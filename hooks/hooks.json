@@ -1,0 +1,15 @@
+{
+  "description": "Notification on Stop — Windows toast and chime",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File ${CLAUDE_PLUGIN_ROOT}/scripts/notify-stop.ps1 &"
+          }
+        ]
+      }
+    ]
+  }
+}
