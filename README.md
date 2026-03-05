@@ -4,15 +4,26 @@ Portable Claude Code plugin — development standards, skills, hooks, and setup 
 
 ## Quickstart
 
-Install the plugin locally from inside Claude Code:
+### Option 1: Install from marketplace (no clone needed)
+
+From inside Claude Code:
+
+```
+/plugin marketplace add pmvanev/claude-marketplace
+/plugin install phil@pmvanev-plugins
+/phil:setup
+```
+
+### Option 2: Install locally from a clone
+
+```bash
+git clone git@github.com:pmvanev/phil-claude-plugin.git
+```
+
+Then from inside Claude Code:
 
 ```
 /plugin install --local /path/to/phil-claude-plugin
-```
-
-Then copy rules and CLAUDE.md into `~/.claude/`:
-
-```
 /phil:setup
 ```
 
