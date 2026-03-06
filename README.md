@@ -31,6 +31,7 @@ Then from inside Claude Code:
 
 **Auto-loaded by the plugin system:**
 - `/phil:clean-comments` — tidy comments and docstrings
+- `/phil:eos` — edit prose for clarity using Elements of Style principles
 - `/phil:extract-method` — extract cohesive code blocks into named methods
 - Stop hook — Windows toast notification + chime when Claude finishes
 
