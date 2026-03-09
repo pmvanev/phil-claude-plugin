@@ -1,8 +1,6 @@
 ---
 name: clean-comments
-description: Clean comments and docstrings according to coding standards — remove redundancy, delete commented-out code, ensure comments explain why not what. Use when tidying comments, cleaning up docstrings, or removing code smell from excessive commenting.
-argument-hint: <lines:N-M | method-name | file-path | directory-path>
-allowed-tools: Read, Edit, Glob, Grep
+description: Skill bundle for phil:clean-comments command — comment cleanup rules
 ---
 
 # Clean Comments

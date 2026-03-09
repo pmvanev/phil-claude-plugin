@@ -1,8 +1,6 @@
 ---
 name: eos
-description: Edit prose for clarity using Elements of Style principles — active voice, no needless words, positive form, parallel structure, strong endings. Use when tightening documentation, commit messages, comments, READMEs, or any written text.
-argument-hint: <lines:N-M | file-path | directory-path>
-allowed-tools: Read, Edit, Glob, Grep
+description: Skill bundle for phil:eos command — Elements of Style editing rules
 ---
 
 # Elements of Style

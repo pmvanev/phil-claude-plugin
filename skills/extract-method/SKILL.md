@@ -1,8 +1,6 @@
 ---
 name: extract-method
-description: Extract cohesive code blocks into independent, reusable methods. Use when refactoring long functions, breaking apart methods that do too much, or extracting named blocks from comment-delimited sections.
-argument-hint: <lines:N-M | method-name | file-path | directory-path>
-allowed-tools: Read, Edit, Write, Glob, Grep, Bash
+description: Skill bundle for phil:extract-method command — method extraction rules
 ---
 
 # Extract Method

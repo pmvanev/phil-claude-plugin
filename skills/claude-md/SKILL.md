@@ -1,8 +1,6 @@
 ---
 name: claude-md
-description: Review and revise a project's CLAUDE.md file against best practices — trim bloat, fix structure, sharpen instructions. Use on any CLAUDE.md to make it concise, specific, and well-organized.
-argument-hint: <file-path | directory-path>
-allowed-tools: Read, Edit, Glob, Grep
+description: Skill bundle for phil:claude-md command — CLAUDE.md review and revision rules
 ---
 
 # CLAUDE.md Reviewer
