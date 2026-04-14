@@ -1,5 +1,6 @@
 {
   "name": "phil",
+  "version": "0.2.0",
   "description": "Phil's portable development standards: rules, skills, hooks, and setup command.",
   "author": {
     "name": "Phil Van Every"
