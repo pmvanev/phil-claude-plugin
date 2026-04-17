@@ -30,6 +30,6 @@ Then from inside Claude Code:
 Everything loads automatically from the plugin directory — no setup step needed.
 
 - **Rules** — architecture, claude-md, coding, continuous-delivery, definitions, refactoring, refactoring-catalog, testing, ui, writing
-- **Skills** — `/phil:claude-md`, `/phil:clean-comments`, `/phil:eos`, `/phil:extract-method`, `/phil:review-code`, `/phil:refactor`
+- **Skills** — `/phil:claude-md`, `/phil:clean-comments`, `/phil:create-plugin-feature`, `/phil:eos`, `/phil:extract-method`, `/phil:refactor`, `/phil:review-code`
 - **Hooks** — Windows toast notification + chime when Claude finishes
 - **CLAUDE.md** — global development principles
