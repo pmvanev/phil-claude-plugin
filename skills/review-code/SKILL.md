@@ -9,6 +9,8 @@ You are reviewing code against the standards in `~/.claude/rules/coding.md`, `~/
 
 Use `~/.claude/rules/refactoring-catalog.md` as your dictionary of named refactorings.
 
+**Language idioms.** For each file, also load the matching language rules file and check against it: `~/.claude/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `~/.claude/rules/python.md` (`.py`), `~/.claude/rules/typescript.md` (`.ts/.tsx`), `~/.claude/rules/react.md` (`.tsx/.jsx`). A `.tsx` file is checked against both TypeScript and React rules. These files use path-scoped frontmatter, so only load the ones whose paths match the file under review.
+
 ## Parse the Argument
 
 Determine what `$ARGUMENTS` refers to:
@@ -84,7 +86,10 @@ For each file, check against the coding guide. Look for these categories of viol
 - Flaky test patterns (non-determinism, shared state)
 - Excessive mocking
 
-For each finding, identify the **specific named refactoring** from the catalog that addresses it.
+### Priority 7 — Language Idioms
+Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1.
+
+For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file) that addresses it.
 
 ---
 
@@ -107,6 +112,7 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 - **Priority 4 (Duplication)**: {count}
 - **Priority 5 (Comments)**: {count}
 - **Priority 6 (Tests)**: {count}
+- **Priority 7 (Language Idioms)**: {count}
 
 ## Backlog
 
@@ -143,9 +149,9 @@ After writing the backlog, report to the user:
 
 ## What NOT to Flag
 
-- Style preferences already handled by formatters (indentation, spacing, trailing commas)
-- Language idioms that are correct for the ecosystem
-- Code that is clear and correct but could be written differently
+- Style preferences already handled by formatters (indentation, spacing, trailing commas, quote style, import order)
+- Code that is already idiomatic for the language (the language rules files define the idioms; flag deviations *from* them, not conformance *to* them)
+- Code that is clear and correct but could merely be written differently with no idiom or standard behind the change
 - Hypothetical improvements for code you don't fully understand — when uncertain, skip
 
 **Be precise, not exhaustive.** A backlog with 10 well-identified items beats one with 50 vague ones.
