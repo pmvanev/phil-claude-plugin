@@ -1,0 +1,15 @@
+- refactor,green,review agent loop
+  - Idea: closed-loop review -> refactor+test -> re-review until quality crosses a threshold.
+  - A FRESH review subagent each pass = independent perspective (avoids rubber-stamping its own work; adversarial-verify pattern).
+  - Review is read-only and returns a structured artifact (.refactoring-backlog.md) -> ideal subagent task. The backlog file is the natural convergence ledger.
+  - Termination is the hard part. Don't loop on "review finds nothing" (subjective naming never converges). Instead:
+    - Objective threshold: loop until ZERO Priority 1-2 findings (correctness + structure). Treat P3-P7 as advisory.
+    - Loop-until-dry: stop after a pass yields no NEW actionable items (1-2 consecutive near-clean passes).
+    - Hard iteration cap (e.g. 5) so a thin test suite can't fund infinite churn.
+    - Carry a seen/resolved set across passes so reverted/won't-fix items don't reappear and block convergence.
+  - Keep refactoring in the MAIN loop, sequential, one commit per item (preserves test-green-before/after, undo-on-failure, per-item commit hygiene, user visibility). Only use worktree-isolated subagents if refactoring items in parallel -- which conflicts with the one-atomic-change discipline. Don't.
+  - Add a coverage/mutation gate at the start: tests passing != behavior preserved when coverage is thin; the loop's safety rests entirely on the suite.
+  - Build options: (a) new phil:refactor-loop skill that calls the Agent tool per review pass (finally uses the dead `Agent` entry already in refactor.md's allowed-tools), or (b) a Workflow (needs explicit opt-in). For a shipped plugin skill, prefer (a) -- self-contained, no opt-in.
+  - Possible shape: gate -> loop(max N){ backlog = fresh-review-subagent(code); new = backlog.P1P2 - seen; if empty break; refactor each in main loop (test, commit); seen += resolved } -> report P3-P7 advisory.
+- language idioms in rules/standards/review-skill
+  - DONE: added rules/cpp.md, python.md, typescript.md, react.md (path-scoped frontmatter) and wired into review-code SKILL.md as Priority 7 - Language Idioms.
