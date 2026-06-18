@@ -127,7 +127,7 @@ accuracy; tri-agent = correlated errors).
 | Field | Value |
 |---|---|
 | **Role** | Read code + ledger + pinned constraints; propose the single next-best refactor as a named refactoring from `rules/refactoring-catalog.md`; attach a predicted-impact manifest. NEVER certifies its own behavior preservation. |
-| **Allowed-tools** | `Read, Grep, Glob, Edit` — **NO** `Write` to test paths (enforced by PreToolUse hook), **NO** `Bash` (cannot run/alter the suite), **NO** `Task`. Edit is needed to author the diff at `APPLY`; the cage gates whether the edit reaches disk. |
+| **Allowed-tools** | `Read, Grep, Glob` — **NO** `Edit`/`Write` (returns the diff as *text* in the manifest; the orchestrator applies it after the critic approves), **NO** `Bash` (cannot run/alter the suite), **NO** `Task`. Revised per ADR-008: under the Workflow substrate the proposer never touches disk, so it structurally cannot edit the oracle; the cage's diff scan + the G2 hook enforce the test-file boundary. |
 | **Model tier** | **strong** (Opus-class). Generation quality drives the whole loop. |
 | **Input contract** | `{ pinned_constraints[], ledger_open_nodes[] (DAG, unresolved only), last_failure_evidence?, target_scope }`. NOT given prior proposer reasoning traces (curated state, not transcript — OS-Symphony: Last-K hurts). |
 | **Output contract** | The **predicted-impact manifest** (see 2.5). |
@@ -276,11 +276,18 @@ text, not an audit trail. Decay belongs on **world state, never on rules**.
 
 ### 3.4 Hook inventory (settings.json)
 
-| Hook | Event | Purpose | Guard |
-|---|---|---|---|
-| test-file write-block | `PreToolUse` (Edit/Write) | block writes to test paths | G2 |
-| anti-premature-exit | `Stop` | force loop continuation until DONE-guard satisfied | G10 |
-| pinned-constraint re-inject | `UserPromptSubmit` / iteration boundary | re-assert durable constraints | G7 |
+> **Updated per ADR-008 (Workflow substrate).** Under the Workflow orchestrator the JS owns the
+> loop condition and holds state in variables, so **G10 and G7 are obviated** (no model-driven
+> termination to guard; no compacting context to lose constraints from). Only **G2** survives —
+> it is the substrate-independent safety boundary and fires on any agent's write. The G7/G10
+> PowerShell scripts in `hooks/refactor-loop/` are retained only for the optional prose-loop
+> fallback and are NOT wired for the Workflow path.
+
+| Hook | Event | Purpose | Guard | Workflow-path status |
+|---|---|---|---|---|
+| test-file write-block | `PreToolUse` (Edit/Write) | block writes to test paths | G2 | **ACTIVE** (wire this) |
+| anti-premature-exit | `Stop` | force loop continuation | G10 | obviated (JS owns the loop) |
+| pinned-constraint re-inject | `UserPromptSubmit` | re-assert constraints | G7 | obviated (JS holds state) |
 
 Test-path globs default to `**/{test,tests,spec,__tests__}/**`, `**/*_test.*`,
 `**/*.test.*`, `**/*.spec.*`, `**/test_*.py`, `**/conftest.py` — overridable per project
@@ -421,9 +428,18 @@ soft false-negative strands the run forever. **Assert:** `DONE` is gated on hard
 
 ## 7. The v1 ↔ v2 seam
 
+> **Revised by ADR-008 (2026-06-18).** The substrate decision below was inverted: **v1 IS the
+> Workflow tool**, not the prose skill-loop. The Workflow's deterministic JS loop is the cage;
+> the only added cost is that the JS sandbox cannot run Bash/FS, so gate execution, diff apply,
+> revert, and ledger persistence are delegated to thin agents — including a **gate-runner agent**
+> that returns a `schema`-validated `{exit_code, stdout}` (the JS routes on the integer). The DAG
+> ledger lives in JS variables during a run and is written to `.refactor-loop-ledger.md` at the
+> end. v2 = the disjoint-rubric panel via `parallel()`. mplv2 = the rigorous v2+ option (ADR-008).
+> The table below is retained for the original framing; the prose-loop column is now the optional
+> interactive-debug fallback, not the production path.
+
 The substrate is a **determinism dial** (rgr-loop §substrate): the more reliability wanted,
-the more control flow moves from prose the model executes into executable code. Build the
-lean skill first, prove convergence (§6), then lift orchestration into the Workflow tool.
+the more control flow moves from prose the model executes into executable code.
 
 | Concern | v1 (lean skill-loop) | v2 (Workflow-tool) |
 |---|---|---|
@@ -465,13 +481,13 @@ flowchart TB
   user([Developer]) -->|/phil:refactor-loop| ORCH
 
   subgraph CAGE["Cage — deterministic"]
-    ORCH["Orchestrator skill<br/>(v1: SKILL.md / v2: Workflow tool)<br/>state machine, gates, stop, HALT"]
-    HOOKS["Hook layer (settings.json)<br/>PreToolUse test-write-block (G2)<br/>Stop anti-exit (G10)<br/>pinned re-inject (G7)"]
-    BASH["Hard gate (Bash)<br/>lint • types • tests • git • API-diff"]
+    ORCH["Orchestrator<br/>(v1: Workflow tool workflows/refactor-loop.js;<br/>--interactive fallback: SKILL.md)<br/>loop, gates, stop, HALT, G2 diff-scan"]
+    HOOKS["Hook layer (Python, settings.json)<br/>PreToolUse test-write-block (G2, defense-in-depth)<br/>Stop anti-exit (G10) / pinned re-inject (G7)<br/>— G7/G10 interactive-fallback only"]
+    GATE["Hard gate (Bash, via gate-runner agent)<br/>lint • types • tests • git • API-diff<br/>returns schema-validated exit_code"]
   end
 
   subgraph BRAIN["Brain — LLM subagents"]
-    PROP["refactor-proposer<br/>(strong)"]
+    PROP["refactor-proposer<br/>(strong) — returns diff as text"]
     CRIT["refactor-critic-correctness<br/>(strong) — v1"]
     PANEL["+ critic-idiom, critic-architecture<br/>(mixed) — v2 panel"]
   end
@@ -482,7 +498,7 @@ flowchart TB
   end
 
   ORCH --> HOOKS
-  ORCH --> BASH
+  ORCH --> GATE
   ORCH -->|invoke, scoped ctx| PROP
   ORCH -->|invoke, diff+intent| CRIT
   ORCH -.v2.-> PANEL
@@ -533,7 +549,8 @@ Full ADRs in `docs/design/refactor-loop/adr-*.md`.
 
 | ADR | Decision | Status |
 |---|---|---|
-| [ADR-001](adr-001-skill-loop-first-vs-workflow.md) | Skill-loop first; Workflow tool deferred to v2 behind a measured trigger | Accepted |
+| [ADR-001](adr-001-skill-loop-first-vs-workflow.md) | Skill-loop first; Workflow tool deferred to v2 | ~~Accepted~~ **Superseded by ADR-008** |
+| [ADR-008](adr-008-workflow-orchestrator.md) | Workflow tool is the v1 orchestrator; keep G2, drop G7/G10; mplv2 = rigorous v2+ option | Accepted |
 | [ADR-002](adr-002-single-critic-v1-vs-panel.md) | Single correctness critic in v1; disjoint panel earned, not default | Accepted |
 | [ADR-003](adr-003-dag-ledger.md) | Backlog is a dependency DAG; reverted prerequisite auto-invalidates dependents | Accepted |
 | [ADR-004](adr-004-test-file-lockbox.md) | Test-file lockbox = tool-scoping + PreToolUse hard guard (defence in depth) | Accepted |
@@ -588,7 +605,7 @@ The open decisions from §10 are resolved as follows (user + recommended default
 | 3 | Model tiers | proposer = **strong**; correctness-critic = **strong**; idiom-critic = **mixed/cheaper** (v2); architecture-critic = **mixed/strong** (v2). Exact IDs pinned at forge. |
 | 4 | `max_iterations` default | **10** (conservative for a watched v1; per-invocation override; raise after §6.4 convergence runs). |
 | 5 | Confidence threshold θ | **0.6** (calibrate against §6.3 human agreement). |
-| 6 | HALT surfacing | **Interrupt-only (Ctrl-C / Esc)** for v1 + the G8 max-iterations HALT. ⚠️ Known v1 limitation: this does NOT fully satisfy invariant #3's "always-reachable, top-priority abort that wins over an in-progress apply" (gap-memo §openclaw). The G9 sentinel-file user-abort is **deferred to v2** (Workflow returned-status). Documented, accepted risk for v1. |
+| 6 | HALT surfacing | **Workflow substrate (ADR-008):** the G8 max-iterations HALT returns a `{status:'HALT-INCOMPLETE'}` object (clean); the baseline-red HALT returns `{status:'HALT'}`. **User-abort** is stopping the background workflow (TaskStop / the `/workflows` UI). ⚠️ Two known v1 limitations: (a) a hard-killed workflow skips the Report step, so `active-run:true` can be left stale in `.refactor-loop-ledger.md` — the next run clears it, or reset manually; (b) there is no top-priority abort that pre-empts an *in-progress* APPLY mid-step (gap-memo §openclaw) — a stop takes effect at the next agent boundary. Both accepted for v1. (Interactive `--interactive` fallback: Ctrl-C/Esc + the G10 Stop hook.) |
 | 7 | Test-path globs | Default glob set (§3.4) + **per-project override via a CLAUDE.md key**. |
 | 8 | Public-API diff (G4) | **Language-specific, start Python + TypeScript** (Python: `__all__` + top-level defs; TS: exported declarations). Other languages: G4 degrades to manifest-only check in v1. |
 | 9 | Ledger location | **Project-root `.refactor-loop-ledger.md`** — distinct from `phil:refactor`'s `.refactoring-backlog.md`; coexists, never collides. |

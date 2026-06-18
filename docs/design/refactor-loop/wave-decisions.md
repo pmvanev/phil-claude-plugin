@@ -13,7 +13,7 @@ system**, built downstream via `nw:forge` (specs, not code).
 | # | Decision | ADR | Rationale source |
 |---|---|---|---|
 | D1 | `/phil:refactor` stays untouched; `/phil:refactor-loop` is a separate, coexisting skill | — (hard constraint) | brief; rgr-loop §decision-2026-06-17 |
-| D2 | Substrate: lean skill-loop v1 first, Workflow-tool v2 behind a measured trigger | ADR-001 | rgr-loop §substrate |
+| D2 | ~~Substrate: lean skill-loop v1 first, Workflow-tool v2~~ **REVISED 2026-06-18: Workflow tool is the v1 orchestrator; keep G2 hook, drop G7/G10; mplv2 = rigorous v2+ option** | ~~ADR-001~~ **ADR-008** | three-way analysis; rgr-loop §substrate; gap-memo §replit-database (audit trail) |
 | D3 | v1 = proposer + 1 separate correctness critic; disjoint panel is earned | ADR-002 | rgr-loop §critic-panel; AHE non-additivity |
 | D4 | Backlog is a dependency DAG; reverted prerequisite auto-invalidates dependents | ADR-003 | gap-memo §complexbench |
 | D5 | Test-file lockbox = tool-scoping + PreToolUse hard guard | ADR-004 | AHE; gap-memo §agentspec |
@@ -37,6 +37,15 @@ system**, built downstream via `nw:forge` (specs, not code).
   all guards.
 - **Brain (LLM subagents):** what to refactor and how (proposer), whether a refactor improves
   quality (critic), whether a surviving critique is weak (typed verdict, not a halt).
+
+## Substrate update (ADR-008)
+
+Production orchestrator = `workflows/refactor-loop.js` (Workflow tool). The proposer + critic
+agents carry over unchanged as schema-validated leaves. Gate execution / apply / revert /
+ledger-persist are delegated to thin agents (JS can't Bash/FS); the DAG ledger lives in JS
+memory during a run and is written to `.refactor-loop-ledger.md` at the end. Only the G2 hook
+stays active; G7/G10 are obviated. The prose `skills/refactor-loop/SKILL.md` is the optional
+`--interactive` fallback.
 
 ## Deliverables for nw:forge (component count: 4 subagents + 1 orchestrator skill + 1 hook layer + 2 state files = 8 buildable artifacts)
 

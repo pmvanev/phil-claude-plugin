@@ -23,6 +23,16 @@ suggestions. Everything below is anchored in this repo's research summaries
 > uncited corpus — agentspec, complexbench, eval-driven-iteration, agentic-benchmarks,
 > evaluation-engineering, hart, advanced-if, terminal-bench, benchmark-contamination, and
 > the Vend/Replit/OpenClaw field reports.
+>
+> **Substrate finalized (2026-06-18, ADR-008):** after a three-way analysis (this prose
+> skill-loop + hooks vs. the Workflow tool vs. mplv2 statecharts), the **Workflow tool is the
+> v1 orchestrator** (`workflows/refactor-loop.js`) — deterministic JS owns the loop/gate/stop.
+> The §substrate "skill first, Workflow later" framing below is **superseded**: the prose
+> SKILL.md survives only as the `--interactive` fallback. Only the **G2** guard stays a hook
+> (now **Python**, defense-in-depth); under the Workflow the real test-file lockbox is the
+> cage's in-JS diff scan, and **G7/G10 are obviated** (JS holds state and owns the loop).
+> mplv2 is recorded as the rigorous v2+ option (its provenance-tagged ledger is the audit
+> trail the §replit field report demands).
 
 ---
 

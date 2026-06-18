@@ -1,8 +1,15 @@
 # ADR-001: Skill-loop first; Workflow tool deferred to v2
 
-**Status:** Accepted
+**Status:** SUPERSEDED by [ADR-008](adr-008-workflow-orchestrator.md) (2026-06-18)
 **Date:** 2026-06-17
 **Scope:** substrate / orchestrator container
+
+> **Superseded.** After a three-way substrate analysis (prose skill-loop + hooks vs. the
+> Workflow tool vs. mplv2 statecharts), the decision reversed: the Workflow tool is the v1
+> orchestrator, not a deferred v2. Reason — the prose skill-loop's two structural mitigations
+> below (the Stop hook G10 and "exit codes can't drift") are exactly the weaknesses the
+> Workflow eliminates by construction, and the hooks weren't wired yet (near-zero sunk cost).
+> The prose SKILL.md survives only as an optional interactive-debug substrate. See ADR-008.
 
 ## Context
 

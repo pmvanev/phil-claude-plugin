@@ -5,6 +5,13 @@ description: Skill bundle for phil:refactor-loop command — gated closed-loop r
 
 # Refactor Loop
 
+> **Substrate note (ADR-008, 2026-06-18).** The production orchestrator is now the **Workflow
+> tool** (`workflows/refactor-loop.js`) — deterministic JS owns the loop/gate/stop, so G7/G10
+> hooks are obviated and only the G2 test-file lockbox remains. This prose skill is retained as
+> the **optional `--interactive` fallback** for step-by-step debugging: the same loop expressed
+> as prose the model executes. It is less deterministic than the Workflow (the loop lives in
+> prose that can drift). Prefer the Workflow path unless you are inspecting the loop by hand.
+
 You are the **orchestrator** of a gated refactoring loop — the cage. You own control flow:
 the test gate, the routing decisions, the stop predicate. Two subagents supply judgment (the
 brain): `refactor-proposer` generates one candidate refactoring at a time, and
