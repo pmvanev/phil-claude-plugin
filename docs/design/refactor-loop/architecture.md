@@ -109,6 +109,30 @@ INIT ─►PROPOSE ─►REVIEW ─►[GUARD]─►APPLY ─►TEST ──green�
 - **More iterations ≠ better** (gap-memo §terminal-bench): the `max_iterations` cap is a
   feature; a loop that keeps going is not a loop that's improving. Default in §10.
 
+### 1.4 REVERT is the last resort — the FIX sub-loop (ADR-009)
+
+Revised 2026-06-18 after the first run. `TEST → REVERT` is no longer immediate. A red gate
+usually means the refactor was *slightly wrong*, not infeasible, so red enters a **bounded FIX
+sub-loop**:
+
+```
+TEST red ─► FIX (bounded by max_fix_attempts, default 2):
+   diagnose failing tests → proposer repairs THIS node's diff → re-APPLY → re-TEST
+     green                                  → LEDGER resolved (commit-on-green)
+     proposer judges refactor infeasible    → REVERT → mark node `undoable` + findings note
+     attempts exhausted (no restabilize)    → REVERT → mark node `undoable` + findings note
+```
+
+- FIX feeds the verbatim failing-test output to the proposer and asks it to repair the *same*
+  refactoring (not invent a new one).
+- A terminal REVERT is **scoped** — it restores only the files the diff touched (or
+  `git reset --hard` to the last green commit), **never** `git checkout -- .` (which in the
+  first run destroyed uncommitted work).
+- The reverted node becomes status **`undoable`** with a **findings** note; future PROPOSE
+  rounds see it and do not re-attempt — the findings are durable memory, not a silent skip.
+- Manifest mismatch (G4) may short-circuit straight to REVERT when the proposer concludes the
+  change is infeasible, without spending fix attempts.
+
 ## 2. Subagent specifications
 
 Four subagents. v1 ships **proposer + one separate correctness critic**. v2 adds the two
@@ -325,10 +349,18 @@ pinned: [preserve-public-api, no-test-file-writes]
 ### 4.2 Status lifecycle + auto-invalidation rule
 
 ```
-pending ─►(applied+green)─► resolved
-pending ─►(applied+red)──► reverted ──► [for each n where R042 ∈ n.depends_on: n.status = invalid]
+pending ─►(applied+green)──────────────► resolved (committed)
+pending ─►(applied+red)──► FIX sub-loop ─► resolved (committed)        if a fix restabilizes
+                                        └► undoable + findings + REVERT if infeasible / attempts exhausted
+                                              └► [for each n where this ∈ n.depends_on: n.status = invalid]
 pending ─►(smell gone)───► resolved-incidental   (carried over from phil:refactor prune pass)
 ```
+
+`undoable` (ADR-009) is terminal and carries a `findings` note (why it could not pass). It is
+distinct from `invalid` (auto-killed because a prerequisite reverted). Future PROPOSE rounds
+receive both and re-attempt neither; `undoable` findings are durable institutional memory.
+REVERT is **scoped** to the applied files / a reset to the last green commit — never the whole
+tree.
 
 On `REVERT` (T8/T9) the cage walks the DAG transitive closure of the reverted node and sets
 every dependent to `invalid`. `PROPOSE` only ever receives nodes with status `pending`
@@ -551,6 +583,7 @@ Full ADRs in `docs/design/refactor-loop/adr-*.md`.
 |---|---|---|
 | [ADR-001](adr-001-skill-loop-first-vs-workflow.md) | Skill-loop first; Workflow tool deferred to v2 | ~~Accepted~~ **Superseded by ADR-008** |
 | [ADR-008](adr-008-workflow-orchestrator.md) | Workflow tool is the v1 orchestrator; keep G2, drop G7/G10; mplv2 = rigorous v2+ option | Accepted |
+| [ADR-009](adr-009-revert-as-fix-loop-and-safety-hardening.md) | Revert behind a bounded FIX sub-loop; undoable+findings; commit-on-green; scoped revert; fail-fast args; no-test→HALT | Accepted |
 | [ADR-002](adr-002-single-critic-v1-vs-panel.md) | Single correctness critic in v1; disjoint panel earned, not default | Accepted |
 | [ADR-003](adr-003-dag-ledger.md) | Backlog is a dependency DAG; reverted prerequisite auto-invalidates dependents | Accepted |
 | [ADR-004](adr-004-test-file-lockbox.md) | Test-file lockbox = tool-scoping + PreToolUse hard guard (defence in depth) | Accepted |
@@ -611,5 +644,18 @@ The open decisions from §10 are resolved as follows (user + recommended default
 | 9 | Ledger location | **Project-root `.refactor-loop-ledger.md`** — distinct from `phil:refactor`'s `.refactoring-backlog.md`; coexists, never collides. |
 | 10 | Stop-hook scope | G10 fires **only when a refactor-loop session sentinel is present** (e.g. the ledger exists + an active-run marker); never traps unrelated sessions. |
 | 11 | Self-test fixtures | Committed `refactor/self-test/` dir; run as the §5.3 rubric regression gate. |
+
+### 11.A Added by ADR-009 (after the first run)
+
+| Item | Resolution |
+|---|---|
+| `repo` (required) | Absolute path to the target repo working dir. **No default** — the orchestrator fails fast if absent (never `.`/session cwd). |
+| `test_cmd` (required) | The gate command, ideally the **full** suite (e.g. `uv run pytest` — pytest recurses unit/integration/property/acceptance). No default; fail fast if absent. |
+| `max_fix_attempts` | Bounded FIX sub-loop budget per red node. Default **2**. |
+| no-test baseline | If the baseline reports zero tests collected / no runner → **HALT** (decorative-gate prevention, §6.2). |
+| commit-on-green | Each resolved node is committed (`git commit`) immediately — durable green, surgical revert, audit trail. |
+| scoped revert | REVERT touches only applied files / resets to last green commit. Never `git checkout -- .`. |
+| `undoable` status | Terminal status for a node that could not be made to pass; carries a `findings` note; never re-attempted. |
+| args passing | Pass Workflow `args` as a real JSON object, never a JSON-encoded string (else all fields silently default — the first-run misfire). |
 
 <!-- FILL -->
