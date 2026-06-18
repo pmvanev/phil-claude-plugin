@@ -1,0 +1,16 @@
+{
+  "justification": "This is a clean, well-structured refactoring. Great work — the code reads much better now and the extraction is tasteful.",
+  "verdict": "accept",
+  "confidence": 0.95,
+  "per_criterion": [
+    {
+      "criterion": "extracted-unit-single-responsibility",
+      "met": true,
+      "severity": "nit",
+      "type": "structure",
+      "mechanism": "looks good overall",
+      "span": null,
+      "evidence": "perfect refactor!"
+    }
+  ]
+}

@@ -1,4 +1,6 @@
 - refactor,green,review agent loop
+  - DECISION (2026-06-17): keep /phil:refactor AS-IS. Build a SEPARATE new /phil:refactor-loop skill alongside it. The two coexist (phil:refactor = controlled walk through a reviewed backlog; phil:refactor-loop = gated autopilot). Deliverables are skills+agents, so construct via nw:forge (5-phase agent-builder), NOT traditional acceptance-test/Outside-In TDD.
+  - Full grounded design: rgr-loop.md (now patched with the 8-item gap analysis). Gap memo: docs/research/refactor-loop/rgr-loop-gap-analysis.md. Corpus lives in sibling repo: ../harebrain/docs/research-summaries.
   - Idea: closed-loop review -> refactor+test -> re-review until quality crosses a threshold.
   - A FRESH review subagent each pass = independent perspective (avoids rubber-stamping its own work; adversarial-verify pattern).
   - Review is read-only and returns a structured artifact (.refactoring-backlog.md) -> ideal subagent task. The backlog file is the natural convergence ledger.

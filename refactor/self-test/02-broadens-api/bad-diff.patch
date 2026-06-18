@@ -1,0 +1,17 @@
+--- a/before.py
++++ b/before.py
+@@ -1,6 +1,6 @@
+ """Starting code for fixture 02. Only `total` is part of the public surface."""
+
+-__all__ = ["total"]
++__all__ = ["total", "line_total"]
+
+
+-def _line_total(qty, price):
++def line_total(qty, price):
+     return qty * price
+
+
+ def total(items):
+-    return sum(_line_total(qty, price) for qty, price in items)
++    return sum(line_total(qty, price) for qty, price in items)

@@ -1,0 +1,11 @@
+{
+  "node_id": "SELFTEST-01",
+  "named_refactoring": "Inline Variable",
+  "target_span": "before.py:5-8",
+  "stated_intent": "simplify the discount arithmetic",
+  "depends_on": [],
+  "diff": "see bad-diff.patch",
+  "predicted_fixes": ["readability of discount calc"],
+  "predicted_regressions_risk": ["none expected"],
+  "public_api_touched": false
+}

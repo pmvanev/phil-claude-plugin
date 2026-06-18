@@ -1,0 +1,12 @@
+# Python build artifacts (self-test fixtures)
+__pycache__/
+*.py[cod]
+
+# Refactor-loop runtime artifact (created in target repos, never committed)
+.refactor-loop-ledger.md
+
+# nWave runtime logs
+.nwave/**/logs/
+
+# Machine-local Claude Code settings (permissions etc.)
+.claude/settings.local.json
