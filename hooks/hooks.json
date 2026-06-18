@@ -1,6 +1,17 @@
 {
-  "description": "Notification on Stop — Windows toast and chime",
+  "description": "Stop: Windows toast/chime notifier. PreToolUse: refactor-loop G2 test-file write-block (no-op unless a refactor-loop run is active).",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/block-test-file-write.py\""
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
