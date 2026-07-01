@@ -189,3 +189,117 @@ ACs; only second-order DESIGN details — detector implementation, backlog schem
   A first-pass draft was forged prematurely and reverted; it is recoverable from git history
   (commit `b29f6aa`: `agents/refactor-tests-critic.md` + `skills/refactor-tests-critic/`) if
   DESIGN chooses to promote it rather than design from scratch.
+
+---
+
+# DESIGN wave
+
+Scope: application/components · mode: propose · architect: Morgan (nw-solution-architect)
+· 2026-07-01
+
+## Wave: DESIGN / [REF] Quality attributes (ranked)
+
+1. **Correctness/safety** — never silently weaken a test (the whole point).
+2. **Usability** — low review burden per approved change.
+3. **Maintainability** — reuse proven patterns; keep the loop legible.
+4. **Extensibility** — clean seam for the deferred critic and new smell types.
+
+## Wave: DESIGN / [REF] DDD list (design decisions)
+
+| ID | Decision | Rationale |
+|----|----------|-----------|
+| DD1 | New `commands/refactor-tests.md` (thin loader) → `skills/refactor-tests/SKILL.md`, mirroring `phil:refactor`'s command→skill split. | Matches the plugin's established shape; auto-discovered, no manifest change. |
+| DD2 | Ports-and-adapters: the loop core lives in the skill; git, filesystem, test-runner, and **human-approval** are ports. | Isolates side effects; the human is a first-class interaction port. |
+| DD3 | The **D5 test-smell detector is new**, lives in the skill, and writes `.test-refactoring-backlog.md` in review-code's format **by convention**. `review-code` stays UNCHANGED. | review-code's "Test Quality" targets behavior smells (coupling/flakiness/mocking), not the D5 structure moves; overloading it repeats the DISCUSS-D3 anti-pattern. |
+| DD4 | **Approval mechanism** = apply the proposed change to the working tree → run the suite (sanity) → pause and ask the human to review the *uncommitted diff in their IDE/editor* → structured approve/reject/skip/quit via AskUserQuestion, **no diff printed in chat**. Approve → commit; reject/quit → `git checkout` revert. | Developers review diffs best in their editor against git; chat-printed diffs are noisy and lossy. Refines DISCUSS-D2 mechanics without changing the human-approval oracle. |
+| DD5 | The automated test-diff critic is **deferred to slice 04**; the propose step exposes a clean pre-screen seam. Promote `b29f6aa` when built. | Its value (cutting review burden) is only measurable once a working loop exists — empirical over speculative. |
+| DD6 | Inherit `phil:refactor` safety: never refactor on a red baseline; **auto-revert** on post-apply red (before bothering the human); one commit per approved item. | Each change stays attributable and reversible. |
+| DD7 | No new hook. The G2 test-file lockbox (`hooks/refactor-loop/block-test-file-write.py`) stays inert — it is gated on the refactor-loop ledger sentinel this command never writes. | The command must write test files; the lockbox is scoped to refactor-loop runs only. |
+| DD8 | No development paradigm selected / no CLAUDE.md paradigm write. | The feature's surface is a prose skill + reused Bash/git mechanics — no application-code paradigm applies. |
+
+## Wave: DESIGN / [REF] Component decomposition
+
+| Component | Path | Change type |
+|-----------|------|-------------|
+| refactor-tests command (loader) | `commands/refactor-tests.md` | CREATE NEW |
+| refactor-tests skill (loop + D5 taxonomy + gate) | `skills/refactor-tests/SKILL.md` | CREATE NEW |
+| test-runner detection | `skills/shared/test-runner-detection.md` | REUSE as-is |
+| backlog file | `.test-refactoring-backlog.md` (project root) | CREATE NEW (review-code format) |
+| test-diff critic | `agents/refactor-tests-critic.md` | DEFER (slice 04; draft at `b29f6aa`) |
+
+## Wave: DESIGN / [REF] Driving ports
+
+- CLI/skill: `/phil:refactor-tests` — `--review <path>` (detect → backlog), `<path>|<test-id>`
+  (scope the loop), no arg (work the existing backlog).
+
+## Wave: DESIGN / [REF] Driven ports + adapters
+
+| Driven port | Adapter | Reuse |
+|-------------|---------|-------|
+| Locate test runner | `skills/shared/test-runner-detection.md` | reuse |
+| Read tests / write backlog / apply diff | filesystem (Read/Edit/Write) | reuse |
+| Checkpoint / commit / revert | git via Bash | reuse `phil:refactor` mechanics |
+| Run suite (baseline + post-apply sanity) | test runner via Bash | reuse |
+| Human approval | AskUserQuestion + human's IDE diff review | CREATE NEW (DD4) |
+
+## Wave: DESIGN / [REF] Technology choices
+
+- Prose skill (Markdown) executed by the model; Bash for git + suite; AskUserQuestion for the
+  gate. No new runtime, language, or dependency. Cross-platform (the plugin targets Windows
+  PowerShell + Bash) — git/test commands run through the existing Bash tool.
+
+## Wave: DESIGN / [REF] Reuse Analysis
+
+| Existing Component | File | Overlap | Decision | Justification |
+|-------------------|------|---------|----------|---------------|
+| review-code skill | `skills/review-code/SKILL.md` | writes a prioritized refactoring backlog; has a Test-Quality category | **CREATE NEW** detector + reuse format by convention | D5 structure-move detection (AAA / fixture extraction) does not exist there; review-code targets behavior/quality test smells and stays UNCHANGED (DISCUSS-D3). |
+| phil:refactor loop | `skills/refactor/SKILL.md` | backlog-driven apply→verify→commit→prune loop | **EXTEND pattern** (new skill, same loop shape, swapped gate) | The loop template is proven; only the gate (auto pass/fail → human approval) and the move set (structure-only test moves) differ. |
+| test-runner detection | `skills/shared/test-runner-detection.md` | baseline suite detection | **REUSE as-is** | Identical need; already a shared module. |
+| refactor-critic-correctness | `agents/refactor-critic-correctness.md` | diff critique verdict | **DEFER** (slice 04) | Critic is a v2 augmentation; draft recoverable at `b29f6aa`. |
+| G2 lockbox hook | `hooks/refactor-loop/block-test-file-write.py` | blocks test-file writes | **NO CHANGE** | Inert outside refactor-loop runs (ledger-sentinel gated). |
+
+Zero unjustified CREATE NEW rows.
+
+## Wave: DESIGN / [REF] Decisions table
+
+| DDD-N | Decision |
+|-------|----------|
+| DD1 | new command + skill (command→skill split) |
+| DD2 | ports-and-adapters, human-approval port |
+| DD3 | new D5 detector, review-code untouched, shared backlog format by convention |
+| DD4 | apply→suite→IDE review→structured approve/reject; no chat diffs |
+| DD5 | critic deferred to slice 04 |
+| DD6 | inherit refactor safety (no red; auto-revert; commit per item) |
+| DD7 | no new hook; G2 stays inert |
+| DD8 | no paradigm write |
+
+## Wave: DESIGN / [REF] Open questions (deferred to DISTILL/DELIVER)
+
+- Exact backlog schema fields for test smells (reuse review-code's, minus prod-only fields).
+- Precise D5 detection heuristics per language (Python vs TS/React) — DISTILL acceptance tests
+  will pin these with examples.
+- Critic pre-screen contract at the slice-04 seam (inputs/outputs already drafted in `b29f6aa`).
+
+## Wave: DESIGN / [REF] Outcome collision check
+
+**Skipped (N/A).** No `docs/product/outcomes/registry.yaml` exists in this plugin repo, and the
+`nwave-ai outcomes` CLI is a construct of the nwave codebase, not this plugin. No contract
+registry to collide against.
+
+## Wave: DESIGN / [REF] Wave decisions summary
+
+- Pattern: modular prose skill with ports-and-adapters; human-approval as an interaction port.
+- Paradigm: N/A (prose + reused Bash/git).
+- Key components: `commands/refactor-tests.md`, `skills/refactor-tests/SKILL.md`; reuse
+  `test-runner-detection`; defer the critic.
+- Constraints: structure-only (D1); human-approval oracle via IDE diff review (D2/DD4);
+  new command, review-code untouched (D3/DD3); inherit refactor safety (DD6).
+- Upstream changes: none — DD4 refines D2's *mechanism* (how approval is surfaced) without
+  changing the decision, so no `## Changed Assumptions` back-propagation is warranted.
+
+## Wave: DESIGN / [REF] Handoff
+
+**To:** nw-platform-architect (DEVOPS). This is a prose-skill feature with no infrastructure,
+deployment, or observability surface beyond the existing plugin — DEVOPS is expected to be a
+near-no-op. Then DISTILL authors acceptance tests for the happy path + four error paths and
+pins the D5 detection heuristics.
