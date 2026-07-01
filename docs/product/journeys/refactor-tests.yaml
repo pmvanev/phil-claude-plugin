@@ -18,6 +18,8 @@ happy_path:
     action: tool selects top backlog item, proposes ONE assertion-preserving diff
     output: the diff + named move + rationale
     emotion: in-control
+    # DESIGN to plan: an automated test-diff critic may pre-screen the diff here
+    # (assertion-set preservation) before it reaches the human gate. Augments, not replaces.
   - step: approve-apply
     action: Tess approves the diff
     output: applied; suite re-run green

@@ -22,7 +22,7 @@ I can keep trusting the suite as a safety net. (`job_id: keep-test-suite-trustwo
 | ID | Decision | Rationale |
 |----|----------|-----------|
 | D1 | Test refactoring is **structure-only** (assertion-preserving moves). | Preserves the suite's meaning; avoids needing a behavioral oracle for v1. |
-| D2 | Safety oracle = **human approval per proposed diff**; a green suite is only a secondary sanity check. | A passing suite cannot prove an assertion was not weakened. Mutation testing is too heavy for v1. Human-in-the-loop is language-agnostic and sufficient given D1. |
+| D2 | Safety oracle = **human approval per proposed diff**; a green suite is only a secondary sanity check. An **automated test-diff critic** is a planned *augmentation* (pre-screen before the human gate) — DESIGN to plan it; it does not replace human approval. | A passing suite cannot prove an assertion was not weakened. Mutation testing is too heavy for v1. Human-in-the-loop is language-agnostic and sufficient given D1; an automated critic can cheaply catch assertion-set changes and reduce review burden. |
 | D3 | Ship a **new command `phil:refactor-tests`** — do not expand `phil:refactor` or `phil:refactor-loop`. | `refactor-loop`'s G2 hook + rubric exist to *block* test-file writes; expanding them fights their design. The new command reuses shared modules instead. |
 | D4 | Use a **separate `.test-refactoring-backlog.md`**. | No collision with `phil:refactor`'s `.refactoring-backlog.md`. |
 | D5 | Structure-only smell set: duplicated setup → *Extract Fixture/Helper*; missing AAA → *reorder into Arrange-Act-Assert*; vague name → *Rename*; long test with extractable block → *Extract Test Helper*. | These are provably assertion-preserving. Assert-splitting changes test identity/count, so it is excluded. |
@@ -178,6 +178,14 @@ ACs; only second-order DESIGN details — detector implementation, backlog schem
 ## Wave: DISCUSS / [REF] Handoff
 
 **To:** nw-solution-architect (DESIGN — full artifact set) + nw-platform-architect
-(DEVOPS — outcome-kpis only). Open for DESIGN: test-smell detector implementation, backlog
-file schema, how the approval prompt is surfaced (AskUserQuestion vs. plain diff + confirm),
-and reuse boundaries with `phil:refactor`'s loop.
+(DEVOPS — outcome-kpis only). Open for DESIGN:
+
+- Test-smell detector implementation and backlog file schema.
+- How the approval prompt is surfaced (AskUserQuestion vs. plain diff + confirm).
+- Reuse boundaries with `phil:refactor`'s loop.
+- **Automated test-diff critic** (D2 augmentation): whether and how to build a read-only
+  reflection critic that pre-screens each proposed diff for assertion-set preservation /
+  structure-only compliance before the human gate, modelled on `refactor-critic-correctness`.
+  A first-pass draft was forged prematurely and reverted; it is recoverable from git history
+  (commit `b29f6aa`: `agents/refactor-tests-critic.md` + `skills/refactor-tests-critic/`) if
+  DESIGN chooses to promote it rather than design from scratch.
