@@ -1,7 +1,11 @@
 # Continue — phil:refactor-loop
 
-Resume point for the `/phil:refactor-loop` feature. Last updated 2026-06-18.
-Latest commit: **9e6c8a9** (`main`, pushed).
+Resume point for the `/phil:refactor-loop` feature. Last updated 2026-07-01.
+Latest commit: **f881b48** (`main`, local — the two smoke-run hardening fixes).
+
+> **MILESTONE (2026-07-01): first successful end-to-end run.** The convergence
+> run below is DONE — the machinery is validated. See "First successful run"
+> before planning next steps.
 
 ---
 
@@ -52,38 +56,42 @@ HALT-CONFIG; and `args` MUST be a real JSON object.
 
 ---
 
-## NEXT — a corrected convergence run (held for explicit go)
+## First successful run (run wf_dfe9faa4-5a4, 2026-07-01) — machinery VALIDATED
 
-This is the immediate next action. Nothing has been run successfully end-to-end yet.
+Target: harebrain `python/packages/wumpus`, on throwaway branch `refactor-loop-smoke-test`
+(since discarded). `args` passed as a real JSON object. Result: **`HALT-INCOMPLETE`, 3/3
+refactors landed green & committed** (R001–R003, all duplication removal in `engine/game.py`,
+net −115 lines), **zero reverts / undoable / invalid**. 20 agents, ~29 min, 766k tokens.
 
-1. **Branch for isolation** in the target repo:
-   `git -C <target-repo> checkout -b refactor-loop-smoke-test`
-   (the harebrain `wumpus` package is the intended target: `python/packages/wumpus`, baseline
-   green = 202 unit tests in ~3s; full suite via `uv run pytest`.)
-2. **Confirm G2 hook is wired** (`hooks/hooks.json` PreToolUse → `block-test-file-write.py`) —
-   already wired + verified.
-3. **Invoke the Workflow** with `scriptPath: workflows/refactor-loop.js` and **`args` as a real
-   JSON OBJECT** (not a string!):
-   ```
-   { repo: "C:/Users/PhilVanEvery/Git/github/pmvanev/harebrain/python/packages/wumpus",
-     test_cmd: "uv run pytest",        // full suite — the suite is the oracle
-     scope: "src/wumpus",
-     max_iterations: 3, max_fix_attempts: 2, theta: 0.6 }
-   ```
-   Start small (`max_iterations: 3`) — it's a machinery-validation run, not exhaustive.
-4. **Validate against the §6 convergence checklist** (`architecture.md` §6): no-op baseline,
-   the 3 self-test fixtures must all be **rejected** (gate not decorative), variance across runs.
-5. **Watch with `/workflows`.** Expect to find and fix real bugs — it's the script's first true
-   end-to-end execution. The one unverified assumption: whether `agent({agentType})` resolves
-   plugin-defined agents (the script currently inlines prompts, so it doesn't depend on it).
+§6 checklist outcomes:
+- **Non-decorative gate** ✅ — 202 real unit tests collected + run every iteration (baseline non-zero).
+- **Real structure-only refactors** ✅ — spot-checked R001 (six 10-field `World(...)` copies →
+  `dataclasses.replace`); independent post-run re-run green (202 passed).
+- **Commit-on-green, one per refactor** ✅ (ADR-009).
+- **Scoped revert never destructive** ✅ — only `game.py` touched.
+- **FIX sub-loop (ADR-009 A) exercised & worked** ✅ — R003's first `git apply` failed →
+  `fix#3.1` produced a corrected diff → green. This is the key ADR-009 mechanism, now proven.
+- **NOT yet exercised** ⧗ — self-test fixture rejection (adversarial critic), cross-run variance.
 
-## After the run converges
+**Oracle note:** the full suite (`uv run pytest`) is NOT usable as the gate — it hangs >17 min on
+the subprocess/acceptance tier (a harebrain issue, not ours). Used `uv run pytest tests/unit`
+(202 tests, ~2s). For future runs pick a fast, deterministic tier as `test_cmd`.
 
-- Reconcile any bugs the run surfaces; re-commit.
-- Decide on **v2**: the disjoint-rubric critic panel (idiom + architecture critics), gated
-  behind a *measured* trigger (ADR-002) — only if the single critic demonstrably misses a class
-  of problem.
+**Two bugs found & fixed** (committed f881b48):
+1. **args string-vs-object footgun** — the run-1 misfire class, *still live* (ADR-009 only
+   documented it). The cage now normalizes `args` as either an object or a JSON string.
+2. **Gate timeout blindness** — gate agents used the 120s Bash default; a slow-but-green suite
+   read as a red gate. Prompt now instructs max 600s and reports a kill as `exit_code:-1`.
+
+## NEXT — optional follow-ups (nothing blocking)
+
+- **Adversarial gate proof**: run the 3 `refactor/self-test/` fixtures through the critic and
+  confirm all are **rejected** (the one §6 check the happy-path run didn't cover).
+- **Variance run**: a second convergence run to confirm non-determinism across runs.
+- **Decide on v2**: the disjoint-rubric critic panel (idiom + architecture critics), gated behind
+  a *measured* trigger (ADR-002) — only if the single critic demonstrably misses a class of problem.
 - Optional far future: mplv2 "rigorous edition" (ADR-008) for a standalone, auditable tool.
+- Housekeeping: `continue.md` latest-commit line is local-only; push `main` when ready.
 
 ## Quick file map
 
