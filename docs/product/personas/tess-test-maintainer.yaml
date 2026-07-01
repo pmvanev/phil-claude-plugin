@@ -1,0 +1,17 @@
+# Persona (SSOT) — bootstrapped by DISCUSS wave, feature: refactor-tests (2026-07-01)
+
+id: tess-test-maintainer
+name: Tess
+role: Developer / test-suite maintainer in a repo using the phil plugin
+goals:
+  - Keep the test suite compliant with testing.md structure standards
+  - Trust the suite as a safety net for production refactoring
+frustrations:
+  - Tests rot after feature pushes; no tool enforces testing.md
+  - phil:refactor is trusted for prod code precisely because tests catch mistakes —
+    that guarantee disappears when the tests themselves are edited
+mental_model:
+  - "Refactoring = safe because tests prove behavior held"
+  - "But if the tests are what changed, what proves THEY still hold?"
+vocabulary:
+  - AAA (Arrange-Act-Assert), F.I.R.S.T., fixture, test smell, assertion, oracle

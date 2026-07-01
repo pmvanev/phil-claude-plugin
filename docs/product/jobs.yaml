@@ -1,0 +1,37 @@
+# Validated Jobs-to-be-Done (SSOT)
+# Bootstrapped by DISCUSS wave, feature: refactor-tests (2026-07-01)
+
+jobs:
+  - id: keep-test-suite-trustworthy
+    job_story: >
+      When my test suite has accumulated smells after a stretch of feature work,
+      I want to systematically clean the test code up to my testing.md standards
+      without silently weakening what the tests verify, so I can keep trusting the
+      suite as a safety net and stop dreading test maintenance.
+    dimensions:
+      functional: >
+        Bring test code into line with testing.md structure standards — AAA layout,
+        intention-revealing names, extracted fixtures/helpers, no duplicated setup.
+      emotional: >
+        Confidence the cleanup did not quietly gut coverage; relief from test-rot dread.
+      social: >
+        A test suite teammates can read and trust; being seen as disciplined about
+        test quality.
+    four_forces:
+      push: >
+        Test rot accumulates; testing.md is not enforced anywhere; phil:refactor and
+        phil:refactor-loop refuse or cannot safely touch tests.
+      pull: >
+        The same one-command, gated cleanup phil:refactor gives production code —
+        but for tests.
+      anxiety: >
+        (A) A green suite does not prove an assertion was not weakened. (B) The tool
+        might touch tests I did not want touched. (C) The tool might make behavior
+        changes to my tests I did not sanction.
+      habit: >
+        Manual test cleanup, or leaving tests to rot; running phil:refactor on
+        production code only.
+    opportunity_score: not-scored   # single job; highest priority by default
+    status: validated
+    personas: [tess-test-maintainer]
+    features: [refactor-tests]

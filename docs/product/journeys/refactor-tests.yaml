@@ -1,0 +1,48 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: refactor-tests (2026-07-01)
+
+id: refactor-tests
+persona: tess-test-maintainer
+job: keep-test-suite-trustworthy
+emotional_arc: [uncertain, seen, in-control, confident, relieved]
+
+happy_path:
+  - step: review
+    action: run `/phil:refactor-tests --review tests/`
+    output: prioritized .test-refactoring-backlog.md (file:line + named move per smell)
+    emotion: seen
+  - step: baseline
+    action: run `/phil:refactor-tests`
+    output: test runner detected; baseline suite green
+    emotion: in-control
+  - step: propose
+    action: tool selects top backlog item, proposes ONE assertion-preserving diff
+    output: the diff + named move + rationale
+    emotion: in-control
+  - step: approve-apply
+    action: Tess approves the diff
+    output: applied; suite re-run green
+    emotion: confident
+  - step: commit
+    action: tool commits the single structure-only change
+    output: commit sha
+    emotion: confident
+  - step: repeat
+    action: loop until backlog empty
+    output: final report (done / pruned / blocked)
+    emotion: relieved
+
+error_paths:
+  - trigger: baseline suite red
+    recovery: stop; report; never refactor on red
+  - trigger: suite red after an approved diff
+    recovery: auto-revert (git checkout); mark item blocked; continue
+  - trigger: Tess rejects the proposed diff
+    recovery: skip item; propose next
+  - trigger: no test runner detected
+    recovery: warn; AskUserQuestion to confirm before proceeding
+
+shared_artifacts:
+  - name: .test-refactoring-backlog.md
+    source: the --review pass (single source of truth for pending test smells)
+  - name: test_cmd
+    source: CLAUDE.md declared command, else auto-detected (test-runner-detection.md)

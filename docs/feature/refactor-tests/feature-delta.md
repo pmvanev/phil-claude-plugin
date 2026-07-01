@@ -1,0 +1,183 @@
+# Feature Delta — refactor-tests
+
+Wave DISCUSS complete · density: lean (Tier-1 [REF] only) · 2026-07-01
+Feature type: user-facing · JTBD: yes · walking skeleton: brownfield extension (slice 01)
+
+---
+
+## Wave: DISCUSS / [REF] Persona
+
+**tess-test-maintainer (Tess)** — a developer who owns a test suite in a repo using the
+phil plugin, trusts `/phil:refactor` on production code *because the tests catch her
+mistakes*, and needs that same trust when the tests themselves are what changes.
+
+## Wave: DISCUSS / [REF] JTBD one-liner
+
+When my test suite has accumulated smells after feature work, I want to clean the test
+code up to `testing.md` standards **without silently weakening what the tests verify**, so
+I can keep trusting the suite as a safety net. (`job_id: keep-test-suite-trustworthy`)
+
+## Wave: DISCUSS / [REF] Locked decisions
+
+| ID | Decision | Rationale |
+|----|----------|-----------|
+| D1 | Test refactoring is **structure-only** (assertion-preserving moves). | Preserves the suite's meaning; avoids needing a behavioral oracle for v1. |
+| D2 | Safety oracle = **human approval per proposed diff**; a green suite is only a secondary sanity check. | A passing suite cannot prove an assertion was not weakened. Mutation testing is too heavy for v1. Human-in-the-loop is language-agnostic and sufficient given D1. |
+| D3 | Ship a **new command `phil:refactor-tests`** — do not expand `phil:refactor` or `phil:refactor-loop`. | `refactor-loop`'s G2 hook + rubric exist to *block* test-file writes; expanding them fights their design. The new command reuses shared modules instead. |
+| D4 | Use a **separate `.test-refactoring-backlog.md`**. | No collision with `phil:refactor`'s `.refactoring-backlog.md`. |
+| D5 | Structure-only smell set: duplicated setup → *Extract Fixture/Helper*; missing AAA → *reorder into Arrange-Act-Assert*; vague name → *Rename*; long test with extractable block → *Extract Test Helper*. | These are provably assertion-preserving. Assert-splitting changes test identity/count, so it is excluded. |
+| D6 | Language scope v1 = **Python + TypeScript/React**; extensible. | Matches the plugin's existing rule coverage; the human-review oracle removes any per-language AST dependency. |
+| D7 | Inherit `phil:refactor` safety: never refactor on a red suite; **auto-revert** on post-apply red; **one commit per approved item**. | Keeps each change attributable and reversible. |
+
+## Wave: DISCUSS / [REF] Driving ports
+
+- **CLI/skill command**: `/phil:refactor-tests [--review] [<path> | <test-id>]`
+  - `--review <path>` → detection only, writes the backlog.
+  - `<path>`/`<test-id>` → scope to one file or test.
+  - no arg → work the existing backlog.
+- **Skill bundle**: `skills/refactor-tests/SKILL.md` (loaded by the command).
+
+## Wave: DISCUSS / [REF] Pre-requisites
+
+- Shared test-runner detection (`skills/shared/test-runner-detection.md`).
+- A git repository with a runnable test suite.
+- `CLAUDE.md` test command (preferred) or an auto-detectable runner.
+
+## Wave: DISCUSS / [REF] User stories
+
+Every story traces to `job_id: keep-test-suite-trustworthy`.
+
+### S1 — Review tests for structure smells
+As Tess, I want to scan my test files for `testing.md` structure smells and get a
+prioritized backlog, so I can see what needs cleanup.
+
+**Elevator Pitch**
+Before: Tess cannot see, in one place, where her tests break `testing.md` structure standards.
+After: run `/phil:refactor-tests --review tests/` → sees a prioritized `.test-refactoring-backlog.md` (file:line + named move per smell).
+Decision enabled: which test smells are worth cleaning.
+
+**Acceptance criteria**
+- AC1.1: Given a path with test files, when `--review` runs, then `.test-refactoring-backlog.md` is written listing each detected smell with `file:line`, the named move (D5), and a priority.
+- AC1.2: Only the D5 smell set is reported; no behavior-changing or deletion items appear.
+- AC1.3: Test files are detected by the same globs `rules/testing.md` scopes itself to; non-test files are ignored.
+
+### S2 — Apply one move, human-approved  *(walking skeleton — slice 01)*
+As Tess, I want the tool to propose one assertion-preserving test refactoring at a time and
+apply it only after I approve the diff, so I stay in control of my safety net.
+
+**Elevator Pitch**
+Before: Tess cannot safely auto-refactor tests; a green suite does not prove assertions were preserved.
+After: run `/phil:refactor-tests` → sees a proposed diff for one move (e.g. Extract Fixture) → approves → tool applies it, runs the suite green, commits.
+Decision enabled: per-diff, whether the change preserves intent.
+
+**Acceptance criteria**
+- AC2.1: Given a green baseline suite, when the tool proposes a move, then it shows the full diff, the named move, and a one-line rationale, and applies nothing until Tess approves.
+- AC2.2: On approval, the tool applies the diff, re-runs the suite, and only commits if the suite is green.
+- AC2.3: If the suite is red after applying, the tool auto-reverts (`git checkout`) and marks the item blocked (D7).
+- AC2.4: If Tess rejects, nothing is written; the item is skipped.
+- AC2.5: If the baseline suite is red, the tool stops and reports — it never refactors on red (D7).
+
+### S3 — Work the whole backlog
+As Tess, I want to work through the whole test backlog one approved move at a time until
+it's clean, so cleanup is systematic, not ad hoc.
+
+**Elevator Pitch**
+Before: Tess cleans tests ad hoc and loses track.
+After: run `/phil:refactor-tests` on an existing backlog → propose→approve→apply→commit loop, reporting "3 of 7 done".
+Decision enabled: when the suite is clean enough to stop.
+
+**Acceptance criteria**
+- AC3.1: Given a backlog with pending items, the tool loops S2 per item in priority order.
+- AC3.2: After each landed item, a prune pass marks incidentally-resolved items `resolved (incidental)`.
+- AC3.3: Progress is reported after each item ("N of total done, M pruned, next: ...").
+- AC3.4: The loop stops when all items are done/resolved/blocked, or Tess interrupts (progress saved for resume).
+
+### S4 — Target a single file or test
+As Tess, I want to point the command at one test file or test id, so I can clean just what
+I'm working on without a full review.
+
+**Elevator Pitch**
+Before: Tess must review the whole suite to fix one known-bad test.
+After: run `/phil:refactor-tests tests/test_orders.py` → the propose→approve→apply loop runs scoped to that file only.
+Decision enabled: whether that one file is clean.
+
+**Acceptance criteria**
+- AC4.1: Given a file path or test id, the tool scopes detection and moves to that target only.
+- AC4.2: Same approval, suite, revert, and commit guarantees as S2 apply.
+
+## Wave: DISCUSS / [REF] Out of scope
+
+- Behavior-changing test improvements: determinism fixes (static timestamps, seeded RNG,
+  injected clocks), tightening loose assertions, assert-splitting.
+- Deleting dead/duplicate tests.
+- A mutation-testing oracle.
+- Expanding `phil:refactor` or `phil:refactor-loop` (D3).
+- Languages beyond Python + TypeScript/React in v1 (D6).
+- Auto-apply without human approval (D2).
+
+## Wave: DISCUSS / [REF] WS strategy
+
+**Strategy B (brownfield extension).** New command in an existing plugin, reusing
+test-runner detection and the backlog/loop pattern from `phil:refactor`. Walking skeleton =
+**slice 01** (S2 thin path: one smell type → propose → approve → apply → green → commit),
+dogfooded on this plugin's own tests.
+
+## Wave: DISCUSS / [REF] Outcome KPIs
+
+| KPI | Target | Measurement |
+|-----|--------|-------------|
+| Approval-gated safety | 100% of applied test diffs were human-approved | Command never writes a test file without a recorded approval. |
+| Post-apply integrity | 0 committed changes on a red suite | Every commit is preceded by a green suite run; red → revert. |
+| Cleanup throughput | ≥ 70% of backlog items closed (done + pruned) per session on a real suite | Backlog status counts. |
+| Detection precision | ≤ 20% of `--review` items rejected as false positives on first dogfood run | Reject rate during S2/S3. |
+
+## Wave: DISCUSS / [REF] Definition of Done
+
+1. `/phil:refactor-tests` command + `skills/refactor-tests/SKILL.md` exist and load.
+2. `--review` writes a valid `.test-refactoring-backlog.md` (S1 ACs).
+3. Propose→approve→apply→suite→commit loop works with human gate (S2 ACs).
+4. Backlog loop + prune + progress reporting work (S3 ACs).
+5. Single-target mode works (S4 ACs).
+6. Never refactors on red; auto-reverts on post-apply red (D7).
+7. Only D5 structure-only moves are ever applied; no behavior change.
+8. Acceptance tests cover happy path + the four error paths.
+9. Docs updated (command help + skill); wave artifacts committed.
+
+## Wave: DISCUSS / [REF] Scope assessment
+
+**PASS (right-sized).** ~4 stories, 2–3 modules, no >5-integration-point skeleton, well
+under 2 weeks. No split required. Carpaccio slicing → 3 slices (below).
+
+## Wave: DISCUSS / [REF] Wave decisions summary
+
+- Primary job: `keep-test-suite-trustworthy` — clean tests to `testing.md` structure
+  standards without weakening assertions.
+- Feature type: user-facing. Walking skeleton: slice 01 (strategy B).
+- Constraints: structure-only (D1); human-approval oracle (D2); new command (D3); separate
+  backlog (D4); D5 smell set; Python + TS/React (D6); inherit phil:refactor safety (D7).
+- Upstream changes: none (greenfield SSOT bootstrap — created `docs/product/jobs.yaml`,
+  `personas/tess-test-maintainer.yaml`, `journeys/refactor-tests.yaml`).
+
+## Wave: DISCUSS / [REF] DoR validation
+
+| # | DoR item | Status | Evidence |
+|---|----------|--------|----------|
+| 1 | Story in LeanUX format | ✓ | S1–S4 above |
+| 2 | Acceptance criteria testable | ✓ | AC1.1–AC4.2, all observable |
+| 3 | Job traceability | ✓ | all stories → `keep-test-suite-trustworthy` in jobs.yaml |
+| 4 | Elevator pitch per story (real entry point + observable output) | ✓ | each story cites `/phil:refactor-tests ...` + concrete output |
+| 5 | Dependencies identified | ✓ | Pre-requisites section |
+| 6 | Out-of-scope explicit | ✓ | Out of scope section |
+| 7 | Sized / sliceable | ✓ | scope assessment PASS; 3 carpaccio slices |
+| 8 | Journey + emotional arc defined | ✓ | `journeys/refactor-tests.yaml` |
+| 9 | No blocking ambiguities | ✓ | three cruxes (oracle/invocation/scope) resolved as D1–D3 |
+
+Requirements completeness: **0.97** (all stories have job trace, elevator pitch, testable
+ACs; only second-order DESIGN details — detector implementation, backlog schema — deferred).
+
+## Wave: DISCUSS / [REF] Handoff
+
+**To:** nw-solution-architect (DESIGN — full artifact set) + nw-platform-architect
+(DEVOPS — outcome-kpis only). Open for DESIGN: test-smell detector implementation, backlog
+file schema, how the approval prompt is surfaced (AskUserQuestion vs. plain diff + confirm),
+and reuse boundaries with `phil:refactor`'s loop.
