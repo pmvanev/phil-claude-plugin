@@ -33,13 +33,20 @@ export const meta = {
 // ---------------------------------------------------------------------------
 
 // --- Config ---
-const MAX_ITER = (args && args.max_iterations) || 10
-const MAX_FIX = (args && typeof args.max_fix_attempts === 'number') ? args.max_fix_attempts : 2
-const THETA = (args && args.theta) || 0.6
-const SCOPE = (args && args.scope) || '.'
-const FOCUS = (args && args.focus) || '' // optional: narrow to a single function/class within SCOPE
-const REPO = args && args.repo // REQUIRED — no default (ADR-009 D)
-const TEST_CMD = args && args.test_cmd // REQUIRED — no default
+// args may arrive as a JSON STRING on some invocation paths (the first-run and
+// second-run misfire: args.repo was undefined -> HALT-CONFIG). Normalize to a
+// real object so the string-vs-object footgun can never default the target repo.
+let A = {}
+if (args && typeof args === 'object') A = args
+else if (typeof args === 'string' && args.trim()) { try { A = JSON.parse(args) } catch (e) { A = {} } }
+
+const MAX_ITER = A.max_iterations || 10
+const MAX_FIX = (typeof A.max_fix_attempts === 'number') ? A.max_fix_attempts : 2
+const THETA = A.theta || 0.6
+const SCOPE = A.scope || '.'
+const FOCUS = A.focus || '' // optional: narrow to a single function/class within SCOPE
+const REPO = A.repo // REQUIRED — no default (ADR-009 D)
+const TEST_CMD = A.test_cmd // REQUIRED — no default
 const LEDGER_PATH = '.refactor-loop-ledger.md'
 const RULES = '~/.claude/rules'
 const PINNED = ['preserve-public-api', 'no-test-file-writes']
@@ -113,7 +120,7 @@ const APPLY_SCHEMA = {
 // --- Prompt builders ---
 function gatePrompt(kind) {
   return `You are the gate-runner for /phil:refactor-loop. ${WORKDIR} Run the test gate and report results. Do NOT modify any files.
-1. Run exactly this test command: \`${TEST_CMD}\`. Capture its exit code and how many tests were collected/run.
+1. Run exactly this test command: \`${TEST_CMD}\`. Capture its exit code and how many tests were collected/run. This suite may take several minutes — set your Bash timeout to the maximum (600000 ms) so a slow-but-passing run is never mistaken for a failure. If the command is killed by a timeout (no real exit code), report exit_code:-1 and say so verbatim in stdout; do NOT report it as a test failure.
 2. ${kind === 'post-apply'
       ? 'Also determine whether the PUBLIC API changed vs HEAD: Python compare `__all__` + top-level def/class names; TypeScript compare exported declarations. Set public_api_changed (false/omit for other languages).'
       : 'Baseline run; public_api_changed is not relevant.'}
