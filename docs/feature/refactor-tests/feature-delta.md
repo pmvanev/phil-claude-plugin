@@ -428,3 +428,93 @@ slice; at each RED-phase entry read `distill/red-classification.md` and drive th
 fixtures to their `expected.md` outcome (slice 01 → fixtures 01–04; slice 02 → fixture 05 +
 a TS review fixture; slice 03 → the `@loop` scenarios). The suite in `self-test/` is the
 regression gate for every subsequent edit to the skill.
+
+---
+
+# DELIVER wave
+
+Scope: prose-skill authoring · density: lean (Tier-1 [REF] only) · 2026-07-02
+
+## Wave: DELIVER / [REF] Execution note (paradigm adaptation)
+
+Per DDD8, this feature's production code is **prose** — `commands/refactor-tests.md` +
+`skills/refactor-tests/SKILL.md`, executed by the model. There is no application code, no
+pytest suite to green, no mutation target, and no OOP/functional paradigm (confirmed: `CLAUDE.md`
+has no `## Development Paradigm`; no `.nwave/des-config.json` rigor profile). The standard
+DES-monitored code-TDD machinery (roadmap.json → crafter subagents doing RED→GREEN→COMMIT →
+mutation) does not apply and was **not** run — it would be theater on Markdown. DELIVER was
+adapted: the main instance authored the two prose files directly, then validated by dogfooding
+the committed self-test fixtures. This is DES-exempt in the sense of the enforcement clause
+("non-deliver tasks: docs"). Deviation logged here for the finalize/back-propagation record.
+
+## Wave: DELIVER / [REF] Implementation summary
+
+Shipped `/phil:refactor-tests` — a human-approved, structure-only test-refactoring loop. The
+thin command loader defers to `skills/refactor-tests/SKILL.md`, which contains: the four-move D5
+taxonomy with per-language (Python + TS/React) detection heuristics; `testing.md`-scoped
+test-file globs; `--review` backlog seeding in `review-code` format (by convention); and the
+apply-then-review loop (green-baseline gate → propose without chat diff → apply → suite sanity →
+auto-revert on red → IDE-diff human gate via AskUserQuestion approve/reject/skip/quit → one
+commit per approved item → prune + progress). Reuses `skills/shared/test-runner-detection.md`.
+The deferred critic (slice 04) is left as a documented pre-screen seam in the propose step.
+
+## Wave: DELIVER / [REF] Files modified
+
+Production (prose):
+- `commands/refactor-tests.md` — CREATE NEW: thin loader (description, argument-hint, allowed-tools → skill).
+- `skills/refactor-tests/SKILL.md` — CREATE NEW: loop core + D5 taxonomy + detection heuristics + human gate.
+
+Reused unchanged: `skills/shared/test-runner-detection.md`, `rules/testing.md`, `review-code` backlog format.
+Tests (from DISTILL, already committed): `skills/refactor-tests/self-test/**`, `skills/refactor-tests/acceptance.feature`.
+Docs: this `feature-delta.md`.
+
+Design compliance: both files are exactly the two CREATE-NEW components in the DESIGN Component
+Decomposition table. No unauthorized new component; `review-code` and the G2 hook untouched (DD3/DD7).
+
+## Wave: DELIVER / [REF] Scenarios green count
+
+Deterministic safety mechanics: **4 of 4 fixtures dogfooded PASS** (01 baseline-red→STOP,
+02 post-apply-red→auto-revert, 03 approve→commit-on-green, 04 reject→clean-revert) — each run in a
+throwaway git repo executing the exact git/suite sequence `SKILL.md` prescribes; outcomes matched
+every `expected.md`. Fixture 05 (`--review`→backlog) and the S3/S4 `@requires-human` scenarios are
+**authored + structurally verified** (detection heuristics ↔ `expected-backlog.md` aligned; loop
+steps present); their full behavioral confirmation is a live LLM+human dogfood run — inherent to a
+prose skill whose oracle is the developer (D2/ADR-002), pending with the maintainer.
+
+## Wave: DELIVER / [REF] DoD check (vs DISCUSS Definition of Done)
+
+| # | DoD item | Status |
+|---|----------|--------|
+| 1 | command + SKILL.md exist and load | ✅ created; convention-auto-discovered; loader→skill link verified |
+| 2 | `--review` writes valid backlog (S1) | ✅ authored (review mode + format); precision KPI needs live dogfood |
+| 3 | propose→approve→apply→suite→commit human gate (S2) | ✅ authored; git/suite mechanics dogfooded (fixture 03) |
+| 4 | backlog loop + prune + progress (S3) | ✅ authored; live loop run pending (human gate) |
+| 5 | single-target mode (S4) | ✅ authored (Scoped mode) |
+| 6 | never on red; auto-revert on post-apply red (D7) | ✅ authored + dogfooded (fixtures 01, 02) |
+| 7 | only D5 structure moves; no behavior change | ✅ authored — explicit scope guards + "never in scope" list |
+| 8 | acceptance tests cover happy + four errors | ✅ DISTILL fixtures committed; happy+4 errors dogfooded |
+| 9 | docs updated (command help + skill); artifacts committed | ✅ command description/argument-hint; committed at finalize |
+
+## Wave: DELIVER / [REF] Demo evidence — 2026-07-02
+
+Dogfood of the loop's prescribed mechanics (throwaway git repos, real `pytest` + `git`):
+
+```
+Fixture 01 baseline-red-stop:      baseline suite=red  -> STOP, apply nothing          => PASS
+Fixture 02 postapply-red-autorevert: baseline=green, post-apply=red -> git checkout    => REVERT, 0 commits, tracked-tree clean => PASS
+Fixture 03 approve-commit-on-green:  baseline=green, post-apply=green -> approve -> commit => suite green, 1 new commit => PASS
+Fixture 04 reject-reverts-clean:     post-apply=green -> reject -> git checkout         => clean revert, 0 commits => PASS
+```
+
+## Wave: DELIVER / [REF] Quality gates
+
+- Design compliance: ✅ only the two authorized CREATE-NEW files; reuse boundaries honored.
+- Wave-completion invariants: ✅ no `__SCAFFOLD__` markers; no dual code paths (nothing superseded).
+- DES code-TDD / roadmap / mutation / L1-L6 refactor: N/A — prose deliverable (adaptation note above).
+- Review: nw-software-crafter-reviewer (prose-framed) — see review outcome recorded at finalize.
+
+## Wave: DELIVER / [REF] Pre-requisites
+
+DISTILL fixtures + `acceptance.feature` (committed); DESIGN component decomposition + reuse
+analysis; `skills/shared/test-runner-detection.md`; `rules/testing.md` globs + smell standards;
+`review-code` backlog format. Runtime: git + a project test runner (per shared detection).
