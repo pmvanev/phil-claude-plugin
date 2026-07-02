@@ -1,0 +1,11 @@
+{
+  "node_id": "RT-SELFTEST-01",
+  "mode": "apply",
+  "target": "test_cart.py",
+  "named_move": "Extract Fixture/Helper",
+  "target_span": "test_cart.py:4-9",
+  "rationale": "duplicated cart literal across two tests (the move the loop WOULD attempt on a green baseline)",
+  "assertion_preserving_claim": true,
+  "human_decision": "n/a — the loop must never reach the human gate",
+  "expected_guard": "baseline-suite-check (D7/DD6) — never refactor on red"
+}

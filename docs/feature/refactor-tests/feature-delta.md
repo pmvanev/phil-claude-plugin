@@ -303,3 +303,128 @@ registry to collide against.
 deployment, or observability surface beyond the existing plugin — DEVOPS is expected to be a
 near-no-op. Then DISTILL authors acceptance tests for the happy path + four error paths and
 pins the D5 detection heuristics.
+
+---
+
+# DISTILL wave
+
+Scope: acceptance tests · density: lean (Tier-1 [REF] only) · designer: main instance
+· 2026-07-02 · DEVOPS: **skipped** (no KPI contracts; prose-skill feature, near-no-op per DESIGN handoff)
+
+## Wave: DISTILL / [REF] Reconciliation
+
+Checked DISCUSS D1–D7 against DESIGN DD1–DD8. **0 contradictions.** DD4 refines D2's approval
+*mechanism* (apply→suite→IDE review→structured approve/reject) without changing the
+human-approval oracle; DESIGN's own summary confirms no back-propagation warranted. Gate passed.
+
+## Wave: DISTILL / [REF] Test approach (project-convention override)
+
+The standard pytest-bdd `.feature` + Python RED-scaffold machinery does **not** fit: DDD8 says
+this feature is a prose skill executed by the model — there is no application module to scaffold,
+and the repo has no pytest-bdd harness. Per the DISTILL "project conventions always win" rule,
+the acceptance suite mirrors the plugin's own **golden-fixture self-test** convention
+(`refactor/self-test/`): self-contained fixtures that feed the safety loop known situations and
+assert the correct gate outcome.
+
+**Inherent oracle limit (D2/ADR-002):** the safety oracle is a *human*. The deterministic git
+safety mechanics (never-on-red, auto-revert-on-post-apply-red, commit-only-green, one-commit-
+per-item) are fixture-driveable and are pinned here. The human approve/reject *judgement* is
+supplied by fixture manifests for unattended runs and validated live by same-day dogfood (the
+slices), not by an automated assertion.
+
+## Wave: DISTILL / [REF] Scenario list with tags
+
+SSOT for scenarios: `skills/refactor-tests/acceptance.feature`. Deterministic mechanics SSOT:
+`skills/refactor-tests/self-test/`.
+
+| Scenario | Story | Tags | Fixture (deterministic) |
+|----------|-------|------|-------------------------|
+| Review pass seeds a prioritized backlog | S1 | `@review` | `05-review-seeds-backlog` |
+| One approved move applied, verified, committed | S2 | `@walking_skeleton @human-gate` | `03-approve-commit-on-green` |
+| Rejected move leaves suite untouched | S2 | `@error @human-gate` | `04-reject-reverts-clean` |
+| Move that breaks suite is reverted pre-gate | S2 | `@error` | `02-postapply-red-autorevert` |
+| Never refactors on a red suite | S2 | `@error` | `01-baseline-red-stop` |
+| Backlog worked one approved move at a time | S3 | `@loop @requires-human` | — (dogfood) |
+| Loop interrupted and resumed | S3 | `@loop @requires-human` | — (dogfood) |
+| Cleanup scoped to a single file | S4 | `@scoped @requires-human` | — (dogfood) |
+
+Error-path coverage: 3 of 5 fixture-backed scenarios are error paths (60%) — exceeds the ≥40% target.
+DoD "happy path + four error paths": happy = `03`; four errors = `01` (baseline red), `02`
+(post-apply red), `04` (reject), plus review false-positive/negative guarded by `05`.
+
+## Wave: DISTILL / [REF] Adapter coverage
+
+| Driven port | Adapter | Exercised by | Real I/O |
+|-------------|---------|--------------|----------|
+| Run suite (baseline + post-apply) | test runner via Bash (`pytest`) | fixtures 01–04 (real pytest runs) | ✅ real-io |
+| Checkpoint / commit / revert | git via Bash | fixtures 02 (revert), 03 (commit), 04 (revert) | ✅ real-io |
+| Read tests / write backlog | filesystem | fixture 05 (real files → real backlog) | ✅ real-io |
+| Locate test runner | `skills/shared/test-runner-detection.md` (reuse) | all fixtures (pytest auto-detected) | ✅ real-io |
+| Human approval | AskUserQuestion + IDE diff review | 03 (approve), 04 (reject) — decision from manifest offline; human live | fake offline / real dogfood |
+
+No driven adapter is left without a real-I/O fixture, except the human-approval port whose
+real exercise is inherently the live dogfood (documented limit above).
+
+## Wave: DISTILL / [REF] Driving adapter coverage
+
+The single driving adapter is the `/phil:refactor-tests` command. Every mode is covered:
+`--review <path>` → fixture 05; `<path>` scoped run → fixtures 01–04; no-arg backlog loop →
+S3 dogfood scenarios. Once `commands/refactor-tests.md` + `SKILL.md` exist (DELIVER), driving a
+fixture = invoking the command scoped to that fixture dir.
+
+## Wave: DISTILL / [REF] Scaffolds (RED-ready)
+
+No production code module exists to scaffold (DDD8). The RED-ready artifacts are the fixtures +
+the absent skill they drive:
+
+- `skills/refactor-tests/self-test/01-baseline-red-stop/` — `cart.py` (buggy), `test_cart.py`, `manifest.json`, `expected.md`
+- `skills/refactor-tests/self-test/02-postapply-red-autorevert/` — `cart.py`, `test_cart.py`, `move.patch`, `manifest.json`, `expected.md`
+- `skills/refactor-tests/self-test/03-approve-commit-on-green/` — `cart.py`, `test_cart.py`, `move.patch`, `manifest.json`, `expected.md`
+- `skills/refactor-tests/self-test/04-reject-reverts-clean/` — `cart.py`, `test_cart.py`, `move.patch`, `manifest.json`, `expected.md`
+- `skills/refactor-tests/self-test/05-review-seeds-backlog/` — `cart.py`, `test_cart_smells.py`, `manifest.json`, `expected.md`, `expected-backlog.md`
+- `skills/refactor-tests/self-test/README.md` — how to drive the suite as the skill gate
+- `skills/refactor-tests/acceptance.feature` — scenario SSOT
+
+RED classification (fail-for-the-right-reason): `docs/feature/refactor-tests/distill/red-classification.md`.
+All fixtures verified BROKEN-free — baselines run under pytest (01 red by design; 02–05 green),
+all patches `git apply --check` clean; the suite is un-driveable only because `SKILL.md` is absent.
+
+## Wave: DISTILL / [REF] Test placement
+
+`skills/refactor-tests/self-test/` (co-located with the skill it validates) +
+`skills/refactor-tests/acceptance.feature`. **Precedent:** `refactor/self-test/` — the plugin's
+existing skill/gate self-test; same fixture format (`before` code, `move.patch`, `manifest.json`,
+`expected.md`, README driver). Co-location keeps the CREATE-NEW feature self-contained.
+
+## Wave: DISTILL / [REF] Register outcomes
+
+**Skipped.** No `docs/product/outcomes/registry.yaml` in this plugin, and the `nwave-ai outcomes`
+CLI is not part of this repo (DESIGN made the same call for the collision check). Feature ships a
+prose skill, not a typed contract surface in the registry's sense.
+
+## Wave: DISTILL / [REF] Pre-requisites
+
+- DESIGN driving/driven ports (above): command `/phil:refactor-tests`; git, filesystem, test
+  runner, human-approval adapters.
+- `skills/shared/test-runner-detection.md` (reuse).
+- A git repo with a runnable suite; `python -m pytest` for the fixtures.
+- DEVOPS environment matrix: N/A (skipped) — default local git + pytest.
+
+## Wave: DISTILL / [REF] Self-review
+
+- WS scenario present, tagged `@walking_skeleton`, backed by fixture `03` (green). ✅
+- Every driven adapter has a real-I/O fixture except human-approval (documented limit). ✅
+- Business-language scenarios; mechanics live in fixtures/steps, not in `.feature`. ✅
+- Error-path coverage 60% (≥40% target). ✅
+- Fixtures are RED (not BROKEN): baselines run, patches apply, states verified. ✅
+- Language: Python fixtures (matches `refactor/self-test/` + D6 Python scope). TS/React
+  detector coverage is a documented forward gap — add a `.test.tsx` review fixture when the
+  detector's TS heuristics are pinned in DELIVER slice 02 (D6 keeps TS in v1 scope).
+
+## Wave: DISTILL / [REF] Handoff
+
+**To:** DELIVER. Author `commands/refactor-tests.md` + `skills/refactor-tests/SKILL.md` slice by
+slice; at each RED-phase entry read `distill/red-classification.md` and drive the mapped
+fixtures to their `expected.md` outcome (slice 01 → fixtures 01–04; slice 02 → fixture 05 +
+a TS review fixture; slice 03 → the `@loop` scenarios). The suite in `self-test/` is the
+regression gate for every subsequent edit to the skill.

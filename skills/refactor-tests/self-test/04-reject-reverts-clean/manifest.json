@@ -1,0 +1,13 @@
+{
+  "node_id": "RT-SELFTEST-04",
+  "mode": "apply",
+  "target": "test_cart.py",
+  "named_move": "Extract Fixture/Helper",
+  "target_span": "test_cart.py:4-9",
+  "diff": "see move.patch",
+  "rationale": "duplicated cart literal across two tests -> a shared pytest fixture",
+  "assertion_preserving_claim": true,
+  "note": "Identical to fixture 03's move and green post-apply state. The ONLY difference is the human decision: reject. A green suite must NOT override the human's no.",
+  "human_decision": "reject",
+  "expected_guard": "human-approval port (DD4) -> reject/skip/quit reverts, writes nothing"
+}

@@ -1,0 +1,27 @@
+diff --git a/test_cart.py b/test_cart.py
+index 3074b1a..165a6de 100644
+--- test_cart.py
++++ test_cart.py
+@@ -1,11 +1,16 @@
++import pytest
++
+ from cart import total
+ 
+ 
+-def test_total_sums_line_items():
+-    cart = {"widget": (10, 2), "gadget": (5, 1)}
+-    assert total(cart) == 25
++@pytest.fixture
++def sample_cart():
++    return {"widget": (10, 1), "gadget": (5, 1)}  # qty silently dropped: total now 15
++
++
++def test_total_sums_line_items(sample_cart):
++    assert total(sample_cart) == 25
+ 
+ 
+-def test_total_applies_discount():
+-    cart = {"widget": (10, 2), "gadget": (5, 1)}
+-    assert total(cart, 0.10) == 22.5
++def test_total_applies_discount(sample_cart):
++    assert total(sample_cart, 0.10) == 22.5

@@ -1,0 +1,13 @@
+{
+  "node_id": "RT-SELFTEST-02",
+  "mode": "apply",
+  "target": "test_cart.py",
+  "named_move": "Extract Fixture/Helper",
+  "target_span": "test_cart.py:4-9",
+  "diff": "see move.patch",
+  "rationale": "duplicated cart literal across two tests",
+  "assertion_preserving_claim": true,
+  "note": "The claim is FALSE: the extracted fixture silently drops a quantity, changing what the test exercises. The suite catches it; the human never has to.",
+  "human_decision": "n/a — auto-revert fires before the human gate",
+  "expected_guard": "post-apply-suite-sanity (D7/DD6) — auto-revert on red"
+}

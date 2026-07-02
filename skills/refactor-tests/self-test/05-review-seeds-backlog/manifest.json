@@ -1,0 +1,9 @@
+{
+  "node_id": "RT-SELFTEST-05",
+  "mode": "review",
+  "target": "test_cart_smells.py",
+  "invocation": "/phil:refactor-tests --review .",
+  "expected_output": ".test-refactoring-backlog.md",
+  "expected_backlog_reference": "expected-backlog.md",
+  "expected_guard": "D5-only detector (DD3) -> writes review-code-format backlog by convention"
+}

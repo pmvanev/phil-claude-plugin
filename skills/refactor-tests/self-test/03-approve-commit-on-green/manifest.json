@@ -1,0 +1,13 @@
+{
+  "node_id": "RT-SELFTEST-03",
+  "mode": "apply",
+  "target": "test_cart.py",
+  "named_move": "Extract Fixture/Helper",
+  "target_span": "test_cart.py:4-9",
+  "diff": "see move.patch",
+  "rationale": "duplicated cart literal across two tests -> a shared pytest fixture",
+  "assertion_preserving_claim": true,
+  "note": "The claim is TRUE: the assertion set is identical before and after; only setup is extracted. Suite stays green.",
+  "human_decision": "approve",
+  "expected_guard": "human-approval port (DD4) -> commit-only-on-green (D7)"
+}
