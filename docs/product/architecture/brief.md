@@ -16,6 +16,11 @@ one proposed move to the working tree, runs the suite as a sanity check, and pau
 developer to review the uncommitted diff **in their IDE/editor** before it is committed or
 reverted.
 
+**Status:** IMPLEMENTED (2026-07-02) — shipped `commands/refactor-tests.md` +
+`skills/refactor-tests/SKILL.md` (acceptance suite: `skills/refactor-tests/self-test/` +
+`acceptance.feature`). Evolution: `docs/evolution/2026-07-02-refactor-tests.md`. The test-diff
+critic remains deferred to slice 04 (the "future pre-screen seam" in the diagram below is accurate).
+
 **Pattern:** modular prose skill, ports-and-adapters. Loop core = the skill; adapters = git,
 filesystem, test runner (all via Bash), and the human-approval port (AskUserQuestion + editor
 review). See feature-delta.md `DESIGN / [REF]` sections for the full decision record (DD1–DD8),
