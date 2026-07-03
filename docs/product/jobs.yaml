@@ -35,3 +35,38 @@ jobs:
     status: validated
     personas: [tess-test-maintainer]
     features: [refactor-tests]
+
+  - id: catch-ux-violations-while-building-ui
+    # Registered by DISCUSS wave, feature: ux-standards-rule (2026-07-02)
+    job_story: >
+      When I'm building or editing a UI and I'm heads-down on behavior, I want the
+      plugin to flag concrete UX/usability and accessibility violations and name the
+      preferred form, so I can catch defects (missing states, placeholder-as-label,
+      color-only status, unlabeled controls, sub-24px targets) before they ship —
+      without having to hold all of Nielsen's heuristics and WCAG in my head.
+    dimensions:
+      functional: >
+        Detect usability/accessibility violations in UI code during editing and review,
+        cite the specific principle, and name the preferred form.
+      emotional: >
+        Confidence that obvious UX/a11y defects will not slip through; relief from
+        carrying the whole heuristic/WCAG checklist mentally.
+      social: >
+        Ship UI that teammates and users perceive as usable and accessible; be seen as
+        someone whose UI work clears the usability bar by default.
+    four_forces:
+      push: >
+        No automated UX coverage exists; ui.md pushes aesthetics ("wow", premium) but
+        nothing owns usability/accessibility; heuristics and WCAG are easy to forget mid-flow.
+      pull: >
+        The same auto-loaded "flag the violation, name the preferred form" help that
+        react.md gives React idioms — but for UX usability and accessibility.
+      anxiety: >
+        (A) A rule that nags on every judgment call creates noise on dense expert tools.
+        (B) It might duplicate or contradict ui.md's aesthetics guidance.
+      habit: >
+        Manual review, relying on memory, or catching UX defects only in QA/production.
+    opportunity_score: not-scored
+    status: validated
+    personas: [devon-ui-developer]
+    features: [ux-standards-rule]
