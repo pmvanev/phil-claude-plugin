@@ -1,0 +1,12 @@
+{
+  "node_id": "RD-SELFTEST-04",
+  "mode": "apply",
+  "target": "test_orders.py",
+  "smell_family": "implementation-coupling",
+  "named_move": "Assert on observable outcome",
+  "target_span": "test_orders.py:1-10",
+  "rationale": "same behavioural rewrite as fixture 03 (real repo, assert retrieved order) — green — but here Tess is not convinced the rewrite preserves intent and rejects it",
+  "coverage_equivalence_claim": "Claims the rewrite catches the same persistence regressions plus wrong-field regressions. Plausible, but Tess judges the claim insufficient (her call — she is the oracle) and rejects.",
+  "human_decision": "reject",
+  "expected_guard": "human is the oracle, not the suite (D2) — reject reverts cleanly even on a green suite"
+}

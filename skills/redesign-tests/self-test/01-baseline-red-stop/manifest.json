@@ -1,0 +1,12 @@
+{
+  "node_id": "RD-SELFTEST-01",
+  "mode": "apply",
+  "target": "test_orders.py",
+  "smell_family": "implementation-coupling",
+  "named_move": "Assert on observable outcome",
+  "target_span": "test_orders.py:1-8",
+  "rationale": "the rewrite the loop WOULD attempt on a green baseline (irrelevant here — the baseline is red)",
+  "coverage_equivalence_claim": "n/a — the loop must never reach the proposal on a red baseline",
+  "human_decision": "n/a — the loop must never reach the human gate",
+  "expected_guard": "baseline-suite-check (DDD5) — never redesign on red"
+}

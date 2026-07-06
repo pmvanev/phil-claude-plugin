@@ -1,0 +1,12 @@
+{
+  "node_id": "RD-SELFTEST-02",
+  "mode": "apply",
+  "target": "test_orders.py",
+  "smell_family": "implementation-coupling",
+  "named_move": "Assert on observable outcome",
+  "target_span": "test_orders.py:1-10",
+  "rationale": "rewrite from mock-interaction assertion to observable persisted state — but this proposal GETS THE NEW ASSERTION WRONG (expects status 'confirmed', SUT produces 'placed')",
+  "coverage_equivalence_claim": "Claims to catch the same persistence regressions by asserting the retrieved order equals {id, amount, status:confirmed}. The claim is WRONG — the SUT status is 'placed' — so the rewritten test reds the suite.",
+  "human_decision": "n/a — the loop must auto-revert before the human gate",
+  "expected_guard": "post-apply auto-revert (DDD5) — a rewrite that reds the suite is reverted, never shown to the human"
+}

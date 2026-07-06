@@ -1,0 +1,14 @@
+{
+  "node_id": "RD-SELFTEST-06",
+  "mode": "apply",
+  "target": "test_orders.py",
+  "smell_family": "excessive-mocking",
+  "named_move": "Replace mock with fake",
+  "target_span": "test_orders.py:1-13",
+  "rationale": "the test mocks both collaborators and asserts on gateway.charge; a behavioural rewrite would need a FakePaymentGateway that captures charges to assert on — but none exists in the SUT",
+  "fake_required": "FakePaymentGateway (captures charge amounts)",
+  "fake_exists": false,
+  "coverage_equivalence_claim": "n/a — the rewrite cannot be constructed without a fake to observe charges",
+  "human_decision": "n/a — the loop must skip before reaching the human gate",
+  "expected_guard": "skip-not-scaffold (S3, AC3.2) — surface the missing fake and skip; never invent unreviewed test scaffolding"
+}

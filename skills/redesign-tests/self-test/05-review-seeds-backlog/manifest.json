@@ -1,0 +1,12 @@
+{
+  "node_id": "RD-SELFTEST-05",
+  "mode": "review",
+  "target": ".",
+  "smell_family": "all-behavioural",
+  "named_move": "n/a — review mode applies nothing",
+  "target_span": "test_orders_smells.py (whole file)",
+  "rationale": "detect behavioural smells across the folder and seed a separate .test-redesign-backlog.md; reuse review-code Priority 6 taxonomy; apply nothing",
+  "coverage_equivalence_claim": "n/a — review mode proposes no rewrite",
+  "human_decision": "n/a — review mode does not reach a gate",
+  "expected_guard": "behavioural-only detector (ADR-003); writes .test-redesign-backlog.md separate from .test-refactoring-backlog.md; SUT not flagged"
+}

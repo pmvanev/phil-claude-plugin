@@ -366,3 +366,84 @@ graph TB
     Skill -.->|"future pre-screen seam"| Seam
 ```
 
+---
+
+# DISTILL wave
+
+**Wave:** DISTILL (wave 4 of 6) · **Date:** 2026-07-06 · **Agent:** Iris (nw-acceptance-designer)
+**Reconciliation:** DISCUSS (D1–D7) + DESIGN (DDD1–9) consistent — **0 contradictions**.
+**Feature shape:** prose skill (no application code) → project golden-fixture convention wins over
+pytest-bdd/scaffolds (same call `refactor-tests` made). Outcomes-registry registration **skipped**
+(methodology feature, no new typed code contract).
+
+## Wave: DISTILL / [REF] Scenario list with tags
+
+Scenario SSOT: `skills/redesign-tests/acceptance.feature`. Safety mechanics pinned by golden
+fixtures under `skills/redesign-tests/self-test/`.
+
+| Scenario | Tags | Fixture |
+|----------|------|---------|
+| A review pass seeds a prioritized behavioural backlog | `@us-S2 @review` | 05 |
+| One approved behavioural rewrite is applied, verified, committed | `@us-S1 @walking_skeleton @human-gate` | 03 |
+| A rejected rewrite leaves the suite untouched | `@us-S1 @error @human-gate` | 04 |
+| A rewrite that breaks the suite is reverted before Tess is asked | `@us-S1 @error` | 02 |
+| The tool never redesigns on a red suite | `@us-S1 @error` | 01 |
+| An over-mock rewrite needing a non-existent fake is skipped | `@us-S3 @mocking` | 06 |
+| The backlog is worked one approved rewrite at a time | `@us-S3 @us-S4 @loop @requires-human` | (dogfood) |
+| A determinism rewrite is confirmed stable before Tess is asked | `@us-S4 @flakiness @requires-human` | (deferred — see gap) |
+| Redesign can be scoped to a single file or test | `@us-S1 @scoped @requires-human` | (dogfood) |
+
+## Wave: DISTILL / [REF] WS strategy
+
+Walking skeleton = **fixture 03** (`@walking_skeleton`, S1): one implementation-coupling rewrite
+driven end-to-end through the gated loop (apply → suite green → surface coverage-equivalence claim →
+human approves → one commit). Litmus: a maintainer at the gate confirms "yes — I can judge that
+rewrite and I'd approve it." No per-feature Strategy A/B/C/D negotiation (prose skill; the "adapters"
+are git + pytest + AskUserQuestion, driven by human/model exactly as `refactor/self-test/` is).
+
+## Wave: DISTILL / [REF] Adapter coverage table
+
+| Adapter | Exercised with real I/O | Covered by |
+|---------|-------------------------|------------|
+| git (apply / commit / revert) | YES | 02 (revert), 03 (commit), 04 (revert) — real `git apply` + `git checkout` in scratch |
+| test runner (pytest) | YES | all fixtures — real `python -m pytest` baselines |
+| filesystem backlog | YES | 05 — writes real `.test-redesign-backlog.md` |
+| human-approval port | supplied via manifest `human_decision` | 03 (approve), 04 (reject) — live: AskUserQuestion |
+
+## Wave: DISTILL / [REF] Scaffolds
+
+None. Prose-skill feature — there is no production module to scaffold RED (Mandate 7 N/A, same as
+`refactor-tests`). The "RED" is structural: the fixtures exist but the skill that drives them does
+not yet. Recorded in `distill/red-classification.md` as `MISSING_FUNCTIONALITY` for all six fixtures.
+
+## Wave: DISTILL / [REF] Test placement
+
+`skills/redesign-tests/self-test/` (six fixture dirs) + `skills/redesign-tests/acceptance.feature`.
+Precedent: `skills/refactor-tests/self-test/` — the plugin's established way to regression-gate a
+skill/loop. Co-located with the skill so the gate ships with the feature.
+
+## Wave: DISTILL / [REF] Fixtures created (self-verified 2026-07-06)
+
+| Fixture | Pins | Outcome | Verified |
+|---------|------|---------|----------|
+| `01-baseline-red-stop` | AC1.7 | STOP | baseline RED ✓ |
+| `02-postapply-red-autorevert` | AC1.3 | REVERT | baseline GREEN, patch→RED ✓ |
+| `03-approve-commit-on-green` (WS) | AC1.1/1.2/1.5/1.6 | COMMIT | baseline GREEN, patch→GREEN ✓ |
+| `04-reject-reverts-clean` | AC1.5, D2 | REVERT | baseline GREEN, patch→GREEN ✓ |
+| `05-review-seeds-backlog` | AC2.1/2.2/2.4 | behavioural backlog | 4 smell tests GREEN ✓ |
+| `06-missing-fake-skips` | AC3.2 | SKIP | baseline GREEN ✓ |
+
+Verification: Python 3.14.3 / pytest 9.0.2; patches applied in scratch git copies.
+
+## Wave: DISTILL / [REF] Pre-requisites
+
+- DELIVER writes `commands/redesign-tests.md` + `skills/redesign-tests/SKILL.md`, then drives all
+  six fixtures to their `expected.md` outcomes (regression gate).
+- Reuses `skills/shared/test-runner-detection.md` and `review-code` P6 taxonomy (per ADR-003).
+
+## Wave: DISTILL / [REF] Open questions / deferred
+
+- Dedicated flakiness-rewrite fixture (S4, AC4.2 N-run stability) — deferred with S4 go/no-go;
+  smell detection already covered by fixture 05.
+- TS/React self-test fixture — documented language gap (Python fixtures first, as `refactor-tests`).
+

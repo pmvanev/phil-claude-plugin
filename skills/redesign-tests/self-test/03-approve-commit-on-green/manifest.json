@@ -1,0 +1,12 @@
+{
+  "node_id": "RD-SELFTEST-03",
+  "mode": "apply",
+  "target": "test_orders.py",
+  "smell_family": "implementation-coupling",
+  "named_move": "Assert on observable outcome",
+  "target_span": "test_orders.py:1-10",
+  "rationale": "the test asserts that save() was CALLED (a mock interaction) rather than that the order is actually persisted with correct fields; rewrite uses the real InMemoryOrderRepo and asserts the retrieved order",
+  "coverage_equivalence_claim": "Old test caught 'order not persisted' by asserting repo.save was called once. Rewrite catches that same class AND wrong-field regressions (bad status or amount) by asserting the retrieved order equals {id:A1, amount:100, status:placed}. Strictly stronger; no coverage lost.",
+  "human_decision": "approve",
+  "expected_guard": "human-approval gate + coverage-equivalence claim (ADR-004); commit only on green AND approval"
+}

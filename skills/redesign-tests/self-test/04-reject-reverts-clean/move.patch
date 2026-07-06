@@ -1,0 +1,23 @@
+diff --git a/test_orders.py b/test_orders.py
+index 81e6d67..efed90e 100644
+--- a/test_orders.py
++++ b/test_orders.py
+@@ -1,12 +1,9 @@
+-from unittest.mock import Mock
++from orders import InMemoryOrderRepo, OrderService
+ 
+-from orders import OrderService
+ 
+-
+-# SMELL: implementation-coupling — asserts that save() was CALLED (a mock interaction),
+-# not that the order is actually persisted with the right fields. Green, but couples to HOW.
+-def test_place_saves_order():
+-    repo = Mock()
++# Asserts the observable outcome: the order is actually persisted with its details.
++def test_placed_order_is_retrievable_with_its_details():
++    repo = InMemoryOrderRepo()
+     svc = OrderService(repo)
+-    svc.place("A1", 100)
+-    repo.save.assert_called_once()
++    order_id = svc.place("A1", 100)
++    assert repo.get(order_id) == {"id": "A1", "amount": 100, "status": "placed"}
