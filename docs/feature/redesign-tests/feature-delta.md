@@ -238,3 +238,131 @@ the feature addition and appends this forces refinement with a provenance note.
   loop, extract flakiness into its own skill.
 - **TS/React fixtures** — Python fixtures first; a `.test.tsx` fixture is the documented language gap
   (same gap `refactor-tests` carries).
+
+---
+
+# DESIGN wave
+
+**Wave:** DESIGN (wave 3 of 6) · **Date:** 2026-07-06 · **Agent:** Morgan (nw-solution-architect)
+**Scope:** Application / components · **Interaction mode:** propose · **Paradigm:** N/A (prose skill)
+
+## Wave: DESIGN / [REF] DDD list
+
+| ID | Decision | Verdict / one-line rationale |
+|----|----------|------------------------------|
+| DDD1 | **New command + new skill; copy the `refactor-tests` loop pattern** | Not a mode, not a shared-module extraction. Keeps two safety contracts separate; zero regression to shipped code. → ADR-003 |
+| DDD2 | **Reuse boundaries** | `test-runner-detection.md` as-is; `review-code` P6 taxonomy read-only; separate `.test-redesign-backlog.md` by convention. `review-code`/`refactor-tests` untouched. → ADR-003 |
+| DDD3 | **Human gate carries a coverage-equivalence claim** | Inherit ADR-002 apply-then-review; ADD a required before/after "what it caught then / catches now" claim the human validates. → ADR-004 |
+| DDD4 | **Behavioral rewrite catalog (the moves), by smell family** | Coupling → *Assert on observable outcome*; Mocking → *Replace double with real collaborator / fake*; Flakiness → *Inject clock / static timestamp*, *Seed RNG*, *Isolate shared state*. |
+| DDD5 | **Safety mechanics inherited verbatim** | Never-on-red baseline; auto-revert on post-apply red; one-commit-per-item; no chat diffs; never touch SUT. |
+| DDD6 | **Flakiness (S4) adds an N-run stability check** | Determinism analog of the coverage claim; if it fits poorly, spin off (DISCUSS deferred). |
+| DDD7 | **No automated oracle in v1; leave a pre-screen seam** | Propose step leaves the seam where a future mutation / break-confirm critic validates the claim before the human. Mirrors ADR-002 critic-deferral. → ADR-004 |
+| DDD8 | **Prose skill, no development paradigm** | Markdown executed by the model (mirror `refactor-tests` DDD8). |
+| DDD9 | **Self-test golden fixtures pin safety behaviors** | never-on-red stop; post-apply-red auto-revert; approve→commit; reject→clean revert; `--review`→behavioral-only backlog. Mirror `refactor-tests/self-test/`. |
+
+## Wave: DESIGN / [REF] Component decomposition
+
+| Component | Path | Change type |
+|-----------|------|-------------|
+| Command loader (thin) | `commands/redesign-tests.md` | CREATE NEW |
+| Skill (loop + behavioral move catalog + smell taxonomy + gate + coverage-equivalence claim) | `skills/redesign-tests/SKILL.md` | CREATE NEW |
+| Self-test golden fixtures | `skills/redesign-tests/self-test/` | CREATE NEW |
+| Acceptance scenarios | `skills/redesign-tests/acceptance.feature` | CREATE NEW |
+
+## Wave: DESIGN / [REF] Driving ports
+
+- **CLI / skill command:** `/phil:redesign-tests [--review <path> | <file-path> | <test-id>]`
+  - `--review <path>` → detect + seed `.test-redesign-backlog.md`, apply nothing.
+  - `<file-path>` / `<test-id>` → scoped redesign loop.
+  - no argument → work the existing `.test-redesign-backlog.md`.
+
+## Wave: DESIGN / [REF] Driven ports + adapters
+
+| Driven port | Adapter | Notes |
+|-------------|---------|-------|
+| Version control (apply / commit / revert) | `git` via Bash | one commit per approved item; `git checkout` revert |
+| Test execution (baseline / sanity / N-run) | test runner via Bash | located by `test-runner-detection.md` |
+| Backlog persistence | filesystem read/write | `.test-redesign-backlog.md` (separate from refactor-tests) |
+| Behavioral-smell detection | `review-code` P6 taxonomy (read-only reference) | consumed by convention; `review-code` unchanged |
+| Human approval (the oracle) | AskUserQuestion + IDE diff review | carries the coverage-equivalence claim (DDD3) |
+
+## Wave: DESIGN / [REF] Technology choices
+
+- **Runtime:** Markdown prose skill executed by the model (no language/framework pinned).
+- **Adapters:** Bash (git, test runner), filesystem, AskUserQuestion.
+- **Detection source:** `review-code` Priority 6 taxonomy.
+- **Languages acted on (v1):** Python + TS/React (globs inherited from `rules/testing.md`, same set
+  as `refactor-tests`); others recognized and skipped.
+
+## Wave: DESIGN / [REF] Decisions table
+
+| DDD | ADR |
+|-----|-----|
+| DDD1, DDD2 | ADR-003 (new command + reuse boundaries) |
+| DDD3, DDD7 | ADR-004 (coverage-equivalence claim at the human gate) |
+| DDD4, DDD5, DDD6, DDD8, DDD9 | (skill-internal; no separate ADR) |
+
+## Wave: DESIGN / [REF] Reuse Analysis
+
+| Existing Component | File | Overlap | Decision | Justification |
+|--------------------|------|---------|----------|---------------|
+| refactor-tests loop | `skills/refactor-tests/SKILL.md` | gated apply→suite→human-gate→commit/revert loop + safety mechanics | EXTEND (pattern-copy) | Same precedent as refactor-tests copying `phil:refactor`; differs only in moves/taxonomy/backlog. Shared-module extraction deferred (ADR-003). Import would refactor shipped code — regression risk. |
+| test-runner-detection | `skills/shared/test-runner-detection.md` | locate + run suite | REUSE as-is | Identical need; no change |
+| review-code P6 taxonomy | `skills/review-code/SKILL.md` | detect behavioral test smells | REUSE (read-only) | ADR-001 posture: leave review-code untouched; `--review` consumes P6 by convention |
+| backlog format | `.test-refactoring-backlog.md` format | prioritized backlog file | EXTEND (new file) | `.test-redesign-backlog.md` — separate so tools never collide (ADR-001 convention) |
+| human-approval port | ADR-002 apply-then-review | AskUserQuestion + IDE diff | EXTEND | Same mechanism + a required coverage-equivalence claim (ADR-004) |
+
+**Zero unjustified CREATE NEW.** The only CREATE-NEW artifacts (command, skill, fixtures) have no
+existing equivalent — a behavior-changing test tool does not yet exist in the plugin.
+
+## Wave: DESIGN / [REF] Open questions (deferred to DISTILL/DELIVER)
+
+- Final named-move list per smell family — DISTILL locks it via golden fixtures.
+- S4 flakiness go/no-go (keep in-skill vs spin off) — decided by the N-run-oracle fit.
+- Automated coverage oracle (mutation / break-confirm) — deferred slice; seam reserved (DDD7).
+- TS/React self-test fixture — documented language gap.
+
+## Wave: DESIGN / [REF] C4 — System Context
+
+```mermaid
+graph TB
+    Tess["Tess — developer / test maintainer<br/>(sole oracle; validates coverage-equivalence claim)"]
+    RD["phil:redesign-tests<br/>(command + skill)"]
+    Git[("git repository")]
+    Runner["Test runner<br/>(pytest / npm test / ...)"]
+    IDE["IDE / editor<br/>(diff review surface)"]
+
+    Tess -->|"runs /phil:redesign-tests"| RD
+    RD -->|"applies behavioral rewrite, commits/reverts"| Git
+    RD -->|"baseline + sanity + N-run (flaky)"| Runner
+    RD -->|"proposes rewrite + coverage-equivalence claim, pauses"| Tess
+    Tess -->|"reviews uncommitted diff"| IDE
+    IDE -.->|"reads working tree"| Git
+```
+
+## Wave: DESIGN / [REF] C4 — Container
+
+```mermaid
+graph TB
+    subgraph plugin["phil plugin"]
+        Cmd["commands/redesign-tests.md<br/>(thin loader)"]
+        Skill["skills/redesign-tests/SKILL.md<br/>(loop + behavioral moves + gate + coverage-equivalence claim)"]
+        Detect["skills/shared/test-runner-detection.md<br/>(REUSE as-is)"]
+        RC["skills/review-code (P6 taxonomy)<br/>(REUSE read-only)"]
+        Seam["automated coverage oracle<br/>(DEFERRED — pre-screen seam)"]
+    end
+    Backlog[(".test-redesign-backlog.md")]
+    Git[("git")]
+    Runner["Test runner"]
+    Human["Human approval<br/>(AskUserQuestion + IDE diff + coverage claim)"]
+
+    Cmd --> Skill
+    Skill --> Detect
+    Skill -.->|"--review consumes P6"| RC
+    Skill -->|"--review writes / reads pending"| Backlog
+    Skill -->|"apply / commit / revert"| Git
+    Skill -->|"baseline / sanity / N-run"| Runner
+    Skill -->|"propose + coverage claim → pause"| Human
+    Skill -.->|"future pre-screen seam"| Seam
+```
+
