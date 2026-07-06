@@ -23,7 +23,8 @@ jobs:
         phil:refactor-loop refuse or cannot safely touch tests.
       pull: >
         The same one-command, gated cleanup phil:refactor gives production code —
-        but for tests.
+        but for tests; and (redesign-tests, 2026-07-06) safely fix tests that verify
+        the wrong thing — implementation instead of behavior — one approved diff at a time.
       anxiety: >
         (A) A green suite does not prove an assertion was not weakened. (B) The tool
         might touch tests I did not want touched. (C) The tool might make behavior
@@ -34,7 +35,13 @@ jobs:
     opportunity_score: not-scored   # single job; highest priority by default
     status: validated
     personas: [tess-test-maintainer]
-    features: [refactor-tests]
+    features: [refactor-tests, redesign-tests]
+    # Forces refinement (DISCUSS, feature redesign-tests, 2026-07-06):
+    # refactor-tests owns the assertion-preserving pole (anxiety C = "prevent unsanctioned
+    # behavior change"). redesign-tests owns the opposite pole: sanctioned, per-diff-approved
+    # behavioral rewrites. For redesign-tests, anxiety C is reframed as "a sanctioned rewrite
+    # could still silently narrow coverage" (human-only oracle) — the accepted v1 risk (D7).
+    # See docs/feature/redesign-tests/feature-delta.md § Changed Assumptions.
 
   - id: catch-ux-violations-while-building-ui
     # Registered by DISCUSS wave, feature: ux-standards-rule (2026-07-02)

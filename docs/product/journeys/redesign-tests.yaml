@@ -1,0 +1,69 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: redesign-tests (2026-07-06)
+
+id: redesign-tests
+persona: tess-test-maintainer
+job: keep-test-suite-trustworthy
+emotional_arc: [wary, seen, in-control, scrutinizing, confident, relieved]
+
+# Sibling of the refactor-tests journey. Same gated loop; the proposed move is a
+# behavior-CHANGING rewrite (implementation -> behavior), not an assertion-preserving one.
+# The human gate carries more weight here: it is the ONLY oracle (v1 decision D2).
+
+happy_path:
+  - step: review
+    action: run `/phil:redesign-tests --review tests/`
+    output: prioritized .test-redesign-backlog.md (file:line + smell type + rewrite intent)
+    emotion: seen
+  - step: baseline
+    action: run `/phil:redesign-tests`
+    output: test runner detected; baseline suite green
+    emotion: in-control
+  - step: propose
+    action: tool selects top backlog item, proposes ONE behavioral rewrite
+    output: the intent (what it verifies now vs. before) + named smell + rationale
+    emotion: in-control
+  - step: apply
+    action: tool applies the rewrite to the working tree, re-runs suite (sanity check)
+    output: suite green
+    emotion: scrutinizing
+  - step: approve
+    action: Tess reviews the real uncommitted diff in her IDE, judging "does this still
+      catch the bugs the old one did?"
+    output: approve / reject / skip / quit
+    emotion: confident
+  - step: commit
+    action: tool commits the single behavioral rewrite (only the touched test file)
+    output: commit sha
+    emotion: confident
+  - step: repeat
+    action: loop until backlog empty
+    output: final report (done / reverted / skipped)
+    emotion: relieved
+
+error_paths:
+  - trigger: baseline suite red
+    recovery: stop; report; never redesign on red
+  - trigger: suite red after an applied rewrite
+    recovery: auto-revert (git checkout); mark item blocked; continue
+  - trigger: Tess rejects the proposed rewrite
+    recovery: revert; skip item; propose next
+  - trigger: rewrite needs a fake/collaborator that does not exist (over-mock family)
+    recovery: surface and skip the item; never invent unreviewed scaffolding
+  - trigger: flaky-test rewrite fails N-run stability check
+    recovery: auto-revert; mark blocked; note possible different-oracle need
+  - trigger: no test runner detected
+    recovery: warn; AskUserQuestion to confirm before proceeding
+
+shared_artifacts:
+  - name: .test-redesign-backlog.md
+    source: the --review pass (SSOT for pending behavioral smells; SEPARATE from
+      .test-refactoring-backlog.md so redesign-tests and refactor-tests never collide)
+  - name: test_cmd
+    source: CLAUDE.md declared command, else auto-detected (test-runner-detection.md)
+
+accepted_risk:
+  # v1 decision D7 — human-only oracle
+  note: >
+    The human reviewing the IDE diff is the sole oracle. Unlike refactor-tests, this journey
+    cannot guarantee coverage was not silently narrowed — the failure mode a mutation test would
+    catch and a human eye can miss. Accepted for v1; automated coverage oracle deferred.
