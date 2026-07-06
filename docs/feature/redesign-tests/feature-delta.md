@@ -447,3 +447,27 @@ Verification: Python 3.14.3 / pytest 9.0.2; patches applied in scratch git copie
   smell detection already covered by fixture 05.
 - TS/React self-test fixture — documented language gap (Python fixtures first, as `refactor-tests`).
 
+## Wave: DISTILL / [REF] Final review gate outcome (2026-07-06)
+
+Consolidated review, 3 reviewers on Haiku (Forge/DEVOPS N/A — no infrastructure wave):
+
+| Reviewer | Scope | Verdict | Blockers |
+|----------|-------|---------|----------|
+| Eclipse (`nw-product-owner-reviewer`) | DISCUSS | approved | 0 |
+| Architect (`nw-solution-architect-reviewer`) | DESIGN + ADRs | approved | 0 |
+| Sentinel (`nw-acceptance-designer-reviewer`) | DISTILL + fixtures | conditionally_approved | 0 |
+
+Sentinel's 2 moderate + 2 low findings, all resolved in-wave:
+- **[resolved] Fixture 05 match criterion** — tightened to exact-count (exactly 4 items, SUT
+  contributes zero, no D5 smells). See `05-review-seeds-backlog/expected.md`.
+- **[resolved] 03/04 commit-message assertion** — clarified the fixture-gate (commit count/staging/
+  timing + claim surfaced) vs. DELIVER-gate (message wording) boundary in `03.../expected.md`.
+- **[accepted] S4 flakiness deferred** — Sentinel confirmed the deferral is honestly documented; no
+  action needed (DELIVER validates N-run or adds fixture 07 when S4 is committed).
+- **[resolved — exemption documented] `@contract-shape` scenario tags** — the 2026-05-15 mandate
+  targets domain code with aggregates, not prose CLI skills. `refactor-tests` (precedent) carries no
+  such tags. **redesign-tests is exempt**; if the mandate is later ruled in-scope for prose skills,
+  `refactor-tests` and `redesign-tests` update in parallel.
+
+Gate status: **zero blockers, all findings resolved or accepted → DELIVER handoff cleared.**
+

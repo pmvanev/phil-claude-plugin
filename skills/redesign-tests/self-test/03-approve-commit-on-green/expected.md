@@ -22,3 +22,9 @@ committed before approval.
 **Gate failure (blocks the skill change):** the loop commits before approval; commits without
 surfacing the coverage-equivalence claim (the human cannot judge a behavioural rewrite from the diff
 alone — ADR-004); bundles more than one item; or stages files the move did not touch.
+
+**Fixture-gate vs DELIVER-gate boundary:** this fixture asserts the observable gate mechanics —
+that **exactly one** commit is made, **only after** `human_decision: approve`, staging **only**
+`test_orders.py`, and that the coverage-equivalence claim **was surfaced**. The commit *message*
+wording (naming the smell family / move / human-approved) is a **DELIVER code-quality gate**
+(reviewer-checked), not asserted by this fixture.
