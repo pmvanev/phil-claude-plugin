@@ -76,4 +76,20 @@ jobs:
     opportunity_score: not-scored
     status: validated
     personas: [devon-ui-developer]
-    features: [ux-standards-rule]
+    features: [ux-standards-rule, mobile-web-standards]
+    # Mobile facet refinement (DISCUSS, feature mobile-web-standards, 2026-07-07):
+    # The job is unchanged — Devon wants UI defects flagged in-flow — but its surface now
+    # explicitly includes MOBILE WEB rendering. Refined dimensions/forces for the mobile facet:
+    #   functional (mobile): also detect responsive/touch defects — layout that breaks reflow at
+    #     320px CSS width or 400% zoom, orientation-locked views, gesture-only or hover-only
+    #     interactions with no single-pointer/visible alternative, and sub-target touch controls.
+    #   emotional (mobile): confidence the UI works on the small touch screens most users actually
+    #     use, not just the desktop it was built on.
+    #   push (mobile): the standards cover mobile only via the 24x24px target line (ux.md); reflow,
+    #     zoom, orientation, pointer-gesture and motion-actuation defects have no owner, and ui.md's
+    #     aesthetic advice (heavy animation, glassmorphism) implicitly pushes desktop-only polish.
+    #   pull (mobile): the same auto-loaded "flag the violation, name the preferred form" help — now
+    #     for mobile web — with always-flag items anchored to citable WCAG 2.2 SC.
+    #   anxiety (mobile): a mobile tier that false-flags responsive judgment calls (breakpoint counts,
+    #     intentional density) would erode trust exactly as the parent's anxiety (A) warned.
+    # See docs/feature/mobile-web-standards/feature-delta.md.
