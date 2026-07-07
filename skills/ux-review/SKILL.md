@@ -65,9 +65,16 @@ Read `~/.claude/rules/ux.md` first so your findings and wording trace to it. For
 - Checkbox/radio wired to trigger an action → use a button; toggles are for instant binary on/off only.
 - Raw error code, stack trace, or "Invalid input" shown to the user → specific, human, actionable message that preserves input.
 
+**Mobile & responsive**
+- Layout that forces two-dimensional scrolling of ordinary content at ~320 CSS px width / 400% zoom (fixed pixel-width container wider than the viewport, page-level `overflow-x`) → reflow to one column with fluid units (WCAG 1.4.10); 2-D content (tables, maps, diagrams) is exempt. **Verify at runtime** — depends on rendered layout.
+- Zoom disabled via `user-scalable=no` / `maximum-scale=1`, or text that can't resize to 200% → allow pinch/browser zoom (WCAG 1.4.4). The `viewport` meta is statically checkable; resize behavior is **verify at runtime**.
+- View locked to one orientation with no essential-use reason → support portrait and landscape (WCAG 1.3.4).
+- Path or multipoint gesture (swipe-path, pinch, drag) as the only way to act → also provide a single-pointer tap/click/long-press alternative (WCAG 2.5.1).
+- Action triggered only by device motion (shake, tilt) → provide an equivalent on-screen control and a way to disable it (WCAG 2.5.4).
+
 ### Consider — judgment calls (advisory tier)
 
-Raise these as guidance, not hard blocks: feedback timing (~1s / ~10s thresholds), empty-state copy that guides the next action, error prevention before messages, forgiving input formats (input only), minimal required fields, sensible defaults, reduce/segment choices + presets, progressive disclosure (≤ 2 levels), recognition over recall / chunking, platform conventions, consistent vocabulary, Gestalt grouping, scannability/headings, one clear visual hierarchy, plain action-labeled copy, progress toward goals, optimistic UI for reversible actions only.
+Raise these as guidance, not hard blocks: feedback timing (~1s / ~10s thresholds), empty-state copy that guides the next action, error prevention before messages, forgiving input formats (input only), minimal required fields, sensible defaults, reduce/segment choices + presets, progressive disclosure (≤ 2 levels), recognition over recall / chunking, platform conventions, consistent vocabulary, Gestalt grouping, scannability/headings, one clear visual hierarchy, plain action-labeled copy, progress toward goals, optimistic UI for reversible actions only, mobile & touch advisories (viewport meta, fluid / content-driven breakpoints, safe-area insets, thumb reach, hover-on-touch alternatives, correct input types / on-screen-keyboard handling, ≥ 16px form inputs).
 
 For each finding, name the **specific `ux.md` principle** it violates and the **preferred form** as the fix.
 
@@ -126,6 +133,7 @@ After writing the backlog, report to the user:
 
 - Anything in `ux.md`'s **"Do not flag"** section: intentional density in expert/pro tools, established conventions, aesthetics (owned by `ui.md`), React-specific a11y (owned by `react.md`), and formatter-owned style.
 - A **"max 7 items" (or equivalent) count cap** — `ux.md` explicitly rejects it; at most advise chunking.
+- **Inherently 2-D content** (tables, maps, diagrams, indented code) for reflow, and **orientation-locked views where the orientation is essential** — `ux.md` exempts both. "Mobile-first" is a workflow, not a defect; and don't cite WCAG for sub-44/48px targets (24px is the floor; 44/48px are HIG comfort guidance).
 - Visual/aesthetic preferences (color palettes, typography, animation) — those are `ui.md`'s remit, not a UX defect.
 - Hypothetical issues in code you don't fully understand — when uncertain, skip.
 
