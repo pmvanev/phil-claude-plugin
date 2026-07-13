@@ -52,9 +52,22 @@ reinforces the sequencing gate already pinned by fixture `06` (a pin that catche
 reverts that wave and leaves last-good) and is dogfood-validated per the slice-03 brief. Consistency
 re-checked against fixtures `01`, `02`, `03`, `06` — all still reach their expected decisions.
 
+## Step 04-01 — initiative-goal gate (slice 04) — ✅ GREEN
+
+Extended `SKILL.md`: FRAME now records the goal metric's **before** reading; VERIFY is a two-gate
+check — preservation gate (every wave's oracle green) AND goal gate (read the after value, compare
+to target). A behavior-preserving run that misses the goal is reported **not achieved** with the
+`before → after (target)` reading, never done.
+
+Drive trace:
+
+| Fixture | Manifest situation | SKILL.md path | Decision | Expected | Result |
+|---|---|---|---|---|---|
+| `07-verify-reports-goal-not-met` | preservation green; deps 8→6, target <5 (missed) | VERIFY: preservation gate passes; goal gate reads 6 vs <5 → not met → report "goal not achieved" w/ reading, not done | REPORT-NOT-DONE | REPORT-NOT-DONE | ✅ |
+| `01-frame-refuses-vague-goal` (reinforced) | uncheckable goal | FRAME still refuses; now also records the before-reading when checkable | REFUSE | REFUSE | ✅ |
+
 ## Remaining (RED until their slice ships)
 
 | Step | Slice | Fixtures | Status |
 |---|---|---|---|
-| 04-01 | Initiative-goal gate | `07` (+ reinforces `01`) | RED — pending |
 | 05-01 | Breadth + routing + evolution | `04`, `05` | RED — pending |

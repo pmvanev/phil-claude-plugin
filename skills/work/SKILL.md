@@ -18,12 +18,11 @@ decision trail.
 The standards you work under are `~/.claude/rules/refactoring.md`, `~/.claude/rules/coding.md`,
 `~/.claude/rules/testing.md`, and `~/.claude/rules/architecture.md`.
 
-> **Delivered so far — slices 01–03.** FRAME → MAP (a wave-by-wave roadmap) → **SAFETY-NET** (pin
-> the change surface before any structural change) → EXECUTE (each wave delegated and gated, the
-> sequence stopping cleanly on any failure) → VERIFY → document. Still to come: the declared
-> goal-metric gate (slice 04), and per-wave routing across many skills + the durable evolution
-> summary (slice 05). Where a section makes a simplifying choice pending a later slice, it is
-> marked `(slice NN)`.
+> **Delivered so far — slices 01–04.** FRAME → MAP (a wave-by-wave roadmap) → SAFETY-NET (pin the
+> change surface) → EXECUTE (each wave delegated and gated, the sequence stopping cleanly on any
+> failure) → **VERIFY (both gates: preservation floor + declared goal metric)** → document. Still
+> to come: per-wave routing across many skills + the durable evolution summary (slice 05). Where a
+> section makes a simplifying choice pending a later slice, it is marked `(slice NN)`.
 
 ---
 
@@ -33,12 +32,12 @@ Every initiative is held to **two** gates:
 
 1. **Preservation floor** (always) — observable behavior is unchanged. You never certify this
    yourself; the **delegate's own oracle** does (see *Delegation & the inherited oracle*).
-2. **Initiative goal** (declared in FRAME) — the specific point of *this* work. In the walking
-   skeleton the goal is captured and reported; the hard goal-metric gate lands in slice 04.
+2. **Initiative goal** (declared in FRAME) — the specific point of *this* work, captured as a
+   **checkable metric** and read at VERIFY.
 
 A run that breaks the preservation floor is **never** reported as done. A run that preserves
-behavior but misses its goal is **never** reported as done (slice 04). Grade the final state, not
-the effort.
+behavior but misses its declared goal metric is **never** reported as done. Grade the final state,
+not the effort.
 
 ---
 
@@ -84,8 +83,8 @@ proceed**. Either:
 - offer to continue on a **behavior-preservation-only** basis (the preservation floor as the sole
   gate), which the developer must explicitly accept.
 
-Change nothing until a checkable goal or an explicit preservation-only basis is agreed. (The full
-goal-metric *gate* at VERIFY is slice 04; FRAME still refuses an uncheckable goal now.)
+Change nothing until a checkable goal or an explicit preservation-only basis is agreed. Record the
+goal metric's **current (before) reading** now, so VERIFY can measure the delta against the target.
 
 ### 3. Declare the preservation contract and pick the oracle (D9 / ADR-005)
 
@@ -206,10 +205,15 @@ unfinished — is not a success. Grade the final state, not the effort.
 
 ## VERIFY & DOCUMENT
 
-1. Confirm the preservation oracle passed (the delegate reported green / approved).
-2. Report the goal outcome. In the skeleton this is a plain statement of what was achieved against
-   the framed goal; the hard goal-metric gate (report *not-achieved* when the metric is missed)
-   lands in slice 04.
+1. **Preservation gate** — confirm the preservation oracle passed for every wave (the delegates
+   reported green / approved). If not, you already stopped in EXECUTE — never reach here green.
+2. **Goal gate** — read the goal metric now (its **after** value) and compare to the target
+   recorded in FRAME. Report the reading as `before → after (target)`.
+   - **Met** → the goal gate clears.
+   - **Not met** → report the goal as **not achieved**, showing the reading as evidence, and do
+     **not** report the initiative as done — even though behavior was preserved. Preservation
+     alone is not success; the initiative had a point, and it was not reached. The developer
+     decides whether to run another pass.
 3. Write the trail under `docs/work/<slug>/`: finalize `decisions.md` (what was done per wave, the
    delegates used, the preservation results, the commits made) and `progress.md` (every wave's
    final status). (The durable `docs/evolution/<date>-<slug>.md` summary lands in slice 05.)
