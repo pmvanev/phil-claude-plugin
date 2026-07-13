@@ -35,10 +35,26 @@ Drive trace:
 |---|---|---|---|---|---|
 | `06-delegate-failure-leaves-last-good` | 3-wave roadmap; wave 1 green, wave 2 delegate red, wave 3 not reached | MAP builds roadmap → EXECUTE: wave 1 `done`+commit; wave 2 delegate reverts → sequencing gate STOPS, wave 3 not run, tree at wave-1 last-good, failure recorded, reported stopped/not-done | STOP-LAST-GOOD | STOP-LAST-GOOD | ✅ |
 
+## Step 03-01 — SAFETY-NET before change (slice 03) — ✅ DONE
+
+Spike resolved inline (coverage-thinness detection): **code** — grep the suite for the wave's
+target symbols/files, use coverage if available; unhit target = thin. **Prose** — is the touched
+behavior pinned by a self-test fixture / acceptance scenario? No harness or no covering fixture =
+thin (no code coverage; the pin is a self-test scenario or a recorded human-approval baseline).
+
+Added the SAFETY-NET step to `SKILL.md` (between MAP and EXECUTE): detect a thin pin → pin current
+behavior (characterization tests for code; captured self-test scenarios / human-approval baseline
+for prose, delegating authoring where a skill fits) → establish a good baseline → for an
+unpinnable seam, fall back to the human-approval gate and flag high-risk (never proceed silently).
+
+Verification: no dedicated fixture in the v1 harness (documented in DISTILL). The behavior
+reinforces the sequencing gate already pinned by fixture `06` (a pin that catches a regression
+reverts that wave and leaves last-good) and is dogfood-validated per the slice-03 brief. Consistency
+re-checked against fixtures `01`, `02`, `03`, `06` — all still reach their expected decisions.
+
 ## Remaining (RED until their slice ships)
 
 | Step | Slice | Fixtures | Status |
 |---|---|---|---|
-| 03-01 | SAFETY-NET (spike-gated) | (dogfood + `06`) | RED — pending |
 | 04-01 | Initiative-goal gate | `07` (+ reinforces `01`) | RED — pending |
 | 05-01 | Breadth + routing + evolution | `04`, `05` | RED — pending |

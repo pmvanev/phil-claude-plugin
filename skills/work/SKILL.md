@@ -18,11 +18,12 @@ decision trail.
 The standards you work under are `~/.claude/rules/refactoring.md`, `~/.claude/rules/coding.md`,
 `~/.claude/rules/testing.md`, and `~/.claude/rules/architecture.md`.
 
-> **Delivered so far — slices 01–02.** FRAME → **MAP** (a wave-by-wave roadmap) → EXECUTE (each
-> wave delegated and gated, the sequence stopping cleanly on any failure) → VERIFY → document.
-> Still to come: the pre-change safety net (SAFETY-NET, slice 03), the declared goal-metric gate
-> (slice 04), and per-wave routing across many skills + the durable evolution summary (slice 05).
-> Where a section makes a simplifying choice pending a later slice, it is marked `(slice NN)`.
+> **Delivered so far — slices 01–03.** FRAME → MAP (a wave-by-wave roadmap) → **SAFETY-NET** (pin
+> the change surface before any structural change) → EXECUTE (each wave delegated and gated, the
+> sequence stopping cleanly on any failure) → VERIFY → document. Still to come: the declared
+> goal-metric gate (slice 04), and per-wave routing across many skills + the durable evolution
+> summary (slice 05). Where a section makes a simplifying choice pending a later slice, it is
+> marked `(slice NN)`.
 
 ---
 
@@ -134,6 +135,43 @@ depend on each other (start flat, escalate on evidence).
 
 > If the survey shows the initiative is actually a single wave, you are in walking-skeleton
 > territory — run the one wave directly (do not manufacture a multi-wave roadmap to look busy).
+
+---
+
+## SAFETY-NET — pin the change surface before you cut
+
+The preservation floor is only real if something actually **catches** a regression. Before EXECUTE
+touches anything, make sure each wave's change surface is pinned. A green suite you don't trust —
+or a prose skill with no self-test — is not a safety net.
+
+### 1. Detect a thin pin (per artifact type)
+
+- **Code:** is the wave's change surface (the functions/files it will touch) exercised by the
+  suite? Grep the tests for the target symbols/files; if a coverage tool is available, check the
+  target is hit. A target with no test exercising it is **thinly pinned**.
+- **Prose (skill / rule / agent):** is the specific behavior this wave changes pinned by a
+  self-test fixture or acceptance scenario? No self-test harness, or no fixture covering the
+  touched behavior, means **thinly pinned** — prose has no code coverage, so the pin is a
+  self-test scenario or a recorded human-approval baseline, not a percentage.
+
+### 2. Pin it (delegate the authoring where a skill fits)
+
+Where the pin is thin, pin **current** observable behavior before changing structure:
+- **Code:** add characterization / golden-master / contract tests that capture today's behavior.
+- **Prose:** capture the current self-test scenarios, or record a human-approval baseline of the
+  current output, so a later diff can be judged against it.
+
+### 3. Establish a good baseline
+
+Run the pin once and confirm it is green (code) or captured (prose) **before** EXECUTE. This is the
+baseline the delegates' gates will hold against.
+
+### 4. When a seam cannot be pinned
+
+If a seam genuinely has no feasible executable oracle and cannot be characterized, do **not**
+proceed silently. Fall back to the **human-approval diff** gate for that wave and **flag it
+high-risk for manual review** in `decisions.md`. Surface the risk to the developer; never treat an
+unpinnable seam as if it were safe.
 
 ---
 
