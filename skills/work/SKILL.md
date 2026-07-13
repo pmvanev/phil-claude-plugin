@@ -18,11 +18,11 @@ decision trail.
 The standards you work under are `~/.claude/rules/refactoring.md`, `~/.claude/rules/coding.md`,
 `~/.claude/rules/testing.md`, and `~/.claude/rules/architecture.md`.
 
-> **This version — the walking skeleton (slice 01).** It carries one initiative end-to-end
-> through a **single** delegated wave: FRAME → delegate → preserve → document. The multi-wave
-> roadmap (MAP), the pre-change safety net (SAFETY-NET), the declared goal-metric gate, and
-> per-wave routing across many skills arrive in slices 02–05. Where this skeleton makes a
-> simplifying choice, it is marked `(slice NN)`.
+> **Delivered so far — slices 01–02.** FRAME → **MAP** (a wave-by-wave roadmap) → EXECUTE (each
+> wave delegated and gated, the sequence stopping cleanly on any failure) → VERIFY → document.
+> Still to come: the pre-change safety net (SAFETY-NET, slice 03), the declared goal-metric gate
+> (slice 04), and per-wave routing across many skills + the durable evolution summary (slice 05).
+> Where a section makes a simplifying choice pending a later slice, it is marked `(slice NN)`.
 
 ---
 
@@ -46,7 +46,7 @@ the effort.
 | Pattern | Mode | Action |
 |---------|------|--------|
 | `"<initiative>"` | Start | Run FRAME on a new initiative, then the loop below. |
-| No argument | Resume | Resume the in-flight initiative from its `docs/work/<slug>/progress.md` (slice 02 gives this real teeth; the skeleton resumes the single wave). |
+| No argument | Resume | Resume the in-flight initiative from its `docs/work/<slug>/progress.md`: read the roadmap and the per-wave status, and continue from the first wave not yet `done`. Do not re-run completed waves or re-frame. |
 
 Derive a kebab-case `<slug>` from the initiative for the trail path `docs/work/<slug>/`.
 
@@ -105,30 +105,64 @@ oracle, and the IN/OUT scope.
 
 ---
 
-## EXECUTE — delegate one wave (walking skeleton)
+## MAP — plan the waves
 
-The skeleton runs a **single** wave. (Slice 02 turns this into a MAP roadmap of several gated
-waves run in sequence; slice 03 inserts SAFETY-NET before this step.)
+Survey the change surface, then produce an ordered, editable roadmap of waves.
+
+### 1. Survey (delegate the reading)
+
+Understand the current state before planning. Delegate the survey to the fitting skill rather than
+doing it ad hoc: `/phil:review-code <scope>` to seed a smell backlog, `/phil:spirit-walk` to
+understand unfamiliar code, or a change-frequency hotspot pass to prioritize. Use the survey to
+find the real change surface and its risks.
+
+### 2. Roadmap
+
+Decompose the initiative into an **ordered list of waves**. Each wave names:
+- the **change** it makes (one cohesive structural step),
+- the **delegate** that will execute it (chosen by artifact type — see the FRAME table),
+- the **gate** it clears (the delegate's oracle; plus the goal check from slice 04).
+
+Keep waves small and independently committable — one wave, one delegate, one commit, mirroring the
+delegates' own per-item discipline. Write the roadmap to `docs/work/<slug>/roadmap.md`.
+
+### 3. Approve
+
+Show the developer the roadmap and let them **edit** it — reorder, drop, or split waves — before
+any execution. A flat ordered list is enough; a dependency DAG is only warranted if waves truly
+depend on each other (start flat, escalate on evidence).
+
+> If the survey shows the initiative is actually a single wave, you are in walking-skeleton
+> territory — run the one wave directly (do not manufacture a multi-wave roadmap to look busy).
+
+---
+
+## EXECUTE — run the roadmap, one gated wave at a time
+
+Work the roadmap in order. For each wave, in turn:
 
 ### Delegation & the inherited oracle (ADR-005 / DDD4)
 
-Hand the change to the delegate chosen in FRAME by invoking its command
+Hand the wave's change to its delegate by invoking that skill's command
 (`/phil:refactor-loop`, `/phil:refactor`, `/phil:refactor-tests`, …). **The delegate owns the
 gate.** You do **not** run a preservation check of your own — the delegate's suite gate (code) or
 human-approval diff (prose) is the oracle. This is non-negotiable: re-implementing a weaker gate
 here would defeat the whole design.
 
-### The sequencing rule (the only gate you own)
+### The sequencing gate (the only gate you own)
 
-React to the delegate's result:
+React to each wave's delegate result:
 
-- **Delegate succeeded** (suite green / self-test green / diff approved) → proceed to VERIFY.
+- **Delegate succeeded** (suite green / self-test green / diff approved) → mark the wave `done` in
+  `progress.md` (with its commit sha), and continue to the next wave.
 - **Delegate failed** (suite red / self-test broken / diff rejected) → the delegate has already
-  reverted its own change. **Stop.** Leave the working tree in its **last-good** state — never
-  red. Record the failure in `decisions.md`. Do **not** report the run as done. (With one wave the
-  skeleton simply stops here; slice 02 stops the *rest of the roadmap* and names the failed wave.)
+  reverted its own change. **Stop the sequence.** Do **not** run any later wave. Leave the working
+  tree in its **last-good** state (the last `done` wave's committed result) — never red. Record in
+  `decisions.md` **which wave failed and why**. Report the run as **stopped / incomplete** — never
+  as done.
 
-Never narrate past a delegate failure. A run that broke something is not a success.
+Never narrate past a delegate failure. A run that broke something — or that stopped with waves
+unfinished — is not a success. Grade the final state, not the effort.
 
 ---
 
@@ -138,10 +172,9 @@ Never narrate past a delegate failure. A run that broke something is not a succe
 2. Report the goal outcome. In the skeleton this is a plain statement of what was achieved against
    the framed goal; the hard goal-metric gate (report *not-achieved* when the metric is missed)
    lands in slice 04.
-3. Write the trail under `docs/work/<slug>/`: finalize `decisions.md` (what was done, the delegate
-   used, the preservation result, the commit made). (`roadmap.md` and `progress.md` become
-   substantive in slice 02; the durable `docs/evolution/<date>-<slug>.md` summary lands in
-   slice 05.)
+3. Write the trail under `docs/work/<slug>/`: finalize `decisions.md` (what was done per wave, the
+   delegates used, the preservation results, the commits made) and `progress.md` (every wave's
+   final status). (The durable `docs/evolution/<date>-<slug>.md` summary lands in slice 05.)
 4. Report a summary to the developer naming: the **goal**, the **preservation result** (oracle
    green / approved), and the **commit(s)** made.
 

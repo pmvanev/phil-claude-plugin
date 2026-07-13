@@ -22,13 +22,23 @@ delegate owns the oracle (ADR-005 — SKILL never runs its own preservation chec
 failure leaves last-good and is not reported done; trivial work is off-ramped; an uncheckable goal
 is refused.
 
+## Step 02-01 — MAP roadmap + sequencing gate (slice 02) — ✅ GREEN
+
+Extended `SKILL.md`: added MAP (survey via review-code/spirit-walk/hotspot → ordered editable
+roadmap written to `roadmap.md`); upgraded EXECUTE to iterate the roadmap one gated wave at a
+time; made resume substantive (continue from first non-`done` wave); sequencing gate now stops the
+*rest of the roadmap* and names the failed wave.
+
+Drive trace:
+
+| Fixture | Manifest situation | SKILL.md path | Decision | Expected | Result |
+|---|---|---|---|---|---|
+| `06-delegate-failure-leaves-last-good` | 3-wave roadmap; wave 1 green, wave 2 delegate red, wave 3 not reached | MAP builds roadmap → EXECUTE: wave 1 `done`+commit; wave 2 delegate reverts → sequencing gate STOPS, wave 3 not run, tree at wave-1 last-good, failure recorded, reported stopped/not-done | STOP-LAST-GOOD | STOP-LAST-GOOD | ✅ |
+
 ## Remaining (RED until their slice ships)
 
 | Step | Slice | Fixtures | Status |
 |---|---|---|---|
-| 02-01 | MAP + sequencing gate | `06` | RED — pending |
 | 03-01 | SAFETY-NET (spike-gated) | (dogfood + `06`) | RED — pending |
 | 04-01 | Initiative-goal gate | `07` (+ reinforces `01`) | RED — pending |
 | 05-01 | Breadth + routing + evolution | `04`, `05` | RED — pending |
-
-Review checkpoint after slice 01 (per the plan) before proceeding to slice 02.
