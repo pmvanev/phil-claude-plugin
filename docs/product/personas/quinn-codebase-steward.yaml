@@ -1,0 +1,20 @@
+# Persona (SSOT) — bootstrapped by DISCUSS wave, feature: phil-work (2026-07-13)
+
+id: quinn-codebase-steward
+name: Quinn
+role: Developer responsible for the health and structure of a codebase in a repo using the phil plugin
+goals:
+  - Carry large, invisible technical initiatives (refactors, re-architectures, migrations, cleanup, perf/dependency work) through to done safely
+  - Preserve observable behavior absolutely while changing structure freely
+  - Leave a decision and progress trail teammates can follow
+frustrations:
+  - nwave assumes personas/journeys/user-stories that invisible work does not have — its frame fights the work
+  - The tactical skills (refactor, refactor-loop, review-code, extract-method) are single-purpose — none discuss, plan across waves, or document decisions
+  - Big technical initiatives end up done ad hoc, or not at all
+mental_model:
+  - "Structure and behavior are separate concerns; change structure freely, preserve behavior absolutely"
+  - "A refactor without a safety net is gambling; I need proof behavior held, not a green suite I don't trust"
+  - "nwave gives me discipline for features; I want that same discipline for the work users never see"
+vocabulary:
+  - refactoring, re-architecture, migration, tech debt, characterization test, golden master,
+    contract test, behavior preservation, seam, coupling, cohesion, wave, preservation floor

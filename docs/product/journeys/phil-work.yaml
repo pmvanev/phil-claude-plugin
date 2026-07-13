@@ -1,0 +1,88 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: phil-work (2026-07-13)
+
+id: phil-work
+name: Carry an invisible technical initiative through with discipline
+persona: quinn-codebase-steward
+job: deliver-invisible-work-with-discipline
+summary: >
+  Quinn runs /phil:work on a chunk of technical work the end user never sees, and is
+  carried FRAME → MAP → SAFETY-NET → EXECUTE → VERIFY, with behavior provably preserved
+  and a decision trail left behind. The command is a general contractor: it discusses,
+  plans, and gates, then delegates the actual work to the tactical skills already in the plugin.
+
+steps:
+  - id: invoke
+    action: Quinn runs `/phil:work "<initiative>"`
+    output: Tool acknowledges the initiative and enters FRAME
+    emotion: overwhelmed — the initiative is big and scary; unsure where to start
+  - id: frame
+    action: >
+      Tool asks what/why/boundaries/constraints, proposes a scoped goal + a preservation
+      contract, and — if a single tactical skill would suffice — recommends running that
+      directly instead (off-ramp). Quinn confirms.
+    output: frame with declared goal metric, preservation contract, and IN/OUT scope
+    emotion: relief — the vague itch is now a checkable goal with clear boundaries
+  - id: map
+    action: >
+      Tool surveys the current state (delegating to spirit-walk / review-code / hotspot)
+      and proposes a wave-by-wave roadmap, naming which tactical skill each step calls.
+      Quinn approves or edits.
+    output: ordered roadmap — each wave has a delegated skill + both gates
+    emotion: control — there is a plan, not a cliff
+  - id: safety-net
+    action: >
+      Tool checks how well the change surface is pinned; where the pin is thin it adds
+      characterization / contract tests (for code) or captures self-test scenarios / a
+      human-approval baseline (for prose skills/rules/agents), then establishes a good baseline.
+    output: safety-net report — pin over the seam, baseline good
+    emotion: confidence — the net exists before anything is cut
+  - id: execute
+    action: >
+      For each wave the tool delegates to the tactical skill (e.g. refactor-loop for code,
+      refactor-tests/redesign-tests for prose), then gates on the preservation floor
+      (pinned behavior intact + oracle passing, where the oracle is a self-test/suite or a
+      human-approved diff) AND the initiative goal metric, committing each change separately.
+    output: per-wave progress entries + separate structural commits
+    emotion: building trust — each wave lands green; the scary change is happening safely
+  - id: verify-document
+    action: >
+      Tool confirms the goal metric is met and no regression occurred, writes the decision
+      log + progress + evolution summary, and reports done with evidence.
+    output: decisions + evolution summary; a done report citing goal + preservation evidence
+    emotion: satisfaction — provably done, and the reasoning is on record
+
+emotional_arc: overwhelmed → relief → control → confidence → trust → satisfaction  # upward
+
+shared_artifacts:
+  - name: goal_metric + preservation_contract
+    source: FRAME
+    consumed_by: [execute, verify-document]  # every gate checks against these
+  - name: roadmap
+    source: MAP
+    consumed_by: [execute]
+  - name: good_baseline + pinned_behavior (characterization tests / self-test scenarios / human-approval baseline)
+    source: SAFETY-NET
+    consumed_by: [execute]  # the preservation oracle, artifact-type-aware (D9)
+  - name: decision_log
+    source: FRAME
+    consumed_by: [map, safety-net, execute, verify-document]  # accumulates across waves
+
+error_paths:
+  - step: frame
+    failure: Goal too vague to make checkable
+    recovery: Tool refuses to proceed until the goal is a checkable metric OR explicitly "behavior-preservation only"
+  - step: frame
+    failure: Initiative small enough for one tactical skill
+    recovery: Tool recommends running that skill directly and exits — no ceremony (addresses anxiety B)
+  - step: map
+    failure: Change surface unknown or too large
+    recovery: Tool proposes a timeboxed spike or a narrower scope before planning
+  - step: safety-net
+    failure: Seam has no coverage and is hard to test
+    recovery: Tool surfaces the risk and either adds characterization tests or flags the wave high-risk for manual review — never proceeds silently
+  - step: execute
+    failure: A wave breaks the suite or misses the goal gate
+    recovery: Revert that wave (delegated skills bound their own fix→revert), log the failure, stop or replan — never leaves the tree red
+  - step: verify-document
+    failure: Goal metric not met at the end
+    recovery: Report honestly as "goal not achieved" with evidence — never claim done

@@ -93,3 +93,46 @@ jobs:
     #   anxiety (mobile): a mobile tier that false-flags responsive judgment calls (breakpoint counts,
     #     intentional density) would erode trust exactly as the parent's anxiety (A) warned.
     # See docs/feature/mobile-web-standards/feature-delta.md.
+
+  - id: deliver-invisible-work-with-discipline
+    # Registered by DISCUSS wave, feature: phil-work (2026-07-13)
+    job_story: >
+      When I have a chunk of technical work that never surfaces to the end user —
+      refactoring, re-architecting, cleanup, a migration, a dependency or performance
+      pass — I want the same disciplined, multi-wave, test-backed workflow nwave gives
+      user-facing features, so I can carry it through safely and leave a decision trail,
+      instead of fighting nwave's user-story frame or doing it ad hoc with one-off
+      tactical skills.
+    dimensions:
+      functional: >
+        Take an invisible technical initiative from vague itch to a scoped goal plus a
+        preservation contract, to a planned sequence of waves, to execution delegated to
+        existing tactical skills, to a documented outcome — with behavior provably preserved.
+      emotional: >
+        Confidence the change broke nothing (the preservation floor); relief from the
+        "is this refactor actually safe / am I done yet?" dread; a feeling of control over
+        big, scary re-architectures.
+      social: >
+        A visible decision/progress trail teammates can follow; being seen as disciplined
+        about tech-debt and architecture rather than cowboy-refactoring.
+    four_forces:
+      push: >
+        nwave assumes personas/journeys/user-stories that invisible work does not have;
+        the tactical skills (refactor, refactor-loop, review-code) are single-purpose — none
+        discuss, plan across waves, or document decisions; so large technical initiatives
+        get done ad hoc, or not at all.
+      pull: >
+        The same wave discipline (discuss → plan → execute → verify → document) nwave
+        provides, but framed for a technical goal — a general contractor that sequences and
+        gates the tactical skills already in the plugin.
+      anxiety: >
+        (A) another orchestrator that merely duplicates nwave/tactical skills without adding
+        value; (B) ceremony overhead for work that sometimes only needs a quick tactical
+        skill; (C) a preservation guarantee that is claimed but not actually enforced.
+      habit: >
+        Reaching for nwave and wrestling its user-story frame; firing tactical skills one-off
+        with no plan and no trail; or doing big refactors by hand and hoping.
+    opportunity_score: not-scored   # single new job; priority by default
+    status: validated
+    personas: [quinn-codebase-steward]
+    features: [phil-work]
