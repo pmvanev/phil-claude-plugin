@@ -1,0 +1,116 @@
+{
+  "roadmap": {
+    "project_id": "phil-work",
+    "created_at": "2026-07-13T20:48:07Z",
+    "total_steps": 5
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "Walking skeleton — FRAME + single delegate + decision trail",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "Build walking skeleton: FRAME, off-ramp, single delegate, decision trail",
+          "criteria": [
+            "Fixture 01 reaches REFUSE: an uncheckable goal is declined; FRAME asks for a checkable metric or explicit preservation-only; nothing changes until agreed",
+            "Fixture 02 reaches OFF-RAMP: a single-skill initiative recommends that skill and exits with no roadmap/SAFETY-NET/trail",
+            "Fixture 03 (@walking_skeleton) reaches DELEGATE+RECORD: confirm goal+contract, delegate to one skill, inherit its oracle (no own gate), write decisions.md, report a summary naming goal/preservation/commit",
+            "SKILL.md never re-implements a delegate's preservation gate (ADR-005/DDD4)",
+            "Prose-skill pattern matches skills/refactor-tests (thin command loader + SKILL.md prose)"
+          ],
+          "test_file": "skills/work/acceptance.feature",
+          "scenario_name": "@slice-01 @fixture:01-frame-refuses-vague-goal; @fixture:02-frame-offramp-trivial; @walking_skeleton @fixture:03-walking-skeleton-end-to-end"
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "MAP + cross-wave sequencing gate",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Add MAP roadmap and cross-wave sequencing gate",
+          "criteria": [
+            "A real multi-step initiative yields an ordered roadmap (>=2 waves), each naming a delegated skill + gate; developer can edit before execution",
+            "Fixture 06 reaches STOP-LAST-GOOD: a delegate failure stops the sequence, leaves the tree last-good (never red), records the failure, does not run later waves, and does not report done",
+            "Roadmap + per-wave progress recorded in docs/work/<initiative>/{roadmap,progress}.md"
+          ],
+          "test_file": "skills/work/acceptance.feature",
+          "scenario_name": "@slice-02 @fixture:06-delegate-failure-leaves-last-good"
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "SAFETY-NET — pin the change surface before structural change (spike-gated)",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "Add SAFETY-NET pinning before change (spike-gated)",
+          "criteria": [
+            "On a thin seam, SAFETY-NET reports the gap, pins current observable behavior, and records a good baseline before EXECUTE",
+            "An injected behavior-changing edit is caught by the pin (failing characterization test / self-test, or a rejected diff) and triggers revert of that wave",
+            "A seam with no feasible executable oracle falls back to the human-approval diff gate and is flagged high-risk for manual review",
+            "Coverage-thinness detection handles prose artifacts (no code coverage) per the slice-03 spike"
+          ],
+          "test_file": "skills/work/acceptance.feature",
+          "scenario_name": "@slice-03 SAFETY-NET (no dedicated v1 fixture; behavior exercised via fixture 06 last-good + dogfood; spike precedes)"
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Initiative-goal gate — declare + check a per-initiative metric",
+      "steps": [
+        {
+          "id": "04-01",
+          "name": "Add initiative-goal gate to FRAME and VERIFY",
+          "criteria": [
+            "FRAME captures a checkable goal metric and rejects a vague one (or accepts explicit preservation-only) — reinforces fixture 01",
+            "Fixture 07 reaches REPORT-NOT-DONE: a behavior-preserving run that misses the goal is reported not-achieved with the metric reading, never done",
+            "Goal metric + per-wave/VERIFY readings recorded in the decision trail"
+          ],
+          "test_file": "skills/work/acceptance.feature",
+          "scenario_name": "@slice-04 @fixture:07-verify-reports-goal-not-met"
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "name": "Breadth + routing + evolution trail",
+      "steps": [
+        {
+          "id": "05-01",
+          "name": "Add per-wave routing and evolution trail",
+          "criteria": [
+            "Fixture 04 reaches DELEGATE-TO-CODE-LOOP: a code wave routes to refactor-loop (suite oracle); no own gate",
+            "Fixture 05 reaches DELEGATE-TO-APPROVAL-CLEANER: a prose wave routes to refactor-tests/redesign-tests (human oracle); no own gate",
+            "MAP selects and justifies an appropriate skill per wave across >=2 distinct real initiative types",
+            "VERIFY writes docs/evolution/<date>-<initiative>.md plus the decision/progress trail"
+          ],
+          "test_file": "skills/work/acceptance.feature",
+          "scenario_name": "@slice-05 @fixture:04-route-code-to-loop; @fixture:05-route-prose-to-approval"
+        }
+      ]
+    }
+  ],
+  "implementation_scope": {
+    "source_directories": [
+      "commands/",
+      "skills/work/"
+    ],
+    "test_directories": [
+      "skills/work/self-test/"
+    ],
+    "excluded_patterns": [
+      "__init__.py",
+      "__pycache__/**"
+    ]
+  },
+  "validation": {
+    "status": "approved",
+    "reviewer": "consolidated end-of-DISTILL gate (Eclipse/Architect/Sentinel), 0 blockers",
+    "approved_at": "2026-07-13"
+  }
+}
