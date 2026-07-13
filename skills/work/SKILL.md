@@ -18,11 +18,10 @@ decision trail.
 The standards you work under are `~/.claude/rules/refactoring.md`, `~/.claude/rules/coding.md`,
 `~/.claude/rules/testing.md`, and `~/.claude/rules/architecture.md`.
 
-> **Delivered so far — slices 01–04.** FRAME → MAP (a wave-by-wave roadmap) → SAFETY-NET (pin the
-> change surface) → EXECUTE (each wave delegated and gated, the sequence stopping cleanly on any
-> failure) → **VERIFY (both gates: preservation floor + declared goal metric)** → document. Still
-> to come: per-wave routing across many skills + the durable evolution summary (slice 05). Where a
-> section makes a simplifying choice pending a later slice, it is marked `(slice NN)`.
+> **The full workflow (slices 01–05).** FRAME → MAP (a wave-by-wave roadmap, each wave routed to
+> the fitting skill) → SAFETY-NET (pin the change surface) → EXECUTE (each wave delegated and
+> gated, the sequence stopping cleanly on any failure) → VERIFY (both gates: preservation floor +
+> declared goal metric) → document (working trail + durable evolution summary).
 
 ---
 
@@ -94,7 +93,15 @@ inherit, not run yourself:
 | The wave changes… | Delegate | Preservation oracle (delegate-owned) |
 |---|---|---|
 | executable **code** | `refactor-loop` (or `refactor` / `extract-method` for a simple move) | its test-suite gate |
-| **prose** (skill / rule / agent) | `refactor-tests` / `redesign-tests` | its human-approval diff review (ADR-002) |
+| **test prose** (test files) | `refactor-tests` / `redesign-tests` | its human-approval diff review (ADR-002) |
+| **other prose** (skill / rule / agent / doc) | the **human-approval diff gate directly** (ADR-002 mechanism) — no dedicated delegate exists in v1 | human diff review |
+
+> **v1 boundary (surfaced in DELIVER — see `distill/upstream-issues.md`).** `refactor-tests` and
+> `redesign-tests` only handle *test* files. Non-test prose (skills, rules, agents, docs) has no
+> dedicated refactoring delegate yet, so its wave uses the ADR-002 human-approval diff gate
+> **directly**: apply the smallest change, pause for the developer to review the uncommitted diff
+> in their editor, commit on approve / `git checkout` on reject. This is inheriting the *oracle*
+> (the human), not re-implementing a preservation check — ADR-005 holds.
 
 ### 4. Confirm with the developer
 
@@ -120,8 +127,27 @@ find the real change surface and its risks.
 
 Decompose the initiative into an **ordered list of waves**. Each wave names:
 - the **change** it makes (one cohesive structural step),
-- the **delegate** that will execute it (chosen by artifact type — see the FRAME table),
-- the **gate** it clears (the delegate's oracle; plus the goal check from slice 04).
+- the **delegate** that will execute it, **routed by the change type** (table below),
+- the **gate** it clears (the delegate's oracle, plus the goal check at VERIFY).
+
+**Per-wave routing.** Pick the delegate that fits the wave's change type, and justify the choice
+in the roadmap:
+
+| Wave change type | Delegate | Oracle inherited |
+|---|---|---|
+| Larger / gated code refactor | `/phil:refactor-loop` | suite gate (Workflow cage) |
+| Simple code refactor from a backlog | `/phil:refactor` | suite gate |
+| A single extraction | `/phil:extract-method` | suite gate |
+| Comment / docstring cleanup | `/phil:clean-comments` | suite gate |
+| Test-prose structure cleanup | `/phil:refactor-tests` | human-approval diff (ADR-002) |
+| Sanctioned test-prose behavior change | `/phil:redesign-tests` | human-approval diff |
+| Other-prose (skill / rule / agent / doc) structure | human-approval diff gate directly (ADR-002; no dedicated delegate in v1) | human diff review |
+| Surveying the change surface (MAP §1) | `/phil:review-code`, `/phil:spirit-walk`, hotspot | n/a (read-only) |
+
+The same FRAME→MAP→SAFETY-NET→EXECUTE→VERIFY spine carries every initiative type (refactor,
+re-architecture, cleanup, migration, dependency/perf) — only the per-wave delegate differs. A
+migration is handled as a re-architecture initiative routed across these delegates; there is no
+bespoke migration engine.
 
 Keep waves small and independently committable — one wave, one delegate, one commit, mirroring the
 delegates' own per-item discipline. Write the roadmap to `docs/work/<slug>/roadmap.md`.
@@ -216,9 +242,13 @@ unfinished — is not a success. Grade the final state, not the effort.
      decides whether to run another pass.
 3. Write the trail under `docs/work/<slug>/`: finalize `decisions.md` (what was done per wave, the
    delegates used, the preservation results, the commits made) and `progress.md` (every wave's
-   final status). (The durable `docs/evolution/<date>-<slug>.md` summary lands in slice 05.)
-4. Report a summary to the developer naming: the **goal**, the **preservation result** (oracle
-   green / approved), and the **commit(s)** made.
+   final status).
+4. Write the **durable evolution summary** to `docs/evolution/<date>-<slug>.md` — what changed,
+   why, the goal outcome (before → after vs target), and the preservation result — reusing the
+   plugin's existing `docs/evolution/` convention. This is the record that outlives the working
+   trail.
+5. Report a summary to the developer naming: the **goal outcome**, the **preservation result**
+   (oracle green / approved), and the **commit(s)** made.
 
 ---
 
@@ -246,4 +276,4 @@ walking skeleton), routes code vs prose (04, 05), stops-and-leaves-last-good on 
 (06), and reports a missed goal as not-done (07). Whenever this skill or `commands/work.md`
 changes, drive the fixtures per `self-test/README.md` and confirm each produces its `expected.md`
 decision — every edit here is non-monotonic, so the skill is changed and regression-tested, never
-changed and eyeballed. Fixtures 04–07 exercise behaviors delivered in slices 02–05.
+changed and eyeballed. All seven fixtures now exercise delivered behavior.

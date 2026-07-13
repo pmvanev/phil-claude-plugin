@@ -3,10 +3,11 @@
   "phase": "EXECUTE",
   "wave": "tidy the structure of a skill's prose (dedupe a repeated instruction block)",
   "artifact_kind": "prose",
+  "prose_subtype": "non-test (skill/rule/agent)",
   "artifact_path": "sample_skill.md",
   "has_test_suite": false,
-  "expected_delegate": "refactor-tests | redesign-tests",
-  "expected_oracle": "human-approval diff (delegate-owned, ADR-002)",
+  "expected_delegate": "human-approval diff gate directly (ADR-002 mechanism); refactor-tests/redesign-tests apply only to TEST prose, so a skill file uses the human oracle directly (no dedicated non-test-prose delegate in v1)",
+  "expected_oracle": "human-approval diff review (ADR-002)",
   "expected_guard": "artifact-aware routing (DDD3) + inherited human oracle (DDD4/D9)",
   "expected_decision": "DELEGATE-TO-APPROVAL-CLEANER"
 }

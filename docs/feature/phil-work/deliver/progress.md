@@ -66,8 +66,34 @@ Drive trace:
 | `07-verify-reports-goal-not-met` | preservation green; deps 8→6, target <5 (missed) | VERIFY: preservation gate passes; goal gate reads 6 vs <5 → not met → report "goal not achieved" w/ reading, not done | REPORT-NOT-DONE | REPORT-NOT-DONE | ✅ |
 | `01-frame-refuses-vague-goal` (reinforced) | uncheckable goal | FRAME still refuses; now also records the before-reading when checkable | REFUSE | REFUSE | ✅ |
 
-## Remaining (RED until their slice ships)
+## Step 05-01 — routing breadth + evolution trail (slice 05) — ✅ GREEN
 
-| Step | Slice | Fixtures | Status |
-|---|---|---|---|
-| 05-01 | Breadth + routing + evolution | `04`, `05` | RED — pending |
+Extended `SKILL.md`: MAP now routes each wave to the fitting delegate across the full skill set
+(per-wave routing table); VERIFY writes the durable `docs/evolution/<date>-<slug>.md` summary.
+
+**Back-propagation (UI-1):** DELIVER surfaced that D9/DDD4's "prose → refactor-tests/redesign-tests"
+is imprecise — those skills handle **test** prose only. Refined routing: test prose → those skills;
+non-test prose (skill/rule/agent/doc) → the ADR-002 human-approval diff gate **directly** (no
+dedicated non-test-prose delegate in v1). Documented in `distill/upstream-issues.md`; ADR-005 holds
+(the human is the inherited oracle, not a re-implemented check). Fixture 05 made accurate.
+
+Drive trace:
+
+| Fixture | Manifest situation | SKILL.md path | Decision | Expected | Result |
+|---|---|---|---|---|---|
+| `04-route-code-to-loop` | code wave, has suite | MAP routes code → refactor-loop (suite oracle); EXECUTE delegates, no own gate | DELEGATE-TO-CODE-LOOP | DELEGATE-TO-CODE-LOOP | ✅ |
+| `05-route-prose-to-approval` | skill (non-test prose), no suite | MAP routes other-prose → ADR-002 human-approval diff gate directly; no own gate | DELEGATE-TO-APPROVAL-CLEANER | DELEGATE-TO-APPROVAL-CLEANER | ✅ |
+
+## All 7 fixtures GREEN — feature complete
+
+| Fixture | Slice | Status |
+|---|---|---|
+| 01 refuse vague goal | 01/04 | ✅ |
+| 02 off-ramp trivial | 01 | ✅ |
+| 03 walking skeleton e2e | 01 | ✅ |
+| 04 route code → loop | 05 | ✅ |
+| 05 route prose → approval | 05 | ✅ |
+| 06 delegate-failure → stop-last-good | 02 | ✅ |
+| 07 verify goal-not-met | 04 | ✅ |
+
+SAFETY-NET (slice 03) has no dedicated fixture (documented in DISTILL); reinforces `06`.
