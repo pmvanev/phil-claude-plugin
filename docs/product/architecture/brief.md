@@ -98,9 +98,96 @@ tools never collide.
 See `docs/feature/redesign-tests/feature-delta.md` `DESIGN / [REF]` sections for DDD1–DDD9,
 component decomposition, Reuse Analysis, and the C4 Container diagram.
 
+### phil-work
+
+A new `/phil:work` command + `skills/work/SKILL.md` — a **wave-based orchestrator** for invisible
+(non-user-facing) technical initiatives: refactoring, re-architecting, cleanup, migrations,
+dependency/perf work. It is the invisible-work sibling to nwave. It follows the plugin's
+command→skill split and ports-and-adapters pattern, but its distinguishing move is that it is a
+**general contractor**: it discusses, plans, and sequences waves, then **delegates execution to
+the tactical skills already in the plugin**, inheriting each delegate's gate rather than building
+its own.
+
+**Status:** DESIGNED (2026-07-13) — DISCUSS + DESIGN complete; `feature-delta.md` holds the full
+record. Delivered as 5 thin end-to-end slices (walking skeleton first).
+
+**Pattern:** modular prose skill, ports-and-adapters. **Substrate (ADR-005):** hybrid — a prose
+spine (`skills/work/SKILL.md`) owns the interactive, non-safety-critical flow (FRAME → MAP →
+SAFETY-NET setup → sequencing → VERIFY → decision trail); each EXECUTE wave delegates to the
+tactical skill that already owns the correct gate.
+
+**Verification spine (DISCUSS D4/D9):** preservation floor (always) + declared initiative goal
+(per initiative). The preservation oracle is **artifact-aware and inherited from the delegate** —
+code → `refactor-loop`'s deterministic Workflow cage; prose (skills/rules/agents) →
+`refactor-tests`/`redesign-tests` human-approval diff (ADR-002). `/phil:work` adds only the
+cross-wave sequencing gate: any delegate failure stops the sequence and leaves the tree last-good.
+
+**Documentation trail (ADR-006):** working trail under `docs/work/<initiative>/`
+(frame, roadmap, decisions, progress); durable evolution summary migrates to
+`docs/evolution/<date>-<initiative>.md`.
+
+#### C4: System Context
+
+```mermaid
+graph TB
+    Quinn["Quinn — codebase steward<br/>(frames goal, approves roadmap, reviews prose diffs)"]
+    Work["phil:work<br/>(command + orchestrator skill)"]
+    Delegates["Tactical skills<br/>(refactor-loop, refactor-tests, redesign-tests,<br/>refactor, extract-method, clean-comments, review-code, spirit-walk)"]
+    Git[("git repository")]
+    Runner["Test runner<br/>(pytest / npm test / self-test harness)"]
+    IDE["IDE / editor<br/>(prose diff review)"]
+    Trail[("docs/work/&lt;initiative&gt;/ + docs/evolution/")]
+
+    Quinn -->|"runs /phil:work '&lt;initiative&gt;'"| Work
+    Work -->|"delegates each wave"| Delegates
+    Delegates -->|"apply / commit / revert"| Git
+    Delegates -->|"run suite (code oracle)"| Runner
+    Delegates -->|"pause for diff approval (prose oracle)"| Quinn
+    Quinn -->|"reviews prose diff"| IDE
+    Work -->|"FRAME confirm, roadmap approval, VERIFY"| Quinn
+    Work -->|"writes frame/roadmap/decisions/progress + evolution"| Trail
+```
+
+#### C4: Container
+
+```mermaid
+graph TB
+    subgraph plugin["phil plugin"]
+        Cmd["commands/work.md<br/>(thin loader)"]
+        Skill["skills/work/SKILL.md<br/>(orchestrator: FRAME · MAP · SAFETY-NET · EXECUTE · VERIFY)"]
+        SelfTest["skills/work/self-test/<br/>(safety-behavior fixtures — regression gate)"]
+        Detect["skills/shared/test-runner-detection.md<br/>(REUSE)"]
+        RL["refactor-loop<br/>(REUSE — code oracle: Workflow cage)"]
+        RT["refactor-tests / redesign-tests<br/>(REUSE — prose oracle: human diff, ADR-002)"]
+        Other["refactor · extract-method · clean-comments · review-code · spirit-walk<br/>(REUSE — per-wave delegates / MAP survey)"]
+    end
+    Trail[("docs/work/&lt;initiative&gt;/")]
+    Evol[("docs/evolution/")]
+    Git[("git")]
+    Runner["Test runner"]
+    Human["Human port<br/>(AskUserQuestion + IDE)"]
+
+    Cmd --> Skill
+    Skill --> Detect
+    Skill -->|"MAP survey"| Other
+    Skill -->|"EXECUTE: code wave"| RL
+    Skill -->|"EXECUTE: prose wave"| RT
+    Skill -->|"EXECUTE: targeted moves"| Other
+    Skill -->|"FRAME / roadmap / VERIFY gates"| Human
+    Skill -->|"frame·roadmap·decisions·progress"| Trail
+    Skill -->|"evolution summary at VERIFY"| Evol
+    RL -->|"suite gate"| Runner
+    RL --> Git
+    RT -->|"human gate"| Human
+    RT --> Git
+    Skill -. "changed when skill changes" .-> SelfTest
+```
+
 ### ADRs
 
 - [ADR-001](adr-001-refactor-tests-reuse-boundaries.md) — refactor-tests: new command + reuse boundaries.
 - [ADR-002](adr-002-human-approval-via-ide-diff.md) — refactor-tests: human-approval oracle via IDE diff review; critic deferred.
 - [ADR-003](adr-003-redesign-tests-reuse-boundaries.md) — redesign-tests: new command + reuse boundaries (Option A).
 - [ADR-004](adr-004-redesign-tests-coverage-equivalence-claim.md) — redesign-tests: coverage-equivalence claim at the human gate; automated oracle deferred.
+- [ADR-005](adr-005-phil-work-hybrid-substrate-delegated-gates.md) — phil-work: hybrid substrate (prose spine + delegate-owned gates); no re-implemented gating.
+- [ADR-006](adr-006-phil-work-documentation-namespace.md) — phil-work: `docs/work/<initiative>/` trail + evolution summary to `docs/evolution/`.

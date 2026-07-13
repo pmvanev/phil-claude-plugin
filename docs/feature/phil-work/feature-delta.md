@@ -165,3 +165,107 @@ Order = 01 → 02 → 03 → 04 → 05. Rationale: (1) **learning leverage** —
 - Coverage-thinness detection heuristic for SAFETY-NET (slice 03 spike) — must cover prose artifacts (skills/rules/agents) that have no code coverage.
 - Goal-metric taxonomy per work type (coupling, dependency count, benchmark, complexity) **and per prose work type** (self-test passing, dead-link/broken-ref checks, frontmatter validity, file-length, required-citation).
 - How FRAME **selects the preservation oracle** per artifact type (executable self-test/suite vs. human-approval diff), and how EXECUTE routes prose refactors to the human-approval-based skills (`refactor-tests`/`redesign-tests`) vs. code skills.
+
+---
+
+## Wave: DESIGN / [REF] DDD list
+
+- **[DDD1]** Application pattern = **modular prose skill, ports-and-adapters** — same as `refactor-tests`/`redesign-tests`. ✓
+- **[DDD2]** Orchestration substrate = **hybrid** (ADR-005): a prose spine (`skills/work/SKILL.md`) owns FRAME/MAP/SAFETY-NET-setup/sequencing/VERIFY/trail; each EXECUTE wave delegates to a tactical skill and inherits its gate. Rationale: most faithful to D3 (don't re-implement execution) and D9. ✓
+- **[DDD3]** EXECUTE **routing**: code → `refactor-loop` / `refactor` / `extract-method`; prose (skills/rules/agents) → `refactor-tests` / `redesign-tests`; comments → `clean-comments`; MAP survey → `review-code` / `spirit-walk` / hotspot. Routing table lives in `SKILL.md`. ✓
+- **[DDD4]** Preservation oracle is **inherited from the delegate**, not re-implemented (realizes D9): code = `refactor-loop`'s deterministic suite gate; prose = `refactor-tests`/`redesign-tests` human-approval diff (ADR-002). `/phil:work` adds only the cross-wave sequencing gate: any delegate failure stops the sequence and leaves the tree last-good — never red, never a faked "done." ✓
+- **[DDD5]** Documentation namespace (ADR-006, resolves D8) = `docs/work/<initiative>/` (frame, roadmap, decisions, progress) + evolution summary to `docs/evolution/<date>-<initiative>.md`. ✓
+- **[DDD6]** A **self-test harness** (`skills/work/self-test/`) pins the orchestrator's safety-critical behaviors as a regression gate — mirrors `refactor-tests`/`refactor-loop`. Non-negotiable per the repo's prose-skill discipline. ✓
+- **[DDD7]** **No new runtime/language** in v1 — prose spine + reused adapters. Delegates bring their own substrate (`refactor-loop`'s JS Workflow cage reused as-is). ✓
+- **[DDD8]** FRAME **off-ramp** (realizes D7) is the first FRAME gate: if a single tactical skill suffices, recommend it and exit — no ceremony (answers anxiety B). ✓
+- **[DDD9]** **Goal-metric taxonomy** FRAME draws from: *code* — coupling/fan-out, dependency count, cyclomatic complexity, benchmark/latency; *prose* — self-test passes, no dead links/broken skill refs, valid frontmatter, file length, required citation present. Uncheckable goal → FRAME refuses or downgrades to "behavior-preservation only." ✓
+
+## Wave: DESIGN / [REF] Component decomposition
+
+| Component | Path | Change type |
+|---|---|---|
+| Command loader | `commands/work.md` | CREATE NEW (thin loader, convention) |
+| Orchestrator skill | `skills/work/SKILL.md` | CREATE NEW (FRAME·MAP·SAFETY-NET·EXECUTE·VERIFY + routing table) |
+| Self-test harness | `skills/work/self-test/` | CREATE NEW (safety-behavior fixtures) |
+| Trail schema | `docs/work/<initiative>/{frame,roadmap,decisions,progress}.md` | CREATE NEW (small, prose schema) |
+| Evolution summary | `docs/evolution/<date>-<initiative>.md` | REUSE (existing convention) |
+| Code-refactor delegate | `skills/refactor-loop` | REUSE (no change) |
+| Prose-refactor delegates | `skills/refactor-tests`, `skills/redesign-tests` | REUSE (no change) |
+| Simple-refactor delegates | `skills/refactor`, `skills/extract-method`, `skills/clean-comments` | REUSE (no change) |
+| MAP survey delegates | `skills/review-code`, `skills/spirit-walk`, nwave hotspot | REUSE (no change) |
+| Test-runner detection | `skills/shared/test-runner-detection.md` | REUSE (shared) |
+
+## Wave: DESIGN / [REF] Driving ports
+
+- **Primary:** `/phil:work "<initiative>"` — start a new initiative (loads `skills/work/SKILL.md`).
+- **Resume:** `/phil:work` (no arg) — resume an in-flight initiative from its `docs/work/<initiative>/progress.md`.
+- **Human interaction port:** `AskUserQuestion` + editor diff review — FRAME confirmation, roadmap approval, and the per-wave human-approval gate for prose (inherited from the delegates).
+
+## Wave: DESIGN / [REF] Driven ports + adapters
+
+| Driven port | Adapter | Notes |
+|---|---|---|
+| Version control | `git` via Bash | checkpoint / per-wave commit / revert — mostly performed by delegates |
+| Filesystem | Read/Write/Edit | read target artifacts; write the `docs/work/` trail |
+| Test execution | test runner via Bash | located via `test-runner-detection`; run by the code delegates / self-test |
+| Delegation | invoke tactical skill | mechanism (slash-command vs Skill tool vs Task subagent) settled by slice-01 skeleton |
+| Human approval | `AskUserQuestion` + IDE | the prose preservation oracle (ADR-002) |
+
+## Wave: DESIGN / [REF] Technology choices
+
+- **Skill/command:** Markdown prose (Claude Code skill), matching all existing `phil:*` skills. No new language runtime in v1.
+- **Adapters:** Bash (git + test runner), `AskUserQuestion` (human port), reused `skills/shared/test-runner-detection.md`.
+- **Reused substrate:** `refactor-loop`'s JS Workflow cage (`workflows/refactor-loop.js`) — invoked as a delegate, not modified.
+- **Paradigm:** not applicable — the orchestrator introduces no production code. When an EXECUTE wave touches target code, it inherits the target repo's paradigm and the plugin's `coding`/`refactoring` rules via the delegate.
+
+## Wave: DESIGN / [REF] Decisions table
+
+| ID | Decision |
+|---|---|
+| DDD1 | Prose skill, ports-and-adapters |
+| DDD2 | Hybrid substrate — prose spine + delegate-owned gates (ADR-005) |
+| DDD3 | Per-wave routing to tactical skills |
+| DDD4 | Preservation oracle inherited from delegate; only cross-wave sequencing gate is new |
+| DDD5 | `docs/work/<initiative>/` + evolution to `docs/evolution/` (ADR-006) |
+| DDD6 | Self-test harness as regression gate |
+| DDD7 | No new runtime in v1 |
+| DDD8 | FRAME off-ramp for trivial work |
+| DDD9 | Goal-metric taxonomy (code + prose) |
+
+## Wave: DESIGN / [REF] Reuse Analysis
+
+| Existing Component | File | Overlap | Decision | Justification |
+|---|---|---|---|---|
+| refactor-loop | `skills/refactor-loop` | code refactor execution + deterministic gate | REUSE (delegate, no change) | its cage IS the code preservation oracle; wrapping beats rebuilding |
+| refactor-tests | `skills/refactor-tests` | prose test-structure refactor + human oracle | REUSE (delegate) | carries the ADR-002 human-approval oracle (D9 prose case) |
+| redesign-tests | `skills/redesign-tests` | sanctioned test-behavior rewrite + human oracle | REUSE (delegate) | prose delegate for behavior-changing test work |
+| refactor | `skills/refactor` | flat-backlog interactive code refactor | REUSE (delegate) | delegate for simple code waves not needing the full loop |
+| extract-method / clean-comments | `skills/extract-method`, `skills/clean-comments` | targeted structural moves | REUSE (delegate) | per-wave targeted delegates |
+| review-code | `skills/review-code` | smell detection → backlog | REUSE (MAP survey delegate) | seeds the wave roadmap |
+| spirit-walk | `skills/spirit-walk` | codebase comprehension | REUSE (MAP survey delegate) | survey of unfamiliar change surface |
+| test-runner-detection | `skills/shared/test-runner-detection.md` | locate test runner | REUSE (shared) | baseline + gate |
+| command→skill split | `commands/*.md` + `skills/*/SKILL.md` | thin-loader convention | EXTEND (follow convention) | `commands/work.md` + `skills/work/SKILL.md` follow the pattern verbatim |
+| self-test harness pattern | `skills/refactor-tests/self-test/` | regression-gate fixtures | EXTEND (follow pattern) | `skills/work/self-test/` mirrors it |
+| evolution summary | `docs/evolution/` | durable per-feature summary | REUSE (convention) | VERIFY writes `docs/evolution/<date>-<initiative>.md` |
+| **orchestrator loop** (FRAME/MAP/sequence/VERIFY/trail) | — | none — no existing component orchestrates across waves | **CREATE NEW** | this is the feature's reason to exist; no overlap to extend |
+| **trail schema** (`docs/work/<initiative>/`) | — | `docs/evolution/` covers durable summaries only | **CREATE NEW** (small) | no existing per-initiative working-trail artifact |
+
+**Zero unjustified CREATE NEW** — both new components have no overlapping existing component to extend.
+
+## Wave: DESIGN / [REF] Open questions (→ DISTILL / DELIVER)
+
+- Exact delegate-invocation mechanism (run slash-command vs Skill tool vs Task subagent) — settled empirically by the slice-01 walking skeleton.
+- Coverage-thinness detection for prose artifacts (slice-03 spike).
+- Whether MAP's roadmap needs a DAG ledger (like `refactor-loop`) or a flat ordered list suffices — start flat, escalate on evidence.
+- Resume semantics across an interrupted multi-wave run (`progress.md` as source of truth).
+- Whether `docs/work/<initiative>/` is committed per wave or git-ignored while in flight (leaning committed, matching delegates' per-item commit discipline).
+
+## Wave: DESIGN / [REF] Wave decisions summary
+
+- **Key decisions:** DDD1–DDD9 above; ADR-005 (substrate), ADR-006 (namespace).
+- **Architecture summary:** modular prose skill, ports-and-adapters; hybrid substrate — prose spine delegating to gate-owning tactical skills.
+- **Paradigm:** n/a (no production code introduced).
+- **Key components:** `commands/work.md`, `skills/work/SKILL.md`, `skills/work/self-test/`, `docs/work/<initiative>/` trail.
+- **Constraints established:** never re-implement a delegate's gate (ADR-005); preservation enforced by the delegate; cross-wave sequencing gate leaves last-good on any delegate failure; self-test harness required (DDD6).
+- **Upstream changes:** none — DESIGN honors DISCUSS D1–D9 without revision (D8 was explicitly deferred to DESIGN and is now resolved by DDD5/ADR-006).
+- **Outcome collision check:** skipped — methodology/prose feature, no typed contract surface, no registry in repo.
