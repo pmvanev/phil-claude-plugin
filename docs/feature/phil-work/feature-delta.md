@@ -269,3 +269,78 @@ Order = 01 → 02 → 03 → 04 → 05. Rationale: (1) **learning leverage** —
 - **Constraints established:** never re-implement a delegate's gate (ADR-005); preservation enforced by the delegate; cross-wave sequencing gate leaves last-good on any delegate failure; self-test harness required (DDD6).
 - **Upstream changes:** none — DESIGN honors DISCUSS D1–D9 without revision (D8 was explicitly deferred to DESIGN and is now resolved by DDD5/ADR-006).
 - **Outcome collision check:** skipped — methodology/prose feature, no typed contract surface, no registry in repo.
+
+---
+
+## Wave: DISTILL / [REF] Scenario list with tags
+
+Scenario SSOT: `skills/work/acceptance.feature`. Fixtures: `skills/work/self-test/`. No CI
+collector — driven by human/model, exactly as `refactor/self-test/` and
+`refactor-tests/self-test/`.
+
+| Scenario | Tags | Fixture |
+|---|---|---|
+| Refuses an uncheckable goal | `@slice-01 @slice-04 @frame @error` | `01-frame-refuses-vague-goal` |
+| Off-ramps a trivial initiative to one skill | `@slice-01 @frame @offramp` | `02-frame-offramp-trivial` |
+| Carries one initiative end-to-end via a single delegate | `@slice-01 @walking_skeleton` | `03-walking-skeleton-end-to-end` |
+| Routes a code wave to the gated code loop | `@slice-05 @execute @routing` | `04-route-code-to-loop` |
+| Routes a prose wave to the approval cleaner | `@slice-05 @execute @routing` | `05-route-prose-to-approval` |
+| A failed wave stops the sequence, leaves last-good, not done | `@slice-02 @execute @error` | `06-delegate-failure-leaves-last-good` |
+| A missed goal is reported not-achieved, never done | `@slice-04 @verify @error` | `07-verify-reports-goal-not-met` |
+
+Coverage: 4 error/honesty scenarios (`01`, `02`, `06`, `07`) = 57%, above the 40% floor; plus 2
+routing-guard scenarios (`04`, `05`); only 1 pure happy path (`03`, the walking skeleton). Fixture
+`06` is the safety core (silent-success-over-broken-tree class).
+
+## Wave: DISTILL / [REF] Preservation-oracle coverage (the adapter-coverage analog)
+
+`/phil:work` owns no preservation gate; each is inherited from the delegate (DDD4). This table is
+the analog of Mandate 6's adapter coverage — every oracle path has a pinning fixture.
+
+| Oracle path | Owner (delegate) | Pinned by |
+|---|---|---|
+| Code — test-suite gate | `refactor-loop` (Workflow cage) | `04-route-code-to-loop`, `03` (WS) |
+| Prose — human-approval diff (ADR-002) | `refactor-tests` / `redesign-tests` | `05-route-prose-to-approval` |
+| Cross-wave sequencing (the only new gate) | `phil:work` itself | `06-delegate-failure-leaves-last-good` |
+| Goal-metric gate | `phil:work` FRAME + VERIFY | `01` (declare/refuse), `07` (verify honesty) |
+
+## Wave: DISTILL / [REF] Scaffolds
+
+**No code scaffolds (Mandate 7 N/A).** `/phil:work` is a prose skill; its "implementation" is
+`commands/work.md` + `skills/work/SKILL.md`, authored in DELIVER. The RED-ready artifacts are the
+self-test fixtures (situation + `expected.md` per fixture). RED-for-right-reason classification:
+`docs/feature/phil-work/distill/red-classification.md` (all 7 fixtures `MISSING_FUNCTIONALITY`,
+zero BROKEN).
+
+## Wave: DISTILL / [REF] Test placement
+
+`skills/work/acceptance.feature` + `skills/work/self-test/<NN-name>/` — colocated with the skill,
+matching `skills/refactor-tests/` and `skills/redesign-tests/` precedent exactly (not `tests/…`;
+this repo places a skill's acceptance harness beside the skill).
+
+## Wave: DISTILL / [REF] Driving-adapter coverage
+
+Single driving adapter: the `/phil:work "<initiative>"` slash command (+ no-arg resume). Exercised
+end-to-end by the walking-skeleton fixture `03`. No HTTP/hook adapters. (Mechanically driven once
+`SKILL.md` exists; RED until then.)
+
+## Wave: DISTILL / [REF] Registrations skipped (methodology-only)
+
+- **Outcomes registry** — skipped (D-6 gate-scoping): prose/methodology feature, no typed contract.
+- **Polyglot state-delta port / PBT bootstrap** — skipped: no unit/PBT layer; the harness is
+  decision-fixture-driven, not property-based.
+- **ATDD Infrastructure Policy** — skipped: no real driven adapters to mechanize; the delegates own
+  their own infra.
+
+## Wave: DISTILL / [REF] Pre-requisites
+
+- DESIGN driving port: `/phil:work` command (DDD driving ports).
+- Delegates present in-repo: `refactor-loop`, `refactor-tests`, `redesign-tests`, `refactor`,
+  `extract-method`, `clean-comments`, `review-code`, `spirit-walk`.
+- No DEVOPS environment matrix (wave skipped — prose tool). No SPIKE.
+
+## Wave: DISTILL / [REF] Wave-decision reconciliation
+
+Read DISCUSS D1–D9 + DESIGN DDD1–DDD9. **0 contradictions** — DESIGN honored every DISCUSS decision
+and resolved the one deferred item (D8 → DDD5/ADR-006). Reconciliation passed; scenarios written
+against a consistent spec.

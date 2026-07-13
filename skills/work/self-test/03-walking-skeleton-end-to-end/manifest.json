@@ -1,0 +1,15 @@
+{
+  "fixture_id": "WORK-SELFTEST-03",
+  "phase": "FRAME->EXECUTE->VERIFY",
+  "walking_skeleton": true,
+  "initiative": "extract the tax calculation out of place_order into its own function",
+  "declared_goal": "place_order delegates tax to a named extract_tax function; no inline tax math remains",
+  "goal_checkable": true,
+  "artifact_kind": "code",
+  "chosen_delegate": "refactor-loop",
+  "preservation_oracle": "test suite (delegate-owned)",
+  "delegate_result": "green",
+  "human_decision": "confirm framed goal + preservation contract",
+  "expected_guard": "end-to-end contractor spine: frame -> delegate -> preserve -> document",
+  "expected_decision": "DELEGATE + RECORD"
+}

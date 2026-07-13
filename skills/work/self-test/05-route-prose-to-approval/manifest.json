@@ -1,0 +1,12 @@
+{
+  "fixture_id": "WORK-SELFTEST-05",
+  "phase": "EXECUTE",
+  "wave": "tidy the structure of a skill's prose (dedupe a repeated instruction block)",
+  "artifact_kind": "prose",
+  "artifact_path": "sample_skill.md",
+  "has_test_suite": false,
+  "expected_delegate": "refactor-tests | redesign-tests",
+  "expected_oracle": "human-approval diff (delegate-owned, ADR-002)",
+  "expected_guard": "artifact-aware routing (DDD3) + inherited human oracle (DDD4/D9)",
+  "expected_decision": "DELEGATE-TO-APPROVAL-CLEANER"
+}

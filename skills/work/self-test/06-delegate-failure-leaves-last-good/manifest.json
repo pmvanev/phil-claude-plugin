@@ -1,0 +1,12 @@
+{
+  "fixture_id": "WORK-SELFTEST-06",
+  "phase": "EXECUTE (sequencing gate)",
+  "roadmap": [
+    {"wave": 1, "change": "extract helper in calc.py", "artifact_kind": "code", "delegate": "refactor-loop", "delegate_result": "green"},
+    {"wave": 2, "change": "inline a constant in calc.py", "artifact_kind": "code", "delegate": "refactor-loop", "delegate_result": "red"},
+    {"wave": 3, "change": "rename for clarity in calc.py", "artifact_kind": "code", "delegate": "refactor-loop", "delegate_result": "not-reached"}
+  ],
+  "last_good_after_wave": 1,
+  "expected_guard": "cross-wave sequencing gate (DDD4) — stop on delegate failure, leave last-good, never red, not done",
+  "expected_decision": "STOP-LAST-GOOD"
+}

@@ -1,0 +1,10 @@
+{
+  "fixture_id": "WORK-SELFTEST-02",
+  "phase": "FRAME",
+  "initiative": "rename the function processOrder to placeOrder across the module",
+  "declared_goal": "the function is renamed everywhere it is referenced",
+  "goal_checkable": true,
+  "scope_signal": "single-skill: one Rename move, no cross-wave sequencing needed",
+  "expected_guard": "off-ramp trivial work (D7/DDD8)",
+  "expected_decision": "OFF-RAMP"
+}

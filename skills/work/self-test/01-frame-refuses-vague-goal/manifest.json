@@ -1,0 +1,9 @@
+{
+  "fixture_id": "WORK-SELFTEST-01",
+  "phase": "FRAME",
+  "initiative": "clean up the order module",
+  "declared_goal": "make it better",
+  "goal_checkable": false,
+  "expected_guard": "goal-must-be-checkable (D4/DDD9) — never run on an uncheckable goal",
+  "expected_decision": "REFUSE"
+}

@@ -1,0 +1,12 @@
+{
+  "fixture_id": "WORK-SELFTEST-04",
+  "phase": "EXECUTE",
+  "wave": "reduce the long function in orders.py",
+  "artifact_kind": "code",
+  "artifact_path": "orders.py",
+  "has_test_suite": true,
+  "expected_delegate": "refactor-loop",
+  "expected_oracle": "test suite (delegate-owned)",
+  "expected_guard": "artifact-aware routing (DDD3) + inherited oracle (DDD4/D9)",
+  "expected_decision": "DELEGATE-TO-CODE-LOOP"
+}
