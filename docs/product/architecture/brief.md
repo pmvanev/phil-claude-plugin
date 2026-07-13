@@ -108,8 +108,12 @@ command→skill split and ports-and-adapters pattern, but its distinguishing mov
 the tactical skills already in the plugin**, inheriting each delegate's gate rather than building
 its own.
 
-**Status:** DESIGNED (2026-07-13) — DISCUSS + DESIGN complete; `feature-delta.md` holds the full
-record. Delivered as 5 thin end-to-end slices (walking skeleton first).
+**Status:** IMPLEMENTED (2026-07-13) — shipped `commands/work.md` + `skills/work/SKILL.md` across
+5 thin slices (walking skeleton first). Acceptance suite: `skills/work/self-test/` (7 fixtures) +
+`skills/work/acceptance.feature`. Evolution: `docs/evolution/2026-07-13-phil-work.md`. `feature-delta.md`
+holds the full DISCUSS+DESIGN+DISTILL record; DELIVER progress in `docs/feature/phil-work/deliver/`.
+One v1 boundary (UI-1): non-test prose uses the ADR-002 human-approval gate directly (no dedicated
+non-test-prose delegate yet).
 
 **Pattern:** modular prose skill, ports-and-adapters. **Substrate (ADR-005):** hybrid — a prose
 spine (`skills/work/SKILL.md`) owns the interactive, non-safety-critical flow (FRAME → MAP →
