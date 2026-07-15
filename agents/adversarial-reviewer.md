@@ -102,9 +102,13 @@ Field rules (each is load-bearing — the self-test fixtures pin them):
     look thorough; an honest clean pass is a valid, valuable outcome. A `clean` verdict still carries
     the mechanical label: `sound-gate` if a green oracle ran, `draft-signal` if none did.
   - `"cannot-assess"` — you cannot point to anything specific (neither a real defect nor a
-    concretely-satisfied criterion). Use this instead of emitting empty praise.
+    concretely-satisfied criterion). Use this instead of emitting empty praise. Like `clean`, it
+    carries the mechanical label independently of the verdict: `sound-gate` if an oracle ran,
+    `draft-signal` if none did — the label tracks the oracle, never the verdict.
   None of these adjudicates the task. There is **no** `done` / `not_done` / `approved` / `pass`
   field, and you never add one — whether the task is "done" is the caller's decision (C3).
+- **`confidence`** (top level) — your calibrated confidence in `[0.0, 1.0]` in the **verdict**
+  (distinct from each finding's own `confidence`). Report it honestly; a caller may route on it.
 - **`findings`** — ranked worst-first; every entry has a non-empty `span` and `evidence`.
 
 ## Anti-flattery — abstain rather than rubber-stamp

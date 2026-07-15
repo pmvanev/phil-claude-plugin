@@ -78,6 +78,20 @@ Executed proof the hard half labels correctly. Fixture 02's hard-finding-cites-f
 verified by the agent's inherit-the-oracle rule + worked example (not live-dogfooded — no real
 failing oracle was manufactured).
 
+## Post-finalize dogfood — review the reviewer (the agent itself)
+Drove the skill against `agents/adversarial-reviewer.md` (the reusable unit — untouched by the two
+earlier SKILL dogfoods). Ran deterministic oracles (frontmatter valid · broken_refs=0 · tools
+read-only) → GREEN, then dispatched an independent reviewer with that `oracle_result`. Verdict:
+`overall_label: sound-gate` (correct mechanical upgrade), `verdict: findings`, no done field, 2 soft
+findings ranked worst-first — both real and fixed:
+- (minor) `cannot-assess` had no mechanical-label guidance and its example anchored `draft-signal`,
+  admitting an accidental under-claim after a green oracle → added the both-directions label note to
+  the `cannot-assess` rule.
+- (nit) top-level `confidence` field was in the schema but undocumented in field rules (sibling
+  `refactor-critic-correctness` documents it) → added a field rule for it.
+Third dogfood, third real catch — including one it found by comparing against its own pattern-lineage
+sibling. No fixture regressions (additive clarifications).
+
 ## Status: both slices delivered
 All 8 self-test fixtures green (5 live-dogfooded end-to-end across the two slices; the rest
 fixture-verified). Composition contract documented; no existing skill edited. Ready for FINALIZE
