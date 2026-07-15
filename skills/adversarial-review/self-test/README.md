@@ -66,6 +66,9 @@ Each fixture is self-contained:
 
 Fixtures are manifest-driven (no separate sample artifacts needed) — the target and any oracle result
 are described inline, mirroring how `skills/edd/self-test/` supplies `engine_evidence` / `producer_result`.
+For the judge fixtures (09/10), the `manifest.json` `target.summary` describes the **fact the judge
+must discover by reading the real artifact** (e.g. "a guard exists three lines above the cited span");
+it is the answer key, not a copy the judge reads instead of the work.
 
 ## How to drive it (as the skill acceptance/regression gate)
 

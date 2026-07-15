@@ -122,6 +122,31 @@ confidence 0.97, `basis` quoting the both-directions label sentence now present 
 finding that no longer holds. The full triple demonstrated end-to-end: adversary raised → builder
 fixed → judge independently refuted the stale claim.
 
+## Slice-03 catch-up (reconciling the skipped wave gates)
+
+Slice 03 was built inline; this closes the wave gates it bypassed.
+
+- **DESIGN back-fill:** added the verifier to the feature-delta DESIGN tables — DDD8, component
+  decomposition row, Reuse Analysis row (CREATE NEW, justified), decisions-table row. Now consistent
+  with brief.md + ADR-012.
+- **DISTILL structural review (Sentinel):** re-ran `@nw-acceptance-designer-reviewer` on the slice-03
+  additions (verifier agent, fixtures 09/10, new scenarios, VERIFY step). **APPROVED** — 0 blockers,
+  0 high, 3 low. Low #2 (verifier lacks a leak-guard) was a false positive — the guard is already at
+  lines 38-39. Low #1 (US-3 orphaned) + #3 (fixture clarity) applied as doc fixes.
+- **Independent review of the verifier agent (executed dogfood):** ran a green oracle
+  (frontmatter/refs/tools) then dispatched an independent reviewer at `adversarial-verifier.md`.
+  `sound-gate`, `verdict: findings`, 3 findings — the major one **real and important**: the verifier
+  had **no guard against over-refuting** (all directives pushed toward refutation; a judge could
+  silently suppress a true-but-subtle finding — the exact failure mode fixture 10 guards, but the
+  agent instructions didn't reinforce it). Fixed: added a symmetric "try to confirm — charitably"
+  step, made refute-by-default a last resort after an honest confirmation attempt, redefined
+  `confidence` as confidence-in-the-fact (uncertainty-refute → low confidence, flaggable), and made
+  `corrected_severity` explicitly bidirectional (escalation is confirmation, not a new finding) with
+  worked examples. Two minors fixed likewise.
+
+Fourth dogfood, fourth real catch — this one a genuine asymmetry in the judge's own instructions.
+`red-classification.md` updated for 09/10. All 10 fixtures still green.
+
 ## Status: three slices delivered
 All 10 self-test fixtures green (no-oracle path, oracle path, and the judge each dogfooded live with
 executed evidence; the rest fixture-verified). A true builder → adversary → judge triple. Composition

@@ -184,23 +184,29 @@ flawed completed tasks the reviewer must catch). 8. `acceptance.feature` + wave-
 - **[DDD4] Hard/soft generalized to prose oracles.** Hard = any deterministic check for the target
   (code: test suite/lint/types; prose: self-test pass, dead-link/broken-ref, frontmatter validity,
   file-length, required-citation). `overall_label=sound-gate` iff ≥1 hard oracle backs it. (ADR-011)
-- **[DDD5] Reviewer independence v1 = single fresh-context subagent.** Different-model/multi-lens
-  panel = documented extension seam (accepted v1 risk: same-model fresh-context isn't full
-  independence). (ADR-010 consequences)
-- **[DDD6] Standalone flow:** frame → curate independent input (exclude builder reasoning, C1) →
-  dispatch → present ranked findings + label to human (ADR-002, advisory). Report by default, no
-  trail unless asked (anxiety C). (ADR-010)
-- **[DDD7] Composition = documentation only.** Agent publishes the typed `{target,intent,standards}`→
-  verdict contract; SKILL documents the Workflow-weaving pattern. **No existing skill edited.** (ADR-010)
+- **[DDD5] Reviewer independence = fresh-context subagent(s).** Different-model / multi-lens panel =
+  documented extension seam (accepted risk: same-model fresh-context isn't full independence).
+  (ADR-010 consequences; refined by DDD8/ADR-012)
+- **[DDD6] Standalone flow:** frame → oracle → curate independent input (exclude builder reasoning,
+  C1) → dispatch → verify → present ranked findings + label to human (ADR-002, advisory). Report by
+  default, no trail unless asked (anxiety C). (ADR-010; verify added by DDD8)
+- **[DDD7] Composition = documentation only.** Agents publish the typed `{target,intent,standards,
+  oracle_result?}`→verdict contract; SKILL documents the Workflow-weaving pattern. **No existing
+  skill edited.** (ADR-010)
+- **[DDD8] Separate the adversary from the judge (the triple).** A second agent
+  (`adversarial-verifier`) independently confirms-or-refutes each finding (fresh context, no reviewer
+  reasoning; refute-by-default); the skill's VERIFY step keeps confirmed, drops+counts refuted.
+  Makes it a builder → adversary → judge triple; honesty label unchanged by verification. (ADR-012)
 
 ## Wave: DESIGN / [REF] Component decomposition
 
 | Component | Path | Change type | Role |
 |---|---|---|---|
 | Command (thin loader) | `commands/adversarial-review.md` | CREATE NEW | driving port (CLI/skill) |
-| Skill spine | `skills/adversarial-review/SKILL.md` | CREATE NEW | standalone driver: frame → curate → dispatch → present |
-| Reviewer agent | `agents/adversarial-reviewer.md` | CREATE NEW | the reusable independent critic + typed-verdict contract |
-| Self-test fixtures | `skills/adversarial-review/self-test/` | CREATE NEW | author-then-ablate golden bad tasks; C1–C5 regression gate |
+| Skill spine | `skills/adversarial-review/SKILL.md` | CREATE NEW | standalone driver: frame → oracle → curate → dispatch → verify → present |
+| Reviewer agent (the adversary) | `agents/adversarial-reviewer.md` | CREATE NEW | reusable independent critic; raises findings + typed-verdict contract |
+| Verifier agent (the judge) | `agents/adversarial-verifier.md` | CREATE NEW | independent per-finding confirm/refute; never sees the adversary's reasoning (DDD8/ADR-012) |
+| Self-test fixtures | `skills/adversarial-review/self-test/` | CREATE NEW | author-then-ablate golden fixtures; C1–C5 + triple regression gate (10 fixtures) |
 | Acceptance scenarios | `skills/adversarial-review/acceptance.feature` | CREATE NEW | behavior spec |
 
 ## Wave: DESIGN / [REF] Driving ports
@@ -234,12 +240,14 @@ paradigm write). Oracles are prose-shaped (self-test fixtures, ADR-002 human dif
 | DDD5 | single fresh-context reviewer; panel = seam | ADR-010 |
 | DDD6 | standalone advisory flow, no default trail | ADR-010 |
 | DDD7 | composition doc-only, no host edits | ADR-010 |
+| DDD8 | separate adversary from judge (the triple); per-finding verification | ADR-012 |
 
 ## Wave: DESIGN / [REF] Reuse Analysis
 
 | Existing Component | File | Overlap | Decision | Justification |
 |---|---|---|---|---|
 | refactor-critic-correctness | `agents/refactor-critic-correctness.md` | independent critic; span-evidence schema; anti-flattery; reason-first | **CREATE NEW (pattern-copy)** | different judgment domain (general vs behavior-preservation+rubric); ADR-003 precedent favors pattern-copy over premature shared extraction; schema shape preserved for consistency. **Source unmodified.** |
+| adversarial-verifier (the judge) | `agents/adversarial-verifier.md` (new) | per-finding confirm/refute — a distinct role from the reviewer (adversary) | **CREATE NEW** | the judge must be a *separate* agent from the adversary (DDD8/ADR-012); merging them would defeat the separation of powers. Independent per-finding judgment, refute-by-default. |
 | refactor-loop GUARD | `skills/refactor-loop/SKILL.md` | severity threshold θ + worst-first ranking | **REUSE (pattern ref)** | prose reference to the same threshold discipline; no code to share. **Source unmodified.** |
 | test-runner-detection | `skills/shared/test-runner-detection.md` | code-oracle detection (slice 02) | **REUSE (invoke/include)** | shared read-only helper, called not changed. **Source unmodified.** |
 | ADR-002 human port | `docs/product/architecture/adr-002-*.md` | advisory presentation to human | **REUSE (pattern)** | same human-approval port mechanism. |
@@ -406,3 +414,9 @@ verification (still oracle-mechanical). Fixtures 09 (refute a false positive) + 
 finding) green. Dogfood: an independent judge refuted a planted false-positive finding citing the
 guard the adversary missed, and confirmed a real one from its own reading — both without the
 adversary's reasoning. Detail: `deliver/progress.md`.
+
+> **US-3 (composition gating) — deferred, not orphaned.** The original slice 03 (a host gating on
+> the verdict) was dropped in DESIGN per user direction (see § Changed Assumptions); slice 03 was
+> then re-used for the judge. US-3's ACs are **deferred to a future host-integration epic** — the
+> composition *contract* (DDD7) is published and awaits a real second consumer per ADR-008. This is
+> intentional, not an unshipped requirement.
