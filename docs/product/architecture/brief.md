@@ -198,10 +198,13 @@ native oracles already prove the intent. Only for the **qualitative residue** (e
 can cheaply assert — "errors are helpful", "the API feels ergonomic") does it delegate the build to
 one engine and attach a **scaled executed-evidence gate** the developer adjudicates.
 
-**Status:** DESIGNED (2026-07-15) — DISCUSS + DESIGN complete; not yet implemented.
-`docs/feature/edd-loop/feature-delta.md` holds the full record. v1 = slices 01–02 (triage + off-ramp;
-single-engine qualitative gate). Cross-domain multi-initiative sequencing + seam-level expectations
-deferred to slice 03.
+**Status:** IMPLEMENTED (2026-07-15) — shipped `commands/edd.md` + `skills/edd/SKILL.md` +
+`agents/edd-evidence-producer.md` across 2 slices (walking-skeleton off-ramp → evidence gate +
+producer). Acceptance suite: `skills/edd/self-test/` (7 fixtures) + `skills/edd/acceptance.feature`.
+Evolution: `docs/evolution/2026-07-15-edd-loop.md`. `docs/feature/edd-loop/feature-delta.md` holds the
+full DISCUSS+DESIGN+DISTILL record; DELIVER progress in `docs/feature/edd-loop/deliver/`. v1 = slices
+01–02 (triage + off-ramp; single-engine qualitative gate). Cross-domain multi-initiative sequencing +
+seam-level expectations deferred to slice 03.
 
 **Pattern:** modular prose skill, ports-and-adapters (same lineage as `phil:work`).
 **Substrate (ADR-007):** prose spine (`skills/edd/SKILL.md`) owns the interactive flow
