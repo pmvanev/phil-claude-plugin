@@ -364,17 +364,23 @@ No existing skill touched. Full detail: `deliver/progress.md`.
 
 ## Wave: DELIVER / [REF] Scenarios green count
 
-Slice-01 fixtures **5 of 5 green** (01, 04, 05, 06, 07); 03 passes vacuously (no `sound-gate` path in
-v1); 02 + 08 intentionally RED (oracle path = slice 02). Timestamp: 2026-07-15.
+**8 of 8 green** across both slices (01, 04, 05, 06, 07 no-oracle path; 02, 03, 08 oracle path). 5
+were dogfooded live end-to-end; the rest are fixture-verified. Timestamp: 2026-07-15.
 
 ## Wave: DELIVER / [REF] Demo evidence (executed)
 
-US-1 dogfood: an independent reviewer was dispatched at a real no-oracle target
+US-1 dogfood (slice 01, no-oracle): an independent reviewer was dispatched at a real no-oracle target
 (`skills/adversarial-review/SKILL.md`) with curated input. It returned a valid typed verdict
 (`justification`-first, `overall_label: draft-signal`, `verdict: findings`, 4 findings ranked
 worst-first with span+mechanism+evidence, **no done field**) and caught 4 real defects (1 major, 1
 minor, 2 nits) — all fixed the same session. Executed proof the WS path works end-to-end and adds
-signal the builder's self-assessment missed. Detail + fix table: `deliver/progress.md`.
+signal the builder's self-assessment missed.
+
+US-2 dogfood (slice 02, oracle path): a real deterministic prose oracle (broken-ref scan, GREEN) was
+run and its captured result handed to an independent reviewer. It returned `overall_label:
+sound-gate` (the mechanical upgrade from a green oracle — no under-claiming), `verdict: clean`, empty
+findings, no manufactured nits. Executed proof the hard half labels correctly. Detail + fix tables:
+`deliver/progress.md`.
 
 ## Wave: DELIVER / [REF] DoD check (slice 01)
 

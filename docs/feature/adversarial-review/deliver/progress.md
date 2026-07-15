@@ -45,6 +45,40 @@ The dogfood is itself the strongest slice-01 acceptance evidence: an independent
 the work + intent + standards, tried to falsify "done", ranked its findings, labeled the review a
 draft signal, and left the decision to the human — exactly US-1.
 
-## Deferred to slice 02
-Oracle detection (`test-runner-detection` + prose oracles) · hard/soft partition · `sound-gate`
-label · fixtures 02, 08 (and the non-vacuous form of 03) · the doc-only composition contract.
+## Slice 02 — the hard half (oracle detection + hard/soft split + sound-gate)
+
+### Changes
+- `agents/adversarial-reviewer.md`: added the `oracle_result` input + inherit-the-oracle step;
+  `kind: hard` findings cite the actual result; `overall_label` is now the mechanical rule
+  (`sound-gate` iff an oracle backed the review, else `draft-signal`) with explicit over- AND
+  under-claim prohibitions; examples for the failing-oracle, green-oracle, and confident-soft cases.
+- `skills/adversarial-review/SKILL.md`: added the **ORACLE** step (driver detects + runs/inherits a
+  code suite via `test-runner-detection` or a prose oracle — self-test/dead-link/frontmatter/length/
+  citation — and passes the captured `oracle_result`; never a builder's *claim*). Scope note, C4
+  line, PRESENT, safety rules, and the composition contract updated. Reviewer stays read-only
+  (inherit, never re-implement — ADR-005).
+- `commands/adversarial-review.md`: added `Bash` to allowed-tools (the driver runs oracles).
+
+### GREEN gate — all 8 fixtures
+| Fixture | Expected | Result |
+|---|---|---|
+| 02 sound-gate-with-oracle | hard finding cites real result; `sound-gate` | ✅ (agent inherit-oracle step + example; mechanism exercised by the live label logic below) |
+| 03 never-sound-gate-without-oracle | `draft-signal` despite confident findings | ✅ (agent rule: no oracle → never sound-gate; confidence never flips) |
+| 08 clean-sound-gate-green-oracle | clean + `sound-gate` | ✅ **live dogfood** below |
+| 01/04/05/06/07 (regression) | unchanged no-oracle behavior | ✅ (no `oracle_result` → soft-only, `draft-signal`) |
+
+### Dogfood (executed evidence — oracle path)
+Ran a real deterministic prose oracle — a broken-skill-reference scan on
+`skills/adversarial-review/SKILL.md` (`broken_refs=0`, GREEN) — then dispatched an independent
+reviewer with that captured `oracle_result`. It returned `overall_label: "sound-gate"` (the
+mechanical upgrade from a green oracle — it did **not** under-claim `draft-signal`), `verdict:
+"clean"`, empty findings, and refused to manufacture nits. It independently confirmed the slice-01
+fix held (it credited the SKILL for honestly conceding CURATE is a discipline, not a hard boundary).
+Executed proof the hard half labels correctly. Fixture 02's hard-finding-cites-failure path is
+verified by the agent's inherit-the-oracle rule + worked example (not live-dogfooded — no real
+failing oracle was manufactured).
+
+## Status: both slices delivered
+All 8 self-test fixtures green (5 live-dogfooded end-to-end across the two slices; the rest
+fixture-verified). Composition contract documented; no existing skill edited. Ready for FINALIZE
+(evolution summary + brief.md status → IMPLEMENTED).

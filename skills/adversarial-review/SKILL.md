@@ -23,12 +23,12 @@ The standards a review is held to are whatever applies to the target —
 > **typed verdict is the composition contract** — the same agent, unchanged, is what a host or a
 > workflow invokes later (composition is documented, not wired — see the seam at the end).
 
-> **v1 / slice-01 scope.** This ships the **no-oracle** path: a soft, honestly-labeled review of a
-> target with no deterministic oracle (a doc, a skill, a design). Every verdict is labeled
-> `draft-signal`. Oracle detection + the hard/soft split + the `sound-gate` label are **slice 02**
-> (see the seam). The self-test fixtures for slice 01 are `01, 04, 05, 06, 07` — and C4's v1 pole
-> (a no-oracle review is `draft-signal`, never `sound-gate`) is asserted by every one of them, since
-> in v1 the label is `draft-signal` by construction.
+> **Scope (slices 01–02).** Both paths ship. **No oracle** (a doc/skill/design with no deterministic
+> check): soft findings only, labeled `draft-signal`. **Oracle available** (code with a test suite,
+> or prose with a runnable check): the driver runs/inherits it (ORACLE step), the reviewer emits
+> `hard` findings citing the actual result plus `soft` findings, and the verdict is labeled
+> `sound-gate`. The label is mechanical — `sound-gate` iff an oracle backed the review, else
+> `draft-signal` — never a matter of the reviewer's confidence.
 
 ---
 
@@ -40,9 +40,10 @@ The standards a review is held to are whatever applies to the target —
    the work). This is the structural analog of edd's producer ≠ builder separation of powers.
 2. **Advisory, never self-adjudicating (C3).** Neither you nor the reviewer declares the task done or
    not done. The reviewer emits findings; **the human decides**. You present, you do not rule.
-3. **Honesty label (C4).** A review with no deterministic oracle behind it is a **draft signal**,
-   never a sound gate. You never present a soft review as a verified pass. (In v1 every review is
-   `draft-signal` by construction — slice 02 is where `sound-gate` can be earned.)
+3. **Honesty label (C4).** The label is **mechanical**: `sound-gate` iff a deterministic oracle
+   actually backed the review, else `draft-signal`. You never present a soft review as a verified
+   pass (over-claiming), and never bury a real oracle result as a mere draft signal (under-claiming).
+   The label answers one question — "did an oracle back this?" — not "how sure is the reviewer?"
 
 ---
 
@@ -77,12 +78,37 @@ Do not begin the review until the target and intent are settled.
 
 ---
 
+## ORACLE — detect and run/inherit a deterministic check (sets the label)
+
+Determine whether a **deterministic oracle** exists for this target, then run or inherit it. You run
+the oracle here (the driver), not the reviewer — the reviewer stays read-only and only *cites* the
+result (ADR-005 lineage: inherit, never re-implement).
+
+- **Code target:** detect a test runner via `skills/shared/test-runner-detection.md`; if one exists,
+  run the suite (and lint/types if present) and capture the result. If a host already ran it, inherit
+  that result rather than re-running.
+- **Prose target** (skill / agent / rule / doc): run the deterministic prose checks that apply —
+  self-test fixture pass, dead-link / broken skill-ref scan, frontmatter validity, file-length limit,
+  required-citation presence. Capture each result.
+- **No deterministic oracle** (a design doc's "soundness", a subjective artifact): none available —
+  proceed with no `oracle_result`.
+
+Record the outcome as `oracle_result` (the captured output + what was run), or note that none was
+available. This single fact sets the honesty label downstream: **an oracle ran → `sound-gate`; none
+→ `draft-signal`.** Never invent or approximate an oracle to earn a `sound-gate` label — if the only
+"check" is your own judgment, there is no oracle.
+
+---
+
 ## CURATE — assemble independent input (C1, the load-bearing step)
 
-Build the reviewer's input as **exactly**: `{ target, intent, standards }`. Then **strip everything
-else** — in particular, any builder reasoning, self-assessment, prior "looks good to me", or your own
-opinion of the work. If the conversation contains the builder's rationale, it does **not** go into the
-dispatch.
+Build the reviewer's input as **exactly**: `{ target, intent, standards, oracle_result? }` — the
+`oracle_result` from ORACLE if one ran, omitted otherwise. Then **strip everything else** — in
+particular, any builder reasoning, self-assessment, prior "looks good to me", or your own opinion of
+the work. If the conversation contains the builder's rationale, it does **not** go into the dispatch.
+(An `oracle_result` is a machine-produced fact, not builder reasoning — it is safe and required to
+pass; a builder's *claim* that "the tests pass" is not — pass the actual captured result, never the
+claim.)
 
 Independence has two parts, and they are not equally strong. The **fresh-context dispatch** is
 structural: the subagent cannot see this session's history. The **curation** here is a *discipline*
@@ -111,11 +137,13 @@ it, do not add an adjudication to it, do not upgrade its label.
 Present the verdict to the developer via the human port (ADR-002 — a clear summary, and offer to open
 the target/spans in their editor):
 
-- Lead with the **honesty label** so it is never mistaken for a verified pass: e.g.
-  *"Draft signal (no oracle) — an independent read, not a verified gate."*
+- Lead with the **honesty label** so it is never mistaken for more or less than it is:
+  *"Draft signal (no oracle) — an independent read, not a verified gate."* or
+  *"Sound gate — backed by the test suite; hard findings cite the actual run."*
 - List findings **worst-first**, each with its span, mechanism, and evidence.
-- If `verdict: "clean"`, say so plainly ("independent review found nothing — still a draft signal,
-  not a verified pass"). If `verdict: "cannot-assess"`, report that honestly rather than dressing it
+- If `verdict: "clean"`, say so plainly, carrying the label: "independent review found nothing —
+  still a draft signal, not a verified pass" (no oracle) or "nothing found, and the suite ran green —
+  sound gate" (oracle). If `verdict: "cannot-assess"`, report that honestly rather than dressing it
   as approval.
 - **Do not** tell the developer whether the task is done. State that the decision is theirs; the
   review is input.
@@ -132,8 +160,9 @@ trail.
   correlated review is not a review.
 - **Advisory only (C3).** Neither you nor the reviewer declares done/not-done. Present; the human
   decides.
-- **Honest label (C4).** No oracle → `draft-signal`; never dress a soft review as a sound gate. (v1:
-  always `draft-signal`.)
+- **Honest label (C4).** Mechanical: oracle ran → `sound-gate`; none → `draft-signal`. Never dress a
+  soft review as a sound gate (over-claim), never bury a real oracle result as a draft signal
+  (under-claim). Never invent an oracle to earn the label.
 - **No manufactured findings; no empty praise (C5).** A clean pass is honest; praise with no span is
   coerced to `cannot-assess` (the reviewer owns this, but never override it toward approval).
 - **You do not edit or fix anything.** This skill reviews; it does not change the work.
@@ -141,15 +170,25 @@ trail.
 
 ---
 
-## Composition seam (documented, not wired in v1 — ADR-010 DDD7)
+## Composition contract (documented, not wired — ADR-010 DDD7)
 
 The reusable unit is `agents/adversarial-reviewer.md`; its **typed verdict is the contract**. A host
 command or an ad-hoc Workflow script composes adversarial review by invoking that agent directly
-(Task / `agent()`), passing `{ target, intent, standards }`, and routing on the typed fields —
-`severity` (+ a threshold θ) and `overall_label`. **A `draft-signal` verdict must never be consumed
-as a passed sound gate.** v1 **edits no existing skill**; hosts (`phil:work`, `phil:edd`,
-`phil:refactor-tests`) adopt this contract later, each as their own work, once a real second consumer
-exists (ADR-008 second-consumer rule).
+(Task / `agent()`):
+
+- **Input:** `{ target, intent, standards, oracle_result? }`. The caller is responsible for the same
+  two disciplines this skill applies — **curate out builder reasoning** (C1), and **run/inherit the
+  oracle itself** and pass the captured `oracle_result` (never a builder's *claim* that tests pass).
+- **Output:** the typed verdict. Route on the typed fields only — `overall_label` and per-finding
+  `kind` + `severity` (+ a threshold θ) — with **no re-judging**.
+- **The boundary rule:** a `draft-signal` verdict must **never** be consumed as a passed sound gate,
+  and the reviewer's advisory verdict is never treated as an adjudication of "done" (C3) — the host
+  owns its gate.
+
+This feature **edits no existing skill.** Hosts (`phil:work`, `phil:edd`, `phil:refactor-tests`)
+adopt this contract later, each as their own work, once a real second consumer exists (ADR-008
+second-consumer rule). Ad-hoc Workflow weaving needs nothing more than the agent + this contract:
+call `agent()` with the input, read the verdict, route on it.
 
 ---
 
@@ -158,10 +197,11 @@ exists (ADR-008 second-consumer rule).
 `skills/adversarial-review/self-test/` holds author-then-ablate golden fixtures that pin these
 behaviors: honest soft review labeled `draft-signal` (01, walking skeleton), independent dispatch
 with builder reasoning withheld (04), anti-flattery `cannot-assess` (05), advisory / never
-self-adjudicate (06), and an honest clean pass with no manufactured findings (07). Fixtures 02 and 08
-exercise the oracle/`sound-gate` path (slice 02); fixture 03 is the honesty-label guard — a no-oracle
-review is **never** labeled `sound-gate` — which becomes non-vacuous once slice 02 introduces the
-`sound-gate` path. Whenever this skill, `commands/adversarial-review.md`,
+self-adjudicate (06), and an honest clean pass with no manufactured findings (07). Fixtures 02
+(oracle + failure → `sound-gate` with a hard finding) and 08 (clean + green oracle → `sound-gate`)
+exercise the hard half; fixture 03 is the honesty-label guard — findings alone, however confident,
+never earn `sound-gate` without an oracle. Fixtures 02/03/07/08 pin the label in both directions —
+over- and under-claiming both fail. Whenever this skill, `commands/adversarial-review.md`,
 or `agents/adversarial-reviewer.md` changes, drive the fixtures per `self-test/README.md` and confirm
 each produces its `expected.md` decision — every edit here is non-monotonic, so these are changed and
 regression-tested, never changed and eyeballed.
