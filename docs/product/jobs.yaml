@@ -194,3 +194,68 @@ jobs:
     # evidence, and it spans BOTH visible (nwave) and invisible (phil:work) work. phil:edd
     # delegates the build to those engines and inherits their oracle (ADR-005 lineage); it
     # adds only the qualitative-evidence gate they structurally lack.
+
+  - id: get-independent-adversarial-critique-of-completed-work
+    # Registered by DISCUSS wave, feature: adversarial-review (2026-07-15)
+    job_story: >
+      When I (or an AI agent I delegated to) have just completed a task and I'm about to
+      trust it, ship it, or call it done, I want an INDEPENDENT adversary to actively try to
+      falsify "done" — separating what's hard-checkable from what's a judgment call, attacking
+      the output against my intent and standards, and handing me ranked, evidence-bearing
+      findings — so I can catch the flaws the builder rationalized past, without either trusting
+      the builder's own self-assessment or reading every line myself.
+    dimensions:
+      functional: >
+        An independent reviewer (fresh context, never saw the builder's reasoning trace) takes
+        a completed task's output + stated intent, SPLITS hard-checkable claims (verified in
+        code / by an available oracle) from soft judgments (adversarially critiqued), attempts a
+        falsifying case, and returns a ranked span-and-evidence verdict — advisory, never
+        self-adjudicating. Usable standalone, composable into phil:work / phil:edd /
+        phil:refactor-tests, and weavable ad-hoc into workflows.
+      emotional: >
+        Confidence a hostile independent pass hunted for what's wrong before I trusted it;
+        relief from "the AI says it's fine, but did anyone actually try to break it?"; freedom
+        to delegate without either rubber-stamping or reading everything.
+      social: >
+        Shipping work that survived an adversarial pass; a "done" that is defensible rather than
+        self-certified; being seen as disciplined about independent verification.
+    four_forces:
+      push: >
+        Builders (human or AI) grade their own homework; every existing critic is bound to a
+        specific oracle (refactor-loop's suite) or gate (edd's evidence) — there is no general
+        adversary you can point at any completed task; soft self-review has correlated-error
+        blind spots (the tri-agent trap).
+      pull: >
+        The refactor-critic generalized out from behind its test oracle — an independent
+        adversarial reviewer any command / workflow can call, honest about hard-vs-soft,
+        returning ranked findings not a rubber stamp.
+      anxiety: >
+        (A) an all-soft-critic loop that is just theatre — LLM judging LLM, dressed as a sound
+        gate (THE force the design is built against; the central tri-agent warning); (B) nit-noise
+        — a reviewer that floods low-value findings; (C) ceremony on work that did not need review;
+        (D) same-model / same-context correlated blind spots make the "independent" review not
+        actually independent.
+      habit: >
+        Trusting the builder's self-assessment ("looks good to me"); reading every diff by hand;
+        catching flaws only in review / QA / production.
+    opportunity_score: not-scored   # single new job; priority by default
+    status: validated
+    personas: [rowan-skeptical-delegator]
+    features: [adversarial-review]
+    # Relationship to prove-qualitative-expectations-with-evidence (edd-loop): SIBLING, distinct
+    # outcome. edd PRODUCES executed evidence and hands it to a human to adjudicate (producer !=
+    # builder; human is the oracle). This job DOES THE JUDGING: an independent critic attacks the
+    # output and returns findings/a verdict. edd's deferred agents/edd-evidence-critic is the
+    # narrow ancestor; this is the general-purpose form.
+    # Load-bearing constraints (DISCUSS, 2026-07-15) — informed by the tri-agent clarification
+    # research (docs/research-summaries/tri-agent-clarification) + LLM-Modulo/ABC lineage:
+    #   C1 INDEPENDENCE: reviewer runs in fresh context and never sees the builder's reasoning
+    #      trace (correlated-error avoidance). Different-model hardening deferred to DESIGN.
+    #   C2 HARD/SOFT SPLIT: every review partitions findings into hard-checkable (actually run
+    #      the check / inherit the host's oracle, ADR-005 lineage) vs soft (adversarial, labeled).
+    #   C3 ADVISORY, NEVER SELF-ADJUDICATING: findings are input the host command or human gates
+    #      on; the reviewer never declares done.
+    #   C4 HONESTY LABEL: when no oracle exists, the review is labeled a soft DRAFT SIGNAL, never
+    #      dressed as a sound gate. This is to adversarial-review what the off-ramp is to edd.
+    #   C5 SPAN-AND-EVIDENCE / ANTI-FLATTERY: no finding without a span + evidence; empty praise
+    #      is coerced to CANNOT_ASSESS (carried from refactor-critic-correctness).
