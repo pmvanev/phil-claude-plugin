@@ -10,8 +10,12 @@ deciding "done" for you.
 - `commands/adversarial-review.md` — thin loader.
 - `skills/adversarial-review/SKILL.md` — the standalone driver: FRAME · ORACLE · CURATE · DISPATCH ·
   PRESENT.
-- `agents/adversarial-reviewer.md` — the **reusable** independent critic + the typed-verdict
-  **composition contract** (pattern-copied from `refactor-critic-correctness`).
+- `agents/adversarial-reviewer.md` — the **adversary**: the reusable independent critic that raises
+  findings + the typed-verdict **composition contract** (pattern-copied from
+  `refactor-critic-correctness`).
+- `agents/adversarial-verifier.md` — the **judge**: independently confirms-or-refutes each finding
+  (fresh context, never sees the adversary's reasoning). Together with the builder this makes a
+  **builder → adversary → judge** triple (ADR-012), realizing the tri-agent RA/EA separation.
 - `skills/adversarial-review/acceptance.feature` + `self-test/` (8 golden fixtures) — the acceptance
   + regression gate.
 
@@ -44,10 +48,13 @@ against that (anxiety A) via five locked constraints:
   frontmatter, length, citation), because the plugin's targets are usually prose.
 - **C5 span-and-evidence / anti-flattery** — no finding without a span; empty praise → `cannot-assess`.
 
-Architecture (ADR-010/011): a prose spine drives a Task-dispatched reviewer subagent; the **agent is
-the reusable unit**, the **typed verdict is the composition contract**. The driver runs/inherits the
-oracle; the reviewer stays read-only (inherit, never re-implement — ADR-005). Standalone only —
-**edits no existing skill**; hosts adopt the contract later (ADR-008 second-consumer rule).
+Architecture (ADR-010/011/012): a prose spine drives Task-dispatched subagents; the **agents are the
+reusable units**, the **typed verdict is the composition contract**. The driver runs/inherits the
+oracle; the reviewer stays read-only (inherit, never re-implement — ADR-005). Slice 03 (ADR-012)
+separated the **adversary** (raises findings) from an independent **judge** (`adversarial-verifier`,
+confirms/refutes each finding without the adversary's reasoning) — a builder → adversary → judge
+triple that filters a motivated attacker's false positives before a human sees them. Standalone only
+— **edits no existing skill**; hosts adopt the contract later (ADR-008 second-consumer rule).
 
 ## Outcome (before → after)
 
@@ -61,9 +68,11 @@ oracle; the reviewer stays read-only (inherit, never re-implement — ADR-005). 
 
 ## Scope / accepted limitations
 
-- v1 reviewer independence is same-model / fresh-context — not *full* independence (tri-agent
-  correlated-error caveat). Accepted; different-model / multi-lens-panel hardening is the recorded
-  extension seam (trivial when composed into a Workflow via `parallel()`).
+- The adversary and judge are now separate agents (ADR-012), but both share a base model —
+  refute-by-default is the diversity lever without a different model, so this is not *full*
+  independence (tri-agent correlated-error caveat). Accepted; a **different-model judge** and a
+  **multi-lens panel** (N judges, majority) are the recorded remaining seams (trivial when composed
+  into a Workflow via `parallel()`).
 - Composition is a documented contract, not wired into any host. First host adoption is future work.
 - Prose-oracle catalog is a bounded v1 subset; breadth can grow.
 

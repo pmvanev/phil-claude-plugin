@@ -326,11 +326,15 @@ ADVISORY-ONLY · CLEAN-PASS`.
 | `06-advisory-never-self-adjudicate` | reviewer tempted to declare done/not-done | C3 (**anti-theatre / fox-henhouse**) | strip to advisory findings only | `ADVISORY-ONLY` |
 | `07-clean-pass-no-manufactured-findings` | nothing wrong, no oracle | honest reporting | no invented findings; clean pass (soft-labeled) | `CLEAN-PASS` |
 | `08-clean-sound-gate-green-oracle` | nothing wrong, oracle ran green | C4 positive pole | verified-clean earns `sound-gate`; no under-claiming | `CLEAN-PASS` |
+| `09-verifier-refutes-false-positive` | reviewer over-reported a misread | adversary→judge separation | judge reads the span, refutes, drops it | `REFUTED` |
+| `10-verifier-confirms-real-finding` | reviewer got one right | judge confirm pole + independence | judge independently confirms; finding survives | `CONFIRMED` |
 
 `01` is the single `@walking_skeleton` scenario. The **safety core** (silent bug classes) is
-`03`, `04`, `06`: over-claiming soundness, a correlated (non-independent) dispatch, and the reviewer
-adjudicating its own verdict — each looks exactly like a smooth run. Fixtures `02/03/07/08` pin the
-honesty label in **both** directions — over-claiming *and* under-claiming are gate failures.
+`03`, `04`, `06`, `09`: over-claiming soundness, a correlated (non-independent) dispatch, the reviewer
+adjudicating its own verdict, and a false positive rubber-stamped instead of refuted — each looks
+exactly like a smooth run. Fixtures `02/03/07/08` pin the honesty label in **both** directions;
+`09/10` pin the third role (the adversary→judge separation) in both directions (refute a false
+positive, confirm a real one).
 
 ## Wave: DISTILL / [REF] Scaffolds & test placement
 
@@ -364,8 +368,9 @@ No existing skill touched. Full detail: `deliver/progress.md`.
 
 ## Wave: DELIVER / [REF] Scenarios green count
 
-**8 of 8 green** across both slices (01, 04, 05, 06, 07 no-oracle path; 02, 03, 08 oracle path). 5
-were dogfooded live end-to-end; the rest are fixture-verified. Timestamp: 2026-07-15.
+**10 of 10 green** across three slices (01/04/05/06/07 no-oracle; 02/03/08 oracle; 09/10 the judge).
+Dogfooded live end-to-end: the no-oracle path, the oracle path, and the judge (refute + confirm). The
+rest are fixture-verified. Timestamp: 2026-07-15.
 
 ## Wave: DELIVER / [REF] Demo evidence (executed)
 
@@ -388,3 +393,16 @@ Command+skill+agent shipped ✅ · typed verdict schema implemented ✅ · hones
 in v1) ✅ (C4) · independence curation ✅ (C1) · anti-flattery `cannot-assess` ✅ (C5) · advisory,
 no self-adjudication ✅ (C3) · self-test fixtures present + slice-01 green ✅ · dogfood evidence
 captured ✅. Deferred to slice 02: oracle path + `sound-gate` + composition-contract doc.
+
+## Wave: DELIVER / [REF] Slice 03 — the third role (adversary → judge separation)
+
+Added `agents/adversarial-verifier.md` (the **judge**) + a **VERIFY** step in the skill: after the
+reviewer (**adversary**) raises findings, each is put to an independent judge — fresh context,
+**without the reviewer's reasoning** — that tries to **refute** it and defaults to `refuted` when it
+cannot independently confirm. Only confirmed findings reach the human; refuted ones are dropped and
+counted. Makes the tool a true **builder → adversary → judge** triple (ADR-012), realizing the
+tri-agent RA/EA separation and the ADR-010 hardening seam. The honesty label is unchanged by
+verification (still oracle-mechanical). Fixtures 09 (refute a false positive) + 10 (confirm a real
+finding) green. Dogfood: an independent judge refuted a planted false-positive finding citing the
+guard the adversary missed, and confirmed a real one from its own reading — both without the
+adversary's reasoning. Detail: `deliver/progress.md`.

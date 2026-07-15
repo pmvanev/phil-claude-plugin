@@ -92,7 +92,37 @@ findings ranked worst-first — both real and fixed:
 Third dogfood, third real catch — including one it found by comparing against its own pattern-lineage
 sibling. No fixture regressions (additive clarifications).
 
-## Status: both slices delivered
-All 8 self-test fixtures green (5 live-dogfooded end-to-end across the two slices; the rest
-fixture-verified). Composition contract documented; no existing skill edited. Ready for FINALIZE
-(evolution summary + brief.md status → IMPLEMENTED).
+## Slice 03 — the third role (adversary → judge separation)
+
+Prompted by a maintainer question: the tri-agent concept has three roles, but v1 merged the adversary
+(RA) and judge (EA) into one reviewer. Slice 03 splits them → a true **builder → adversary → judge**
+triple (ADR-012).
+
+### Changes
+- `agents/adversarial-verifier.md` (CREATE NEW) — the **judge**: receives ONE finding + target +
+  intent + standards + oracle_result, but **not** the reviewer's reasoning/confidence/other findings.
+  Tries to refute; defaults to `refuted` when it cannot independently confirm; may correct severity.
+  Read-only.
+- `skills/adversarial-review/SKILL.md` — added the **VERIFY** step (dispatch the judge per finding,
+  keep confirmed, drop+count refuted, present confirmed-only). Updated scope note (the triple), the
+  safety rules, PRESENT (report the refuted count), and the composition contract (the judge is a
+  separate reusable unit; a host may run reviewer-alone with unverified findings, or reviewer+judge).
+- Fixtures 09 (judge refutes a false positive) + 10 (judge confirms a real finding, independently).
+- `acceptance.feature` +2 scenarios; ADR-012; brief.md (files + C4 container + ADR list); feature-delta.
+
+### GREEN gate
+Fixtures 09 + 10 green; 01–08 unaffected (verification is an added stage, the reviewer's behavior is
+unchanged). Honesty label unchanged by verification (still oracle-mechanical).
+
+### Dogfood (executed evidence — the judge)
+Handed the judge the very finding the slice-01/agent dogfood raised ("cannot-assess has no
+mechanical-label guidance") against `agents/adversarial-reviewer.md` **as it now stands (fixed)**.
+Reading the real file independently (no reviewer reasoning), it returned `judgment: "refuted"`,
+confidence 0.97, `basis` quoting the both-directions label sentence now present — correctly dropping a
+finding that no longer holds. The full triple demonstrated end-to-end: adversary raised → builder
+fixed → judge independently refuted the stale claim.
+
+## Status: three slices delivered
+All 10 self-test fixtures green (no-oracle path, oracle path, and the judge each dogfooded live with
+executed evidence; the rest fixture-verified). A true builder → adversary → judge triple. Composition
+contract + judge documented as separate reusable units; no existing skill edited.

@@ -23,12 +23,19 @@ The standards a review is held to are whatever applies to the target —
 > **typed verdict is the composition contract** — the same agent, unchanged, is what a host or a
 > workflow invokes later (composition is documented, not wired — see the seam at the end).
 
-> **Scope (slices 01–02).** Both paths ship. **No oracle** (a doc/skill/design with no deterministic
-> check): soft findings only, labeled `draft-signal`. **Oracle available** (code with a test suite,
-> or prose with a runnable check): the driver runs/inherits it (ORACLE step), the reviewer emits
-> `hard` findings citing the actual result plus `soft` findings, and the verdict is labeled
-> `sound-gate`. The label is mechanical — `sound-gate` iff an oracle backed the review, else
-> `draft-signal` — never a matter of the reviewer's confidence.
+> **The triple (builder → adversary → judge).** Three roles separate the concerns the tri-agent
+> research keeps apart: the **builder** is whoever did the work (the main session or a delegated AI
+> — not built here); the **adversary** is `agents/adversarial-reviewer` (attacks, raises findings);
+> the **judge** is `agents/adversarial-verifier` (independently confirms-or-refutes each finding).
+> Separating adversary from judge stops a motivated attacker from rubber-stamping its own findings.
+>
+> **Scope (slices 01–03).** No oracle → soft findings only, labeled `draft-signal`. Oracle available
+> (code suite, or a runnable prose check) → the driver runs/inherits it (ORACLE step), the reviewer
+> emits `hard` findings citing the actual result plus `soft` findings, and the verdict is labeled
+> `sound-gate`. Every raised finding is then put to the independent judge (VERIFY step); only
+> confirmed findings reach the human. The label is mechanical — `sound-gate` iff an oracle backed the
+> review, else `draft-signal` — never a matter of the reviewer's confidence, and never changed by
+> verification.
 
 ---
 
@@ -132,6 +139,39 @@ it, do not add an adjudication to it, do not upgrade its label.
 
 ---
 
+## VERIFY — an independent judge tests each finding (the third role)
+
+The reviewer is the **adversary** — motivated to find something, it can over-report. Before any
+finding reaches the human, put each one to an independent **judge**: `agents/adversarial-verifier`.
+This is the third role that makes the tool a **builder → adversary → judge** triple, not a single
+self-certifying critic.
+
+For **each** finding the reviewer raised, dispatch `adversarial-verifier` (a fresh subagent, one per
+finding) with `{ finding, target, intent, standards, oracle_result? }` — and **withhold the
+reviewer's `justification`, `confidence`, and other findings**. The judge must reach its own view
+from the work itself, or the two agents would simply agree. The judge is prompted to **refute**, and
+**defaults to `refuted` when it cannot independently confirm**.
+
+Then filter:
+
+- Keep findings the judge **`confirmed`** (applying any `corrected_severity`); re-rank worst-first.
+- **Drop** findings the judge **`refuted`**, and count them.
+- If every finding was refuted, the presented result has **no confirmed findings** — report that
+  honestly (the reviewer raised N, the judge refuted all N); it is not a `clean` verdict (the
+  reviewer did see problems), but nothing survived independent scrutiny.
+
+The **honesty label is unchanged** by verification — it still tracks only whether an oracle backed
+the review (C4). Verification changes *which findings* survive, never the label. Hard findings that
+faithfully cite the oracle should pass verification; a hard finding the judge refutes was misreading
+the oracle.
+
+> **Cost/skip.** Verification is one judge pass per finding. For a review with no findings
+> (`clean` / `cannot-assess`) there is nothing to verify — skip it. A composing host may run the
+> reviewer alone (findings unverified, clearly labeled as such) when it owns its own downstream
+> gate — see the composition contract.
+
+---
+
 ## PRESENT — put the findings to the human (advisory)
 
 Present the verdict to the developer via the human port (ADR-002 — a clear summary, and offer to open
@@ -140,7 +180,10 @@ the target/spans in their editor):
 - Lead with the **honesty label** so it is never mistaken for more or less than it is:
   *"Draft signal (no oracle) — an independent read, not a verified gate."* or
   *"Sound gate — backed by the test suite; hard findings cite the actual run."*
-- List findings **worst-first**, each with its span, mechanism, and evidence.
+- Present the **judge-confirmed** findings **worst-first**, each with its span, mechanism, and
+  evidence. Note how many the judge **refuted and dropped** ("the reviewer raised 5; an independent
+  judge confirmed 3 and refuted 2") — the refuted count is a signal about reviewer noise, worth
+  surfacing, not hiding.
 - If `verdict: "clean"`, say so plainly, carrying the label: "independent review found nothing —
   still a draft signal, not a verified pass" (no oracle) or "nothing found, and the suite ran green —
   sound gate" (oracle). If `verdict: "cannot-assess"`, report that honestly rather than dressing it
@@ -157,9 +200,13 @@ trail.
 ## Safety rules
 
 - **Independence is non-negotiable (C1).** Fresh-context reviewer; builder reasoning withheld. A
-  correlated review is not a review.
-- **Advisory only (C3).** Neither you nor the reviewer declares done/not-done. Present; the human
-  decides.
+  correlated review is not a review. The judge is independent of the reviewer too — it never sees the
+  reviewer's reasoning, or the two would just agree.
+- **Adversary and judge are separate (the triple).** The reviewer raises findings; a separate judge
+  confirms-or-refutes each. Never let the reviewer verify its own findings, and never present an
+  unverified finding as confirmed.
+- **Advisory only (C3).** Neither the reviewer nor the judge declares done/not-done. Present; the
+  human decides.
 - **Honest label (C4).** Mechanical: oracle ran → `sound-gate`; none → `draft-signal`. Never dress a
   soft review as a sound gate (over-claim), never bury a real oracle result as a draft signal
   (under-claim). Never invent an oracle to earn the label.
@@ -177,12 +224,16 @@ command or an ad-hoc Workflow script composes adversarial review by invoking tha
 (Task / `agent()`):
 
 - **Input:** `{ target, intent, standards, oracle_result? }`. The caller is responsible for the same
-  two disciplines this skill applies — **curate out builder reasoning** (C1), and **run/inherit the
+  disciplines this skill applies — **curate out builder reasoning** (C1), and **run/inherit the
   oracle itself** and pass the captured `oracle_result` (never a builder's *claim* that tests pass).
-- **Output:** the typed verdict. Route on the typed fields only — `overall_label` and per-finding
-  `kind` + `severity` (+ a threshold θ) — with **no re-judging**.
+- **Output:** the reviewer's typed verdict. Route on the typed fields only — `overall_label` and
+  per-finding `kind` + `severity` (+ a threshold θ) — with **no re-judging**.
+- **Verification is composable too.** The judge (`agents/adversarial-verifier`) is a separate
+  reusable unit. A host that wants confirmed-only findings runs the reviewer then the judge per
+  finding (as this skill's VERIFY step does); a host that owns its own downstream gate may consume
+  the reviewer's raw findings, provided it treats them as *unverified* and says so.
 - **The boundary rule:** a `draft-signal` verdict must **never** be consumed as a passed sound gate,
-  and the reviewer's advisory verdict is never treated as an adjudication of "done" (C3) — the host
+  and neither agent's advisory output is ever treated as an adjudication of "done" (C3) — the host
   owns its gate.
 
 This feature **edits no existing skill.** Hosts (`phil:work`, `phil:edd`, `phil:refactor-tests`)
@@ -201,7 +252,9 @@ self-adjudicate (06), and an honest clean pass with no manufactured findings (07
 (oracle + failure → `sound-gate` with a hard finding) and 08 (clean + green oracle → `sound-gate`)
 exercise the hard half; fixture 03 is the honesty-label guard — findings alone, however confident,
 never earn `sound-gate` without an oracle. Fixtures 02/03/07/08 pin the label in both directions —
-over- and under-claiming both fail. Whenever this skill, `commands/adversarial-review.md`,
-or `agents/adversarial-reviewer.md` changes, drive the fixtures per `self-test/README.md` and confirm
+over- and under-claiming both fail. Fixtures 09 (judge refutes a false-positive finding) and 10
+(judge confirms a real finding, independently) pin the third role — the adversary→judge separation.
+Whenever this skill, `commands/adversarial-review.md`, `agents/adversarial-reviewer.md`, or
+`agents/adversarial-verifier.md` changes, drive the fixtures per `self-test/README.md` and confirm
 each produces its `expected.md` decision — every edit here is non-monotonic, so these are changed and
 regression-tested, never changed and eyeballed.

@@ -96,3 +96,18 @@ Feature: Get an independent adversarial critique of completed work
     Then it reports a clean pass with no findings
     And the overall verdict is labeled a sound gate, because a real oracle backed it
     And it does not under-claim by labeling a verified result a mere draft signal
+
+  # --- THE JUDGE (third role): an independent verifier filters the adversary's findings ----
+  @slice-03 @separation-of-powers @fixture:09-verifier-refutes-false-positive
+  Scenario: A finding that misreads the work is refuted by an independent judge and never shown
+    Given the reviewer raised a finding that the work already handles the case it flagged
+    When an independent judge checks that finding against the work, without the reviewer's reasoning
+    Then the judge refutes it, citing the part of the work the reviewer missed
+    And the refuted finding is dropped, not shown to the developer as confirmed
+
+  @slice-03 @separation-of-powers @fixture:10-verifier-confirms-real-finding
+  Scenario: A real finding is independently confirmed by the judge and survives to the developer
+    Given the reviewer raised a finding that reflects a real defect in the work
+    When an independent judge checks that finding against the work, without the reviewer's reasoning
+    Then the judge confirms it from its own reading of the work
+    And the confirmed finding is presented to the developer
