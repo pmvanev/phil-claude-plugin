@@ -187,6 +187,98 @@ graph TB
     Skill -. "changed when skill changes" .-> SelfTest
 ```
 
+### edd-loop
+
+A new `/phil:edd` command + `skills/edd/SKILL.md` — the **expectation-driven sibling to
+`phil:work`**. Where `phil:work` is the general contractor for *invisible* work (preserve behavior +
+hit a checkable goal), `phil:edd` is the contractor for *expectation-driven* work: it captures a
+developer's intent as discrete **expectations**, classifies each, and — biased toward getting out of
+the way — **off-ramps** to nwave (user-facing) or `phil:work` (invisible) whenever those engines'
+native oracles already prove the intent. Only for the **qualitative residue** (expectations no test
+can cheaply assert — "errors are helpful", "the API feels ergonomic") does it delegate the build to
+one engine and attach a **scaled executed-evidence gate** the developer adjudicates.
+
+**Status:** DESIGNED (2026-07-15) — DISCUSS + DESIGN complete; not yet implemented.
+`docs/feature/edd-loop/feature-delta.md` holds the full record. v1 = slices 01–02 (triage + off-ramp;
+single-engine qualitative gate). Cross-domain multi-initiative sequencing + seam-level expectations
+deferred to slice 03.
+
+**Pattern:** modular prose skill, ports-and-adapters (same lineage as `phil:work`).
+**Substrate (ADR-007):** prose spine (`skills/edd/SKILL.md`) owns the interactive flow
+(CAPTURE → CLASSIFY → OFF-RAMP | BUILD → EVIDENCE-GATE → ADJUDICATE → DOCUMENT); the **build** is
+delegated to nwave / `phil:work` and their oracle is **inherited** (never re-verified — ADR-005
+lineage); **separation of powers** is structural — a dedicated non-builder **evidence-producer
+subagent** runs/renders and captures the artifact verbatim, and the **human adjudicates** via the
+ADR-002 port.
+
+**Gate factoring (ADR-008):** the qualitative-evidence gate is **inlined** in `skills/edd/SKILL.md`
+with a defined input/output contract and an extraction seam — NOT extracted to a shared skill in v1
+(one consumer today), and `phil:work`/nwave are composed **unchanged**.
+
+**Evidence contract (DISCUSS D2):** evidence must be a raw artifact from an actual run/render,
+captured verbatim + the command that reproduces it; narration (a description/claim without a
+reproducible artifact) is rejected and re-commissioned.
+
+**Documentation trail (ADR-009):** `docs/edd/<slug>/` (expectations · evidence/ · verdicts) —
+written **only when the gate ran** (off-ramp-only runs leave no trail); durable summary migrates to
+`docs/evolution/<date>-<slug>.md`.
+
+#### C4: System Context
+
+```mermaid
+graph TB
+    Avery["Avery — expectation owner / evaluator<br/>(states intent, adjudicates evidence)"]
+    Edd["phil:edd<br/>(command + orchestrator skill)"]
+    Engines["Build engines<br/>(nwave — user-facing · phil:work — invisible)"]
+    Producer["edd-evidence-producer<br/>(independent, non-builder subagent)"]
+    Git[("git repository")]
+    IDE["IDE / editor<br/>(evidence + diff review)"]
+    Trail[("docs/edd/&lt;slug&gt;/ + docs/evolution/")]
+
+    Avery -->|"runs /phil:edd '&lt;intent&gt;'"| Edd
+    Edd -->|"CLASSIFY all engine-checkable → OFF-RAMP (recommend + exit, no trail)"| Avery
+    Edd -->|"delegates the BUILD; inherits the engine oracle"| Engines
+    Edd -->|"commissions EXECUTED evidence (producer ≠ builder)"| Producer
+    Producer -->|"runs / renders; captures verbatim + repro command"| Git
+    Edd -->|"ADJUDICATE qualitative expectation (ADR-002 port)"| Avery
+    Avery -->|"reviews evidence / diff"| IDE
+    Edd -->|"writes expectations · evidence · verdicts (only if gate ran)"| Trail
+```
+
+#### C4: Container
+
+```mermaid
+graph TB
+    subgraph plugin["phil plugin"]
+        Cmd["commands/edd.md<br/>(thin loader)"]
+        Skill["skills/edd/SKILL.md<br/>(spine: CAPTURE · CLASSIFY · OFF-RAMP · BUILD · EVIDENCE-GATE · ADJUDICATE · DOCUMENT)"]
+        Gate["## Evidence Gate (inlined, ADR-008)<br/>contract: {expectation, engine_evidence?} → {verdict, artifact, trail}"]
+        SelfTest["skills/edd/self-test/<br/>(safety-behavior fixtures — regression gate)"]
+        Producer["agents/edd-evidence-producer.md<br/>(CREATE NEW — non-builder; runs/renders, captures verbatim)"]
+        Critic["agents/edd-evidence-critic.md<br/>(DEFERRED — advisory executed-vs-narration pre-screen)"]
+        nWave["nwave (DISCUSS…DELIVER)<br/>(REUSE — build user-facing; AT oracle inherited)"]
+        Work["phil:work<br/>(REUSE — build invisible; preservation+goal oracle inherited)"]
+        Detect["skills/shared/test-runner-detection.md<br/>(REUSE — when evidence commission runs a suite)"]
+    end
+    Trail[("docs/edd/&lt;slug&gt;/")]
+    Evol[("docs/evolution/")]
+    Git[("git")]
+    Human["Human port<br/>(AskUserQuestion + IDE — ADR-002)"]
+
+    Cmd --> Skill
+    Skill --> Gate
+    Skill -->|"BUILD user-facing"| nWave
+    Skill -->|"BUILD invisible"| Work
+    Gate -->|"commission executed evidence"| Producer
+    Producer --> Detect
+    Producer --> Git
+    Gate -.->|"future pre-screen seam"| Critic
+    Gate -->|"ADJUDICATE"| Human
+    Skill -->|"expectations · evidence · verdicts (gate-ran only)"| Trail
+    Skill -->|"evolution summary at completion"| Evol
+    Skill -. "changed when skill changes" .-> SelfTest
+```
+
 ### ADRs
 
 - [ADR-001](adr-001-refactor-tests-reuse-boundaries.md) — refactor-tests: new command + reuse boundaries.
@@ -195,3 +287,6 @@ graph TB
 - [ADR-004](adr-004-redesign-tests-coverage-equivalence-claim.md) — redesign-tests: coverage-equivalence claim at the human gate; automated oracle deferred.
 - [ADR-005](adr-005-phil-work-hybrid-substrate-delegated-gates.md) — phil-work: hybrid substrate (prose spine + delegate-owned gates); no re-implemented gating.
 - [ADR-006](adr-006-phil-work-documentation-namespace.md) — phil-work: `docs/work/<initiative>/` trail + evolution summary to `docs/evolution/`.
+- [ADR-007](adr-007-edd-loop-substrate-delegated-build-evidence-producer.md) — edd-loop: prose spine + delegated build + inherited oracle; separation of powers via a non-builder evidence-producer subagent; human adjudicates.
+- [ADR-008](adr-008-edd-loop-evidence-gate-factoring.md) — edd-loop: qualitative-evidence gate inlined with an extraction seam (not a shared skill in v1); engines composed unchanged.
+- [ADR-009](adr-009-edd-loop-documentation-namespace.md) — edd-loop: `docs/edd/<slug>/` trail (gate-ran only) + evolution summary to `docs/evolution/`.

@@ -232,3 +232,172 @@ skeleton needs ≤2 integration points: nwave + phil:work as off-ramp targets).
 **To:** DESIGN (nw-solution-architect) — decide D3 (gate: shared skill vs inlined) + D5 (namespace ADR),
 component decomposition, and reuse boundaries against refactor-loop/redesign-tests/phil-work.
 **Deliverables:** this feature-delta + `journeys/edd-loop.yaml` + `jobs.yaml` job + slice briefs + KPIs.
+
+---
+
+## Wave: DESIGN / [REF] Scope, mode & paradigm
+
+- **Design scope:** Application / components (nw-solution-architect lens). Not system-scope (no
+  distributed concerns) and not domain-scope (no new bounded context/aggregates — the concepts
+  "expectation / evidence / verdict" are lightweight prose-skill vocabulary, not a domain model).
+- **Interaction mode:** propose (options + trade-offs; the D3 fork was decided by the developer).
+- **Paradigm:** N/A in the programming sense — the artifact is a **prose skill** (Markdown), like
+  `work`/`refactor-tests`. The relevant choice is the **substrate** (ADR-007), not FP vs OOP. No
+  `CLAUDE.md` paradigm line is written.
+
+## Wave: DESIGN / [REF] Design decisions (DDD)
+
+- **[DDD1] Substrate = prose spine + delegated build + evidence-producer subagent (ADR-007).**
+  Rejected a Workflow cage (interactive flow + human oracle fight a headless cage; most new
+  mechanism) — same reasoning as ADR-005. Separation of powers is supplied by a distinct subagent,
+  not the cage.
+- **[DDD2] Build is delegated, oracle inherited (ADR-007 / ADR-005 lineage).** `/phil:edd` never
+  re-verifies engine-checkable expectations; nwave's AT run and `phil:work`'s preservation+goal
+  gates are the oracle for those. Only the qualitative residue gets the new gate.
+- **[DDD3] Gate inlined with an extraction seam (ADR-008 — resolves D3).** Self-contained block in
+  `skills/edd/SKILL.md` with contract `{expectation, engine_evidence?} → {verdict, artifact,
+  trail}`. Not a shared skill in v1 (one consumer); `phil:work`/nwave unchanged.
+- **[DDD4] Separation of powers is structural (ADR-007 — D4).** A dedicated non-builder
+  `agents/edd-evidence-producer.md` runs/renders and captures verbatim; the **human** is the final
+  adjudicator (ADR-002 port). Automated evidence critic deferred behind a seam (ADR-002/004 style).
+- **[DDD5] Evidence contract (D2).** Executed artifact + reproducing command, captured verbatim;
+  narration (no reproducible artifact) is rejected and re-commissioned.
+- **[DDD6] Trail namespace `docs/edd/<slug>/`, gate-ran only (ADR-009 — resolves D5).** Off-ramp
+  runs leave no trail (zero-ceremony KPI observable as a filesystem fact).
+- **[DDD7] Self-test harness pins safety behaviors.** `skills/edd/self-test/` fixtures (off-ramp
+  zero-trail, narration rejection, builder≠producer, blocked-done) are the regression gate, as in
+  `work`/`refactor-tests`/`refactor-loop`.
+- **[DDD8] Build-time substrate = prose authoring, not code TDD; agents forged-then-trimmed.**
+  This is a Claude Code extension: the "implementation" is prose artifacts (command, skill, agent),
+  and the "tests" are Gherkin acceptance scenarios + self-test fixtures — NOT production/unit code.
+  DELIVER authors prose to satisfy those fixtures (the `phil-work` model: `roadmap.json` steps whose
+  criteria are fixtures reached against `acceptance.feature`), not a code RED→GREEN cycle. New
+  **agents** are authored **hybrid**: draft + validate via `nw-agent-builder` / `nw-forge`, then trim
+  to the plugin's lean ~110-line convention (matching `refactor-proposer` / `refactor-critic-
+  correctness`: `model: inherit`, tight tools). The **command + skill** are hand-authored following
+  the established command→skill split (the `refactor-tests` / `work` precedent). See the build-time
+  section below.
+
+## Wave: DESIGN / [REF] Component decomposition
+
+| Component | Path | Change |
+|---|---|---|
+| Command loader | `commands/edd.md` | CREATE NEW (thin loader, per command→skill split) |
+| Orchestrator spine | `skills/edd/SKILL.md` | CREATE NEW (CAPTURE·CLASSIFY·OFF-RAMP·BUILD·EVIDENCE-GATE·ADJUDICATE·DOCUMENT) |
+| Evidence gate | `skills/edd/SKILL.md` `## Evidence Gate` section | CREATE NEW (inlined, ADR-008 contract + seam) |
+| Evidence producer | `agents/edd-evidence-producer.md` | CREATE NEW (independent, non-builder; runs/renders, captures verbatim) |
+| Evidence critic | `agents/edd-evidence-critic.md` | DEFERRED (advisory executed-vs-narration pre-screen; seam only) |
+| Self-test fixtures | `skills/edd/self-test/` | CREATE NEW (regression gate) |
+
+## Wave: DESIGN / [REF] Build-time substrate & authoring tooling (DDD8)
+
+This is a **Claude Code extension** — there is little/no production or unit-test *code*. The build
+surface is prose artifacts, and the acceptance surface is executable-in-spirit fixtures. DESIGN
+records how each artifact is produced so DELIVER routes correctly.
+
+| Artifact | Authoring approach | Precedent |
+|---|---|---|
+| `commands/edd.md` | Hand-author (thin loader; command→skill split) | `commands/work.md`, `commands/refactor-tests.md` |
+| `skills/edd/SKILL.md` (+ inlined gate) | Hand-author prose; slice-by-slice to satisfy fixtures | `skills/work/SKILL.md` |
+| `agents/edd-evidence-producer.md` | **Hybrid** — draft/validate via `nw-agent-builder`/`nw-forge`, then **trim to the lean ~110-line convention** | `agents/refactor-proposer.md` (~112 ln), `agents/refactor-critic-correctness.md` (~107 ln) |
+| `agents/edd-evidence-critic.md` (deferred) | Same hybrid, when built | same |
+| `skills/edd/self-test/` + `acceptance.feature` | Authored in DISTILL (acceptance-designer) as Gherkin scenarios + fixtures | `skills/work/self-test/`, `skills/work/acceptance.feature` |
+
+**DELIVER flow (prose-adapted, not code TDD).** "GREEN" for a step = the step's self-test
+fixture reaches its **expected decision** and the human-approval oracle passes — mirroring
+`phil-work`'s `roadmap.json`, whose step `criteria` are *"Fixture NN reaches <STATE>"* against
+`test_file: skills/edd/acceptance.feature`. There is no RED→GREEN production-code cycle; the
+software-crafter's role is **prose authoring gated by fixtures**, and the agent(s) are forged via
+the agent-building tooling. DELIVER routing must reflect this — do **not** dispatch a code-TDD
+crafter expecting to write and green unit tests.
+
+## Wave: DESIGN / [REF] Driving & driven ports
+
+- **Driving port:** `/phil:edd "<intent>"` (+ no-arg **resume** of an in-flight loop, mirroring
+  `phil:work`). Command→skill split.
+- **Driven ports & adapters:**
+  | Driven port | Adapter | Notes |
+  |---|---|---|
+  | Build delegation (user-facing) | nwave skills | inherit AT oracle (DDD2) |
+  | Build delegation (invisible) | `/phil:work` | inherit preservation+goal oracle (DDD2) |
+  | Evidence commission | `agents/edd-evidence-producer.md` via Agent/Task | producer ≠ builder (DDD4); mechanism settled in slice 01 |
+  | Suite execution (evidence) | `skills/shared/test-runner-detection.md` + Bash | REUSE, only when evidence needs a run |
+  | Human adjudication | AskUserQuestion + IDE review | ADR-002 port (DDD4) |
+  | Trail persistence | filesystem + git → `docs/edd/<slug>/`, `docs/evolution/` | ADR-009 (DDD6) |
+
+## Wave: DESIGN / [REF] Reuse Analysis
+
+| Existing component | File | Overlap | Decision | Justification |
+|---|---|---|---|---|
+| phil:work orchestrator spine | `skills/work/SKILL.md` | FRAME/off-ramp/trail/sequencing shape | **EXTEND (pattern-copy)** | Same contractor shape; pattern-copy as `redesign-tests` did `refactor-tests` (ADR-003 Option A). A shared spine has one consumer each — extraction is premature. |
+| nwave (DISCUSS…DELIVER) | nwave skills | the BUILD for user-facing expectations | **REUSE (unchanged)** | Delegate + inherit AT oracle (ADR-005 lineage). |
+| phil:work | `commands/work.md`, `skills/work/` | the BUILD for invisible expectations | **REUSE (unchanged)** | Delegate + inherit preservation+goal oracle. |
+| Human-approval port | ADR-002 (AskUserQuestion + IDE) | adjudication UX | **REUSE** | D4 human adjudicator = the same port. |
+| Coverage-equivalence-claim pattern | ADR-004 / `redesign-tests` | "human validates a claim, not just a diff" | **EXTEND (analogous claim)** | Here the human validates "this executed evidence meets the qualitative expectation" — same claim-at-the-gate shape. |
+| Independent-critic agent pair | `agents/refactor-proposer.md`, `agents/refactor-critic-correctness.md` | separation of powers (judge ≠ author) | **EXTEND (copy pattern, not the cage)** | Copy the independent-agent pattern (producer ≠ builder); the Workflow cage is rejected (DDD1). |
+| Doc namespace | ADR-006 `docs/work/` + `docs/evolution/` | trail location | **CREATE NEW (`docs/edd/`)** | Sibling namespace; reusing `docs/work/` conflates preservation initiatives with expectation loops (ADR-009). |
+| Test-runner detection | `skills/shared/test-runner-detection.md` | running a suite to produce evidence | **REUSE** | When evidence commission runs tests. |
+| Self-test harness convention | `skills/work/self-test/` etc. | regression gate for a prose skill | **EXTEND (same convention)** | New fixtures under `skills/edd/self-test/`. |
+
+**Genuinely NEW (no existing component covers it):** the triage/classify front-door (D1), the
+scaled qualitative-evidence gate (ADR-008), and the `edd-evidence-producer` agent (DDD4). Everything
+else is REUSE or pattern-copy.
+
+## Wave: DESIGN / [REF] Decisions table
+
+| ID | Decision | ADR |
+|---|---|---|
+| DDD1 | Prose spine + delegated build + evidence-producer subagent | ADR-007 |
+| DDD2 | Build delegated; engine oracle inherited (no re-verification) | ADR-007 |
+| DDD3 | Evidence gate inlined with extraction seam (D3) | ADR-008 |
+| DDD4 | Separation of powers structural; human final adjudicator (D4) | ADR-007 |
+| DDD5 | Executed-evidence-vs-narration contract (D2) | ADR-007 |
+| DDD6 | Trail `docs/edd/<slug>/`, gate-ran only (D5) | ADR-009 |
+| DDD7 | Self-test fixtures as regression gate | — |
+| DDD8 | Build-time = prose authoring (not code TDD); agents forged-then-trimmed to lean convention | — |
+
+## Wave: DESIGN / [REF] Open questions (→ DISTILL / DELIVER)
+
+- Evidence-producer **invocation mechanism** (Agent vs Task) and the engine-build invocation —
+  settled empirically by the slice-01 walking skeleton (ADR-007 open item).
+- Whether `docs/edd/<slug>/` is git-ignored in flight or committed per adjudication (ADR-009 open
+  item; leaning committed).
+- Promotion of the inlined gate to `skills/shared/qualitative-evidence-gate.md` once a second
+  consumer (`phil:work` FRAME / nwave VERIFY) exists (ADR-008 open item; post-v1).
+- The **advisory evidence critic** (`agents/edd-evidence-critic.md`) — deferred; the gate reserves
+  a clean pre-screen seam (ADR-002/004 precedent).
+
+## Wave: DESIGN / [REF] Outcome Collision Check
+
+**Skipped — methodology/prose feature.** `/phil:edd` adds no new typed code contract surface (it is
+a prose orchestrator skill composing existing engines); per the outcomes-registry gate-scoping
+(code-feature pipelines only), the collision check does not apply. Reuse Analysis above covers
+in-codebase deduplication.
+
+## Wave: DESIGN / [REF] Decisions summary (for DEVOPS / DISTILL)
+
+- **Pattern:** modular monolith prose skill, ports-and-adapters; prose spine + delegated build +
+  inherited oracle + inlined evidence gate + non-builder evidence-producer subagent + human
+  adjudication.
+- **Paradigm:** N/A (prose skill).
+- **Key components:** `commands/edd.md`, `skills/edd/SKILL.md` (+ inlined gate),
+  `agents/edd-evidence-producer.md`, `skills/edd/self-test/`.
+- **Constraints:** compose nwave + `phil:work` **unchanged**; never re-verify inherited oracles;
+  off-ramp mandatory when fully checkable (zero trail); evidence executed-not-narrated;
+  producer ≠ builder; human is final adjudicator.
+- **New ADRs:** ADR-007 (substrate), ADR-008 (gate factoring — D3), ADR-009 (namespace — D5).
+- **Upstream changes:** none — no DISCUSS assumption contradicted.
+
+## Wave: DESIGN / [REF] Handoff
+
+**To:** DEVOPS (nw-platform-architect) then DISTILL (acceptance-designer). DISTILL turns the
+DISCUSS ACs + these DESIGN decisions into executable acceptance scenarios (the `skills/edd/self-test/`
+fixtures + `acceptance.feature`), mirroring how `phil-work` was distilled.
+**Deliverables:** this feature-delta (DISCUSS+DESIGN) + ADR-007/008/009 + updated
+`docs/product/architecture/brief.md` (edd-loop section + C4).
+
+**DELIVER routing note (DDD8):** this is a prose-artifact feature. DELIVER authors prose
+(command/skill hand-authored; agents forged-then-trimmed via `nw-agent-builder`/`nw-forge`) gated
+by the DISTILL fixtures — **not** a code RED→GREEN cycle. The roadmap's step criteria are
+"Fixture NN reaches <STATE>" against `skills/edd/acceptance.feature`, exactly as `phil-work`'s
+`roadmap.json` was shaped.
