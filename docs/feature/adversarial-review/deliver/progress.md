@@ -147,6 +147,30 @@ Slice 03 was built inline; this closes the wave gates it bypassed.
 Fourth dogfood, fourth real catch — this one a genuine asymmetry in the judge's own instructions.
 `red-classification.md` updated for 09/10. All 10 fixtures still green.
 
+## Full-feature dogfood (the whole triple, end-to-end)
+
+Ran the complete pipeline against the **entire feature** as one target. ORACLE: a deterministic sweep
+across all artifacts (frontmatter on command + both agents + skill; broken-ref scan; 10/10 fixtures
+complete; acceptance.feature = 10 scenarios, 1:1 with fixtures) → all GREEN → `sound-gate`. DISPATCH:
+an independent reviewer read the artifacts as a set and hunted cross-file contradictions. VERIFY: the
+judge independently checked the load-bearing finding.
+
+Verdict: `sound-gate`, 5 findings — **all doc-drift, zero in runtime behavior** (a good result for a
+feature this size). The judge **confirmed** the major finding but **corrected its severity
+major→minor** (the runtime is self-consistent and correct; only the ADR wording drifted) — the
+adversary→judge separation adding precision, exactly as designed. All 5 fixed:
+
+| # | Sev (adversary→judge) | Finding | Fix |
+|---|---|---|---|
+| 1 | major→**minor** | ADR-011 said "the reviewer runs the oracle"; slice 02 moved that to the driver (reviewer is read-only, no Bash) — stale design-of-record | ADR-011 reworded: driver runs/inherits, reviewer cites; notes the pre-split wording |
+| 2 | minor | self-test README said the suite gates only the skill + reviewer, omitting the verifier | README gate statement + "nothing to drive" now list all three artifacts |
+| 3 | minor | outcome vocabulary (README + acceptance.feature) omitted CONFIRMED/REFUTED (the judge's outcomes) | both enumerations now split reviewer vs verifier outcomes |
+| 4 | nit | ADR-010's published contract omitted `oracle_result` (added by ADR-011) | ADR-010 contract now `{target,intent,standards,oracle_result?}` |
+| 5 | nit | README + feature-delta tables gave fixtures 07 and 08 the same `CLEAN-PASS` token, hiding 08's sound-gate distinction | both tables now show `CLEAN-PASS (draft-signal)` vs `(sound-gate)` |
+
+Fifth dogfood; the tool found real cross-file drift its own construction had accumulated across
+three slices + the catch-up — the kind of thing only a whole-feature adversarial pass surfaces.
+
 ## Status: three slices delivered
 All 10 self-test fixtures green (no-oracle path, oracle path, and the judge each dogfooded live with
 executed evidence; the rest fixture-verified). A true builder → adversary → judge triple. Composition

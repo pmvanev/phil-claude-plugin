@@ -16,9 +16,10 @@
 # as a sound gate. These bugs are silent: a soft review labeled sound-gate, or a reviewer that quietly
 # declares the task done, looks exactly like a smooth, thorough pass.
 #
-# Decision outcomes the reviewer must produce:
-#   DRAFT-SIGNAL · SOUND-GATE · NEVER-SOUND-GATE · INDEPENDENT-DISPATCH · CANNOT-ASSESS ·
-#   ADVISORY-ONLY · CLEAN-PASS
+# Decision outcomes produced across the triple:
+#   the reviewer (adversary): DRAFT-SIGNAL · SOUND-GATE · NEVER-SOUND-GATE · INDEPENDENT-DISPATCH ·
+#     CANNOT-ASSESS · ADVISORY-ONLY · CLEAN-PASS
+#   the verifier (judge):     CONFIRMED · REFUTED
 
 Feature: Get an independent adversarial critique of completed work
   As Rowan, a delegator/shipper about to trust a just-completed task,

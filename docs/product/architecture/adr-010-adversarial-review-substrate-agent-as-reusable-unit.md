@@ -34,8 +34,9 @@ existing skill.**
    **typed verdict**. The agent is substrate-agnostic; the skill is only the standalone human driver.
    This mirrors how `refactor-critic-correctness` is the reusable unit `refactor-loop` composes.
 3. **v1 scope = standalone only; composition is a documented contract, not wiring.** The agent
-   publishes a typed input/output contract (`{target, intent, standards}` → typed verdict) and the
-   skill documents the ad-hoc Workflow-weaving pattern. **No existing skill is modified.** Hosts
+   publishes a typed input/output contract (`{target, intent, standards, oracle_result?}` → typed
+   verdict; `oracle_result` added by ADR-011 — its presence is what makes a `sound-gate` label
+   possible) and the skill documents the ad-hoc Workflow-weaving pattern. **No existing skill is modified.** Hosts
    adopt the contract later, each as its own work, once a real second consumer exists.
 
 ## Alternatives considered

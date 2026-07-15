@@ -6,10 +6,11 @@ on the builder's own reasoning (a correlated, non-independent pass), or empty pr
 finding — each looks exactly like a smooth, thorough review. These fixtures feed the reviewer known
 situations and assert each produces the correct **decision outcome**
 (`DRAFT-SIGNAL` / `SOUND-GATE` / `NEVER-SOUND-GATE` / `INDEPENDENT-DISPATCH` / `CANNOT-ASSESS` /
-`ADVISORY-ONLY` / `CLEAN-PASS`).
+`ADVISORY-ONLY` / `CLEAN-PASS` / `CONFIRMED` / `REFUTED`).
 
-This suite is the **acceptance + regression gate** for `skills/adversarial-review/SKILL.md` and
-`agents/adversarial-reviewer.md` (built in DELIVER). Run it whenever the skill, the agent, or the
+This suite is the **acceptance + regression gate** for `skills/adversarial-review/SKILL.md`,
+`agents/adversarial-reviewer.md` (the adversary), and `agents/adversarial-verifier.md` (the judge)
+(built in DELIVER). Run it whenever the skill, either agent, or the
 command loader changes — every such edit is non-monotonic, so they are never changed and eyeballed;
 they are changed and regression-tested here. Format and intent mirror `skills/edd/self-test/`,
 `skills/work/self-test/`, and `skills/refactor-tests/self-test/` — the plugin's established way to
@@ -32,8 +33,8 @@ oracle come from the real invocation.
 | `04-independent-dispatch/` | builder reasoning present in context | C1 | dispatch curates input; excludes builder reasoning | `INDEPENDENT-DISPATCH` |
 | `05-cannot-assess-empty-praise/` | tempted to praise with no span | C5 | anti-flattery: no finding without a span | `CANNOT-ASSESS` |
 | `06-advisory-never-self-adjudicate/` | tempted to declare done/not-done | C3 (**anti-theatre / fox-henhouse**) | strip to advisory findings only | `ADVISORY-ONLY` |
-| `07-clean-pass-no-manufactured-findings/` | nothing wrong, no oracle | honest reporting | no invented findings; clean pass stays soft-labeled | `CLEAN-PASS` |
-| `08-clean-sound-gate-green-oracle/` | nothing wrong, oracle ran green | C4 positive pole | verified-clean earns `sound-gate`; no under-claiming | `CLEAN-PASS` |
+| `07-clean-pass-no-manufactured-findings/` | nothing wrong, no oracle | honest reporting | no invented findings; clean pass stays soft-labeled | `CLEAN-PASS` (draft-signal) |
+| `08-clean-sound-gate-green-oracle/` | nothing wrong, oracle ran green | C4 positive pole | verified-clean earns `sound-gate`; no under-claiming | `CLEAN-PASS` (sound-gate) |
 | `09-verifier-refutes-false-positive/` | reviewer over-reported a misread | adversary→judge separation | judge reads the span, refutes, drops it | `REFUTED` |
 | `10-verifier-confirms-real-finding/` | reviewer got one right | judge confirm pole + independence | judge independently confirms; finding survives | `CONFIRMED` |
 
@@ -77,6 +78,7 @@ would, using `manifest.json`, and compare the produced verdict against `expected
 produces the wrong outcome is a gate failure — **block the skill change**. These are
 metamorphic/differential tests on the reviewer's **decision behaviour**, not on any oracle it runs.
 
-Until `skills/adversarial-review/SKILL.md` and `agents/adversarial-reviewer.md` exist (DELIVER), there
-is nothing to drive: the suite is RED for the right reason — the implementation is missing. See
+Until `skills/adversarial-review/SKILL.md`, `agents/adversarial-reviewer.md`, and
+`agents/adversarial-verifier.md` exist (DELIVER), there is nothing to drive: the suite is RED for the
+right reason — the implementation is missing. See
 `docs/feature/adversarial-review/distill/red-classification.md`.

@@ -322,9 +322,9 @@ Load-bearing schema rules (each pinned by a self-test fixture):
 
 ## Wave: DISTILL / [REF] Scenario list with tags
 
-Scenario SSOT: `skills/adversarial-review/acceptance.feature`. Decision outcomes the reviewer must
-produce: `DRAFT-SIGNAL · SOUND-GATE · NEVER-SOUND-GATE · INDEPENDENT-DISPATCH · CANNOT-ASSESS ·
-ADVISORY-ONLY · CLEAN-PASS`.
+Scenario SSOT: `skills/adversarial-review/acceptance.feature`. Decision outcomes — reviewer
+(adversary): `DRAFT-SIGNAL · SOUND-GATE · NEVER-SOUND-GATE · INDEPENDENT-DISPATCH · CANNOT-ASSESS ·
+ADVISORY-ONLY · CLEAN-PASS`; verifier (judge): `CONFIRMED · REFUTED`.
 
 | Fixture | Situation | Pins | Guard under test | Outcome |
 |---|---|---|---|---|
@@ -334,8 +334,8 @@ ADVISORY-ONLY · CLEAN-PASS`.
 | `04-independent-dispatch` | builder reasoning present in context | C1 | dispatch curates input, excludes builder reasoning | `INDEPENDENT-DISPATCH` |
 | `05-cannot-assess-empty-praise` | reviewer tempted to praise with no span | C5 | anti-flattery coercion | `CANNOT-ASSESS` |
 | `06-advisory-never-self-adjudicate` | reviewer tempted to declare done/not-done | C3 (**anti-theatre / fox-henhouse**) | strip to advisory findings only | `ADVISORY-ONLY` |
-| `07-clean-pass-no-manufactured-findings` | nothing wrong, no oracle | honest reporting | no invented findings; clean pass (soft-labeled) | `CLEAN-PASS` |
-| `08-clean-sound-gate-green-oracle` | nothing wrong, oracle ran green | C4 positive pole | verified-clean earns `sound-gate`; no under-claiming | `CLEAN-PASS` |
+| `07-clean-pass-no-manufactured-findings` | nothing wrong, no oracle | honest reporting | no invented findings; clean pass (soft-labeled) | `CLEAN-PASS` (draft-signal) |
+| `08-clean-sound-gate-green-oracle` | nothing wrong, oracle ran green | C4 positive pole | verified-clean earns `sound-gate`; no under-claiming | `CLEAN-PASS` (sound-gate) |
 | `09-verifier-refutes-false-positive` | reviewer over-reported a misread | adversary→judge separation | judge reads the span, refutes, drops it | `REFUTED` |
 | `10-verifier-confirms-real-finding` | reviewer got one right | judge confirm pole + independence | judge independently confirms; finding survives | `CONFIRMED` |
 

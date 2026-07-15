@@ -24,9 +24,12 @@ type. The verdict carries `overall_label = sound-gate` iff ≥1 hard oracle back
 | Code | test suite (reuse `skills/shared/test-runner-detection.md`); lint / types | design/intent fit, missed requirement |
 | **Prose** (skill/agent/rule/doc) | self-test fixture pass, dead-link / broken skill-ref check, frontmatter validity, file-length limit, required-citation presence — the same checkable-prose taxonomy `phil:work` FRAME uses | clarity, factoring, whether it *actually* achieves the stated intent |
 
-- The reviewer **runs** available deterministic checks (or **inherits** a result already produced —
-  ADR-005 lineage, never re-implement an oracle) and reports them as `hard` findings citing the
-  actual result (exit code / failing test / the broken ref), never a prediction.
+- The **driver** (the skill's ORACLE step) **runs** available deterministic checks, or **inherits** a
+  result already produced (ADR-005 lineage, never re-implement an oracle), and passes the captured
+  `oracle_result` to the reviewer. The **reviewer is read-only** (no `Bash`): it never runs the
+  oracle — it reports the inherited result as `hard` findings citing the actual output (exit code /
+  failing test / the broken ref), never a prediction. (The driver/reviewer split was named in
+  ADR-010/DDD8; this ADR's earlier "the reviewer runs" wording predated it and is corrected here.)
 - Everything requiring subjective judgment is a `soft` finding: adversarial, span-and-evidence,
   `CANNOT_ASSESS` when unsupportable (C5).
 - **`overall_label`** is mechanical: `sound-gate` when at least one hard oracle backed the review,
