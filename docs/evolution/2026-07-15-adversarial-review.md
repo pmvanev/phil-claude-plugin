@@ -35,8 +35,9 @@ adversarial-review *does the judging*.
 ## The design, in one idea
 
 Generalize `refactor-critic-correctness` out from behind its test-suite oracle — and confront the
-soundness problem that move creates. Informed by the tri-agent clarification research
-(`docs/research-summaries/tri-agent-clarification`) and its LLM-Modulo/ABC lineage: an all-soft-critic
+soundness problem that move creates. Informed by the tri-agent clarification framework (Zhao,
+KDD '25), read via the harebrain summary `docs/research-summaries/tri-agent-clarification` (in the
+sibling `harebrain` repo), and its LLM-Modulo/ABC lineage: an all-soft-critic
 loop dressed as a sound gate is "a graded essay presented as a verified plan." So the feature is built
 against that (anxiety A) via five locked constraints:
 

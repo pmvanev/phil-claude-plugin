@@ -40,8 +40,10 @@ Registered in `docs/product/jobs.yaml`; full dimensions + four forces there.
 
 ### Load-bearing constraints (C1–C5) — the design is built against soft-critic theatre
 
-Informed by `docs/research-summaries/tri-agent-clarification/` (three-role split, reason-before-verdict,
-adversarial persona, author-then-ablate self-tests) and its LLM-Modulo/ABC warnings (a loop is only
+Informed by the **tri-agent clarification framework** (Zhao, KDD '25), read via the harebrain summary
+`docs/research-summaries/tri-agent-clarification/` (in the sibling `harebrain` repo) — three-role
+split, reason-before-verdict, adversarial persona, author-then-ablate self-tests — and its
+LLM-Modulo/ABC warnings (a loop is only
 as sound as its hardest critic; correlated errors from same-model judging; an unvalidated judge is a
 promissory note):
 

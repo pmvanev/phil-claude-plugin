@@ -19,8 +19,9 @@
 - C4 HONESTY LABEL — no oracle → `draft-signal`, never dressed as a sound gate (the defining guard).
 - C5 SPAN-AND-EVIDENCE / ANTI-FLATTERY — no finding without a span; empty praise → CANNOT_ASSESS.
 
-Provenance: informed by docs/research-summaries/tri-agent-clarification (three-role split,
-reason-before-verdict, adversarial persona, author-then-ablate self-tests) + its LLM-Modulo/ABC
+Provenance: informed by the tri-agent clarification framework (Zhao, KDD '25), read via the harebrain
+summary docs/research-summaries/tri-agent-clarification (in the sibling `harebrain` repo) — three-role
+split, reason-before-verdict, adversarial persona, author-then-ablate self-tests — + its LLM-Modulo/ABC
 warnings (hardest-critic soundness, correlated errors, unvalidated judge).
 
 ## Requirements Summary

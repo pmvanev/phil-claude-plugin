@@ -17,9 +17,10 @@ summary: >
   for a human to judge; this DOES the judging.
 
 # Research depth: LIGHTWEIGHT (DISCUSS Decision 3) — happy path + key error paths.
-# Informed by docs/research-summaries/tri-agent-clarification (three-role split, reason-before-verdict,
-# adversarial persona, author-then-ablate self-tests) + its LLM-Modulo/ABC warnings (hardest-critic
-# soundness, correlated errors, unvalidated judge) — see feature-delta § locked constraints C1-C5.
+# Informed by the tri-agent clarification framework (Zhao, KDD '25), read via the harebrain summary
+# docs/research-summaries/tri-agent-clarification (in the sibling `harebrain` repo) — three-role split,
+# reason-before-verdict, adversarial persona, author-then-ablate self-tests — + its LLM-Modulo/ABC
+# warnings (hardest-critic soundness, correlated errors, unvalidated judge). See feature-delta § C1-C5.
 
 steps:
   - id: invoke

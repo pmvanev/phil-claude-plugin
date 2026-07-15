@@ -5,7 +5,9 @@ Status: accepted (DESIGN wave, 2026-07-15) · Feature: adversarial-review · Res
 ## Context
 
 The feature's defining risk is anxiety (A): an all-soft-critic loop dressed as a sound gate —
-"a graded essay presented as a verified plan" (the tri-agent / LLM-Modulo warning). DISCUSS locked
+"a graded essay presented as a verified plan" (the tri-agent / LLM-Modulo warning; tri-agent
+framework = Zhao, KDD '25, read via the harebrain summary
+`docs/research-summaries/tri-agent-clarification/` in the sibling `harebrain` repo). DISCUSS locked
 C2 (partition findings hard-checkable vs soft) and C4 (when no oracle backs the review, label it a
 soft DRAFT SIGNAL, never a sound gate). DESIGN must fix *what counts as a hard oracle* — and because
 this is a Claude Code plugin, the targets are usually **prose** (skills / agents / rules / docs),

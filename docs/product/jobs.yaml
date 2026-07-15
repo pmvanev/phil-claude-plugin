@@ -248,7 +248,8 @@ jobs:
     # output and returns findings/a verdict. edd's deferred agents/edd-evidence-critic is the
     # narrow ancestor; this is the general-purpose form.
     # Load-bearing constraints (DISCUSS, 2026-07-15) — informed by the tri-agent clarification
-    # research (docs/research-summaries/tri-agent-clarification) + LLM-Modulo/ABC lineage:
+    # framework (Zhao, KDD '25), read via the harebrain summary
+    # docs/research-summaries/tri-agent-clarification (in the sibling `harebrain` repo) + LLM-Modulo/ABC lineage:
     #   C1 INDEPENDENCE: reviewer runs in fresh context and never sees the builder's reasoning
     #      trace (correlated-error avoidance). Different-model hardening deferred to DESIGN.
     #   C2 HARD/SOFT SPLIT: every review partitions findings into hard-checkable (actually run

@@ -62,7 +62,9 @@ existing skill.**
   bad tasks) pins the reviewer's C1–C5 behaviors as a regression gate.
 - (−) **Accepted v1 risk (reviewer independence):** a same-model, fresh-context subagent is not
   *fully* independent — a blind spot shared by builder and reviewer can survive (the tri-agent
-  correlated-error caveat). v1 accepts this (isolation is the cheapest real independence);
+  correlated-error caveat; tri-agent framework = Zhao, KDD '25, read via the harebrain summary
+  `docs/research-summaries/tri-agent-clarification/` in the sibling `harebrain` repo). v1 accepts
+  this (isolation is the cheapest real independence);
   different-model and multi-lens-panel hardening are recorded as an **extension seam** (trivial to
   add when composed into a Workflow via `parallel()`), designed against real data rather than
   speculation. Mirrors edd's D7 accepted-risk posture.
