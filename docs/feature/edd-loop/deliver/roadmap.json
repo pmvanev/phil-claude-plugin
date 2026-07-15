@@ -1,0 +1,49 @@
+{
+  "roadmap": {
+    "project_id": "edd-loop",
+    "created_at": "2026-07-15T00:00:00Z",
+    "total_steps": 2,
+    "note": "Prose-artifact feature (DDD8): steps author prose gated by DISTILL fixtures, not code RED->GREEN. GREEN = the named fixture(s) reach their expected decision against skills/edd/SKILL.md, and the human-approval oracle passes for judgment scenarios."
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "Walking skeleton — CAPTURE + CLASSIFY + OFF-RAMP",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "Author commands/edd.md + skills/edd/SKILL.md front-door (capture, classify, off-ramp)",
+          "criteria": [
+            "Fixture 01 (@walking_skeleton) reaches OFF-RAMP: an all-engine-checkable intent yields a classification table + a specific engine recommendation and EXITS with zero docs/edd/<slug>/ trail files",
+            "Fixture 02 reaches CLASSIFY-CHECKABLE: an ambiguous expectation defaults to engine-checkable; an offered-qualitative expectation with no concrete reason is treated as engine-checkable; the tool asks Avery to confirm before ever marking anything qualitative",
+            "commands/edd.md is a thin loader (command->skill split), matching commands/work.md",
+            "SKILL.md never re-implements an engine oracle and never builds a gate for an all-checkable intent (D1/DDD1/DDD2)"
+          ],
+          "test_file": "skills/edd/acceptance.feature",
+          "scenario_name": "@slice-01 @walking_skeleton @fixture:01-offramp-all-checkable; @slice-01 @classify @fixture:02-classify-bias-to-offramp",
+          "status": "done"
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Evidence gate — BUILD delegation + gate + adjudication + DOCUMENT",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Add qualitative-evidence gate + forge-then-trim agents/edd-evidence-producer.md + DOCUMENT trail",
+          "criteria": [
+            "Fixture 03 reaches GATE-POINT-EXISTING: qualitative expectation with engine evidence already present reuses it (no new commission)",
+            "Fixture 04 reaches GATE-COMMISSION: qualitative expectation with no evidence gets a fresh executed artifact from a NON-BUILDER producer (producer_agent != builder_agent), verbatim + reproduce command",
+            "Fixture 05 reaches REJECT-NARRATION: a described-but-not-run claim is rejected and re-commissioned",
+            "Fixture 06 reaches BLOCK-DONE: a rejected qualitative expectation blocks done and iterates",
+            "Fixture 07 reaches DOCUMENT-TRAIL: a gated run writes docs/edd/<slug>/{expectations,evidence/,verdicts} + docs/evolution/<date>-<slug>.md; an off-ramp-only run writes none"
+          ],
+          "test_file": "skills/edd/acceptance.feature",
+          "scenario_name": "@slice-02 @fixture:03-gate-evidence-exists; @fixture:04-gate-commission-new; @fixture:05-reject-narration; @fixture:06-blocked-done; @fixture:07-living-docs-gate-ran-only",
+          "status": "pending"
+        }
+      ]
+    }
+  ]
+}
