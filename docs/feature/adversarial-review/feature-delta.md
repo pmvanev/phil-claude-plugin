@@ -351,3 +351,34 @@ SKIPPED — methodology/prose feature; no `docs/product/outcomes/` registry in t
 DELIVER builds `skills/adversarial-review/SKILL.md`, `commands/adversarial-review.md`,
 `agents/adversarial-reviewer.md` to satisfy these scenarios. The self-test suite is the
 acceptance + regression gate; run it whenever the skill/agent/command changes.
+
+---
+
+## Wave: DELIVER / [REF] Implementation summary (slice 01)
+
+Walking skeleton shipped: standalone `/phil:adversarial-review` on a no-oracle target dispatches an
+independent reviewer (fresh context, builder reasoning withheld) that returns a typed, advisory,
+ranked span-and-evidence verdict labeled `draft-signal`, presented to the human who decides. Files:
+`commands/adversarial-review.md`, `skills/adversarial-review/SKILL.md`, `agents/adversarial-reviewer.md`.
+No existing skill touched. Full detail: `deliver/progress.md`.
+
+## Wave: DELIVER / [REF] Scenarios green count
+
+Slice-01 fixtures **5 of 5 green** (01, 04, 05, 06, 07); 03 passes vacuously (no `sound-gate` path in
+v1); 02 + 08 intentionally RED (oracle path = slice 02). Timestamp: 2026-07-15.
+
+## Wave: DELIVER / [REF] Demo evidence (executed)
+
+US-1 dogfood: an independent reviewer was dispatched at a real no-oracle target
+(`skills/adversarial-review/SKILL.md`) with curated input. It returned a valid typed verdict
+(`justification`-first, `overall_label: draft-signal`, `verdict: findings`, 4 findings ranked
+worst-first with span+mechanism+evidence, **no done field**) and caught 4 real defects (1 major, 1
+minor, 2 nits) — all fixed the same session. Executed proof the WS path works end-to-end and adds
+signal the builder's self-assessment missed. Detail + fix table: `deliver/progress.md`.
+
+## Wave: DELIVER / [REF] DoD check (slice 01)
+
+Command+skill+agent shipped ✅ · typed verdict schema implemented ✅ · honesty label (`draft-signal`
+in v1) ✅ (C4) · independence curation ✅ (C1) · anti-flattery `cannot-assess` ✅ (C5) · advisory,
+no self-adjudication ✅ (C3) · self-test fixtures present + slice-01 green ✅ · dogfood evidence
+captured ✅. Deferred to slice 02: oracle path + `sound-gate` + composition-contract doc.
