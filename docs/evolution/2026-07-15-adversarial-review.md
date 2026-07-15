@@ -59,13 +59,23 @@ triple that filters a motivated attacker's false positives before a human sees t
 
 ## Outcome (before → after)
 
-- **Goal:** ship a standalone, composable, honest adversarial reviewer. **Met.** 8/8 self-test
-  fixtures green; both slices delivered.
+- **Goal:** ship a standalone, composable, honest adversarial reviewer as a builder → adversary →
+  judge triple. **Met.** **10/10 self-test fixtures green**; three slices delivered (no-oracle soft
+  review → oracle + `sound-gate` → the judge), plus a wave-gate catch-up.
 - **Preservation:** no existing skill touched (verified — Reuse Analysis all pattern-copy/invoke).
-- **Dogfood (executed evidence):** on its first real run the reviewer caught 4 real defects in its
-  own SKILL (1 major, all fixed); on the oracle path it correctly applied the mechanical `sound-gate`
-  label and refused to manufacture nits. The tool did exactly what it exists to do — an independent
-  adversary caught what the builder rationalized past.
+- **Dogfood (executed evidence — five passes, each a real catch).** The tool was pointed at its own
+  construction repeatedly, and every time an independent adversary caught what the builder (the
+  session) had rationalized past:
+  1. **Walking skeleton** on its own SKILL → 4 real defects (1 major), all fixed.
+  2. **Oracle path** → correctly applied the mechanical `sound-gate` label; refused to manufacture nits.
+  3. **The reviewer agent** → 2 real defects (undocumented field; a `cannot-assess` label gap), fixed.
+  4. **The verifier agent** → a **major** flaw: no guard against *over-refuting* (it could suppress a
+     true-but-subtle finding); fixed with a symmetric confirm step.
+  5. **The whole feature** → 5 cross-file doc-drift findings; the judge confirmed the major one but
+     corrected its severity major→minor (runtime self-consistent, only the ADR wording had drifted).
+  This is the feature's own thesis, demonstrated on itself: separation of powers surfaces defects a
+  self-assessment misses — and the adversary→judge split measurably added precision (the severity
+  correction in pass 5).
 
 ## Scope / accepted limitations
 
