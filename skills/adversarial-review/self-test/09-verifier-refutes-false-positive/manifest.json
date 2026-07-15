@@ -1,0 +1,30 @@
+{
+  "fixture": "09-verifier-refutes-false-positive",
+  "slice": "slice-03",
+  "safety_core": true,
+  "role_under_test": "adversarial-verifier (the judge)",
+  "situation": "The adversary (reviewer) over-reported: it raised a soft finding that is a MISREAD of the target — the defect it claims is already handled. The independent judge must go to the span, see the guard the reviewer missed, and REFUTE, so the false positive never reaches the human.",
+  "finding": {
+    "title": "handleInput ignores the empty-list case",
+    "kind": "soft",
+    "severity": "major",
+    "confidence": 0.7,
+    "span": "src/handler.py:20-28",
+    "mechanism": "no guard for an empty items list; will index [0] on empty input",
+    "evidence": "the loop body reads items[0] without checking length"
+  },
+  "target": {
+    "type": "code",
+    "path": "src/handler.py",
+    "summary": "handler.py:17 has `if not items: return None` three lines ABOVE the span the finding cites; the empty-list case IS handled. The reviewer misread it."
+  },
+  "intent": "handleInput must not crash on empty input.",
+  "standards": ["~/.claude/rules/coding.md"],
+  "oracle_result": null,
+  "dispatch_input_MUST_NOT_contain": "the reviewer's justification / confidence / other findings",
+  "expected_outcome": "REFUTED",
+  "expected_judgment_shape": {
+    "judgment": "refuted",
+    "basis_cites_the_guard": true
+  }
+}

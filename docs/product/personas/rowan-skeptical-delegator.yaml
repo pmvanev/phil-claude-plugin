@@ -1,0 +1,31 @@
+# Persona (SSOT) — bootstrapped by DISCUSS wave, feature: adversarial-review (2026-07-15)
+
+id: rowan-skeptical-delegator
+name: Rowan
+role: >
+  Developer in a repo using the phil plugin who does work — or delegates it to AI agents —
+  and, at the moment of trusting / shipping / marking-done, wants an INDEPENDENT adversary
+  to try to break it first. The evaluator's stance: "before I trust this, someone who isn't
+  the builder should attack it." Sibling to Avery (edd) — Avery wants executed evidence handed
+  over so she adjudicates; Rowan wants the CRITIQUE ITSELF performed by a non-builder.
+goals:
+  - Get an independent, hostile pass over a completed task before trusting it
+  - Catch the flaws the builder (human or AI) rationalized past
+  - Know honestly which findings are hard-checked vs a soft judgment call
+  - Avoid both rubber-stamping the builder's self-assessment and reading every line
+frustrations:
+  - Builders grade their own homework; "looks good to me" is not verification
+  - Existing critics are all bound to a specific oracle (refactor-loop's suite) or gate
+    (edd's evidence) — there is no general adversary you can point at any completed task
+  - Soft LLM self-review has correlated blind spots — the same model judging itself
+  - A nitpicking reviewer that floods low-value findings is as useless as no reviewer
+mental_model:
+  - "Whoever built it shouldn't be the one certifying it's done"
+  - "An independent adversary should try to FALSIFY done, not grade politely"
+  - "Tell me honestly what was hard-checked vs what's a judgment call"
+  - "A soft opinion dressed as a sound gate is theatre — worse than no gate"
+  - "A finding with no span/evidence is a shrug, not a finding"
+vocabulary:
+  - adversarial review, independent critic, falsify done, hard-checkable vs soft,
+    span-and-evidence, advisory not self-adjudicating, correlated blind spot,
+    soft-critic theatre, oracle, ranked findings, separation of powers

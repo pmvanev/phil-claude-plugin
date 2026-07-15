@@ -1,0 +1,27 @@
+{
+  "fixture": "01-draft-signal-no-oracle",
+  "slice": "slice-01",
+  "walking_skeleton": true,
+  "situation": "Standalone adversarial review of a just-written prose artifact (a skill doc) with NO deterministic oracle available.",
+  "target": {
+    "type": "prose",
+    "path": "skills/example/SKILL.md",
+    "summary": "A newly written skill spine with two real weaknesses: (a) a step that says 'validate the input' with no statement of what invalid means or what happens on failure; (b) a claimed safety rule ('never runs on a red suite') that no step in the skill actually enforces."
+  },
+  "intent": "The skill should be executable as written and its stated safety rules should be enforced by an actual step.",
+  "standards": ["~/.claude/rules/coding.md (clarity, make every word tell)"],
+  "oracle": { "available": false, "reason": "prose target; no self-test harness, links, or frontmatter check declared in scope for this run" },
+  "dispatch_input": {
+    "artifact": "<the SKILL.md text>",
+    "intent": "<as above>",
+    "standards": "<as above>"
+  },
+  "expected_outcome": "DRAFT-SIGNAL",
+  "expected_verdict_shape": {
+    "overall_label": "draft-signal",
+    "verdict": "findings",
+    "findings_ranked_worst_first": true,
+    "every_finding_has_span_and_evidence": true,
+    "contains_done_or_not_done_field": false
+  }
+}

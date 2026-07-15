@@ -1,0 +1,108 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: adversarial-review (2026-07-15)
+
+id: adversarial-review
+name: Get an independent adversarial critique of completed work
+persona: rowan-skeptical-delegator
+job: get-independent-adversarial-critique-of-completed-work
+summary: >
+  Rowan runs /phil:adversarial-review on a just-completed task (standalone), or a host command
+  (phil:work / phil:edd / phil:refactor-tests) or an ad-hoc workflow invokes it. An INDEPENDENT
+  reviewer subagent — fresh context, never given the builder's reasoning trace — frames the target
+  (output + stated-or-inferred intent + standards), detects whether an oracle is available, SPLITS
+  the finding surface into hard-checkable (run the check / inherit the host oracle) vs soft
+  (adversarially critiqued), attempts to FALSIFY "done", and returns a ranked span-and-evidence
+  verdict. The verdict is ADVISORY and typed so a host can gate on it programmatically or a human
+  can decide; the reviewer NEVER self-adjudicates. When no oracle exists the review is honestly
+  labeled a soft DRAFT SIGNAL, never dressed as a sound gate. Sibling to edd: edd produces evidence
+  for a human to judge; this DOES the judging.
+
+# Research depth: LIGHTWEIGHT (DISCUSS Decision 3) — happy path + key error paths.
+# Informed by the tri-agent clarification framework (Zhao, KDD '25), read via the harebrain summary
+# docs/research-summaries/tri-agent-clarification (in the sibling `harebrain` repo) — three-role split,
+# reason-before-verdict, adversarial persona, author-then-ablate self-tests — + its LLM-Modulo/ABC
+# warnings (hardest-critic soundness, correlated errors, unvalidated judge). See feature-delta § C1-C5.
+
+steps:
+  - id: invoke
+    action: >
+      Rowan runs `/phil:adversarial-review` on the just-completed task (or a named target). Intent
+      is supplied by the host when composed, or inferred from the conversation/context leading up to
+      the invocation when standalone.
+    output: Tool acknowledges the target and enters framing
+    emotion: uncertain — "the builder says it's done; did anyone actually try to break it?"
+  - id: frame-target
+    action: >
+      Establish the review contract — the completed output under review, the stated-or-inferred
+      intent / claim-of-done, and the applicable standards — and dispatch an INDEPENDENT reviewer
+      subagent. The orchestrator curates what the subagent sees: artifact + intent + standards, and
+      WITHHOLDS the builder's reasoning trace (C1 independence; same curation refactor-loop applies
+      to its critic).
+    output: review contract {target, intent, standards}; independent reviewer dispatched
+    emotion: oriented — a non-builder is now looking at this
+  - id: partition
+    action: >
+      Detect whether an ORACLE is available for the target (a test suite / a checkable metric /
+      executed evidence — or, when composed, the host's own oracle). Split the finding surface into
+      hard-checkable vs soft (C2), and set the HONESTY LABEL: "sound gate" when an oracle backs the
+      hard findings, else "draft signal" (C4).
+    output: hard/soft partition + honesty label
+    emotion: reassured — nothing is being dressed up as more than it is
+  - id: attack
+    action: >
+      Adversarially hunt. For hard-checkable claims, RUN the check (or inherit the host oracle's
+      result — ADR-005 lineage, never re-implement it). For soft ones, try to FALSIFY "done" against
+      intent + standards. Every finding carries a span + evidence; empty praise with no span is
+      coerced to CANNOT_ASSESS (C5, carried from refactor-critic-correctness).
+    output: findings, each tagged hard|soft, each with span + evidence
+    emotion: exposed but informed — the weak points are named, not hidden
+  - id: report
+    action: >
+      Return a ranked (worst-first, severity-thresholded) span-and-evidence verdict as a TYPED
+      schema a host can gate on programmatically, carrying the honesty label. The verdict is
+      ADVISORY — the reviewer NEVER declares done (C3).
+    output: typed ranked findings verdict + honesty label (advisory)
+    emotion: in-control — I have a defensible read of what's wrong
+  - id: route
+    action: >
+      Standalone → the HUMAN decides what to do with the findings. Composed → the HOST gates on the
+      typed verdict (phil:work's sequencing gate, edd's adjudication, refactor-tests' human diff, or
+      an ad-hoc workflow's routing). The gate/guard is always owned by the host or human, never by
+      the reviewer.
+    output: verdict consumed by human (standalone) or host gate (composed)
+    emotion: confident — "done" is defensible, not self-certified
+
+emotional_arc: uncertain -> oriented -> reassured -> exposed-but-informed -> in-control -> confident  # upward
+
+shared_artifacts:
+  - name: review_contract
+    source: frame-target
+    consumed_by: [partition, attack, report]  # target + intent + standards; excludes builder reasoning (C1)
+  - name: hard_soft_partition
+    source: partition
+    consumed_by: [attack, report]  # routes run-the-check vs adversarial-critique
+  - name: honesty_label
+    source: partition
+    consumed_by: [report, route]  # sound gate vs draft signal (C4)
+  - name: findings_verdict
+    source: report
+    consumed_by: [route]  # typed, advisory; host gates or human decides (C3)
+
+error_paths:
+  - step: partition
+    failure: No oracle is available, but the review is presented as a sound pass/fail gate
+    recovery: Label it a soft DRAFT SIGNAL, never a gate (C4) — the defining guard; same role as edd's off-ramp
+  - step: attack
+    failure: The reviewer floods low-value nits, drowning the real finding
+    recovery: Rank worst-first and apply a severity threshold (carried from refactor-loop's GUARD) — noise is a failure mode (anxiety B)
+  - step: frame-target
+    failure: The reviewer sees the builder's reasoning trace or runs in the builder's context
+    recovery: Re-dispatch in fresh context with curated state only — independence is mandatory (C1); a correlated review is not independent (anxiety D)
+  - step: attack
+    failure: A finding is generic praise or a claim with no span/evidence
+    recovery: Coerce to CANNOT_ASSESS — no finding without a span (C5, anti-flattery, carried from refactor-critic-correctness)
+  - step: report
+    failure: The reviewer declares the task done / not-done itself
+    recovery: Strip to advisory findings — the reviewer never self-adjudicates (C3); the host or human gates
+  - step: report
+    failure: Nothing is actually wrong, but findings are manufactured to look thorough
+    recovery: Report a clean pass honestly (still soft-labeled if no oracle) — a no-finding review is a valid outcome, not a failure

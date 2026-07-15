@@ -282,6 +282,93 @@ graph TB
     Skill -. "changed when skill changes" .-> SelfTest
 ```
 
+### adversarial-review
+
+A new `/phil:adversarial-review` command + `skills/adversarial-review/SKILL.md` + a reusable
+`agents/adversarial-reviewer.md` — a **general-purpose independent critic**. Point it at a completed
+task and it returns ranked, evidence-bearing findings that try to **falsify "done"**. It is the
+sibling to `phil:edd`: edd *produces executed evidence for a human to judge*; adversarial-review
+*does the judging* — an independent adversary that attacks the output and returns a typed, advisory
+verdict. It generalizes `refactor-critic-correctness` out from behind its test-suite oracle.
+
+**Status:** IMPLEMENTED (2026-07-15) — shipped `commands/adversarial-review.md` +
+`skills/adversarial-review/SKILL.md` + `agents/adversarial-reviewer.md` (adversary) +
+`agents/adversarial-verifier.md` (judge) across 3 slices (walking-skeleton no-oracle soft review →
+hard half with oracle + `sound-gate` → the adversary→judge separation). It is a **builder → adversary
+→ judge** triple: the builder is whoever did the work (not built here); the adversary raises findings;
+an independent judge confirms-or-refutes each before a human sees it. Acceptance suite:
+`skills/adversarial-review/self-test/` (10 fixtures) + `acceptance.feature`; all 10 green.
+Evolution: `docs/evolution/2026-07-15-adversarial-review.md`.
+`docs/feature/adversarial-review/feature-delta.md` holds the full DISCUSS+DESIGN+DISTILL+DELIVER
+record; DELIVER detail in `docs/feature/adversarial-review/deliver/progress.md`. Standalone only —
+composition is a documented contract (ADR-010 DDD7); **no existing skill edited**.
+
+**Pattern:** modular prose skill, ports-and-adapters (same lineage as edd / phil-work).
+**Substrate (ADR-010):** prose spine (`skills/adversarial-review/SKILL.md`) drives a **Task-dispatched
+reviewer subagent**; the **agent is the reusable unit** (invoked by the standalone skill and — later,
+unwired in v1 — by hosts/workflows), and the **typed verdict is the composition contract**. Advisory
+only — the reviewer **never self-adjudicates** (C3); the host or human owns any gate.
+
+**The anti-theatre spine (ADR-011):** every review **splits findings hard-checkable vs soft** (C2)
+and carries a mechanical **honesty label** — `sound-gate` iff ≥1 deterministic oracle backs it, else
+`draft-signal` (C4). "Hard oracle" is generalized to **prose oracles** (self-test pass, dead-link /
+broken-ref, frontmatter validity, file-length, required-citation) — not just a test suite — because
+the plugin's targets are usually prose. Independence (C1): fresh-context subagent, builder reasoning
+withheld. Anti-flattery (C5): no finding without a span; empty praise → `CANNOT_ASSESS`.
+
+**v1 scope:** standalone only; **edits no existing skill** (composition is a documented contract, not
+wiring — hosts adopt later per ADR-008's second-consumer rule). Accepted v1 risk: same-model
+fresh-context reviewer isn't *full* independence; different-model / multi-lens-panel hardening is a
+recorded extension seam.
+
+#### C4: System Context
+
+```mermaid
+graph TB
+    Rowan["Rowan — skeptical delegator / shipper<br/>(wants an independent adversary before trusting done)"]
+    AR["phil:adversarial-review<br/>(command + skill spine)"]
+    Reviewer["adversarial-reviewer<br/>(independent subagent — fresh context, no builder reasoning)"]
+    Oracle["Deterministic oracles<br/>(code: test runner · prose: self-test / links / frontmatter / length / citations)"]
+    IDE["IDE / editor<br/>(findings review — ADR-002)"]
+
+    Rowan -->|"runs /phil:adversarial-review [target] [--intent]"| AR
+    AR -->|"dispatches with curated input (artifact + intent + standards)"| Reviewer
+    Reviewer -->|"runs / inherits (never re-implements)"| Oracle
+    Reviewer -->|"typed ranked verdict + honesty label (advisory)"| AR
+    AR -->|"presents findings; human decides"| Rowan
+    Rowan -->|"reviews findings"| IDE
+    AR -. "composition contract (typed verdict) — documented, unwired in v1" .-> Hosts["future hosts / workflows<br/>(phil:work · edd · refactor-tests · ad-hoc)"]
+```
+
+#### C4: Container
+
+```mermaid
+graph TB
+    subgraph plugin["phil plugin"]
+        Cmd["commands/adversarial-review.md<br/>(thin loader)"]
+        Skill["skills/adversarial-review/SKILL.md<br/>(spine: frame · oracle · curate · dispatch · verify · present)"]
+        Agent["agents/adversarial-reviewer.md<br/>(CREATE NEW — the ADVERSARY: raises findings + typed-verdict contract)"]
+        Verifier["agents/adversarial-verifier.md<br/>(CREATE NEW — the JUDGE: confirms/refutes each finding, independent of the adversary)"]
+        SelfTest["skills/adversarial-review/self-test/<br/>(author-then-ablate golden fixtures — C1–C5 + triple regression gate)"]
+        Detect["skills/shared/test-runner-detection.md<br/>(REUSE — code-oracle detection)"]
+        Crit["agents/refactor-critic-correctness.md<br/>(PATTERN-COPY source — schema/anti-flattery/reason-first; unmodified)"]
+    end
+    Human["Human port<br/>(AskUserQuestion + IDE — ADR-002)"]
+    Prose["Prose oracles<br/>(links / frontmatter / length / citation / self-test)"]
+
+    Cmd --> Skill
+    Skill -->|"ORACLE: run/inherit (driver runs it)"| Detect
+    Skill -->|"ORACLE: prose checks"| Prose
+    Skill -->|"DISPATCH (curated input + oracle_result, no builder reasoning — C1)"| Agent
+    Agent -->|"typed verdict (findings)"| Skill
+    Skill -->|"VERIFY: each finding, no reviewer reasoning"| Verifier
+    Verifier -->|"confirmed / refuted"| Skill
+    Agent -. "schema shape copied from" .-> Crit
+    Skill -->|"present confirmed findings + label (advisory — C3)"| Human
+    Skill -. "changed when skill/agents change" .-> SelfTest
+    Agent -. "typed verdict contract — documented, unwired" .-> Compose["hosts / workflows (future)"]
+```
+
 ### ADRs
 
 - [ADR-001](adr-001-refactor-tests-reuse-boundaries.md) — refactor-tests: new command + reuse boundaries.
@@ -293,3 +380,6 @@ graph TB
 - [ADR-007](adr-007-edd-loop-substrate-delegated-build-evidence-producer.md) — edd-loop: prose spine + delegated build + inherited oracle; separation of powers via a non-builder evidence-producer subagent; human adjudicates.
 - [ADR-008](adr-008-edd-loop-evidence-gate-factoring.md) — edd-loop: qualitative-evidence gate inlined with an extraction seam (not a shared skill in v1); engines composed unchanged.
 - [ADR-009](adr-009-edd-loop-documentation-namespace.md) — edd-loop: `docs/edd/<slug>/` trail (gate-ran only) + evolution summary to `docs/evolution/`.
+- [ADR-010](adr-010-adversarial-review-substrate-agent-as-reusable-unit.md) — adversarial-review: prose spine + agent-as-reusable-unit; standalone-only v1, composition documented not wired.
+- [ADR-011](adr-011-adversarial-review-hard-soft-oracle-honesty-label.md) — adversarial-review: hard/soft split generalized to prose oracles; mechanical `sound-gate`/`draft-signal` honesty label.
+- [ADR-012](adr-012-adversarial-review-adversary-judge-separation.md) — adversarial-review: separate the adversary from the judge (builder → adversary → judge triple); independent per-finding verification.

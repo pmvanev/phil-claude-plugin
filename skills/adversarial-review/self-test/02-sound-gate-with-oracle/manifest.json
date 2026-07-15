@@ -1,0 +1,32 @@
+{
+  "fixture": "02-sound-gate-with-oracle",
+  "slice": "slice-02",
+  "walking_skeleton": false,
+  "situation": "Standalone adversarial review of a just-completed code change in a repo WITH a runnable test suite (a real deterministic oracle).",
+  "target": {
+    "type": "code",
+    "path": "src/orders/discount.py",
+    "summary": "A refactor of discount calculation. The suite has a detectable runner (pytest). Running it yields one failing test (test_bulk_discount_rounding) — a real, oracle-backed defect. There is also a soft concern: the extracted function name 'calc2' is non-intention-revealing."
+  },
+  "intent": "Refactor discount calculation without changing behavior.",
+  "standards": ["~/.claude/rules/refactoring.md", "~/.claude/rules/coding.md"],
+  "oracle": {
+    "available": true,
+    "kind": "test-suite",
+    "runner": "pytest",
+    "result": "1 failed: test_bulk_discount_rounding (AssertionError: expected 90.00, got 90.01); 41 passed"
+  },
+  "dispatch_input": {
+    "artifact": "<the diff for discount.py>",
+    "intent": "<as above>",
+    "standards": "<as above>",
+    "oracle_result": "<the pytest result above — inherited, not re-run by the reviewer>"
+  },
+  "expected_outcome": "SOUND-GATE",
+  "expected_verdict_shape": {
+    "overall_label": "sound-gate",
+    "findings_have_kind_tag": true,
+    "hard_finding_cites_actual_result": true,
+    "soft_finding_present": true
+  }
+}

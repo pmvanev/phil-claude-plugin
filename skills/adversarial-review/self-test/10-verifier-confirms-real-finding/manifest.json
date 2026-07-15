@@ -1,0 +1,31 @@
+{
+  "fixture": "10-verifier-confirms-real-finding",
+  "slice": "slice-03",
+  "safety_core": false,
+  "role_under_test": "adversarial-verifier (the judge)",
+  "situation": "The adversary raised a REAL soft finding. The independent judge goes to the span, confirms the defect from the work itself (without the reviewer's reasoning), and confirms it — so a true finding survives verification and reaches the human.",
+  "finding": {
+    "title": "skill asserts a safety rule no step enforces",
+    "kind": "soft",
+    "severity": "major",
+    "confidence": 0.8,
+    "span": "skills/example/SKILL.md:30 (claims 'never runs on a red suite')",
+    "mechanism": "the claim is a guarantee, but no step in the skill checks suite state before proceeding",
+    "evidence": "line 30 states the guarantee; the flow (steps 1-5) contains no suite-state check"
+  },
+  "target": {
+    "type": "prose",
+    "path": "skills/example/SKILL.md",
+    "summary": "The skill really does claim 'never runs on a red suite' at line 30, and its steps 1-5 really contain no step that checks suite state. The finding is accurate."
+  },
+  "intent": "Stated safety rules must be enforced by an actual step.",
+  "standards": ["~/.claude/rules/coding.md"],
+  "oracle_result": null,
+  "dispatch_input_MUST_NOT_contain": "the reviewer's justification / confidence / other findings",
+  "expected_outcome": "CONFIRMED",
+  "expected_judgment_shape": {
+    "judgment": "confirmed",
+    "basis_independently_read_from_target": true,
+    "corrected_severity": null
+  }
+}
