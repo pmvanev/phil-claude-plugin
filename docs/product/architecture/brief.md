@@ -291,9 +291,14 @@ sibling to `phil:edd`: edd *produces executed evidence for a human to judge*; ad
 *does the judging* — an independent adversary that attacks the output and returns a typed, advisory
 verdict. It generalizes `refactor-critic-correctness` out from behind its test-suite oracle.
 
-**Status:** DESIGNED (2026-07-15) — DISCUSS + DESIGN complete; not yet implemented.
-`docs/feature/adversarial-review/feature-delta.md` holds the full record; slice briefs 01–02 in
-`docs/feature/adversarial-review/slices/`.
+**Status:** IMPLEMENTED (2026-07-15) — shipped `commands/adversarial-review.md` +
+`skills/adversarial-review/SKILL.md` + `agents/adversarial-reviewer.md` across 2 slices
+(walking-skeleton no-oracle soft review → hard half with oracle + `sound-gate`). Acceptance suite:
+`skills/adversarial-review/self-test/` (8 fixtures) + `acceptance.feature`; all 8 green.
+Evolution: `docs/evolution/2026-07-15-adversarial-review.md`.
+`docs/feature/adversarial-review/feature-delta.md` holds the full DISCUSS+DESIGN+DISTILL+DELIVER
+record; DELIVER detail in `docs/feature/adversarial-review/deliver/progress.md`. Standalone only —
+composition is a documented contract (ADR-010 DDD7); **no existing skill edited**.
 
 **Pattern:** modular prose skill, ports-and-adapters (same lineage as edd / phil-work).
 **Substrate (ADR-010):** prose spine (`skills/adversarial-review/SKILL.md`) drives a **Task-dispatched

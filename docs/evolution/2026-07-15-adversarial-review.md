@@ -1,0 +1,74 @@
+# Evolution — adversarial-review (2026-07-15)
+
+## What shipped
+
+`/phil:adversarial-review` — a general-purpose **independent adversarial critic**. Point it at a
+just-completed task and a fresh reviewer (that never sees the builder's reasoning) tries to falsify
+"done" and returns a typed, advisory, ranked span-and-evidence verdict — honestly labeled, never
+deciding "done" for you.
+
+- `commands/adversarial-review.md` — thin loader.
+- `skills/adversarial-review/SKILL.md` — the standalone driver: FRAME · ORACLE · CURATE · DISPATCH ·
+  PRESENT.
+- `agents/adversarial-reviewer.md` — the **reusable** independent critic + the typed-verdict
+  **composition contract** (pattern-copied from `refactor-critic-correctness`).
+- `skills/adversarial-review/acceptance.feature` + `self-test/` (8 golden fixtures) — the acceptance
+  + regression gate.
+
+Registered SSOT: persona `rowan-skeptical-delegator`, job
+`get-independent-adversarial-critique-of-completed-work`, journey `adversarial-review`,
+ADR-010 + ADR-011, and the Application Architecture entry (C4 diagrams) in `brief.md`.
+
+## Why
+
+The plugin already had the adversarial critic in narrow forms — `refactor-critic-correctness` (bound
+to a test-suite oracle), edd's deferred evidence-critic — but no *general* adversary you could point
+at any completed task. Rowan (the skeptical delegator) wants an independent second opinion before
+trusting AI-produced or hand-built work, without either rubber-stamping the builder's self-assessment
+or reading every line. Sibling to edd: edd *produces evidence for a human to judge*;
+adversarial-review *does the judging*.
+
+## The design, in one idea
+
+Generalize `refactor-critic-correctness` out from behind its test-suite oracle — and confront the
+soundness problem that move creates. Informed by the tri-agent clarification research
+(`docs/research-summaries/tri-agent-clarification`) and its LLM-Modulo/ABC lineage: an all-soft-critic
+loop dressed as a sound gate is "a graded essay presented as a verified plan." So the feature is built
+against that (anxiety A) via five locked constraints:
+
+- **C1 independence** — fresh-context reviewer; builder reasoning withheld (correlated-error avoidance).
+- **C2 hard/soft split** — deterministic checks run/inherited as `hard` findings; judgment as `soft`.
+- **C3 advisory** — the reviewer never self-adjudicates; the host or human gates.
+- **C4 mechanical honesty label** — `sound-gate` iff an oracle backed the review, else `draft-signal`;
+  over- and under-claiming both fail. Generalized to **prose oracles** (self-test, dead-link,
+  frontmatter, length, citation), because the plugin's targets are usually prose.
+- **C5 span-and-evidence / anti-flattery** — no finding without a span; empty praise → `cannot-assess`.
+
+Architecture (ADR-010/011): a prose spine drives a Task-dispatched reviewer subagent; the **agent is
+the reusable unit**, the **typed verdict is the composition contract**. The driver runs/inherits the
+oracle; the reviewer stays read-only (inherit, never re-implement — ADR-005). Standalone only —
+**edits no existing skill**; hosts adopt the contract later (ADR-008 second-consumer rule).
+
+## Outcome (before → after)
+
+- **Goal:** ship a standalone, composable, honest adversarial reviewer. **Met.** 8/8 self-test
+  fixtures green; both slices delivered.
+- **Preservation:** no existing skill touched (verified — Reuse Analysis all pattern-copy/invoke).
+- **Dogfood (executed evidence):** on its first real run the reviewer caught 4 real defects in its
+  own SKILL (1 major, all fixed); on the oracle path it correctly applied the mechanical `sound-gate`
+  label and refused to manufacture nits. The tool did exactly what it exists to do — an independent
+  adversary caught what the builder rationalized past.
+
+## Scope / accepted limitations
+
+- v1 reviewer independence is same-model / fresh-context — not *full* independence (tri-agent
+  correlated-error caveat). Accepted; different-model / multi-lens-panel hardening is the recorded
+  extension seam (trivial when composed into a Workflow via `parallel()`).
+- Composition is a documented contract, not wired into any host. First host adoption is future work.
+- Prose-oracle catalog is a bounded v1 subset; breadth can grow.
+
+## Follow-ups
+
+- Adopt the contract in a first real host (candidate: `phil:work` review-wave — also fills its v1
+  prose-gap UI-1), once it's a genuine second consumer.
+- Different-model / multi-lens reviewer hardening when single-reviewer data warrants it.
