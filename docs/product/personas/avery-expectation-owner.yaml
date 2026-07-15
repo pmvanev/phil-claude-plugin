@@ -1,0 +1,29 @@
+# Persona (SSOT) — bootstrapped by DISCUSS wave, feature: edd-loop (2026-07-15)
+
+id: avery-expectation-owner
+name: Avery
+role: >
+  Developer in a repo using the phil plugin who delegates building and changing to AI
+  agents and evaluates the results against intent — the "code author -> evaluator/editor"
+  shift EDD describes. Cares that AI-produced work meets real intent, including the
+  qualitative parts no test cheaply asserts.
+goals:
+  - Trust that AI-produced work meets real intent, including qualitative expectations
+    ("errors are helpful", "the API feels ergonomic", "the guide is clear")
+  - Avoid ceremony where the existing engines (nwave, phil:work) already prove things
+  - Adjudicate on EXECUTED evidence, not narration, without reading every line
+  - Keep a reviewable expectation-and-evidence trail
+frustrations:
+  - Line-by-line review of high-volume AI output does not scale
+  - Formal tests drop qualitative intent — there's no cheap assertion for "helpful"
+  - The AI that built the thing also "verifies" it (fox guarding the henhouse)
+  - Narration ("I checked, it's fine") masquerades as verification
+mental_model:
+  - "Executed evidence beats narration — show me the real output, not a description of it"
+  - "I adjudicate qualitative claims; tests/metrics adjudicate the checkable ones"
+  - "Don't add ceremony where my engine already proves it — get out of the way"
+  - "Whoever built it shouldn't be the one certifying it met my intent"
+vocabulary:
+  - expectation, executed evidence, narration, off-ramp, separation of powers,
+    fox guarding the henhouse, oracle, adjudication, living documentation,
+    engine-checkable vs qualitative, scaled evidence gate

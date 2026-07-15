@@ -136,3 +136,61 @@ jobs:
     status: validated
     personas: [quinn-codebase-steward]
     features: [phil-work]
+
+  - id: prove-qualitative-expectations-with-evidence
+    # Registered by DISCUSS wave, feature: edd-loop (2026-07-15)
+    job_story: >
+      When I've handed building or changing something to AI agents and my intent
+      includes qualitative expectations that formal tests can't cheaply assert
+      (e.g. "error messages are helpful", "the API feels ergonomic", "the migration
+      guide is clear to a newcomer"), I want a disciplined loop that captures those
+      expectations, gets EXECUTED evidence they're met, and lets me adjudicate —
+      without adding ceremony where my existing engines (nwave, phil:work) already
+      prove the checkable ones — so I can trust AI-produced work against my real
+      intent instead of reading every line or trusting the AI's narration.
+    dimensions:
+      functional: >
+        Capture expectations in plain language; classify each as engine-checkable
+        vs qualitative; OFF-RAMP the checkable ones to nwave (user-facing) or
+        phil:work (invisible) unchanged; and for the qualitative residue commission
+        or collect EXECUTED evidence produced by someone other than the builder,
+        put it to human adjudication, and persist expectations + verdicts as living
+        documentation.
+      emotional: >
+        Confidence the qualitative intent was actually met, not narrated; relief
+        from the "the AI says it's fine, but did it really?" (fox-guarding-the-
+        henhouse) dread; freedom to delegate to agents without reading everything.
+      social: >
+        Being seen as someone who ships AI-built work that genuinely meets intent;
+        a reviewable expectation-and-evidence trail teammates can trust.
+    four_forces:
+      push: >
+        AI agents produce large volumes of code fast; line-by-line review does not
+        scale; the same AI that builds also "verifies" its own work (fox guarding
+        the henhouse); qualitative intent gets dropped by formal tests or accepted
+        on narration.
+      pull: >
+        A lightweight expectation -> executed-evidence -> human-adjudication loop
+        that REUSES nwave / phil:work for everything checkable and adds a gate ONLY
+        for the qualitative residue — the missing third option for the qualitative
+        goals phil:work's FRAME currently refuses.
+      anxiety: >
+        (A) yet another orchestrator that merely duplicates nwave/phil:work — countered
+        by the central off-ramp; (B) ceremony on work that did not need it — countered
+        by bias-to-off-ramp + a gate that scales to zero when evidence already exists;
+        (C) evidence that is narrated, not executed — countered by the executed-artifact
+        rule; (D) the builder grading its own homework — countered by separation of
+        powers (builder != evidence-producer; human is the final adjudicator).
+      habit: >
+        Trusting AI narration ("looks good to me"), reading every diff by hand, or
+        silently dropping qualitative intent because no test exists for it.
+    opportunity_score: not-scored   # single new job; priority by default
+    status: validated
+    personas: [avery-expectation-owner]
+    features: [edd-loop]
+    # Relationship to deliver-invisible-work-with-discipline (phil-work): distinct outcome.
+    # phil-work's job is PRESERVE behavior through invisible change (preservation floor +
+    # checkable goal). This job is PROVE a qualitative expectation is met with executed
+    # evidence, and it spans BOTH visible (nwave) and invisible (phil:work) work. phil:edd
+    # delegates the build to those engines and inherits their oracle (ADR-005 lineage); it
+    # adds only the qualitative-evidence gate they structurally lack.
