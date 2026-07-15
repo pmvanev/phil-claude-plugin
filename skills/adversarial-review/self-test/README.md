@@ -32,12 +32,17 @@ oracle come from the real invocation.
 | `04-independent-dispatch/` | builder reasoning present in context | C1 | dispatch curates input; excludes builder reasoning | `INDEPENDENT-DISPATCH` |
 | `05-cannot-assess-empty-praise/` | tempted to praise with no span | C5 | anti-flattery: no finding without a span | `CANNOT-ASSESS` |
 | `06-advisory-never-self-adjudicate/` | tempted to declare done/not-done | C3 (**anti-theatre / fox-henhouse**) | strip to advisory findings only | `ADVISORY-ONLY` |
-| `07-clean-pass-no-manufactured-findings/` | nothing actually wrong | honest reporting | no invented findings; clean pass stays soft-labeled | `CLEAN-PASS` |
+| `07-clean-pass-no-manufactured-findings/` | nothing wrong, no oracle | honest reporting | no invented findings; clean pass stays soft-labeled | `CLEAN-PASS` |
+| `08-clean-sound-gate-green-oracle/` | nothing wrong, oracle ran green | C4 positive pole | verified-clean earns `sound-gate`; no under-claiming | `CLEAN-PASS` |
 
 `01` is the single walking-skeleton scenario (a standalone review end-to-end). The **safety core** is
 `03`, `04`, `06` — the bug classes most likely to ship silently: a soft review dressed as a sound
 gate, a review that isn't actually independent, and a reviewer that grades its own homework. These
 are the three ways adversarial-review would become the soft-critic theatre it exists to prevent.
+
+Fixtures `02`, `03`, `07`, `08` together pin the honesty label in **both** directions: oracle+failure
+→ `sound-gate` (02), no oracle → never `sound-gate` (03), clean without oracle → `draft-signal` (07),
+clean with a green oracle → `sound-gate` (08). Over-claiming and under-claiming are both gate failures.
 
 ## Layout
 

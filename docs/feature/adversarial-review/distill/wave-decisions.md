@@ -12,15 +12,18 @@
   `overall_label ∈ {sound-gate, draft-signal}` (mechanical, C4); `verdict ∈ {findings, clean,
   cannot-assess}` (no done/not-done field, C3); per-finding `kind ∈ {hard, soft}` (C2); every finding
   has span+evidence, ranked worst-first (C5 / anxiety B).
-- [DT3] 7 fixtures pin WS + C1–C5 + honest reporting. Safety core = 03 (never sound-gate w/o oracle),
+- [DT3] 8 fixtures pin WS + C1–C5 + honest reporting. Safety core = 03 (never sound-gate w/o oracle),
   04 (independent dispatch), 06 (advisory never self-adjudicate) — the silent theatre bug classes.
+  Fixtures 02/03/07/08 pin the honesty label bidirectionally (over- AND under-claiming both fail).
+  [Fixture 08 added post-Sentinel-review, 2026-07-15, closing the positive sound-gate pole the
+  reviewer flagged — clean work + green oracle → clean + sound-gate.]
 - [DT4] Register-outcomes SKIPPED (methodology/prose feature; no outcomes registry — D-6 scoping),
   consistent with DESIGN's Outcome Collision Check skip.
 
 ## Scenario / fixture inventory
 01 draft-signal-no-oracle (WS) · 02 sound-gate-with-oracle · 03 never-sound-gate-without-oracle ·
 04 independent-dispatch · 05 cannot-assess-empty-praise · 06 advisory-never-self-adjudicate ·
-07 clean-pass-no-manufactured-findings.
+07 clean-pass-no-manufactured-findings · 08 clean-sound-gate-green-oracle.
 
 ## Test placement
 `skills/adversarial-review/` (acceptance.feature + self-test/) — the skill IS the SUT; not `tests/`.

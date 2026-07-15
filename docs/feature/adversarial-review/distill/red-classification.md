@@ -12,8 +12,9 @@ is authored ahead of the implementation. Per the pre-DELIVER fail-for-the-right-
 | 05 cannot-assess-empty-praise | same | `MISSING_FUNCTIONALITY` ✅ |
 | 06 advisory-never-self-adjudicate | same | `MISSING_FUNCTIONALITY` ✅ |
 | 07 clean-pass-no-manufactured-findings | same | `MISSING_FUNCTIONALITY` ✅ |
+| 08 clean-sound-gate-green-oracle | same | `MISSING_FUNCTIONALITY` ✅ |
 
-All seven are RED for the right reason — the implementation is missing, not a fixture/setup bug.
+All eight are RED for the right reason — the implementation is missing, not a fixture/setup bug.
 There is no `IMPORT_ERROR` / `FIXTURE_BROKEN` / `WRONG_ASSERTION` class here because the suite is
 prose-driven (a human or the model drives each fixture against `expected.md`), exactly as
 `skills/edd/self-test/` and `skills/work/self-test/` are. DELIVER reads this file at PREPARE to

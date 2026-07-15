@@ -87,3 +87,12 @@ Feature: Get an independent adversarial critique of completed work
     Then it reports a clean pass with no findings
     And it does not manufacture low-value findings to appear thorough
     And the clean pass is still labeled a draft signal, because no oracle backed it
+
+  # --- HONESTY LABEL, POSITIVE POLE: verified-clean earns a sound gate ---------------------
+  @slice-02 @honesty_label @honest_reporting @fixture:08-clean-sound-gate-green-oracle
+  Scenario: When nothing is wrong and a real oracle ran green, the clean pass is labeled a sound gate
+    Given a just-completed code change with no defects and a test suite that runs fully green
+    When the adversarial review runs
+    Then it reports a clean pass with no findings
+    And the overall verdict is labeled a sound gate, because a real oracle backed it
+    And it does not under-claim by labeling a verified result a mere draft signal
