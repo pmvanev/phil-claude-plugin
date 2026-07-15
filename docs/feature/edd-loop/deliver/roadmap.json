@@ -41,7 +41,7 @@
           ],
           "test_file": "skills/edd/acceptance.feature",
           "scenario_name": "@slice-02 @fixture:03-gate-evidence-exists; @fixture:04-gate-commission-new; @fixture:05-reject-narration; @fixture:06-blocked-done; @fixture:07-living-docs-gate-ran-only",
-          "status": "pending"
+          "status": "done"
         }
       ]
     }

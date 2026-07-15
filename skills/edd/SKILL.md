@@ -1,6 +1,6 @@
 ---
 name: edd
-description: Skill bundle for phil:edd command — Expectation-Driven Development front-door. Captures intent as expectations, classifies each, off-ramps to nwave/phil:work when the engine already proves them, and (slice 02) attaches a scaled executed-evidence gate to the qualitative residue, adjudicated by the human, with evidence produced by someone other than the builder.
+description: Skill bundle for phil:edd command — Expectation-Driven Development front-door. Captures intent as expectations, classifies each, off-ramps to nwave/phil:work when the engine already proves them, and attaches a scaled executed-evidence gate to the qualitative residue, adjudicated by the human, with evidence produced by someone other than the builder.
 ---
 
 # EDD — Expectation-Driven Development front-door
@@ -22,8 +22,7 @@ The standards you work under are `~/.claude/rules/coding.md`, `~/.claude/rules/t
 > **The full flow.** CAPTURE (intent → expectations) → CLASSIFY (engine-checkable vs qualitative,
 > biased to off-ramp) → **OFF-RAMP** (all checkable → recommend the engine and exit, zero trail) →
 > BUILD (delegate to one engine, inherit its oracle) → EVIDENCE-GATE (scaled, executed evidence,
-> producer ≠ builder) → ADJUDICATE (human) → DOCUMENT. **This slice (01) delivers CAPTURE, CLASSIFY,
-> and OFF-RAMP** — the walking skeleton. BUILD → DOCUMENT is the slice-02 boundary (marked below).
+> producer ≠ builder) → ADJUDICATE (human) → DOCUMENT (living-doc trail, only when the gate ran).
 
 ---
 
@@ -44,7 +43,7 @@ The standards you work under are `~/.claude/rules/coding.md`, `~/.claude/rules/t
 | Pattern | Action |
 |---|---|
 | `"<intent>"` | Run CAPTURE on the intent, then the flow below. |
-| No argument | (Slice 02+) resume an in-flight loop from `docs/edd/<slug>/`. In slice 01, ask for an intent. |
+| No argument | Ask for an intent. (No-arg **resume** of an in-flight loop is deferred past v1 — see feature-delta Out of scope.) |
 
 Derive a kebab-case `<slug>` from the intent for the trail path `docs/edd/<slug>/` — but do **not**
 create it yet (the trail is written only if the gate runs; see DOCUMENT).
@@ -107,15 +106,72 @@ gate or a trail for an all-checkable intent is a defect (it is the ceremony leak
 
 ---
 
-## BUILD → EVIDENCE-GATE → ADJUDICATE → DOCUMENT  (SLICE 02 — not yet implemented)
+When CLASSIFY leaves a **qualitative residue** (one or more developer-confirmed qualitative
+expectations), run the rest of the flow. The engine-checkable expectations are still routed to the
+engine and proven by its own oracle — you never re-verify those.
 
-> **Slice-01 boundary.** When CLASSIFY finds a **qualitative residue** (one or more
-> developer-confirmed qualitative expectations), the remaining flow — delegate the build to one
-> engine, run the scaled executed-evidence gate (producer ≠ builder), adjudicate with the human, and
-> write the `docs/edd/<slug>/` trail — is built in **slice 02**. In this slice, after CLASSIFY, tell
-> the developer which expectations are the qualitative residue and that the evidence gate is the next
-> increment; do **not** fake a gate, and do **not** report the work done. The contract the gate will
-> satisfy is fixed in DESIGN (ADR-007/008) and pinned by `self-test/` fixtures 03–07.
+## BUILD — delegate to one engine, inherit its oracle
+
+Delegate the actual build to the fitting engine and let its native oracle prove the engine-checkable
+expectations:
+
+- **user-facing behavior** → nwave (its acceptance-test run is the oracle);
+- **invisible / developer-facing** → `/phil:work` (its preservation floor + checkable goal is the oracle).
+
+You do **not** run a preservation or acceptance check of your own — that is the engine's job
+(ADR-005 lineage). Record which engine built, and note that its checkable expectations are proven by
+its oracle, so the gate below only ever concerns the **qualitative residue**.
+
+## EVIDENCE-GATE — scaled executed evidence for each qualitative expectation
+
+For each qualitative expectation, the gate **scales** — do the least that yields real evidence:
+
+1. **Reuse if it already exists.** If the engine already produced relevant executed evidence (a
+   DELIVER demo / e2e run, a captured transcript), point the developer at *that* artifact. Commission
+   nothing new. (Whether the existing evidence is actually *relevant* is the developer's call at
+   ADJUDICATE, not yours — if they say it isn't, treat that as a reject and commission fresh.)
+2. **Otherwise commission it — from a non-builder.** Dispatch `agents/edd-evidence-producer`
+   (Agent/Task) to actually run or render the thing and capture the raw output **verbatim** with the
+   command that reproduces it. The producer is a **different actor than whatever built the thing**
+   (it has no Edit/Write tool by design) — this separation of powers is non-negotiable; it is the
+   whole reason the gate exists.
+3. **Reject narration.** If what comes back (from either path) is a description, a summary, or a
+   claim with no reproducible artifact, it is **narration, not evidence** — reject it and
+   re-commission a real run. Narration never satisfies the gate. Never adjudicate against narration.
+
+The output of the gate, per qualitative expectation, is an **executed artifact + its reproduce
+command**, ready for the human.
+
+## ADJUDICATE — the human decides
+
+Put each qualitative expectation's executed evidence to the developer via the human-approval port
+(AskUserQuestion + optional review of the artifact in their editor — ADR-002). The developer — never
+you, never the producer — renders the verdict: **accept** or **reject**.
+
+- **accept** → the expectation is met; record the verdict.
+- **reject** → the expectation is **not** met. **Block done.** Route that expectation back to the
+  engine to change the thing, then re-commission evidence and re-adjudicate. Never move on, never
+  drop a rejected expectation, and never report the run done while any qualitative expectation stands
+  rejected. Grade the final state, not the effort.
+
+## DOCUMENT — living documentation (only when the gate ran)
+
+On completion with **≥1 adjudicated** qualitative expectation, write the trail under
+`docs/edd/<slug>/`:
+
+```
+docs/edd/<slug>/
+  expectations.md   # each expectation + classification (engine-checkable | qualitative + reason) + routing
+  evidence/         # the captured EXECUTED artifacts (verbatim), one per qualitative expectation
+  verdicts.md       # per-expectation verdict (accept/reject) + timestamp + evidence reference
+```
+
+and a durable summary at `docs/evolution/<date>-<slug>.md`, reusing the plugin's evolution
+convention. Report a summary naming, per qualitative expectation, the verdict and the evidence it
+rested on.
+
+An **off-ramp-only** run writes **none** of this — the trail exists if and only if the gate ran.
+(ADR-009 / DDD6.)
 
 ---
 
@@ -138,9 +194,8 @@ gate or a trail for an all-checkable intent is a defect (it is the ceremony leak
 ## Self-test (regression gate)
 
 `skills/edd/self-test/` holds golden fixtures pinning these behaviors: off-ramp with zero trail on an
-all-checkable intent (01), bias-to-off-ramp classification (02), and — for slice 02 — evidence reuse
-(03), commission from a non-builder (04), narration rejection (05), blocked-done (06), and
-trail-only-when-the-gate-ran (07). Whenever this skill or `commands/edd.md` changes, drive the
+all-checkable intent (01), bias-to-off-ramp classification (02), evidence reuse (03), commission from
+a non-builder (04), narration rejection (05), blocked-done (06), and trail-only-when-the-gate-ran
+(07). Whenever this skill, `commands/edd.md`, or `agents/edd-evidence-producer.md` changes, drive the
 fixtures per `self-test/README.md` and confirm each produces its `expected.md` decision — every edit
 here is non-monotonic, so the skill is changed and regression-tested, never changed and eyeballed.
-Slice 01 delivers fixtures **01** and **02**; fixtures 03–07 remain RED until slice 02.
