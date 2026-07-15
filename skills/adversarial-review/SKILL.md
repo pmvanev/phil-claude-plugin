@@ -37,6 +37,19 @@ The standards a review is held to are whatever applies to the target —
 > review, else `draft-signal` — never a matter of the reviewer's confidence, and never changed by
 > verification.
 
+> **Provenance.** The design is adapted from the **tri-agent clarification framework** — Zhao,
+> "A Tri-Agent Framework for Evaluating and Aligning Question Clarification Capabilities of Large
+> Language Models" (KDD '25) — via the harebrain reading of it
+> (`docs/research-summaries/tri-agent-clarification/` in the sibling `harebrain` repo). That paper's
+> three roles (QCA candidate / RA adversary / EA judge) map onto this tool's builder / adversary
+> (`adversarial-reviewer`) / judge (`adversarial-verifier`), and its reason-before-verdict split
+> (`<think>`→`<output>`) is why both agents write justification first. Its deeper lesson — borrowed
+> from LLM-Modulo, and the reason C4 exists — is that a loop is only as sound as its **hardest
+> critic**, so an all-soft-critic review must be labeled a draft signal, never dressed as a verified
+> gate. The correlated-error caveat (the paper's three agents shared one model) is why C1 keeps the
+> reviewer independent and why the judge never sees the adversary's reasoning — and the honest reason
+> the same-model residual risk is documented, not hidden (ADR-010/012).
+
 ---
 
 ## The three lines you never cross
