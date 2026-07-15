@@ -1,0 +1,21 @@
+{
+  "fixture_id": "EDD-SELFTEST-06",
+  "phase": "ADJUDICATE",
+  "intent": "make the export command's failure messages helpful when the output path is bad",
+  "expectations": [
+    {
+      "text": "when the output path does not exist, the error tells the user what was wrong and what to do",
+      "classification": "qualitative",
+      "reason": "'helpful / actionable' is a judgment about wording"
+    }
+  ],
+  "engine": "phil:work",
+  "producer_result": {
+    "reproduce_command": "myapp export --out /nonexistent/dir 2>&1; echo exit=$?",
+    "captured_verbatim": "Error: EACCES\nexit=2"
+  },
+  "human_verdict": "reject",
+  "human_verdict_reason": "the captured message is a raw error code, not actionable — it does not tell the user what was wrong or what to do",
+  "expected_guard": "never report done over a rejected expectation; iterate (D4)",
+  "expected_decision": "BLOCK-DONE"
+}

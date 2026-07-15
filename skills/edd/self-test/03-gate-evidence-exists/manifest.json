@@ -1,0 +1,18 @@
+{
+  "fixture_id": "EDD-SELFTEST-03",
+  "phase": "EVIDENCE-GATE",
+  "intent": "make the onboarding CLI wizard feel welcoming to a first-time user",
+  "expectations": [
+    {
+      "text": "the first-run wizard's greeting and prompts feel welcoming to a newcomer",
+      "classification": "qualitative",
+      "reason": "'welcoming' is a subjective judgment about tone that no cheap assertion captures"
+    }
+  ],
+  "engine": "nwave",
+  "engine_evidence_present": true,
+  "engine_evidence": "self-test/03-gate-evidence-exists/existing-wizard-transcript.txt",
+  "engine_evidence_note": "nwave DELIVER already produced a real end-to-end run transcript of the wizard as its demo/e2e step",
+  "expected_guard": "scaled gate reuses evidence the engine already produced (DDD3) — no new commission",
+  "expected_decision": "GATE-POINT-EXISTING"
+}

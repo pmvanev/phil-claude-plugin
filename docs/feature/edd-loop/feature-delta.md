@@ -163,11 +163,14 @@ Measured against self-test fixtures (mirrors phil:work's self-test-as-regression
   advisory pre-screen is a reserved seam).
 - Physically extracting the evidence gate into a shared skill (DESIGN decides — D3).
 - Any modification of nwave or phil:work internals — `phil:edd` composes them unchanged.
+- **No-arg resume of an in-flight loop** — the resume port mirrors `phil:work` but is **deferred
+  past v1**; slices 01–02 build only the fresh-invocation path. (Recorded in response to Sentinel
+  DISTILL review, 2026-07-15.)
 
 ## Wave: DISCUSS / [REF] Driving ports & prerequisites
 
-- **Driving port:** `/phil:edd "<intent>"` slash command (+ no-arg **resume** of an in-flight loop,
-  mirroring phil:work). Command→skill split per plugin convention.
+- **Driving port:** `/phil:edd "<intent>"` slash command. Command→skill split per plugin convention.
+  (A no-arg **resume** port mirroring phil:work is **deferred past v1** — see Out of scope.)
 - **Prerequisites / reuse:** nwave present; `phil:work` present (off-ramp/build targets);
   ADR-002 human-approval port; ADR-004 human-validated-claim (redesign-tests); refactor-loop's
   independent-critic pattern; ADR-005 delegation-with-inherited-oracle; ADR-006 doc-namespace pattern.
@@ -313,8 +316,8 @@ crafter expecting to write and green unit tests.
 
 ## Wave: DESIGN / [REF] Driving & driven ports
 
-- **Driving port:** `/phil:edd "<intent>"` (+ no-arg **resume** of an in-flight loop, mirroring
-  `phil:work`). Command→skill split.
+- **Driving port:** `/phil:edd "<intent>"`. Command→skill split. (No-arg **resume** deferred past
+  v1 — see DISCUSS Out of scope.)
 - **Driven ports & adapters:**
   | Driven port | Adapter | Notes |
   |---|---|---|
@@ -401,3 +404,79 @@ fixtures + `acceptance.feature`), mirroring how `phil-work` was distilled.
 by the DISTILL fixtures — **not** a code RED→GREEN cycle. The roadmap's step criteria are
 "Fixture NN reaches <STATE>" against `skills/edd/acceptance.feature`, exactly as `phil-work`'s
 `roadmap.json` was shaped.
+
+---
+
+## Wave: DISTILL / [REF] Reconciliation & reading
+
+- **Wave-Decision Reconciliation:** DISCUSS D1–D5 vs DESIGN DDD1–DDD8 — **0 contradictions**
+  (D3→DDD3 inline+seam; D5→DDD6/ADR-009 `docs/edd/`; D1/D2/D4 carried consistently). Gate passed.
+- **Prior-wave reads:** `journeys/edd-loop.yaml`, `architecture/brief.md` (edd-loop + C4),
+  `feature-delta.md` (DISCUSS+DESIGN), `slices/*`, ADR-007/008/009, and the `skills/work/self-test/`
+  precedent. Absent (WARN, proceed): `kpi-contracts.yaml` (KPIs live in this file), `devops/`
+  (prose feature, no infra), `spike/`.
+
+## Wave: DISTILL / [REF] Scenario list with tags
+
+Scenario SSOT: `skills/edd/acceptance.feature`. Decision outcomes: `OFF-RAMP · CLASSIFY-CHECKABLE ·
+GATE-POINT-EXISTING · GATE-COMMISSION · REJECT-NARRATION · BLOCK-DONE · DOCUMENT-TRAIL`.
+
+| # | Scenario | Tags | Fixture | Pins |
+|---|---|---|---|---|
+| 1 | All-checkable intent → engine, no ceremony | `@slice-01 @walking_skeleton @offramp` | `01-offramp-all-checkable` | AC1.1, KPI zero-ceremony |
+| 2 | Unclear expectation treated as provable unless concrete reason | `@slice-01 @classify` | `02-classify-bias-to-offramp` | AC1.2, AC1.3 |
+| 3 | Qualitative expectation reuses engine's existing evidence | `@slice-02 @gate` | `03-gate-evidence-exists` | AC2.1 |
+| 4 | Qualitative expectation → fresh evidence from a non-builder | `@slice-02 @gate @separation-of-powers` | `04-gate-commission-new` | AC2.2, AC2.4 |
+| 5 | Described-but-not-run claim rejected as narration | `@slice-02 @gate @error` | `05-reject-narration` | AC2.3, KPI narration-rejection |
+| 6 | Rejected qualitative expectation never reported done | `@slice-02 @adjudicate @error` | `06-blocked-done` | AC2.5, KPI no-false-done |
+| 7 | Trail written only when the gate ran | `@slice-02 @document` | `07-living-docs-gate-ran-only` | AC3.1–AC3.3, KPI zero-ceremony |
+
+Error/edge coverage: 3 of 7 scenarios are `@error`/safety-core (05, 06, plus the off-ramp-leak half
+of 07) ≈ 43%, meeting the ≥40% error-path target. Walking skeleton: exactly one (`@walking_skeleton`,
+scenario 1).
+
+## Wave: DISTILL / [REF] Test placement, strategy & infrastructure
+
+- **Placement:** `skills/edd/acceptance.feature` (scenario SSOT) + `skills/edd/self-test/` (7 golden
+  fixtures: `manifest.json` + `expected.md`, plus sample artifacts for fixtures 03 and 05) +
+  `skills/edd/self-test/README.md`. Mirrors `skills/work/self-test/` exactly.
+- **No pytest / scaffolds / Infrastructure-Policy bootstrap.** This plugin has **no CI runner**;
+  fixtures are driven by a human or the model, as `refactor-tests`/`work` established. Mandate-7 RED
+  code scaffolds and the pytest-bdd layout do not apply to a prose-skill feature (skill's
+  "project-conventions-win" frame). The equivalent RED gate is `distill/red-classification.md`.
+- **Port treatment:** driving port = the `/phil:edd` command (real, in dogfood). Driven side-effects
+  (engine build, evidence-producer, trail writes) are supplied via `manifest.json`
+  (`engine_evidence` / `producer_result` / `builder_agent` / `producer_agent` / `human_verdict`) so
+  the suite runs unattended — the same manifest-driven decision-test approach `phil-work` used for
+  its delegate results.
+
+## Wave: DISTILL / [REF] Separation-of-powers & narration — checkable assertions
+
+The two silent failure modes EDD exists to prevent are pinned as explicit fixture assertions:
+- **Producer ≠ builder** (fixture 04): `manifest.json` carries distinct `builder_agent` and
+  `producer_agent`; `expected.md` fails the gate if they coincide or if evidence is produced without a
+  real run.
+- **Narration ≠ evidence** (fixture 05): a described claim with no reproducible artifact must reach
+  `REJECT-NARRATION`; accepting it is a gate failure.
+
+## Wave: DISTILL / [REF] RED classification & scaffolds
+
+- **Scaffolds:** none (prose feature — `skills/edd/SKILL.md` and `agents/edd-evidence-producer.md`
+  are authored in DELIVER, not stubbed).
+- **RED state:** the suite is RED for the right reason (implementation missing), with zero BROKEN-class
+  problems. Full per-fixture classification: `docs/feature/edd-loop/distill/red-classification.md`.
+
+## Wave: DISTILL / [REF] Outcomes registry
+
+**Skipped — methodology/prose feature** (per the registry's code-feature gate-scoping). `/phil:edd`
+adds no new typed code contract surface; it is a prose orchestrator composing existing engines.
+
+## Wave: DISTILL / [REF] Handoff to DELIVER
+
+DELIVER builds, one slice at a time, gated by these fixtures (no code RED→GREEN — DDD8):
+- **Slice 01 (walking skeleton):** `commands/edd.md` + `skills/edd/SKILL.md` CAPTURE·CLASSIFY·OFF-RAMP
+  → fixtures **01, 02** reach `OFF-RAMP` / `CLASSIFY-CHECKABLE`.
+- **Slice 02:** BUILD delegation + evidence gate + adjudication + DOCUMENT, and forge-then-trim
+  `agents/edd-evidence-producer.md` → fixtures **03, 04, 05, 06, 07** reach their outcomes.
+Roadmap step criteria take the form "Fixture NN reaches <STATE>" against
+`skills/edd/acceptance.feature`, mirroring `phil-work`'s `roadmap.json`.

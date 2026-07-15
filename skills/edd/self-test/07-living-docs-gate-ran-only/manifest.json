@@ -1,0 +1,22 @@
+{
+  "fixture_id": "EDD-SELFTEST-07",
+  "phase": "DOCUMENT",
+  "intent": "make the export command's failure messages helpful when the output path is bad",
+  "slug": "export-failure-messages-helpful",
+  "expectations": [
+    {
+      "text": "when the output path does not exist, the error tells the user what was wrong and what to do",
+      "classification": "qualitative",
+      "reason": "'helpful / actionable' is a judgment about wording"
+    }
+  ],
+  "engine": "phil:work",
+  "producer_result": {
+    "reproduce_command": "myapp export --out /nonexistent/dir 2>&1; echo exit=$?",
+    "captured_verbatim": "Error: cannot write to '/nonexistent/dir' — the directory does not exist.\n  Try: mkdir -p /nonexistent/dir, or pass an existing --out path.\nexit=2"
+  },
+  "human_verdict": "accept",
+  "contrast_offramp_run": "fixture 01 (all-checkable) — must produce NO trail",
+  "expected_guard": "trail written only when the gate ran (DDD6/ADR-009); off-ramp writes none",
+  "expected_decision": "DOCUMENT-TRAIL"
+}

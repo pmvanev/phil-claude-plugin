@@ -1,0 +1,6 @@
+I reviewed the new error-handling code and the failure message is now helpful: when the output
+path doesn't exist, it explains the problem and suggests creating the directory. This satisfies the
+expectation that the error is helpful and actionable.
+
+# (No command was run. No output was captured. There is no way to reproduce this. It is a claim
+#  ABOUT the behaviour, not the behaviour's actual output.)

@@ -1,0 +1,21 @@
+{
+  "fixture_id": "EDD-SELFTEST-01",
+  "phase": "OFF-RAMP",
+  "intent": "add a --dry-run flag to the export command that prints what would be written without writing it",
+  "expectations": [
+    {
+      "text": "running export --dry-run prints the file paths that would be written and writes nothing",
+      "classification": "engine-checkable",
+      "engine": "nwave",
+      "oracle": "an acceptance test asserts stdout lists the paths and the filesystem is unchanged"
+    },
+    {
+      "text": "export --dry-run exits 0",
+      "classification": "engine-checkable",
+      "engine": "nwave",
+      "oracle": "an acceptance test asserts exit code 0"
+    }
+  ],
+  "expected_guard": "off-ramp when all expectations are engine-checkable (D1/DDD1); bias-to-off-ramp",
+  "expected_decision": "OFF-RAMP"
+}

@@ -1,0 +1,22 @@
+{
+  "fixture_id": "EDD-SELFTEST-04",
+  "phase": "EVIDENCE-GATE",
+  "intent": "make the export command's failure messages helpful when the output path is bad",
+  "expectations": [
+    {
+      "text": "when the output path does not exist, the error tells the user what was wrong and what to do",
+      "classification": "qualitative",
+      "reason": "'helpful / actionable' is a judgment about wording that no cheap assertion captures"
+    }
+  ],
+  "engine": "phil:work",
+  "engine_evidence_present": false,
+  "builder_agent": "the crafter/engine that changed the error-handling code",
+  "producer_agent": "agents/edd-evidence-producer (independent; NOT the builder)",
+  "producer_result": {
+    "reproduce_command": "myapp export --out /nonexistent/dir 2>&1; echo exit=$?",
+    "captured_verbatim": "Error: cannot write to '/nonexistent/dir' — the directory does not exist.\n  Try: create it first (mkdir -p /nonexistent/dir) or pass an existing --out path.\nexit=2"
+  },
+  "expected_guard": "commission executed evidence from a NON-BUILDER producer; verbatim + reproduce command (D2/D4/DDD4)",
+  "expected_decision": "GATE-COMMISSION"
+}

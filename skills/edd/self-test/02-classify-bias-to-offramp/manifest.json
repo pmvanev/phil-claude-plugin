@@ -1,0 +1,19 @@
+{
+  "fixture_id": "EDD-SELFTEST-02",
+  "phase": "CLASSIFY",
+  "intent": "improve the export command's error handling",
+  "expectations": [
+    {
+      "text": "when the target directory is not writable, export fails with a clear error and non-zero exit",
+      "classification": "unclear",
+      "note": "an acceptance test CAN assert 'non-zero exit' and 'stderr contains the path' cheaply — the provable part should be routed to the engine"
+    },
+    {
+      "text": "the error message should be helpful",
+      "classification": "offered-qualitative-without-reason",
+      "note": "no concrete reason given for why 'helpful' can't be reduced to a cheap assertion; under bias-to-off-ramp this defaults to engine-checkable until Avery names a concrete reason"
+    }
+  ],
+  "expected_guard": "bias-to-off-ramp: default to engine-checkable; confirm with Avery before marking anything qualitative (D1)",
+  "expected_decision": "CLASSIFY-CHECKABLE"
+}
