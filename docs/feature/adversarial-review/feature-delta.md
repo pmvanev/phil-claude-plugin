@@ -270,3 +270,82 @@ wiring. Slice 03 is **dropped**; the contract publication rides along in slice 0
 not touching other commands/skills." This aligns with ADR-008's precedent (edd refused to touch
 `phil:work`; extract/wire only when a real second consumer exists). Job traceability and the C1–C5
 constraints are unaffected. Upstream note filed at `docs/feature/adversarial-review/design/upstream-changes.md`.
+
+---
+
+## Wave: DISTILL / [REF] Typed verdict schema (the composition contract)
+
+Pattern-copied from `agents/refactor-critic-correctness.md`, generalized. This JSON is the reviewer's
+sole output and the contract every host/workflow reads (ADR-010 DDD2/DDD7).
+
+```json
+{
+  "justification": "<reasoning, written FIRST — reason-before-verdict>",
+  "overall_label": "sound-gate | draft-signal",
+  "verdict": "findings | clean | cannot-assess",
+  "confidence": 0.0,
+  "findings": [
+    {
+      "title": "<one-line statement of the defect>",
+      "kind": "hard | soft",
+      "severity": "major | minor | nit",
+      "confidence": 0.0,
+      "span": "<path:line-range, or the artifact locus>",
+      "mechanism": "<why it is a defect>",
+      "evidence": "<hard: the ACTUAL oracle result (exit code / failing test / broken ref / invalid frontmatter). soft: the offending lines + the intent/standard violated>"
+    }
+  ]
+}
+```
+
+Load-bearing schema rules (each pinned by a self-test fixture):
+- **No `done` / `not_done` / `approved` / `pass` field anywhere** — `verdict` is `findings | clean |
+  cannot-assess`, all **advisory**; none adjudicates the task (C3).
+- **`overall_label` is mechanical, not a judgment**: `sound-gate` iff ≥1 deterministic oracle backed
+  the review (a `kind:hard` finding citing a real result, or a `clean` verdict with an oracle that
+  ran); otherwise `draft-signal` (C4, ADR-011).
+- **`justification` is written first** (reason-before-verdict — consistency; from refactor-critic).
+- **`findings` ranked worst-first** (severity, then confidence) — nit-noise never buries the real
+  finding (anxiety B).
+- **No finding without a `span` + `evidence`.** Generic praise is not a finding; if that is all
+  there is, `verdict: cannot-assess` (C5 anti-flattery).
+
+## Wave: DISTILL / [REF] Scenario list with tags
+
+Scenario SSOT: `skills/adversarial-review/acceptance.feature`. Decision outcomes the reviewer must
+produce: `DRAFT-SIGNAL · SOUND-GATE · NEVER-SOUND-GATE · INDEPENDENT-DISPATCH · CANNOT-ASSESS ·
+ADVISORY-ONLY · CLEAN-PASS`.
+
+| Fixture | Situation | Pins | Guard under test | Outcome |
+|---|---|---|---|---|
+| `01-draft-signal-no-oracle` | no-oracle target (a doc/skill) | US-1, AC1.1–1.3, C4/C5 (**walking skeleton**) | soft review labeled honestly + ranked | `DRAFT-SIGNAL` |
+| `02-sound-gate-with-oracle` | code target + test suite | US-2, AC2.1–2.2, C2 | hard/soft partition; hard cites real result | `SOUND-GATE` |
+| `03-never-sound-gate-without-oracle` | no oracle, reviewer tempted to over-claim soundness | C4 (**the defining guard**) | label can't be `sound-gate` without an oracle | `NEVER-SOUND-GATE` |
+| `04-independent-dispatch` | builder reasoning present in context | C1 | dispatch curates input, excludes builder reasoning | `INDEPENDENT-DISPATCH` |
+| `05-cannot-assess-empty-praise` | reviewer tempted to praise with no span | C5 | anti-flattery coercion | `CANNOT-ASSESS` |
+| `06-advisory-never-self-adjudicate` | reviewer tempted to declare done/not-done | C3 (**anti-theatre / fox-henhouse**) | strip to advisory findings only | `ADVISORY-ONLY` |
+| `07-clean-pass-no-manufactured-findings` | nothing actually wrong | honest reporting | no invented findings; clean pass (soft-labeled) | `CLEAN-PASS` |
+
+`01` is the single `@walking_skeleton` scenario. The **safety core** (silent bug classes) is
+`03`, `04`, `06`: over-claiming soundness, a correlated (non-independent) dispatch, and the reviewer
+adjudicating its own verdict — each looks exactly like a smooth run.
+
+## Wave: DISTILL / [REF] Scaffolds & test placement
+
+- Scenario SSOT + fixtures under `skills/adversarial-review/` (mirrors edd/work/refactor-tests) —
+  **not** `tests/` (this is a prose plugin; the skill IS the SUT). No pytest collector; fixtures are
+  driven by a human or the model, exactly as `skills/work/self-test/` is.
+- RED-ready: until `skills/adversarial-review/SKILL.md` + `agents/adversarial-reviewer.md` exist
+  (DELIVER), the suite is RED for the right reason — implementation missing. See
+  `distill/red-classification.md`.
+
+## Wave: DISTILL / [REF] Register outcomes
+
+SKIPPED — methodology/prose feature; no `docs/product/outcomes/` registry in this plugin (D-6
+"code-feature pipelines only" gate-scoping), consistent with DESIGN's Outcome Collision Check skip.
+
+## Wave: DISTILL / [REF] Pre-requisites
+
+DELIVER builds `skills/adversarial-review/SKILL.md`, `commands/adversarial-review.md`,
+`agents/adversarial-reviewer.md` to satisfy these scenarios. The self-test suite is the
+acceptance + regression gate; run it whenever the skill/agent/command changes.
