@@ -58,6 +58,34 @@ be a lookup wrapper.
 - **Projects v2 remains owner-scoped**, so a GitHub board cannot be driven by a repository-scoped
   token. Noted, not solved.
 
+## Amendment — cross-linking and dependency chains
+
+Two sections added after first ship: `## Link what the forge cannot resolve` and `## Leave a chain
+when you pivot`.
+
+The motivating request was "hyperlink every reference." Rendering the same issue body through both
+forges' `POST /markdown` endpoints showed the naive form is wrong twice over:
+
+- **Relative paths split the forges silently.** GitLab expands `[adr](docs/adr/016.md)` to a blob
+  URL on the default branch; GitHub emits the href verbatim, where it resolves against the *issue*
+  URL and 404s. Both render a link, so the GitHub failure is invisible until clicked. A leading
+  slash changes nothing. Absolute URLs are the only portable form.
+- **Wrapping an issue reference downgrades it.** A bare `#12` is a live reference carrying title and
+  state (GitHub delivers it as a hovercard); `[#12](…/issues/12)` is an ordinary link that drops all
+  of it. So the rule is *not* "link everything" — it is link what the forge cannot resolve, and
+  leave alone what it can.
+
+A useful side effect: both forges autolink a reference only when the issue exists, so a `#12` still
+rendered as plain text is a free wrong-number check on read-back.
+
+The chain sections record why work stopped, not just that it did — the edge is what the forge
+stores, the reason is what only the author has. Written on both issues before starting the blocker,
+because that is when the reason exists. Not hand-maintained afterwards: the linked issue is
+authoritative about its own state, and a copy in the blocked issue can only go stale.
+
+One claim ships marked unverified — GitLab's `#L40-52` line-anchor form, since no project on the
+available instance had issues to render against. GitHub's `#L40-L52` is confirmed.
+
 ## Follow-ups
 
 - `plugin-dev:skill-reviewer` raised ~30 medium/low findings across today's three skills that were

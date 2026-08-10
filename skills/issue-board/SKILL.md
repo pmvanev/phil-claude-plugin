@@ -1,6 +1,6 @@
 ---
 name: issue-board
-description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — creating or updating issues, moving a card between board columns, setting a status label or a Projects v2 Status field, grooming a forge backlog, linking blockers, or connecting to a self-hosted GitLab instance. Covers the forge semantics `glab --help` and `gh --help` do not explain, where a wrong guess reports success.
+description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — creating or updating issues, moving a card between board columns, setting a status label or a Projects v2 Status field, grooming a forge backlog, cross-linking an issue to a file, an ADR, or another issue, recording a dependency chain when work pivots to a blocker, or connecting to a self-hosted GitLab instance. Covers the forge semantics `glab --help` and `gh --help` do not explain, where a wrong guess reports success.
 ---
 
 # Driving GitLab and GitHub Issue Boards
@@ -78,6 +78,53 @@ If a project needs a list rather than a board, plain issues plus open/closed is 
 with a repository-scoped token — which a Projects v2 board cannot, because projects are
 owner-scoped.
 
+## Link what the forge cannot resolve
+
+An issue is read on its own page, away from the repo and away from you. Every reference a reader
+might need to follow — a file, an ADR, a sibling issue — should be traversable by clicking. Two
+rules, and they pull in opposite directions.
+
+**Do not wrap what the forge already autolinks.** A bare `#12` becomes a live reference carrying the
+issue's title and state — on GitHub, as a hovercard on the rendered link. `[#12](https://…/issues/12)`
+renders as an ordinary link with none of that, and adds a URL to maintain. Leave bare: `#12` and
+`owner/repo#12` on GitHub; `#12`, `group/project#12`, `!34` (MR), `%2` (milestone), `~label`,
+`@user` on GitLab; commit SHAs on both.
+
+Both forges autolink an issue reference **only when the issue exists**. A `#12` still rendering as
+plain text after you post is the forge telling you the number is wrong — read the body back and use
+it as a free correctness check. GitHub shares one number space between issues and pull requests, so
+`#12` may resolve to a PR.
+
+**Write an absolute URL for everything else.** Relative paths are the trap, because the two forges
+disagree and both render a link either way:
+
+| `[adr](docs/adr/016.md)` in an issue body | Result |
+|---|---|
+| GitLab | expands to `<host>/<project>/-/blob/<default-branch>/docs/adr/016.md` ✅ |
+| GitHub | emitted verbatim, resolved against the *issue* URL → **404** |
+
+Verified by rendering the same body through both forges' markdown APIs (`POST /markdown`). A
+leading slash does not save it: GitLab resolves `/docs/…` identically, GitHub emits it verbatim and
+it resolves to `github.com/docs/…`. Absolute URLs work on both — write those and the question never
+comes up.
+
+- **Docs and ADRs** — link at the default branch, so the reader gets current content:
+  `https://<host>/<owner>/<repo>/blob/main/docs/adr/ADR-016.md` on GitHub,
+  `https://<host>/<project>/-/blob/main/…` on GitLab. Note the `/-/` — GitLab needs it, GitHub has
+  no such segment.
+- **A specific line of code** — use a commit-SHA permalink, never a branch. A line anchor against a
+  moving branch drifts onto unrelated code and stays plausible while doing it. Anchor syntax
+  differs: GitHub `#L40-L52`, GitLab `#L40-52` *(GitLab form unverified — confirm on your
+  instance)*.
+- **Confirm the path is pushed** before linking it. A file that exists only in your working tree
+  produces a link that renders correctly, passes your read-back, and 404s for every other reader.
+  Resolve the path in the repo first, then check it is on the default branch.
+
+On GitHub only, `gh api repos/<owner>/<repo>/autolinks` maps a prefix to a URL template, so every
+bare `ADR-016` becomes a link — including ones a human types, with no markdown. It needs admin, is
+configured per repository, and has no GitLab equivalent, so treat it as a bonus on top of writing
+real links, never as the mechanism you rely on.
+
 ## Dependencies depend on the tier
 
 - **GitLab Premium and above**: real link types — `blocks`, `is_blocked_by` — enforced by GitLab
@@ -88,6 +135,36 @@ owner-scoped.
   above. Use `relates_to` and carry the direction in a `Blocked by #N` line in the description.
 - **GitHub**: no native dependency links. Task lists and issue references in the body are the
   practical equivalent.
+
+## Leave a chain when you pivot
+
+Recognizing a blocker mid-work and switching to it — whether the blocker already existed or you
+just created it — is the moment the reasoning exists only in your head. Write both ends **before**
+starting work on the blocker, not after you finish it.
+
+Under a fixed `## Chain` heading in each issue's **description**. Descriptions are what a reader
+sees on landing; a comment scrolls away and has to be hunted for.
+
+```
+On #12:  Blocked by #47 — token refresh must land first or the retry test can't be written
+On #47:  Blocks #12 — split out of it on 2026-08-10
+```
+
+The forge records the edge; the clause after the dash records why you stopped. Six issues deep, the
+edge alone tells you what blocked but not what you were in the middle of.
+
+Write both directions by hand unless GitLab Premium is writing them for you:
+
+| Forge | Backlink written for you |
+|---|---|
+| GitLab Premium+ | Yes — `blocks` / `is_blocked_by` render on both issues. Add the prose line anyway; the link carries no reason. |
+| GitLab Free | No — only `relates_to`, which carries no direction. |
+| GitHub | No — a mention creates a cross-reference event on the target, but nothing states which way the dependency runs. |
+
+Do not hand-maintain the chain as blockers close. The linked issue is authoritative about its own
+state and is one click away, so editing #12 to say #47 closed just creates a second copy that can
+go stale. This is the second reason to leave the reference bare: a live reference exposes that
+state at the link, a hand-written markdown link does not.
 
 ## Bulk seeding needs two passes
 
@@ -156,5 +233,6 @@ cannot be discovered:
 - Tier: Premium (scoped labels swap server-side; real `blocks` links) | Free (swap manually with
   `--unlabel`; `relates_to` only)
 - Status lives in `status::` labels — swap, never add a board list
+- Docs root for links: `https://<host>/<project>/-/blob/main/docs/` — `ADR-016` → `<docs root>adr/ADR-016.md`
 - (optional) <local task system> owns in-flight work; issues own the outward-facing tier
 ```
