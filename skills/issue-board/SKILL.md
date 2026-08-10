@@ -1,6 +1,6 @@
 ---
 name: issue-board
-description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — creating or updating issues, moving a card between board columns, setting a status label or a Projects v2 Status field, grooming a forge backlog, cross-linking an issue to a file, an ADR, or another issue, recording a dependency chain when work pivots to a blocker, or connecting to a self-hosted GitLab instance. Covers the forge semantics `glab --help` and `gh --help` do not explain, where a wrong guess reports success.
+description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — moving a card between board columns, setting a status label or a Projects v2 Status field, hyperlinking or cross-linking references in an issue body to a file, an ADR, or another issue, marking an issue blocked by another and recording why, or connecting to a self-hosted GitLab instance. Covers the forge semantics `glab --help` and `gh --help` do not explain, where a wrong guess reports success.
 ---
 
 # Driving GitLab and GitHub Issue Boards
@@ -86,21 +86,35 @@ rules, and they pull in opposite directions.
 
 **Do not wrap what the forge already autolinks.** A bare `#12` becomes a live reference carrying the
 issue's title and state — on GitHub, as a hovercard on the rendered link. `[#12](https://…/issues/12)`
-renders as an ordinary link with none of that, and adds a URL to maintain. Leave bare: `#12` and
-`owner/repo#12` on GitHub; `#12`, `group/project#12`, `!34` (MR), `%2` (milestone), `~label`,
-`@user` on GitLab; commit SHAs on both.
+renders as an ordinary link with none of that, and adds a URL to maintain. Leave these bare:
 
-Both forges autolink an issue reference **only when the issue exists**. A `#12` still rendering as
-plain text after you post is the forge telling you the number is wrong — read the body back and use
-it as a free correctness check. GitHub shares one number space between issues and pull requests, so
-`#12` may resolve to a PR.
+| | Autolinked without markdown |
+|---|---|
+| Both | `#12`, `@user`, commit SHAs |
+| GitHub also | `owner/repo#12` |
+| GitLab also | `group/project#12`, `!34` (MR), `%2` (milestone), `~label` |
+
+Both forges autolink an issue reference **only when the issue exists**, which makes a read-back a
+free wrong-number check — but only against *rendered* output. `gh issue view --json body` returns
+the raw markdown, where `#12` is literal text whether or not it resolves, so checking there proves
+nothing either way. Render it:
+
+```sh
+gh api -X POST /markdown -f mode=gfm -f context=<owner>/<repo> \
+  -f text="$(gh issue view 12 -R <owner>/<repo> --json body -q .body)"
+# GitLab: POST /api/v4/markdown with gfm=true and project=<group/project>
+```
+
+Plain text means the number is wrong **or** you cannot read the target — a confidential issue or a
+private project renders identically. GitHub shares one number space between issues and pull
+requests, so `#12` may resolve to a PR.
 
 **Write an absolute URL for everything else.** Relative paths are the trap, because the two forges
 disagree and both render a link either way:
 
 | `[adr](docs/adr/016.md)` in an issue body | Result |
 |---|---|
-| GitLab | expands to `<host>/<project>/-/blob/<default-branch>/docs/adr/016.md` ✅ |
+| GitLab | expands to `<host>/<project>/-/blob/<default-branch>/docs/adr/016.md` |
 | GitHub | emitted verbatim, resolved against the *issue* URL → **404** |
 
 Verified by rendering the same body through both forges' markdown APIs (`POST /markdown`). A
@@ -109,19 +123,27 @@ it resolves to `github.com/docs/…`. Absolute URLs work on both — write those
 comes up.
 
 - **Docs and ADRs** — link at the default branch, so the reader gets current content:
-  `https://<host>/<owner>/<repo>/blob/main/docs/adr/ADR-016.md` on GitHub,
-  `https://<host>/<project>/-/blob/main/…` on GitLab. Note the `/-/` — GitLab needs it, GitHub has
-  no such segment.
+  `https://<host>/<owner>/<repo>/blob/<default-branch>/docs/adr/ADR-016.md` on GitHub,
+  `https://<host>/<project>/-/blob/<default-branch>/…` on GitLab. Note the `/-/` — GitLab needs it,
+  GitHub has no such segment.
 - **A specific line of code** — use a commit-SHA permalink, never a branch. A line anchor against a
   moving branch drifts onto unrelated code and stays plausible while doing it. Anchor syntax
-  differs: GitHub `#L40-L52`, GitLab `#L40-52` *(GitLab form unverified — confirm on your
-  instance)*.
+  differs: GitHub `#L40-L52`, GitLab `#L40-52` *(GitLab form unverified — confirm by clicking a line
+  number on any file in your instance; GitLab writes the anchor into the address bar)*.
 - **Confirm the path is pushed** before linking it. A file that exists only in your working tree
   produces a link that renders correctly, passes your read-back, and 404s for every other reader.
-  Resolve the path in the repo first, then check it is on the default branch.
+  Resolve it against the branch you are linking, not your checkout:
+  `git ls-tree origin/<default-branch> -- <path>` prints nothing if the file is not there.
 
-On GitHub only, `gh api repos/<owner>/<repo>/autolinks` maps a prefix to a URL template, so every
-bare `ADR-016` becomes a link — including ones a human types, with no markdown. It needs admin, is
+On GitHub only, a repository can map a prefix to a URL template, so every bare `ADR-016` becomes a
+link — including ones a human types, with no markdown:
+
+```sh
+gh api --method POST repos/<owner>/<repo>/autolinks \
+  -f key_prefix='ADR-' -f url_template='https://…/docs/adr/ADR-<num>.md'
+```
+
+The same path without `--method POST` lists what is already configured. It needs admin, is
 configured per repository, and has no GitLab equivalent, so treat it as a bonus on top of writing
 real links, never as the mechanism you rely on.
 
@@ -133,8 +155,18 @@ real links, never as the mechanism you rely on.
   *(command form unverified — check whether your `glab` exposes a subcommand for this).*
 - **GitLab Free**: only `relates_to` is available; `blocks` and `is_blocked_by` are Premium and
   above. Use `relates_to` and carry the direction in a `Blocked by #N` line in the description.
-- **GitHub**: no native dependency links. Task lists and issue references in the body are the
-  practical equivalent.
+- **GitHub**: native `blocked by` / `blocking` links and sub-issues, exposed as first-class flags.
+  These are recent — older guidance says GitHub has none, so check `gh --version` before believing
+  it. Verified on `gh` 2.97.0:
+
+  ```sh
+  gh issue edit 123 -R owner/repo --add-blocked-by 200 --add-blocking 300,301
+  gh issue edit 100 -R owner/repo --add-sub-issue 123,124   # or: --parent 100 on the child
+  ```
+
+  Each flag takes an issue number or a URL, so links cross repositories. It is one edge read from
+  both ends — `blockedBy` and `blocking` are both fields on `Issue` in GraphQL — so the reverse side
+  needs no second write.
 
 ## Leave a chain when you pivot
 
@@ -142,24 +174,25 @@ Recognizing a blocker mid-work and switching to it — whether the blocker alrea
 just created it — is the moment the reasoning exists only in your head. Write both ends **before**
 starting work on the blocker, not after you finish it.
 
-Under a fixed `## Chain` heading in each issue's **description**. Descriptions are what a reader
-sees on landing; a comment scrolls away and has to be hunted for.
+Put it under a fixed `## Chain` heading in each issue's **description**. Descriptions are what a
+reader sees on landing; a comment scrolls away and has to be hunted for.
 
+In #12's description:
+
+```markdown
+## Chain
+
+Blocked by #47 — token refresh must land first or the retry test can't be written
 ```
-On #12:  Blocked by #47 — token refresh must land first or the retry test can't be written
-On #47:  Blocks #12 — split out of it on 2026-08-10
-```
+
+And the mirror, in #47's: `Blocks #12 — split out of it on 2026-08-10`.
 
 The forge records the edge; the clause after the dash records why you stopped. Six issues deep, the
 edge alone tells you what blocked but not what you were in the middle of.
 
-Write both directions by hand unless GitLab Premium is writing them for you:
-
-| Forge | Backlink written for you |
-|---|---|
-| GitLab Premium+ | Yes — `blocks` / `is_blocked_by` render on both issues. Add the prose line anyway; the link carries no reason. |
-| GitLab Free | No — only `relates_to`, which carries no direction. |
-| GitHub | No — a mention creates a cross-reference event on the target, but nothing states which way the dependency runs. |
+Where the forge writes the reverse edge for you — GitHub, and GitLab Premium — it writes only the
+edge, never the reason, so the prose line goes on both issues either way. See *Dependencies depend
+on the tier* above for what each forge gives you.
 
 Do not hand-maintain the chain as blockers close. The linked issue is authoritative about its own
 state and is one click away, so editing #12 to say #47 closed just creates a second copy that can

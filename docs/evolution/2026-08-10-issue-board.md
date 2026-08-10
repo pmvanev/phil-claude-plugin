@@ -86,6 +86,27 @@ authoritative about its own state, and a copy in the blocked issue can only go s
 One claim ships marked unverified — GitLab's `#L40-52` line-anchor form, since no project on the
 available instance had issues to render against. GitHub's `#L40-L52` is confirmed.
 
+## Correction — GitHub does have dependency links
+
+A `plugin-dev:skill-reviewer` pass over the amendment doubted "GitHub: no native dependency links"
+without being able to assert the alternative. Checking settled it: `gh issue edit` carries
+`--add-blocked-by`, `--add-blocking`, `--add-sub-issue`, and `--parent`, and the GraphQL `Issue`
+type exposes `blockedBy`, `blocking`, `parent`, and `subIssues`. The claim was not stale, it was
+wrong — and it was wrong in a skill whose entire premise is that a wrong guess about forge semantics
+reports success.
+
+Two things follow. The **absolute negative is the dangerous shape**: "X has no Y" reads as settled
+and gets no re-check, while "confirm against your version" invites one. The skill already opens by
+telling the reader to check `gh --version` before trusting board behavior, and then failed to apply
+that to itself. Capability claims about a moving forge now name the version they were verified on.
+
+The same pass caught a check that could not fire: "a `#12` still rendering as plain text means the
+number is wrong" is true of *rendered* output, but `gh issue view --json body` returns raw markdown,
+where `#12` is literal text unconditionally. The section named a retrieval path that defeated its
+own test. Replaced with a `POST /markdown` round-trip, verified — `#3` renders with an `href`,
+`#999` stays plain text — plus the caveat that an unreadable target renders identically to a wrong
+number.
+
 ## Follow-ups
 
 - `plugin-dev:skill-reviewer` raised ~30 medium/low findings across today's three skills that were
