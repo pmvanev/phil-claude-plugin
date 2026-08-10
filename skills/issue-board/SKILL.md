@@ -125,6 +125,17 @@ half-updated.
 Read back what was written. `glab issue list` and `gh issue list` are cheap, and a board operation
 that reports success while placing a card in the wrong column is the characteristic failure here.
 
+**GitHub Projects v2 reads lag writes.** Three consequences, learned the hard way:
+
+- `gh project item-add` exits **0 with no output** whether or not the item landed. The exit code is
+  not evidence.
+- `gh project list` and `gh project item-list` can under-report — an empty result is not proof of an
+  empty board. Treat `gh api graphql` as the source of truth, and **pause and re-read** before
+  concluding a write failed. Adding the same issue twice is idempotent, so a retry is safe.
+- **Check for an existing project before creating one**, and do not trust a single empty
+  `gh project list` to tell you there isn't one. This is exactly how a duplicate board gets built
+  alongside the real one.
+
 ## One system of record per scope
 
 Do not sync a local task file and a forge board — two authorities over the same item generate
