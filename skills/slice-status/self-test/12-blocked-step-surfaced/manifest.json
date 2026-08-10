@@ -1,0 +1,13 @@
+{
+  "fixture": "12-blocked-step-surfaced",
+  "situation": "A step died mid-run. The execution log has no COMMIT/PASS for it, and .develop-progress.json records the failure point. By position alone it is simply the first not-done step.",
+  "invocation": "/phil:slice-status rate-limiting 02",
+  "artifacts": {
+    "docs/feature/rate-limiting/deliver/roadmap.json": {
+      "phases": "02, steps 02-01 .. 02-03"
+    },
+    "docs/feature/rate-limiting/deliver/execution-log.json": "COMMIT/PASS for 02-01 only",
+    ".develop-progress.json": "records a failure at step 02-02: acceptance scenario 'burst window resets' red after 3 attempts"
+  },
+  "expected_outcome": "BLOCKED"
+}

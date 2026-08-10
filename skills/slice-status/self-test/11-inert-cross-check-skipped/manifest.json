@@ -1,0 +1,15 @@
+{
+  "fixture": "11-inert-cross-check-skipped",
+  "situation": "The real phil-work layout. implementation_scope is a top-level object on the roadmap, not a per-step field, and all five steps carry the identical test_file. A git log over those paths returns the same commits for every step and cannot discriminate between them.",
+  "invocation": "/phil:slice-status phil-work",
+  "artifacts": {
+    "docs/feature/phil-work/deliver/roadmap.json": {
+      "top_level_keys": ["roadmap", "phases", "implementation_scope", "validation"],
+      "implementation_scope": "top-level only: source_directories, test_directories, excluded_patterns — no per-step field",
+      "every_step_test_file": "skills/work/acceptance.feature",
+      "per_step_implementation_scope": false
+    },
+    "git_log": "commands/ and skills/work/ have many commits; a log over them returns the same result for all five steps"
+  },
+  "expected_outcome": "CROSS-CHECK-SKIPPED"
+}

@@ -1,9 +1,14 @@
 {
   "fixture": "04-disagreeing-sources-named",
-  "situation": "The real edd-loop case. The slices/ directory holds three slice files, but roadmap.json defines only two phases. The sources disagree about how many slices this feature has.",
+  "situation": "The real edd-loop case. The slices/ directory holds three slice files, but roadmap.json defines only two phases. The third slice file declares itself out of scope in both its heading and a Status line — so it is not merely missing a phase, it was deliberately deferred.",
   "invocation": "/phil:slice-status edd-loop",
   "artifacts": {
     "docs/feature/edd-loop/slices/": ["slice-01-triage-and-off-ramp.md", "slice-02-qualitative-evidence-gate.md", "slice-03-cross-domain-sequencing.md"],
+    "docs/feature/edd-loop/slices/slice-03-cross-domain-sequencing.md": {
+      "heading": "# Slice 03 — Cross-domain sequencing & seam-level expectations (DEFERRED — post-v1)",
+      "status_line": "**Status:** OUT of v1. Recorded here so the later capability has a home; do NOT build in this cycle.",
+      "goal_line_format": "**Goal (one sentence):**"
+    },
     "docs/feature/edd-loop/deliver/roadmap.json": {
       "phases": "01, 02 only",
       "steps": "01-01 (status done), 02-01 (status done)"

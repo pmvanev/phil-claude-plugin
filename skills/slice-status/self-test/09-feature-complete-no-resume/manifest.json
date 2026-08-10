@@ -1,0 +1,15 @@
+{
+  "fixture": "09-feature-complete-no-resume",
+  "situation": "Every step of every slice is done. There is no first-not-done step, so the rule that picks 'current' has nothing to select and the resume line has nothing to resume.",
+  "invocation": "/phil:slice-status checkout-redesign",
+  "artifacts": {
+    "docs/feature/checkout-redesign/deliver/roadmap.json": {
+      "phases": "01, 02",
+      "steps": "01-01 done, 01-02 done, 02-01 done"
+    },
+    "docs/feature/checkout-redesign/deliver/execution-log.json": "COMMIT/PASS for all three steps",
+    "docs/feature/checkout-redesign/slices/": ["slice-01-cart-totals.md", "slice-02-payment-handoff.md"],
+    "no_deferred_slices": true
+  },
+  "expected_outcome": "COMPLETE"
+}
