@@ -10,3 +10,6 @@ __pycache__/
 
 # Machine-local Claude Code settings (permissions etc.)
 .claude/settings.local.json
+# nWave activation marker (keep .nwave/local-config.json trackable)
+.nwave/*
+!.nwave/local-config.json
