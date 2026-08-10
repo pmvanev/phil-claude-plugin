@@ -1,6 +1,6 @@
 ---
 name: red-team-prose
-description: Skill bundle for phil:red-team-prose command — red-teams a document from all three prose angles in one pass, AI-generated tells (ai-eos) plus Elements of Style clarity (eos) plus document fitness for audience and purpose (rules/technical-communication.md), as a single ranked report with an approval gate before any edit
+description: Skill bundle for phil:red-team-prose command — reviews a doc, README, or release note for AI-generated tells, Elements of Style clarity, and fitness for its audience, as one worst-first report with an opt-in fix pass. Use when asked to red-team, de-AI, or publish-check prose.
 ---
 
 # Red-Team Prose
@@ -9,15 +9,9 @@ You are red-teaming a document against **all three** prose standards this plugin
 
 | Pass | Tag | Source | Asks |
 |------|-----|--------|------|
-| **Tells** | `[tells]` | `skills/ai-eos/SKILL.md` | Does this read as AI-generated? |
-| **Clarity** | `[clarity]` | `skills/eos/SKILL.md` | Is this clear, concise, and active? |
-| **Fitness** | `[fitness]` | `rules/technical-communication.md` | Is this fit for its reader and purpose? |
-
-The three catch different failures at different altitudes, so the overlap is small:
-
-- `ai-eos` finds prose that is **hollow** — grand claims carrying no fact, participle clauses padding cadence. *Register.*
-- `eos` finds prose that is **slack** — passive voice, needless words, weak endings. *Sentence.*
-- `technical-communication` finds prose that is **unfit** — no named reader, missing prerequisites, unnavigable structure, a true-sentences-false-whole document. *Document.*
+| **Tells** | `[tells]` | `${CLAUDE_PLUGIN_ROOT}/skills/ai-eos/SKILL.md` | Does this read as AI-generated? (*register*) |
+| **Clarity** | `[clarity]` | `${CLAUDE_PLUGIN_ROOT}/skills/eos/SKILL.md` | Is this clear, concise, and active? (*sentence*) |
+| **Fitness** | `[fitness]` | `${CLAUDE_PLUGIN_ROOT}/rules/technical-communication.md` | Is this fit for its reader and purpose? (*document*) |
 
 A document can fail any one independently. The third is the one the other two structurally cannot catch: every sentence can be tight, active, and free of tells while the document still omits what the reader needed.
 
@@ -33,13 +27,15 @@ Determine what `$ARGUMENTS` refers to:
 
 | Pattern | Type | Example |
 |---------|------|---------|
-| `--changes` | Latest git changes | `--changes` |
-| Digits separated by `-` or `:` | Line range | `42-67`, `42:67` |
+| `--changes` | Uncommitted changes | `--changes` |
+| Digits separated by `-` or `:`, with an optional `lines:` prefix | Line range | `42-67`, `42:67`, `lines:42-67` |
 | Has a file extension | File path | `README.md`, `docs/setup.md` |
 | Ends with `/` or a directory with no extension | Directory path | `docs/`, `skills/` |
 | No argument | Prose in the current context | — |
 
-Pass the argument through to all three passes unchanged, so they review exactly the same span.
+Resolve the argument once; give all three passes the same span.
+
+**Directory mode.** Emit one verdict triple and one findings list **per file**, files ordered worst verdict first, preceded by a one-line roll-up. For large directories (>20 files), use an Explore agent to parallelize reading, as `ai-eos` specifies.
 
 **One exception.** The fitness pass judges the document as a whole — audience, completeness, structure. A line range cannot be judged for comprehensiveness or navigability. When the argument is a line range, read the whole file for the fitness pass, scope the other two to the range, and say so in the report.
 
@@ -49,25 +45,39 @@ Pass the argument through to all three passes unchanged, so they review exactly 
 
 Read the target **once** and hold it for all three passes. Do not read the file three times.
 
-Resolve the argument as `ai-eos` Step 1 specifies (`--changes` → `git diff HEAD~1 --name-only` filtered to `**/*.{md,txt,rst}`; line range → read with surrounding context; directory → glob recursively). Review prose only — skip code blocks, frontmatter, config, link URLs, and generated output.
+Resolve the argument as `ai-eos` Step 1 specifies (`--changes` → `git diff --name-only HEAD` filtered to `**/*.{md,txt,rst}`, then `git diff HEAD -- {file}` per file; line range → read with surrounding context; directory → glob recursively). Review prose only — skip code blocks, frontmatter, config, link URLs, and generated output.
 
 ---
 
 ## Step 2: Run the Tells Pass
 
-Load `skills/ai-eos/SKILL.md` and apply its catalog and tiers to the text. Honor its `What NOT to Flag` section in full — especially the em-dash rule and the single-vocabulary-hit rule. Compute its density verdict.
+Load `${CLAUDE_PLUGIN_ROOT}/skills/ai-eos/SKILL.md` and apply its catalog and tiers to the text. Honor its `What NOT to Flag` section in full — especially the em-dash rule, the single-vocabulary-hit rule, and the illustrative-spans rule. Compute its density verdict.
+
+Clustered whiffs report as `[tells]` findings with the whiff mechanism named and the cluster quoted. Unclustered whiffs are not reported and do not affect the density count.
+
+**Overrides while composing.** A sibling skill's own report template is suppressed — its findings feed the merged report at Step 5 only, never a second report of its own. `ai-eos`'s **Never edit** holds through Steps 1–5 and is lifted at Step 6 for `[auto-applicable]` fixes only. `eos` never writes before approval.
 
 ---
 
 ## Step 3: Run the Clarity Pass
 
-Load `skills/eos/SKILL.md` and apply its ten editing rules to the same text — but **diagnostically**. Identify each violation and its rewrite; do not edit the file yet. Honor `eos`'s Safety section: preserve meaning, formatting, tone, and domain terminology.
+Load `${CLAUDE_PLUGIN_ROOT}/skills/eos/SKILL.md` and apply its ten editing rules to the same text — but **diagnostically**. Identify each violation and its rewrite; do not edit the file yet. Honor `eos`'s Safety section: preserve meaning, formatting, tone, and domain terminology. Its File Path mode — which edits in place and emits its own summary — is suppressed here; both are deferred to Steps 5 and 6.
 
 ---
 
 ## Step 4: Run the Fitness Pass
 
-Load `rules/technical-communication.md` and apply it to the document **as a whole**. This pass is not span-by-span like the other two — it walks the measures of excellence and the checklist, asking whether the document serves its reader.
+Load `${CLAUDE_PLUGIN_ROOT}/rules/technical-communication.md` and apply it to the document **as a whole**. This pass is not span-by-span like the other two — it walks the measures of excellence and the checklist, asking whether the document serves its reader.
+
+The fitness verdict uses this scale, so runs stay comparable:
+
+| Verdict | Signal |
+|---------|--------|
+| **unfit** | the audience is never identifiable, **or** a reader cannot act on the document |
+| **serviceable** | usable, but one or more measures fail |
+| **fit** | no measure fails |
+
+State which measures fail alongside the verdict.
 
 Check, in this order:
 
@@ -90,7 +100,10 @@ The three catalogs collide in a few places. Assign each finding to exactly one p
 | Finding | Owner | Why |
 |---------|-------|-----|
 | "utilize" → "use", "facilitate" → "help" | `eos` (fancy words) | A plain-word substitution, not a tell |
-| "seamless", "robust", "cutting-edge" | `ai-eos` (promotional register) | Marketing register, not verbosity |
+| "seamless", "cutting-edge" | `ai-eos` (promotional register) | Marketing register, not verbosity |
+| "robust", "delve", "underscore" — single words | `ai-eos` (era vocabulary, **whiff**) | Only counts when three or more cluster |
+| Title Case headings, skipped levels, `---` before a heading | `ai-eos` (formatting tells) | Deviation from the file's own pattern |
+| Label-only headings, wrong nesting depth, unnavigable structure | `[fitness]` | A structure defect, not a register one |
 | "it is important to note that" | `eos` (needless words) | Deletable filler with no AI signature |
 | "highlighting its importance in..." | `ai-eos` (participle padding) | The signature construction |
 | "absolutely essential", "completely unique" | `eos` (do not overstate) | Intensifier misuse |
@@ -100,7 +113,7 @@ The three catalogs collide in a few places. Assign each finding to exactly one p
 | Conciseness, correctness, sentence-level clarity | `eos` | `technical-communication` names these measures but defers to `writing.md` for them |
 | Overstated *register* ("powerful", "seamless") | `ai-eos` | Tone inflation |
 | Misleading or missing *content* | `[fitness]` (honesty, comprehensiveness) | A content defect, not a word choice |
-| Headings, nesting, navigability, prerequisites | `[fitness]` | No sentence-level equivalent |
+| Prerequisites, missing sections | `[fitness]` | No sentence-level equivalent |
 | Audience mismatch, undefined purpose | `[fitness]` | Only this pass asks the question |
 
 The honesty split is the one worth getting right: **`ai-eos` owns register, `[fitness]` owns content.** "A powerful, seamless solution" is a tells finding. "Claims 40% faster without saying faster than what" is a fitness finding. When a span genuinely violates two passes, report it once under the more severe and note the other rule on the same line. Never list one span twice.
@@ -156,7 +169,7 @@ After reporting, ask once:
 
 Then:
 
-- **On approval** — apply only the `[auto-applicable]` fixes, using `eos`'s editing discipline for clarity fixes and plain deletion for tells fixes. Report what you changed, per line.
+- **On approval** — apply only the `[auto-applicable]` fixes, using each pass's own fix form: `eos`'s rewrite discipline for clarity findings, and `ai-eos`'s stated fix for tells (cut, or the plain form it names). Report what you changed, per line.
 - **On refusal, or no answer** — change nothing. The report is the deliverable.
 - **Never** apply a `[NEEDS YOU]` finding. Not on approval, not on a follow-up "fix everything." Those need information the document does not contain.
 
@@ -167,7 +180,7 @@ Applying is opt-in every time. Do not offer to apply before the full report, and
 ## Safety
 
 - **Never invent a fact** to replace vagueness, and **never write the missing section.** This is the single hardest rule here, and the fitness pass raises the stakes: `eos`'s habit is to rewrite, `ai-eos` findings often *look* rewritable, and a missing-prerequisites finding is a standing invitation to invent prerequisites. "Plays a crucial role in validation" cannot become "validates the request schema" unless you verified that it does. Flag the gap and stop.
-- **Never accuse the author.** Report tells in the text, not conclusions about provenance. Detection is unreliable and humans perform near chance — you are reporting style, not authorship.
+- **Never accuse the author.** Report tells in the text, not conclusions about provenance. Detection is unreliable and this skill does not attempt it — you are reporting style, not authorship.
 - **Respect every `What NOT to Flag` boundary.** `ai-eos` protects the em dash as a mark, single vocabulary hits, correct technical terms, and this project's deliberate house style. `eos` protects meaning, formatting, tone, and domain terminology. A three-pass composite is not a licence to flag more than any pass would alone — it is three lenses, not a lower bar.
 - **Fitness findings need a named measure.** "This could be clearer" is not a finding. "Comprehensiveness: a reader cannot start without the tool versions" is. No measure, no finding — this is the fitness pass's equivalent of the quote-the-span rule, and it is what stops the pass becoming vague editorializing.
 - **Judge the document it is, not the document you'd write.** A terse reference page is not failing comprehensiveness for lacking a tutorial. Fitness is measured against the document's own purpose and audience.
@@ -180,6 +193,7 @@ Applying is opt-in every time. Do not offer to apply before the full report, and
 
 This skill owns **prose review across all three standards**. It does not own:
 
+- **A single lens** → `/phil:eos` (clarity, edits) or `/phil:ai-eos` (tells, reports only)
 - **Comment and docstring quality** → `clean-comments`
 - **CLAUDE.md structure** → `claude-md`
 - **Independent adversarial critique** → `adversarial-review` (a different tool with a different contract: fresh-context reviewer, separate judge, honesty label)

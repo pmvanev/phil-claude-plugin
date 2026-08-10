@@ -39,7 +39,7 @@ Markel's central framework. Editions group these differently — seven to nine, 
 | Measure | The question | Failure looks like |
 |---|---|---|
 | **Honesty** | Is every claim true, and does the whole leave a true impression? | Technically-accurate statements arranged to mislead; buried caveats |
-| **Clarity** | Does this convey one meaning, easily? | Ambiguity a reader must resolve by guessing |
+| **Clarity** | Does the *document* convey one meaning, easily? (sentence-level clarity: see `writing.md`) | Ambiguity a reader must resolve by guessing |
 | **Accuracy** | Are the facts, figures, and names right? | Wrong version numbers, stale commands, transposed values |
 | **Comprehensiveness** | Is everything the reader needs here, in enough detail to follow? | Missing prerequisites; a step that assumes unstated knowledge |
 | **Accessibility** | Can a reader find the part they need without reading it all? | One undifferentiated wall of text; no headings |
