@@ -15,8 +15,8 @@ The real judgment is the reviewer's; the real decision is the human's. You are t
 you set up the review so it is honest and independent, and you present the result.
 
 The standards a review is held to are whatever applies to the target —
-`~/.claude/rules/coding.md`, `~/.claude/rules/testing.md`, `~/.claude/rules/architecture.md`,
-`~/.claude/rules/writing.md`, and the target's own stated intent.
+`${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`,
+`${CLAUDE_PLUGIN_ROOT}/rules/writing.md`, and the target's own stated intent.
 
 > **The through-line (ADR-010/011).** The reusable unit is the **agent**
 > (`agents/adversarial-reviewer.md`); this skill is only the standalone human driver. The agent's

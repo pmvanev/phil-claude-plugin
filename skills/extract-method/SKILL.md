@@ -5,7 +5,7 @@ description: Skill bundle for phil:extract-method command — method extraction 
 
 # Extract Method
 
-You are performing the **Extract Function** refactoring. This is a structure-only change — preserve behavior absolutely. Follow the standards in `~/.claude/rules/refactoring.md` and `~/.claude/rules/coding.md`.
+You are performing the **Extract Function** refactoring. This is a structure-only change — preserve behavior absolutely. Follow the standards in `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md` and `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`.
 
 ## Parse the Argument
 

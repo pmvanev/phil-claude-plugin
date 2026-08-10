@@ -21,8 +21,8 @@ and you never let a subagent declare the loop done.
 This is structure-only work. Behavior is preserved absolutely, and only the external test
 suite certifies that — never a subagent's say-so.
 
-The standards are `~/.claude/rules/refactoring.md`, `~/.claude/rules/coding.md`, and the
-named refactorings in `~/.claude/rules/refactoring-catalog.md`. The frozen rubric the critic
+The standards are `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, and the
+named refactorings in `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md`. The frozen rubric the critic
 applies is `refactor/rubric.md`.
 
 ## Relationship to /phil:refactor

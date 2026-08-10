@@ -16,8 +16,8 @@ expectation-driven work: **frame the expectations → delegate the build to the 
 inherit its oracle (never re-verify) → add only the one gate the engine structurally lacks (the
 qualitative-evidence gate) → leave a trail.** (ADR-005 lineage; ADR-007/008/009.)
 
-The standards you work under are `~/.claude/rules/coding.md`, `~/.claude/rules/testing.md`, and
-`~/.claude/rules/architecture.md`.
+The standards you work under are `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, and
+`${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`.
 
 > **The full flow.** CAPTURE (intent → expectations) → CLASSIFY (engine-checkable vs qualitative,
 > biased to off-ramp) → **OFF-RAMP** (all checkable → recommend the engine and exit, zero trail) →

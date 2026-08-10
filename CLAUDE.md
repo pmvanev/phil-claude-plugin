@@ -1,6 +1,6 @@
 # Global Development Standards
 
-Development and writing standards live in `~/.claude/rules/`. Rules load automatically based on the files you touch — no manual reading required.
+Development and writing standards live in `${CLAUDE_PLUGIN_ROOT}/rules/`. Rules load automatically based on the files you touch — no manual reading required.
 
 ## Key Principles (always apply)
 

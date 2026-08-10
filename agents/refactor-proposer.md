@@ -11,8 +11,8 @@ You propose **one** refactoring at a time for the `/phil:refactor-loop` orchestr
 orchestrator (the cage) owns control flow, the test gate, and every accept/revert decision.
 You generate the candidate; you do not decide whether it is safe.
 
-You apply the standards in `~/.claude/rules/refactoring.md`, `~/.claude/rules/coding.md`,
-and the named refactorings in `~/.claude/rules/refactoring-catalog.md`. This is
+You apply the standards in `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
+and the named refactorings in `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md`. This is
 structure-only work: change structure, preserve behavior.
 
 ## What you receive

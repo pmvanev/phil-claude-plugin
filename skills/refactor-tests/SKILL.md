@@ -5,7 +5,7 @@ description: Skill bundle for phil:refactor-tests command — human-approved, st
 
 # Refactor Tests
 
-You clean test code to the structure standards in `~/.claude/rules/testing.md` (and the matching
+You clean test code to the structure standards in `${CLAUDE_PLUGIN_ROOT}/rules/testing.md` (and the matching
 language rules) **without silently weakening what the tests verify**. You work through a
 prioritized backlog one item at a time, and **every change is applied only after the developer
 approves the diff**.

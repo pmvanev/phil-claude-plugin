@@ -5,7 +5,7 @@ description: Skill bundle for phil:ux-review command — UX usability & accessib
 
 # UX Review
 
-You are auditing UI against the usability and accessibility standard in `~/.claude/rules/ux.md`. Your job is to find UX violations and produce a prioritized, actionable backlog. `ux.md` owns usability + accessibility; **aesthetics belong to `ui.md`** and React idioms to `react.md` — do not review against those here.
+You are auditing UI against the usability and accessibility standard in `${CLAUDE_PLUGIN_ROOT}/rules/ux.md`. Your job is to find UX violations and produce a prioritized, actionable backlog. `ux.md` owns usability + accessibility; **aesthetics belong to `ui.md`** and React idioms to `react.md` — do not review against those here.
 
 `ux.md` is the source of truth for what to flag and how to phrase the fix. It defines two tiers and a "Do not flag" section — mirror them:
 
@@ -43,7 +43,7 @@ Glob recursively for UI files. Read each. For large directories (>20 files), use
 
 ## Step 2: Analyze Against `rules/ux.md`
 
-Read `~/.claude/rules/ux.md` first so your findings and wording trace to it. For each file, check the tiers below. **Static review catches most defects; some need the rendered UI** — when a check depends on computed styles or live behavior (contrast ratios, actual focus visibility, real target size), flag it as must-fix only when the source makes it clear, otherwise raise a **consider** item asking the author to verify at runtime. Say which.
+Read `${CLAUDE_PLUGIN_ROOT}/rules/ux.md` first so your findings and wording trace to it. For each file, check the tiers below. **Static review catches most defects; some need the rendered UI** — when a check depends on computed styles or live behavior (contrast ratios, actual focus visibility, real target size), flag it as must-fix only when the source makes it clear, otherwise raise a **consider** item asking the author to verify at runtime. Say which.
 
 ### Must-fix — objective defects (always-flag tier)
 

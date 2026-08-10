@@ -45,9 +45,9 @@ proposer.
 
 ## Slice 1 — Correctness / Behavior  *(ACTIVE in v1)*
 
-Owner: `refactor-critic-correctness`. References `~/.claude/rules/refactoring.md`
-(Definition: tests pass before and after) and `~/.claude/rules/testing.md`. Named
-refactorings are drawn from `~/.claude/rules/refactoring-catalog.md` so critic and proposer
+Owner: `refactor-critic-correctness`. References `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`
+(Definition: tests pass before and after) and `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`. Named
+refactorings are drawn from `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md` so critic and proposer
 share one dictionary.
 
 | Criterion | Type | Test (behavioral anchor) | Kind |
@@ -74,9 +74,9 @@ Graded anchor for `extracted-unit-single-responsibility`:
 
 ## Slice 2 — Idiom / Readability  *(STUB — activated in v2)*
 
-Owner (v2): `refactor-critic-idiom`. Will reference `~/.claude/rules/coding.md` and the
-path-scoped language idiom files `~/.claude/rules/cpp.md`, `~/.claude/rules/python.md`,
-`~/.claude/rules/typescript.md`, `~/.claude/rules/react.md` (a `.tsx` file is judged against
+Owner (v2): `refactor-critic-idiom`. Will reference `${CLAUDE_PLUGIN_ROOT}/rules/coding.md` and the
+path-scoped language idiom files `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md`, `${CLAUDE_PLUGIN_ROOT}/rules/python.md`,
+`${CLAUDE_PLUGIN_ROOT}/rules/typescript.md`, `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (a `.tsx` file is judged against
 both TypeScript and React rules).
 
 Not active in v1. v1 ships a single correctness critic; the disjoint idiom slice is earned,
@@ -93,8 +93,8 @@ genuine correctness hazards promoted into Slice 1.
 
 ## Slice 3 — Architecture / Coupling  *(STUB — activated in v2)*
 
-Owner (v2): `refactor-critic-architecture`. Will reference `~/.claude/rules/architecture.md`
-and `~/.claude/rules/refactoring.md` §Economics (Constantine's equivalence: change cost =
+Owner (v2): `refactor-critic-architecture`. Will reference `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`
+and `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md` §Economics (Constantine's equivalence: change cost =
 coupling cost).
 
 Not active in v1. When v2 adds the architecture critic, populate this slice with criteria

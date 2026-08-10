@@ -19,7 +19,7 @@
     "summary": "handler.py:17 has `if not items: return None` three lines ABOVE the span the finding cites; the empty-list case IS handled. The reviewer misread it."
   },
   "intent": "handleInput must not crash on empty input.",
-  "standards": ["~/.claude/rules/coding.md"],
+  "standards": ["${CLAUDE_PLUGIN_ROOT}/rules/coding.md"],
   "oracle_result": null,
   "dispatch_input_MUST_NOT_contain": "the reviewer's justification / confidence / other findings",
   "expected_outcome": "REFUTED",

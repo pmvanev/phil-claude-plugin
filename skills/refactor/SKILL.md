@@ -5,7 +5,7 @@ description: Skill bundle for phil:refactor command — iterative refactoring fr
 
 # Refactor
 
-You are performing systematic refactoring against the standards in `~/.claude/rules/coding.md`, `~/.claude/rules/refactoring.md`, and `~/.claude/rules/refactoring-catalog.md`. You work through a prioritized backlog, one item at a time, verifying with tests at every step.
+You are performing systematic refactoring against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md`. You work through a prioritized backlog, one item at a time, verifying with tests at every step.
 
 **This is structure-only work. Preserve behavior absolutely.**
 

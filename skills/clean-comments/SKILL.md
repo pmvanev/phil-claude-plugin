@@ -5,7 +5,7 @@ description: Skill bundle for phil:clean-comments command — comment cleanup ru
 
 # Clean Comments
 
-You are applying the comment rules from `~/.claude/rules/coding.md` and the writing standards from `~/.claude/rules/writing.md`. The best comment is code that needs no comment.
+You are applying the comment rules from `${CLAUDE_PLUGIN_ROOT}/rules/coding.md` and the writing standards from `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`. The best comment is code that needs no comment.
 
 ## Parse the Argument
 

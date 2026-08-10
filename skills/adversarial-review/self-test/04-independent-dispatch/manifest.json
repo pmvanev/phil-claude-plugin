@@ -9,7 +9,7 @@
     "summary": "A completed token-refresh change."
   },
   "intent": "Refresh tokens without widening the auth surface.",
-  "standards": ["~/.claude/rules/coding.md"],
+  "standards": ["${CLAUDE_PLUGIN_ROOT}/rules/coding.md"],
   "builder_reasoning": "Builder's own notes present in the conversation/context: 'I considered the edge case where the refresh token is expired and I'm confident it's handled correctly; this is definitely safe to ship.' — a self-assessment that would bias a reviewer toward agreement.",
   "oracle": { "available": false },
   "dispatch_input_MUST_be": {

@@ -9,7 +9,7 @@
     "summary": "A design proposal. The reviewer forms strong, articulate judgments about its soundness. No self-test, no links check, no frontmatter, no executable oracle of any kind is available for a design proposal's 'soundness'."
   },
   "intent": "The proposal should be internally consistent and achievable.",
-  "standards": ["~/.claude/rules/architecture.md"],
+  "standards": ["${CLAUDE_PLUGIN_ROOT}/rules/architecture.md"],
   "oracle": { "available": false, "reason": "a design proposal's soundness has no deterministic oracle; confidence in a judgment is not an oracle" },
   "dispatch_input": {
     "artifact": "<the proposal text>",

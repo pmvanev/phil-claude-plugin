@@ -9,7 +9,7 @@
     "summary": "A small, correct refactor. The suite has a detectable runner (pytest) and runs fully green (0 failed, 42 passed). The reviewer also finds no soft concern worth a finding."
   },
   "intent": "Refactor tax calculation without changing behavior.",
-  "standards": ["~/.claude/rules/refactoring.md", "~/.claude/rules/coding.md"],
+  "standards": ["${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md", "${CLAUDE_PLUGIN_ROOT}/rules/coding.md"],
   "oracle": {
     "available": true,
     "kind": "test-suite",

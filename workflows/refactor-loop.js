@@ -48,7 +48,7 @@ const FOCUS = A.focus || '' // optional: narrow to a single function/class withi
 const REPO = A.repo // REQUIRED — no default (ADR-009 D)
 const TEST_CMD = A.test_cmd // REQUIRED — no default
 const LEDGER_PATH = '.refactor-loop-ledger.md'
-const RULES = '~/.claude/rules'
+const RULES = '${CLAUDE_PLUGIN_ROOT}/rules'
 const PINNED = ['preserve-public-api', 'no-test-file-writes']
 const WORKDIR = `Work inside the repository at \`${REPO}\` — cd into it first; all paths below are relative to it.`
 

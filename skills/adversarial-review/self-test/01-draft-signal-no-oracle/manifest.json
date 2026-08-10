@@ -9,7 +9,7 @@
     "summary": "A newly written skill spine with two real weaknesses: (a) a step that says 'validate the input' with no statement of what invalid means or what happens on failure; (b) a claimed safety rule ('never runs on a red suite') that no step in the skill actually enforces."
   },
   "intent": "The skill should be executable as written and its stated safety rules should be enforced by an actual step.",
-  "standards": ["~/.claude/rules/coding.md (clarity, make every word tell)"],
+  "standards": ["${CLAUDE_PLUGIN_ROOT}/rules/coding.md (clarity, make every word tell)"],
   "oracle": { "available": false, "reason": "prose target; no self-test harness, links, or frontmatter check declared in scope for this run" },
   "dispatch_input": {
     "artifact": "<the SKILL.md text>",

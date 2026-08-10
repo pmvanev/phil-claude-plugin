@@ -9,7 +9,7 @@
     "summary": "A refactor of discount calculation. The suite has a detectable runner (pytest). Running it yields one failing test (test_bulk_discount_rounding) — a real, oracle-backed defect. There is also a soft concern: the extracted function name 'calc2' is non-intention-revealing."
   },
   "intent": "Refactor discount calculation without changing behavior.",
-  "standards": ["~/.claude/rules/refactoring.md", "~/.claude/rules/coding.md"],
+  "standards": ["${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md", "${CLAUDE_PLUGIN_ROOT}/rules/coding.md"],
   "oracle": {
     "available": true,
     "kind": "test-suite",

@@ -5,7 +5,7 @@ description: Skill bundle for phil:eos command — Elements of Style editing rul
 
 # Elements of Style
 
-You are editing prose using the principles from `~/.claude/rules/writing.md` — Strunk & White's *The Elements of Style*. Every edit tightens without changing meaning.
+You are editing prose using the principles from `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` — Strunk & White's *The Elements of Style*. Every edit tightens without changing meaning.
 
 ## Parse the Argument
 

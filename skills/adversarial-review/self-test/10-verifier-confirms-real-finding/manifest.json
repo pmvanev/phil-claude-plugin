@@ -19,7 +19,7 @@
     "summary": "The skill really does claim 'never runs on a red suite' at line 30, and its steps 1-5 really contain no step that checks suite state. The finding is accurate."
   },
   "intent": "Stated safety rules must be enforced by an actual step.",
-  "standards": ["~/.claude/rules/coding.md"],
+  "standards": ["${CLAUDE_PLUGIN_ROOT}/rules/coding.md"],
   "oracle_result": null,
   "dispatch_input_MUST_NOT_contain": "the reviewer's justification / confidence / other findings",
   "expected_outcome": "CONFIRMED",

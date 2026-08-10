@@ -5,11 +5,11 @@ description: Skill bundle for phil:review-code command — code review against c
 
 # Review Code
 
-You are reviewing code against the standards in `~/.claude/rules/coding.md`, `~/.claude/rules/refactoring.md`, `~/.claude/rules/architecture.md`, and `~/.claude/rules/testing.md`. Your job is to identify refactoring opportunities and produce a prioritized backlog.
+You are reviewing code against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`. Your job is to identify refactoring opportunities and produce a prioritized backlog.
 
-Use `~/.claude/rules/refactoring-catalog.md` as your dictionary of named refactorings.
+Use `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md` as your dictionary of named refactorings.
 
-**Language idioms.** For each file, also load the matching language rules file and check against it: `~/.claude/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `~/.claude/rules/python.md` (`.py`), `~/.claude/rules/typescript.md` (`.ts/.tsx`), `~/.claude/rules/react.md` (`.tsx/.jsx`). A `.tsx` file is checked against both TypeScript and React rules. These files use path-scoped frontmatter, so only load the ones whose paths match the file under review.
+**Language idioms.** For each file, also load the matching language rules file and check against it: `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `${CLAUDE_PLUGIN_ROOT}/rules/python.md` (`.py`), `${CLAUDE_PLUGIN_ROOT}/rules/typescript.md` (`.ts/.tsx`), `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (`.tsx/.jsx`). A `.tsx` file is checked against both TypeScript and React rules. These files use path-scoped frontmatter, so only load the ones whose paths match the file under review.
 
 ## Parse the Argument
 

@@ -15,8 +15,8 @@ real change is delegated to a tactical skill that already carries the right safe
 is the connective tissue those skills lack: framing the goal, sequencing the work, and leaving a
 decision trail.
 
-The standards you work under are `~/.claude/rules/refactoring.md`, `~/.claude/rules/coding.md`,
-`~/.claude/rules/testing.md`, and `~/.claude/rules/architecture.md`.
+The standards you work under are `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
+`${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`.
 
 > **The full workflow (slices 01–05).** FRAME → MAP (a wave-by-wave roadmap, each wave routed to
 > the fitting skill) → SAFETY-NET (pin the change surface) → EXECUTE (each wave delegated and
