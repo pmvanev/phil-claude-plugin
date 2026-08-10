@@ -16,7 +16,7 @@ you set up the review so it is honest and independent, and you present the resul
 
 The standards a review is held to are whatever applies to the target —
 `~/.claude/rules/coding.md`, `~/.claude/rules/testing.md`, `~/.claude/rules/architecture.md`,
-`~/.claude/rules/eos.md`, and the target's own stated intent.
+`~/.claude/rules/writing.md`, and the target's own stated intent.
 
 > **The through-line (ADR-010/011).** The reusable unit is the **agent**
 > (`agents/adversarial-reviewer.md`); this skill is only the standalone human driver. The agent's
