@@ -1,0 +1,14 @@
+{
+  "fixture": "08-drift-recorded-done-no-commit",
+  "situation": "The execution log records step 02-02 as COMMIT/PASS, but no commit in the repository touches that step's test file or implementation paths. The record and the tree disagree.",
+  "invocation": "/phil:slice-status checkout-redesign 02",
+  "artifacts": {
+    "docs/feature/checkout-redesign/deliver/roadmap.json": {
+      "phases": "02, steps 02-01 .. 02-03",
+      "step_02_02": { "test_file": "tests/checkout/test_totals.py", "implementation_scope": ["src/checkout/totals.py"] }
+    },
+    "docs/feature/checkout-redesign/deliver/execution-log.json": "COMMIT/PASS for 02-01 and 02-02",
+    "git_log": "commits touch tests/checkout/test_cart.py (02-01) only; nothing touches tests/checkout/test_totals.py or src/checkout/totals.py"
+  },
+  "expected_outcome": "DRIFT-NOTED"
+}

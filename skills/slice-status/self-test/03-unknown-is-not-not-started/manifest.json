@@ -1,0 +1,15 @@
+{
+  "fixture": "03-unknown-is-not-not-started",
+  "situation": "The real phil-work layout. roadmap.json lists five phases with one step each, and every step's status field is null. No execution log exists, and progress.md carries no step table. Nothing records whether any step ran.",
+  "invocation": "/phil:slice-status phil-work",
+  "artifacts": {
+    "docs/feature/phil-work/deliver/roadmap.json": {
+      "phases": "01..05, one step each (01-01 .. 05-01)",
+      "every_step_status": null
+    },
+    "docs/feature/phil-work/deliver/execution-log.json": "ABSENT",
+    "docs/feature/phil-work/deliver/progress.md": "present; narrative, no step table",
+    "docs/feature/phil-work/slices/": ["slice-01-walking-skeleton.md", "slice-02-map-roadmap.md", "slice-03-safety-net.md", "slice-04-goal-gate.md", "slice-05-breadth-and-trail.md"]
+  },
+  "expected_outcome": "UNKNOWN"
+}

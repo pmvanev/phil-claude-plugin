@@ -1,0 +1,14 @@
+{
+  "fixture": "04-disagreeing-sources-named",
+  "situation": "The real edd-loop case. The slices/ directory holds three slice files, but roadmap.json defines only two phases. The sources disagree about how many slices this feature has.",
+  "invocation": "/phil:slice-status edd-loop",
+  "artifacts": {
+    "docs/feature/edd-loop/slices/": ["slice-01-triage-and-off-ramp.md", "slice-02-qualitative-evidence-gate.md", "slice-03-cross-domain-sequencing.md"],
+    "docs/feature/edd-loop/deliver/roadmap.json": {
+      "phases": "01, 02 only",
+      "steps": "01-01 (status done), 02-01 (status done)"
+    },
+    "docs/feature/edd-loop/deliver/progress.md": "has a real step table: | Slice | Step | Scope | Fixtures | Status | Commit | — rows for 01-01 and 02-01, both 'done (GREEN)'"
+  },
+  "expected_outcome": "DISAGREEMENT-NAMED"
+}

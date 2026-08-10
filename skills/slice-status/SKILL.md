@@ -138,3 +138,22 @@ The user asked where they are; they can see it.
 - **Layout unrecognized** — say "layout not recognized", show the paths you checked, and stop.
   These are nWave's paths, not this plugin's; they move between versions, and guessing at a
   half-matched layout produces a plausible table that is wrong.
+
+---
+
+## Self-test (regression gate)
+
+`skills/slice-status/self-test/` holds golden fixtures that pin these behaviors: the table rendered
+from agreeing sources (01, walking skeleton), a narrative `progress.md` whose fixture and findings
+tables must never be read as step records (02), `unknown` reported instead of `not started` when the
+record is empty (03), disagreeing sources named rather than resolved (04), read-only discipline under
+maximum temptation to launch (05), an ambiguous slice argument asked rather than guessed (06), no
+table at all when no step record exists (07), and drift surfaced without overriding the record (08).
+
+Fixtures 03 and 07 pin the honesty of absence in both directions — an empty record versus no record —
+because collapsing either into "not started" makes a claim about the work from a fact about the
+evidence.
+
+Whenever this skill or `commands/slice-status.md` changes, drive the fixtures per
+`self-test/README.md` and confirm each produces its `expected.md` decision. Every failure mode here
+is silent: the wrong answer arrives as a clean, confident table.

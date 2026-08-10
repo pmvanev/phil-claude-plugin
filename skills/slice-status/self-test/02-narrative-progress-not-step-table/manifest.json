@@ -1,0 +1,19 @@
+{
+  "fixture": "02-narrative-progress-not-step-table",
+  "situation": "The real adversarial-review layout. No roadmap.json. progress.md is narrative, and the only markdown tables in it are an authored-artifacts table, a self-test fixture table, and an adversarial findings table. None is a step record.",
+  "invocation": "/phil:slice-status adversarial-review",
+  "artifacts": {
+    "docs/feature/adversarial-review/slices/": ["slice-01-walking-skeleton.md", "slice-02-hard-half.md"],
+    "docs/feature/adversarial-review/deliver/roadmap.json": "ABSENT",
+    "docs/feature/adversarial-review/deliver/progress.md": {
+      "shape": "prose under '## Slice 01 — ...' and '## Slice 02 — ...' headings",
+      "tables_present": [
+        "| File | Role |",
+        "| Fixture | Expected | Result |",
+        "| # | Severity | Finding | Fix |"
+      ],
+      "step_table_present": false
+    }
+  },
+  "expected_outcome": "NARRATIVE-RECORD"
+}
