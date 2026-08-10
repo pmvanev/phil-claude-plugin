@@ -13,7 +13,7 @@ Determine what `$ARGUMENTS` refers to:
 
 | Pattern | Type | Example |
 |---------|------|---------|
-| Digits separated by `-` or `:` | Line range | `42-67`, `42:67` |
+| Digits separated by `-` or `:`, with an optional `lines:` prefix | Line range | `42-67`, `42:67`, `lines:42-67` |
 | Has a file extension | File path | `src/order.py`, `lib/utils.ts` |
 | Ends with `/` or has no extension and is a directory | Directory path | `src/`, `src/services` |
 | Otherwise | Method/function name | `processOrder`, `handle_request` |
