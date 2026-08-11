@@ -210,6 +210,30 @@ the hard way", and no run in this repo records that experience. The operational 
 either way, but the experience claim is unsourced and unversioned while every neighbouring capability
 claim names `gh` 2.97.0. Left standing pending the author's confirmation of what was actually run.
 
+### Self-test suite added
+
+Twelve fixtures under `skills/nwave-issue-board/self-test/`, mirroring the sibling's format. The
+reviewer's argument for building them: this skill's failure modes are strictly worse than
+`nwave-slice-status`'s, because a wrong table there is read by one person in a terminal and a wrong
+table here is read by the team, in an issue, for as long as it stands.
+
+Two fixtures pin faults the skill actually shipped in its first draft — the dropped `Notes` column
+(02) and the invented rule forbidding a status source its owner permits (12) — which is the argument
+for the suite in miniature: both got through design, review of the design, and writing, and were
+caught only by reading the two owners side by side.
+
+Fixtures 04 and 11 are deliberately adjacent and resolve opposite ways. In 04 a person recorded
+something no artifact can hold (*waiting on Sam*) and it must survive a refresh. In 11 a person
+overwrote something the artifacts own (a step's done-ness) and it must not. A rule that gets one right
+by getting the other wrong is a gate failure — this is the pair that stops "preserve human edits" from
+becoming "let the forge edit the ledger".
+
+Fixture 08 is the suite's only actively harmful case, matching the sibling's 04: a card for deferred
+work does not misinform someone, it assigns them.
+
+`issue-board` still has no suite. Its content is reference rather than procedure, so the convention
+there is genuinely unsettled — noted rather than resolved.
+
 ## Follow-ups
 
 - `plugin-dev:skill-reviewer` raised ~30 medium/low findings across today's three skills that were

@@ -1,0 +1,12 @@
+{
+  "fixture": "04-human-state-outranks-refresh",
+  "situation": "Slice 02's issue was edited by a person: its row for step 02-01 reads 'awaiting input - waiting on Sam for the retention decision'. The execution log records RED for 02-01, so a derived refresh would call it current.",
+  "invocation": "refresh the board for raw-data-capture",
+  "forge_state": {
+    "slice_02_issue": "row 02-01 hand-set to 'awaiting input - waiting on Sam for the retention decision'"
+  },
+  "slice_status_output": {
+    "02-01": "current"
+  },
+  "expected_outcome": "HUMAN-STATE-KEPT"
+}

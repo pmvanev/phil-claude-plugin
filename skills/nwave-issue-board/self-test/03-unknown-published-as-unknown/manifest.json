@@ -1,0 +1,9 @@
+{
+  "fixture": "03-unknown-published-as-unknown",
+  "situation": "roadmap.json lists five phases with one step each and no status recorded anywhere. No execution log. progress.md is narrative. nwave-slice-status returns unknown for every step.",
+  "invocation": "put phil-work on the board",
+  "slice_status_output": {
+    "every_step": "unknown"
+  },
+  "expected_outcome": "UNKNOWN-PUBLISHED"
+}

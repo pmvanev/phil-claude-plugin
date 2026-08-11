@@ -1,0 +1,18 @@
+{
+  "fixture": "02-notes-column-survives",
+  "situation": "Step 01-02 is recorded done in the execution log, but a git cross-check finds no commit touching the files it claims. nwave-slice-status renders the row as done with a no-commit-found warning in Notes.",
+  "invocation": "refresh the board for raw-data-capture",
+  "slice_status_output": {
+    "columns": [
+      "Step",
+      "What it does",
+      "Status",
+      "Notes"
+    ],
+    "row_01_02": {
+      "status": "done",
+      "notes": "no commit found"
+    }
+  },
+  "expected_outcome": "NOTES-PRESERVED"
+}

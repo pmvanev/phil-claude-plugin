@@ -1,0 +1,21 @@
+{
+  "fixture": "01-publish-happy-path",
+  "situation": "Walking skeleton. Feature raw-data-capture is in DELIVER on GitHub. roadmap.json has two phases with two steps each; execution-log.json records COMMIT/PASS for 01-01 and 01-02 and RED for 02-01. Two slice files exist. No issues exist yet.",
+  "invocation": "put raw-data-capture on the board",
+  "artifacts": {
+    "docs/feature/raw-data-capture/slices/": [
+      "slice-01-pure-functions.md",
+      "slice-02-projection.md"
+    ],
+    "docs/feature/raw-data-capture/deliver/roadmap.json": {
+      "phases": "01 (2 steps), 02 (2 steps)"
+    },
+    "docs/feature/raw-data-capture/deliver/execution-log.json": "01-01 COMMIT/PASS, 01-02 COMMIT/PASS, 02-01 RED"
+  },
+  "forge_state": {
+    "host": "github",
+    "repo": "pmvanev/beatrix",
+    "existing_issues": "none for this feature"
+  },
+  "expected_outcome": "PUBLISHED"
+}

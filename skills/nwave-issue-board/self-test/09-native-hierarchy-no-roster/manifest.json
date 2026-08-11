@@ -1,0 +1,10 @@
+{
+  "fixture": "09-native-hierarchy-no-roster",
+  "situation": "GitHub. Feature issue plus four slice issues. GitHub carries parent/child natively and shows the parent's completed-children count, so a hand-written roster in the feature description would duplicate it.",
+  "invocation": "put access-control on the board",
+  "forge_state": {
+    "host": "github",
+    "hierarchy": "native sub-issues available"
+  },
+  "expected_outcome": "NATIVE-HIERARCHY"
+}

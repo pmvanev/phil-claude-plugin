@@ -1,0 +1,12 @@
+{
+  "fixture": "08-deferred-slice-not-a-card",
+  "situation": "The real edd-loop shape. Three slice files; slices 01 and 02 are done. slice-03's own file carries a DEFERRED marker and the line 'do NOT build in this cycle'. roadmap.json contains only phases 01 and 02.",
+  "invocation": "put edd-loop on the board",
+  "artifacts": {
+    "docs/feature/edd-loop/slices/slice-03-breadth.md": "marked DEFERRED - do NOT build in this cycle",
+    "docs/feature/edd-loop/deliver/roadmap.json": {
+      "phases": "01, 02 only"
+    }
+  },
+  "expected_outcome": "DEFERRED-NOT-A-CARD"
+}

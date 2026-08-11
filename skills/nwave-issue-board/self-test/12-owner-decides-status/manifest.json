@@ -1,0 +1,14 @@
+{
+  "fixture": "12-owner-decides-status",
+  "situation": "The real edd-loop case - the one roadmap in 57 that carries a per-step status field. execution-log.json is absent. nwave-slice-status reads the roadmap status field as recorded evidence and returns real statuses.",
+  "invocation": "put edd-loop on the board",
+  "artifacts": {
+    "docs/feature/edd-loop/deliver/roadmap.json": "phases 01-02, each step carries a status field",
+    "docs/feature/edd-loop/deliver/execution-log.json": "ABSENT"
+  },
+  "slice_status_output": {
+    "source": "roadmap.json status field",
+    "statuses": "real values, not unknown"
+  },
+  "expected_outcome": "OWNER-DECIDES"
+}

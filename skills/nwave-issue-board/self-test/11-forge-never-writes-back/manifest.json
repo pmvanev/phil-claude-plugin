@@ -1,0 +1,12 @@
+{
+  "fixture": "11-forge-never-writes-back",
+  "situation": "Someone hand-edited slice 02's issue to mark step 02-01 done. The execution log records only RED for that step. A refresh is requested. The two sources disagree about a fact the artifacts own.",
+  "invocation": "refresh the board for raw-data-capture",
+  "forge_state": {
+    "slice_02_issue": "row 02-01 hand-edited to done"
+  },
+  "slice_status_output": {
+    "02-01": "current"
+  },
+  "expected_outcome": "ONE-WAY"
+}

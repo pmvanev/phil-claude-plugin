@@ -1,0 +1,13 @@
+{
+  "fixture": "06-wave-swaps-not-accumulates",
+  "situation": "Feature moves from DISTILL to DELIVER. The forge does not support scoped labels, so nothing enforces exclusion between wave labels. The feature issue already carries wave labels for DISCUSS, DESIGN and DISTILL from earlier transitions.",
+  "invocation": "the feature has entered DELIVER",
+  "forge_state": {
+    "feature_issue_labels": [
+      "wave: discuss",
+      "wave: design",
+      "wave: distill"
+    ]
+  },
+  "expected_outcome": "WAVE-SWAPPED"
+}

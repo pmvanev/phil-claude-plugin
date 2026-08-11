@@ -1,0 +1,9 @@
+{
+  "fixture": "05-no-markers-append",
+  "situation": "The slice issue already exists and its description is four paragraphs a person wrote about the approach and an open question. There are no nwave:status markers anywhere in it. A refresh is requested.",
+  "invocation": "refresh the board for raw-data-capture",
+  "forge_state": {
+    "slice_01_issue": "hand-written description, no nwave:status markers"
+  },
+  "expected_outcome": "BLOCK-DELIMITED"
+}

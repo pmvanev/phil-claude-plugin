@@ -144,3 +144,32 @@ answers "where are we" locally and writes nothing.
 
 Timestamp the generated block. A projection that states when it was made is honestly stale; one that
 does not is indistinguishable from current.
+
+---
+
+## Self-test (regression gate)
+
+`skills/nwave-issue-board/self-test/` holds twelve fixtures that pin these behaviors: the end-to-end
+publish (01, walking skeleton), the `Notes` column surviving the trip to the forge (02), `unknown`
+published as `unknown` rather than `not started` (03), a human-set state outranking a regenerated one
+(04), hand-written prose surviving a refresh that must replace the whole description (05), a wave
+label swapped rather than accumulated (06), no step rows invented before `/nw-roadmap` (07), a
+deferred slice never given a card (08), native sub-issues used instead of a hand-written roster (09),
+the GitLab roster written in a second pass as bare references (10), the forge never writing back to
+the artifacts (11), and status decided by `nwave-slice-status` rather than folded here (12).
+
+Fixtures 04 and 11 are deliberately adjacent and resolve opposite ways: a person recording something
+no artifact can hold is preserved; a person overwriting something the artifacts own is not. Getting
+one of them right by a rule that gets the other wrong is a gate failure.
+
+Fixture 08 is the only actively harmful case — positionally the deferred slice *is* next, and a card
+on a board does not misinform someone, it assigns them.
+
+Fixtures 02 and 12 pin the two faults this skill actually shipped in its first draft: a three-column
+block that dropped the drift warning, and a locally invented rule forbidding a status source its
+owner permits.
+
+Whenever this skill changes — or `phil:issue-board` or `phil:nwave-slice-status` changes, since this
+skill's correctness is partly theirs — drive the fixtures per `self-test/README.md`. Every failure
+mode here is silent: the wrong answer arrives as a clean, timestamped table that the whole team
+reads.

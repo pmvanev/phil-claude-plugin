@@ -1,0 +1,14 @@
+{
+  "fixture": "07-no-rows-before-roadmap",
+  "situation": "Feature notification-service is in DESIGN. Three slice files exist under slices/. There is no deliver/ directory and no roadmap.json, so no step ids exist anywhere.",
+  "invocation": "put notification-service on the board",
+  "artifacts": {
+    "docs/feature/notification-service/slices/": [
+      "slice-01-transport.md",
+      "slice-02-templates.md",
+      "slice-03-delivery-receipts.md"
+    ],
+    "docs/feature/notification-service/deliver/": "ABSENT"
+  },
+  "expected_outcome": "NO-ROWS-BEFORE-ROADMAP"
+}
