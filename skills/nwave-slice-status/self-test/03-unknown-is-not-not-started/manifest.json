@@ -1,7 +1,7 @@
 {
   "fixture": "03-unknown-is-not-not-started",
   "situation": "The real phil-work layout. roadmap.json lists five phases with one step each, and every step's status field is null. No execution log exists, and progress.md carries no step table. Nothing records whether any step ran.",
-  "invocation": "/phil:slice-status phil-work",
+  "invocation": "/phil:nwave-slice-status phil-work",
   "artifacts": {
     "docs/feature/phil-work/deliver/roadmap.json": {
       "phases": "01..05, one step each (01-01 .. 05-01)",

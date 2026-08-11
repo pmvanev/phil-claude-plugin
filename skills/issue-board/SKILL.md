@@ -1,6 +1,6 @@
 ---
 name: issue-board
-description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — moving a card between board columns, setting a status label or a Projects v2 Status field, hyperlinking or cross-linking references in an issue body to a file, an ADR, or another issue, marking an issue blocked by another and recording why, or connecting to a self-hosted GitLab instance. Covers the forge semantics `glab --help` and `gh --help` do not explain, where a wrong guess reports success.
+description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — moving a card between board columns, setting a status label or a Projects v2 Status field, deciding whether a piece of work is one issue or several, hyperlinking or cross-linking references in an issue body to a file, an ADR, or another issue, marking an issue blocked by another and recording why, weighing whether to sync a local task file with a board, or connecting to a self-hosted GitLab instance. Covers the semantics `--help` does not, where a wrong guess reports success.
 ---
 
 # Driving GitLab and GitHub Issue Boards
@@ -8,6 +8,9 @@ description: Use when driving a GitLab or GitHub issue tracker or board from the
 Both forges are driven from the command line: `glab` for GitLab, `gh` for GitHub. Prefer the CLI
 over an MCP server — the commands are auditable in the transcript, credentials stay in each tool's
 own store, and no extra configuration is needed.
+
+In an **nWave** repo, `phil:nwave-issue-board` maps features, slices, and steps onto the objects
+below. This skill stays generic; that one holds the mapping.
 
 Check `gh --version` and `glab --version` against the latest upstream release before trusting board
 behavior. Some distribution channels lag badly — Ubuntu's universe repository shipped `gh` 2.46
@@ -31,12 +34,18 @@ Two of GitLab's board mechanisms are gated behind Premium, and both fail silentl
 than erroring. Establish the tier first.
 
 ```sh
-glab api "groups/<group>/epics"   # 200 → Premium+ · 403 → Free · 404 → wrong group path · 401 → not authenticated
+glab api "groups/<group>/epics"   # 200 → Premium+ · 403 → Free · 404 → path wrong OR invisible to the token · 401 → not authenticated
 ```
 
+Only the 200 case is observed (against an 18.9.1-ee instance); the rest are inferred from GitLab's
+documented tier gating. Treat 404 with care — GitLab returns it for a group the token cannot see as
+well as for one that does not exist, so it is not proof the path is wrong.
+
 Epics need a real group; a project in a personal namespace has none, so the probe is unavailable
-there. Do not substitute `/api/v4/version` — `"enterprise": true` reports the EE *package*, not a
-paid subscription, and reading it as a tier signal is wrong.
+there. **Assume Free in that case** and keep `--unlabel` mandatory — the cost of being wrong that
+way is a redundant flag, and the cost of the other way is cards in two columns. Do not substitute
+`/api/v4/version` — `"enterprise": true` reports the EE *package*, not a paid subscription, and
+reading it as a tier signal is wrong.
 
 ## GitLab boards are label views, not a status field
 
@@ -94,8 +103,10 @@ renders as an ordinary link with none of that, and adds a URL to maintain. Leave
 | GitHub also | `owner/repo#12` |
 | GitLab also | `group/project#12`, `!34` (MR), `%2` (milestone), `~label` |
 
-Both forges autolink an issue reference **only when the issue exists**, which makes a read-back a
-free wrong-number check — but only against *rendered* output. `gh issue view --json body` returns
+A forge autolinks an issue reference **only when the issue exists**, which makes a read-back a
+free wrong-number check — verified on GitHub (`#3` renders an href, `#999` stays plain text), and
+on GitLab only in the negative direction, where a reference to a non-existent issue stayed plain.
+It works only against *rendered* output. `gh issue view --json body` returns
 the raw markdown, where `#12` is literal text whether or not it resolves, so checking there proves
 nothing either way. Render it:
 
@@ -196,8 +207,8 @@ on the tier* above for what each forge gives you.
 
 Do not hand-maintain the chain as blockers close. The linked issue is authoritative about its own
 state and is one click away, so editing #12 to say #47 closed just creates a second copy that can
-go stale. This is the second reason to leave the reference bare: a live reference exposes that
-state at the link, a hand-written markdown link does not.
+go stale. Bare references carry title and state, as above; this is the second reason to leave them
+bare — a live reference exposes a closed issue at the link, a hand-written markdown link does not.
 
 ## Bulk seeding needs two passes
 
@@ -253,6 +264,20 @@ conflicts nobody has designed a resolution for. If both exist, partition by scop
 in-flight detail, the forge owns what other people see, and the local task records the issue number
 as the only join. Nothing duplicated means nothing can drift.
 
+## Choosing what becomes an issue
+
+Ask what moves. A board earns its keep when cards cross columns; an issue that sits in one column
+for weeks is a status page with extra steps.
+
+Default to **one issue per thing that can be demonstrated on its own**, and split further only when
+two halves would sit in different columns at the same time. When the right split is not obvious,
+ask rather than guess — the cost of asking is one question, and the cost of guessing is a backlog
+someone has to re-cut by hand.
+
+An **nWave** project answers this question for you, because its artifacts already name the units —
+feature, slice, step. Use `phil:nwave-issue-board` for that mapping. Everywhere else, use the rule
+above.
+
 ## Per-project setup
 
 Instance-specific constants belong in the project's `CLAUDE.md`, not in this skill. Record only what
@@ -266,6 +291,7 @@ cannot be discovered:
 - Tier: Premium (scoped labels swap server-side; real `blocks` links) | Free (swap manually with
   `--unlabel`; `relates_to` only)
 - Status lives in `status::` labels — swap, never add a board list
-- Docs root for links: `https://<host>/<project>/-/blob/main/docs/` — `ADR-016` → `<docs root>adr/ADR-016.md`
+- Docs root for links: `https://<host>/<project>/-/blob/<default-branch>/docs/` — `ADR-016` → `<docs root>adr/ADR-016.md`
+- (nWave) see `phil:nwave-issue-board` for the artifact → issue mapping
 - (optional) <local task system> owns in-flight work; issues own the outward-facing tier
 ```

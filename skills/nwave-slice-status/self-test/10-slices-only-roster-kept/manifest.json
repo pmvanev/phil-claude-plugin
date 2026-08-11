@@ -1,7 +1,7 @@
 {
   "fixture": "10-slices-only-roster-kept",
   "situation": "The real mobile-web-standards layout. The feature has a slices/ directory and a feature-delta.md, and no deliver/ directory at all — so there is no roadmap and no progress file, but the slice roster is intact and well-formed.",
-  "invocation": "/phil:slice-status mobile-web-standards",
+  "invocation": "/phil:nwave-slice-status mobile-web-standards",
   "artifacts": {
     "docs/feature/mobile-web-standards/slices/": "three well-formed slice files, each with a **Goal.** line and IN/OUT scope",
     "docs/feature/mobile-web-standards/feature-delta.md": "present",

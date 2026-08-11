@@ -107,6 +107,109 @@ own test. Replaced with a `POST /markdown` round-trip, verified — `#3` renders
 `#999` stays plain text — plus the caveat that an unreadable target renders identically to a wrong
 number.
 
+## Amendment — issue granularity and the nWave mapping
+
+Two sections added: `## Choosing what becomes an issue` and `## nWave features on a board`.
+
+The question behind them was whether nWave already does something kanban-shaped. It does not. It
+holds the data and renders it three ways, none of them persistent or visible to anyone else:
+
+| Artifact | Role | Status? |
+|---|---|---|
+| `roadmap.json` | The plan — `phases[].steps[]` with `id`, `name`, `criteria`, `deps`, `agent` | **No.** 56 of 57 roadmaps on disk carry no `status` field on any step |
+| `execution-log.json` | The ledger — `{sid, p: RED\|GREEN\|COMMIT, s, d, t}` | Yes; status is a fold over events per `sid` |
+
+`/nw-continue` derives progress and then launches the next wave; `/nw-buddy` answers in prose;
+`/phil:slice-status` already renders the table, read-only. No `nw-*` skill touches `gh` or `glab`
+for issues. So the gap was never the table — it was persistence and visibility to other people.
+
+Design decisions worth recording:
+
+- **Slices are the cards, not features.** A feature card sits in one column for weeks; a slice moves.
+  Steps stay rows, because one 22-phase feature would otherwise mint hundreds of issues.
+- **Wave is a label, not a column** — reversed during the session. Wave-columned boards looked
+  natural (waves are sequential, so the board reads left to right) until the owner pointed out that
+  nWave is worked one feature at a time. Five columns holding one card between them is a progress
+  readout wearing a board's clothes. The wave stays as a label, which still filters and still
+  records how far a finished feature got. The board that earns its keep is the slice board.
+- **The projection is generated, never typed** — otherwise the description becomes a second
+  authority over facts `execution-log.json` owns, which this skill already forbids.
+- **The log cannot say `blocked` or `awaiting input`.** No event exists for either. The render owns
+  the three derivable states and must preserve human-set ones; a regeneration that overwrites
+  "blocked — waiting on an answer" destroys the only record of why work stopped.
+- **Delimited `nwave:status` block**, because both forges replace a description wholesale.
+
+The `skill-reviewer` correction above changed this section before it shipped: since GitHub has real
+sub-issues (`--add-sub-issue`, `--parent`, verified on `gh` 2.97.0), slices attach to the feature
+natively and the roster table is redundant there. `glab issue update` 1.112.0 exposes no hierarchy
+flag, so the roster table survives as the GitLab path only.
+
+Dropping wave columns also retired the section's one unverified claim — that multiple issue boards
+per project is GitLab Premium — which mattered only when a project needed a wave board *and* a slice
+board. One board suffices.
+
+`phil:slice-status` was renamed `phil:nwave-slice-status` in the same change: it was always
+nWave-specific, and the pairing reads clearly now that a second nWave skill exists. The rename
+covers the skill, its command, and its twelve self-test fixtures.
+
+## Split — `nwave-issue-board` extracted
+
+The mapping shipped inside `issue-board` and was extracted within the session. Size was the visible
+reason (3403 words); the real one was a conflict that appeared immediately:
+
+| | `phil:slice-status` | the new section, as first written |
+|---|---|---|
+| Vocabulary | `done`, `current`, `next`, `not started`, `blocked`, `deferred`, `unknown` | `done`, `in progress`, `not started` |
+| `blocked` | derivable from `.develop-progress.json` | claimed not derivable at all |
+| `unknown` | a distinct claim; reporting it as `not started` is "a lie the user will act on" | absent |
+
+Two skills deriving status from the same files, disagreeing on the vocabulary and on whether
+`blocked` exists. So the split is not primarily about length — **derivation already had an owner**,
+and the extracted skill is a bridge rather than a second implementation. It names `phil:issue-board`
+and `phil:slice-status` as REQUIRED BACKGROUND and states outright that it never derives a status.
+
+The generic half stayed behind as `## Choosing what becomes an issue`, which applies to any tracker:
+one issue per independently demonstrable thing, split when two halves would occupy different columns
+at once, ask when the split is not obvious.
+
+Named `nwave-issue-board`, not `nw-issue-board`: `nw-*` is the nwave plugin's own namespace
+(`nw-buddy`, `nw-roadmap`, `nw-continue`), and a prefixed name would read as one of theirs.
+
+`issue-board` ends at 2665 words; the bridge at 1297.
+
+### What the reviewer pass caught in the bridge
+
+Two independent `skill-reviewer` passes ran over both skills. The bridge shipped its first draft
+reproducing, at birth, the exact fault the split was meant to cure:
+
+- **It forbade what the owner permits.** "Never read a step's status from `roadmap.json`" contradicts
+  `nwave-slice-status`, which takes done-ness from "the execution log, `progress.md`, or the per-step
+  `status` field, whichever the project actually maintains" — and the 57th roadmap is precisely the
+  one that maintains it. A precedence rule, invented by the skill that had just delegated precedence
+  away.
+- **It re-listed the status vocabulary verbatim** — the very table whose divergence justified the
+  split.
+- **It duplicated the `gh` sub-issue commands and their version pin**, which already live in
+  `issue-board`, inside the skill whose charter says it does not own forge mechanics.
+- **It dropped the `Notes` column.** `nwave-slice-status` renders four columns, and Notes is where
+  drift (`⚠ no commit found`), named source disagreements, and missing artifacts go. Publishing
+  three columns sends the cleanest-looking version of the table to the widest audience — inverting
+  the honesty the neighbouring section spends two paragraphs defending.
+
+All four are fixed. The lesson worth keeping: extracting a skill does not, by itself, stop
+duplication. The bridge had to be rewritten to *reference* rather than *restate*, and the reviewer
+found each restatement by reading the two owners side by side.
+
+Also corrected in `issue-board`: the tier probe's non-200 rows are now marked inferred rather than
+observed, and 404 is no longer read as "wrong path" when it equally means the token cannot see the
+group; the personal-namespace case now has a fallback (assume Free, keep `--unlabel`) instead of a
+dead end; the autolink-existence check is scoped to what was actually verified on each forge.
+
+**Open, not fixed:** `## Verify the end state` asserts three GitHub Projects v2 behaviors as "learned
+the hard way", and no run in this repo records that experience. The operational advice is sound
+either way, but the experience claim is unsourced and unversioned while every neighbouring capability
+claim names `gh` 2.97.0. Left standing pending the author's confirmation of what was actually run.
+
 ## Follow-ups
 
 - `plugin-dev:skill-reviewer` raised ~30 medium/low findings across today's three skills that were

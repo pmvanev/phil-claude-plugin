@@ -1,7 +1,7 @@
 {
   "fixture": "04-disagreeing-sources-named",
   "situation": "The real edd-loop case. The slices/ directory holds three slice files, but roadmap.json defines only two phases. The third slice file declares itself out of scope in both its heading and a Status line — so it is not merely missing a phase, it was deliberately deferred.",
-  "invocation": "/phil:slice-status edd-loop",
+  "invocation": "/phil:nwave-slice-status edd-loop",
   "artifacts": {
     "docs/feature/edd-loop/slices/": ["slice-01-triage-and-off-ramp.md", "slice-02-qualitative-evidence-gate.md", "slice-03-cross-domain-sequencing.md"],
     "docs/feature/edd-loop/slices/slice-03-cross-domain-sequencing.md": {

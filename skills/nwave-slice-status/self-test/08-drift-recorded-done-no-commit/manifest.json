@@ -1,7 +1,7 @@
 {
   "fixture": "08-drift-recorded-done-no-commit",
   "situation": "The execution log records step 02-02 as COMMIT/PASS, but no commit in the repository touches that step's test file or implementation paths. The record and the tree disagree.",
-  "invocation": "/phil:slice-status checkout-redesign 02",
+  "invocation": "/phil:nwave-slice-status checkout-redesign 02",
   "artifacts": {
     "docs/feature/checkout-redesign/deliver/roadmap.json": {
       "phases": "02, steps 02-01 .. 02-03",

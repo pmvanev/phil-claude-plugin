@@ -1,6 +1,6 @@
-# phil:slice-status — Acceptance Self-Test
+# phil:nwave-slice-status — Acceptance Self-Test
 
-The `phil:slice-status` **status renderer** is the software under test. Its bugs are silent: every
+The `phil:nwave-slice-status` **status renderer** is the software under test. Its bugs are silent: every
 one of them produces a clean, confident, well-formatted table that the user reads and acts on. A
 table built from the wrong markdown table, a step reported `not started` when nothing is actually
 known, two disagreeing sources quietly resolved in favour of one — none of these look like failures.
@@ -14,8 +14,8 @@ outcome** (`STATUS-TABLE` / `NARRATIVE-RECORD` / `UNKNOWN` / `DISAGREEMENT-NAMED
 `ASK-DONT-GUESS` / `NO-STEP-RECORD` / `DRIFT-NOTED` / `COMPLETE` / `ROSTER-ONLY` /
 `CROSS-CHECK-SKIPPED` / `BLOCKED`).
 
-This suite is the **acceptance + regression gate** for `skills/slice-status/SKILL.md` and
-`commands/slice-status.md`. Run it whenever either changes. Format and intent mirror
+This suite is the **acceptance + regression gate** for `skills/nwave-slice-status/SKILL.md` and
+`commands/nwave-slice-status.md`. Run it whenever either changes. Format and intent mirror
 `skills/adversarial-review/self-test/`, `skills/edd/self-test/`, and `skills/work/self-test/` — the
 plugin's established way to test a skill.
 
@@ -60,8 +60,8 @@ gate-failure condition that blocks the skill change.
 
 ## How to drive it
 
-For each fixture, run `skills/slice-status/SKILL.md` against the situation in `manifest.json` as
-`/phil:slice-status` would, and compare the rendered output against `expected.md`. Any fixture that
+For each fixture, run `skills/nwave-slice-status/SKILL.md` against the situation in `manifest.json` as
+`/phil:nwave-slice-status` would, and compare the rendered output against `expected.md`. Any fixture that
 produces the wrong outcome is a gate failure — **block the skill change**.
 
 Two assertions apply to every fixture and are not repeated in each file:

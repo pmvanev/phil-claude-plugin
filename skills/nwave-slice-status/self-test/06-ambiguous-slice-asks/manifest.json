@@ -1,7 +1,7 @@
 {
   "fixture": "06-ambiguous-slice-asks",
   "situation": "The argument '03' has two valid readings in the same repository: phase 03 of the resolved feature, and a separate feature directory named slice-03-admin-triage.",
-  "invocation": "/phil:slice-status 03",
+  "invocation": "/phil:nwave-slice-status 03",
   "artifacts": {
     "docs/feature/": ["admin-field-triage", "slice-03-admin-triage"],
     "docs/feature/admin-field-triage/deliver/roadmap.json": "phases 01, 02, 03 — so '03' resolves to a phase here",

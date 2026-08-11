@@ -1,7 +1,7 @@
 {
   "fixture": "07-no-step-record-degrades",
   "situation": "A feature that has not reached DELIVER. Upstream wave artifacts exist, but there is no roadmap, no progress file, no execution log, and no slices directory. Git history is rich enough to tempt reconstruction.",
-  "invocation": "/phil:slice-status notification-service",
+  "invocation": "/phil:nwave-slice-status notification-service",
   "artifacts": {
     "docs/feature/notification-service/discuss/": "user-stories.md, feature-delta.md",
     "docs/feature/notification-service/design/": "architecture.md",

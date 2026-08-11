@@ -2,7 +2,7 @@
   "fixture": "01-status-table-happy-path",
   "walking_skeleton": true,
   "situation": "A feature whose sources all agree. Slice is a roadmap phase; the execution log records COMMIT/PASS for the first two steps of phase 03.",
-  "invocation": "/phil:slice-status admin-field-triage 03",
+  "invocation": "/phil:nwave-slice-status admin-field-triage 03",
   "artifacts": {
     "docs/feature/admin-field-triage/slices/slice-03-triage-feed.md": "# Slice 03 — Triage feed and bulk actions\n\n**Goal.** Admins see a live triage feed and can dismiss items in bulk.",
     "docs/feature/admin-field-triage/deliver/roadmap.json": {

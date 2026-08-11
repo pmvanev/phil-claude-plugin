@@ -1,5 +1,5 @@
 ---
-name: slice-status
+name: nwave-slice-status
 description: Use when the user asks where an nWave feature stands — "how many steps are in this slice", "which ones are done", "which one are we on", "what's next", "is slice 03 next", "what was the point of slice 02". Renders a read-only step table from the feature's own artifacts and stops. Prefer over `/nw-continue`, which computes the same thing and then launches the next wave, and over `/nw-buddy`, which answers in prose — this produces a table and starts nothing.
 ---
 
@@ -22,7 +22,7 @@ Three hard rules:
 
 ## Step 1 — Resolve the feature and the slice
 
-Resolve scope from the user's request — `$ARGUMENTS` when invoked as `/phil:slice-status`, otherwise
+Resolve scope from the user's request — `$ARGUMENTS` when invoked as `/phil:nwave-slice-status`, otherwise
 the feature id or slice number named in the question itself. **Most invocations arrive as prose**,
 where `$ARGUMENTS` is empty but "is slice 03 next?" plainly names a slice. Treat scope as empty only
 when neither carries one.
@@ -195,7 +195,7 @@ The user asked where they are; they can see it.
 
 ## Self-test (regression gate)
 
-`skills/slice-status/self-test/` holds golden fixtures that pin these behaviors: the table rendered
+`skills/nwave-slice-status/self-test/` holds golden fixtures that pin these behaviors: the table rendered
 from agreeing sources (01, walking skeleton), a narrative `progress.md` whose fixture and findings
 tables must never be read as step records (02), `unknown` reported instead of `not started` when the
 record is empty (03), disagreeing sources named rather than resolved and a deferred slice never
@@ -212,6 +212,6 @@ evidence.
 Fixture 04 is the one actively harmful case: positionally the deferred slice *is* next, and its own
 file says not to build it. Every other failure misinforms; that one directs.
 
-Whenever this skill or `commands/slice-status.md` changes, drive the fixtures per
+Whenever this skill or `commands/nwave-slice-status.md` changes, drive the fixtures per
 `self-test/README.md` and confirm each produces its `expected.md` decision. Every failure mode here
 is silent: the wrong answer arrives as a clean, confident table.

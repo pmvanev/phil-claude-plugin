@@ -1,7 +1,7 @@
 {
   "fixture": "09-feature-complete-no-resume",
   "situation": "Every step of every slice is done. There is no first-not-done step, so the rule that picks 'current' has nothing to select and the resume line has nothing to resume.",
-  "invocation": "/phil:slice-status checkout-redesign",
+  "invocation": "/phil:nwave-slice-status checkout-redesign",
   "artifacts": {
     "docs/feature/checkout-redesign/deliver/roadmap.json": {
       "phases": "01, 02",
