@@ -1,6 +1,6 @@
 ---
 name: issue-board
-description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — moving a card between board columns, setting a status label or a Projects v2 Status field, deciding whether a piece of work is one issue or several, hyperlinking or cross-linking references in an issue body to a file, an ADR, or another issue, marking an issue blocked by another and recording why, weighing whether to sync a local task file with a board, or connecting to a self-hosted GitLab instance. Covers the semantics `--help` does not, where a wrong guess reports success.
+description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — moving a card between board columns, reordering a column or prioritizing a backlog so the top card is what to work on next, ordering sub-issues under a parent, setting a status label or a Projects v2 Status field, deciding whether a piece of work is one issue or several, hyperlinking or cross-linking references in an issue body to a file, an ADR, or another issue, marking an issue blocked by another and recording why, weighing whether to sync a local task file with a board, or connecting to a self-hosted GitLab instance. Covers the semantics `--help` does not, where a wrong guess reports success.
 ---
 
 # Driving GitLab and GitHub Issue Boards
@@ -62,6 +62,9 @@ mandatory on Free, belt-and-braces on Premium.
 Confirm `--label` / `--unlabel` against `glab issue update --help` on your version; flag names drift
 across major releases.
 
+A label swap moves the card between columns and says nothing about where it lands inside one. See
+*A column is a queue, so its order is a claim* for the position, which is a separate write.
+
 ## GitHub does not work the same way
 
 GitHub has **no scoped labels and no label-based mutual exclusion**. Do not port the `status::`
@@ -86,6 +89,71 @@ is unavailable — reissue the token with the scope instead. Check with `gh auth
 If a project needs a list rather than a board, plain issues plus open/closed is enough, and it works
 with a repository-scoped token — which a Projects v2 board cannot, because projects are
 owner-scoped.
+
+## A column is a queue, so its order is a claim
+
+Read top to bottom, a column says what to pick up next. Neither forge decides that for you, and the
+two cases fail differently. A **plain issue list** is a reverse-chronological feed — `glab issue
+list` defaults to `created_at` descending, per `--help` on 1.112.0 — which is a record of when work
+was filed, not of when it will be done. A **board column** has a real position, and it stays unset
+until someone writes one. Unset still renders in some order, and that order is indistinguishable
+from one a person chose.
+
+**Where the work has a known order — a plan, a dependency chain, a release — write that order into
+the board.** Where it has none, rank it anyway, by what unblocks the most work, and record the basis
+where the column's readers already look: the description of the parent or tracking issue, under a
+fixed heading, as with `## Chain` below. A stated guess gets corrected; an unstated one gets
+followed.
+
+| | Position is | Set with | Read back with |
+|---|---|---|---|
+| GitLab board | the issue's `relative_position` | `issueMoveList` (GraphQL) | `glab issue list --order relative_position --sort asc --label <column>` |
+| GitHub Projects v2 | the item's position in the project | `updateProjectV2ItemPosition` (GraphQL) | `gh api graphql`, per *Verify the end state* |
+| A plain issue list, either forge | nothing | — | — |
+
+**Neither CLI exposes a way to set position, and the label swap this skill prescribes cannot set
+one either.** A `glab
+issue update --label/--unlabel` move changes the column and leaves the card wherever the default
+drops it — so on GitLab a deliberate move is two operations, not one. `glab issue` has no reorder
+subcommand and `gh project item-edit` has no position flag (checked on `glab` 1.112.0 and `gh`
+2.97.0). Position is GraphQL-only on both:
+
+```sh
+gh api graphql -f query='mutation($p:ID!,$i:ID!,$a:ID){
+  updateProjectV2ItemPosition(input:{projectId:$p,itemId:$i,afterId:$a}){clientMutationId}}' \
+  -f p=<project-node-id> -f i=<item-node-id> -f a=<the item this one should land below>
+```
+
+GitLab's `issueMoveList` carries `moveBeforeId`, `moveAfterId`, and `positionInList` alongside
+`fromListId` and `toListId`, so there a move between columns and a move within one are the same
+mutation. It has no one-liner here because it needs a `boardId` and both list IDs resolved first.
+
+Two behaviors come from the schemas' own description fields rather than from a run, and both are the
+kind that reads as a no-op and is not: `afterId` **omitted or null moves the item to the top**, and
+`positionInList` is 0-based with `-1` meaning the end of the list.
+
+**Sub-issue order is a separate order** from any column's. Repositioning it is a third mutation —
+`reprioritizeSubIssue(issueId, subIssueId, afterId | beforeId)` — and setting a card's board
+position leaves the parent's list untouched. What that list renders in when nobody has set a
+position is unverified here; set it explicitly if the order matters.
+
+All three signatures here were read from live schemas — GitHub's, and an 18.9.1-ee instance — and
+**none was exercised**. Confirm against one card before reordering a backlog.
+
+**Write the order top-down in one pass.** Each call anchors to a neighbor, so anchoring to a card
+you have not placed yet shifts everything after it — successfully, and with no output that says so.
+That failure mode is reasoned from the mutations' shape, not observed: read the column back and
+compare it against the intended sequence, per *Verify the end state*.
+
+A GitHub view with a sort configured orders by that field, which leaves a hand-set position
+invisible on that view *(unverified — check the view's sort and the position it may be hiding before
+trusting either)*. On GitLab, `glab issue list --order` also offers field-derived orders —
+`priority`, `label_priority`, `weight`, `milestone_due`, `due_date`, among them — which keep working
+as new issues arrive, where a hand-set position does not. Which of those fields your tier populates
+is a tier question; see *Find the tier before choosing a convention*.
+
+Without a board there is no position to set. Carry the order in a milestone, or in a checklist in
+one tracking issue, and say which one is authoritative.
 
 ## Link what the forge cannot resolve
 

@@ -234,6 +234,44 @@ work does not misinform someone, it assigns them.
 `issue-board` still has no suite. Its content is reference rather than procedure, so the convention
 there is genuinely unsettled — noted rather than resolved.
 
+## Amendment — card ordering (2026-08-11)
+
+Neither skill said anything about the order of the cards. Asked directly whether the nWave mapping
+covered it, the answer was no: the only ordering rule anywhere was *row order is `phases[].steps[]`
+array order*, governing rows inside one issue, and `issue-board` had no hit for order, sort, rank,
+position, or priority at all. Both now cover it.
+
+`issue-board` gains *A column is a queue, so its order is a claim*: known order gets written, unknown
+order gets ranked anyway with the basis recorded where readers already look. The mechanics were
+verified the same day against live schemas — `updateProjectV2ItemPosition` and `reprioritizeSubIssue`
+on GitHub, `issueMoveList` on the 18.9.1-ee instance, and the negative claims (`glab issue` has no
+reorder subcommand, `gh project item-edit` has no position flag) against `glab` 1.112.0 and `gh`
+2.97.0. **None of the mutations was exercised**, and the section says so.
+
+`nwave-issue-board` gains *The order of the cards is the order of the work*: slice cards sit in
+`phases[]` array order, and before `/nw-roadmap` exists they sit in slice-number order carrying
+`Order: slice number, provisional until /nw-roadmap`. The suite goes from twelve fixtures to
+**fourteen** — `13-order-follows-roadmap` (array order beats the slice and issue numbers that agree
+with each other) and `14-guessed-order-says-so` (a guess published as a guess). Both sit with `08`:
+a position is an instruction to whoever reads the column next, whether or not anyone chose it.
+
+### What the reviewer pass caught, again
+
+The first draft repeated the mistake `12` exists to pin — asserting behavior beyond its evidence.
+The ordering section was the least evidence-marked passage in a file whose identity is evidence
+marking, and its highest-consequence claim (`afterId` null moves an item to the **top**, not nowhere)
+was stated flatly while the same paragraph admitted the mutation was never run. Both quoted
+behaviors are schema description fields now, attributed as such.
+
+Three contradictions with the file's own content came out of the same pass: the intro said GitLab
+board lists fall back to a timestamp while the table said position is `relative_position` ten lines
+later; the prescribed `--label`/`--unlabel` move cannot set a position, which the file never said;
+and the table's GitHub read-back pointed at `gh project item-list`, which *Verify the end state*
+already warns under-reports. A fourth claim — that `--add-sub-issue` appends in call order — was
+unverified inference, and `nwave-issue-board` had built a seeding strategy on it that would have left
+the column in forge order while reporting the board ordered. That is fixture 13's failure mode,
+licensed by the skill's own text. Claim dropped, strategy replaced.
+
 ## Follow-ups
 
 - `plugin-dev:skill-reviewer` raised ~30 medium/low findings across today's three skills that were
@@ -242,3 +280,12 @@ there is genuinely unsettled — noted rather than resolved.
   the share-alike question is open until a license statement exists somewhere in the repo.
 - `nw-skill-reviewer` approved all three of today's skills with zero actionable findings, including
   one verifiably false certification. Treat it as a structure check, not a quality gate.
+- `issue-board` is over the 3,000-word guideline (~3,400). The reviewer's split proposal — move the
+  per-type link recipes and the self-hosted certificate section to `references/` — is sound and
+  deliberately not taken here, because no skill in this repo uses `references/` yet and the write-path
+  content must stay resident. Decide the convention before splitting.
+- Neither ordering mutation has been run against a real board. The first person to reorder a real
+  column should confirm the `afterId`-null and `positionInList` semantics and upgrade the markers.
+- `agents/adversarial-reviewer.md` frontmatter has an unquoted `description` containing
+  `Pattern lineage: …`; a plain YAML scalar cannot contain `: `, and a strict parser drops the agent.
+  Predates this work.

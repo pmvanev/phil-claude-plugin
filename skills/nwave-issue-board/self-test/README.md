@@ -13,7 +13,8 @@ like failures. They look like a board that is up to date.
 These fixtures feed the skill known project and forge states and assert each produces the correct
 **decision outcome** (`PUBLISHED` / `NOTES-PRESERVED` / `UNKNOWN-PUBLISHED` / `HUMAN-STATE-KEPT` /
 `BLOCK-DELIMITED` / `WAVE-SWAPPED` / `NO-ROWS-BEFORE-ROADMAP` / `DEFERRED-NOT-A-CARD` /
-`NATIVE-HIERARCHY` / `TWO-PASS-BARE-REFS` / `ONE-WAY` / `OWNER-DECIDES`).
+`NATIVE-HIERARCHY` / `TWO-PASS-BARE-REFS` / `ONE-WAY` / `OWNER-DECIDES` / `ORDER-FOLLOWS-ROADMAP` /
+`ORDER-STATED-AS-PROVISIONAL`).
 
 This suite is the **acceptance + regression gate** for `skills/nwave-issue-board/SKILL.md`. Run it
 whenever that file changes, and whenever either skill it delegates to changes — `phil:issue-board`
@@ -36,6 +37,8 @@ and intent mirror `skills/nwave-slice-status/self-test/`.
 | `10-gitlab-roster-second-pass/` | GitLab, four slices created in one run | roster written after numbers exist, as bare `#N` | `TWO-PASS-BARE-REFS` |
 | `11-forge-never-writes-back/` | issue was hand-edited to `done`; the log disagrees | treats the artifacts as authoritative; changes no file | `ONE-WAY` |
 | `12-owner-decides-status/` | `roadmap.json` carries a per-step `status` field (**the real edd-loop case**) | publishes what `nwave-slice-status` returns, not a local fold | `OWNER-DECIDES` |
+| `13-order-follows-roadmap/` | `phases[]` reads 01, 03, 02, 04; slice and issue numbers both ascend; GitHub | positions the column by array order, not by the numbers that agree with each other | `ORDER-FOLLOWS-ROADMAP` |
+| `14-guessed-order-says-so/` | DESIGN wave, three slices, no `roadmap.json`; GitLab | orders by slice number and marks the order provisional | `ORDER-STATED-AS-PROVISIONAL` |
 
 `01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `05`, `11`,
 `12` — the bug classes that ship silently because the published artifact is indistinguishable from a
@@ -43,9 +46,14 @@ correct one: honesty stripped on the way out, missing knowledge published as kno
 escalation erased by a refresh, hand-written prose destroyed by a whole-body write, artifacts
 corrupted from the forge, and a status computed here instead of asked for.
 
-Fixture `08` carries the only actively harmful failure in the suite. Slices 01 and 02 are done, so
-positionally slice 03 *is* next — and its own file says not to build it. A card on the board for
-deferred work does not misinform someone; it assigns them.
+Fixture `08` carries the suite's worst failure. Slices 01 and 02 are done, so positionally slice 03
+*is* next — and its own file says not to build it. A card on the board for deferred work does not
+misinform someone; it assigns them.
+
+Fixtures `13` and `14` belong with `08` rather than with the reporting fixtures, whatever their
+numbering suggests. Position is an instruction to whoever reads the column next. An order nobody
+wrote issues that instruction without anyone having decided it, and a provisional order issues it a
+wave before anyone can.
 
 Fixtures `03` and `04` pin the two directions in which this skill can lie about *why* a status is what
 it is. `03` is the machine having nothing to say. `04` is a person having said something the machine

@@ -1,0 +1,16 @@
+{
+  "fixture": "14-guessed-order-says-so",
+  "situation": "The feature is in DESIGN. Three slice files exist; roadmap.json does not, so no schedule has been decided. The slice files carry no sequence beyond their numbers. GitLab, so the feature description carries the roster table.",
+  "invocation": "put token-refresh on the board",
+  "artifacts": {
+    "docs/feature/token-refresh/slices/": "slice-01-*.md, slice-02-*.md, slice-03-*.md",
+    "docs/feature/token-refresh/deliver/roadmap.json": "ABSENT"
+  },
+  "forge_state": {
+    "host": "gitlab",
+    "tier": "Free",
+    "board": "slice board exists, with to-do / in progress / blocked / done lists",
+    "issues": "none yet; feature issue and three slice issues are created by this invocation"
+  },
+  "expected_outcome": "ORDER-STATED-AS-PROVISIONAL"
+}

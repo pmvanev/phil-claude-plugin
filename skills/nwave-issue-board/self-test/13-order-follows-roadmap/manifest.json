@@ -1,0 +1,18 @@
+{
+  "fixture": "13-order-follows-roadmap",
+  "situation": "Four slices, all open, none done. roadmap.json lists its phases in the array order 01, 03, 02, 04 - slice 02 was resequenced behind 03 after a spike. The four issues were created in file order, so the board's default sort shows 01, 02, 03, 04, and the slice numbers agree with it. Every card is in the to-do column.",
+  "invocation": "reorder the to-do column for token-refresh",
+  "artifacts": {
+    "docs/feature/token-refresh/deliver/roadmap.json": {
+      "phases": "array order 01, 03, 02, 04"
+    },
+    "docs/feature/token-refresh/slices/": "slice-01-*.md through slice-04-*.md, none deferred"
+  },
+  "forge_state": {
+    "host": "github",
+    "board": "Projects v2 board with a to-do column",
+    "issues": "#101 slice-01, #102 slice-02, #103 slice-03, #104 slice-04, all sub-issues of #100",
+    "column": "all four in to-do, no position ever written, rendering 101, 102, 103, 104"
+  },
+  "expected_outcome": "ORDER-FOLLOWS-ROADMAP"
+}
