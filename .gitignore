@@ -13,3 +13,9 @@ __pycache__/
 # nWave activation marker (keep .nwave/local-config.json trackable)
 .nwave/*
 !.nwave/local-config.json
+# nWave writes a .nwave/des/logs/ tree into whatever directory a command ran from, so these
+# appear anywhere. Only the root one is real; nested ones are pure runtime and are consolidated
+# into the root logs. This pattern needs the leading */ so it does NOT match the root .nwave/ —
+# git cannot re-include a file whose parent directory is excluded, and the negation above would
+# stop working.
+*/**/.nwave/

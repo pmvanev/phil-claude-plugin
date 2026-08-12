@@ -183,9 +183,9 @@ Three slices, one per independent outcome from the scope assessment. Briefs in
 
 | # | Slice | Learning hypothesis — disproves… | Depends on |
 |---|---|---|---|
-| 01 | Snapshot and resume (**WS**) | …that recording beats reconstructing | — |
-| 02 | Entry-point routing (absorbs #10) | …that a written instruction is sufficient | 01 (session-side half only) |
-| 03 | Claimed-card link | …that the board already carries enough | 01 |
+| 01 | Snapshot and resume (**WS**) | `bounded-change` | …that recording beats reconstructing |
+| 02 | Entry-point routing (absorbs #10) | `unbounded-preservation` | …that a written instruction is sufficient |
+| 03 | Claimed-card link | `bounded-change` | …that the board already carries enough |
 
 **Order rationale** — highest learning leverage first, per the Phase 2.5 rule:
 
@@ -627,6 +627,12 @@ graph TB
     Skill -. "changed when skill changes" .-> SelfTest
 ```
 
+`.gitignore` appears in the component decomposition table but deliberately not in this diagram. The
+table lists every **change** the feature makes, including configuration; the C4 diagram shows
+architectural **components**. A one-line ignore rule is the former and not the latter. Noted because
+the discrepancy is otherwise indistinguishable from an omission.
+*(Raised as a low finding by the DESIGN reviewer, 2026-08-12.)*
+
 ## Wave: DESIGN / [REF] Decisions table
 
 | # | Decision | ADR |
@@ -725,18 +731,24 @@ value would be machine-local unless that rule is amended.
 
 Ten scenarios, ten golden fixtures, one-to-one. `skills/session-handoff/self-test/`.
 
-| # | Scenario | Tags | Outcome |
-|---|---|---|---|
-| 01 | A session hands its reasoning to the next one | `@walking_skeleton @driving_port @real-io @slice-01` | `CAPTURE` → `RESUME-CURRENT` |
-| 02 | A session that achieved nothing leaves nothing behind | `@slice-01 @error` | `NO-OP` |
-| 03 | The resume point refuses to duplicate what is recorded elsewhere | `@slice-01 @error` | `REFUSE-DERIVABLE` |
-| 04 | A resume point that no longer matches says so before anything else | `@slice-01 @error @real-io` | `RESUME-STALE` |
-| 05 | With no resume point, what is reconstructed is labelled so | `@slice-01 @error` | `RECONSTRUCT` |
-| 06 | Work is handed to whatever owns it | `@slice-02 @driving_port` | `ROUTE` |
-| 07 | A recorded owner that has since changed does not win | `@slice-02 @error` | `ROUTE-LIVE-WINS` |
-| 08 | An unknown owner is admitted, never guessed | `@slice-02 @error` | `ASK-OWNER` |
-| 09 | The next session resumes the same work, for the same reason | `@slice-03` | `CAPTURE` + claim |
-| 10 | Two sessions claiming the same work is reported | `@slice-03 @error` | `REPORT-CLAIM-CONFLICT` |
+Every scenario carries a `@contract-shape:` tag, per the acceptance-designer's principle 14 — untagged
+scenarios block at review, and the tag drives the crafter's universe-mechanism choice in DELIVER. The
+classification is **not** uniform, and that is the point: a scenario whose guarantee is *nothing
+changed anywhere* (02, 06, 07, 08) needs a wide universe, and tagging it `bounded-change` would let a
+crafter check one file and miss that the command wrote a log, a lock, or a stray directory.
+
+| # | Scenario | Contract shape | Outcome | Tags |
+|---|---|---|---|---|
+| 01 | A session hands its reasoning to the next one | `bounded-change` | `CAPTURE` → `RESUME-CURRENT` | `@walking_skeleton @driving_port @real-io @slice-01` |
+| 02 | A session that achieved nothing leaves nothing behind | `unbounded-preservation` | `NO-OP` | `@slice-01 @error` |
+| 03 | The resume point refuses to duplicate what is recorded elsewhere | `bounded-change` | `REFUSE-DERIVABLE` | `@slice-01 @error` |
+| 04 | A resume point that no longer matches says so before anything else | `pure-function` | `RESUME-STALE` | `@slice-01 @error @real-io` |
+| 05 | With no resume point, what is reconstructed is labelled so | `pure-function` | `RECONSTRUCT` | `@slice-01 @error` |
+| 06 | Work is handed to whatever owns it | `unbounded-preservation` | `ROUTE` | `@slice-02 @driving_port` |
+| 07 | A recorded owner that has since changed does not win | `unbounded-preservation` | `ROUTE-LIVE-WINS` | `@slice-02 @error` |
+| 08 | An unknown owner is admitted, never guessed | `unbounded-preservation` | `ASK-OWNER` | `@slice-02 @error` |
+| 09 | The next session resumes the same work, for the same reason | `bounded-change` | `CAPTURE` + claim | `@slice-03` |
+| 10 | Two sessions claiming the same work is reported | `pure-function` | `REPORT-CLAIM-CONFLICT` | `@slice-03 @error` |
 
 **Error/edge coverage: 7 of 10 (70%)**, against the ≥40% target. That ratio is not padding — six of
 the seven pin a *silent* failure, where the wrong behaviour is indistinguishable from success without
@@ -835,17 +847,45 @@ vacuous pass plus a documented skip should not be mistaken for two independent c
   `tests/test_self_test_fixtures.py` automates the mechanically-decidable subset, and **pytest is not
   installed in the current environment**, so it could not be run during this wave.
 
-## Wave: DISTILL / [REF] Final Wave Review Gate — NOT RUN
+## Wave: DISTILL / [REF] Final Wave Review Gate — RUN
 
-The skill makes this mandatory: four reviewers in parallel over the full four-wave chain
-(`@nw-product-owner-reviewer`, `@nw-solution-architect-reviewer`, `@nw-platform-architect-reviewer`,
-`@nw-acceptance-designer-reviewer`), plus the `plugin`-type additions `@nw-plugin-validator` and
-`@nw-skill-reviewer`.
+Dispatched 2026-08-12 in parallel over the full wave chain.
 
-**None were dispatched**, because the operator's standing instruction is not to invoke subagents unless
-asked. This is a deviation, not an omission — recorded here so it is visible rather than assumed
-handled. Sentinel (`@nw-acceptance-designer-reviewer`) is the one the skill says never skips, being the
-structural-correctness reviewer for Gherkin antipatterns and scaffold integrity.
+| Reviewer | Scope | Verdict | B / H / L |
+|---|---|---|---|
+| `@nw-product-owner-reviewer` | DISCUSS | **approved** | 0 / 0 / 0 |
+| `@nw-solution-architect-reviewer` | DESIGN | **approved** | 0 / 0 / 1 |
+| `@nw-acceptance-designer-reviewer` | DISTILL + `.feature` + fixtures | **needs_revision** → resolved | 1 / 0 / 1 |
+| `@nw-plugin-validator` | plugin structure and schema | **approved** | 0 / 0 / 0 |
+| `@nw-platform-architect-reviewer` | DEVOPS | **N/A** | no DEVOPS wave ran; the range it reviews is empty |
+| `@nw-skill-reviewer` | `SKILL.md` quality | **deferred to DELIVER** | its target does not exist until DELIVER authors it |
 
-**DELIVER hand-off is therefore un-gated.** The wave's artifacts are complete; the review that would
-certify them has not run.
+### Findings and disposition
+
+- **BLOCKER (Sentinel) — every scenario lacked a `@contract-shape:` tag. Valid; fixed.** The mandate
+  is the acceptance-designer's principle 14, and it lives in the *agent definitions* rather than in the
+  `nw-distill` skill, which is why authoring missed it. Untagged scenarios block at review by mechanical
+  grep. All ten are now tagged and the grep passes 10/10.
+
+  Its *recommendation* — tag everything `bounded-change` — was **not** followed. The tag drives the
+  crafter's universe-mechanism choice in DELIVER, so a uniform tag would be actively harmful: four
+  scenarios (02, 06, 07, 08) assert that **nothing changed anywhere**, which needs a wide universe.
+  Tagging those `bounded-change` would license a crafter to check one file and miss a stray log, lock,
+  or directory. Classification is per-scenario and recorded in the scenario table above.
+
+- **LOW (Architect) — `.gitignore` in the decomposition table but not in the C4 Container diagram.**
+  Valid; resolved with a note distinguishing *changes* from *architectural components*.
+
+- **LOW (Sentinel) — "`self-test/` lacks a README.md". Rejected: factually wrong.**
+  `skills/session-handoff/self-test/README.md` exists, 63 lines, written before the review ran. No
+  action taken.
+
+### Honest reading of these verdicts
+
+Two of the four returned **approved with an entirely empty findings list** after being prompted to
+attack specific claims adversarially. That is a weak signal, not a strong one — it is the
+soft-critic-theatre failure mode this repo's own `adversarial-review` skill is built against, where an
+LLM judging LLM output produces a clean bill of health that reflects agreeableness rather than scrutiny.
+Sentinel was the only reviewer to find anything real, and one of its two findings was false.
+
+Treat this gate as **passed, weakly**. The DELIVER hand-off is unblocked; it is not certified.
