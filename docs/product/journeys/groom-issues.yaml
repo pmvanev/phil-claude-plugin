@@ -1,0 +1,100 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: groom-issues (2026-08-12)
+
+id: groom-issues
+name: Bring an issue board into shape without guessing
+persona: robin-backlog-curator
+job: keep-a-backlog-trustworthy
+summary: >
+  Robin runs the grooming session on a board that has been accumulating. One cheap scan derives a
+  defect table fresh — no stored marker is consulted or written — and reports it. Robin scopes what
+  to work. Mechanical defects are fixed inside that scope; every cross-issue judgement (merge, split,
+  close, group) is presented with evidence and applied only if Robin says so.
+
+steps:
+  - id: invoke
+    action: Robin runs `/phil:groom-issues` against a board
+    output: The board is identified and the scan begins
+    emotion: wary — the board has been accumulating and nobody knows how bad it is
+  - id: scan
+    action: >
+      One call per forge fetches every issue with its body, labels and milestone. The defect table is
+      derived fresh against the house-default standard; no marker is read, because none exists.
+    output: >
+      "57 clean, 3 with body defects, 2 duplicate candidates, 1 oversized" — plus the evidence behind
+      each finding
+    emotion: relief — the size of the problem is known, and it is usually smaller than feared
+  - id: scope
+    action: >
+      Robin picks what to work: a defect class, a subset of issues, or everything. The tool does not
+      choose, and does not start fixing to demonstrate progress.
+    output: An agreed scope
+    emotion: control — the board is not being rewritten out from under me
+  - id: fix-mechanical
+    action: >
+      Inside the agreed scope, apply only the defects that need no judgement — links that would 404,
+      accumulated single-valued labels, missing cross-links. Each change is reported as it is made.
+    output: Per-issue changes, each stating what changed and why it was safe
+    emotion: momentum — the boring half is disappearing without me deciding anything
+  - id: decide-set-level
+    action: >
+      For each cross-issue candidate — duplicate, oversized, overcome by events, ungrouped — present
+      the evidence and ask. Nothing here is applied unasked, because each is expensive to undo.
+    output: A decision per candidate; applied or declined, and declined leaves no trace
+    emotion: confidence — nothing irreversible happened without me
+  - id: report
+    action: >
+      State what changed, what was declined, and what remains outstanding. A board with nothing wrong
+      is reported as clean rather than given manufactured work.
+    output: A closing summary; the board itself is the record
+    emotion: trust — the board now says what it means
+
+emotional_arc: wary → relief → control → momentum → confidence → trust  # upward
+
+shared_artifacts:
+  - name: house_default_body_standard
+    source: the skill, overridable per project in CLAUDE.md
+    consumed_by: [scan]          # the oracle; without it the defect table is taste
+  - name: defect_table
+    source: scan                  # re-derived every run, never stored
+    consumed_by: [scope, fix-mechanical, report]
+  - name: set_level_candidates
+    source: scan
+    consumed_by: [decide-set-level]
+  - name: agreed_scope
+    source: scope
+    consumed_by: [fix-mechanical, decide-set-level]
+  # DELIBERATELY NOT an artifact: any "groomed" marker — no label, no timestamp block. A stored
+  # marker becomes a second authority the moment a human edits a groomed issue, which is what
+  # phil:issue-board forbids under "One system of record per scope".
+
+error_paths:
+  - step: scan
+    failure: The forge is unreachable, or the board is larger than one page
+    recovery: >
+      Paginate; if the read is still partial, say so and refuse to report "N clean" — a completeness
+      claim over a partial read is the one output that actively misleads
+  - step: scan
+    failure: An issue body contains session state or other scratch
+    recovery: >
+      Flag it as a body defect. ADR-013 puts session state in a git-ignored local file precisely
+      because a board is world-readable
+  - step: fix-mechanical
+    failure: A fix would edit inside a generated region (e.g. the `nwave:status` block)
+    recovery: >
+      Refuse. That region is generated, never typed; a hand edit is overwritten at the next refresh
+      and disagrees with its source until then
+  - step: fix-mechanical
+    failure: The issue changed between the scan and the write
+    recovery: Re-read before writing, and report the change rather than overwriting it silently
+  - step: decide-set-level
+    failure: Robin declines a merge, split, close, or grouping
+    recovery: >
+      Leave the card untouched and record nothing. ACCEPTED COST — because the defect table is
+      re-derived every run and no marker is stored, a declined candidate WILL be proposed again next
+      run. That is the price of having no second authority; it is not a bug, and the report should
+      say so plainly rather than let it read as the tool forgetting
+  - step: report
+    failure: Nothing is wrong with the board
+    recovery: >
+      Report it clean and stop. Manufacturing work to justify the run is how a grooming tool teaches
+      people to stop running it

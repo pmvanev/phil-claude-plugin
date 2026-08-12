@@ -323,3 +323,52 @@ jobs:
     # Relationship to deliver-invisible-work-with-discipline (phil-work): distinct outcome.
     # phil-work owns discipline WITHIN one initiative and says nothing about the session boundary;
     # this job owns continuity ACROSS that boundary, for nWave and non-nWave work alike.
+
+  - id: keep-a-backlog-trustworthy
+    # Registered by DISCUSS wave, feature: groom-issues (2026-08-12)
+    job_story: >
+      When my issue board has accumulated cards that someone — often a past me — dropped in
+      half-finished, I want the board systematically brought into shape, with the judgement
+      calls put to me rather than guessed, so I can trust what the board says and rank it
+      without ranking misunderstood work.
+    dimensions:
+      functional: >
+        Bring every issue to a stated standard — a body that says what and why, links that
+        resolve, correct single-valued labels — and resolve the defects that live BETWEEN
+        issues (duplicates, oversized cards, work overcome by events, ungrouped effort),
+        surfacing evidence for each rather than applying judgement calls unasked.
+      emotional: >
+        Trust that the board says what it means; relief from the dread of a backlog nobody has
+        read end to end; confidence that ranking it will rank real work.
+      social: >
+        A board a teammate can read and act on without asking what a card means; being someone
+        whose backlog is navigable rather than a graveyard.
+    four_forces:
+      push: >
+        Issues get filed half-finished and nothing catches it. phil:issue-board covers how to
+        MANIPULATE an issue — labels, links, chains, position — but never says what a body must
+        CONTAIN, so "appropriate description" is not checkable and grooming is vibes. Defects
+        between issues (duplicates, oversized cards) are structurally invisible to a per-issue
+        read. And ranking (phil:rank-issues) runs on whatever the board says, so a misunderstood
+        card gets confidently ranked.
+      pull: >
+        One command that reads the whole board cheaply, reports what is wrong with evidence,
+        fixes what is mechanical, and asks about everything else.
+      anxiety: >
+        (A) An irreversible set-level operation applied without asking — a closed duplicate, a
+        split that cut the wrong seam, a milestone nobody wanted. (B) A `groomed` marker that
+        lies the moment a human edits the issue — the second authority phil:issue-board forbids
+        under "One system of record per scope". (C) A defect oracle that is really taste, because
+        nothing states what a body must contain. (D) Ceremony on a board that was already fine.
+      habit: >
+        Reading the board only when something feels wrong; fixing issues ad hoc while tripping
+        over them; or leaving it and ranking anyway.
+    opportunity_score: not-scored   # single new job; priority by default
+    status: validated
+    personas: [robin-backlog-curator]
+    features: [groom-issues]
+    # Relationship to the ranking work (phil:rank-issues, #8): sequential, not overlapping.
+    # Grooming settles what each card MEANS; ranking settles what order they go in. Ranking's
+    # own precondition names grooming as advice rather than a gate — a messy board can be
+    # ranked, just worse.
+

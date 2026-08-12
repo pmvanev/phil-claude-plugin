@@ -1,0 +1,26 @@
+# Persona (SSOT) — bootstrapped by DISCUSS wave, feature: groom-issues (2026-08-12)
+
+id: robin-backlog-curator
+name: Robin
+role: >
+  Owns an issue board that other people — and a past self — also file into, and pays when a card
+  turns out to mean something other than what it said. Curator rather than steward: Quinn holds
+  stewardship of the codebase; Robin holds the board that decides what gets worked on it.
+goals:
+  - Trust that every card on the board says what it means, without reading all of them again
+  - Catch the defects that live between issues — duplicates, oversized cards, work overcome by events
+  - Keep judgement calls with a human, and let the mechanical fixes happen without ceremony
+  - Hand a groomed board to ranking, so the order is over understood work
+frustrations:
+  - Cards get filed half-finished and nothing catches it
+  - Nothing states what a body must contain, so "appropriate description" is not checkable
+  - Duplicates and oversized cards are invisible when reading one issue at a time
+  - A backlog nobody has read end to end is one nobody trusts, so it gets bypassed rather than fixed
+mental_model:
+  - A board is only worth ranking if the cards mean what they say
+  - The expensive mistakes live between issues, not inside one
+  - Anything irreversible — closing, splitting, merging — is mine to decide, not the tool's
+  - A "groomed" marker would start lying the first time someone edited an issue
+vocabulary:
+  - grooming, defect table, well-formed body, duplicate, oversized, overcome by events,
+    set-level pass, mechanical vs semantic, house default, one system of record
