@@ -855,7 +855,7 @@ Dispatched 2026-08-12 in parallel over the full wave chain.
 |---|---|---|---|
 | `@nw-product-owner-reviewer` | DISCUSS | **approved** | 0 / 0 / 0 |
 | `@nw-solution-architect-reviewer` | DESIGN | **approved** | 0 / 0 / 1 |
-| `@nw-acceptance-designer-reviewer` | DISTILL + `.feature` + fixtures | **needs_revision** → resolved | 1 / 0 / 1 |
+| `@nw-acceptance-designer-reviewer` | DISTILL + `.feature` + fixtures | **needs_revision** → re-run **approved** | 1 / 0 / 1 → 0 / 0 / 0 |
 | `@nw-plugin-validator` | plugin structure and schema | **approved** | 0 / 0 / 0 |
 | `@nw-platform-architect-reviewer` | DEVOPS | **N/A** | no DEVOPS wave ran; the range it reviews is empty |
 | `@nw-skill-reviewer` | `SKILL.md` quality | **deferred to DELIVER** | its target does not exist until DELIVER authors it |
@@ -888,4 +888,11 @@ soft-critic-theatre failure mode this repo's own `adversarial-review` skill is b
 LLM judging LLM output produces a clean bill of health that reflects agreeableness rather than scrutiny.
 Sentinel was the only reviewer to find anything real, and one of its two findings was false.
 
-Treat this gate as **passed, weakly**. The DELIVER hand-off is unblocked; it is not certified.
+Sentinel was re-run after the two valid findings were fixed and returned **approved, 0/0/0** — but in
+two tool calls and fifteen seconds, and without engaging the explicit challenge put to it (whether any
+per-scenario `@contract-shape:` assignment is wrong). That is confirmation in form rather than in
+substance, and it does not raise the confidence above.
+
+Treat this gate as **passed, weakly**. The DELIVER hand-off is unblocked; it is not certified. The
+contract-shape classification in particular has been asserted and reviewed by nobody who pushed back
+on it — it is the thing most worth a human eye before DELIVER consumes it.
