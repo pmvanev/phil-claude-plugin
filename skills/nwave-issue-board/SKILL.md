@@ -116,7 +116,8 @@ people act on is the one on the board. The mechanics for setting a position are 
 - **GitHub** — the board column and the parent's sub-issue list are two orders, and setting one
   leaves the other alone. Each needs its own write, per issue and per sub-issue; neither follows
   from the order the issues were created in. Both mutations are in `phil:issue-board`, which also
-  records that neither has been exercised.
+  records their exercise status — both GitHub mutations are confirmed by a run as of 2026-08-12;
+  GitLab's is still schema-only.
 - **A deferred slice takes no position, because it takes no card.** The top of a to-do column
   assigns work to whoever reads it next.
 

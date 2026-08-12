@@ -100,9 +100,9 @@ the read-back path, not an incidental property.
 - (+) The delegated derivation is what keeps the snapshot small — it records only what nothing else can.
 - (−) Two new commands on the plugin's surface.
 - (−) `continue.md` and `todo.md` are not subsumed. Out of scope per DISCUSS; worth revisiting once
-  the snapshot proves itself. **Update 2026-08-12:** `continue.md` has since been retired to
-  `docs/evolution/2026-07-01-refactor-loop.md` — not subsumed, but no longer competing from the root.
-  `todo.md` still stands.
+  the snapshot proves itself. **Update 2026-08-12:** both have since been retired to
+  `docs/evolution/2026-07-01-refactor-loop.md` — `continue.md` as the body of that document, `todo.md`
+  as its appendix. Not subsumed by the feature, but no longer competing with it from the repo root.
 - (−) Anxiety A is only mitigated, not closed, until the hook lands.
 - Open (→ DELIVER): slice 02 extends `skills/nwave-issue-board/SKILL.md` with the card-side routing
   line — the only planned edit to an existing skill, and its wave → command table must be verified

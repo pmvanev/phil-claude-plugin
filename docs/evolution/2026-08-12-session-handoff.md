@@ -110,8 +110,10 @@ rather than command descriptions, had **omitted DEVOPS entirely** (wave 4 of 6) 
   whether it can see the *why*, which is the entire payload.
 - **Cards with no wave label get no routing line.** The one genuine requirements-level gap carried
   from #10, and the common case on a mixed board.
-- **`todo.md` still stands** at the root — same class as the retired `continue.md`, but a live idea
-  list rather than a resume point.
+- ~~`todo.md` still stands at the root~~ — **retired 2026-08-12**, folded into
+  `docs/evolution/2026-07-01-refactor-loop.md` as an appendix. Every one of its items was already
+  marked `DONE`; nothing in it was live. The repo root now carries no hand-maintained resume or
+  backlog file, which is the condition this feature argued for.
 - **Competing claims are neither detected nor resolved** in v1 — detection was slice 03's.
 - Open (→ whenever slice 03 lands): whether the snapshot should be per-repo or per-worktree, given
   worktree isolation can put several trees on one initiative (ADR-013).

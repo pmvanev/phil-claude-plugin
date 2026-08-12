@@ -130,19 +130,33 @@ GitLab's `issueMoveList` carries `moveBeforeId`, `moveAfterId`, and `positionInL
 `fromListId` and `toListId`, so there a move between columns and a move within one are the same
 mutation. It has no one-liner here because it needs a `boardId` and both list IDs resolved first.
 
-Two behaviors come from the schemas' own description fields rather than from a run, and both are the
-kind that reads as a no-op and is not: `afterId` **omitted or null moves the item to the top**, and
-`positionInList` is 0-based with `-1` meaning the end of the list.
+Two behaviors come from the schemas' own description fields, and both are the kind that reads as a
+no-op and is not: `afterId` **omitted or null moves the item to the top**, and `positionInList` is
+0-based with `-1` meaning the end of the list. The `afterId`-omitted behavior is **confirmed by a run**
+(GitHub, `gh` 2.97.0) — it moved a card from last to first. `positionInList` is still description-only.
 
 **Sub-issue order is a separate order** from any column's. Repositioning it is a third mutation —
 `reprioritizeSubIssue(issueId, subIssueId, afterId | beforeId)` — and setting a card's board
-position leaves the parent's list untouched. What that list renders in when nobody has set a
-position is unverified here; set it explicitly if the order matters.
+position leaves the parent's list untouched.
+
+**Confirmed by a run**: `--add-sub-issue 11,10,12` produced the parent list `12, 10, 11` — not call
+order, not creation order, not the column's order. Both `beforeId` and `afterId` anchoring then fixed
+it on the first attempt. Set the sub-issue order explicitly whenever it matters; nothing you have
+already done will have set it for you.
 
 All three signatures here were read from live schemas — GitHub's, and an 18.9.1-ee instance, the
 latter out of the schema dump described under *`glab api graphql` answers introspection with the whole
-schema* — and **none was exercised**. Confirm against one card before reordering a backlog, and read
-that section before running an introspection query of your own.
+schema*. Exercise status, as of 2026-08-12:
+
+| Mutation | Exercised? |
+|---|---|
+| `updateProjectV2ItemPosition`, `afterId` omitted → top | **yes** — `gh` 2.97.0 |
+| `updateProjectV2ItemPosition`, `afterId` → a specific sibling | **yes** |
+| `reprioritizeSubIssue`, `beforeId` and `afterId` | **yes**, both forms |
+| GitLab `issueMoveList` | **no** — still schema-only |
+
+Every GitHub form landed correctly on the first attempt. Confirm the GitLab mutation against one card
+before reordering a backlog, and read that section before running an introspection query of your own.
 
 **Write the order top-down in one pass.** Each call anchors to a neighbor, so anchoring to a card
 you have not placed yet shifts everything after it — successfully, and with no output that says so.
@@ -387,6 +401,29 @@ generated content that dates the moment the instance is upgraded. Going around `
 needs the instance's CA and its own token handling, and on an IP-addressed instance the certificate
 may carry no matching SAN.
 
+## A status write can close the issue underneath you
+
+GitHub Projects v2 ships built-in workflows, and one of them — commonly enabled — **closes the issue
+when Status is set to Done**. So `gh project item-edit --single-select-option-id <Done>` is not only a
+field write; on such a board it is also `gh issue close`, with no output saying so.
+
+The damage is to whatever you queued next. Observed 2026-08-12: setting an item to Done, then running
+`gh issue close <n> -c "<closing note>"`, produced `! Issue #<n> is already closed` — and **the
+comment was silently discarded**. The exit path reports the state you wanted, so nothing looks wrong;
+the note simply never posted.
+
+Two consequences worth holding:
+
+- **Order the two operations comment-first.** Post the closing comment, *then* set Status. The reverse
+  loses the comment on any board with the workflow enabled, and you cannot tell from the board which
+  kind you are on until it bites.
+- **A status write is not reversible by another status write.** Moving Done → Todo does not reopen the
+  issue. Reopen it explicitly with `gh issue reopen`.
+
+The same class applies to the mirror workflow (*item closed → Status: Done*), which makes
+`gh issue close` a board write. Neither is discoverable from `--help`, and neither is visible in the
+project's field schema — check the project's workflow settings, or infer it the way this was found.
+
 ## Verify the end state
 
 If the instance is reachable only over a VPN or a home network, expect connection-level failures; a
@@ -442,6 +479,8 @@ cannot be discovered:
 - Tier: Premium (scoped labels swap server-side; real `blocks` links) | Free (swap manually with
   `--unlabel`; `relates_to` only)
 - Status lives in `status::` labels — swap, never add a board list
+- (Projects v2) Built-in workflows enabled: <none | auto-close on Done | auto-Done on close> —
+  a status write is also an issue write when one is on; comment before setting Status
 - Docs root for links: `https://<host>/<project>/-/blob/<default-branch>/docs/` — `ADR-016` → `<docs root>adr/ADR-016.md`
 - (nWave) see `phil:nwave-issue-board` for the artifact → issue mapping
 - (optional) <local task system> owns in-flight work; issues own the outward-facing tier

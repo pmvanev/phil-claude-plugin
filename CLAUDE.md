@@ -20,6 +20,9 @@ Development and writing standards live in `${CLAUDE_PLUGIN_ROOT}/rules/`. Rules 
   field can be set; editing one that was never added does nothing.
 - IDs: project `PVT_kwHOANPp-M4Bf-px` · Status field `PVTSSF_lAHOANPp-M4Bf-pxzhaNnGs` · options
   Todo `f75ad846`, In Progress `47fc9ee4`, Done `98236657`.
+- **Auto-close on Done is ENABLED.** Setting Status=Done closes the issue; a `gh issue close -c`
+  afterwards reports "already closed" and **silently drops the comment**. Post the closing
+  comment first, then set Status. Moving Done→Todo does not reopen — use `gh issue reopen`.
 - `gh auth` needs the `project` scope — present as of 2026-08-12; `gh auth refresh -s project` if it
   is lost.
 - Read the board with `gh api graphql`, never `gh project item-list` — item-list served a stale
