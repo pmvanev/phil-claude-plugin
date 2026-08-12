@@ -1,0 +1,11 @@
+{
+  "fixture_id": "SH-SELFTEST-02",
+  "phase": "WIND-DOWN",
+  "situation": "A session was opened, some files were read, a question was answered, and nothing was changed or decided.",
+  "session_advanced_work": false,
+  "decisions_made": [],
+  "next_action": null,
+  "files_changed": 0,
+  "expected_decision": "NO-OP",
+  "expected_guard": "C4 — no ceremony on a no-op; KPI-4 hard zero"
+}

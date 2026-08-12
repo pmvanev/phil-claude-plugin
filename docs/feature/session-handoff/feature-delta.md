@@ -1,6 +1,7 @@
 # Feature Delta — session-handoff
 
-Forge: pmvanev/phil-claude-plugin#9 · Waves: DISCUSS ✓ · DESIGN ✓ (both 2026-08-12)
+Forge: pmvanev/phil-claude-plugin#9 · Waves: DISCUSS ✓ · DESIGN ✓ · DISTILL ✓ (all 2026-08-12)
+Deliverable type: `plugin` — verification is Gherkin + fixtures + dogfood, **not** pytest/Hypothesis.
 Density: lean + ask-intelligent (`~/.nwave/global-config.json`)
 Rendered Tier-2 expansion: `alternatives-considered` [WHY] — accepted 2026-08-12, trigger:
 cross-context complexity (5 bounded contexts, threshold ≥3). Recorded here because this repo has no
@@ -680,3 +681,171 @@ Deferred deliberately, with the wave that owns each.
 
 None. DESIGN settled the three questions DISCUSS deferred without altering any DISCUSS assumption;
 all three were recorded as open rather than as decisions, so no back-propagation is required.
+
+---
+
+# Wave: DISTILL (entered 2026-08-12)
+
+Deliverable type: **`plugin`** · Policy: `inherit` · Scenario SSOT:
+`skills/session-handoff/acceptance.feature`
+
+## Wave: DISTILL / [REF] Wave-decision reconciliation
+
+**Reconciliation passed — 0 contradictions.** DISCUSS D1–D7 checked against DESIGN DDD-1–DDD-7. No
+DEVOPS wave ran.
+
+The three items DISCUSS left open (surface, trigger, topology) were recorded there **as open**, so
+DESIGN settling them is resolution rather than contradiction, and no back-propagation is owed. The
+prior waves' `wave-decisions.md` files do not exist as separate artifacts under `discuss/` and
+`design/` — this repo uses the single-narrative convention, so the reconciliation was run against the
+`## Wave: … / [REF] Wave decisions summary` sections of `feature-delta.md`.
+
+## Wave: DISTILL / [REF] Deliverable type
+
+**`plugin`**, resolved through the documented precedence: `.nwave/des-config.json` is **absent**;
+`~/.nwave/global-config.json` declares no `defaults.deliverable_type`; so resolution falls to step 3,
+root-only FS detection, and `.claude-plugin/plugin.json` at the root makes this a plugin.
+
+This is the wave's most consequential routing fact, because the `plugin` type explicitly directs
+verification away from the pytest/Hypothesis machinery that dominates this skill:
+
+| | Applies here |
+|---|---|
+| `@nw-plugin-validator` + `@nw-skill-reviewer` | yes — the type-specific verification |
+| Behavioural Gherkin scenarios | yes — `acceptance.feature`, business language only |
+| Example-interaction evidence | yes — same-day dogfood, captured verbatim |
+| pytest / Hypothesis / PBT / state-delta `Universe` | **no** — "NOT pytest/Hypothesis-centric" |
+
+**Recommendation:** pin `deliverable_type: plugin` in `.nwave/des-config.json`. The skill requires the
+routing and the runtime enforcement gate to read the *same* source, and today neither reads anything —
+both re-derive it. Note that `.gitignore` excludes `.nwave/*` except `local-config.json`, so a pinned
+value would be machine-local unless that rule is amended.
+
+## Wave: DISTILL / [REF] Scenario list
+
+Ten scenarios, ten golden fixtures, one-to-one. `skills/session-handoff/self-test/`.
+
+| # | Scenario | Tags | Outcome |
+|---|---|---|---|
+| 01 | A session hands its reasoning to the next one | `@walking_skeleton @driving_port @real-io @slice-01` | `CAPTURE` → `RESUME-CURRENT` |
+| 02 | A session that achieved nothing leaves nothing behind | `@slice-01 @error` | `NO-OP` |
+| 03 | The resume point refuses to duplicate what is recorded elsewhere | `@slice-01 @error` | `REFUSE-DERIVABLE` |
+| 04 | A resume point that no longer matches says so before anything else | `@slice-01 @error @real-io` | `RESUME-STALE` |
+| 05 | With no resume point, what is reconstructed is labelled so | `@slice-01 @error` | `RECONSTRUCT` |
+| 06 | Work is handed to whatever owns it | `@slice-02 @driving_port` | `ROUTE` |
+| 07 | A recorded owner that has since changed does not win | `@slice-02 @error` | `ROUTE-LIVE-WINS` |
+| 08 | An unknown owner is admitted, never guessed | `@slice-02 @error` | `ASK-OWNER` |
+| 09 | The next session resumes the same work, for the same reason | `@slice-03` | `CAPTURE` + claim |
+| 10 | Two sessions claiming the same work is reported | `@slice-03 @error` | `REPORT-CLAIM-CONFLICT` |
+
+**Error/edge coverage: 7 of 10 (70%)**, against the ≥40% target. That ratio is not padding — six of
+the seven pin a *silent* failure, where the wrong behaviour is indistinguishable from success without
+the fixture.
+
+Exactly one `@walking_skeleton` scenario (01), green before hand-off is claimed.
+
+## Wave: DISTILL / [REF] Port treatment — replacing the A/B/C/D strategy
+
+DESIGN handed DISTILL an open question: "confirm WS adapter strategy; the read is Strategy C."
+**That mechanism no longer exists.** `nw-distill` retires the per-feature A/B/C/D choice and replaces
+it with port-class → treatment defaults plus a per-project Infrastructure Policy. Existing features
+naming a strategy remain valid as historical record; new features express the same intent structurally.
+
+So the answer to DESIGN's question is a correction, not a confirmation. The intent DESIGN meant by
+"Strategy C — real local resources" survives intact:
+
+| Port | Class | Treatment | Mechanism |
+|---|---|---|---|
+| `/phil:handoff`, `/phil:resume` | Driving | Real | Golden fixture + dogfood through the real invocation path |
+| `.session-handoff.md` | Driven internal | Real | Real files in a throwaway dir |
+| git fingerprint | Driven internal | Real | Real `git` in a throwaway repo |
+| Forge (`gh`) | Driven external | Fake | Board state supplied by `manifest.json` |
+| `/nw-continue`, `/phil:nwave-slice-status` | Driven external | Fake | Delegate result supplied by `manifest.json` |
+
+Policy written to `docs/product/architecture/atdd-infrastructure-policy.md` — placed under the repo's
+existing architecture root rather than the skill's suggested `docs/architecture/`, per project
+convention.
+
+## Wave: DISTILL / [REF] Adapter coverage (Mandate 6)
+
+| Adapter | Real-I/O scenario | Covered by |
+|---|---|---|
+| Filesystem — snapshot write/read | YES | 01 (`@real-io`), 02 (asserts absence) |
+| Git — tree fingerprint | YES | 04 (`@real-io`, real commit range `11def92 → 2baad65`) |
+| Forge — wave label | fake | 06, 07 — board state in `manifest.json`; live board covered by dogfood |
+| Forge — card status | fake | 09, 10 — same |
+| `/nw-continue` delegate | fake | 05 — delegate result in `manifest.json` |
+| `/phil:nwave-slice-status` delegate | fake | 05 — same |
+
+Zero `NO — MISSING` rows. The four fakes are driven-external per the policy, and each is additionally
+exercised for real during that slice's same-day dogfood — which is the example-interaction evidence the
+`plugin` deliverable type requires.
+
+## Wave: DISTILL / [REF] Scaffolds (Mandate 7, adapted)
+
+Mandate 7 exists so tests fail **RED** (behaviour missing) rather than **BROKEN** (harness faulty), and
+prescribes stub modules with `__SCAFFOLD__` markers so imports resolve.
+
+**No scaffolds are needed here, and none were written.** The fixtures are prose inputs with no imports
+to resolve, so there is no BROKEN failure mode available to them. All ten fail today because
+`skills/session-handoff/SKILL.md` does not exist — the behaviour is unimplemented, which is genuine RED
+by Mandate 7's own definition. This matches `edd` and `adversarial-review`, whose fixtures were likewise
+authored in DISTILL against a `SKILL.md` built in DELIVER.
+
+Consequently `docs/feature/session-handoff/distill/red-classification.md` is not produced: every
+scenario's classification is `MISSING_FUNCTIONALITY`, uniformly and by construction.
+
+## Wave: DISTILL / [REF] Driving adapter coverage
+
+DESIGN names two driving ports and one deferred. Each needs a scenario exercising its real invocation
+path, not an internal call:
+
+| Driving port | Scenario | Exercised how |
+|---|---|---|
+| `/phil:handoff` | 01, 02, 03, 09 | Invoked as the command, at wind-down |
+| `/phil:resume` | 01, 04, 05, 06, 07, 08, 10 | Invoked as the command, in a fresh session |
+| `Stop` / `SessionEnd` hook | — | **Deferred** past slice 01 per DDD-2; no scenario, correctly |
+
+## Wave: DISTILL / [REF] Test placement
+
+`skills/session-handoff/` — `acceptance.feature` beside `self-test/`, matching `skills/edd/`,
+`skills/work/`, `skills/refactor-tests/`, and `skills/adversarial-review/`.
+
+**Not** `tests/{path}/{feature-id}/acceptance/`, which the skill's Python examples assume. The suite
+under `tests/` is a *driver* that runs the fixtures; `pytest.ini` sets `norecursedirs = … self-test`
+precisely so fixtures are treated as inputs, never collected. Placing these under `tests/` would
+invert that.
+
+## Wave: DISTILL / [REF] Outcomes registration
+
+**Skipped, correctly.** The registry tracks code-feature pipelines only; methodology features — skill
+propagation, prose changes, no new typed contract surface — are explicitly out of scope. This feature
+ships a prose skill and two command loaders.
+
+Recorded because the earlier DESIGN-wave collision check exited 0 against an empty registry, and a
+vacuous pass plus a documented skip should not be mistaken for two independent clean gates.
+
+## Wave: DISTILL / [REF] Pre-requisites
+
+- **DESIGN driving ports** — `/phil:handoff`, `/phil:resume` (hook deferred). Consumed above.
+- **DEVOPS environment matrix** — no DEVOPS wave ran. Graceful degradation applies: warn, use project
+  defaults, proceed. No environment-specific scenarios were written, because a prose skill in a plugin
+  has no install/upgrade/stale-config matrix to vary over.
+- **Runner** — none. There is no CI in this plugin; fixtures are driven by a human or the model.
+  `tests/test_self_test_fixtures.py` automates the mechanically-decidable subset, and **pytest is not
+  installed in the current environment**, so it could not be run during this wave.
+
+## Wave: DISTILL / [REF] Final Wave Review Gate — NOT RUN
+
+The skill makes this mandatory: four reviewers in parallel over the full four-wave chain
+(`@nw-product-owner-reviewer`, `@nw-solution-architect-reviewer`, `@nw-platform-architect-reviewer`,
+`@nw-acceptance-designer-reviewer`), plus the `plugin`-type additions `@nw-plugin-validator` and
+`@nw-skill-reviewer`.
+
+**None were dispatched**, because the operator's standing instruction is not to invoke subagents unless
+asked. This is a deviation, not an omission — recorded here so it is visible rather than assumed
+handled. Sentinel (`@nw-acceptance-designer-reviewer`) is the one the skill says never skips, being the
+structural-correctness reviewer for Gherkin antipatterns and scaffold integrity.
+
+**DELIVER hand-off is therefore un-gated.** The wave's artifacts are complete; the review that would
+certify them has not run.

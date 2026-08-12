@@ -1,0 +1,11 @@
+{
+  "fixture_id": "SH-SELFTEST-09",
+  "phase": "CAPTURE -> BOOTSTRAP",
+  "situation": "A session claimed the walking-skeleton card ahead of two siblings because everything else consumes its snapshot format, and recorded that reason.",
+  "session_advanced_work": true,
+  "claimed_card": 11,
+  "claim_basis": "walking skeleton — slices 02 and 03 both consume the snapshot format it ships",
+  "board_state": { "card": 11, "status": "In Progress" },
+  "expected_decision": "CAPTURE",
+  "expected_guard": "the session-to-card link and its basis survive the boundary"
+}

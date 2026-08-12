@@ -1,0 +1,13 @@
+{
+  "fixture_id": "SH-SELFTEST-04",
+  "phase": "BOOTSTRAP",
+  "situation": "A snapshot was captured, then eleven commits landed and the working tree was left dirty. A fresh session now picks the work up.",
+  "snapshot_present": true,
+  "tree_fingerprint_at_capture": "11def92",
+  "tree_fingerprint_at_readback": "2baad65",
+  "commits_between": 11,
+  "working_tree_dirty": true,
+  "next_action_recorded": "add the routing line to the generated block",
+  "expected_decision": "RESUME-STALE",
+  "expected_guard": "C1 — freshness is a verdict, not a footnote; KPI-3 hard zero"
+}

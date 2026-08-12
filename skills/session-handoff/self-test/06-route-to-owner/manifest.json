@@ -1,0 +1,10 @@
+{
+  "fixture_id": "SH-SELFTEST-06",
+  "phase": "ROUTE",
+  "situation": "A fresh session picks up a slice card belonging to a feature whose parent issue carries a wave label. The card describes the work to be done.",
+  "snapshot_present": true,
+  "recorded_entry_point": "/nw-execute",
+  "board_state": { "parent_issue": 9, "wave_label": "wave: deliver", "card": 11 },
+  "expected_decision": "ROUTE",
+  "expected_guard": "KPI-2 — route, never freelance; the correction the user repeats today disappears"
+}

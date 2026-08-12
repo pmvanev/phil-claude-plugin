@@ -1,0 +1,19 @@
+{
+  "fixture_id": "SH-SELFTEST-03",
+  "phase": "CAPTURE",
+  "situation": "The session is mid-way through an nWave feature. Its wave, current slice, and step position are all recorded in docs/feature/ and derivable by /nw-continue.",
+  "session_advanced_work": true,
+  "decisions_made": ["chose the local surface to keep the forge out of the skeleton"],
+  "next_action": "write the fixtures",
+  "offered_for_capture": {
+    "why": "chose the local surface to keep the forge out of the skeleton",
+    "next_action": "write the fixtures",
+    "current_wave": "DISTILL",
+    "current_slice": "slice-01",
+    "current_step": "01-03",
+    "branch": "main"
+  },
+  "derivable_by_delegate": ["current_wave", "current_slice", "current_step", "branch"],
+  "expected_decision": "REFUSE-DERIVABLE",
+  "expected_guard": "C8 / DDD-5 — one system of record; KPI-5 hard zero"
+}

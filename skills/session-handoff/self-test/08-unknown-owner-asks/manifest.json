@@ -1,0 +1,10 @@
+{
+  "fixture_id": "SH-SELFTEST-08",
+  "phase": "ROUTE",
+  "situation": "A fresh session picks up a card that carries no wave label and belongs to no nWave feature. The snapshot recorded no entry point. The card describes a concrete piece of work.",
+  "snapshot_present": true,
+  "recorded_entry_point": null,
+  "board_state": { "card": 4, "wave_label": null, "parent_issue": null },
+  "expected_decision": "ASK-OWNER",
+  "expected_guard": "C5 — unknown owner is stated, never defaulted to inline work"
+}

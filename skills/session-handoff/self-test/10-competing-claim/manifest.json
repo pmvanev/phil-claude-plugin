@@ -1,0 +1,12 @@
+{
+  "fixture_id": "SH-SELFTEST-10",
+  "phase": "BOOTSTRAP",
+  "situation": "Two snapshots exist naming the same card, captured by different sessions minutes apart. This repo runs workflows and subagents, so concurrent sessions are routine.",
+  "snapshot_present": true,
+  "competing_snapshots": [
+    { "claimed_card": 11, "captured": "2026-08-12T15:02Z", "next_action": "write the fixtures" },
+    { "claimed_card": 11, "captured": "2026-08-12T15:19Z", "next_action": "draft the acceptance feature" }
+  ],
+  "expected_decision": "REPORT-CLAIM-CONFLICT",
+  "expected_guard": "C6 — detection without resolution is the honest v1 boundary"
+}

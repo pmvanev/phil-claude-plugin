@@ -1,0 +1,16 @@
+{
+  "fixture_id": "SH-SELFTEST-01",
+  "phase": "CAPTURE -> BOOTSTRAP",
+  "situation": "A session worked on the routing slice, ruled out a hook because it could not see the why, and was about to verify the wave-to-command table against a run.",
+  "session_advanced_work": true,
+  "decisions_made": [
+    "hook rejected for v1 — cannot see the why, which is the payload",
+    "card-side half can ship before the session-side half"
+  ],
+  "next_action": "verify the wave-to-command table against an actual /nw-execute run",
+  "tree_fingerprint_at_capture": "083c953",
+  "tree_fingerprint_at_readback": "083c953",
+  "delegate_results": { "nw-continue": "slice 02, not started" },
+  "expected_decision": ["CAPTURE", "RESUME-CURRENT"],
+  "expected_guard": "the loop closes: what was recorded is what comes back, and freshness is asserted"
+}

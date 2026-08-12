@@ -1,0 +1,10 @@
+{
+  "fixture_id": "SH-SELFTEST-07",
+  "phase": "ROUTE",
+  "situation": "A snapshot recorded /nw-distill as the owner. Since then the feature advanced and the parent issue's wave label was swapped to deliver.",
+  "snapshot_present": true,
+  "recorded_entry_point": "/nw-distill",
+  "board_state": { "parent_issue": 9, "wave_label": "wave: deliver" },
+  "expected_decision": "ROUTE-LIVE-WINS",
+  "expected_guard": "live wave label beats the recorded entry point; disagreement surfaced, not settled silently"
+}

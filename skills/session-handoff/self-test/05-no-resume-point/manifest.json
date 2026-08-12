@@ -1,0 +1,12 @@
+{
+  "fixture_id": "SH-SELFTEST-05",
+  "phase": "BOOTSTRAP",
+  "situation": "A fresh session picks up work in a repo where no snapshot has ever been captured. The feature does have nWave artifacts under docs/feature/.",
+  "snapshot_present": false,
+  "delegate_results": {
+    "nw-continue": "feature session-handoff, wave DISTILL, slice 01 in progress",
+    "nwave-slice-status": "step 01-03 current"
+  },
+  "expected_decision": "RECONSTRUCT",
+  "expected_guard": "reconstruction is labelled as reconstructed, never presented as recorded"
+}
