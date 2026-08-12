@@ -1,0 +1,18 @@
+{
+  "fixture": "15-roster-not-checkboxes",
+  "situation": "GitLab, where no project-scoped rollup counts child issues. Four slices; slices 01 and 02 are closed, 03 and 04 are open. The feature description carries the roster table. A completion count for the feature is wanted, and GitLab will produce one from markdown checkboxes — so the roster is the obvious place to put them.",
+  "invocation": "refresh the board for access-control, and show how many slices are done",
+  "artifacts": {
+    "docs/feature/access-control/slices/": "slice-01-*.md through slice-04-*.md",
+    "docs/feature/access-control/deliver/roadmap.json": "four phases, array order 01, 02, 03, 04"
+  },
+  "forge_state": {
+    "host": "gitlab",
+    "tier": "Premium",
+    "namespace": "personal — the project has no group, so epics are unavailable regardless of tier",
+    "hierarchy": "none available at project scope; epics are group-scoped",
+    "issues": "feature issue plus four slice issues; #101 and #102 closed, #103 and #104 open",
+    "roster": "present in the feature description as bare #N references"
+  },
+  "expected_outcome": "ROSTER-NOT-CHECKBOXES"
+}

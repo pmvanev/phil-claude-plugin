@@ -272,6 +272,54 @@ unverified inference, and `nwave-issue-board` had built a seeding strategy on it
 the column in forge order while reporting the board ordered. That is fixture 13's failure mode,
 licensed by the skill's own text. Claim dropped, strategy replaced.
 
+## Amendment — progress rollups (2026-08-12)
+
+Asked whether GitLab has GitHub's `0/3` sub-issue progress bar, neither skill had an answer, and the
+honest one turned out to be forge-shaped rather than yes/no. `issue-board` gains *A parent's "N of M
+done" counts different things on each forge*.
+
+The asymmetry is the content: **GitHub's parent rollup counts sub-issues, which are cards; GitLab's
+stable parent rollup counts markdown checkboxes, which are not.** So a GitLab feature whose children
+must also cross board columns has no project-scoped, non-experimental count of them, and the remedy
+is a milestone — the one GitLab rollup that is stable and counts real issues.
+
+Evidence, all gathered the same day. `subIssuesSummary {total, completed, percentCompleted}` returned
+`{3, 0, 0}` on a three-sub-issue parent with `trackedIssues.totalCount: 0` alongside it, confirming
+the two GitHub counters are independent (`gh` 2.97.0). GitLab's `task_completion_status` was verified
+by parsing checkboxes out of twelve raw descriptions on the 18.9.1-ee instance and comparing —
+partials and completes matched. `rolledUpCountsByType` is marked Experiment in that instance's schema
+and **was not run**. `WorkItemWidgetProgress` is recorded as the trap it is: the name fits and the
+field is OKR start/current/end values, so it answers with something unrelated.
+
+A second section came out of the tooling rather than the question. **`glab api graphql` 1.112.0
+discards any query containing `__type` or `__schema` and answers with a 7.4 MB full-schema dump** —
+valid JSON with a `data` key, so it reads as success until `data.__type` turns out to be missing.
+Five query forms pinned the discriminator as introspection, not syntax; two neighbouring forms
+(`--input` with a JSON body, `-f query=@file`) fail differently and are not workarounds. The remedy
+is to keep one dump and query it locally, which is in fact how the previous amendment's GitLab
+signatures were read — so the section documents a practice the file already depended on silently.
+
+`nwave-issue-board` gains the mapping consequence: on GitHub the slices-done count is free and the
+generated block must not restate it; on GitLab the roster stays bare references and **must not be
+converted to checkboxes to manufacture a bar**, because a checkbox is ticked by hand while a slice
+issue closes on its own. The suite goes from fourteen fixtures to **fifteen** —
+`15-roster-not-checkboxes`, which sits with `08`, `13`, and `14`: correct on the day it is written,
+authoritative long after.
+
+### What the reviewer pass caught, again
+
+Two self-contradictions, both introduced by compressing a four-mechanism answer into one sentence.
+"GitLab's stable rollup counts checkboxes, not issues" was flatly contradicted by the milestone row of
+its own table two lines below, and by the milestone remedy twenty lines below — fixed by scoping the
+claim to the *parent-issue* rollup. On the nWave side, "there is no slices-done count" dropped the
+*project-scoped* qualifier that the surrounding paragraph, the sibling skill, and fixture 10's fourth
+assertion all carry; as written it would have failed that fixture.
+
+The sharpest finding was self-inflicted. Fixture 15's own assertion 5 forbids restating GitLab rollup
+field names in this skill, and the prose it shipped alongside named `MilestoneStats`. The fixture
+caught the skill it was written for, in the same commit — which is the delegation boundary working,
+one draft later than it should have.
+
 ## Follow-ups
 
 - `plugin-dev:skill-reviewer` raised ~30 medium/low findings across today's three skills that were
@@ -280,10 +328,17 @@ licensed by the skill's own text. Claim dropped, strategy replaced.
   the share-alike question is open until a license statement exists somewhere in the repo.
 - `nw-skill-reviewer` approved all three of today's skills with zero actionable findings, including
   one verifiably false certification. Treat it as a structure check, not a quality gate.
-- `issue-board` is over the 3,000-word guideline (~3,400). The reviewer's split proposal — move the
-  per-type link recipes and the self-hosted certificate section to `references/` — is sound and
-  deliberately not taken here, because no skill in this repo uses `references/` yet and the write-path
-  content must stay resident. Decide the convention before splitting.
+- `issue-board` is well over the 3,000-word guideline (~4,000 after the 2026-08-12 amendment, up from
+  ~3,400). The reviewer's split proposal — move the per-type link recipes and the self-hosted
+  certificate section to `references/` — is sound and deliberately not taken here, because no skill in
+  this repo uses `references/` yet and the write-path content must stay resident. Decide the
+  convention before splitting.
+- The 2026-08-12 reviewer pass argues the real defect is shape, not length: sixteen flat `##` sections
+  in the order they were written, which is why the introspection section landed 200 lines from the
+  advice that sends readers into it. Its proposal — group under *Before you write* / *Writing to a
+  board* / *Reading back* / *Operating*, demoting today's sections to `###` — is zero content change
+  and was not taken. Forward pointers were added instead. Revisit if a seventeenth section has nowhere
+  obvious to go.
 - Neither ordering mutation has been run against a real board. The first person to reorder a real
   column should confirm the `afterId`-null and `positionInList` semantics and upgrade the markers.
 - `agents/adversarial-reviewer.md` frontmatter has an unquoted `description` containing

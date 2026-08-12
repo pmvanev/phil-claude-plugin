@@ -50,6 +50,13 @@ Where the forge maintains the parent's rollup, **do not also hand-write a slice 
 the feature description** — that is a second copy of something the forge already keeps, and the
 hand-written copy is the one that goes stale.
 
+On GitHub that rollup is free and exact: because slices are sub-issues, the feature issue reports
+`N of M` and draws a bar without anything being published to it — the mechanism, and the count
+observed from a three-slice parent, are in `phil:issue-board` under *A parent's "N of M done" counts
+different things on each forge*. **Slices done over slices total is therefore already on the board,
+and the generated block must not restate it** — a hand-written count is a second tally of a number
+the forge computes, and it is the one that will disagree.
+
 `glab issue update` exposes no parent or child flag, and GitLab hierarchy means epics, which are
 Premium and group-scoped. So on GitLab the feature description carries a roster table of bare `#N`
 references, and that is the only *project-scoped* rollup available. Two things govern it:
@@ -58,6 +65,16 @@ references, and that is the only *project-scoped* rollup available. Two things g
   is in `phil:issue-board` under *Link what the forge cannot resolve*.
 - Slice numbers exist only after the issues are created, so the roster is a **second pass** — see
   *Bulk seeding needs two passes* in `phil:issue-board`.
+
+**On GitLab there is no *project-scoped* slices-done count, and the obvious way to manufacture one is
+a trap.** Writing the roster as `- [ ] #N` checkboxes does make GitLab report a completion count —
+the mechanism is real, and `phil:issue-board` records it under *A parent's "N of M done" counts
+different things on each forge*. But a checkbox is ticked by hand while a slice issue closes on its
+own, so the two diverge the first time anyone forgets, and what the feature displays is the state of
+the checkboxes, not the state of the work. Leave the roster as bare references: they render each
+slice's live state, and an unsummed column of true states beats a summed count of stale ones. Where a
+feature-level bar is genuinely wanted, put the slice issues in a **milestone** named for the feature;
+what that buys and what it costs are in `phil:issue-board`, in the same section.
 
 ## Wave is a fact about the feature, not a column
 
@@ -179,7 +196,7 @@ does not is indistinguishable from current.
 
 ## Self-test (regression gate)
 
-`skills/nwave-issue-board/self-test/` holds fourteen fixtures that pin these behaviors: the
+`skills/nwave-issue-board/self-test/` holds fifteen fixtures that pin these behaviors: the
 end-to-end publish (01, walking skeleton), the `Notes` column surviving the trip to the forge (02),
 `unknown` published as `unknown` rather than `not started` (03), a human-set state outranking a
 regenerated one (04), hand-written prose surviving a refresh that must replace the whole description
@@ -188,7 +205,8 @@ regenerated one (04), hand-written prose surviving a refresh that must replace t
 roster (09), the GitLab roster written in a second pass as bare references (10), the forge never
 writing back to the artifacts (11), status decided by `nwave-slice-status` rather than folded here
 (12), the column positioned in `phases[]` order rather than the creation order that looks just as
-deliberate (13), and an order guessed before `/nw-roadmap` published as a guess (14).
+deliberate (13), an order guessed before `/nw-roadmap` published as a guess (14), and a GitLab roster
+left as bare references rather than converted to checkboxes to manufacture a progress bar (15).
 
 Fixtures 04 and 11 are deliberately adjacent and resolve opposite ways: a person recording something
 no artifact can hold is preserved; a person overwriting something the artifacts own is not. Getting
@@ -196,7 +214,9 @@ one of them right by a rule that gets the other wrong is a gate failure.
 
 Fixture 08 is the sharpest case — positionally the deferred slice *is* next, and a card on a board
 does not misinform someone, it assigns them. Fixtures 13 and 14 are the same mechanism weaker: a
-position is an instruction, whether or not anyone chose it.
+position is an instruction, whether or not anyone chose it. Fixture 15 is that mechanism in the
+reporting register — a hand-ticked checkbox, like a card for deferred work, is correct on the day it
+is written and authoritative long after.
 
 Fixtures 02 and 12 pin the two faults this skill actually shipped in its first draft: a three-column
 block that dropped the drift warning, and a locally invented rule forbidding a status source its

@@ -1,7 +1,17 @@
 # Feature Delta — session-handoff
 
-Forge: pmvanev/phil-claude-plugin#9 · Waves: DISCUSS ✓ · DESIGN ✓ · DISTILL ✓ (all 2026-08-12)
-Deliverable type: `plugin` — verification is Gherkin + fixtures + dogfood, **not** pytest/Hypothesis.
+Forge: pmvanev/phil-claude-plugin#9 · Waves: DISCUSS ✓ · DESIGN ✓ (both 2026-08-12)
+
+**This feature leaves the nWave wave sequence after DESIGN.** The build is authored with
+`plugin-dev` (`skill-development` + `command-development`) rather than DISTILL/DELIVER, because the
+deliverable is a skill plus two thin command loaders — prose, not application code. This repo already
+made that call twice: `todo.md` (2026-06-17) *"Deliverables are skills+agents … NOT traditional
+acceptance-test/Outside-In TDD"*, and `docs/evolution/2026-07-15-edd-loop.md` DDD8 *"Build-time =
+prose authoring (not code TDD)"*.
+
+What survives as the verification contract: `skills/session-handoff/acceptance.feature` and the ten
+golden fixtures under `skills/session-handoff/self-test/` — a component DESIGN's own decomposition
+table names as CREATE NEW. They gate the build regardless of what authored it.
 Density: lean + ask-intelligent (`~/.nwave/global-config.json`)
 Rendered Tier-2 expansion: `alternatives-considered` [WHY] — accepted 2026-08-12, trigger:
 cross-context complexity (5 bounded contexts, threshold ≥3). Recorded here because this repo has no
@@ -665,6 +675,20 @@ Deferred deliberately, with the wave that owns each.
   (`docs/product/outcomes/registry.yaml` does not exist). Passing on zero outcomes is not evidence of
   no collision, and is recorded as such rather than as a clean gate.
 
+### Where the deferred items go now
+
+DISCUSS and DESIGN both defer things "→ DISTILL" and "→ DELIVER". Those waves are not running for this
+feature, so those pointers no longer resolve. Re-homed:
+
+| Deferred item | Was owed to | Now |
+|---|---|---|
+| WS adapter strategy confirmation | DISTILL | **Moot.** The per-feature A/B/C/D strategy has been retired in favour of port-class → treatment defaults. DESIGN's intent — real local resources, forge kept out of the walking skeleton — stands on its own. |
+| Consolidated four-reviewer gate | end of DISTILL | **Already run** (2026-08-12) and passed weakly: two of four reviewers returned approved with empty findings lists. Not repeated. |
+| Verify the wave → command table against a run | DELIVER | **Slice 02's build.** Still owed; the table is assembled from command descriptions and has never been exercised. |
+| Per-repo vs per-worktree snapshot | DELIVER | **Slice 01's build**, if it surfaces; otherwise carried. |
+| Snapshot schema detail | DELIVER | **Slice 01's build.** The constraint is fixed (record only the unrecoverable); the encoding is not. |
+| Cards with no wave label | unowned | **Still unowned.** The one genuine requirements-level gap.
+
 ## Wave: DESIGN / [REF] Wave decisions summary
 
 ### Architecture summary
@@ -687,212 +711,3 @@ Deferred deliberately, with the wave that owns each.
 
 None. DESIGN settled the three questions DISCUSS deferred without altering any DISCUSS assumption;
 all three were recorded as open rather than as decisions, so no back-propagation is required.
-
----
-
-# Wave: DISTILL (entered 2026-08-12)
-
-Deliverable type: **`plugin`** · Policy: `inherit` · Scenario SSOT:
-`skills/session-handoff/acceptance.feature`
-
-## Wave: DISTILL / [REF] Wave-decision reconciliation
-
-**Reconciliation passed — 0 contradictions.** DISCUSS D1–D7 checked against DESIGN DDD-1–DDD-7. No
-DEVOPS wave ran.
-
-The three items DISCUSS left open (surface, trigger, topology) were recorded there **as open**, so
-DESIGN settling them is resolution rather than contradiction, and no back-propagation is owed. The
-prior waves' `wave-decisions.md` files do not exist as separate artifacts under `discuss/` and
-`design/` — this repo uses the single-narrative convention, so the reconciliation was run against the
-`## Wave: … / [REF] Wave decisions summary` sections of `feature-delta.md`.
-
-## Wave: DISTILL / [REF] Deliverable type
-
-**`plugin`**, resolved through the documented precedence: `.nwave/des-config.json` is **absent**;
-`~/.nwave/global-config.json` declares no `defaults.deliverable_type`; so resolution falls to step 3,
-root-only FS detection, and `.claude-plugin/plugin.json` at the root makes this a plugin.
-
-This is the wave's most consequential routing fact, because the `plugin` type explicitly directs
-verification away from the pytest/Hypothesis machinery that dominates this skill:
-
-| | Applies here |
-|---|---|
-| `@nw-plugin-validator` + `@nw-skill-reviewer` | yes — the type-specific verification |
-| Behavioural Gherkin scenarios | yes — `acceptance.feature`, business language only |
-| Example-interaction evidence | yes — same-day dogfood, captured verbatim |
-| pytest / Hypothesis / PBT / state-delta `Universe` | **no** — "NOT pytest/Hypothesis-centric" |
-
-**Recommendation:** pin `deliverable_type: plugin` in `.nwave/des-config.json`. The skill requires the
-routing and the runtime enforcement gate to read the *same* source, and today neither reads anything —
-both re-derive it. Note that `.gitignore` excludes `.nwave/*` except `local-config.json`, so a pinned
-value would be machine-local unless that rule is amended.
-
-## Wave: DISTILL / [REF] Scenario list
-
-Ten scenarios, ten golden fixtures, one-to-one. `skills/session-handoff/self-test/`.
-
-Every scenario carries a `@contract-shape:` tag, per the acceptance-designer's principle 14 — untagged
-scenarios block at review, and the tag drives the crafter's universe-mechanism choice in DELIVER. The
-classification is **not** uniform, and that is the point: a scenario whose guarantee is *nothing
-changed anywhere* (02, 06, 07, 08) needs a wide universe, and tagging it `bounded-change` would let a
-crafter check one file and miss that the command wrote a log, a lock, or a stray directory.
-
-| # | Scenario | Contract shape | Outcome | Tags |
-|---|---|---|---|---|
-| 01 | A session hands its reasoning to the next one | `bounded-change` | `CAPTURE` → `RESUME-CURRENT` | `@walking_skeleton @driving_port @real-io @slice-01` |
-| 02 | A session that achieved nothing leaves nothing behind | `unbounded-preservation` | `NO-OP` | `@slice-01 @error` |
-| 03 | The resume point refuses to duplicate what is recorded elsewhere | `bounded-change` | `REFUSE-DERIVABLE` | `@slice-01 @error` |
-| 04 | A resume point that no longer matches says so before anything else | `pure-function` | `RESUME-STALE` | `@slice-01 @error @real-io` |
-| 05 | With no resume point, what is reconstructed is labelled so | `pure-function` | `RECONSTRUCT` | `@slice-01 @error` |
-| 06 | Work is handed to whatever owns it | `unbounded-preservation` | `ROUTE` | `@slice-02 @driving_port` |
-| 07 | A recorded owner that has since changed does not win | `unbounded-preservation` | `ROUTE-LIVE-WINS` | `@slice-02 @error` |
-| 08 | An unknown owner is admitted, never guessed | `unbounded-preservation` | `ASK-OWNER` | `@slice-02 @error` |
-| 09 | The next session resumes the same work, for the same reason | `bounded-change` | `CAPTURE` + claim | `@slice-03` |
-| 10 | Two sessions claiming the same work is reported | `pure-function` | `REPORT-CLAIM-CONFLICT` | `@slice-03 @error` |
-
-**Error/edge coverage: 7 of 10 (70%)**, against the ≥40% target. That ratio is not padding — six of
-the seven pin a *silent* failure, where the wrong behaviour is indistinguishable from success without
-the fixture.
-
-Exactly one `@walking_skeleton` scenario (01), green before hand-off is claimed.
-
-## Wave: DISTILL / [REF] Port treatment — replacing the A/B/C/D strategy
-
-DESIGN handed DISTILL an open question: "confirm WS adapter strategy; the read is Strategy C."
-**That mechanism no longer exists.** `nw-distill` retires the per-feature A/B/C/D choice and replaces
-it with port-class → treatment defaults plus a per-project Infrastructure Policy. Existing features
-naming a strategy remain valid as historical record; new features express the same intent structurally.
-
-So the answer to DESIGN's question is a correction, not a confirmation. The intent DESIGN meant by
-"Strategy C — real local resources" survives intact:
-
-| Port | Class | Treatment | Mechanism |
-|---|---|---|---|
-| `/phil:handoff`, `/phil:resume` | Driving | Real | Golden fixture + dogfood through the real invocation path |
-| `.session-handoff.md` | Driven internal | Real | Real files in a throwaway dir |
-| git fingerprint | Driven internal | Real | Real `git` in a throwaway repo |
-| Forge (`gh`) | Driven external | Fake | Board state supplied by `manifest.json` |
-| `/nw-continue`, `/phil:nwave-slice-status` | Driven external | Fake | Delegate result supplied by `manifest.json` |
-
-Policy written to `docs/product/architecture/atdd-infrastructure-policy.md` — placed under the repo's
-existing architecture root rather than the skill's suggested `docs/architecture/`, per project
-convention.
-
-## Wave: DISTILL / [REF] Adapter coverage (Mandate 6)
-
-| Adapter | Real-I/O scenario | Covered by |
-|---|---|---|
-| Filesystem — snapshot write/read | YES | 01 (`@real-io`), 02 (asserts absence) |
-| Git — tree fingerprint | YES | 04 (`@real-io`, real commit range `11def92 → 2baad65`) |
-| Forge — wave label | fake | 06, 07 — board state in `manifest.json`; live board covered by dogfood |
-| Forge — card status | fake | 09, 10 — same |
-| `/nw-continue` delegate | fake | 05 — delegate result in `manifest.json` |
-| `/phil:nwave-slice-status` delegate | fake | 05 — same |
-
-Zero `NO — MISSING` rows. The four fakes are driven-external per the policy, and each is additionally
-exercised for real during that slice's same-day dogfood — which is the example-interaction evidence the
-`plugin` deliverable type requires.
-
-## Wave: DISTILL / [REF] Scaffolds (Mandate 7, adapted)
-
-Mandate 7 exists so tests fail **RED** (behaviour missing) rather than **BROKEN** (harness faulty), and
-prescribes stub modules with `__SCAFFOLD__` markers so imports resolve.
-
-**No scaffolds are needed here, and none were written.** The fixtures are prose inputs with no imports
-to resolve, so there is no BROKEN failure mode available to them. All ten fail today because
-`skills/session-handoff/SKILL.md` does not exist — the behaviour is unimplemented, which is genuine RED
-by Mandate 7's own definition. This matches `edd` and `adversarial-review`, whose fixtures were likewise
-authored in DISTILL against a `SKILL.md` built in DELIVER.
-
-Consequently `docs/feature/session-handoff/distill/red-classification.md` is not produced: every
-scenario's classification is `MISSING_FUNCTIONALITY`, uniformly and by construction.
-
-## Wave: DISTILL / [REF] Driving adapter coverage
-
-DESIGN names two driving ports and one deferred. Each needs a scenario exercising its real invocation
-path, not an internal call:
-
-| Driving port | Scenario | Exercised how |
-|---|---|---|
-| `/phil:handoff` | 01, 02, 03, 09 | Invoked as the command, at wind-down |
-| `/phil:resume` | 01, 04, 05, 06, 07, 08, 10 | Invoked as the command, in a fresh session |
-| `Stop` / `SessionEnd` hook | — | **Deferred** past slice 01 per DDD-2; no scenario, correctly |
-
-## Wave: DISTILL / [REF] Test placement
-
-`skills/session-handoff/` — `acceptance.feature` beside `self-test/`, matching `skills/edd/`,
-`skills/work/`, `skills/refactor-tests/`, and `skills/adversarial-review/`.
-
-**Not** `tests/{path}/{feature-id}/acceptance/`, which the skill's Python examples assume. The suite
-under `tests/` is a *driver* that runs the fixtures; `pytest.ini` sets `norecursedirs = … self-test`
-precisely so fixtures are treated as inputs, never collected. Placing these under `tests/` would
-invert that.
-
-## Wave: DISTILL / [REF] Outcomes registration
-
-**Skipped, correctly.** The registry tracks code-feature pipelines only; methodology features — skill
-propagation, prose changes, no new typed contract surface — are explicitly out of scope. This feature
-ships a prose skill and two command loaders.
-
-Recorded because the earlier DESIGN-wave collision check exited 0 against an empty registry, and a
-vacuous pass plus a documented skip should not be mistaken for two independent clean gates.
-
-## Wave: DISTILL / [REF] Pre-requisites
-
-- **DESIGN driving ports** — `/phil:handoff`, `/phil:resume` (hook deferred). Consumed above.
-- **DEVOPS environment matrix** — no DEVOPS wave ran. Graceful degradation applies: warn, use project
-  defaults, proceed. No environment-specific scenarios were written, because a prose skill in a plugin
-  has no install/upgrade/stale-config matrix to vary over.
-- **Runner** — none. There is no CI in this plugin; fixtures are driven by a human or the model.
-  `tests/test_self_test_fixtures.py` automates the mechanically-decidable subset, and **pytest is not
-  installed in the current environment**, so it could not be run during this wave.
-
-## Wave: DISTILL / [REF] Final Wave Review Gate — RUN
-
-Dispatched 2026-08-12 in parallel over the full wave chain.
-
-| Reviewer | Scope | Verdict | B / H / L |
-|---|---|---|---|
-| `@nw-product-owner-reviewer` | DISCUSS | **approved** | 0 / 0 / 0 |
-| `@nw-solution-architect-reviewer` | DESIGN | **approved** | 0 / 0 / 1 |
-| `@nw-acceptance-designer-reviewer` | DISTILL + `.feature` + fixtures | **needs_revision** → re-run **approved** | 1 / 0 / 1 → 0 / 0 / 0 |
-| `@nw-plugin-validator` | plugin structure and schema | **approved** | 0 / 0 / 0 |
-| `@nw-platform-architect-reviewer` | DEVOPS | **N/A** | no DEVOPS wave ran; the range it reviews is empty |
-| `@nw-skill-reviewer` | `SKILL.md` quality | **deferred to DELIVER** | its target does not exist until DELIVER authors it |
-
-### Findings and disposition
-
-- **BLOCKER (Sentinel) — every scenario lacked a `@contract-shape:` tag. Valid; fixed.** The mandate
-  is the acceptance-designer's principle 14, and it lives in the *agent definitions* rather than in the
-  `nw-distill` skill, which is why authoring missed it. Untagged scenarios block at review by mechanical
-  grep. All ten are now tagged and the grep passes 10/10.
-
-  Its *recommendation* — tag everything `bounded-change` — was **not** followed. The tag drives the
-  crafter's universe-mechanism choice in DELIVER, so a uniform tag would be actively harmful: four
-  scenarios (02, 06, 07, 08) assert that **nothing changed anywhere**, which needs a wide universe.
-  Tagging those `bounded-change` would license a crafter to check one file and miss a stray log, lock,
-  or directory. Classification is per-scenario and recorded in the scenario table above.
-
-- **LOW (Architect) — `.gitignore` in the decomposition table but not in the C4 Container diagram.**
-  Valid; resolved with a note distinguishing *changes* from *architectural components*.
-
-- **LOW (Sentinel) — "`self-test/` lacks a README.md". Rejected: factually wrong.**
-  `skills/session-handoff/self-test/README.md` exists, 63 lines, written before the review ran. No
-  action taken.
-
-### Honest reading of these verdicts
-
-Two of the four returned **approved with an entirely empty findings list** after being prompted to
-attack specific claims adversarially. That is a weak signal, not a strong one — it is the
-soft-critic-theatre failure mode this repo's own `adversarial-review` skill is built against, where an
-LLM judging LLM output produces a clean bill of health that reflects agreeableness rather than scrutiny.
-Sentinel was the only reviewer to find anything real, and one of its two findings was false.
-
-Sentinel was re-run after the two valid findings were fixed and returned **approved, 0/0/0** — but in
-two tool calls and fifteen seconds, and without engaging the explicit challenge put to it (whether any
-per-scenario `@contract-shape:` assignment is wrong). That is confirmation in form rather than in
-substance, and it does not raise the confidence above.
-
-Treat this gate as **passed, weakly**. The DELIVER hand-off is unblocked; it is not certified. The
-contract-shape classification in particular has been asserted and reviewed by nobody who pushed back
-on it — it is the thing most worth a human eye before DELIVER consumes it.

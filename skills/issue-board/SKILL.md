@@ -1,6 +1,6 @@
 ---
 name: issue-board
-description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — moving a card between board columns, reordering a column or prioritizing a backlog so the top card is what to work on next, ordering sub-issues under a parent, setting a status label or a Projects v2 Status field, deciding whether a piece of work is one issue or several, hyperlinking or cross-linking references in an issue body to a file, an ADR, or another issue, marking an issue blocked by another and recording why, weighing whether to sync a local task file with a board, or connecting to a self-hosted GitLab instance. Covers the semantics `--help` does not, where a wrong guess reports success.
+description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — moving a card between board columns, reordering a column or prioritizing a backlog so the top card is what to work on next, ordering sub-issues under a parent, setting a status label or a Projects v2 Status field, reading a parent issue's completed-children count or progress bar, deciding whether a piece of work is one issue or several, hyperlinking or cross-linking references in an issue body to a file, an ADR, or another issue, marking an issue blocked by another and recording why, weighing whether to sync a local task file with a board, reading a forge's GraphQL schema to confirm a mutation's signature, or connecting to a self-hosted GitLab instance. Covers the semantics `--help` does not, where a wrong guess reports success.
 ---
 
 # Driving GitLab and GitHub Issue Boards
@@ -137,8 +137,10 @@ kind that reads as a no-op and is not: `afterId` **omitted or null moves the ite
 position leaves the parent's list untouched. What that list renders in when nobody has set a
 position is unverified here; set it explicitly if the order matters.
 
-All three signatures here were read from live schemas — GitHub's, and an 18.9.1-ee instance — and
-**none was exercised**. Confirm against one card before reordering a backlog.
+All three signatures here were read from live schemas — GitHub's, and an 18.9.1-ee instance, the
+latter out of the schema dump described under *`glab api graphql` answers introspection with the whole
+schema* — and **none was exercised**. Confirm against one card before reordering a backlog, and read
+that section before running an introspection query of your own.
 
 **Write the order top-down in one pass.** Each call anchors to a neighbor, so anchoring to a card
 you have not placed yet shifts everything after it — successfully, and with no output that says so.
@@ -247,6 +249,55 @@ real links, never as the mechanism you rely on.
   both ends — `blockedBy` and `blocking` are both fields on `Issue` in GraphQL — so the reverse side
   needs no second write.
 
+## A parent's "N of M done" counts different things on each forge
+
+Both forges render a completion count on a parent issue, and the two are backed by unrelated
+mechanisms. Reading the wrong field returns a real number that counts something else — the
+characteristic failure of this whole area, since nothing errors.
+
+**GitHub carries two independent rollups on one issue.** Sub-issues are real issues, so the children
+are also cards; the parent's bar comes from `subIssuesSummary`. A markdown task list that references
+issues is counted separately, by `trackedIssues`. The two do not fall back to each other.
+
+```sh
+gh api graphql -f query='query{ repository(owner:"<o>",name:"<r>"){ issue(number:9){
+  subIssuesSummary{ total completed percentCompleted }
+  trackedIssues(first:1){ totalCount } } } }'
+```
+
+Verified on `gh` 2.97.0, 2026-08-12: a parent with three open sub-issues and no checkboxes in its
+body returned `{total: 3, completed: 0, percentCompleted: 0}` alongside `trackedIssues.totalCount: 0`.
+What the issue page renders when *both* counters are non-zero is unverified — check it before relying
+on either to be the one displayed.
+
+**GitLab's stable *parent-issue* rollup counts checkboxes, not issues.**
+
+| Mechanism | Field | Children are | Status |
+|---|---|---|---|
+| Checklist | `taskCompletionStatus {count, completedCount}`; REST `task_completion_status {count, completed_count}` | markdown `- [ ]` in the description | Free, stable — **verified** |
+| Child work items | `WorkItemWidgetHierarchy.rolledUpCountsByType` → `countsByState {all, opened, closed}` | real issues and tasks | **Experiment**, added 17.3 — 18.9.1-ee schema only, not run |
+| Milestone | `MilestoneStats {closedIssuesCount, totalIssuesCount}` | real issues | Free, stable |
+
+`task_completion_status` needs no widget and no tier, and appeared on every issue observed in the
+REST payload — which makes it the one to reach for:
+
+```sh
+glab api "projects/<id>/issues/<iid>" | jq .task_completion_status   # {"count":6,"completed_count":1}
+```
+
+Verified against an 18.9.1-ee instance by parsing checkboxes out of raw descriptions and comparing:
+counts matched on twelve issues, including partials (`1/6`, `2/6`) and complete (`5/5`).
+
+**`WorkItemWidgetProgress` is not this.** Despite the name it carries
+`startValue` / `currentValue` / `endValue` / `progress` for OKR key results — a manually set
+percentage, not a count of finished children. It answers, and the answer is unrelated.
+
+The asymmetry decides the design: **GitHub's parent rollup counts things that are cards; GitLab's
+stable parent rollup counts things that are not.** A GitLab parent whose children must also cross
+board columns has no project-scoped, non-experimental count of them. Group those children under a
+**milestone** instead — the one GitLab rollup that is both stable and counts real issues — at the
+cost of grouping by milestone rather than by parent, and of one milestone per parent.
+
 ## Leave a chain when you pivot
 
 Recognizing a blocker mid-work and switching to it — whether the blocker already existed or you
@@ -303,6 +354,36 @@ that matters. If the developer decides to accept that risk, it is scoped to the 
 version), it is temporary, and it must be stated out loud in the transcript every time it is used.
 
 An expired certificate is a defect to fix, not a setting to work around.
+
+## `glab api graphql` answers introspection with the whole schema
+
+This skill sends readers to live schemas to confirm mutation signatures. On `glab` 1.112.0, that
+route has a trap: **any query containing `__type` or `__schema` is discarded and answered with a full
+schema dump** — 7.4 MB against an 18.9.1-ee instance. The response is valid JSON with a `data` key,
+so it looks like a success; only `data.__type` is missing, and a naive parse raises a `KeyError`
+rather than reporting what happened.
+
+Verified on 1.112.0 — the discriminator is introspection, not syntax:
+
+| Query | Result |
+|---|---|
+| `--raw-field query='{currentUser{username}}'` | correct response |
+| `--raw-field query='query{currentUser{username}}'` | correct response |
+| `--raw-field query='{__type(name:"Issue"){name}}'` | full schema dump |
+| `--raw-field query='query{__type(name:"Issue"){name}}'` | full schema dump |
+| `--raw-field query='query Foo{__type(name:"Issue"){name}}'` | full schema dump |
+
+Ordinary queries pass through untouched, so this affects schema reading only. Two neighboring forms
+fail differently and are not workarounds: `--input <file>` with a `{"query": "..."}` body arrives as
+an empty document (`Unexpected end of document`), and `-f query=@<file>` sends the literal string
+`@<file>` rather than reading it.
+
+**Capture the dump once and query it locally** — `jq`, or a few lines of Python over
+`data.__schema.types` — rather than fighting the flag. It contains every type, so one dump answers
+every later question. Write it to a scratch path, never into the repository: it is megabytes of
+generated content that dates the moment the instance is upgraded. Going around `glab` with `curl`
+needs the instance's CA and its own token handling, and on an IP-addressed instance the certificate
+may carry no matching SAN.
 
 ## Verify the end state
 

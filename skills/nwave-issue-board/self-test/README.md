@@ -14,7 +14,7 @@ These fixtures feed the skill known project and forge states and assert each pro
 **decision outcome** (`PUBLISHED` / `NOTES-PRESERVED` / `UNKNOWN-PUBLISHED` / `HUMAN-STATE-KEPT` /
 `BLOCK-DELIMITED` / `WAVE-SWAPPED` / `NO-ROWS-BEFORE-ROADMAP` / `DEFERRED-NOT-A-CARD` /
 `NATIVE-HIERARCHY` / `TWO-PASS-BARE-REFS` / `ONE-WAY` / `OWNER-DECIDES` / `ORDER-FOLLOWS-ROADMAP` /
-`ORDER-STATED-AS-PROVISIONAL`).
+`ORDER-STATED-AS-PROVISIONAL` / `ROSTER-NOT-CHECKBOXES`).
 
 This suite is the **acceptance + regression gate** for `skills/nwave-issue-board/SKILL.md`. Run it
 whenever that file changes, and whenever either skill it delegates to changes — `phil:issue-board`
@@ -39,6 +39,7 @@ and intent mirror `skills/nwave-slice-status/self-test/`.
 | `12-owner-decides-status/` | `roadmap.json` carries a per-step `status` field (**the real edd-loop case**) | publishes what `nwave-slice-status` returns, not a local fold | `OWNER-DECIDES` |
 | `13-order-follows-roadmap/` | `phases[]` reads 01, 03, 02, 04; slice and issue numbers both ascend; GitHub | positions the column by array order, not by the numbers that agree with each other | `ORDER-FOLLOWS-ROADMAP` |
 | `14-guessed-order-says-so/` | DESIGN wave, three slices, no `roadmap.json`; GitLab | orders by slice number and marks the order provisional | `ORDER-STATED-AS-PROVISIONAL` |
+| `15-roster-not-checkboxes/` | GitLab, two of four slices closed, a slices-done count is wanted | keeps the roster as bare refs; manufactures no hand-maintained count | `ROSTER-NOT-CHECKBOXES` |
 
 `01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `05`, `11`,
 `12` — the bug classes that ship silently because the published artifact is indistinguishable from a
@@ -54,6 +55,10 @@ Fixtures `13` and `14` belong with `08` rather than with the reporting fixtures,
 numbering suggests. Position is an instruction to whoever reads the column next. An order nobody
 wrote issues that instruction without anyone having decided it, and a provisional order issues it a
 wave before anyone can.
+
+Fixture `15` is the reporting counterpart to `08`. Both offer a number or a position that is
+defensible on the day it is written and becomes an instruction nobody rechecks. A hand-ticked
+checkbox is the roster equivalent of a card for deferred work: correct once, authoritative forever.
 
 Fixtures `03` and `04` pin the two directions in which this skill can lie about *why* a status is what
 it is. `03` is the machine having nothing to say. `04` is a person having said something the machine
