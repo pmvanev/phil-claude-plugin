@@ -260,3 +260,66 @@ jobs:
     #      dressed as a sound gate. This is to adversarial-review what the off-ramp is to edd.
     #   C5 SPAN-AND-EVIDENCE / ANTI-FLATTERY: no finding without a span + evidence; empty praise
     #      is coerced to CANNOT_ASSESS (carried from refactor-critic-correctness).
+
+  - id: carry-work-across-session-boundaries
+    # Registered by DISCUSS wave, feature: session-handoff (2026-08-12)
+    job_story: >
+      When a session ends mid-initiative — context exhausted, the day over, or compaction
+      hit — I want the next session to pick up with the reasoning, the intended next action,
+      and the correct entry-point already in hand, so I can keep momentum instead of
+      re-explaining the state of play or watching a fresh agent freelance work that a
+      command should have driven.
+    dimensions:
+      functional: >
+        Capture the state a fresh session cannot derive (the why, the how, the intended next
+        action, the claimed card), surface it at session start, and route the session to the
+        correct entry-point — without becoming a second authority over facts the artifacts
+        already own.
+      emotional: >
+        Relief from re-explaining the state of play at the top of every session; confidence
+        the next session resumes correctly rather than plausibly-but-wrongly; trust that a
+        snapshot is either current or honestly says it is not.
+      social: >
+        A teammate, or a future self, can see what was in flight and why it stopped; being
+        someone whose work gets picked up cleanly rather than restarted.
+    four_forces:
+      push: >
+        continue.md (108 lines) and todo.md (19 lines) are hand-maintained resume notes, both
+        scoped to a single feature rather than a session, and both stale — newest date
+        2026-07-01 with ~a dozen commits since. /nw-continue reconstructs only wave-managed
+        nWave features. A fresh session performs work inline that a command should have driven.
+        The why is never recorded anywhere at all.
+      pull: >
+        One command to put the session down and one to pick it up, so resumption is not a
+        re-briefing; and a card or snapshot that names the entry-point so the agent routes
+        instead of freelancing.
+      anxiety: >
+        (A) A snapshot the human must remember to update goes stale silently, and a stale
+        handoff is WORSE than none because the next session trusts it — THE force the design
+        is built against, and an observed failure of continue.md rather than a hypothetical.
+        (B) Two authorities over the same state (a local file and the board) drift — forbidden
+        by phil:issue-board under "One system of record per scope". (C) Session scratch
+        published to a board is visible to everyone who reads the board. (D) Ceremony on work
+        that did not need it (the anxiety phil:work B and edd B both carry, countered there by
+        an off-ramp).
+      habit: >
+        Hand-writing continue.md; re-explaining state in the first prompt of each session;
+        letting the agent start freelancing and correcting it mid-flight.
+    opportunity_score: not-scored   # single new job; priority by default
+    status: validated
+    personas: [kai-session-relay]
+    features: [session-handoff]
+    # The design axis (DISCUSS, 2026-08-12): five categories of lost state, ranked by whether a
+    # fresh session can recover them unaided. Anything recoverable that a snapshot ALSO records
+    # becomes a second authority that can drift (anxiety B).
+    #   1 the why   — decisions, ruled-out approaches, why work stopped   UNRECOVERABLE
+    #   2 the how   — which command/skill/entry-point should drive it     UNRECOVERABLE
+    #   3 what-next — the intended next action                           partly; wrong guess is costly
+    #   4 the card  — which card was claimed and why it was next          board knows status, not claimant
+    #   5 the where — file, step, branch, commit                         LARGELY SOLVED (/nw-continue,
+    #                 /phil:nwave-slice-status) — nWave features only; must NOT be re-recorded
+    # Categories 1 and 2 are the irreducible core: no reconstruction can recover what was never
+    # an artifact. Category 2 subsumes the concern originally filed standalone as issue #10.
+    # Relationship to deliver-invisible-work-with-discipline (phil-work): distinct outcome.
+    # phil-work owns discipline WITHIN one initiative and says nothing about the session boundary;
+    # this job owns continuity ACROSS that boundary, for nWave and non-nWave work alike.

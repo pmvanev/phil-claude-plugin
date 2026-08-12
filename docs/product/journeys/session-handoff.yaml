@@ -1,0 +1,112 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: session-handoff (2026-08-12)
+
+id: session-handoff
+name: Hand work from one session to the next without a re-briefing
+persona: kai-session-relay
+job: carry-work-across-session-boundaries
+summary: >
+  Kai's session ends mid-initiative. The state a fresh session cannot derive — the reasoning,
+  the intended next action, the entry-point that owns the work, the claimed card — is captured;
+  everything the artifacts already own is deliberately NOT captured. The next session reads that
+  snapshot, states honestly whether it is still current, routes to the entry-point rather than
+  working inline, and resumes.
+
+steps:
+  - id: wind-down
+    action: >
+      Kai ends the session — or a lifecycle hook fires at session end / compaction. The tool
+      decides whether there is anything worth recording at all; a session that advanced nothing
+      leaves no snapshot.
+    output: Decision to capture or to exit quietly, stated either way
+    emotion: pressured — the session is ending and the thread is about to be dropped
+  - id: capture
+    action: >
+      The tool records ONLY what a fresh session cannot derive: the why (decisions made,
+      approaches ruled out, why work stopped), the entry-point that owns the work, the intended
+      next action, and the claimed card. It refuses to copy what the artifacts already own,
+      stamping a tree fingerprint instead so freshness is checkable later.
+    output: >
+      Snapshot containing non-derivable state plus pointers, a timestamp, and a tree fingerprint
+      (commit SHA + dirty-state)
+    emotion: relief — the reasoning is held somewhere other than in my head
+  - id: bootstrap
+    action: >
+      A new session reads the snapshot and checks the fingerprint against the current tree
+      BEFORE presenting anything, reporting current-or-stale as a verdict rather than a footnote.
+      With no snapshot it falls back to reconstruction (/nw-continue, /phil:nwave-slice-status)
+      and says that is what it did.
+    output: Resume briefing carrying an explicit freshness verdict
+    emotion: cautious confidence — I am told what is known and how much to trust it
+  - id: route
+    action: >
+      The tool names the entry-point that owns the work and invokes it, rather than performing
+      the work inline. Where the recorded entry-point disagrees with the feature's current wave,
+      the live wave wins and the disagreement is surfaced.
+    output: The owning command running, or an explicit statement of which command owns the work
+    emotion: trust — it is being done the right way, not the fast way
+  - id: resume
+    action: >
+      Work continues under the owning command. The snapshot is superseded rather than left
+      standing as a second account of where things are.
+    output: Work advancing; prior snapshot marked consumed
+    emotion: momentum — no re-briefing was needed, and nothing was restarted
+
+emotional_arc: pressured → relief → cautious confidence → trust → momentum  # upward
+
+shared_artifacts:
+  - name: snapshot
+    source: capture
+    consumed_by: [bootstrap, route]
+  - name: why (decisions, ruled-out approaches, reason work stopped)
+    source: capture          # unrecoverable elsewhere — this is the irreducible payload
+    consumed_by: [bootstrap]
+  - name: entry_point (the command that owns the work)
+    source: capture          # derived at capture from the feature's wave; re-derived live at route
+    consumed_by: [route]
+  - name: next_action
+    source: capture
+    consumed_by: [bootstrap]
+  - name: tree_fingerprint (commit SHA + dirty-state)
+    source: capture
+    consumed_by: [bootstrap]  # the staleness oracle
+  - name: claimed_card
+    source: capture
+    consumed_by: [bootstrap, route]
+  # DELIBERATELY NOT a shared artifact: the WHERE (file, step, branch). It is derived at bootstrap
+  # from the artifacts that already own it. Carrying it in the snapshot would create the second
+  # authority anxiety B forbids.
+
+error_paths:
+  - step: wind-down
+    failure: Session advanced nothing worth recording
+    recovery: Write no snapshot and say so — ceremony on work that did not need it is anxiety D
+  - step: capture
+    failure: State offered for capture is already owned by an artifact
+    recovery: >
+      Refuse to copy it; record a pointer or derive it at bootstrap instead. Two authorities over
+      one fact drift (anxiety B; phil:issue-board "One system of record per scope")
+  - step: capture
+    failure: Snapshot target would publish session scratch to an audience
+    recovery: >
+      Surface that the board is world-readable before writing there; prefer the local surface for
+      in-flight detail and let the forge carry only what others need (anxiety C)
+  - step: bootstrap
+    failure: Tree fingerprint no longer matches — the snapshot is stale
+    recovery: >
+      Report STALE with the delta and refuse to resume silently. A confidently-followed stale
+      snapshot is the worst available outcome and the failure continue.md actually exhibits
+      (anxiety A)
+  - step: bootstrap
+    failure: No snapshot exists
+    recovery: Fall back to reconstruction and label the briefing as reconstructed, not recorded
+  - step: route
+    failure: No entry-point recorded, or the wave cannot be determined
+    recovery: State that the owner is unknown and ask — never default to working inline
+  - step: route
+    failure: Recorded entry-point disagrees with the feature's current wave
+    recovery: Prefer the live wave label, and surface the disagreement rather than resolving it silently
+  - step: resume
+    failure: Two sessions hold snapshots for the same initiative
+    recovery: >
+      Detect and refuse to clobber. Arbitrating between two live sessions is out of scope for v1 —
+      detection without resolution is the honest boundary

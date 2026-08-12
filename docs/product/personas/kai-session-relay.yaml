@@ -1,0 +1,28 @@
+# Persona (SSOT) — bootstrapped by DISCUSS wave, feature: session-handoff (2026-08-12)
+
+id: kai-session-relay
+name: Kai
+role: >
+  Developer carrying multi-session, AI-assisted work in a repo using the phil plugin. Hands the
+  baton from one session to the next — across context exhaustion, the end of a day, and
+  compaction — and is the one who pays when the handoff drops. Sibling to Quinn (phil-work):
+  Quinn wants discipline WITHIN an initiative; Kai wants continuity ACROSS the session boundary
+  that cuts through it.
+goals:
+  - Resume mid-initiative work without re-explaining the state of play
+  - Preserve the reasoning that was never written down — decisions made, approaches ruled out, why work stopped
+  - Have the next session routed to the correct entry-point rather than freelancing the work inline
+  - Know whether a resume point is current, or be told honestly that it is not
+frustrations:
+  - continue.md and todo.md are hand-maintained, feature-scoped, and stale — nothing keeps them current
+  - /nw-continue reconstructs only wave-managed nWave features; everything else has no resume path
+  - A fresh session reads a work description and starts doing the work instead of invoking the command that owns it
+  - The why is never recorded anywhere, so it dies with the session that held it
+mental_model:
+  - "A stale handoff is worse than no handoff, because the next session trusts it"
+  - "Anything the artifacts already own should be derived, never copied — a second copy is a second authority"
+  - "What no reconstruction can recover is the reasoning, because it was never an artifact"
+  - "A card tells the next session what to do; it should also tell it how"
+vocabulary:
+  - session boundary, handoff, snapshot, bootstrap, resume point, compaction, staleness,
+    reconstruct vs record, entry-point routing, one system of record, claimed card, baton
