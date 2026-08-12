@@ -6,5 +6,5 @@
   "recorded_entry_point": "/nw-execute",
   "board_state": { "parent_issue": 9, "wave_label": "wave: deliver", "card": 11 },
   "expected_decision": "ROUTE",
-  "expected_guard": "KPI-2 — route, never freelance; the correction the user repeats today disappears"
+  "expected_guard": "KPI-2 — name the owner and stop; never freelance the work, and never launch the owner either"
 }

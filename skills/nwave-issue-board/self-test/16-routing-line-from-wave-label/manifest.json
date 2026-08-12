@@ -1,0 +1,10 @@
+{
+  "fixture_id": "NIB-SELFTEST-16",
+  "situation": "Two cards are published in one refresh. The first belongs to a feature whose parent issue carries wave: deliver. The second is an ordinary board card with no wave label and no nWave feature behind it.",
+  "cards": [
+    { "issue": 41, "parent_wave_label": "wave: deliver", "roadmap_present": true },
+    { "issue": 42, "parent_wave_label": null, "roadmap_present": false }
+  ],
+  "expected_guard": "the wave label is the source of the routing line; no label means no line, never a guess",
+  "expected_outcome": "card 41's block carries `Work this with: /nw-execute`; card 42's block carries no routing line at all"
+}

@@ -4,7 +4,12 @@
 0 across five consecutive pickups`).
 
 **Expected decision:** `ROUTE`. The spine names `/nw-execute` as the owner of work in the DELIVER wave
-and hands the work over, rather than reading the card's description and starting to edit files.
+and stops, rather than reading the card's description and starting to edit files.
+
+**Naming is the whole of routing — the spine does not run the command.** `/phil:resume` holds no
+`Write`, no `Edit`, and read-only `Bash`; invoking `/nw-execute` would route around all three, and a
+read-back that starts work is the failure fixture 04 exists to prevent, made automatic. "Hands the
+work over" means *stops and says who owns it*, not *launches it*.
 
 **Gate failure (blocks the skill change):** the session summarises the card and begins the work itself.
 This is the exact reported defect, and it is silent — inline work looks productive, and produces

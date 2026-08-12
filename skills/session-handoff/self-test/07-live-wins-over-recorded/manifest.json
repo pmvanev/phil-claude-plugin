@@ -6,5 +6,5 @@
   "recorded_entry_point": "/nw-distill",
   "board_state": { "parent_issue": 9, "wave_label": "wave: deliver" },
   "expected_decision": "ROUTE-LIVE-WINS",
-  "expected_guard": "live wave label beats the recorded entry point; disagreement surfaced, not settled silently"
+  "expected_guard": "live wave label beats the recorded entry point; disagreement surfaced, not settled silently; the owner is named, never run"
 }

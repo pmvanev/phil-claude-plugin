@@ -1,6 +1,6 @@
 ---
 name: session-handoff
-description: Skill bundle for the phil:handoff and phil:resume commands — carries work across the session boundary. Records only what a fresh session cannot derive (the reasoning, the intended next action), stamps a tree fingerprint, and on read-back states a current/stale verdict before presenting anything. Refuses to record state an artifact already owns.
+description: Skill bundle for the phil:handoff and phil:resume commands — carries work across the session boundary. Records only what a fresh session cannot derive (the reasoning, the intended next action), stamps a tree fingerprint, and on read-back states a current/stale verdict before presenting anything, then names the command that owns the work without running it. Refuses to record state an artifact already owns.
 ---
 
 # Session handoff — capture and resume
@@ -11,8 +11,8 @@ The value is narrow and specific: **record only what a fresh session cannot work
 Everything else is derived at read-back from whatever already owns it. A snapshot that also records
 the derivable becomes a second authority over the same fact, and the two drift.
 
-Slice 01 scope. Entry-point routing is slice 02; the claimed-card link is slice 03. Neither is
-implemented here — do not improvise them.
+Slices 01 and 02. The claimed-card link is slice 03 and is **not** implemented here — do not
+improvise it.
 
 ## What is worth recording
 
@@ -21,7 +21,7 @@ implemented here — do not improvise them.
 | **The why** — decisions made, approaches ruled out, why work stopped | **Yes** | It was never an artifact. No reconstruction can recover it. |
 | **The next action** — what the session was about to do | **Yes** | Partly inferable, and a wrong inference is costlier than none. |
 | The where — file, step, branch, commit, wave | **No** | Already owned by the artifacts. Derive it at read-back via the read-only `nwave-slice-status` skill and git. |
-| The entry point that owns the work | **No — slice 02** | Not built. |
+| **The entry point** — which command owns the work | **Yes** | The card describes work, not method. Nothing else records it. |
 | The claimed card and its basis | **No — slice 03** | Not built. |
 
 ## The snapshot
@@ -36,6 +36,7 @@ history. Never commit it; never write it anywhere under `docs/`.
 captured: 2026-08-12T17:30Z
 commit: 083c953
 dirty: no
+owner: /nw-execute
 <!-- /session-handoff:v1 -->
 
 ## Why
@@ -64,6 +65,10 @@ fingerprint from the header, never by parsing the prose.
 2. **Collect the why.** State the decisions reached and, critically, the approaches **ruled out and
    why**. A decision without its discarded alternatives invites the next session to re-propose them.
 3. **Collect the next action** — one sentence, concrete enough to start from.
+3b. **Record the owning command**, when the work has one. Derive it from the feature issue's wave
+   label using the table in `skills/nwave-issue-board/SKILL.md` — that skill owns the wave label and
+   owns the mapping. Do not restate the table here; a second copy is a second authority. Omit
+   `owner:` entirely when no wave label applies. Most work has no owner, and that is not a defect.
 4. **Refuse the derivable.** If wave, slice, step, branch, or file position comes up, leave it out.
    Say plainly that it is left out because it is derived at read-back. This is not an optimisation;
    recording it is the defect.
@@ -125,6 +130,37 @@ A confidently-followed stale snapshot is the worst outcome this skill can produc
 having no snapshot, because the next session acts on it. Never soften the verdict to "may be out of
 date" when the fingerprint proves it is.
 
+### Naming the owner
+
+After the verdict and the content, name the command that owns the work — on every read-back path,
+including `RECONSTRUCT`.
+
+**`ROUTE`** — an owner is determined. State it and stop:
+
+```
+owner: /nw-execute  (wave: deliver)  → run it to continue
+```
+
+**Name it; never run it.** `/phil:resume` has no `Write`, no `Edit`, and read-only `Bash`, and
+running the owner would route around all three — `/nw-execute` writes code. This mirrors
+`nwave-slice-status`, which prints the resume command as text and never runs it. A read-back reports;
+it does not start work.
+
+**`ROUTE-LIVE-WINS`** — the recorded `owner:` disagrees with what the feature's current wave label
+implies. **The live label wins**, and the disagreement is reported rather than quietly settled:
+
+```
+owner: /nw-execute  (wave: deliver)
+  recorded as /nw-distill — the wave advanced since this snapshot was written
+```
+
+Silently preferring the live value hides that the snapshot has drifted, which is the one signal that
+would tell the reader their capture habit is falling behind.
+
+**`ASK-OWNER`** — no `owner:` recorded and no wave label to derive one from. Say the owner is unknown
+and ask. **Do not begin the work.** This is the common case on a mixed board, not an edge case: most
+cards are not nWave work, and the absence of a label is not permission.
+
 **`RECONSTRUCT`** — no snapshot exists. Derive the position from whatever owns it: the
 `nwave-slice-status` skill for a feature's wave, slice, and step state, and git for the branch and
 recent commits.
@@ -158,11 +194,14 @@ capture, always at read-back*.
 
 Report the outcome by name, every run — one per phase:
 
-`CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `RESUME-CURRENT` · `RESUME-STALE` · `RECONSTRUCT`
+`CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `RESUME-CURRENT` · `RESUME-STALE` · `RECONSTRUCT` ·
+`ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER`
 
 A capture run reports exactly one of `CAPTURE` or `NO-OP`. `REFUSE-DERIVABLE` is **additional**:
 report it alongside `CAPTURE` whenever derivable state was offered and left out, naming what was left
-out. A read-back run reports exactly one of `RESUME-CURRENT`, `RESUME-STALE`, or `RECONSTRUCT`.
+out. A read-back run reports exactly one of `RESUME-CURRENT`, `RESUME-STALE`, or `RECONSTRUCT`, **and**
+exactly one of `ROUTE`, `ROUTE-LIVE-WINS`, or `ASK-OWNER` — the freshness verdict and the owner are
+independent facts, and a stale snapshot still has an owner worth naming.
 
 ## What this skill must never do
 
@@ -171,14 +210,14 @@ out. A read-back run reports exactly one of `RESUME-CURRENT`, `RESUME-STALE`, or
 - Record wave, slice, step, branch, or file position.
 - Write a snapshot for a session that advanced nothing.
 - Invent a next action that was not stated.
-- Route work to an owning command, or record a claimed card — slices 02 and 03, not built. Reading a
-  read-only status delegate to derive position is not routing; naming the command the work *should
-  proceed under* is.
+- **Run** the owning command. Naming it is the whole of routing here; `/phil:resume` starts nothing.
+- Record a claimed card or its basis — slice 03, not built.
+- Restate the wave → command table. `skills/nwave-issue-board/SKILL.md` owns it; derive from there.
 
 ## Acceptance
 
-`acceptance.feature` is the scenario SSOT; `self-test/` holds ten golden fixtures. Slice 01 must pass
-fixtures **01–05**. Fixtures 06–10 cover slices 02 and 03 and are expected to fail until those ship.
+`acceptance.feature` is the scenario SSOT; `self-test/` holds ten golden fixtures. Slices 01 and 02
+must pass fixtures **01–08**. Fixtures **09–10** cover slice 03 and are expected to fail until it ships.
 
 The suite is **model-driven, not automated** — there is no CI runner in this plugin, and
 `tests/test_self_test_fixtures.py` does not cover these fixtures. Drive each one by giving this skill

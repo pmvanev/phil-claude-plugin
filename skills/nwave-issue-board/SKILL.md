@@ -152,6 +152,7 @@ sends the cleanest-looking version of the table to the largest audience.
 ```
 <!-- nwave:status:begin -->
 Wave: DELIVER · generated 2026-08-10T21:04Z
+Work this with: /nw-execute
 
 | Step | What it does | Status | Notes |
 |---|---|---|---|
@@ -167,6 +168,44 @@ the description.
 
 Row order is `phases[].steps[]` array order. A step's `deps` may imply a different order and does
 not override it.
+
+## A card that does not say how to work it gets worked the wrong way
+
+A card describes work. An agent handed a work description does the work — inline, in the session,
+skipping the wave command that owns it. That skips the TDD cycle `/nw-execute` dispatches and the
+artifact writes that make the work resumable, so the *next* session's reconstruction finds artifacts
+that were never written. The failure is silent: inline work looks productive and produces plausible
+output.
+
+The wave label already on the feature issue determines the owning command, so **emit a
+`Work this with:` line into the generated block**, directly under the `Wave:` line. It inherits the
+block's properties — generated, never typed; delimited; timestamped — so it cannot drift from the
+wave it was derived from.
+
+| Wave label | Work this with |
+|---|---|
+| `wave: discover` | `/nw-discover` |
+| `wave: diverge` | `/nw-diverge` — optional wave, between DISCOVER and DISCUSS |
+| `wave: discuss` | `/nw-discuss` |
+| `wave: design` | `/nw-design` |
+| `wave: devops` | `/nw-devops` |
+| `wave: distill` | `/nw-distill` |
+| `wave: deliver` | `/nw-deliver` for the wave; `/nw-execute` for a single step |
+
+Verified 2026-08-12 against the wave declarations in `~/.claude/skills/nw-*/SKILL.md`, not against
+the command descriptions — which is the correction that matters. A first draft assembled from
+descriptions **omitted DEVOPS entirely** (it is wave 4 of 6) along with DISCOVER and DIVERGE, and
+would have cited `nw-design`'s declared `**Command**: *design-architecture` as the user entry point,
+when that is the internal agent dispatch and `/nw-design` is what a person runs.
+
+Three rules:
+
+- **The wave label is the source.** Derive the line from the label at generation time; never carry a
+  routing line the label does not support.
+- **No label, no line.** A card outside a wave gets no `Work this with:` line — emit nothing rather
+  than guess. Most cards on a mixed board are not nWave work.
+- **This line names; it does not launch.** It tells a reader which command owns the work. Nothing
+  here runs anything.
 
 ## This is a projection, not a sync
 
@@ -206,7 +245,7 @@ does not is indistinguishable from current.
 
 ## Self-test (regression gate)
 
-`skills/nwave-issue-board/self-test/` holds fifteen fixtures that pin these behaviors: the
+`skills/nwave-issue-board/self-test/` holds sixteen fixtures that pin these behaviors: the
 end-to-end publish (01, walking skeleton), the `Notes` column surviving the trip to the forge (02),
 `unknown` published as `unknown` rather than `not started` (03), a human-set state outranking a
 regenerated one (04), hand-written prose surviving a refresh that must replace the whole description
@@ -216,7 +255,9 @@ roster (09), the GitLab roster written in a second pass as bare references (10),
 writing back to the artifacts (11), status decided by `nwave-slice-status` rather than folded here
 (12), the column positioned in `phases[]` order rather than the creation order that looks just as
 deliberate (13), an order guessed before `/nw-roadmap` published as a guess (14), and a GitLab roster
-left as bare references rather than converted to checkboxes to manufacture a progress bar (15).
+left as bare references rather than converted to checkboxes to manufacture a progress bar (15), and
+the `Work this with:` routing line derived from the wave label — emitted for a labelled card, and
+withheld entirely for one with no label rather than guessed (16).
 
 Fixtures 04 and 11 are deliberately adjacent and resolve opposite ways: a person recording something
 no artifact can hold is preserved; a person overwriting something the artifacts own is not. Getting
