@@ -1,5 +1,13 @@
 # Slice 03 — Claimed-card link
 
+> **DEFERRED 2026-08-12 — pending evidence, not cancelled.** Slices 01 and 02 shipped; this one's
+> learning hypothesis (*the board already carries enough*) is so far holding: the snapshot's `Next`
+> field carried the work identity in prose on every dogfood run, and the two-cards-In-Progress
+> evidence below proved to be board hygiene rather than a design gap — #3 had simply been left there.
+> Card #12 stays open as the standing follow-up. Note this brief carries a `DEFERRED` marker, which
+> `phil:nwave-issue-board` treats as "not a card"; the card is retained deliberately, because this
+> feature no longer publishes through that flow.
+
 Feature: session-handoff · Job: `carry-work-across-session-boundaries` · Persona: `kai-session-relay`
 
 ## Goal
