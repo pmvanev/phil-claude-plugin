@@ -114,11 +114,14 @@ followed.
 | A plain issue list, either forge | nothing | — | — |
 
 **Neither CLI exposes a way to set position, and the label swap this skill prescribes cannot set
-one either.** A `glab
+one either.** *(Correction, 2026-08-12: the "GraphQL-only" claim that used to close this paragraph was
+wrong for GitLab — see* A column is a queue *below and* GitLab reorders over REST *for what replaced
+it.)* A `glab
 issue update --label/--unlabel` move changes the column and leaves the card wherever the default
 drops it — so on GitLab a deliberate move is two operations, not one. `glab issue` has no reorder
 subcommand and `gh project item-edit` has no position flag (checked on `glab` 1.112.0 and `gh`
-2.97.0). Position is GraphQL-only on both:
+2.97.0) — but that does **not** make position GraphQL-only. It is on GitHub; on GitLab there is a
+REST endpoint that works. GitHub's mutation:
 
 ```sh
 gh api graphql -f query='mutation($p:ID!,$i:ID!,$a:ID){
@@ -126,7 +129,42 @@ gh api graphql -f query='mutation($p:ID!,$i:ID!,$a:ID){
   -f p=<project-node-id> -f i=<item-node-id> -f a=<the item this one should land below>
 ```
 
-GitLab's `issueMoveList` carries `moveBeforeId`, `moveAfterId`, and `positionInList` alongside
+### GitLab reorders over REST
+
+**Use this, not GraphQL.** Exercised 2026-08-12 against a self-hosted 18.x Premium instance:
+
+```sh
+glab api --method PUT "projects/<id>/issues/<iid>/reorder" -f move_after_id=<issue id>
+# or -f move_before_id=<issue id>
+```
+
+Three things the run established, each of which will otherwise cost an hour:
+
+- **`move_after_id` and `move_before_id` name the *other* issue's destination, not the subject's.**
+  `move_after_id=X` means "place X **after** the issue in the path" — so the subject moves *ahead of*
+  X. The natural reading is inverted, and the call succeeds either way.
+
+  **This is the exact opposite of GitHub's convention.** In `updateProjectV2ItemPosition`, `afterId`
+  is the item the subject lands *below*. Same word, opposite direction. Carrying a mental model
+  across forges silently reverses your ordering.
+
+  | | Parameter | Subject ends up |
+  |---|---|---|
+  | GitHub | `afterId: X` | **after** X |
+  | GitLab | `move_after_id: X` | **before** X |
+
+- **The IDs are global issue `id`s, not project `iid`s** — while the path takes the `iid`. Both
+  numbers appear on the same object and mixing them yields `404 Issue Not Found`.
+- **`relative_position` is not serialized in the REST response.** It read `null` on every issue
+  before, during, and after a successful reorder, in both the single-issue GET and the list. A
+  reorder that worked is indistinguishable from one that did nothing if you check that field — so
+  **verify by reading the ordered list back**, never by reading `relative_position`.
+
+An unset position also reads as `null`, which is the same warning as everywhere else in this
+section: the order you see is indistinguishable from one somebody chose. On the instance tested, all
+39 open issues had `null` — nothing had ever been positioned.
+
+GitLab's GraphQL `issueMoveList` carries `moveBeforeId`, `moveAfterId`, and `positionInList` alongside
 `fromListId` and `toListId`, so there a move between columns and a move within one are the same
 mutation. It has no one-liner here because it needs a `boardId` and both list IDs resolved first.
 
@@ -153,10 +191,11 @@ schema*. Exercise status, as of 2026-08-12:
 | `updateProjectV2ItemPosition`, `afterId` omitted → top | **yes** — `gh` 2.97.0 |
 | `updateProjectV2ItemPosition`, `afterId` → a specific sibling | **yes** |
 | `reprioritizeSubIssue`, `beforeId` and `afterId` | **yes**, both forms |
-| GitLab `issueMoveList` | **no** — still schema-only |
+| GitLab REST `PUT …/issues/:iid/reorder` | **yes** — 18.x Premium, both directions, repeatable |
+| GitLab GraphQL `issueMoveList` | **no** — still schema-only, and superseded by the REST call above |
 
-Every GitHub form landed correctly on the first attempt. Confirm the GitLab mutation against one card
-before reordering a backlog, and read that section before running an introspection query of your own.
+Every form above landed correctly on the first attempt. Read the introspection section before running
+a query of your own.
 
 **Write the order top-down in one pass.** Each call anchors to a neighbor, so anchoring to a card
 you have not placed yet shifts everything after it — successfully, and with no output that says so.
