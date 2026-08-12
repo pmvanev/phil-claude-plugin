@@ -20,13 +20,15 @@ implemented here — do not improvise them.
 |---|---|---|
 | **The why** — decisions made, approaches ruled out, why work stopped | **Yes** | It was never an artifact. No reconstruction can recover it. |
 | **The next action** — what the session was about to do | **Yes** | Partly inferable, and a wrong inference is costlier than none. |
-| The where — file, step, branch, commit, wave | **No** | Owned by `/nw-continue` and `/phil:nwave-slice-status`. Derive at read-back. |
+| The where — file, step, branch, commit, wave | **No** | Already owned by the artifacts. Derive it at read-back via the read-only `nwave-slice-status` skill and git. |
 | The entry point that owns the work | **No — slice 02** | Not built. |
 | The claimed card and its basis | **No — slice 03** | Not built. |
 
 ## The snapshot
 
-One file, `.session-handoff.md`, at the repository root. Git-ignored — it is runtime state, not
+One file, `.session-handoff.md`, at the repository root — resolve it as
+`$(git rev-parse --show-toplevel)/.session-handoff.md`, never relative to the current directory, so
+both paths agree when a command runs from a subdirectory. Git-ignored — it is runtime state, not
 history. Never commit it; never write it anywhere under `docs/`.
 
 ```markdown
@@ -51,17 +53,25 @@ fingerprint from the header, never by parsing the prose.
 
 ## CAPTURE — `/phil:handoff`
 
-1. **Decide whether anything happened.** Establish whether the session advanced work: decisions
-   reached, files changed, a next action formed. If none of these hold, take the `NO-OP` path below.
+1. **Decide whether anything happened.** The payload is the why and the next action. If neither can
+   be stated — no decision reached, no next action formed — take the `NO-OP` path below, **however
+   many files changed**. File churn alone is derivable from git and is not a reason to write a
+   snapshot.
+
+   `$ARGUMENTS`, when present, is the session's own account of what it was doing. Treat it as raw
+   material for the why and the next action, never as the record itself — it is subject to every rule
+   below, including the refusal of derivable state it may contain.
 2. **Collect the why.** State the decisions reached and, critically, the approaches **ruled out and
    why**. A decision without its discarded alternatives invites the next session to re-propose them.
 3. **Collect the next action** — one sentence, concrete enough to start from.
 4. **Refuse the derivable.** If wave, slice, step, branch, or file position comes up, leave it out.
    Say plainly that it is left out because it is derived at read-back. This is not an optimisation;
    recording it is the defect.
-5. **Stamp the fingerprint.** `git rev-parse --short HEAD` for `commit`; `git status --porcelain`
+5. **Stamp the header.** `captured:` is the current time in UTC at minute precision
+   (`2026-08-12T17:30Z`); `commit` is `git rev-parse --short HEAD`; `git status --porcelain`
    non-empty means `dirty: yes`.
-6. **Write `.session-handoff.md`**, overwriting any previous snapshot.
+6. **Write `.session-handoff.md`**, overwriting any previous snapshot outright — never merging into
+   it. Competing-snapshot detection is slice 03.
 7. **Report** `CAPTURE`, and echo what was recorded so a mistake is visible immediately.
 
 ### NO-OP
@@ -85,16 +95,23 @@ from the command having failed.
 3. **Compare against the tree now** — current short HEAD, and current dirty state.
 4. **Branch on the comparison**, and state the verdict *first*:
 
-**`RESUME-CURRENT`** — commit matches and the tree is as clean as it was. Say the resume point is
-current, then present the why and the next action.
+**`RESUME-CURRENT`** — the commit matches **and** the dirty flag matches. Say the resume point is
+current, then present the why and the next action. When both were and are dirty, add one line: the
+fingerprint records only *that* the tree was dirty, not what was in it, so uncommitted work may have
+moved beneath a current verdict.
 
-**`RESUME-STALE`** — commit differs, or the tree is dirty when the snapshot was clean. Say so
-**before** any content, and quantify it:
+**`RESUME-STALE`** — the commit differs, **or** the dirty flag differs in either direction, **or** the
+recorded commit is unknown to this tree (rebased, or captured on another branch). Say so **before**
+any content, and quantify it:
 
 ```
 STALE — snapshot at 4a91c02, HEAD is now e17bd55 (6 commits), working tree dirty.
 The recorded next action may no longer apply.
 ```
+
+Measure the distance with `git rev-list --count <recorded>..HEAD`. If that command fails, the
+recorded commit is not in this tree's history — report `STALE` and say the recorded commit is
+unreachable, rather than reporting no distance at all.
 
 The shape is what matters, not these values: both fingerprints, the distance between them, and the
 tree state. Report the distance in whatever unit is available — commit count is best; a bare
@@ -108,9 +125,13 @@ A confidently-followed stale snapshot is the worst outcome this skill can produc
 having no snapshot, because the next session acts on it. Never soften the verdict to "may be out of
 date" when the fingerprint proves it is.
 
-**`RECONSTRUCT`** — no snapshot exists. Derive the position from whatever owns it: `/nw-continue`
-for an nWave feature, `/phil:nwave-slice-status` for a slice's step state, git for the branch and
-recent commits. Present that, and **label it as reconstructed rather than recorded** — including
+**`RECONSTRUCT`** — no snapshot exists. Derive the position from whatever owns it: the
+`nwave-slice-status` skill for a feature's wave, slice, and step state, and git for the branch and
+recent commits.
+
+**Never invoke `/nw-continue` here.** It computes much the same position and then *launches the next
+wave* — `skills/nwave-slice-status/SKILL.md` exists because of that side effect. Read-back starts
+nothing. Present that, and **label it as reconstructed rather than recorded** — including
 that the *why* is unavailable, because nothing derives it.
 
 A recorded briefing carries reasoning that was witnessed. A reconstructed one carries position
@@ -120,11 +141,12 @@ inferred from files. They have different warranties; blurring them invents confi
 
 At read-back, fetch the derivable from its owner rather than the snapshot:
 
-| Wanted | Ask |
-|---|---|
-| Where an nWave feature stands | `/nw-continue` |
-| A slice's step state | `/phil:nwave-slice-status` |
-| Branch, HEAD, working-tree state | `git` |
+| Wanted | Ask | Read-only? |
+|---|---|---|
+| Where an nWave feature stands — wave, slice, step | the `nwave-slice-status` skill | yes |
+| Branch, HEAD, working-tree state | `git` | yes |
+
+Every delegate on this path must be read-only. That is the selection criterion, not a coincidence.
 
 Delegate; do not re-derive. These own their answers and have their own correctness gates.
 
@@ -134,11 +156,13 @@ capture, always at read-back*.
 
 ## Decision outcomes
 
-Report exactly one, by name, every run:
+Report the outcome by name, every run — one per phase:
 
 `CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `RESUME-CURRENT` · `RESUME-STALE` · `RECONSTRUCT`
 
-`REFUSE-DERIVABLE` is reported alongside `CAPTURE` when derivable state was offered and left out.
+A capture run reports exactly one of `CAPTURE` or `NO-OP`. `REFUSE-DERIVABLE` is **additional**:
+report it alongside `CAPTURE` whenever derivable state was offered and left out, naming what was left
+out. A read-back run reports exactly one of `RESUME-CURRENT`, `RESUME-STALE`, or `RECONSTRUCT`.
 
 ## What this skill must never do
 
@@ -147,13 +171,18 @@ Report exactly one, by name, every run:
 - Record wave, slice, step, branch, or file position.
 - Write a snapshot for a session that advanced nothing.
 - Invent a next action that was not stated.
-- Route work, name an owning command, or record a claimed card — slices 02 and 03, not built.
+- Route work to an owning command, or record a claimed card — slices 02 and 03, not built. Reading a
+  read-only status delegate to derive position is not routing; naming the command the work *should
+  proceed under* is.
 
 ## Acceptance
 
 `acceptance.feature` is the scenario SSOT; `self-test/` holds ten golden fixtures. Slice 01 must pass
 fixtures **01–05**. Fixtures 06–10 cover slices 02 and 03 and are expected to fail until those ship.
 
-Run the suite whenever this file or either command loader changes. Every failure mode here is
+The suite is **model-driven, not automated** — there is no CI runner in this plugin, and
+`tests/test_self_test_fixtures.py` does not cover these fixtures. Drive each one by giving this skill
+the situation in its `manifest.json` and comparing the decision reached against its `expected.md`. Do
+that whenever this file or either command loader changes. Every failure mode here is
 silent — a snapshot that records too much looks more complete, and a stale one presented as current
 looks like a smooth resume.

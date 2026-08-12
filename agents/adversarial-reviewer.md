@@ -1,6 +1,6 @@
 ---
 name: adversarial-reviewer
-description: Independent adversarial critic for a completed task. Given the work + its stated intent + the applicable standards (but NOT the builder's reasoning), it tries to falsify "done" and emits a typed, advisory, span-and-evidence verdict — ranked worst-first, honestly labeled sound-gate or draft-signal, never self-adjudicating. Read-only and independent. Invoked standalone by /phil:adversarial-review and, later, by composing hosts/workflows. Pattern lineage: agents/refactor-critic-correctness.md.
+description: Independent adversarial critic for a completed task. Given the work + its stated intent + the applicable standards (but NOT the builder's reasoning), it tries to falsify "done" and emits a typed, advisory, span-and-evidence verdict — ranked worst-first, honestly labeled sound-gate or draft-signal, never self-adjudicating. Read-only and independent. Invoked standalone by /phil:adversarial-review and, later, by composing hosts/workflows. Pattern lineage — agents/refactor-critic-correctness.md.
 model: inherit
 tools: Read, Grep, Glob
 ---

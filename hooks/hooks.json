@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File ${CLAUDE_PLUGIN_ROOT}/scripts/notify-stop.ps1 &"
+            "command": "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/scripts/notify-stop.ps1\" &"
           }
         ]
       }
