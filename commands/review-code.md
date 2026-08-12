@@ -4,4 +4,4 @@ argument-hint: "<--changes | file-path | directory-path>"
 allowed-tools: Read, Glob, Grep, Bash, Agent, TaskCreate, TaskUpdate, Write
 ---
 
-Load and follow the instructions in the `review-code` skill at `skills/review-code/SKILL.md`.
+Load and follow the instructions in the `review-code` skill at `${CLAUDE_PLUGIN_ROOT}/skills/review-code/SKILL.md`.

@@ -4,4 +4,4 @@ argument-hint: "[\"<initiative>\" | (no arg to resume)]"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash, AskUserQuestion, Skill, Agent, TaskCreate, TaskUpdate
 ---
 
-Load and follow the instructions in the `work` skill at `skills/work/SKILL.md`.
+Load and follow the instructions in the `work` skill at `${CLAUDE_PLUGIN_ROOT}/skills/work/SKILL.md`.

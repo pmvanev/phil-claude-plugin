@@ -4,4 +4,4 @@ argument-hint: "[\"<intent>\"]"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash, AskUserQuestion, Skill, Agent, TaskCreate, TaskUpdate
 ---
 
-Load and follow the instructions in the `edd` skill at `skills/edd/SKILL.md`.
+Load and follow the instructions in the `edd` skill at `${CLAUDE_PLUGIN_ROOT}/skills/edd/SKILL.md`.

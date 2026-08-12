@@ -4,4 +4,4 @@ argument-hint: "<lines:N-M | method-name | file-path | directory-path>"
 allowed-tools: Read, Edit, Glob, Grep
 ---
 
-Load and follow the instructions in the `clean-comments` skill at `skills/clean-comments/SKILL.md`.
+Load and follow the instructions in the `clean-comments` skill at `${CLAUDE_PLUGIN_ROOT}/skills/clean-comments/SKILL.md`.

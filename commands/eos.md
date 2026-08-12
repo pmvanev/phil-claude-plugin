@@ -4,4 +4,4 @@ argument-hint: "<lines:N-M | file-path | directory-path>"
 allowed-tools: Read, Edit, Glob, Grep
 ---
 
-Load and follow the instructions in the `eos` skill at `skills/eos/SKILL.md`.
+Load and follow the instructions in the `eos` skill at `${CLAUDE_PLUGIN_ROOT}/skills/eos/SKILL.md`.

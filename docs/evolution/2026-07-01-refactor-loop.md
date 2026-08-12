@@ -1,3 +1,20 @@
+> **Historical record — not a live resume point.**
+>
+> This file was `continue.md` at the repository root, hand-maintained as a resume point for the
+> `phil:refactor-loop` build. It is preserved here because it is the **only** narrative record of
+> that feature — `docs/evolution/` had no `refactor-loop` entry — and it is moved because a
+> hand-maintained resume point at the root is exactly the second-authority drift that
+> `/phil:handoff` and `/phil:resume` exist to prevent. The plugin validator flagged it as
+> *"precisely the second-authority drift the new skill exists to prevent, left standing in the
+> skill's own repo."*
+>
+> Everything below is as of **2026-07-01**, pinned to commit `f881b48`, and has not been updated
+> since. Read it as history. For where work actually stands now, run `/phil:resume`, which will tell
+> you whether what it holds is current before it tells you anything else — the property this file
+> never had.
+
+---
+
 # Continue — phil:refactor-loop
 
 Resume point for the `/phil:refactor-loop` feature. Last updated 2026-07-01.

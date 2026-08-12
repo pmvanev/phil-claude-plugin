@@ -1,7 +1,7 @@
 {
   "fixture_id": "SH-SELFTEST-03",
   "phase": "CAPTURE",
-  "situation": "The session is mid-way through an nWave feature. Its wave, current slice, and step position are all recorded in docs/feature/ and derivable by /nw-continue.",
+  "situation": "The session is mid-way through an nWave feature. Its wave, current slice, and step position are all recorded in docs/feature/ and derivable at read-back by the read-only nwave-slice-status skill.",
   "session_advanced_work": true,
   "decisions_made": ["chose the local surface to keep the forge out of the skeleton"],
   "next_action": "write the fixtures",

@@ -4,5 +4,5 @@ argument-hint: "[\"<what you were doing>\"]"
 allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion, Skill
 ---
 
-Load the `session-handoff` skill at `skills/session-handoff/SKILL.md`. Follow the CAPTURE path; the
+Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handoff/SKILL.md`. Follow the CAPTURE path; the
 snapshot format, the deriving rules, the decision outcomes, and the never-do list govern both paths.

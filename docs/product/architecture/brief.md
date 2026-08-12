@@ -405,7 +405,7 @@ composed **unchanged**. The single CREATE NEW is justified on coupling — exten
 only `phil:work` initiatives have a `progress.md` at all.
 
 **v1 boundaries:** capture is explicitly invoked (the `Stop` hook is deferred until a SPIKE shows a hook
-can see the *why*); competing session claims are **detected, not resolved**; `continue.md` and `todo.md`
+can see the *why*); competing session claims are **detected, not resolved**; `todo.md`
 are not subsumed. Slice 02 extends `skills/nwave-issue-board/SKILL.md` with a card-side routing line —
 the only planned edit to an existing skill.
 

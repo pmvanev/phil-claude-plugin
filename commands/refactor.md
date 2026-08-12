@@ -4,4 +4,4 @@ argument-hint: "[--changes | file-path | directory-path]"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash, Agent, TaskCreate, TaskUpdate
 ---
 
-Load and follow the instructions in the `refactor` skill at `skills/refactor/SKILL.md`.
+Load and follow the instructions in the `refactor` skill at `${CLAUDE_PLUGIN_ROOT}/skills/refactor/SKILL.md`.

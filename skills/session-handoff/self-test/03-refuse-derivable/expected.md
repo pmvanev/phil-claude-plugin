@@ -1,6 +1,7 @@
 # Expected outcome — fixture 03 (derivable state offered)
 
-Four of the six fields offered are already owned by artifacts and derivable by `/nw-continue`.
+Four of the six fields offered are already owned by artifacts and derivable at read-back by the
+read-only `nwave-slice-status` skill.
 
 **Pins:** slice-01 AC6 and **KPI-5** (`facts duplicated between the snapshot and an artifact that owns
 them = 0`).

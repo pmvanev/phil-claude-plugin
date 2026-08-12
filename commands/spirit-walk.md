@@ -4,4 +4,4 @@ argument-hint: "[starting point: file, function, feature, folder, or topic]"
 allowed-tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
 ---
 
-Load and follow the instructions in the `spirit-walk` skill at `skills/spirit-walk/SKILL.md`.
+Load and follow the instructions in the `spirit-walk` skill at `${CLAUDE_PLUGIN_ROOT}/skills/spirit-walk/SKILL.md`.

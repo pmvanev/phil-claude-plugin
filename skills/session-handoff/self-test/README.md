@@ -13,11 +13,11 @@ outcome**:
 `CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `RESUME-CURRENT` · `RESUME-STALE` · `RECONSTRUCT` ·
 `ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER` · `REPORT-CLAIM-CONFLICT`
 
-This suite is the acceptance + regression gate for `skills/session-handoff/SKILL.md` (built in
-DELIVER). Format and intent mirror `skills/edd/self-test/`, `skills/work/self-test/`, and
+This suite is the acceptance + regression gate for `skills/session-handoff/SKILL.md`. Format and intent mirror `skills/edd/self-test/`, `skills/work/self-test/`, and
 `skills/refactor-tests/self-test/` — this plugin's established way to test a skill.
 
-Delegate results (`/nw-continue`, `/phil:nwave-slice-status`) and forge state are **supplied by
+Delegate results (the read-only `nwave-slice-status` skill — never `/nw-continue`, which launches a
+wave) and forge state are **supplied by
 `manifest.json`** so the suite runs unattended. In live use they come from the real delegates and the
 real board. Those own their own gates; this suite does not re-test them — it tests the spine around
 them.
@@ -41,7 +41,8 @@ them.
 
 **`04` is the one that matters most.** A stale resume point that presents itself as current is worse
 than no resume point at all, because the next session acts on it. This is not a hypothetical failure
-mode — it is the observed state of this repo's own hand-written `continue.md`, stamped 2026-07-01 and
+mode — it is the observed state of this repo's own hand-written `continue.md` (since retired to
+`docs/evolution/2026-07-01-refactor-loop.md`), stamped 2026-07-01 and
 a dozen commits behind. If fixture 04 passes while 01 fails, the feature is merely incomplete; if 04
 fails while 01 passes, the feature is actively dangerous.
 
@@ -54,9 +55,10 @@ read-back.
 ## Running
 
 Drive each fixture by giving the spine the situation in `manifest.json` and comparing the decision it
-reaches against `expected.md`. Every fixture is expected to fail until `skills/session-handoff/SKILL.md`
-exists — that is genuine RED (the behaviour is unimplemented), not BROKEN (the harness is faulty),
-because the fixtures are prose inputs with no imports to resolve.
+reaches against `expected.md`. Fixtures 01-05 cover slice 01 and should pass against the current `SKILL.md`. Fixtures 06-10 cover
+slices 02 and 03, which are not built, and are expected to fail — that is genuine RED (the behaviour
+is unimplemented), not BROKEN (the harness is faulty), because the fixtures are prose inputs with no
+imports to resolve.
 
 Run the whole suite whenever `SKILL.md`, either command loader, or `skills/nwave-issue-board/SKILL.md`
 changes — the last because slice 02's routing line lives inside its generated block, so this skill's

@@ -4,9 +4,8 @@
   "situation": "A fresh session picks up work in a repo where no snapshot has ever been captured. The feature does have nWave artifacts under docs/feature/.",
   "snapshot_present": false,
   "delegate_results": {
-    "nw-continue": "feature session-handoff, wave DISTILL, slice 01 in progress",
-    "nwave-slice-status": "step 01-03 current"
+    "nwave-slice-status": "feature session-handoff, slice 01 in progress, step 01-03 current"
   },
   "expected_decision": "RECONSTRUCT",
-  "expected_guard": "reconstruction is labelled as reconstructed, never presented as recorded"
+  "expected_guard": "reconstruction is labelled as reconstructed, never presented as recorded; delegates must be read-only \u2014 /nw-continue is excluded because it launches a wave"
 }

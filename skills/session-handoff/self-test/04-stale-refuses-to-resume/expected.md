@@ -2,7 +2,8 @@
 
 **The sharpest fixture in the suite.** A stale resume point that presents itself as current is worse
 than no resume point at all, because the next session acts on it. This is not hypothetical: it is the
-observed state of this repo's own `continue.md`, stamped 2026-07-01 and a dozen commits behind.
+observed state of this repo's own `continue.md` — since retired to
+`docs/evolution/2026-07-01-refactor-loop.md`, and stamped 2026-07-01, a dozen commits behind.
 
 **Pins:** slice-01 AC3 and **KPI-3** (`resumes that proceed on a stale snapshot without stating
 staleness = 0`, a hard zero).

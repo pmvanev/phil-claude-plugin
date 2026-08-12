@@ -66,5 +66,5 @@ and returns `{ status, iterations, applied, undoable[], invalid[] }`. Relay it �
 
 ## Optional fallback (`--interactive`)
 
-For step-by-step debugging, load and follow `skills/refactor-loop/SKILL.md` instead — the same
+For step-by-step debugging, load and follow `${CLAUDE_PLUGIN_ROOT}/skills/refactor-loop/SKILL.md` instead — the same
 loop as prose the model executes (original substrate, less deterministic; see ADR-008).

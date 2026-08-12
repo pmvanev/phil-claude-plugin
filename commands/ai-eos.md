@@ -4,4 +4,4 @@ argument-hint: "<--changes | file-path | lines:N-M | directory-path>"
 allowed-tools: Read, Glob, Grep, Bash, Agent
 ---
 
-Load and follow the instructions in the `ai-eos` skill at `skills/ai-eos/SKILL.md`.
+Load and follow the instructions in the `ai-eos` skill at `${CLAUDE_PLUGIN_ROOT}/skills/ai-eos/SKILL.md`.

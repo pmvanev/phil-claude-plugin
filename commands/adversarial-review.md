@@ -4,4 +4,4 @@ argument-hint: "[\"<target>\"] [--intent \"<what it was meant to achieve>\"]"
 allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion, Agent, Task
 ---
 
-Load and follow the instructions in the `adversarial-review` skill at `skills/adversarial-review/SKILL.md`.
+Load and follow the instructions in the `adversarial-review` skill at `${CLAUDE_PLUGIN_ROOT}/skills/adversarial-review/SKILL.md`.

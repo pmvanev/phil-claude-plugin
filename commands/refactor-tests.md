@@ -4,4 +4,4 @@ argument-hint: "[--review <path> | <file-path> | <test-id>]"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash, AskUserQuestion, TaskCreate, TaskUpdate
 ---
 
-Load and follow the instructions in the `refactor-tests` skill at `skills/refactor-tests/SKILL.md`.
+Load and follow the instructions in the `refactor-tests` skill at `${CLAUDE_PLUGIN_ROOT}/skills/refactor-tests/SKILL.md`.

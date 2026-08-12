@@ -32,8 +32,7 @@ The spine **never derives** what another component owns:
 
 | Needed at read-back | Owner | How obtained |
 |---|---|---|
-| Where an nWave feature stands | `/nw-continue` | Delegated, unmodified |
-| A slice's step state | `/phil:nwave-slice-status` | Delegated, unmodified |
+| Where an nWave feature stands — wave, slice, step | the `nwave-slice-status` skill | Delegated, unmodified |
 | A card's status and position | the forge, via `phil:issue-board` | Read at slice 03 |
 | The why, the next action, the entry-point, the claimed card | **nothing — this feature** | Recorded at capture |
 
@@ -86,14 +85,24 @@ reports `stale` rather than misleading the next session.
 
 ## Consequences
 
-- (+) No existing skill is modified for slice 01; `/phil:work`, `/nw-continue`, and
-  `/phil:nwave-slice-status` are composed unchanged.
+- (+) No existing skill is modified for slice 01; `/phil:work` and `/phil:nwave-slice-status` are
+  composed unchanged.
+
+**Correction (2026-08-12, found by the plugin-dev skill review).** This ADR originally listed
+`/nw-continue` as the delegate for "where an nWave feature stands". That was wrong and dangerous:
+`/nw-continue` computes the position and then *launches the next wave*, so a read-back delegating to
+it would start work. `skills/nwave-slice-status/SKILL.md` exists precisely because of that side
+effect — "Print the resume command as text. Never run it." The delegate is the read-only
+`nwave-slice-status` skill, and **read-only is now the stated selection criterion** for anything on
+the read-back path, not an incidental property.
 - (+) Derivable state has exactly one authority, satisfying anxiety B structurally rather than by
   discipline.
 - (+) The delegated derivation is what keeps the snapshot small — it records only what nothing else can.
 - (−) Two new commands on the plugin's surface.
-- (−) `continue.md` and `todo.md` are not subsumed and continue to rot. Out of scope per DISCUSS;
-  worth revisiting once the snapshot proves itself.
+- (−) `continue.md` and `todo.md` are not subsumed. Out of scope per DISCUSS; worth revisiting once
+  the snapshot proves itself. **Update 2026-08-12:** `continue.md` has since been retired to
+  `docs/evolution/2026-07-01-refactor-loop.md` — not subsumed, but no longer competing from the root.
+  `todo.md` still stands.
 - (−) Anxiety A is only mitigated, not closed, until the hook lands.
 - Open (→ DELIVER): slice 02 extends `skills/nwave-issue-board/SKILL.md` with the card-side routing
   line — the only planned edit to an existing skill, and its wave → command table must be verified

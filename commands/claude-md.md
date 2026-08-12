@@ -4,4 +4,4 @@ argument-hint: "<file-path | directory-path>"
 allowed-tools: Read, Edit, Glob, Grep
 ---
 
-Load and follow the instructions in the `claude-md` skill at `skills/claude-md/SKILL.md`.
+Load and follow the instructions in the `claude-md` skill at `${CLAUDE_PLUGIN_ROOT}/skills/claude-md/SKILL.md`.
