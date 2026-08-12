@@ -51,14 +51,24 @@ being drawn at the size of tasks rather than outcomes.
 An issue may end up in no goal. Leave it unassigned rather than inventing a home; unassigned is a
 visible state, and a wrong goal is not.
 
+**Say what that costs.** An unassigned issue drops out of the between-goals level entirely: only its
+position carries it, so when a new goal is added later its placement relative to that goal is
+arbitrary rather than ranked. That is usually the right trade against a false grouping — but it is a
+trade, and the user should hear it rather than discover it.
+
 ### 3. ORDER THE GOALS
 
 Ask which goal comes first, and why. The *why* is the deliverable here, not a nicety — it is what
 step 5 records.
 
-Turn the order into **due dates**, spaced far enough apart to be re-ordered later without collisions.
-Dates are a rank here, not a commitment; say that out loud, because a due date reads as a promise to
-anyone who did not sit in this conversation.
+Turn the order into **due dates**, spaced far enough apart to be re-ordered later without collisions
+— a month is ample. Dates are a rank here, not a commitment; say that out loud, and put it in the
+description too, because a due date reads as a promise to anyone who did not sit in this conversation.
+
+**Send midday, not midnight.** GitHub stores a milestone `due_on` of `T00:00:00Z` as the *previous*
+day — send `2026-09-15T00:00:00Z` and read back `2026-09-14`. `T12:00:00Z` stores the date you meant.
+Observed on both milestones of a real run, and corrected by re-sending at midday. It does not break
+the ranking, since every goal shifts equally, but a date read as a commitment is then a day wrong.
 
 ### 4. ORDER WITHIN EACH GOAL
 
@@ -123,6 +133,17 @@ Four failure modes, each of which reports success:
   after it. Write top-down, in one pass.
 - **Re-cutting the whole board** when a single issue arrives. That is the flat order the two-level
   scheme exists to avoid; give the new issue a goal and one position.
+
+## Known limit — deferred work has no outcome
+
+A deliberately deferred issue — parked pending evidence, not abandoned — has no expression here. Rank
+it and it sits in the queue saying "work me second"; leave it out and it falls off the board's order
+entirely. Neither is right, and the column's top is an instruction, so a deferred card ranked normally
+is a small lie about what is next.
+
+Surface the choice rather than picking silently: ask whether to rank it in place or leave it out, and
+say which failure each buys. A `DEFERRED` outcome that ranks an issue *within* its goal while marking
+it not-next would resolve this properly; it does not exist yet.
 
 ## Boundaries
 
