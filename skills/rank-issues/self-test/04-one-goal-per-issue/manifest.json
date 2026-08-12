@@ -1,0 +1,9 @@
+{
+  "fixture_id": "RANK-SELFTEST-04",
+  "situation": "Asked what goals the 8 issues serve, the user names 7 goals — nearly one per issue.",
+  "forge": "github",
+  "issue_count": 8,
+  "proposed_goal_count": 7,
+  "expected_decision": "MERGE-GOALS",
+  "expected_guard": "goals are outcomes, not tasks; one goal per issue is a rename, not a grouping"
+}

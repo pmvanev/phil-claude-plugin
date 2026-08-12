@@ -1,0 +1,9 @@
+{
+  "fixture_id": "RANK-SELFTEST-06",
+  "situation": "The board was ranked last week. One new issue has arrived and carries no milestone and no position.",
+  "forge": "github",
+  "board_already_ranked": true,
+  "new_issue": {"number": 13, "title": "issue-board: document the auto-close-on-Done workflow"},
+  "expected_decision": "INCREMENTAL-PLACE",
+  "expected_guard": "two levels exist so an arrival costs one goal assignment plus one position — never a re-cut of the whole board"
+}

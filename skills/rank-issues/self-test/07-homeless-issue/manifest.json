@@ -1,0 +1,9 @@
+{
+  "fixture_id": "RANK-SELFTEST-07",
+  "situation": "One issue matches none of the agreed goals. It is a real piece of work, just unrelated to the outcomes named.",
+  "forge": "github",
+  "issue": {"number": 4, "title": "Add rules/latex.md — LaTeX technical prose typesetting"},
+  "agreed_goals": ["Board tooling usable", "Code-quality rules"],
+  "expected_decision": "LEAVE-UNASSIGNED",
+  "expected_guard": "unassigned is a visible state; a wrong goal is not"
+}

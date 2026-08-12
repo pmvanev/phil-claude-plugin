@@ -1,0 +1,22 @@
+{
+  "fixture_id": "RANK-SELFTEST-01",
+  "situation": "A GitHub board with 7 open issues, none carrying a milestone and none with a set position. Two natural groupings are visible from the titles: board tooling, and code-quality rules.",
+  "forge": "github",
+  "issues": [
+    {"number": 5, "title": "New skill: groom issue content on a board"},
+    {"number": 8, "title": "New skill: guide the user through priority ranking"},
+    {"number": 12, "title": "session-handoff slice 03 — claimed-card link"},
+    {"number": 1, "title": "New skill: architecture cruft detector"},
+    {"number": 2, "title": "Add Humble Object pattern to rules/"},
+    {"number": 3, "title": "review-code: flag excessive nesting"},
+    {"number": 4, "title": "Add rules/latex.md"}
+  ],
+  "user_answers": {
+    "goals": {"Board tooling usable": [5, 8, 12], "Code-quality rules": [1, 2, 3, 4]},
+    "goal_order": ["Board tooling usable", "Code-quality rules"],
+    "goal_basis": "board tooling first — the board is re-cut by hand until ranking lands",
+    "within": {"Board tooling usable": [8, 5, 12], "Code-quality rules": [3, 2, 1, 4]}
+  },
+  "expected_decision": ["GROUP", "ORDER-DIRECT"],
+  "expected_guard": "the two-level scheme end to end: milestones with due dates, then positions written top-down in one pass"
+}

@@ -1,0 +1,9 @@
+{
+  "fixture_id": "RANK-SELFTEST-03",
+  "situation": "While ordering a goal, the user says issue 5 is pointless until issue 8 lands — it is not a preference, it is a hard precondition.",
+  "forge": "github",
+  "goal": "Board tooling usable",
+  "user_statement": "5 is pointless until 8 lands",
+  "expected_decision": "WRITE-DEPENDENCY",
+  "expected_guard": "a dependency is a fact the order cannot express; write the forge link AND the Chain reason, in addition to the position"
+}

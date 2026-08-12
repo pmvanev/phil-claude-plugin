@@ -1,0 +1,10 @@
+{
+  "fixture_id": "RANK-SELFTEST-02",
+  "situation": "The user has ordered one goal's four issues and explained why that goal ranks first. The session is now writing.",
+  "forge": "github",
+  "goal": "Board tooling usable",
+  "goal_basis": "unblocks ranking for everything else; the board is re-cut by hand until it lands",
+  "within_order": [8, 5, 12],
+  "expected_decision": "WRITE-BASIS-NOT-ORDER",
+  "expected_guard": "milestone description carries the reasoning only; the sequence lives in board position and nowhere else"
+}

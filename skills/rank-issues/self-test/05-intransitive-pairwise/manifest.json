@@ -1,0 +1,9 @@
+{
+  "fixture_id": "RANK-SELFTEST-05",
+  "situation": "The user could not order a goal's three issues directly, so the session fell back to pairwise. The answers contradict: A over B, B over C, C over A.",
+  "forge": "github",
+  "goal": "Code-quality rules",
+  "pairwise": [["A", "B", "A"], ["B", "C", "B"], ["C", "A", "C"]],
+  "expected_decision": "REGROUP-INTRANSITIVE",
+  "expected_guard": "do not average a contradiction; intransitivity means the goal holds work that is not comparable"
+}
