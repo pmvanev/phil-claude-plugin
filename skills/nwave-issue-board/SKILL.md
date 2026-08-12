@@ -1,6 +1,6 @@
 ---
 name: nwave-issue-board
-description: Use when an nWave feature needs to exist on a GitLab or GitHub board — putting a feature and its slices on the tracker, opening an issue per slice, ordering the slice cards so the board matches the roadmap, recording which wave a feature is in, refreshing the step table inside a slice's issue, or deciding what a feature, slice, and step each become in a forge. Covers only the mapping; `phil:issue-board` owns the forge mechanics and `phil:nwave-slice-status` owns the status.
+description: Use for any GitLab or GitHub board or tracker work in an nWave repo — one holding `.nwave/` or `docs/feature/` — including putting a feature and its slices on the tracker, opening an issue per slice, ordering the slice cards so the board matches the roadmap, recording which wave a feature is in, refreshing the step table inside a slice's issue, or deciding what a feature, slice, and step each become in a forge. Read this before `phil:issue-board` whenever those directories exist. Covers only the mapping; `phil:issue-board` owns the forge mechanics and `phil:nwave-slice-status` owns the status.
 ---
 
 # nWave Features on a Forge Board

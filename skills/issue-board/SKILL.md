@@ -5,12 +5,14 @@ description: Use when driving a GitLab or GitHub issue tracker or board from the
 
 # Driving GitLab and GitHub Issue Boards
 
+**Check the repo before touching the board.** If `.nwave/` or `docs/feature/` exists, load
+`phil:nwave-issue-board` first — it owns what a feature, a slice, and a step each become, and it
+sends you back here for the mechanics. Acting from this skill alone in an nWave repo mints the
+wrong objects: an issue per step instead of per slice, and no feature parent to hang them on.
+
 Both forges are driven from the command line: `glab` for GitLab, `gh` for GitHub. Prefer the CLI
 over an MCP server — the commands are auditable in the transcript, credentials stay in each tool's
 own store, and no extra configuration is needed.
-
-In an **nWave** repo, `phil:nwave-issue-board` maps features, slices, and steps onto the objects
-below. This skill stays generic; that one holds the mapping.
 
 Check `gh --version` and `glab --version` against the latest upstream release before trusting board
 behavior. Some distribution channels lag badly — Ubuntu's universe repository shipped `gh` 2.46
