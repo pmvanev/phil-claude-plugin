@@ -209,8 +209,41 @@ trusting either)*. On GitLab, `glab issue list --order` also offers field-derive
 as new issues arrive, where a hand-set position does not. Which of those fields your tier populates
 is a tier question; see *Find the tier before choosing a convention*.
 
-Without a board there is no position to set. Carry the order in a milestone, or in a checklist in
-one tracking issue, and say which one is authoritative.
+Without a board there is no position to set. Carry the order in a checklist in one tracking issue,
+and say which one is authoritative.
+
+### A milestone is a goal, and its due date is the only order that survives
+
+**One issue carries at most one milestone.** Verified on `glab` 1.112.0 (*"Set to `""` or 0 to
+unassign"*) and `gh` 2.97.0 (`--milestone` singular, plus `--remove-milestone`). That slot is spent
+once, so what it means is a real decision — and the decision is: **a milestone is a goal**, on both
+forges alike.
+
+That buys the one thing hand-set position cannot give: an order that **survives new issues arriving**.
+
+| Level | Ordered by | Survives new arrivals? |
+|---|---|---|
+| Between goals | milestone **due date** (`--due-date`, ISO 8601, on both CLIs) | **yes** |
+| Within a goal | hand-set position | no — needs a re-rank, but only inside one goal |
+
+A new issue then needs a goal (coarse, cheap) and a position inside it, instead of a re-cut of one
+flat total order across the whole backlog.
+
+**Why a goal and not a feature.** Grouping issues by feature is the obvious alternative and it is the
+wrong trade. On GitHub, native sub-issues already give a feature its roster and its rollup, so the
+slot buys nothing. On GitLab it does buy a roster — but at the price of the only durable cross-issue
+ordering the forge offers, and a stale roster is a smaller problem than an unrankable backlog.
+
+**Same meaning on both forges.** A milestone that means "goal" on one and "feature" on the other is a
+word that has to be re-explained at every boundary, in a skill already carrying two forges'
+conventions. Accept the redundancy on GitHub rather than the divergence.
+
+Three limits worth stating before anyone builds on it:
+
+- **Milestones do not nest.** One level of goal, and no sub-goals.
+- **A milestone gives no order *within* itself.** It groups; ranking inside a goal is still position.
+- **Not Premium-gated** — verified against a self-hosted 18.x instance, which is what makes this
+  usable on Free where epics are not.
 
 ## Link what the forge cannot resolve
 
@@ -349,9 +382,13 @@ percentage, not a count of finished children. It answers, and the answer is unre
 
 The asymmetry decides the design: **GitHub's parent rollup counts things that are cards; GitLab's
 stable parent rollup counts things that are not.** A GitLab parent whose children must also cross
-board columns has no project-scoped, non-experimental count of them. Group those children under a
-**milestone** instead — the one GitLab rollup that is both stable and counts real issues — at the
-cost of grouping by milestone rather than by parent, and of one milestone per parent.
+board columns has no project-scoped, non-experimental count of them.
+
+A milestone is the one GitLab rollup that is both stable and counts real issues, so grouping those
+children under one *would* buy the count — but **do not**. The milestone slot is singular and is
+spent on the goal (see *A milestone is a goal*), and trading the backlog's only durable ordering for
+a progress bar is a bad exchange. Accept that GitLab has no reliable feature-level count, and read
+the children's live states instead of a summed one.
 
 ## Leave a chain when you pivot
 

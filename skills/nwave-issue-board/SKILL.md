@@ -72,9 +72,11 @@ the mechanism is real, and `phil:issue-board` records it under *A parent's "N of
 different things on each forge*. But a checkbox is ticked by hand while a slice issue closes on its
 own, so the two diverge the first time anyone forgets, and what the feature displays is the state of
 the checkboxes, not the state of the work. Leave the roster as bare references: they render each
-slice's live state, and an unsummed column of true states beats a summed count of stale ones. Where a
-feature-level bar is genuinely wanted, put the slice issues in a **milestone** named for the feature;
-what that buys and what it costs are in `phil:issue-board`, in the same section.
+slice's live state, and an unsummed column of true states beats a summed count of stale ones. A milestone named for the feature *would* buy the bar, and
+**that option is closed**: the one milestone an issue can carry is spent on the goal, per
+`phil:issue-board` under *A milestone is a goal*. A feature gets no reliable completion count on
+GitLab, and the honest response is to read the slices' live states rather than manufacture a summed
+one.
 
 ## Wave is a fact about the feature, not a column
 
