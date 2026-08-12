@@ -5,6 +5,11 @@ __pycache__/
 # Refactor-loop runtime artifact (created in target repos, never committed)
 .refactor-loop-ledger.md
 
+# Session-handoff runtime artifact (per-session resume point; ephemeral, never committed —
+# ADR-013: concurrent sessions would collide, and committing dirties the tree its own
+# fingerprint reads)
+.session-handoff.md
+
 # nWave runtime logs
 .nwave/**/logs/
 

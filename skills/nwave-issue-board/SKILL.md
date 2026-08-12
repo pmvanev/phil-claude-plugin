@@ -136,6 +136,12 @@ forge, because the forge copy has the widest audience:
   recorded something no artifact contains. A refresh that replaces it with a derived value reports
   success while destroying the only record of why work stopped. Preserve it and note the derived
   state beside it.
+- **A human-set state that contradicts what the artifacts own is replaced — and the replacement is
+  recorded.** The discriminator is the same one, read the other way: *awaiting input* adds something
+  no artifact can hold, while a hand-typed `done` overwrites something they do. Publish the derived
+  value, and note in `Notes` that a hand-set value was replaced and what it said. This disagreement
+  is between the forge and the artifacts, so `nwave-slice-status` cannot see it and will not record
+  it — written here or written nowhere.
 
 ## Generate into a delimited block
 
@@ -178,6 +184,10 @@ step ids at all. Do not invent them.
    `slices/slice-NN-*.md` exists and attach them to the parent. Before that, say the roster is not
    yet known.
 2. **After `/nw-roadmap`** — generate each slice issue's step table.
+
+A slice issue opened in stage 1 **says that its step table arrives with the roadmap**. An issue
+carrying neither a table nor that line reads as a slice with no steps, which is the same false
+impression the invented rows would have given, arrived at by omission.
 
 A slice file marked `DEFERRED` or out of scope is not a card. Honor the marker; `nwave-slice-status`
 treats it as overriding every other source.

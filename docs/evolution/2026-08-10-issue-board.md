@@ -320,6 +320,28 @@ field names in this skill, and the prose it shipped alongside named `MilestoneSt
 caught the skill it was written for, in the same commit — which is the delegation boundary working,
 one draft later than it should have.
 
+### Driving the suite turned up two pre-existing gaps
+
+All fifteen fixtures produce the correct decision. Two failed on a *checkable assertion* rather than
+on the outcome, both predating this change, and both the same shape: a disclosure the skill implies
+but never requires.
+
+`07` asserts that a slice issue opened before `/nw-roadmap` says its step table arrives with the
+roadmap. *Fill in two stages* forbade inventing rows and deferred the table, but never required the
+line — so an issue reached the same false impression as invented rows would have, by omission.
+
+`11` is the more interesting one, and it is a hole in the 04/11 pair the suite calls its sharpest.
+The fixture asserts the forge-versus-artifacts disagreement is surfaced. *Generate into a delimited
+block* does name `Notes` as where disagreeing sources go — but `nwave-slice-status` populates `Notes`
+and never reads the forge, so the one disagreement only this skill can observe was the one nothing
+instructed it to write down. `04` had its disclosure rule from the start; its deliberate opposite did
+not. Both are now stated as one rule read in two directions, sharing the discriminator explicitly:
+*awaiting input* adds what no artifact can hold, a hand-typed `done` overwrites what they do.
+
+The gaps are evidence for the suite rather than against it — both sat under passing outcomes, and
+neither surfaced until the assertions were read one at a time. The grader was also the author, which
+is the standing weakness of driving this suite at all.
+
 ## Follow-ups
 
 - `plugin-dev:skill-reviewer` raised ~30 medium/low findings across today's three skills that were
