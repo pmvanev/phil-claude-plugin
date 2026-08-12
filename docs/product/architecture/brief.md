@@ -369,6 +369,49 @@ graph TB
     Agent -. "typed verdict contract — documented, unwired" .-> Compose["hosts / workflows (future)"]
 ```
 
+### session-handoff
+
+Two new commands — `/phil:handoff` and `/phil:resume` — over one new `skills/session-handoff/SKILL.md`,
+carrying work across the **session boundary**. It is the continuity sibling to `phil:work`: `phil:work`
+owns discipline *within* an initiative, session-handoff owns continuity *across* the boundary that cuts
+through it, for nWave features, `phil:work` initiatives, and ad-hoc sessions alike.
+
+**Status:** DESIGNED (2026-08-12) — not yet implemented. DISCUSS + DESIGN complete;
+`docs/feature/session-handoff/feature-delta.md` holds the full record, and three slice briefs live in
+`docs/feature/session-handoff/slices/`. Board: #9 (feature) with slices #11, #10, #12.
+
+**Pattern:** modular prose skill, ports-and-adapters (the `refactor-tests` → `phil-work` → `edd-loop`
+→ `adversarial-review` lineage). No paradigm declared — the deliverable is prose with Bash adapters.
+
+**The design axis (DISCUSS):** five categories of lost state, sorted by whether a fresh session can
+derive them unaided. The *why* and the *how* are unrecoverable by any reconstruction because they were
+never artifacts; the *where* is already owned by `/nw-continue` and `/phil:nwave-slice-status`. The
+snapshot therefore records **only the unrecoverable** and delegates the rest (DDD-5, C8) — which makes
+"two authorities over one fact" structurally impossible rather than a matter of discipline.
+
+**Snapshot surface (ADR-013):** a git-ignored root dotfile, `.session-handoff.md`, reusing the
+`.refactor-loop-ledger.md` convention. This deliberately breaks ADR-006/ADR-009's committed lean: a
+per-initiative trail has one writer, a per-session snapshot has concurrent ones, and committing it
+would convert a concurrency problem into a merge conflict on the resume path while dirtying the tree
+its own fingerprint reads.
+
+**Safety oracle:** the **staleness verdict** (C1). Read-back computes `current`/`stale` from a tree
+fingerprint and states it *before* any resume content. A confidently-followed stale snapshot is the
+worst available outcome and is the observed failure of the repo's hand-written `continue.md`.
+
+**Reuse (ADR-014):** CREATE NEW spine; `/phil:work`, `/nw-continue`, and `/phil:nwave-slice-status`
+composed **unchanged**. The single CREATE NEW is justified on coupling — extending `phil:work`'s
+`progress.md` would make it own continuity for work it never launched — plus coverage arithmetic, since
+only `phil:work` initiatives have a `progress.md` at all.
+
+**v1 boundaries:** capture is explicitly invoked (the `Stop` hook is deferred until a SPIKE shows a hook
+can see the *why*); competing session claims are **detected, not resolved**; `continue.md` and `todo.md`
+are not subsumed. Slice 02 extends `skills/nwave-issue-board/SKILL.md` with a card-side routing line —
+the only planned edit to an existing skill.
+
+C4 System Context and Container diagrams: `docs/feature/session-handoff/feature-delta.md`
+(`## Wave: DESIGN / [REF] C4 — …`).
+
 ### ADRs
 
 - [ADR-001](adr-001-refactor-tests-reuse-boundaries.md) — refactor-tests: new command + reuse boundaries.
@@ -383,3 +426,5 @@ graph TB
 - [ADR-010](adr-010-adversarial-review-substrate-agent-as-reusable-unit.md) — adversarial-review: prose spine + agent-as-reusable-unit; standalone-only v1, composition documented not wired.
 - [ADR-011](adr-011-adversarial-review-hard-soft-oracle-honesty-label.md) — adversarial-review: hard/soft split generalized to prose oracles; mechanical `sound-gate`/`draft-signal` honesty label.
 - [ADR-012](adr-012-adversarial-review-adversary-judge-separation.md) — adversarial-review: separate the adversary from the judge (builder → adversary → judge triple); independent per-finding verification.
+- [ADR-013](adr-013-session-handoff-snapshot-surface.md) — session-handoff: snapshot is a git-ignored root-dotfile runtime artifact; breaks ADR-006/009's committed lean because a per-session snapshot has concurrent writers.
+- [ADR-014](adr-014-session-handoff-reuse-boundaries-delegated-derivation.md) — session-handoff: CREATE NEW spine with delegated derivation; two commands; hook deferred behind a payload-visibility SPIKE.

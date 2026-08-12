@@ -1,6 +1,6 @@
 # Feature Delta — session-handoff
 
-Forge: pmvanev/phil-claude-plugin#9 · Wave: DISCUSS (entered 2026-08-12)
+Forge: pmvanev/phil-claude-plugin#9 · Waves: DISCUSS ✓ · DESIGN ✓ (both 2026-08-12)
 Density: lean + ask-intelligent (`~/.nwave/global-config.json`)
 Rendered Tier-2 expansion: `alternatives-considered` [WHY] — accepted 2026-08-12, trigger:
 cross-context complexity (5 bounded contexts, threshold ≥3). Recorded here because this repo has no
@@ -481,3 +481,202 @@ Three mechanism questions are deliberately left open and are DESIGN's to settle:
 01 is specified so that none of them blocks the walking skeleton. Separately, the wave → command table
 in slice 02 is assembled from command descriptions and **must be verified against a run** before it is
 written into a skill.
+
+---
+
+# Wave: DESIGN (entered 2026-08-12)
+
+Scope: application / components · Mode: propose · Architect lens: `nw-solution-architect`
+(worked inline rather than dispatched as a subagent, at the user's standing instruction).
+
+## Wave: DESIGN / [REF] DDD list
+
+- **[DDD-1]** Snapshot surface = **a git-ignored root dotfile, `.session-handoff.md`**. Reuses the
+  `.refactor-loop-ledger.md` convention. Deliberately breaks ADR-006/ADR-009's committed lean, because
+  a per-session snapshot has concurrent writers where a per-initiative trail has one. → ADR-013
+- **[DDD-2]** Trigger = **explicit command in v1; `Stop`/`SessionEnd` hook deferred past slice 01**.
+  Hook infrastructure already fires in this plugin; what is unproven is whether a hook can see the
+  *why*. → ADR-014
+- **[DDD-3]** Topology = **two commands**, `/phil:handoff` and `/phil:resume`. Capture and read-back
+  happen at opposite ends of a session with opposite effects; a single command would need an implicit
+  disambiguation rule, and implicit state is what this feature exists to remove. → ADR-014
+- **[DDD-4]** Reuse = **CREATE NEW spine, REUSE by delegation**. `/phil:work`, `/nw-continue`, and
+  `/phil:nwave-slice-status` are composed unchanged. → ADR-014
+- **[DDD-5]** The spine **never derives** what another component owns. The snapshot records only the
+  unrecoverable; everything else is fetched from its owner at read-back. This makes DISCUSS anxiety B
+  structural rather than a matter of discipline.
+- **[DDD-6]** Pattern = **modular prose skill, ports-and-adapters** — the lineage of every prior
+  feature here (`refactor-tests` → `phil-work` → `edd-loop` → `adversarial-review`).
+- **[DDD-7]** Paradigm = **not declared**. The deliverable is prose (skill + commands) with Bash
+  adapters. No prior feature wrote a `## Development Paradigm` section to `CLAUDE.md`, and this one
+  gives no reason to start.
+
+## Wave: DESIGN / [REF] Component decomposition
+
+| Component | Path | Change |
+|---|---|---|
+| Capture command | `commands/handoff.md` | **CREATE NEW** — thin loader |
+| Read-back command | `commands/resume.md` | **CREATE NEW** — thin loader |
+| Spine | `skills/session-handoff/SKILL.md` | **CREATE NEW** — WIND-DOWN · CAPTURE · BOOTSTRAP · ROUTE · RESUME |
+| Regression gate | `skills/session-handoff/self-test/` | **CREATE NEW** — fixtures, incl. the KPI-3/4/5 hard zeros |
+| Runtime artifact | `.session-handoff.md` (repo root) | **CREATE NEW** — git-ignored, per ADR-013 |
+| Ignore rule | `.gitignore` | **EXTEND** — one line, beside `.refactor-loop-ledger.md` |
+| Card-side routing line | `skills/nwave-issue-board/SKILL.md` | **EXTEND** — slice 02 only; the sole planned edit to an existing skill |
+| Session-end automation | `hooks/hooks.json` | **EXTEND — DEFERRED** past slice 01, gated on the SPIKE |
+
+## Wave: DESIGN / [REF] Driving ports
+
+| Port | Surface | Slice |
+|---|---|---|
+| `/phil:handoff` | Slash command — capture at wind-down | 01 |
+| `/phil:resume` | Slash command — read back at session start | 01 |
+| `Stop` / `SessionEnd` hook | Lifecycle event — automatic capture | deferred, post-SPIKE |
+
+## Wave: DESIGN / [REF] Driven ports and adapters
+
+| Driven port | Adapter | Notes |
+|---|---|---|
+| Snapshot store | Filesystem via Bash — `.session-handoff.md` | Real local resource; WS strategy C |
+| Tree fingerprint | `git rev-parse HEAD` + porcelain dirty-state, via Bash | The staleness oracle (C1) |
+| nWave feature position | **Delegate** `/nw-continue` | Unmodified; owns the *where* |
+| Slice step state | **Delegate** `/phil:nwave-slice-status` | Unmodified; read-only by design |
+| Entry-point resolution | Wave label on the feature issue, via `phil:nwave-issue-board` | Slice 02; live label beats recorded |
+| Claimed card | Forge read via `gh`, per `phil:issue-board` | Slice 03; external dependency → WS strategy B if pulled earlier |
+
+## Wave: DESIGN / [REF] Technology choices
+
+| Choice | Pin | Rationale |
+|---|---|---|
+| Substrate | Prose skill + thin command loaders (markdown) | The plugin's established shape; no runtime added |
+| Adapters | Bash (git, filesystem) | Real local resources per Mandate 5's table |
+| Forge client | `gh` 2.97.0 | Already the plugin's verified client; slices 02–03 only |
+| Hooks | Python, `hooks/hooks.json` | Matches the existing `refactor-loop` G2 guard; deferred |
+| Snapshot format | Markdown with a delimited, machine-readable header | Human-readable at rest; fingerprint parseable without a parser dependency |
+
+## Wave: DESIGN / [REF] Reuse Analysis
+
+Hard gate. Every component with overlapping responsibility, classified.
+
+| Existing component | File | Overlap | Decision | Justification |
+|---|---|---|---|---|
+| `/phil:work` no-arg resume | `skills/work/SKILL.md:48` | Resumes an interrupted multi-step run from `progress.md` | **CREATE NEW** | Coupling, not complexity: extending it makes `phil:work` own continuity for nWave and ad-hoc work it never launched, inverting ADR-005's delegate-and-inherit arrow. Coverage settles it independently — only `phil:work` initiatives have a `progress.md`, so extending covers ~⅓ of cases and still needs a second mechanism, which is anxiety B. Pattern reused, component not. |
+| `/nw-continue` | nWave skill | Reconstructs an nWave feature's position from artifacts | **REUSE (delegate)** | Owns the *where*. Delegated unmodified; re-deriving it here would create the second authority DDD-5 forbids. |
+| `/phil:nwave-slice-status` | `skills/nwave-slice-status/SKILL.md` | Derives a slice's step state | **REUSE (delegate)** | Same rule `nwave-issue-board` already follows: never derive a status, ask its owner. |
+| `phil:nwave-issue-board` generated block | `skills/nwave-issue-board/SKILL.md` | Publishes per-feature state to a card | **EXTEND** | Slice 02's routing line belongs inside the existing delimited, timestamped block — it inherits generated-not-typed, so it cannot drift. ~1 line + 1 fixture versus a new publishing path. |
+| `phil:issue-board` | `skills/issue-board/SKILL.md` | Forge mechanics, card status and position | **REUSE (unchanged)** | Already the mechanics owner; slice 03 reads through it. |
+| `.refactor-loop-ledger.md` | `.gitignore` | Git-ignored root-dotfile runtime artifact | **REUSE (convention)** | ADR-013 adopts this exact shape rather than minting a fourth `docs/*/` namespace. |
+| `hooks/hooks.json` `Stop` entry | `hooks/hooks.json` | Session-end triggering | **EXTEND (deferred)** | Infrastructure proven and firing; the open question is payload visibility, not mechanism. |
+| `continue.md`, `todo.md` | repo root | Hand-written resume notes | **NEITHER** | Artifacts, not components — they are the failure being replaced. Subsuming them is out of scope per DISCUSS. |
+
+Zero unjustified CREATE NEW decisions. The single CREATE NEW carries a coupling argument plus
+independent coverage arithmetic, per the gate's evidence standard.
+
+## Wave: DESIGN / [REF] C4 — System Context
+
+```mermaid
+graph TB
+    Kai["Kai — session relay<br/>(ends a session, resumes in the next)"]
+    SH["session-handoff<br/>(/phil:handoff · /phil:resume)"]
+    Snap[(".session-handoff.md<br/>git-ignored runtime artifact")]
+    Git[("git repository<br/>(tree fingerprint)")]
+    Delegates["Derivation delegates<br/>(/nw-continue · /phil:nwave-slice-status)"]
+    Forge["Forge board<br/>(wave label · claimed card)"]
+
+    Kai -->|"runs /phil:handoff at wind-down"| SH
+    Kai -->|"runs /phil:resume in a fresh session"| SH
+    SH -->|"writes why · next · entry-point · card"| Snap
+    SH -->|"stamps + checks fingerprint"| Git
+    SH -->|"asks for the WHERE — never derives it"| Delegates
+    SH -->|"reads wave label (02) · claimed card (03)"| Forge
+    SH -->|"verdict: current | stale, before any briefing"| Kai
+    SH -->|"names the owning command and invokes it"| Kai
+```
+
+## Wave: DESIGN / [REF] C4 — Container
+
+```mermaid
+graph TB
+    subgraph plugin["phil plugin"]
+        CmdH["commands/handoff.md<br/>(thin loader)"]
+        CmdR["commands/resume.md<br/>(thin loader)"]
+        Skill["skills/session-handoff/SKILL.md<br/>(spine: WIND-DOWN · CAPTURE · BOOTSTRAP · ROUTE · RESUME)"]
+        SelfTest["skills/session-handoff/self-test/<br/>(regression gate — KPI-3/4/5 hard zeros)"]
+        NIB["skills/nwave-issue-board/SKILL.md<br/>(EXTEND — routing line, slice 02)"]
+        IB["skills/issue-board/SKILL.md<br/>(REUSE — forge mechanics)"]
+        SS["skills/nwave-slice-status/SKILL.md<br/>(REUSE — delegate)"]
+        Hook["hooks/hooks.json<br/>(EXTEND — DEFERRED, post-SPIKE)"]
+    end
+    Snap[(".session-handoff.md")]
+    Git[("git")]
+    NC["/nw-continue<br/>(REUSE — delegate, nWave)"]
+    Forge["Forge (gh)"]
+
+    CmdH --> Skill
+    CmdR --> Skill
+    Skill -->|"CAPTURE: write unrecoverable state only"| Snap
+    Skill -->|"BOOTSTRAP: read + fingerprint check"| Snap
+    Skill -->|"fingerprint stamp / compare"| Git
+    Skill -->|"the WHERE"| NC
+    Skill -->|"step state"| SS
+    Skill -->|"ROUTE: wave label → owning command"| NIB
+    NIB --> IB
+    Skill -->|"claimed card (slice 03)"| IB
+    IB --> Forge
+    Skill -. "deferred automatic capture" .-> Hook
+    Skill -. "changed when skill changes" .-> SelfTest
+```
+
+## Wave: DESIGN / [REF] Decisions table
+
+| # | Decision | ADR |
+|---|---|---|
+| DDD-1 | Snapshot surface = git-ignored root dotfile `.session-handoff.md` | ADR-013 |
+| DDD-2 | Trigger = explicit command in v1; hook deferred past slice 01 | ADR-014 |
+| DDD-3 | Topology = two commands | ADR-014 |
+| DDD-4 | CREATE NEW spine; REUSE by delegation | ADR-014 |
+| DDD-5 | The spine never derives what another component owns | ADR-014 |
+| DDD-6 | Modular prose skill, ports-and-adapters | — (plugin lineage) |
+| DDD-7 | Paradigm not declared | — (precedent) |
+
+## Wave: DESIGN / [REF] Open questions
+
+Deferred deliberately, with the wave that owns each.
+
+- **→ DISTILL** — WS adapter strategy confirmation. DDD-1 keeps the forge out of slice 01, so the read
+  is **Strategy C (real local)**; Mandate 5 makes this DISTILL's auto-detected call with user
+  confirmation, not DESIGN's ruling.
+- **→ DELIVER** — per-repo versus per-worktree snapshot. `EnterWorktree` and workflow isolation can put
+  several trees on one initiative; ADR-013 records this unresolved.
+- **→ DELIVER** — the wave → command table in slice 02 is assembled from command descriptions and
+  **must be verified against a run** before it is written into a skill.
+- **→ DELIVER** — snapshot schema detail: exactly which fields are structured versus prose. The
+  constraint is fixed (record only the unrecoverable); the encoding is not.
+- **Carried, unowned** — cards with **no** wave label. Slice 02 covers only the wave-labelled case,
+  and most cards on this board are not nWave work. This is the DISCUSS requirements-level gap, still
+  open after DESIGN.
+- **Vacuous gate** — the Outcome Collision Check exited 0 against an empty registry
+  (`docs/product/outcomes/registry.yaml` does not exist). Passing on zero outcomes is not evidence of
+  no collision, and is recorded as such rather than as a clean gate.
+
+## Wave: DESIGN / [REF] Wave decisions summary
+
+### Architecture summary
+
+- **Pattern:** modular prose skill, ports-and-adapters
+- **Paradigm:** not declared (prose-first deliverable)
+- **Key components:** `skills/session-handoff/SKILL.md` spine · two thin command loaders ·
+  `.session-handoff.md` runtime artifact · self-test regression gate
+
+### Constraints established
+
+- **C7 — The snapshot is never committed.** It is runtime state; committing it converts a concurrency
+  problem into a merge conflict on the resume path, and dirties the tree its own fingerprint reads.
+- **C8 — Nothing derivable is recorded.** Every fact with an owner is fetched from that owner at
+  read-back. This is anxiety B made structural.
+- **C9 — No existing skill changes in slice 01.** `nwave-issue-board` is extended in slice 02 and
+  nothing else is touched.
+
+### Upstream changes
+
+None. DESIGN settled the three questions DISCUSS deferred without altering any DISCUSS assumption;
+all three were recorded as open rather than as decisions, so no back-propagation is required.
