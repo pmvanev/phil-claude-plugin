@@ -41,4 +41,12 @@ artifacts already own.
   and that order is authoritative: the top Todo card is what to work on next.
 - Docs root for absolute links (GitHub emits relative paths verbatim and they 404):
   `https://github.com/pmvanev/phil-claude-plugin/blob/main/`
+- **Label families.** `wave: *` is **single-valued — swap, never add** (`phil:nwave-issue-board`).
+  GitHub has no scoped labels, so nothing enforces it: a feature walked DISCUSS→DELIVER accumulates
+  four wave labels and the record of where it stands becomes unreadable while every command reported
+  success. `bug` · `documentation` · `enhancement` are **multi-valued by decision, not by neglect** —
+  this plugin's product is prose, so `documentation` names a surface, never a kind of work that could
+  compete with `enhancement`. The two answer different questions, so a card carrying both (#2, #4) is
+  correct. This bullet is the declaration `phil:groom-issues` rule 4 reads; label descriptions may
+  echo it and lose on disagreement.
 - Forge mechanics: `phil:issue-board`. nWave feature/slice/step mapping: `phil:nwave-issue-board`.
