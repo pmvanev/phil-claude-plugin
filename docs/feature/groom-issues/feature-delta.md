@@ -88,10 +88,17 @@ downstream rests on nothing. It is also read-only, so a failed bet costs nothing
 
 | Port | Surface | Slice |
 |---|---|---|
-| `/phil:groom-issues` | Slash command — the whole session | 01 |
+| `/phil:groom-issues` | Slash command — scan and report, holds no write tool | 01 |
+| `/phil:groom-fix` | Slash command — applies the mechanical column inside a chosen scope | 02 |
+| `/phil:groom-set` | Slash command — resolves merge, split, close and group, asking before each | 03 |
 
-One port. Scoping and every judgement call happen inside the session via the human-approval port
-(`AskUserQuestion`), not as separate commands.
+**Revised at slice 02, and again at 03.** DISCUSS planned one port, on the reasoning that scoping and
+every judgement call happen inside the session through `AskUserQuestion` rather than as separate
+commands. That held for the *decisions* and failed for the *tools*: a single command must carry every
+write tool the feature will ever need, which destroys the scan's read-only guarantee (slice 02) and puts
+a reversible label edit behind the same consent as an irreversible close (slice 03). The judgement calls
+are still made in-session by `AskUserQuestion`; what the extra ports buy is that the tools a command
+lacks are unreachable from it. Three ports, each holding the narrowest grant its job needs.
 
 ## Wave: DISCUSS / [REF] Journey
 

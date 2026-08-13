@@ -1,0 +1,13 @@
+{
+  "fixture_id": "GROOM-SELFTEST-22",
+  "situation": "The run opens with three candidates. Candidate 1 is a merge of #9 into #34, approved and applied. Candidate 3 was derived from the same scan and proposes that #9 is oversized and should be split.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "candidates": [
+    {"class": "duplicate", "pair": [9, 34], "resolved": "merged into #34, #9 closed"},
+    {"class": "ungrouped", "issue": 20},
+    {"class": "oversized", "issue": 9}
+  ],
+  "expected_decision": "REDERIVE-BETWEEN",
+  "expected_guard": "an apply changes the set the remaining candidates were computed over; candidate 3's subject no longer exists"
+}

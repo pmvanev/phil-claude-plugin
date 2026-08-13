@@ -1,0 +1,11 @@
+{
+  "fixture_id": "GROOM-SELFTEST-23",
+  "situation": "MEASURED on this repo's board, 2026-08-13. Thirteen open issues, eleven carrying a milestone. The two without one are #4 (add rules/latex.md) and #20 (a command to clean widows and orphans in a rendered LaTeX PDF) — the same effort, and the only two cards on the board that are about typesetting. The three existing milestones are 'Board and session tooling', 'The plugin checks what it claims' and 'Sharper code review'; none of them is that goal.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "candidate": {"class": "ungrouped", "issues": [4, 20]},
+  "existing_milestones": ["Board and session tooling", "The plugin checks what it claims", "Sharper code review"],
+  "fitting_container": null,
+  "expected_decision": "ASK-SET-LEVEL",
+  "expected_guard": "joining an existing container and creating a new one are different questions; this command cannot create a milestone and must not simulate one"
+}

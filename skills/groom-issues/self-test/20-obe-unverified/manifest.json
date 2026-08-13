@@ -1,0 +1,10 @@
+{
+  "fixture_id": "GROOM-SELFTEST-20",
+  "situation": "#26 asks for a validator. #38's body says 'the validator landed in the DELIVER wave, so this is now just wiring'. Nothing else on the board mentions it. The repository has no commit and no file matching the validator.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "candidate": {"class": "overcome-by-events", "issue": 26, "evidence_source": "another issue's body (#38)"},
+  "repository_check": {"git log": "no matching commit", "tree": "no matching file"},
+  "expected_decision": "REFUSE-UNVERIFIED",
+  "expected_guard": "board prose is not evidence that work landed; the claim is settled in the repository or it is not settled"
+}

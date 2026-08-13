@@ -1,6 +1,6 @@
 ---
 name: groom-issues
-description: Skill bundle for the phil:groom-issues command — reads a whole issue board in one call per forge and reports what is wrong with it, against a stated standard for what a well-formed issue contains. Derives the defect table fresh every run, stores no grooming marker, surfaces cross-issue candidates without acting on them, and changes nothing.
+description: Skill bundle for the phil:groom-issues, phil:groom-fix and phil:groom-set commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, and resolves the defects between issues (merge, split, close, group) by asking before each one. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
 ---
 
 # Groom issues — say what is wrong with a board
@@ -8,14 +8,21 @@ description: Skill bundle for the phil:groom-issues command — reads a whole is
 A board accumulates cards that someone filed half-finished. Reading them one at a time finds the
 sloppy ones and misses the expensive ones, because the costly defects live *between* issues.
 
-**Two commands, and the split between them is the guarantee.** `/phil:groom-issues` reads and reports —
-it holds no write tool at all, so read-only is enforced rather than declared. `/phil:groom-fix` applies
-the mechanical column inside a scope the user picks. Merging, splitting, closing and grouping are slice
-03 and are never applied unasked. Do not improvise either.
+**Three commands, and the splits between them are the guarantee.** `/phil:groom-issues` reads and
+reports — it holds no write tool at all, so read-only is enforced rather than declared.
+`/phil:groom-fix` applies the mechanical column inside a scope the user picks, and can change no card's
+existence. `/phil:groom-set` resolves the defects between issues — merge, split, close, group — and asks
+before every one. Do not improvise any of them.
 
-The split is not tidiness. A single command carrying the report in context is the design where a write
+The splits are not tidiness. A single command carrying the report in context is the design where a write
 gets computed against remembered text instead of read text, and where read-only holds only as long as
 nobody adds a tool. Separating them makes the re-read structural and the guarantee mechanical.
+
+They also separate two different blast radii. `/phil:groom-fix` edits bodies and labels; every change it
+makes is one edit to undo. `/phil:groom-set` changes **which cards exist** — a merge closes one, a split
+creates several, and neither reverses cleanly. Handing both to one command would put the reversible and
+the irreversible behind the same consent, and the reversible ones are far more numerous, so the habit
+formed on them is the habit carried into the others.
 
 **REQUIRED BACKGROUND: `phil:issue-board`.** Every forge mechanic — `-R` targeting, label semantics,
 absolute-URL rules, dependency links, generated blocks — lives there. Do not guess any of it here.
@@ -212,10 +219,10 @@ and its fixes need no question, but this is not a bulk fixer. Its value is catch
 author just made, and a design that assumes a full queue will build ceremony the population cannot
 justify.
 
-## Cross-issue candidates — surface, never act
+## Cross-issue candidates — the scan surfaces, never acts
 
-These cannot be found by reading one issue, which is why the scan is whole-board. Report each with
-its evidence and stop; every one is expensive to undo and belongs to slice 03.
+These cannot be found by reading one issue, which is why the scan is whole-board. `/phil:groom-issues`
+reports each with its evidence and stops; resolving them is `/phil:groom-set`, and is ask-first there.
 
 - **Duplicates** — quote the overlapping content from both. Partial overlap is the real case and is
   not automatically a merge; it may be a split or a dependency.
@@ -223,6 +230,128 @@ its evidence and stop; every one is expensive to undo and belongs to slice 03.
 - **Overcome by events** — the work landed another way, or the decision behind it was reversed.
 - **Ungrouped effort** — a card belonging to a larger effort that says so nowhere. A milestone is a
   goal (`phil:issue-board`); do not invent a second convention.
+
+## Resolving the set-level candidates — `/phil:groom-set`
+
+The four above are the only operations here, and each asks. What follows is what the question has to
+contain to be answerable, and what the apply owes afterwards.
+
+**The ask must have the same arity as the finding.** This is the rule the whole step turns on. Two
+issues that overlap in part are not a yes-or-no about merging: they may be a merge, a split along the
+seam, a dependency edge, or two cards that happen to share a mechanism and should stay apart. Offering
+*merge? y/n* over that finding forces a wrong answer, because the true answer was never on the menu —
+and a declined merge then reads as *these are unrelated*, which is a third thing that was also never
+asked. Present the outcomes the evidence actually admits, and let *leave them alone* be one of them.
+
+**Evidence is quoted, not characterised.** "These look similar" is the finding restating its own
+conclusion. Quote the overlapping content from both bodies, then say in one line what is shared and
+what is not — the difference is the part the user is actually adjudicating, and summarising it away
+leaves them deciding on your reading instead of theirs.
+
+**One candidate at a time, re-derived, not carried.** An apply here changes the set the remaining
+candidates were computed over: a merge closes a card a later candidate names, a split assigns numbers
+no earlier read could have seen. Slice 02's *re-read before every write* holds one level up — re-read
+the board between candidates, and drop any whose subject a previous apply has already moved. Working
+down a list built at the start of the run is how a session proposes merging an issue it closed ten
+minutes ago.
+
+### Merge
+
+**Which card survives is the user's choice, not the lower number.** The lower number is older, which
+correlates with nothing — the better-written body, the one carrying the acceptance criteria, and the
+one people have already linked to are all independent of it. Ask, showing enough of both to choose.
+
+On approval, in this order: move the detail that would be lost into the survivor, close the other with
+a comment naming the survivor, then **re-point every reference to the closed issue.** That last pass is
+separate and comes last, because until the close lands there is no settled answer to point at. Search
+the board for the closed number and fix each mention — a merge that leaves five cards pointing at a
+tombstone has moved the confusion rather than removed it.
+
+**Closing sets Status on a project board.** Where the project has the closed-item workflow enabled — it
+is on for this repo — the card lands in Done by itself, and this command holds no `gh project
+item-edit` to put it anywhere else. Say so when you close; a card the user expected to keep triaging
+has just left the queue.
+
+### Split
+
+**Numbers are assigned at creation, so the cross-references are a second pass.** Create the new cards
+first, collect the numbers the forge hands back, then write the `## Chain` lines. Writing a reference
+during creation means writing a number that does not exist yet, and the forge will render it as a link
+to whatever else claims it.
+
+**Nothing is inherited.** Labels, milestone, and the chains that pointed at the original do not follow
+the split — they are carried deliberately or not at all, and both are decisions. State what you are
+carrying to each new card as part of the ask, not after.
+
+**Then decide the original.** A split leaves a card that no longer describes work: it is closed as
+superseded, or kept as the container the new cards hang under. That is a second question, and the split
+is not finished until it is answered — an original left open beside its own pieces is now the
+duplicate this command exists to find.
+
+**A created issue is not a board card.** `gh issue create` puts an issue in the repo and nowhere on the
+project; a card that was never `item-add`ed has no Status and is invisible in a kanban grouped by it.
+Add each new card to the project, and report that its Status is unset — placing it in the queue is
+`phil:rank-issues`, which is a decision about order and not this command's.
+
+### Overcome by events
+
+**This is the weakest oracle of the four, and it fails in the expensive direction.** The others are
+answerable from the payload the scan already holds; this one is a claim about the world outside the
+board — that the work landed another way, or the decision behind it was reversed. Board prose is not
+evidence of that. A sibling card asserting that something shipped is exactly the stale copy of state
+the defect table already distrusts.
+
+So an OBE candidate arrives **unverified**, in the same shape as slice 01's unlinked path: report it,
+name what would settle it, and do not close on it. What settles it is the repository — the commit, the
+file, the reversing decision — reachable here through `git log` and the working tree. Confirm it or
+leave it standing. Closing a live card because another card said the work was done is the one
+irreversible mistake on this board that nobody notices for months.
+
+On approval, close with the reason **in the same call** (`gh issue close -c`). A comment posted after
+the close is silently dropped once the project's close workflow has run, so the reason vanishes and the
+card carries no account of why it went.
+
+### Ungrouped effort
+
+A card belonging to a larger effort that says so nowhere. **A milestone is a goal** — #7's convention,
+owned by `phil:issue-board`. Consume it; a second grouping convention invented here would make the two
+disagree and neither authoritative.
+
+**Joining an existing container and creating a new one are different questions.** Joining is the only
+reversible operation in this whole section — one `--milestone` away from undone — so it can be offered
+over a group of cards at once, provided the evidence for each is shown beside it. Creating a container
+cannot: a goal is a commitment about what the board is for, and this command deliberately cannot make
+one. Propose it, hand over the exact call, and stop.
+
+### A declined candidate leaves no trace
+
+Nothing is written: no label, no comment, no note in a body, no file. D6 forbids a grooming marker and
+a decline record is a grooming marker wearing the word *decline* — the moment it exists, the next run
+trusts it over the board, and a candidate the user declined for a reason that has since evaporated
+never surfaces again.
+
+The visible cost is that **the same candidate is proposed again next run**, and the report must say so
+where the decline happened, not only in a footnote. Unstated, it reads as the tool having forgotten,
+which is the complaint that produces a request for the marker this rule exists to refuse. Stated, it
+reads as what it is: the board is the only record, and it is re-read every time.
+
+### What the population actually is
+
+Measured on this repo's board on 2026-08-13, thirteen open issues: **two candidates, both declined, and
+nothing written.** One partial overlap (two cards adding checks to the same priority ladder) and one
+ungrouped pair (the board's only two typesetting cards, with no milestone naming that goal). No
+duplicates, no oversized cards, no work overcome by events.
+
+Read that result carefully, because the obvious reading is wrong. The run's output was not *nothing* —
+it was two questions, one of which named a seam the board did not previously hold: both cards leave the
+same question open about how a new check earns its tier, and neither says so. The user declined and the
+seam is now known. **On a board in reasonable shape the deliverable of this command is the question, and
+the write is the exception**, which inverts the assumption a section full of merge and split mechanics
+invites. Build the ask as the product; the applies are what happens on the minority of runs.
+
+It also settles which guard is load-bearing. *Declined leaves no trace* looked like an edge case when it
+was written and is the observed common path — so the note that a candidate will return is not a footnote
+for a rare run, it is the sentence most runs end on.
 
 ## Reporting
 
@@ -265,14 +394,14 @@ the target. No candidate, no note.
 
 ## What this skill must never do
 
-Both commands:
+All three commands:
 
-- Read or write a grooming marker, in any form.
+- Read or write a grooming marker, in any form — including a record of what was declined.
 - Report a finding without the rule it violates and the evidence for it.
 - Claim completeness over a partial read.
 - Let a rule that could not be evaluated pass for a rule that was satisfied.
 - Report a missing generated line as a body defect.
-- Merge, split, close, or group — slice 03, and never unasked even then.
+- Merge, split, close, or group without an explicit answer to a question that offered the outcome.
 
 `/phil:groom-issues` (the scan) additionally:
 
@@ -290,6 +419,18 @@ Both commands:
   are reported and left, every time.
 - Carry a scope from one run into the next. Nothing is stored between runs; a remembered scope is the
   marker this skill refuses, grown back in another shape.
+
+`/phil:groom-set` (the set-level loop) additionally:
+
+- Offer a yes-or-no over a finding whose evidence admits more than two outcomes.
+- Choose the surviving card of a merge, by number or by any other proxy for the user's judgement.
+- Leave references pointing at an issue it closed.
+- Write a cross-reference to a card the forge has not yet numbered.
+- Leave a split's original open beside its own pieces, or its new cards off the project board.
+- Close on board prose alone. The claim that work landed another way is settled in the repository or
+  not at all.
+- Create a milestone, or treat one card's container as evidence for another's.
+- Record a decline anywhere, or let a run of approvals turn the next ask into a formality.
 
 ## Acceptance
 

@@ -13,8 +13,8 @@ fix computed against remembered text is the failure the separation exists to pre
 **This command writes, and its scoping is the boundary.** `Bash` is scoped to issue read and edit verbs
 plus `git ls-tree` for confirming a link target is pushed. It grants no `gh api` (which permits
 `--method POST` on anything), no `gh project` (status and position are `phil:rank-issues`), no
-`gh issue close`, no `gh issue create`, no bare `Bash`. Changing the *set* of cards is slice 03 and is
-not reachable from here.
+`gh issue close`, no `gh issue create`, no bare `Bash`. Changing the *set* of cards belongs to
+`/phil:groom-set` and is not reachable from here.
 
 **It never writes before you have picked a scope**, and never touches a defect the report classified as
 needing a decision. Both are in the skill; neither is negotiable here.

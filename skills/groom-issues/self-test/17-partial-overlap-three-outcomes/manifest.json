@@ -1,0 +1,11 @@
+{
+  "fixture_id": "GROOM-SELFTEST-17",
+  "situation": "The pair fixture 07 surfaced, now handed to /phil:groom-set. #1 proposes a detector for architecture cruft; #17 proposes one for test smells. Both bodies describe the same mechanism — walk the tree, score against a rule set, emit a ranked backlog the refactor loop consumes. Neither is a restatement of the other.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "candidate": {"class": "duplicate", "pair": [1, 17], "overlap": "partial — shared mechanism, different target"},
+  "shared": "detector mechanism and output format (ranked backlog feeding phil:refactor-loop)",
+  "not_shared": "what is being detected: architecture cruft vs test smells",
+  "expected_decision": "ASK-SET-LEVEL",
+  "expected_guard": "the ask must offer every outcome the evidence admits — merge, split along the seam, dependency edge, or leave apart — never merge yes/no"
+}

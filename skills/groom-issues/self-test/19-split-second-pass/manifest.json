@@ -1,0 +1,12 @@
+{
+  "fixture_id": "GROOM-SELFTEST-19",
+  "situation": "#28 carries three independently demonstrable outcomes behind one title. The user approves a split into three, each depending on the one before it, and asks that the original be kept as the container.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "candidate": {"class": "oversized", "issue": 28, "seams": 3},
+  "original": {"labels": ["enhancement", "documentation"], "milestone": "Board and session tooling", "chains": ["relates to #7"]},
+  "user_answer": {"action": "split", "into": 3, "original": "keep as container", "carry": {"labels": ["enhancement"], "milestone": "Board and session tooling", "chains": "on the container only"}},
+  "assigned_numbers": [41, 42, 43],
+  "expected_decision": "APPLY-SPLIT",
+  "expected_guard": "cross-references are a second pass because numbers are assigned at creation; nothing is inherited without being asked; the new cards are added to the project"
+}

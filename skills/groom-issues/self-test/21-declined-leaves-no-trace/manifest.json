@@ -1,0 +1,11 @@
+{
+  "fixture_id": "GROOM-SELFTEST-21",
+  "situation": "A duplicate candidate is put to the user, who declines: the two cards stay apart. This is the third run in which the same pair has been proposed and declined.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "candidate": {"class": "duplicate", "pair": [2, 3]},
+  "user_answer": {"action": "leave apart"},
+  "prior_runs": 2,
+  "expected_decision": "DECLINE-NO-TRACE",
+  "expected_guard": "no label, no comment, no body note, no file — and the report says the pair will be proposed again"
+}

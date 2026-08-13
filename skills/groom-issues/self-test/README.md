@@ -1,4 +1,4 @@
-# phil:groom-issues — Acceptance Self-Test (slices 01–02)
+# phil:groom-issues — Acceptance Self-Test (slices 01–03)
 
 The **scan and report** is the software under test. Its bugs are silent, and one of them is worse
 than the rest: a completeness claim over a partial read looks exactly like a completeness claim over
@@ -15,6 +15,15 @@ Slice 01, the scan — `/phil:groom-issues`:
 Slice 02, the apply — `/phil:groom-fix`:
 
 `SCOPE-FIRST` · `APPLY-MECHANICAL` · `LEAVE-SEMANTIC` · `STALE-REREAD` · `REFUSE-GENERATED`
+
+Slice 03, the set-level loop — `/phil:groom-set`:
+
+`ASK-SET-LEVEL` · `APPLY-MERGE` · `APPLY-SPLIT` · `REFUSE-UNVERIFIED` · `DECLINE-NO-TRACE` ·
+`REDERIVE-BETWEEN`
+
+**`ASK-SET-LEVEL` precedes every apply in slice 03**, and is the outcome on its own wherever the question
+is the whole deliverable — `17`, where the evidence admits four resolutions, and `23`, where the answer is
+a container this command cannot create.
 
 **`LEAVE-SEMANTIC` is additive too**, and pairs with `APPLY-MECHANICAL` on the same issue — fixture `13`
 pins the case where one card holds one of each, because the column is a property of the defect and not of
@@ -48,6 +57,13 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `14-stale-since-scan/` | the body changed between scan and apply | a silent overwrite of prose nobody read | `STALE-REREAD` — say what moved and when |
 | `15-generated-region-refused/` | a mechanical fix inside `nwave:status` markers | right content, wrong owner | `REFUSE-GENERATED` — with the generator named |
 | `16-population-of-one/` | six checks with oracles, exactly one defect (**measured**) | ceremony over a population of one | `SCOPE-FIRST` — proportionate, passes named |
+| `17-partial-overlap-three-outcomes/` | 07's pair, now handed to the set-level loop | a binary question over evidence admitting four answers | `ASK-SET-LEVEL` — every outcome offered |
+| `18-merge-survivor-is-a-choice/` | duplicate where the newer card is the better one | the lower number treated as the survivor | `APPLY-MERGE` — user's choice, references re-pointed |
+| `19-split-second-pass/` | one card, three seams, split approved | a cross-reference to a number not yet assigned | `APPLY-SPLIT` — create, add to board, then link |
+| `20-obe-unverified/` | one card claims another's work shipped; the repo does not | closing a live card on board prose | `REFUSE-UNVERIFIED` — say what would settle it |
+| `21-declined-leaves-no-trace/` | the same pair declined for the third run | a decline record, which is a marker renamed | `DECLINE-NO-TRACE` — and say it will reappear |
+| `22-rederive-between-candidates/` | candidate 1's merge closes candidate 3's subject | walking a list the run's own applies invalidated | `REDERIVE-BETWEEN` — drop it, and say why |
+| `23-ungrouped-effort-container/` | two LaTeX cards, no milestone is that goal (**measured**) | inventing the container, or filing under the nearest | `ASK-SET-LEVEL` — propose, hand over the call, stop |
 
 ## The sharpest
 
@@ -68,11 +84,41 @@ failing it means the session tried to acquire one. In `11` the session *has* the
 merely unstated, and nothing but the rule stands between it and four correct edits. A suite containing
 only `08` proves the guarantee where it is structural and never tests it where it is a decision.
 
-**`16` is the only fixture here that is a measurement rather than a construction.** Its numbers came off
-this repo's real board after slice 01 had been dogfooded twice, and they contradict the slice brief:
-the mechanical column held one defect, not a queue, and the maintainer had authored it that same session.
-It pins proportionate scoping — but its more important job is to stop a future reader from designing a
-bulk fixer for a population that has never been observed to exist.
+**`16` and `23` are the two fixtures here that are measurements rather than constructions.** `16`'s
+numbers came off this repo's real board after slice 01 had been dogfooded twice, and they contradict the
+slice brief: the mechanical column held one defect, not a queue, and the maintainer had authored it that
+same session. It pins proportionate scoping — but its more important job is to stop a future reader from
+designing a bulk fixer for a population that has never been observed to exist.
+
+`23` is the same board a day later, and it landed on the one branch of *ungrouped effort* the slice brief
+did not plan for. The brief says *join the existing milestone, or propose creating one* as though they
+were two shapes of the same offer. On the real board they are not: eleven of thirteen cards carry a
+milestone, the two that do not are the same effort, and **no existing container is that goal** — so the
+only honest move is the one this command cannot perform. Keep it measured. Constructing a fixture where a
+fitting milestone happens to exist would test the easy branch and hide that the hard one ends in a refusal.
+
+**`17` carries slice 03's whole bet, and it is a bet about the question rather than the evidence.** The
+slice was written to disprove that set-level defects can be surfaced with actionable evidence, and `07`
+had already shown a partial overlap could be *described*. What `17` pins is that describing it is not
+enough: a correct finding put behind *merge? y/n* still produces a wrong board, because the right answer —
+split along the seam, or a dependency edge — was never on the menu, and the user's **no** is then read as
+a fourth position they were never shown. The ask has to have the same arity as the finding.
+
+**`20` is `02`'s failure mode moved from the report into the world.** `02` emits a false claim about
+issues nobody read; `20` acts on one. Its evidence is a sentence in another card's body, which is exactly
+the stale copy of forge state the defect table already distrusts — so the candidate that reads most
+convincingly is sourced from the thing the skill trusts least. Refusing costs one line in one report;
+being wrong closes a live card, and nobody notices for months.
+
+**`21` is `06` under pressure.** `06` refuses the marker when nothing wants one. `21` refuses it on the
+third run of the same declined pair, where writing one would be a kindness and every user would thank
+you for it. A guarantee only tested where it is free is not tested — the same relationship `08` has
+to `11`, one slice further along.
+
+**`22` is the only fixture where the session is its own adversary.** Every other staleness case here
+involves someone else editing between read and write. This one cannot be avoided by being careful about
+other people: the run's first apply invalidates its own remaining candidates, so any run that resolves
+more than one candidate from a single scan is wrong by construction.
 
 **`04` and `05` resolve in opposite directions over the same surface.** Both concern content that
 appears in an issue body; `05` must flag it and `04` must not. A rule that catches one by a principle
