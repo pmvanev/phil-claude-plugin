@@ -34,6 +34,28 @@ from the slice brief and its sibling commands, with `plugin-dev` never loaded �
 build path its own `feature-delta.md` declares, invisible afterwards because nothing records
 compliance either way.
 
+## Which copy is under test
+
+**The released copy is what a `/phil:*` command runs — never this working tree.** Claude Code loads
+the plugin from `~/.claude/plugins/cache/pmvanev-plugins/phil/<version>/`, snapshotted at install
+time. Editing a skill here changes nothing about what the command executes until the plugin updates.
+
+**That is deliberate: dogfooding tests what users actually get.** The cost is that the skew is
+otherwise silent — nothing errors, and a run against a stale snapshot is indistinguishable from one
+against your edits. On 2026-08-13 the gap reached five versions.
+
+So a `SessionStart` hook in this repo's `.claude/settings.json` reports it. It lives in the working
+tree rather than in `hooks/hooks.json` on purpose: a detector shipped inside the plugin would load
+from the cache and could not report the gap that exists before the first update.
+
+**A dogfood claim must name the version it exercised.** "I ran `/phil:groom-issues` and it reported
+X" is a claim about the loaded version, not about your edits. Either update the plugin first, or say
+which version the run was against. A run that drove the loop by hand rather than through the command
+must say that too — it exercised the prose, not the command.
+
+Do not trust `gitCommitSha` in `installed_plugins.json` to identify what is installed; on
+2026-08-13 it pointed at a 0.12.0 commit while `version` read 0.27.0. Use `version` / `installPath`.
+
 ## Resuming work
 
 **Starting a session to continue existing work? Run `/phil:resume` before anything else.** It reads
