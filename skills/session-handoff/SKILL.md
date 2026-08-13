@@ -11,8 +11,13 @@ The value is narrow and specific: **record only what a fresh session cannot work
 Everything else is derived at read-back from whatever already owns it. A snapshot that also records
 the derivable becomes a second authority over the same fact, and the two drift.
 
-Slices 01 and 02. The claimed-card link is slice 03 and is **not** implemented here — do not
-improvise it.
+Slices 01 and 02. **The claimed-card link was slice 03, and was tested and deliberately not built** —
+its hypothesis (*the board already carries enough*) held. Do not improvise it, and do not read its
+absence as an oversight to correct: `In Progress` is unused in this workflow, the board's top Todo card
+answers *what is next*, and the basis for a claim is what the `Why` section is already for. Recording
+it as a field would duplicate prose that carries it, which is the drift this skill exists to prevent.
+The finding is in
+[`slice-03-claimed-card-link.md`](https://github.com/pmvanev/phil-claude-plugin/blob/main/docs/feature/session-handoff/slices/slice-03-claimed-card-link.md).
 
 ## What is worth recording
 
@@ -22,7 +27,7 @@ improvise it.
 | **The next action** — what the session was about to do | **Yes** | Partly inferable, and a wrong inference is costlier than none. |
 | The where — file, step, branch, commit, wave | **No** | Already owned by the artifacts. Derive it at read-back via the read-only `nwave-slice-status` skill and git. |
 | **The entry point** — which command owns the work | **Yes** | The card describes work, not method. Nothing else records it. |
-| The claimed card and its basis | **No — slice 03** | Not built. |
+| The claimed card and its basis | **No — tested, not built** | The board's top Todo answers *what is next*; the basis is what **the why** already records. |
 
 ## The snapshot
 
@@ -76,7 +81,8 @@ fingerprint from the header, never by parsing the prose.
    (`2026-08-12T17:30Z`); `commit` is `git rev-parse --short HEAD`; `git status --porcelain`
    non-empty means `dirty: yes`.
 6. **Write `.session-handoff.md`**, overwriting any previous snapshot outright — never merging into
-   it. Competing-snapshot detection is slice 03.
+   it. There is one snapshot per repository root, so a competing snapshot would need a second worktree
+   on the same repo; that case was examined with slice 03 and left unhandled deliberately.
 7. **Report** `CAPTURE`, and echo what was recorded so a mistake is visible immediately.
 
 ### NO-OP
@@ -211,7 +217,7 @@ independent facts, and a stale snapshot still has an owner worth naming.
 - Write a snapshot for a session that advanced nothing.
 - Invent a next action that was not stated.
 - **Run** the owning command. Naming it is the whole of routing here; `/phil:resume` starts nothing.
-- Record a claimed card or its basis — slice 03, not built.
+- Record a claimed card or its basis as a field. Tested and not built; the why already carries the basis.
 - Restate the wave → command table. `skills/nwave-issue-board/SKILL.md` owns it; derive from there.
 
 ## Acceptance

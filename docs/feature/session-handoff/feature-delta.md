@@ -195,7 +195,7 @@ Three slices, one per independent outcome from the scope assessment. Briefs in
 |---|---|---|---|
 | 01 | Snapshot and resume (**WS**) | `bounded-change` | …that recording beats reconstructing |
 | 02 | Entry-point routing (absorbs #10) | `unbounded-preservation` | …that a written instruction is sufficient |
-| 03 | Claimed-card link | `bounded-change` | …that the board already carries enough |
+| 03 | Claimed-card link — **tested 2026-08-13, NOT BUILT** | `bounded-change` | …that the board already carries enough — **it does; hypothesis confirmed** |
 
 **Order rationale** — highest learning leverage first, per the Phase 2.5 rule:
 

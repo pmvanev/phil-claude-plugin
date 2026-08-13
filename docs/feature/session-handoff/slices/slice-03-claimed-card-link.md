@@ -1,12 +1,18 @@
 # Slice 03 — Claimed-card link
 
-> **DEFERRED 2026-08-12 — pending evidence, not cancelled.** Slices 01 and 02 shipped; this one's
-> learning hypothesis (*the board already carries enough*) is so far holding: the snapshot's `Next`
-> field carried the work identity in prose on every dogfood run, and the two-cards-In-Progress
-> evidence below proved to be board hygiene rather than a design gap — #3 had simply been left there.
-> Card #12 stays open as the standing follow-up. Note this brief carries a `DEFERRED` marker, which
-> `phil:nwave-issue-board` treats as "not a card"; the card is retained deliberately, because this
-> feature no longer publishes through that flow.
+> **NOT BUILT 2026-08-13 — hypothesis confirmed, slice closed by evidence.** This supersedes the
+> `DEFERRED 2026-08-12` note. The learning hypothesis — *the board already carries enough* — was
+> tested and held, so the slice did its job by not shipping. Card #12 closed; the one residual gap the
+> investigation found is carded separately. Findings in *Verdict* below.
+>
+> The 2026-08-12 deferral read "pending evidence, not cancelled." That framing turned out to be the
+> flaw: **the evidence it waited for cannot arrive.** `.session-handoff.md` is git-ignored, so no
+> history of past snapshots exists and no retrospective run can answer whether a resume ever failed
+> for want of a claimed card. A deferral pending evidence needs to name the run that would produce it,
+> or it defers forever while looking patient.
+>
+> Everything below this note is the original brief, kept as written. Read it as the proposal that was
+> tested, not as an agenda.
 
 Feature: session-handoff · Job: `carry-work-across-session-boundaries` · Persona: `kai-session-relay`
 
@@ -96,3 +102,49 @@ Lowest learning leverage of the three and the most mechanical. Ordered by the Ph
 (highest-uncertainty first): slice 01 tests the feature's central bet, slice 02 tests whether prose
 routing works at all, and this slice tests the narrowest claim against the surface most likely to
 already cover it.
+
+---
+
+## Verdict — 2026-08-13
+
+**Hypothesis confirmed. The board plus this repo's ranking convention already carry enough, and the
+snapshot's prose carries the rest.** Four findings.
+
+**1. `In Progress` is not used in this workflow.** The slice is built around a session claiming a card
+and the board recording it as In Progress. On 2026-08-13 no card was In Progress; #15 and #5 went to
+Done and #23 to Todo without passing through it. The one observed instance the original brief cites
+(#3 and #9) had already been diagnosed as hygiene — #3 was left there. **A slice whose central state
+transition the workflow does not perform has no population.**
+
+**2. The board answers *what is next* deterministically.** `CLAUDE.md` fixes the convention: the top
+Todo card in board-position order is what to work on next, and `phil:rank-issues` maintains that
+order. Verified live: this session selected #15 from board position without reading the snapshot at
+all, and it was correct.
+
+**3. The claim's basis is already recorded, in prose.** The live snapshot's `Why` carried five bullets
+of reasoning and ruled-out alternatives; `Next` and `owner` carried the work identity. A structured
+`claimed_card:` field would duplicate that, against **KPI-5** — facts duplicated between the snapshot
+and an artifact that owns them, target 0. The category-4 row of the design axis says the board owns
+this "partially"; what it does not own turned out to be what `Why` was already for.
+
+**4. The competing-claim case cannot arise in this setup.** Fixture 10 needs two snapshots naming one
+card. There is one snapshot per repository root and `git worktree list` shows a single worktree. The
+two other snapshots on this machine are in *different repositories*, which this brief scopes OUT under
+*multi-repo or cross-forge claims*.
+
+### The residual, which is real and much narrower
+
+Findings 2 and 3 hold only while the board's top Todo **is** the in-flight card. On 2026-08-13 they
+diverged: the snapshot's `Next` named a dogfood run while the board's top Todo was #15. It was
+harmless — the dogfood had happened in an intervening session — but **nothing detected the
+divergence**, and `RESUME-STALE` would not have: it compares the snapshot against the *tree* and never
+against the *board*.
+
+That gap is not "record which card was claimed." It is "notice when the two records of what is in
+flight disagree." Carded separately.
+
+### What happens to the fixtures
+
+`self-test/09-claim-and-basis/` and `10-competing-claim/` pin a slice that was tested and deliberately
+not built. They stay, marked as such — a fixture for unbuilt work is a standing claim about what the
+skill would have to do, and deleting it would erase the reasoning along with the test.

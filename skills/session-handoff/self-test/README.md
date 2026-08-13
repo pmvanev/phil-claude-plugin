@@ -34,8 +34,8 @@ them.
 | `06-route-to-owner/` | work carries a wave label | slice-02 AC1, AC2, **KPI-2** | route, never freelance | `ROUTE` — names the owner and hands over |
 | `07-live-wins-over-recorded/` | recorded owner disagrees with the live label | slice-02 AC3 | live beats recorded, disagreement surfaced | `ROUTE-LIVE-WINS` |
 | `08-unknown-owner-asks/` | no owner determinable | slice-02 AC4 | unknown is stated, never defaulted (C5) | `ASK-OWNER` — work not begun |
-| `09-claim-and-basis/` | a card was claimed for a stated reason | slice-03 AC1, AC2 | the session→card link survives | `CAPTURE` carrying claim + basis |
-| `10-competing-claim/` | two snapshots claim one card | slice-03 AC4 | detection without resolution (C6) | `REPORT-CLAIM-CONFLICT` — neither discarded |
+| `09-claim-and-basis/` | a card was claimed for a stated reason | slice-03 AC1, AC2 — **slice not built** | the session→card link survives | `CAPTURE` carrying claim + basis |
+| `10-competing-claim/` | two snapshots claim one card | slice-03 AC4 — **slice not built** | detection without resolution (C6) | `REPORT-CLAIM-CONFLICT` — neither discarded |
 
 ## The two sharpest fixtures
 
