@@ -9,5 +9,8 @@ scan it describes.
 
 This command is **read-only**, and enforced rather than declared. It has no `Write` or `Edit`, and
 its `Bash` is scoped to `gh issue list` and `glab issue list` — not `gh api`, which would permit
-`--method POST` and hand back the mutation the scoping exists to remove. Fixing what the report finds
-is a later slice.
+`--method POST` and hand back the mutation the scoping exists to remove.
+
+End the report by naming `/phil:groom-fix` as the command that applies the mechanical column, and its
+count — *"3 mechanical findings; `/phil:groom-fix` applies them inside a scope you pick"*. Name it; do
+not run it, and do not offer to. The set-level candidates belong to slice 03 and have no command yet.

@@ -1,0 +1,10 @@
+{
+  "fixture_id": "GROOM-SELFTEST-16",
+  "situation": "A maintained board. Every mechanical check runs and has an oracle: relative links 0, markdown-wrapped issue refs 0, accumulated single-valued labels 0 (family declared, none carrying two values), one-sided chains 0, absolute links whose target is missing from origin/main 0 of 19 checked. Exactly one mechanical defect exists: an unlinked specific file path in one body, target confirmed present on origin/main.",
+  "forge": "github",
+  "mechanical": [{"issue": 22, "kind": "missing-cross-reference", "path": ".claude-plugin/plugin.json"}],
+  "checks_run_with_oracle": 6,
+  "user_has_scoped": false,
+  "expected_decision": "SCOPE-FIRST",
+  "expected_guard": "the scoping step scales to the population; consent does not scale away with it"
+}

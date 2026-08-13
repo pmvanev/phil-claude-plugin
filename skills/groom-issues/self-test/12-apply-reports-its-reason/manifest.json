@@ -1,0 +1,10 @@
+{
+  "fixture_id": "GROOM-SELFTEST-12",
+  "situation": "The user scoped to relative links only. In scope: two relative links (#31 './docs/adr/ADR-013.md', #33 'rules/testing.md'). Out of scope but still mechanical: one accumulated wave label on #40. Also present: #33 states no acceptance criteria (semantic).",
+  "forge": "github",
+  "scope": {"kind": "defect-class", "value": "relative-link"},
+  "in_scope": [{"issue": 31, "kind": "relative-link"}, {"issue": 33, "kind": "relative-link"}],
+  "out_of_scope_mechanical": [{"issue": 40, "kind": "accumulated-label"}],
+  "expected_decision": "APPLY-MECHANICAL",
+  "expected_guard": "each change reports why it needed no judgement; a mechanical defect outside the scope stays untouched"
+}

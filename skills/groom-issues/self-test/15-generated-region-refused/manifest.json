@@ -1,0 +1,9 @@
+{
+  "fixture_id": "GROOM-SELFTEST-15",
+  "situation": "A missing cross-reference sits inside #29's nwave:status block — the generated region maintained by phil:nwave-issue-board. The fix itself is mechanical: the target file is unambiguous and confirmed on origin/main. The user scoped to everything.",
+  "forge": "github",
+  "scope": {"kind": "everything"},
+  "defect": {"issue": 29, "kind": "missing-cross-reference", "location": "inside nwave:status markers"},
+  "expected_decision": "REFUSE-GENERATED",
+  "expected_guard": "a correct edit in a generated region is destroyed on the next refresh and disagrees with its source until then"
+}

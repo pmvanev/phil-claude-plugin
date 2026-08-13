@@ -1,0 +1,10 @@
+{
+  "fixture_id": "GROOM-SELFTEST-14",
+  "situation": "The scan read #47 and found a relative link in its body. Between the scan and the apply, someone edited #47 — the body changed and the relative link is now on a different line, beside new prose the session has never read. The user scoped to relative links.",
+  "forge": "github",
+  "scope": {"kind": "defect-class", "value": "relative-link"},
+  "scanned_at": "09:00",
+  "issue_updated_at": "09:12",
+  "expected_decision": "STALE-REREAD",
+  "expected_guard": "a write is computed against text the session has read, not against text it remembers"
+}

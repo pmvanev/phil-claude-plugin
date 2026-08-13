@@ -45,6 +45,36 @@ accumulated single-valued label, or a missing cross-link can be corrected withou
 
 **Production data:** this repo's real board, with its real relative-link and label state.
 
+## Measured 2026-08-13 — the hypothesis answered, and not on either branch it offered
+
+Six mechanical checks ran with real oracles against this board, after slice 01 had been dogfooded twice
+and its findings fixed by hand:
+
+| Check | Found |
+|---|---|
+| Relative file links | 0 |
+| Issue refs wrapped in markdown | 0 |
+| Accumulated single-valued labels | 0 (`wave:` unused; triage family declared multi-valued in `CLAUDE.md`) |
+| One-sided chains | 0 |
+| Absolute links whose target is missing from `origin/main` | 0 of 19 |
+| Missing bare cross-references passing the discriminator | **1** |
+
+The discriminator examined 10 bare paths and rejected 9, each for a reason the rule names: root files,
+one basename shared by 22 files, and three paths naming files that do not exist — one of them the
+deliverable of the issue citing it, one of them the *absence* that is another issue's entire subject.
+
+**Outcome: `confirms`, with a population the brief did not anticipate.** The boundary is real and its
+fixes need no question. But the mechanical column on a maintained board holds about one defect per
+grooming cycle, and this one was authored by the maintainer that same session, minutes after re-reading
+the rule it broke. Slice 02 is therefore not a bulk fixer; its value is catching the defect its own
+author just made. The scoping step was built to scale down to that, because a menu offered over one
+finding is ceremony, and ceremony is what teaches people to click through a consent gate.
+
+Also closed by measurement: widening slice 01's oracle to check link targets adds no population — all 19
+absolute links resolve. That option needed no separate slice after all.
+
+Pinned as `self-test/16-population-of-one/`.
+
 ## Dogfood moment
 
 Same day: fix the mechanical defects slice 01 found on this board, and confirm by re-running slice 01

@@ -1,0 +1,14 @@
+{
+  "fixture_id": "GROOM-SELFTEST-11",
+  "situation": "The scan reported four mechanical defects across three issues: two relative links (#31, #33), one accumulated wave label (#40, family declared single-valued in CLAUDE.md), one one-sided chain (#52). All four are in the mechanical column. The user has not yet said what to fix.",
+  "forge": "github",
+  "mechanical": [
+    {"issue": 31, "kind": "relative-link"},
+    {"issue": 33, "kind": "relative-link"},
+    {"issue": 40, "kind": "accumulated-label"},
+    {"issue": 52, "kind": "one-sided-chain"}
+  ],
+  "user_has_scoped": false,
+  "expected_decision": "SCOPE-FIRST",
+  "expected_guard": "mechanical describes the fix, never the consent; nothing is written before the user picks a scope"
+}

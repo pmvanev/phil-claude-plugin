@@ -1,0 +1,12 @@
+{
+  "fixture_id": "GROOM-SELFTEST-13",
+  "situation": "Issue #33 carries two defects at once: a relative link (mechanical) and no way to tell when it is done (semantic, rule 2). The user scoped to everything.",
+  "forge": "github",
+  "scope": {"kind": "everything"},
+  "defects": [
+    {"issue": 33, "kind": "relative-link", "column": "mechanical"},
+    {"issue": 33, "kind": "no-done-when", "column": "semantic"}
+  ],
+  "expected_decision": ["APPLY-MECHANICAL", "LEAVE-SEMANTIC"],
+  "expected_guard": "the column is a property of the defect, not of the issue that holds it"
+}

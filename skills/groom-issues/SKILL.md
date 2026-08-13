@@ -8,9 +8,14 @@ description: Skill bundle for the phil:groom-issues command — reads a whole is
 A board accumulates cards that someone filed half-finished. Reading them one at a time finds the
 sloppy ones and misses the expensive ones, because the costly defects live *between* issues.
 
-**Slice 01 scope: this reads and reports. It changes nothing.** Fixing within a scope is slice 02;
-merging, splitting, closing and grouping are slice 03 and are never applied unasked. Do not
-improvise either.
+**Two commands, and the split between them is the guarantee.** `/phil:groom-issues` reads and reports —
+it holds no write tool at all, so read-only is enforced rather than declared. `/phil:groom-fix` applies
+the mechanical column inside a scope the user picks. Merging, splitting, closing and grouping are slice
+03 and are never applied unasked. Do not improvise either.
+
+The split is not tidiness. A single command carrying the report in context is the design where a write
+gets computed against remembered text instead of read text, and where read-only holds only as long as
+nobody adds a tool. Separating them makes the re-read structural and the guarantee mechanical.
 
 **REQUIRED BACKGROUND: `phil:issue-board`.** Every forge mechanic — `-R` targeting, label semantics,
 absolute-URL rules, dependency links, generated blocks — lives there. Do not guess any of it here.
@@ -88,7 +93,7 @@ forgetting and the user starts asking for the marker this rule exists to refuse.
 Every finding names the rule it violates and quotes the evidence. A finding without both is an
 opinion, and this skill does not report opinions.
 
-Classify each, because slice 02 acts only on the first column:
+Classify each, because `/phil:groom-fix` acts only on the first column:
 
 | Mechanical — one right answer | Semantic — needs a human |
 |---|---|
@@ -144,6 +149,69 @@ establish which kind it is holding first, and that question is the human's.
 delimited block by `phil:nwave-issue-board`; its absence is a publishing question, not a content one,
 and hand-writing it would be typing into a generated region.
 
+## Applying the mechanical column — `/phil:groom-fix`
+
+**Mechanical is a claim about the fix, never about the consent.** It says the content is derivable and
+invents nothing — a relative path has one correct absolute form, a one-sided chain's missing half is
+written on the other issue. It says nothing about whether the user wants their board edited now.
+Reading the classification as authorisation is the failure this whole step is shaped against.
+
+**Scope first, and write nothing before the answer.** The user picks a defect class, a subset of
+issues, or everything. The tool does not choose, and does not start with the safest fix to show
+progress. Group the offer by class, because that is the unit a class-level answer selects; a flat list
+makes the user do the grouping the report should have done.
+
+**Scale the offer to the population, and never the consent.** Over one finding, a
+class/subset/everything menu is ceremony — and a step that feels like ceremony is the step people learn
+to click through, which is how a consent gate stops working on the run where it matters. One finding
+gets one confirmation naming it. Nothing gets applied because it was trivially small.
+
+**Report the checks that ran and found nothing.** "One defect" over five silent checks reads as a thin
+scan. Naming the passes is what separates *this board is clean* from *this tool looked at one thing*.
+Do not report them as unevaluated — they had an oracle and they ran, which is a stronger statement than
+`REPORT-UNEVALUATED` and must not be blurred into it.
+
+**Every change carries the reason it needed no judgement**, per change, not per run:
+
+```
+#31 — rewrote ./docs/adr/ADR-013.md as <absolute URL>. No judgement: GitHub emits relative
+      paths verbatim so the original 404s for every reader; target confirmed on origin/main;
+      nothing invented.
+```
+
+The reason is the deliverable, because it is what makes the mechanical claim falsifiable. "Applied 2
+fixes" cannot be contradicted by a reader; the sentence above can. A slice whose premise is that some
+fixes need no consultation has to show its work, or the boundary is asserted rather than drawn.
+
+**The scope is a line, not a hint.** A mechanical defect outside the chosen scope stays untouched — and
+stays *mentioned*. Out of scope means untouched, not unmentioned; a defect that disappears from the
+output reads as fixed.
+
+**The column is a property of the defect, not of the card that holds it.** An issue carrying one
+mechanical and one semantic defect gets one of each treatment in the same pass. Skipping the card
+because it also has a semantic defect makes that column contagious, and on a real board the mechanical
+column would then empty itself through proximity rather than through measurement.
+
+**Re-read before every write.** The apply is a separate command, so it must fetch the issue it edits
+and cannot act on the scan's copy. If the body moved since the scan, report what moved and when, and do
+not overwrite — the defect surviving is necessary but not sufficient, because the surrounding text is
+unassessed and the scope the user agreed to was over the board as reported. The failure prevented here
+is not a lost edit but a silent one: the forge records the session as last author, and whoever's
+paragraph vanished cannot see that a groom run did it.
+
+**Refuse a generated region even when the content is right.** A fix inside `nwave:status` markers is
+destroyed on the next refresh and disagrees with its source until then. Refuse with the reason and point
+at the generator — that pointer is the only part of the refusal that leads anywhere. Do not edit just
+outside the markers to place it "nearly" right; that leaves the region wrong and hides it from the next
+reader. Mechanical governs the content, ownership governs the bytes, and both must pass.
+
+**What the population actually is.** Measured on this repo's board on 2026-08-13, after slice 01 had
+been dogfooded twice: six mechanical checks with real oracles, and **one** defect board-wide — created
+by the maintainer that same session, minutes after re-reading the rule it broke. The boundary is real
+and its fixes need no question, but this is not a bulk fixer. Its value is catching the defect its own
+author just made, and a design that assumes a full queue will build ceremony the population cannot
+justify.
+
 ## Cross-issue candidates — surface, never act
 
 These cannot be found by reading one issue, which is why the scan is whole-board. Report each with
@@ -197,13 +265,31 @@ the target. No candidate, no note.
 
 ## What this skill must never do
 
-- **Write anything.** No issue edits, no labels, no comments, no milestones. Read-only is the slice.
+Both commands:
+
 - Read or write a grooming marker, in any form.
 - Report a finding without the rule it violates and the evidence for it.
 - Claim completeness over a partial read.
 - Let a rule that could not be evaluated pass for a rule that was satisfied.
 - Report a missing generated line as a body defect.
 - Merge, split, close, or group — slice 03, and never unasked even then.
+
+`/phil:groom-issues` (the scan) additionally:
+
+- **Write anything.** No issue edits, no labels, no comments, no milestones. It holds no write tool, so
+  a session that finds itself needing one here has misread the command.
+
+`/phil:groom-fix` (the apply) additionally:
+
+- Write before the user has picked a scope.
+- Treat the mechanical classification as consent, or a small population as permission.
+- Cross the chosen scope, even to fix something mechanical.
+- Apply an edit computed against text read before the last change to the issue.
+- Write inside a generated region, or just outside it to approximate the fix.
+- Touch a semantic defect — draft acceptance criteria, rewrite a purpose, decide a granularity. These
+  are reported and left, every time.
+- Carry a scope from one run into the next. Nothing is stored between runs; a remembered scope is the
+  marker this skill refuses, grown back in another shape.
 
 ## Acceptance
 

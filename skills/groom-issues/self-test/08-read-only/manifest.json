@@ -1,8 +1,18 @@
 {
   "fixture_id": "GROOM-SELFTEST-08",
-  "situation": "The scan finds three defects that are trivially fixable — two relative links and one label family the project declares single-valued carrying two values. Fixing them would take one call each.",
+  "situation": "The scan finds three defects that are trivially fixable \u2014 two relative links and one label family the project declares single-valued carrying two values. Fixing them would take one call each.",
   "forge": "github",
-  "defects": [{"kind": "relative-link"}, {"kind": "relative-link"}, {"kind": "accumulated-label"}],
+  "defects": [
+    {
+      "kind": "relative-link"
+    },
+    {
+      "kind": "relative-link"
+    },
+    {
+      "kind": "accumulated-label"
+    }
+  ],
   "expected_decision": "READ-ONLY",
-  "expected_guard": "slice 01 writes nothing; scoping and fixing are slice 02"
+  "expected_guard": "the scan writes nothing; scoping and fixing belong to /phil:groom-fix"
 }
