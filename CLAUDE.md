@@ -10,6 +10,30 @@ Development and writing standards live in `${CLAUDE_PLUGIN_ROOT}/rules/`. Rules 
 - **Make every word tell.** Active voice, no needless words, clear on first read.
 - **Empirical design over speculation.** Solve for what is really there, not imagined futures.
 
+## Build path for this plugin
+
+This repo's product is a plugin — skills, commands, agents, rules. Two tools own the two halves, and
+neither substitutes for the other:
+
+- **Understand it with `nw-discuss`.** New feature, new skill, new command: run DISCUSS before
+  authoring. It produces the persona, the JTBD, the locked decisions and the slice split that the
+  `docs/feature/<name>/` artifacts then hold. Skip it and the slice brief is invented at authoring
+  time by whoever is typing.
+- **Author, review and vet with `plugin-dev`.** Consult `plugin-dev:skill-development`,
+  `command-development`, `agent-development` or `plugin-structure` **before writing the file**, not
+  after — they own the schema, the frontmatter fields and the layout. Then run
+  `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` over the result. Neither is optional
+  because a sibling file is a convenient template: copying the shape of an existing command
+  propagates whatever that command got wrong and records nothing about whether it was checked.
+
+DESIGN/DISTILL/DELIVER do **not** run here — the deliverable is prose, and this repo settled twice
+that skills are authored rather than waved (`todo.md` 2026-06-17; edd-loop DDD8).
+
+**Say in the commit which of the two ran.** Slice 03 of `groom-issues` was authored on 2026-08-13
+from the slice brief and its sibling commands, with `plugin-dev` never loaded — a deviation from the
+build path its own `feature-delta.md` declares, invisible afterwards because nothing records
+compliance either way.
+
 ## Resuming work
 
 **Starting a session to continue existing work? Run `/phil:resume` before anything else.** It reads
