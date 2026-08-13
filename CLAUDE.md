@@ -10,6 +10,17 @@ Development and writing standards live in `${CLAUDE_PLUGIN_ROOT}/rules/`. Rules 
 - **Make every word tell.** Active voice, no needless words, clear on first read.
 - **Empirical design over speculation.** Solve for what is really there, not imagined futures.
 
+## Resuming work
+
+**Starting a session to continue existing work? Run `/phil:resume` before anything else.** It reads
+the session snapshot (`.session-handoff.md`, git-ignored and machine-local) and states up front
+whether it is current or stale against the tree, then names the command that owns the work without
+running it. With no snapshot it reconstructs from the artifacts and says that is what it did.
+
+Put a session down with `/phil:handoff`. It records only what a fresh session cannot derive — the
+decisions, the approaches ruled out, the intended next action — and refuses to copy anything the
+artifacts already own.
+
 ## Issue board
 
 - Forge: GitHub — pass `-R pmvanev/phil-claude-plugin` on every `gh` call. Issue #12 exists in every
