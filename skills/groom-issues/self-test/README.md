@@ -31,6 +31,7 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `07-surface-not-act/` | two issues overlapping in part | set-level ops are slice 03 and ask-first | `SURFACE-CANDIDATE` — evidence, no action |
 | `08-read-only/` | defects found and obviously fixable | the slice is read-only | `READ-ONLY` — nothing written |
 | `09-unevaluated-is-not-clean/` | whole board read, but rules 3 and 4 have no oracle here | silence from a rule reading as compliance | `REPORT-UNEVALUATED` — name the dark rules |
+| `10-one-sided-chain/` | one chain named from one end only, beside a correctly mirrored pair | half a relationship reads as a whole one | `REPORT-DEFECT` — mechanical, on the silent end |
 
 ## The sharpest
 

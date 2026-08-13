@@ -1,0 +1,14 @@
+{
+  "fixture_id": "GROOM-SELFTEST-10",
+  "situation": "Issue 41 carries a `## Chain` line reading `Relates to #55 — if every mechanical defect needs a question, this slice collapses into that one`. Issue 55 is open and has no `## Chain` section at all. A second pair, 41 and 39, is correctly mirrored on both ends.",
+  "forge": "github",
+  "scan": {"issues_returned": 9, "calls_made": 1, "truncated": false},
+  "chains": {
+    "41": ["Relates to #55 — if every mechanical defect needs a question, this slice collapses into that one", "Blocked by #39 — the boundary had to be measured by a real run first"],
+    "39": ["Blocks #41 — the boundary had to be measured by a real run first"],
+    "55": []
+  },
+  "expected_decision": "REPORT-DEFECT",
+  "expected_classification": "mechanical",
+  "expected_guard": "C7 — a chain names both ends; the missing half is stated on the other issue and only needs mirroring"
+}

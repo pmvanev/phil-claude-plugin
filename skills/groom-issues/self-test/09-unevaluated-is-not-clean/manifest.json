@@ -1,6 +1,6 @@
 {
   "fixture_id": "GROOM-SELFTEST-09",
-  "situation": "Every issue on the board was read in one call, and no rule that ran found anything. Two issues carry both `documentation` and `enhancement`, and the project's CLAUDE.md declares no single-valued label family. Six bodies mention repository paths in code spans rather than links.",
+  "situation": "Every issue on the board was read in one call, and no rule that ran found anything. Two issues carry both `documentation` and `enhancement`, and the project's CLAUDE.md declares no single-valued label family. Six bodies name a specific repository file in a code span rather than a link — not directories, globs or ambiguous basenames, so the discriminator is satisfied and only pushed-ness is open.",
   "forge": "github",
   "scan": {"issues_returned": 11, "calls_made": 1, "truncated": false},
   "rules_evaluated": [1, 2, 3, 5],

@@ -39,7 +39,11 @@ A well-formed issue has:
    in the project's `CLAUDE.md`, report this rule **unevaluated**. Do not infer the family from the
    labels in use — that makes the most common pairing the rule, and then the board's habits audit
    themselves.
-5. **A `## Chain` section when blocked or related** — the edge *and* the reason it exists.
+5. **A `## Chain` section when blocked or related** — the edge *and* the reason it exists, **on both
+   ends**. `phil:issue-board` puts the prose line on both issues even where the forge writes the
+   reverse edge itself, because the forge records the edge and never the reason. A chain naming an
+   issue that does not name back is therefore half-written, and it is the half a reader lands on that
+   decides whether they learn why. Cheap to check: the reciprocal is derivable from the same payload.
 
 And it does **not** contain:
 
@@ -50,6 +54,12 @@ And it does **not** contain:
   then.
 - **A second copy of something the forge already keeps** — a roster where sub-issues exist, an order
   where position holds it. The copy is the one that goes stale.
+
+  **A dated observation is not a copy.** The defect is a body asserting the forge's *present* state —
+  "this board currently shows two cards In Progress" — which is wrong the moment the board moves and
+  says nothing about when it was true. An observation stamped with its date, and pointing at the forge
+  for the live answer, is history: it stays true, and a reader knows what to distrust. Prefer the
+  observation where the state is the argument and deleting it would remove the argument.
 
 ## Scan once, derive fresh
 
@@ -87,9 +97,28 @@ Classify each, because slice 02 acts only on the first column:
 | A single-valued label family carrying two values, where the project declares the family | Session scratch in the body |
 | A missing cross-reference whose target is unambiguous | A second copy of forge-kept state the body's argument leans on |
 | A second copy of forge-kept state that only restates it | Deciding which of those two a copy is |
+| A `## Chain` line naming an issue that does not name back | Which end of a one-sided chain is right |
 
-**The cross-reference row needs a check this command cannot run.** "Unambiguous" means the target
-exists and is pushed, which `phil:issue-board` establishes with
+**A one-sided chain is the cheapest finding here and the easiest to write.** Detection is pure
+derivation: collect every `#N` inside a `## Chain` section, and flag any whose target is open and
+carries no reciprocal line. It is mechanical because the missing half is *stated on the other issue* —
+nothing has to be invented, only mirrored. What is **not** mechanical is which end is right when the
+two disagree about the reason; that is a human's.
+
+Weight it by who writes it. On a real run, three of four chains written that day by an author who had
+just read this rule were one-sided — writing one end while the relationship is fresh, and never
+returning for the other, is the normal way this defect is made, not a careless one.
+
+**The cross-reference row needs two things, and only one of them is a command away.** First, a
+discriminator, because "unambiguous" alone made this row a judgement call wearing a mechanical label:
+a reference is a finding when it names **a specific file a reader would open to follow the argument**.
+A repository-root file (`CLAUDE.md`), a bare directory (`rules/`, `agents/`), a glob (`commands/*.md`)
+and an ambiguous basename (`SKILL.md`, where twenty exist) are **not** findings — the first two are one
+click from any page, and the last two have no single target to link. Without that line, two references
+in the same body get opposite treatment and the column stops meaning "one right answer".
+
+Second, the check itself. "Unambiguous" also means the target exists and is pushed, which
+`phil:issue-board` establishes with
 `git ls-tree origin/<default-branch> -- <path>` — outside a `Bash` scoped to `gh issue list` /
 `glab issue list`, and deliberately so. A bare file path in a body is therefore a **candidate**, not a
 finding: report it as unverified and say what would settle it. Promoting it anyway produces the failure
