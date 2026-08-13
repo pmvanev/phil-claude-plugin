@@ -1,0 +1,8 @@
+{
+  "fixture_id": "GROOM-SELFTEST-05",
+  "situation": "An issue body carries a hand-pasted working note: what the last session decided, which commit it stopped at, and what to do next.",
+  "forge": "github",
+  "issue": {"number": 22, "body_contains": "## Where I got to\\n\\nStopped at 083c953, next: wire the hook"},
+  "expected_decision": "REPORT-DEFECT",
+  "expected_guard": "ADR-013 puts session state in a git-ignored local surface; a board is world-readable"
+}

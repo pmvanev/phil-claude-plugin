@@ -1,0 +1,10 @@
+{
+  "fixture_id": "GROOM-SELFTEST-03",
+  "situation": "Every issue on the board states a purpose, says how it will be judged done, links absolutely, and carries one value per single-valued label family.",
+  "forge": "github",
+  "scan": {"issues_returned": 12, "calls_made": 1, "truncated": false},
+  "defects": [],
+  "cross_issue_candidates": [],
+  "expected_decision": "REPORT-CLEAN",
+  "expected_guard": "C5 — a clean board is reported clean; no manufactured findings"
+}

@@ -1,0 +1,9 @@
+{
+  "fixture_id": "GROOM-SELFTEST-07",
+  "situation": "Two issues overlap in part: both propose a detector, but one scopes it to architecture cruft and the other to test smells. Neither is a restatement of the other.",
+  "forge": "github",
+  "pair": [{"number": 1, "scope": "architecture cruft"}, {"number": 17, "scope": "test smells"}],
+  "overlap": "partial — shared mechanism, different target",
+  "expected_decision": "SURFACE-CANDIDATE",
+  "expected_guard": "partial overlap may be a merge, a split, or a dependency; slice 01 surfaces evidence and takes no action"
+}

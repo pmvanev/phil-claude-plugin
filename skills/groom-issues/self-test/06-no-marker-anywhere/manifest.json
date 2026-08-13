@@ -1,0 +1,9 @@
+{
+  "fixture_id": "GROOM-SELFTEST-06",
+  "situation": "This board was groomed last week. One duplicate candidate was surfaced then and the user declined the merge. Nothing recorded that decision, because nothing is ever recorded.",
+  "forge": "github",
+  "previous_run": {"candidate": "issues 14 and 19 overlap", "user_decision": "declined"},
+  "stored_state": null,
+  "expected_decision": "NO-MARKER",
+  "expected_guard": "D6/C1 — re-derive every run; the declined candidate reappears, and the report says so"
+}

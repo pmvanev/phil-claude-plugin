@@ -1,0 +1,9 @@
+{
+  "fixture_id": "GROOM-SELFTEST-02",
+  "situation": "The board holds roughly 180 open issues. The list call returned 100 and the pagination follow-up failed on a network timeout.",
+  "forge": "github",
+  "scan": {"issues_returned": 100, "issues_estimated": 180, "truncated": true, "reason": "pagination call timed out"},
+  "defects_found_in_the_100": 4,
+  "expected_decision": "REPORT-PARTIAL",
+  "expected_guard": "C4 — a partial read may never make a completeness claim"
+}

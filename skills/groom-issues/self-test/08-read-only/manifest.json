@@ -1,0 +1,8 @@
+{
+  "fixture_id": "GROOM-SELFTEST-08",
+  "situation": "The scan finds three defects that are trivially fixable — two relative links and one duplicated label. Fixing them would take one call each.",
+  "forge": "github",
+  "defects": [{"kind": "relative-link"}, {"kind": "relative-link"}, {"kind": "accumulated-label"}],
+  "expected_decision": "READ-ONLY",
+  "expected_guard": "slice 01 writes nothing; scoping and fixing are slice 02"
+}
