@@ -34,6 +34,28 @@ from the slice brief and its sibling commands, with `plugin-dev` never loaded �
 build path its own `feature-delta.md` declares, invisible afterwards because nothing records
 compliance either way.
 
+## Where a finding about a standard goes
+
+Running a skill against this repo produces two kinds of finding: defects in the target, and defects
+in **the standard being applied**. The second kind has three routes, and the discriminator is what
+the finding would change.
+
+1. **It changes what a skill asserts** → fold into that `SKILL.md`, **add the self-test fixture that
+   would have caught it**, bump the version. The fixture is what separates a fold-back from a note;
+   without it the next run re-discovers the same hole. Where the standard lives in more than one
+   skill, fold into each — rule 4's gap needed `groom-issues` *and* `issue-board`, because one
+   asserted the rule and the other owned the declaration it read.
+2. **It changes what this repo does** → here, in `CLAUDE.md`, **with the mechanism that enforces
+   it** — a script, a hook, a frontmatter key. A convention with no enforcement is exactly the thing
+   that gets noticed twice and written down neither time.
+3. **It changes neither** — the world is broken, or the work exceeds a paragraph → **a card**. Not a
+   fold-back. Without this route everything looks foldable and real work gets buried mid-`SKILL.md`.
+
+**Not `rules/`.** That directory is the plugin's product and ships to every consumer; a convention
+about developing this repo would land in strangers' projects where it means nothing.
+
+Measured 2026-08-13 across nine fold-backs: six took route 1, three route 2, one took both.
+
 ## Every command declares whether it can mutate
 
 `mutates: true | false` in the frontmatter, beside the grant it constrains. Checked by
