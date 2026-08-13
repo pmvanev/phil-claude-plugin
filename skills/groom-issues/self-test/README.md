@@ -21,9 +21,15 @@ Slice 03, the set-level loop — `/phil:groom-set`:
 `ASK-SET-LEVEL` · `APPLY-MERGE` · `APPLY-SPLIT` · `REFUSE-UNVERIFIED` · `DECLINE-NO-TRACE` ·
 `REDERIVE-BETWEEN`
 
-**`ASK-SET-LEVEL` precedes every apply in slice 03**, and is the outcome on its own wherever the question
-is the whole deliverable — `17`, where the evidence admits four resolutions, and `23`, where the answer is
-a container this command cannot create.
+**`ASK-SET-LEVEL` precedes every apply in slice 03**, and is encoded that way — fixtures `18`, `19`, `21`
+and `22` carry it in the array form alongside their terminal outcome, as `13` does for `LEAVE-SEMANTIC`.
+A runner comparing `expected_decision` therefore checks that the ask happened, which is the property
+these fixtures exist to guard; a scalar terminal outcome would have let a session skip the question and
+still pass. It is the outcome on its own wherever the question is the whole deliverable — `17`, where the
+evidence admits four resolutions, and `23`, where the answer is a container this command cannot create.
+
+`20` is the deliberate exception: `REFUSE-UNVERIFIED` stands alone because nothing was asked there. An
+unconfirmed candidate is not put to a vote.
 
 **`LEAVE-SEMANTIC` is additive too**, and pairs with `APPLY-MECHANICAL` on the same issue — fixture `13`
 pins the case where one card holds one of each, because the column is a property of the defect and not of

@@ -190,6 +190,19 @@ The reason is the deliverable, because it is what makes the mechanical claim fal
 fixes" cannot be contradicted by a reader; the sentence above can. A slice whose premise is that some
 fixes need no consultation has to show its work, or the boundary is asserted rather than drawn.
 
+**This command settles what the scan could not, and must actually do it.** The scan reports an unlinked
+path as an unverified *candidate* because confirming the target needs `git`, which its `Bash` scoping
+withholds. `/phil:groom-fix` holds `git ls-tree`, and that grant exists for exactly this: run
+`git ls-tree origin/<default-branch> -- <path>` on every candidate in scope, and the confirmed ones
+become findings you may fix. A candidate that will not confirm **stays unfixed and stays reported**,
+with the check that failed named.
+
+Read the scan's caveat as a statement about tools, not about truth. Carried across unexamined it
+disqualifies the fix this command leads with — relative links that 404 are the first row of the
+mechanical column and the headline of the command's own description, and a session that treats every
+one of them as permanently unverifiable refuses its most common correct edit while reporting that it
+followed the rules.
+
 **The scope is a line, not a hint.** A mechanical defect outside the chosen scope stays untouched — and
 stays *mentioned*. Out of scope means untouched, not unmentioned; a defect that disappears from the
 output reads as fixed.
@@ -391,6 +404,35 @@ labels does not need rule 4's oracle, and reporting it unevaluated there is boil
 a caveat stops being read by the run that needs it. The note is owed when a candidate existed and the
 check could not settle it: two labels and no declared family, an unlinked path and no way to confirm
 the target. No candidate, no note.
+
+## Decision outcomes
+
+Report the outcome by name, every run. Each command draws from its own set.
+
+`/phil:groom-issues` (the scan) reports exactly one of:
+
+`REPORT-DEFECT` · `REPORT-CLEAN` · `REPORT-PARTIAL`
+
+and any of these **alongside** it: `REPORT-UNEVALUATED` (a rule had a candidate and no oracle) ·
+`SURFACE-CANDIDATE` (a cross-issue candidate reported, not acted on) · `NOT-A-DEFECT` (something that
+looks like a finding and is not) · `NO-MARKER` · `READ-ONLY`.
+
+`/phil:groom-fix` (the apply) reports `SCOPE-FIRST` before any write, then exactly one of:
+
+`APPLY-MECHANICAL` · `STALE-REREAD` · `REFUSE-GENERATED`
+
+with `LEAVE-SEMANTIC` alongside whenever a semantic defect was reported and left.
+
+`/phil:groom-set` (the set-level loop) reports `ASK-SET-LEVEL` before any write, then exactly one of:
+
+`APPLY-MERGE` · `APPLY-SPLIT` · `DECLINE-NO-TRACE` · `REFUSE-UNVERIFIED`
+
+with `REDERIVE-BETWEEN` alongside whenever an apply invalidated a later candidate.
+
+**`SCOPE-FIRST` and `ASK-SET-LEVEL` are preconditions, not alternatives.** An apply that reports only
+its terminal outcome has not said whether it asked — and *did it ask* is the one property both writing
+commands exist to guarantee. `REFUSE-UNVERIFIED` is the exception that proves it: nothing was asked
+there, because an unconfirmed candidate is not put to a vote.
 
 ## What this skill must never do
 

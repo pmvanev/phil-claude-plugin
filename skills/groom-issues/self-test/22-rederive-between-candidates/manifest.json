@@ -8,6 +8,6 @@
     {"class": "ungrouped", "issue": 20},
     {"class": "oversized", "issue": 9}
   ],
-  "expected_decision": "REDERIVE-BETWEEN",
+  "expected_decision": ["ASK-SET-LEVEL", "APPLY-MERGE", "REDERIVE-BETWEEN"],
   "expected_guard": "an apply changes the set the remaining candidates were computed over; candidate 3's subject no longer exists"
 }

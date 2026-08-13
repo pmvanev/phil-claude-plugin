@@ -6,6 +6,6 @@
   "candidate": {"class": "duplicate", "pair": [2, 3]},
   "user_answer": {"action": "leave apart"},
   "prior_runs": 2,
-  "expected_decision": "DECLINE-NO-TRACE",
+  "expected_decision": ["ASK-SET-LEVEL", "DECLINE-NO-TRACE"],
   "expected_guard": "no label, no comment, no body note, no file — and the report says the pair will be proposed again"
 }

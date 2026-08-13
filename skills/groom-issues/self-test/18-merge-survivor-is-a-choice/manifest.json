@@ -7,6 +7,6 @@
   "detail_only_on_loser": "#9 records the original reporter's reproduction steps",
   "references_to_loser": [{"issue": 22, "text": "blocked by #9"}],
   "user_answer": {"action": "merge", "survivor": 34},
-  "expected_decision": "APPLY-MERGE",
+  "expected_decision": ["ASK-SET-LEVEL", "APPLY-MERGE"],
   "expected_guard": "the survivor is the user's choice, not the lower number; the close comes after the detail moves and before the references are re-pointed"
 }
