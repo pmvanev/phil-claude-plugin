@@ -34,6 +34,15 @@ artifacts already own.
 - **Auto-close on Done is ENABLED.** Setting Status=Done closes the issue; a `gh issue close -c`
   afterwards reports "already closed" and **silently drops the comment**. Post the closing
   comment first, then set Status. Moving Done→Todo does not reopen — use `gh issue reopen`.
+- **A closing keyword in a commit message closes the card *and* sets Status=Done.** It fires on the
+  bare `#N` and the rest of the sentence is never read: `fixed #22's unlinked path` closed #22 on
+  2026-08-13, in a commit whose subject was another issue's slice. Write `issue 22` or `the #22 body`
+  whenever the commit is not the fix. Recovery is two steps, because **`gh issue reopen` restores the
+  issue and not the field** — the card is left OPEN while sitting in Done, and no view flags that
+  combination. Set Status back by hand, and check with the open-in-Done query below.
+- Verify the two can't drift: an open issue in Done, or a closed one outside it, is always a defect.
+  Compare `gh issue list --state open --json number` against the project's items and their Status —
+  the same one call that reads the board already returns both halves.
 - `gh auth` needs the `project` scope — present as of 2026-08-12; `gh auth refresh -s project` if it
   is lost.
 - Read the board with `gh api graphql`, never `gh project item-list` — item-list served a stale
