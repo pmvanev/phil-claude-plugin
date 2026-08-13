@@ -7,8 +7,13 @@ distinguishes the two.
 
 These fixtures assert the correct **decision outcome**:
 
-`REPORT-DEFECT` · `REPORT-CLEAN` · `REPORT-PARTIAL` · `SURFACE-CANDIDATE` · `NOT-A-DEFECT` ·
-`NO-MARKER` · `READ-ONLY`
+`REPORT-DEFECT` · `REPORT-CLEAN` · `REPORT-PARTIAL` · `REPORT-UNEVALUATED` · `SURFACE-CANDIDATE` ·
+`NOT-A-DEFECT` · `NO-MARKER` · `READ-ONLY`
+
+**`REPORT-UNEVALUATED` is additive**, like `REFUSE-DERIVABLE` in `skills/session-handoff/`. A run
+reports it *alongside* `REPORT-DEFECT`, `REPORT-CLEAN` or `REPORT-PARTIAL` whenever a check went dark —
+a board with defects can also have rules that never ran. Fixture `09` pins the case where it is the
+only thing left to say, which is the one most likely to be swallowed by a clean-looking summary.
 
 Format and intent mirror `skills/rank-issues/self-test/` and `skills/session-handoff/self-test/`.
 Forge responses are supplied by `manifest.json` so the suite runs unattended.
@@ -25,13 +30,20 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `06-no-marker-anywhere/` | a board previously groomed | a stored marker is a second authority | `NO-MARKER` — re-derive; declined items reappear |
 | `07-surface-not-act/` | two issues overlapping in part | set-level ops are slice 03 and ask-first | `SURFACE-CANDIDATE` — evidence, no action |
 | `08-read-only/` | defects found and obviously fixable | the slice is read-only | `READ-ONLY` — nothing written |
+| `09-unevaluated-is-not-clean/` | whole board read, but rules 3 and 4 have no oracle here | silence from a rule reading as compliance | `REPORT-UNEVALUATED` — name the dark rules |
 
-## The two sharpest
+## The sharpest
 
 **`02` is the one that matters most.** Every other failure here produces a wrong item in a list a
 human reads and can argue with. This one produces a *right-looking* summary line that is false about
 work nobody examined — and the reader has no way to tell. If `02` fails while the rest pass, the tool
 is more dangerous than no tool.
+
+**`09` is `02`'s quieter twin, and harder to catch.** Both emit a summary that overstates what was
+examined. In `02` the issue count is visibly short, so a reader who checks the numbers can see it. In
+`09` every number is honest and complete, and what is missing is which *rules* were awake — invisible
+from the output alone. `02` was found by reasoning about pagination; `09` came out of the first real
+run, where two rules produced no findings because neither had an oracle on that board.
 
 **`04` and `05` resolve in opposite directions over the same surface.** Both concern content that
 appears in an issue body; `05` must flag it and `04` must not. A rule that catches one by a principle
