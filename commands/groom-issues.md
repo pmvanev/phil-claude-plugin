@@ -1,6 +1,7 @@
 ---
 description: "Read a whole issue board and report what is wrong with it — bodies that state no purpose or no way to tell when they are done, links that will 404, accumulated labels, plus the defects that live between issues: duplicates, oversized cards, work overcome by events. Reports only; changes nothing."
 argument-hint: "[<owner/repo> or <group/project>]"
+mutates: false
 allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(glab issue list:*), AskUserQuestion, Skill
 ---
 

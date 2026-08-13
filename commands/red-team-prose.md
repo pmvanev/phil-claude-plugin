@@ -1,6 +1,7 @@
 ---
 description: "Red-team a document from all three prose angles in one pass — AI-generated tells (ai-eos), Elements of Style clarity (eos), and fitness for audience and purpose (technical-communication) — as a single ranked report, then offer to apply the safe fixes."
 argument-hint: "<--changes | file-path | lines:N-M | directory-path>"
+mutates: true
 allowed-tools: Read, Edit, Glob, Grep, Bash, Agent
 ---
 

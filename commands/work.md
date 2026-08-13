@@ -1,6 +1,7 @@
 ---
 description: "Carry an invisible technical initiative (refactor, re-architecture, cleanup, migration, perf/dependency work) through with discipline — frame, plan, safeguard, execute by delegating to your tactical skills, and document, with behavior provably preserved."
 argument-hint: "[\"<initiative>\" | (no arg to resume)]"
+mutates: true
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash, AskUserQuestion, Skill, Agent, TaskCreate, TaskUpdate
 ---
 

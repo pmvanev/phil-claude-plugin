@@ -1,6 +1,7 @@
 ---
 description: "Review and revise a project's CLAUDE.md file against best practices — trim bloat, fix structure, sharpen instructions."
 argument-hint: "<file-path | directory-path>"
+mutates: true
 allowed-tools: Read, Edit, Glob, Grep
 ---
 

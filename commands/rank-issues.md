@@ -1,6 +1,7 @@
 ---
 description: "Turn an unsorted board into a queue: elicit the goals your issues serve, order the goals by milestone due date, then order the issues inside each goal by board position — recording why each goal ranks where it does, and writing any dependency it uncovers as a real forge link rather than burying it in the order."
 argument-hint: "[<owner/repo> or <group/project>]"
+mutates: true
 allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion, Skill
 ---
 

@@ -1,6 +1,7 @@
 ---
 description: "Apply the mechanical fixes /phil:groom-issues reported — relative links that 404, accumulated single-valued labels, one-sided chains, missing cross-references — inside a scope you pick, each change reported with the reason it needed no judgement. Never touches a defect that needs a decision."
 argument-hint: "[<owner/repo> or <group/project>]"
+mutates: true
 allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(gh issue view:*), Bash(gh issue edit:*), Bash(glab issue list:*), Bash(glab issue view:*), Bash(glab issue update:*), Bash(git ls-tree:*), AskUserQuestion, Skill
 ---
 

@@ -1,6 +1,7 @@
 ---
 description: "Iteratively refactor code by working through the refactoring backlog — test, fix, prune, repeat."
 argument-hint: "[--changes | file-path | directory-path]"
+mutates: true
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash, Agent, TaskCreate, TaskUpdate
 ---
 

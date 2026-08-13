@@ -1,5 +1,6 @@
 ---
 description: "Pick the work back up: read the resume point, state up front whether it is still current or stale against the tree, and only then present what was decided and what to do next. With no resume point, reconstructs the position from the artifacts that own it and says that is what it did."
+mutates: false
 allowed-tools: Read, Glob, Grep, Bash(git rev-parse:*), Bash(git status:*), Bash(git rev-list:*), Bash(git log:*), Skill
 ---
 

@@ -1,6 +1,7 @@
 ---
 description: "Gated closed-loop refactoring — a separate proposer and correctness critic, hard test gates, a bounded fix sub-loop, and a DAG ledger drive structure-only change until convergence. Orchestrated by the Workflow tool (the deterministic cage)."
 argument-hint: "[--changes | function | class | file | directory] [--max-iterations N] [--max-fix-attempts N]"
+mutates: true
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash, Agent, Workflow, TaskCreate, TaskUpdate
 ---
 

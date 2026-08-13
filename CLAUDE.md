@@ -34,6 +34,27 @@ from the slice brief and its sibling commands, with `plugin-dev` never loaded �
 build path its own `feature-delta.md` declares, invisible afterwards because nothing records
 compliance either way.
 
+## Every command declares whether it can mutate
+
+`mutates: true | false` in the frontmatter, beside the grant it constrains. Checked by
+`scripts/check-readonly-commands.py`, which fails the build on a `mutates: false` command that
+grants `Write`/`Edit`, bare `Bash`, or a `Bash(...)` verb outside its read-only allowlist — and on
+any command carrying no declaration at all.
+
+**It is a claim about the grant, not about intent.** That is the half a script can verify.
+`mutates: false` asserts the tool list makes mutation impossible; `mutates: true` asserts only that
+the grant permits it, and says nothing about whether the command means to. `adversarial-review` is
+the standing example: it reports and never edits, yet runs the project's test suite as its
+deterministic oracle, and executing project code can write. It declares `true`, and its skill
+carries the intent in prose.
+
+**Absence of `Write` never meant read-only, and presence of bare `Bash` never meant mutating.**
+Audited 2026-08-13: `ai-eos` and `adversarial-review` were byte-identical on both signals — no
+`Write`/`Edit`, bare `Bash` — while one must never write and the other must execute arbitrary code.
+Only the skill's prose separated them, and no validator reads that. Hence the declaration.
+
+Adding a verb to the allowlist is a promise that it has no writing mode. Check before adding one.
+
 ## Which copy is under test
 
 **The released copy is what a `/phil:*` command runs — never this working tree.** Claude Code loads

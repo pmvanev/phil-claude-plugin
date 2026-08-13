@@ -1,6 +1,7 @@
 ---
 description: "Clean comments and docstrings — remove redundancy, delete commented-out code, ensure comments explain why not what."
 argument-hint: "<lines:N-M | method-name | file-path | directory-path>"
+mutates: true
 allowed-tools: Read, Edit, Glob, Grep
 ---
 

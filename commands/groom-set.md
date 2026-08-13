@@ -1,6 +1,7 @@
 ---
 description: "Resolve the defects that live between issues — duplicates, oversized cards, work overcome by events, effort with no container — one candidate at a time, each surfaced with its evidence and applied only on your answer. Merges, splits and closes are irreversible, so none of them happens without a question."
 argument-hint: "[<owner/repo> or <group/project>]"
+mutates: true
 allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(gh issue view:*), Bash(gh issue edit:*), Bash(gh issue create:*), Bash(gh issue close:*), Bash(gh issue comment:*), Bash(gh project item-add:*), Bash(glab issue list:*), Bash(glab issue view:*), Bash(glab issue update:*), Bash(glab issue create:*), Bash(glab issue close:*), Bash(glab issue note:*), Bash(git log:*), Bash(git ls-tree:*), AskUserQuestion, Skill
 ---
 
