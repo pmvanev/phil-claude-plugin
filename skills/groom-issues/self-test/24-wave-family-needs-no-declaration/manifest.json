@@ -1,0 +1,13 @@
+{
+  "fixture_id": "GROOM-SELFTEST-24",
+  "situation": "An nWave repo — `docs/feature/` is present — whose CLAUDE.md declares no label family of any kind. One feature issue carries both `wave: discuss` and `wave: deliver`; a second carries `wave::design` and `wave::deliver` in the scoped spelling. Two other issues carry both `documentation` and `enhancement`.",
+  "forge": "github",
+  "repo_shape": {"nwave": true, "marker": "docs/feature/", "claude_md_declares": []},
+  "accumulated": [
+    {"issue": 31, "family": "wave", "values": ["wave: discuss", "wave: deliver"]},
+    {"issue": 44, "family": "wave", "values": ["wave::design", "wave::deliver"]}
+  ],
+  "project_local_pairs": [{"issues": [12, 19], "labels": ["documentation", "enhancement"]}],
+  "expected_decision": ["REPORT-DEFECT", "REPORT-UNEVALUATED"],
+  "expected_guard": "the wave family is normative via phil:nwave-issue-board and needs no project declaration; project-local families still do"
+}

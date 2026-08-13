@@ -74,12 +74,14 @@ artifacts already own.
   and that order is authoritative: the top Todo card is what to work on next.
 - Docs root for absolute links (GitHub emits relative paths verbatim and they 404):
   `https://github.com/pmvanev/phil-claude-plugin/blob/main/`
-- **Label families.** `wave: *` is **single-valued — swap, never add** (`phil:nwave-issue-board`).
-  GitHub has no scoped labels, so nothing enforces it: a feature walked DISCUSS→DELIVER accumulates
-  four wave labels and the record of where it stands becomes unreadable while every command reported
-  success. `bug` · `documentation` · `enhancement` are **multi-valued by decision, not by neglect** —
-  this plugin's product is prose, so `documentation` names a surface, never a kind of work that could
-  compete with `enhancement`. The two answer different questions, so a card carrying both (#2, #4) is
-  correct. This bullet is the declaration `phil:groom-issues` rule 4 reads; label descriptions may
-  echo it and lose on disagreement.
+- **Label families.** `bug` · `documentation` · `enhancement` are **multi-valued by decision, not by
+  neglect** — this plugin's product is prose, so `documentation` names a surface, never a kind of work
+  that could compete with `enhancement`. The two answer different questions, so a card carrying both
+  (#2, #4) is correct. This bullet is the declaration `phil:groom-issues` rule 4 reads for
+  project-local families; label descriptions may echo it and lose on disagreement.
+
+  `wave: *` needs no entry here. It is single-valued in every nWave repo on
+  `phil:nwave-issue-board`'s authority, and rule 4 applies that by default rather than waiting for a
+  local copy — a repo that forgot the copy would go dark on the one family with a documented failure
+  mode. Only declare `wave: *` here to *override* that, which nothing should.
 - Forge mechanics: `phil:issue-board`. nWave feature/slice/step mapping: `phil:nwave-issue-board`.

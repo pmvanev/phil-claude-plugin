@@ -44,13 +44,32 @@ A well-formed issue has:
    a relative path is a finding whether or not its target exists, because the form 404s either way.
    Whether a correctly-formed link *reaches* something is a different question, and it belongs to the
    cross-reference row of the defect table below, which is where it goes dark.
-4. **Correct labels**, with single-valued families carrying exactly one value — **checkable only where
-   the project declares which families are single-valued.** Nothing in a label's name says whether it
-   excludes a sibling; GitHub has no scoped labels at all. `documentation` + `enhancement` on one issue
-   is a defect or two orthogonal facts depending on a convention no forge records. Absent a declaration
-   in the project's `CLAUDE.md`, report this rule **unevaluated**. Do not infer the family from the
-   labels in use — that makes the most common pairing the rule, and then the board's habits audit
-   themselves.
+4. **Correct labels**, with single-valued families carrying exactly one value. Nothing in a label's
+   name says whether it excludes a sibling; GitHub has no scoped labels at all. `documentation` +
+   `enhancement` on one issue is a defect or two orthogonal facts depending on a convention no forge
+   records — so for a **project-local** family this is checkable only where the project declares it,
+   and absent a declaration you report the rule **unevaluated**.
+
+   **`wave: *` is the exception, and it is not the project's to declare.** In a repo holding `.nwave/`
+   or `docs/feature/`, the wave family is single-valued **by default**, on `phil:nwave-issue-board`'s
+   authority — *"the wave label is single-valued and must be swapped, not added"* — which also names
+   the failure: a feature walked DISCUSS→DELIVER accumulates four wave labels and the record of where
+   it stands becomes unreadable while every command reported success. That invariant is identical in
+   every nWave repo. Requiring each one to hand-copy it means a repo that forgets goes dark on **the
+   one family with a documented failure mode**, and dark silently, because unevaluated reads as clean
+   to anyone not looking for it. Report the accumulation as a mechanical defect. A project overrides
+   this only by declaring `wave: *` multi-valued in as many words, which nothing should.
+
+   Match a family on the prefix before `::` or `: ` — `wave::deliver` where scoped labels exist and
+   `wave: deliver` where they do not are the same family, and a board may carry both spellings.
+
+   **What counts as a declaration**, because "the project declares it" is not self-executing: a bullet
+   under the project's `## Issue board` section in `CLAUDE.md` naming a family and calling it
+   single-valued or multi-valued, per the setup block in `phil:issue-board`. `CLAUDE.md` is already in
+   context, so this costs no read. Two things are **not** declarations. A label's own description —
+   it is not authoritative and loses on disagreement. And the labels in use: inferring the family from
+   what the board already carries makes the most common pairing the rule, and then the board's habits
+   audit themselves.
 5. **A `## Chain` section when blocked or related** — the edge *and* the reason it exists, **on both
    ends**. `phil:issue-board` puts the prose line on both issues even where the forge writes the
    reverse edge itself, because the forge records the edge and never the reason. A chain naming an
@@ -106,7 +125,7 @@ Classify each, because `/phil:groom-fix` acts only on the first column:
 |---|---|
 | A relative file link (404s on GitHub) | No purpose stated |
 | An issue reference wrapped in markdown that should be bare | No way to tell when it is done |
-| A single-valued label family carrying two values, where the project declares the family | Session scratch in the body |
+| A single-valued family carrying two values — `wave: *` always, a project-local family where declared | Session scratch in the body |
 | A missing cross-reference whose target is unambiguous | A second copy of forge-kept state the body's argument leans on |
 | A second copy of forge-kept state that only restates it | Deciding which of those two a copy is |
 | A `## Chain` line naming an issue that does not name back | Which end of a one-sided chain is right |
@@ -386,12 +405,13 @@ found. "52 clean" over a partial scan is the single most misleading thing this s
 because it is a claim about issues nobody looked at.
 
 **A rule that could not be evaluated is not a rule that passed.** Two checks go dark routinely: rule 4
-wherever the project declares no label family, and the cross-reference row wherever a target cannot be
+wherever a **project-local** family is undeclared, and the cross-reference row wherever a target cannot be
 confirmed pushed. Both then produce no findings, and no findings reads as compliance. Name them, with
 the reason:
 
 ```
-rules 1, 2, 3, 5 evaluated · rule 4 unevaluated (no label family declared in CLAUDE.md)
+rules 1, 2, 3, 5 evaluated · rule 4 partly unevaluated (`wave: *` checked — normative;
+  `documentation`/`enhancement` undeclared in CLAUDE.md)
 · 6 unlinked paths unverified (target check needs git, out of scope here)
 ```
 

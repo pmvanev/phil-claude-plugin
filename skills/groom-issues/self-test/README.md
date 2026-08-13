@@ -70,6 +70,7 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `21-declined-leaves-no-trace/` | the same pair declined for the third run | a decline record, which is a marker renamed | `DECLINE-NO-TRACE` — and say it will reappear |
 | `22-rederive-between-candidates/` | candidate 1's merge closes candidate 3's subject | walking a list the run's own applies invalidated | `REDERIVE-BETWEEN` — drop it, and say why |
 | `23-ungrouped-effort-container/` | two LaTeX cards, no milestone is that goal (**measured**) | inventing the container, or filing under the nearest | `ASK-SET-LEVEL` — propose, hand over the call, stop |
+| `24-wave-family-needs-no-declaration/` | nWave repo declaring nothing, two cards with accumulated wave labels | a normative family going dark for want of a local copy | `REPORT-DEFECT` + `REPORT-UNEVALUATED` — both halves |
 
 ## The sharpest
 
@@ -125,6 +126,19 @@ to `11`, one slice further along.
 involves someone else editing between read and write. This one cannot be avoided by being careful about
 other people: the run's first apply invalidates its own remaining candidates, so any run that resolves
 more than one candidate from a single scan is wrong by construction.
+
+**`09` and `24` are the same undeclared board with one difference, and it is the whole change.** Both
+run against a project whose `CLAUDE.md` declares no label family. In `09` there are no wave labels, so
+rule 4 has nothing but project-local pairs to judge and correctly reports only `REPORT-UNEVALUATED`. In
+`24` two cards have accumulated wave labels, and rule 4 must fire on those while still going dark on
+`documentation` + `enhancement` — **one rule, two authorities, resolved independently in a single run**.
+A session that treats the two fixtures alike has either broken `09` by inferring families from the
+labels in use, or failed `24` by letting a normative invariant wait for a local copy that no forge
+requires.
+
+`24` also inverts `09`'s visibility argument. There, the danger was a clean summary hiding a dark rule.
+Here the summary already carries findings, so it *looks* thorough — which makes the missing unevaluated
+note harder to spot, not easier.
 
 **`04` and `05` resolve in opposite directions over the same surface.** Both concern content that
 appears in an issue body; `05` must flag it and `04` must not. A rule that catches one by a principle

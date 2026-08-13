@@ -555,6 +555,10 @@ cannot be discovered:
 - Tier: Premium (scoped labels swap server-side; real `blocks` links) | Free (swap manually with
   `--unlabel`; `relates_to` only)
 - Status lives in `status::` labels — swap, never add a board list
+- Label families: `<name>` single-valued — swap, never add · `<a>` + `<b>` multi-valued by decision.
+  Nothing on a forge records this, so grooming reports the rule **unevaluated** for any family not
+  listed here. `wave: *` needs no entry — `phil:nwave-issue-board` declares it single-valued for
+  every nWave repo.
 - (Projects v2) Built-in workflows enabled: <none | auto-close on Done | auto-Done on close> —
   a status write is also an issue write when one is on; comment before setting Status
 - Docs root for links: `https://<host>/<project>/-/blob/<default-branch>/docs/` — `ADR-016` → `<docs root>adr/ADR-016.md`
