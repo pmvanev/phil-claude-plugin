@@ -8,6 +8,12 @@
             "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/check-plugin-skew.py\" 2>/dev/null || true",
             "timeout": 10,
             "statusMessage": "Checking plugin version skew"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/check-invariants.py\" 2>/dev/null || true",
+            "timeout": 40,
+            "statusMessage": "Checking repo invariants"
           }
         ]
       }

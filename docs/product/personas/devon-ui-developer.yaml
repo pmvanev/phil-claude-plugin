@@ -1,0 +1,38 @@
+# Persona (SSOT) — BACKFILLED 2026-08-13 from shipped artifacts, not from a DISCUSS wave.
+#
+# `jobs.yaml` referenced this persona from the day the job was registered and the file was never
+# written; the gap was noticed at least three times (ux-standards-rule, mobile-web-standards, and
+# issue #16) and recorded as out-of-scope twice. Every field below is reconstructed from evidence
+# that already shipped — the job entry in `docs/product/jobs.yaml`, the two evolution records
+# (2026-07-03-ux-standards-rule, 2026-07-07-mobile-web-standards), and `rules/ux.md` itself.
+#
+# Read it as derived rather than observed. Nothing here came from talking to a user, so a later
+# wave that does talk to one should overwrite rather than extend it.
+
+id: devon-ui-developer
+name: Devon
+role: Developer building or editing UI in a repo using the phil plugin
+goals:
+  - Ship UI whose objective usability and accessibility defects were caught before review
+  - Stay heads-down on behavior without holding Nielsen's heuristics and WCAG in memory
+  - Trust that the small touch screens most users actually have are covered, not just the
+    desktop the UI was built on
+frustrations:
+  - The plugin owned visual aesthetics (`ui.md`) and nothing owned usability or accessibility
+  - Defects that are objective and cheap to fix — missing states, placeholder-as-label,
+    color-only status, unlabeled controls, sub-24px targets — surfaced in QA or production
+  - Mobile web had no owner beyond a single touch-target line: reflow at 320px, 400% zoom,
+    orientation lock, and gesture-only interactions went unflagged
+  - A rule that nags on every judgment call would be noise on a dense expert tool, so silence
+    and over-flagging are both failures
+mental_model:
+  - "Aesthetics and usability are different questions — one is taste, the other is checkable"
+  - "If it is objective, a tool should catch it in-flow; if it is a judgment call, tell me once"
+  - "It works on my desktop" is not evidence about the device the user is holding
+vocabulary:
+  - WCAG, Nielsen heuristics, a11y, reflow, touch target, focus state, contrast ratio,
+    single-pointer alternative, motion actuation, orientation lock
+
+# Traceability: job `catch-ux-violations-while-building-ui` (status: validated).
+# Served by shipped features `ux-standards-rule` and `mobile-web-standards`, whose artifacts are
+# `rules/ux.md`, `rules/ui.md`, `skills/ux-review/SKILL.md` and `commands/ux-review.md`.

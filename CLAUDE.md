@@ -34,6 +34,17 @@ from the slice brief and its sibling commands, with `plugin-dev` never loaded �
 build path its own `feature-delta.md` declares, invisible afterwards because nothing records
 compliance either way.
 
+## Repo invariants run themselves
+
+`scripts/check-invariants.py` runs the repo's checks at `SessionStart` and reports **only
+failures** — command mutation declarations, and job → persona traceability in `docs/product/`.
+A check nobody runs reports compliance by staying quiet, which is this board's recurring defect;
+a runner that announces success every session trains people to stop reading it.
+
+Add a check here when a defect is found twice. `devon-ui-developer` was referenced by `jobs.yaml`
+with no file for six weeks, noticed three times and recorded as out-of-scope twice — a shallow
+check passes because the field is populated.
+
 ## Where a finding about a standard goes
 
 Running a skill against this repo produces two kinds of finding: defects in the target, and defects
