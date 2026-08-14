@@ -14,12 +14,23 @@ These fixtures feed the skill known project and forge states and assert each pro
 **decision outcome** (`PUBLISHED` / `NOTES-PRESERVED` / `UNKNOWN-PUBLISHED` / `HUMAN-STATE-KEPT` /
 `BLOCK-DELIMITED` / `WAVE-SWAPPED` / `NO-ROWS-BEFORE-ROADMAP` / `DEFERRED-ROW-NOT-OMITTED` /
 `GENERATED-ROSTER` / `ONE-WAY` / `OWNER-DECIDES` / `ROSTER-ORDER-FOLLOWS-ROADMAP` /
-`ORDER-STATED-AS-PROVISIONAL` / `ROSTER-NOT-CHECKBOXES` / `PROJECTION-BOUNDED`).
+`ORDER-STATED-AS-PROVISIONAL` / `ROSTER-NOT-CHECKBOXES` / `ROUTING-LINE-DERIVED` /
+`PROJECTION-BOUNDED`).
 
 This suite is the **acceptance + regression gate** for `skills/nwave-issue-board/SKILL.md`. Run it
 whenever that file changes, and whenever either skill it delegates to changes — `phil:issue-board`
 or `phil:nwave-slice-status` — because this skill's correctness is defined partly by theirs. Format
 and intent mirror `skills/nwave-slice-status/self-test/`.
+
+## Why the numbering skips 10
+
+`10-gitlab-roster-second-pass` was **retired on 2026-08-14**. It pinned a roster written in a second pass as
+bare `#N` references, because slice numbers existed only once the slice issues had been created. Slices are
+no longer issues, so there is nothing to wait for and no second pass to get wrong.
+
+Retired rather than renumbered: renumbering would invalidate every reference to fixtures 11 through 17 in
+this file, in `SKILL.md`, and in the feature's slice briefs, to save one integer. The gap is a question, and
+this section is its answer.
 
 ## What the fixtures pin
 

@@ -2,10 +2,10 @@
 
 **Where it fails silently.** Both forges really will report `2 of 4` from a roster written as `- [ ] `
 checkboxes, and on the day it is written the number is correct. But a checkbox is ticked by a person
-and a slice issue is closed by the work, so the two authorities diverge the first time anyone forgets
-one of them — and what the feature displays is the state of the checkboxes. The failure is invisible
-in exactly the way the rest of this suite guards against: a feature reading `2 of 4` while three
-slices are closed looks like a healthy board, not a broken one. The bare-reference roster has no
+and a glyph is regenerated from the artifacts, so the two diverge the first time anyone forgets to tick
+— and what the feature displays is the state of the checkboxes. The failure is invisible in exactly the
+way the rest of this suite guards against: a feature reading `2 of 4` while three slices are done looks
+like a healthy board, not a broken one. The generated roster has no
 such gap, because each `#N` renders the issue's own live state and nothing caches a total.
 
 The tier is Premium on purpose. Premium is what would normally unlock a real child-issue rollup, and
@@ -20,11 +20,11 @@ set to Free would pass for the weaker reason that nothing was available anyway.
    `- [x]` markers are introduced anywhere in it.
 2. No slices-done count is written into the block — on either forge
    the honest answer is the roster's live states, not a total.
-3. The closed slices are not hand-marked. `#101` and `#102` already render as closed; nothing
-   restates it.
-4. If a feature-level bar is asked for explicitly, the answer offered is a **milestone** holding the
-   slice issues, per *A parent's "N of M done" counts different things on each forge* in
-   `phil:issue-board` — not checkboxes, and not a hand-kept tally.
+3. The done slices are not hand-marked. The `✓` glyphs on slices 01 and 02 already render them done;
+   nothing restates it.
+4. If a feature-level count is asked for explicitly, the answer offered is **the roster's live states,
+   re-derived on every refresh** — not checkboxes, and not a hand-kept tally. No forge rollup applies,
+   because slices are not issues; what the forge counters measure stays `phil:issue-board`'s to explain.
 5. Nothing here restates the GitLab rollup field names or their tier and stability; those live in
    `phil:issue-board`.
 

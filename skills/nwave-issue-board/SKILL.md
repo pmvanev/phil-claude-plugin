@@ -1,6 +1,6 @@
 ---
 name: nwave-issue-board
-description: Use for any GitLab or GitHub board or tracker work in an nWave repo — one holding `.nwave/` or `docs/feature/` — including putting a feature and its slices on the tracker, opening an issue per slice, ordering the slice cards so the board matches the roadmap, recording which wave a feature is in, refreshing the step table inside a slice's issue, or deciding what a feature, slice, and step each become in a forge. Read this before `phil:issue-board` whenever those directories exist. Covers only the mapping; `phil:issue-board` owns the forge mechanics and `phil:nwave-slice-status` owns the status.
+description: Use for any GitLab or GitHub board or tracker work in an nWave repo — one holding `.nwave/` or `docs/feature/` — including putting a feature on the tracker as a single card, generating the slice roster and current-slice step table inside it, ordering those rows to match the roadmap, recording which wave a feature is in, or deciding what a feature, slice, and step each become in a forge. Read this before `phil:issue-board` whenever those directories exist. Covers only the mapping; `phil:issue-board` owns the forge mechanics and `phil:nwave-slice-status` owns the status.
 ---
 
 # nWave Features on a Forge Board
@@ -42,9 +42,11 @@ property of a **developer**, not of a repo. With several developers each owning 
 flight, and every conclusion drawn from the single-card premise has to be re-derived. The full record is
 in `docs/feature/single-issue-per-feature/feature-delta.md`.
 
-**Split a feature into slice cards only when two people work it concurrently.** That is
-`phil:issue-board`'s rule under *Choosing what becomes an issue* — split when two halves would sit in
-different columns at the same time — and concurrency is now the only thing that produces it.
+**A slice is never its own issue under this mapping, and there is no exception clause here.** Two people
+working one feature at once is the case `phil:issue-board` covers under *Choosing what becomes an issue*,
+and a repo that needs it has left this mapping rather than found a branch inside it. Do not read that rule
+as licence to create slice cards while following this one: every rule below — no rollup, no per-slice
+position, no sub-issue — assumes there are none, and a mixed application resurrects all of them at once.
 
 Steps and slices both stay rows for the reason steps always did: a 22-phase feature would otherwise mint
 hundreds of issues, and that size is real. **The inverted form of that argument binds too** — every step
@@ -69,8 +71,12 @@ a second tally that would disagree. Once slices stop being issues, nothing compu
 **generated, delimited, timestamped** roster is the same instrument as the step table that already ships,
 carrying the same guarantees.
 
-Both forges are now identical on this point, which removes the asymmetry the old design had to work
-around: no epics, no Premium tier question, no second seeding pass, and no per-forge rollup divergence.
+Both forges are now identical **on the roster**, which removes the asymmetry the old design had to work
+around: no epics, no second seeding pass, and no per-forge rollup divergence.
+
+**The tier still matters elsewhere, so do not read that as "no tier question".** Scoped labels — which the
+wave label uses — and real dependency links are both Premium-gated, per `phil:issue-board`. What retired is
+the tier question about *hierarchy*, not the tier probe itself.
 
 **Never write the roster as `- [ ] ` checkboxes**, on either forge. GitLab will report a completion count
 from them and GitHub will count them under `trackedIssues`, so the temptation is real and the mechanism
@@ -78,8 +84,23 @@ works. **A checkbox is ticked by hand while work completes on its own**, so the 
 anyone forgets, and what the feature then displays is the state of the checkboxes rather than the state of
 the work. Plain rows with generated glyphs, always.
 
-**Per-row status is a glyph, from exactly this set:** `✓` done · `▶` current · `·` not started ·
-`⊘` deferred · `?` unknown. Generated from what `phil:nwave-slice-status` returns, never typed.
+**Per-row status is a glyph, generated from what `phil:nwave-slice-status` returns and never typed.** That
+skill owns the vocabulary and defines **seven** values; this table is a rendering of them and nothing more:
+
+| Its status | Glyph |
+|---|---|
+| `done` | `✓` |
+| `current` | `▶` |
+| `next` | `→` |
+| `not started` | `·` |
+| `blocked` | `!` |
+| `deferred` | `⊘` |
+| `unknown` | `?` |
+
+**Every value it can return has a glyph, and that is the property to preserve.** A value added there needs
+one added here, or the generator faces a status it cannot render and will downgrade it — and downgrading
+`blocked` or `unknown` to `·` is the *unknown-published-as-not-started* defect wearing a new costume. Never
+invent a glyph for a value the owner does not define; never render a value by omitting its row.
 
 **Every roster row carries a two-line description of what that slice does** — not just its name. The
 name is a label the owner recognises; a reader inheriting the feature needs to know what the slice
@@ -91,43 +112,33 @@ delta, the slice briefs, the journey — give each a clause saying what it holds
 read: *"I like that the artifacts are all linked **and summarized**."* Six bare URLs would have consumed
 the whole thirty-second budget the projection exists to fit inside.
 
-## Wave is the column, and also stays a label
+## Wave is a label on the feature card
 
-**The board columns are the waves** — `discover · diverge · discuss · design · devops · distill ·
-deliver` — plus a generic `to do · in progress · blocked · done` family for work nWave is not driving.
-One board serves both populations.
-
-**This reverses the earlier rule, on the same premise correction as the mapping.** Wave columns were
-rejected because *"nWave is worked one feature at a time, so those columns hold a single card between
-them — a progress readout wearing a board's clothes."* With several developers each owning a feature,
-those columns hold real cards and the board answers the question a teammate actually has: who is where in
-the process.
-
-**Record the wave as a label as well** — `wave::deliver`, or `wave: deliver` where scoped labels are
-unavailable — and restate it in the generated block. That is redundant with the column in exactly one
-case, which is the case that matters: **a blocked card has left its wave column**, and without the label
-nothing on the board says which wave it will return to.
+**Record the wave as a label** — `wave::deliver`, or `wave: deliver` where scoped labels are
+unavailable — and restate it in the generated block. The routing table below is keyed on the
+`wave: <name>` form, so use that form wherever the label is written or read.
 
 **The wave label is single-valued and must be swapped, not added.** Where scoped labels are
 unavailable, nothing enforces that, so a feature walked from DISCUSS to DELIVER accumulates four
 wave labels and the record of where it stands becomes unreadable while every command reported
 success. Remove the old wave in the same call that adds the new one.
 
-**A feature's column state is a fold over its slices, and `phil:nwave-slice-status` owns that
-derivation** — never this skill. No slice started → `to do`; any started and not all done → `in
-progress`; the current slice blocked → `blocked`; all done → `done`. **Never fold from the current slice
-alone**: a feature with five of six slices done and the sixth not started would render as `to do`,
-reporting near-finished work as untouched, which is the same lie as publishing `unknown` as `not started`.
-
 Keep **blocked** off the wave label. When the blocker is another issue, use the forge's dependency
 link and leave the chain line, both per `phil:issue-board`. A label carries only what no link can
 express — waiting on a person, a decision, or an outside event.
 
-**Adding the wave family is a real change to an existing board, not a free one.** A project whose Status
-field holds three options goes to about eleven, and every existing card is re-sorted against them.
-Observed on this repo's board 2026-08-14: `Todo`, `In Progress`, `Done`, and no `blocked` at all. Look at
-what the board holds before adding columns to it — the decision this section reverses was itself reversed
-mid-session by someone doing exactly that.
+**Whether the wave becomes a board column is deliberately unsettled here.** Making the feature the card
+is what reopens the question — with several developers each owning a feature, wave columns would hold
+real cards rather than the single card that got them rejected in the first place. But that decision is
+`docs/feature/single-issue-per-feature/slices/slice-03-wave-columns-and-blocked.md`'s, it has three
+recorded candidates, and its brief requires it be **decided against a rendered board** rather than by
+whichever option someone implemented first. Two things follow and belong to that slice, not this
+section: what a feature's column state is folded from, and whether a blocked card leaves its wave column.
+
+**Do not fold a feature-level state here.** `phil:nwave-slice-status` owns every derivation over these
+files, and it does not currently expose a feature-level state at all — it emits a per-slice table and a
+count. A fold written here would be this skill's recurring defect in its exact historical form: a
+derivation invented by the skill that had just delegated derivation away.
 
 ## The order of the cards is the order of the work
 
@@ -187,7 +198,8 @@ Publish `nwave-slice-status`'s table **with its `Notes` column intact**. Notes i
 disagreeing sources, and missing artifacts are recorded, and dropping it on the way to the forge
 sends the cleanest-looking version of the table to the largest audience.
 
-**The block carries the roster, then the current slice's steps — and nothing else.**
+**The roster and the current slice's steps are the only tables in the block.** Header lines precede them:
+`Wave:`, the generation timestamp, `Work this with:` where the routing table has a row, and `Order:`.
 
 ```
 <!-- nwave:status:begin -->
@@ -293,8 +305,11 @@ granularity that will exist, and let it carry the two-line descriptions the step
 Observed in this plugin's own repo 2026-08-14. **Stage 2 is conditional on DELIVER running, and the
 two-stage rule was written assuming it always would.**
 
-A slice file marked `DEFERRED` or out of scope is not a card. Honor the marker; `nwave-slice-status`
-treats it as overriding every other source.
+A slice file marked `DEFERRED` or out of scope **takes a `⊘` row and is never pointed at as current or
+next.** Honor the marker; `nwave-slice-status` treats it as overriding every other source.
+
+*(This sentence read "is not a card" until 2026-08-14. There are no slice cards to withhold, and withholding
+the **row** instead erases a slice that existed, was considered, and was set aside — see fixture 08.)*
 
 ## Refresh at boundaries
 

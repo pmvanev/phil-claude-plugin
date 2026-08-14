@@ -15,7 +15,7 @@ cards in a column, indistinguishable from a sequence someone agreed to, one wave
 2. The roster carries the basis, in words: `Order: slice number, provisional until /nw-roadmap`.
 3. The order is never described as the roadmap's, the plan's, or the sequence.
 4. No step rows are invented, per fixture 07. The absent roadmap constrains both.
-5. The roster is written in a second pass, per fixture 10 — slice numbers do not exist until the
+5. The roster is generated in one pass; there are no slice numbers to wait for — slice numbers do not exist until the
    issues do, and neither does the order they are published in.
 
 **Gate failure (blocks the skill change):** an unlabelled guess published as an order; OR the column

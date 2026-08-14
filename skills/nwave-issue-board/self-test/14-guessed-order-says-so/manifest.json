@@ -10,7 +10,7 @@
     "host": "gitlab",
     "tier": "Free",
     "board": "slice board exists, with to-do / in progress / blocked / done lists",
-    "issues": "none yet; feature issue and three slice issues are created by this invocation"
+    "issues": "none yet; only the feature issue is created by this invocation"
   },
   "expected_outcome": "ORDER-STATED-AS-PROVISIONAL"
 }

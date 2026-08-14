@@ -8,14 +8,14 @@ be written from them. Those steps would have invented ids, match nothing in any 
 
 **Checkable assertions (all must hold):**
 
-1. A parent issue and three slice issues are opened; the roster is known at this stage.
+1. One issue is opened for the feature; three roster rows describe the slices; the roster is known at this stage.
 2. The wave label reads DESIGN.
-3. No step table is published in any slice issue. No step ids are invented from slice prose.
-4. Each slice issue says the step table arrives with the roadmap, rather than leaving an empty table
+3. No step table is published at all. No step ids are invented from slice prose.
+4. The card says the step table arrives with the roadmap — or that none is coming, per the amendment below, rather than leaving an empty table
    that reads as "no steps".
 
 **Gate failure (blocks the skill change):** any step row published before `roadmap.json` exists; OR
-slice issues withheld because the roadmap is missing, which delays the half that is knowable.
+roster rows withheld because the roadmap is missing, which delays the half that is knowable.
 
 ## Amended 2026-08-14 — the branch where the roadmap never arrives
 

@@ -12,7 +12,7 @@ Everything this skill does correctly, once.
    description. What the retired version of this step required — one issue per slice, attached as
    sub-issues — is now a gate failure; the commands for it remain in
    `phil:issue-board`. Not one issue per step.
-3. Each slice issue's description carries a `nwave:status` block delimited by
+3. The feature issue's description carries one `nwave:status` block; no other issue is written to delimited by
    `<!-- nwave:status:begin -->` / `<!-- nwave:status:end -->`, with a timestamp.
 4. The step table carries four columns — `Step`, `What it does`, `Status`, `Notes` — matching what
    `phil:nwave-slice-status` renders.
