@@ -18,6 +18,8 @@ Slice 02, the apply — `/phil:groom-fix`:
 
 Slice 03, the set-level loop — `/phil:groom-set`:
 
+(plus `APPLY-CONSOLIDATE`, added 2026-08-14 with the decomposed-feature class.)
+
 `ASK-SET-LEVEL` · `APPLY-MERGE` · `APPLY-SPLIT` · `REFUSE-UNVERIFIED` · `DECLINE-NO-TRACE` ·
 `REDERIVE-BETWEEN`
 
@@ -95,6 +97,10 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `33-suggestion-replaced-not-adopted/` | both purpose suggestions are wrong about the direction of the problem | a rejected framing surviving as residue in the card | `WRITE-ELICITED` — `you wrote` + `you edited my suggestion` |
 | `34-feature-card-is-not-oversized/` | the longest card on the board, correctly shaped, with a generated projection | a size-keyed oversized rule flagging the intended shape | `REPORT-CLEAN` — no oversized, no session-state finding |
 | `35-genuinely-oversized-still-caught/` | four unrelated jobs in a card **shorter** than 34's | passing a real defect because it is short | `REPORT-DEFECT` + `SURFACE-CANDIDATE` — seam named |
+| `36-decomposed-feature-offered/` | four slice cards, real parent edge, one feature directory | acting on conclusive evidence without asking; closing before un-parenting | `ASK-SET-LEVEL` + `APPLY-CONSOLIDATE` — shape (a) |
+| `37-title-evidence-reports-only/` | `slice NN` titles and a shared milestone, nothing else | consolidating on a naming habit | `SURFACE-CANDIDATE` — reported, **not** offered |
+| `38-closed-original-is-the-target/` | the feature card exists and is **closed**, so the open list misses it | minting a duplicate of a card that already exists | `APPLY-CONSOLIDATE` — shape (b), reopen + Status hazard |
+| `39-rollup-counts-closed-not-done/` | #9 reads `3/3 100%`; one child was deliberately not built (**measured**) | reading 100% as three-of-three built | `NOT-A-DEFECT` + `REPORT-UNEVALUATED` |
 
 ## The sharpest
 
@@ -212,3 +218,15 @@ shape is flagged and the real defect passes. The discriminator is the rule exact
 demonstrated on its own?* — which is why `34`'s last gate failure is **modifying that rule's text to make
 the fixture pass**. An earlier design for the slice proposed doing exactly that, and it would have caused a
 consolidate→split oscillation, because this family stores no marker and a declined split returns every run.
+
+**`39` is the fifth measured fixture, and the only one that could not have been constructed honestly.** To
+test *the rollup counts closed rather than done*, you need a child that is closed and **not** done — and
+inventing one means inventing the very ambiguity that makes the hazard real. This board supplies it: `#9`
+reads `3/3 · 100%` while slice 03 of that feature was tested and deliberately not built, its card closed
+anyway. A won't-build close and a shipped close are the same value to the counter, and the difference survives
+only in a skill's prose.
+
+`36`, `37` and `38` are one decision at three evidence strengths, and they must resolve **three different
+ways**: act-after-asking, report-only, and act-on-a-target-you-had-to-go-looking-for. A rule that collapses any
+two of them is a gate failure — `37` is where an over-eager rule closes real cards on a naming habit, and `38`
+is where a literal-minded one mints a duplicate because the card it needed was not in the list it read.

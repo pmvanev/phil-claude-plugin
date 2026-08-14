@@ -1,0 +1,20 @@
+{
+  "fixture_id": "GROOM-SELFTEST-37",
+  "phase": "SCAN",
+  "situation": "Three open cards titled 'billing slice 01', 'billing slice 02', 'billing slice 03'. There is NO parent edge, no body names any docs/feature/ directory, and the three share a milestone called 'Q3 billing'. The naming is the only tie.",
+  "forge": "github",
+  "command": "/phil:groom-issues",
+  "issues": [
+    51,
+    52,
+    53
+  ],
+  "evidence": [
+    "`slice NN` in the titles",
+    "shared milestone 'Q3 billing'"
+  ],
+  "expected_decision": [
+    "SURFACE-CANDIDATE"
+  ],
+  "expected_guard": "reported with the evidence's weakness named; NO consolidation offered"
+}

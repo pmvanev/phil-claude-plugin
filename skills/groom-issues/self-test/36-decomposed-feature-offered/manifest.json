@@ -1,0 +1,23 @@
+{
+  "fixture_id": "GROOM-SELFTEST-36",
+  "phase": "SET-LEVEL",
+  "situation": "Four open cards -- #41 'auth slice 01', #42 'auth slice 02', #43 'auth slice 03', #44 'auth slice 04' -- are real sub-issues of open parent #40 'Auth rework'. The board is an nWave repo where one issue is one feature. All four bodies name docs/feature/auth-rework/.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "issues": [
+    40,
+    41,
+    42,
+    43,
+    44
+  ],
+  "evidence": [
+    "real parent/child edge on #40",
+    "all four bodies name docs/feature/auth-rework/"
+  ],
+  "expected_decision": [
+    "ASK-SET-LEVEL",
+    "APPLY-CONSOLIDATE"
+  ],
+  "expected_guard": "shape (a) named; edges removed before children closed; rollup effect stated before the answer"
+}

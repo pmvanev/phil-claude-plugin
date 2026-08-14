@@ -1,6 +1,6 @@
 ---
 name: groom-issues
-description: Skill bundle for the phil:groom-issues, phil:groom-fix, phil:groom-set and phil:groom-ask commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, resolves the defects between issues (merge, split, close, group) by asking before each one, and fills in a card that says too little from the user's answers and its own suggestions, labelling where every field's words came from. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
+description: Skill bundle for the phil:groom-issues, phil:groom-fix, phil:groom-set and phil:groom-ask commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, resolves the defects between issues (merge, split, close, group, consolidate a feature decomposed under retired rules) by asking before each one, and fills in a card that says too little from the user's answers and its own suggestions, labelling where every field's words came from. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
 ---
 
 # Groom issues — say what is wrong with a board
@@ -290,6 +290,27 @@ reports each with its evidence and stops; resolving them is `/phil:groom-set`, a
 - **Overcome by events** — the work landed another way, or the decision behind it was reversed.
 - **Ungrouped effort** — a card belonging to a larger effort that says so nowhere. A milestone is a
   goal (`phil:issue-board`); do not invent a second convention.
+- **Decomposed feature** — several open cards that are **slices of one feature**, on a board where one issue
+  is one feature (`phil:nwave-issue-board`). Report the set with the evidence that ties them together.
+
+  **This class exists because the retired rules produced it.** Under the old granularity rule a slice was
+  independently demonstrable, so it was cardable — and this family's own split would have cut a feature into
+  exactly these cards. **Grooming now meets the wreckage of its own earlier advice**, and none of the four
+  classes above fires on it: not duplicates (a decomposition has no overlapping content to quote), not
+  oversized (each card is small and demonstrable), not overcome by events, not ungrouped (they are grouped
+  already). A board full of them reports **clean**, correctly and uselessly.
+
+  **The evidence is ranked, because consolidating is irreversible:**
+
+  | Signal | What it licenses |
+  |---|---|
+  | A real parent/child edge (sub-issues) | **Offer.** The forge asserts it; nothing is inferred. |
+  | Bodies naming the same `docs/feature/<id>/` | **Offer.** The artifacts assert it. |
+  | `slice NN` in the titles | **Report, never offer.** A naming convention is a habit, not a fact. |
+  | A shared milestone | **Nothing at all.** A milestone is a goal and holds unrelated work by design. |
+
+  Quote the evidence rather than characterising it. *"These look like slices of one feature"* is the finding
+  restating its own conclusion.
 
 ## Resolving the set-level candidates — `/phil:groom-set`
 
@@ -398,6 +419,41 @@ reversible operation in this whole section — one `--milestone` away from undon
 over a group of cards at once, provided the evidence for each is shown beside it. Creating a container
 cannot: a goal is a commitment about what the board is for, and this command deliberately cannot make
 one. Propose it, hand over the exact call, and stop.
+
+### Consolidate a decomposed feature
+
+**Establish which of three shapes it is before writing anything.** The old split either closed its original
+as superseded or kept it as the container, so the target of a consolidation may already exist, may exist
+closed, or may not exist at all:
+
+| Shape | Target | The risk |
+|---|---|---|
+| **(a)** An open parent exists | Absorb the children into its roster, then close them | Lowest. Still ask. |
+| **(b)** No parent, but a closed original is findable | That closed card is probably the right feature card | **A closed card is not in the list you just read**, so this shape is the one a session misses and resolves as (c) — minting a duplicate of a card that already exists |
+| **(c)** Neither | Consolidation requires *creating* the feature card | A create, so its cross-references take the two-pass discipline |
+
+**Search closed issues before concluding (c).** Never guess between the three; name which one the evidence
+shows and put it in the question.
+
+**In shape (b), reopening carries its own defect.** `gh issue reopen` restores the issue and **not** the
+Status field, so the card lands OPEN while sitting in Done — a combination no board view flags. Set the field
+by hand afterwards and read it back. (`phil:issue-board`; the same asymmetry `CLAUDE.md` records for this
+repo.)
+
+**Remove the edge, then close the child. Never the reverse.** A closed sub-issue still counts toward its
+parent's completion, so closing children first renders the feature **100% done** while the work continues.
+Measured 2026-08-14: adding a child gave `1/0`, closing it gave `1/1 · 100%`, removing the edge gave `0/0` —
+so removal genuinely drops the child rather than hiding it, and the order is the whole safeguard.
+
+**The rollup counts *closed*, not *done*, and that is worse than it sounds.** A card closed as won't-build is
+indistinguishable from one closed as shipped. Observed on this repo's board: a parent reporting `3/3 · 100%`
+where one child had been deliberately **not** built and closed anyway. So a consolidation that closes
+children does not merely inflate a number — it produces an inflation nobody can read as one. Say what the
+rollup will show, before the user answers.
+
+**Every closed child carries a pointer comment, posted *before* the close** — naming the feature card and the
+roster row it became. Auto-close-on-Done drops a comment posted afterwards, and a closed card with no pointer
+is a dead end for the next reader who finds it.
 
 ### A declined candidate leaves no trace
 
@@ -585,9 +641,14 @@ with `LEAVE-SEMANTIC` alongside whenever a semantic defect was reported and left
 
 `/phil:groom-set` (the set-level loop) reports `ASK-SET-LEVEL` before any write, then exactly one of:
 
-`APPLY-MERGE` · `APPLY-SPLIT` · `DECLINE-NO-TRACE` · `REFUSE-UNVERIFIED`
+`APPLY-MERGE` · `APPLY-SPLIT` · `APPLY-CONSOLIDATE` · `DECLINE-NO-TRACE` · `REFUSE-UNVERIFIED`
 
 with `REDERIVE-BETWEEN` alongside whenever an apply invalidated a later candidate.
+
+**`APPLY-CONSOLIDATE` must name which of the three shapes it took** — an open parent, a reopened closed
+original, or a newly created card — because the three have different blast radii and the report is the only
+place that distinction survives. It must also state what the parent's rollup now shows, since the number
+changed and nobody reading the card can tell inflation from completion.
 
 `/phil:groom-ask` (the elicitation loop) reports `ASK-CONTENT` before any write, then exactly one of:
 
@@ -679,6 +740,16 @@ All four commands:
 - Leave references pointing at an issue it closed.
 - Write a cross-reference to a card the forge has not yet numbered.
 - Leave a split's original open beside its own pieces, or its new cards off the project board.
+- **Close a child while its parent edge still exists.** The child then counts toward the parent's completion;
+  remove the edge first.
+- **Conclude that no feature card exists without searching closed issues.** A previous split may have closed
+  the original as superseded, and minting a second one buries the first.
+- **Consolidate on title evidence alone.** `slice NN` in a title is a habit; it licenses a report, never an
+  irreversible write. A shared milestone licenses nothing.
+- **Reopen a card and leave its Status unset.** `gh issue reopen` does not restore the field, so the card sits
+  OPEN in Done and no view flags it.
+- **Split a feature into slice cards.** Splitting a story creates cards; splitting a feature means re-slicing
+  its roadmap, which is not this command's to do.
 - Close on board prose alone. The claim that work landed another way is settled in the repository or
   not at all.
 - Create a milestone, or treat one card's container as evidence for another's.

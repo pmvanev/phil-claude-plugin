@@ -132,6 +132,34 @@ constructed one, because a constructed one would have to invent the very ambigui
 ~1 day. Reference class: slice 03 of `groom-issues` (the set-level loop), which shipped four ask-first
 operations with their evidence rules at about this size.
 
+## Result — authored 2026-08-14
+
+**Hypothesis CONFIRMED: the class is identifiable enough to act on** — but only because the evidence is
+ranked. The unranked version would have failed: title-only evidence is common, feels conclusive, and licenses
+an irreversible close.
+
+Landed: the class in the scan's cross-issue list with its four-tier evidence table; the consolidation
+operation in `/phil:groom-set` with the three shapes; `APPLY-CONSOLIDATE` with the requirement that it names
+which shape it took and what the rollup now reads; six new never-do entries; and four fixtures.
+
+**The evidence ranking did the real work.** Two of the four fixtures exist to stop a write rather than to
+perform one — `37` where a naming habit would have closed real cards, `38` where a literal reading mints a
+duplicate because the card it needed was closed and therefore absent from the list it read. The operation is
+mostly a set of reasons not to act yet.
+
+**Fixture 39 could not have been constructed honestly.** Testing *the rollup counts closed, not done* requires
+a child that is closed and not done, and inventing one means inventing the ambiguity that makes the hazard
+real. This board supplied it.
+
+### Not done
+
+- **No consolidation has been performed.** There is nothing live on this board to consolidate, by design
+  (slice 06's finding). The operation is authored and unexercised, exactly as `/phil:groom-ask` was.
+- **`skill-reviewer` has not run** over the class or the operation. Both prior passes on this feature found
+  contradictions surviving far from the edit, and this change touched a 8,767-word file.
+- **`#9`'s misleading `3/3 100%` is reported, not fixed.** It is the forge's counter doing what it documents,
+  and `#12`'s closure was a real decision.
+
 ## Carpaccio taste tests
 
 | Test | Result |

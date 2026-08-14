@@ -1,0 +1,21 @@
+{
+  "fixture_id": "GROOM-SELFTEST-39",
+  "phase": "SCAN",
+  "situation": "MEASURED on this repo's real board 2026-08-14. Parent #9 'Session handoff' reports subIssuesSummary total=3 completed=3 percent=100%. Its three children #11, #10, #12 are all closed. But slice 03 (#12) was TESTED AND DELIBERATELY NOT BUILT -- the session-handoff skill says so in as many words -- and was closed anyway.",
+  "forge": "github",
+  "command": "/phil:groom-issues",
+  "issue": 9,
+  "measured": {
+    "subIssuesSummary": {
+      "total": 3,
+      "completed": 3,
+      "percentCompleted": 100
+    },
+    "actually_built": 2
+  },
+  "expected_decision": [
+    "NOT-A-DEFECT",
+    "REPORT-UNEVALUATED"
+  ],
+  "expected_guard": "the rollup is reported as counting closed rather than done; it is not corrected, and not treated as a body defect"
+}

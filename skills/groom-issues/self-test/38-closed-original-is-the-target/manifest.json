@@ -1,0 +1,18 @@
+{
+  "fixture_id": "GROOM-SELFTEST-38",
+  "phase": "SET-LEVEL",
+  "situation": "Three open cards #62, #63, #64 are slices of one feature -- their bodies all name docs/feature/search-rank/. No open parent exists. But #61 'Search ranking rework' is CLOSED, with a comment reading 'superseded by #62, #63, #64' from the split that created them. A default `gh issue list` does not return it.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "issues": [
+    62,
+    63,
+    64
+  ],
+  "closed_original": 61,
+  "expected_decision": [
+    "ASK-SET-LEVEL",
+    "APPLY-CONSOLIDATE"
+  ],
+  "expected_guard": "shape (b) found by searching closed issues; the reopen/Status hazard stated; no new card minted"
+}
