@@ -374,7 +374,7 @@ AC2 — A dependency uncovered during ranking is written as a real forge link, a
 | # | KPI | Target | Measurement |
 |---|---|---|---|
 | KPI-1a | Time to comprehension — position | ≤ **30 s** to name wave and current slice | **MET 2026-08-14** — owner's timed read of card #26, under 30 s. Recorded in slice 01's brief |
-| KPI-1b | Time to comprehension — reasoning | ≤ **30 s** to name the above **plus why work stopped** | Slice 04's oracle; not yet attempted |
+| KPI-1b | Time to comprehension — reasoning | ≤ **30 s** to name the above **plus why work stopped** | **MET 2026-08-14** — owner's timed read of #26 after the first live `/phil:handoff` projection; all four facts named, under 30 s |
 | KPI-2 | Cards per feature | Exactly **1** (from 1 + N) | Board query: items whose parent is the feature |
 | KPI-3 | Projection staleness | Block timestamp within **one boundary** of the last artifact change | Compare block timestamp to the last commit touching the feature's artifacts |
 | KPI-4 | Grooming false positives | **0** correct cards flagged oversized or session-state-bearing | Run `/phil:groom-issues` after slice 05 and count |

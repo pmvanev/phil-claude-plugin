@@ -102,10 +102,44 @@ above the projection step, which is where the stack is *used*, and the write bet
 **Appending a step next to where its output is consumed rather than where its input is gathered is how this
 class of bug looks from inside.**
 
-### Not done
+### Dogfooded 2026-08-14 — the first live run, at 0.47.0
 
-- **KPI-1b unmeasured** — the same read as KPI-1a plus *why work stopped*. It needs a projection to exist
-  and a reader who has not seen the feature.
+`/phil:handoff` ran through the command (not by hand) after the merge and push closed the skew. Reported
+`CAPTURE` · `PROJECTED` · `REFUSE-DERIVABLE`. **KPI-1b MET**: the owner named the wave, the current slice,
+why work stopped, and what is next, in under 30 s.
+
+`owner:` was omitted because #26 carries no `wave:` label — step 3b's rule firing live, and slice 01's
+finding 1 in action: this repo's build path has no row in the routing table.
+
+**Three things the run exercised, and three it did not.**
+
+| Exercised | Not exercised |
+|---|---|
+| Local write before the forge call | The forge **failure** path — `PROJECTION-UNREFRESHED` (fixture 11) never fired, because the forge was reachable |
+| Whole-block markers surviving a refresh with human prose above them | The **stack rendering** — no diversion was open, so there was nothing to render |
+| `Stack — none` as distinct from `unknown` | `unknown` itself (fixture 12) — a snapshot existed |
+
+**The stack was empty, and that is the honest result.** The session ended at a slice boundary rather than
+inside a detour, so the first ever run of the stack feature had no stack to record — it exercised the
+*omit-rather-than-render-empty* rule instead of the rendering. Worth stating plainly: **the feature's
+headline mechanism is still unexercised**, and the run that was supposed to prove it proved its degenerate
+case instead.
+
+### The defect the run exposed — fold-back, route 1
+
+The reasoning went **inside** the `nwave:status` markers, appended, with the position content preserved by
+hand. It worked, and it worked for the wrong reason: **the region had two writers and only care kept them
+from colliding.** A later position-only refresh, done properly from its own single source, would have
+silently deleted the why, the next action and the stack — the only record of reasoning no artifact holds,
+erased by a routine boundary refresh reporting success.
+
+Fixed in `nwave-issue-board`: **one writer owns the whole block and regenerates it entire from two sources**
+(`nwave-slice-status` for position, `.session-handoff.md` for reasoning), on every refresh, even when only
+one source changed. A missing source renders `unknown`, which is what makes whole-block regeneration
+incapable of destroying anything. Fixture `19` pins it, including the tempting optimisation and the
+inverted-one-way-rule variant that copies the old reasoning back out of the rendered block.
+
+### Not done
 - **`plugin-dev:command-development` could not be consulted.** It fails to load: its frontmatter injects
   `bash .../scripts/test.sh`, which is absent from the installed copy. That is issue #23 reproducing, with
   a detail worth adding to it — `skill-development` loads fine, so the fault is specific to this skill's

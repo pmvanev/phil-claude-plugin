@@ -293,7 +293,18 @@ Stack
 2. └ The observed population was partial, so the rule needed changing first · open since 02:02Z
 ```
 
-Four rules, and the first is the one that makes this legal:
+**One writer owns the whole block, and it regenerates it entire from two sources.** Position comes from
+`phil:nwave-slice-status`; the reasoning comes from `.session-handoff.md`. **A partial refresh is
+forbidden** — a writer that updates the position and leaves the reasoning alone, or the reverse, is a second
+writer in one delimited region, and the next full regeneration silently drops whatever the other one put
+there. Where a source is absent, render its section `unknown` rather than omitting it or preserving a stale
+copy: that is what keeps *whole-block regeneration* from destroying anything.
+
+Found by the first live run, 2026-08-14: a handoff refreshed the reasoning by **appending inside the
+markers** and preserving the position content by hand. It worked, and it worked for the wrong reason — the
+region had two writers and only care kept them from colliding.
+
+Five rules, and the first is the one that makes this legal:
 
 - **Write-only, like everything else in the block.** `/phil:resume` reads the local snapshot; nothing reads
   this. The local file stays the single authority, so no second authority exists to drift — which is the

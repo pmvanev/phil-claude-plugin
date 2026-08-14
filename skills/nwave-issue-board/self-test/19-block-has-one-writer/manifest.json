@@ -1,0 +1,11 @@
+{
+  "fixture": "19-block-has-one-writer",
+  "situation": "Card #26 already carries a full block: position (wave, roster, order) plus reasoning (why, next, stack) projected from a handoff. A slice boundary is crossed, so the POSITION must refresh. The reasoning's source, .session-handoff.md, has not changed since it was projected.",
+  "invocation": "refresh the board for single-issue-per-feature",
+  "sources": {
+    "phil:nwave-slice-status": "current slice moved 04 -> 05",
+    ".session-handoff.md": "unchanged since the last projection"
+  },
+  "expected_outcome": "WHOLE-BLOCK-REGENERATED",
+  "expected_guard": "the block is regenerated entire from both sources; no writer edits one region and leaves the other"
+}
