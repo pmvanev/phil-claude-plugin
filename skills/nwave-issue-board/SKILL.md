@@ -42,6 +42,12 @@ property of a **developer**, not of a repo. With several developers each owning 
 flight, and every conclusion drawn from the single-card premise has to be re-derived. The full record is
 in `docs/feature/single-issue-per-feature/feature-delta.md`.
 
+**A board may already carry slice cards, and this mapping does not itself clean them up.** Boards shaped by
+the retired mapping — or by grooming advice that followed it — hold a feature's slices as separate issues, and
+under the rules here those should be roster rows. That consolidation is a **grooming** operation with ranked
+evidence, three target shapes and a rollup hazard: `phil:groom-set`, under *Consolidate a decomposed feature*.
+Do not improvise it from this side; a consolidation done wrong closes real cards.
+
 **A slice is never its own issue under this mapping, and there is no exception clause here.** Two people
 working one feature at once is the case `phil:issue-board` covers under *Choosing what becomes an issue*,
 and a repo that needs it has left this mapping rather than found a branch inside it. Do not read that rule

@@ -25,6 +25,7 @@ person.
 | `04-one-goal-per-issue/` | 8 issues, user proposes 7 goals | goals are outcomes, not tasks | `MERGE-GOALS` — say so and offer to merge |
 | `05-intransitive-pairwise/` | pairwise returns A>B, B>C, C>A | do not average a contradiction | `REGROUP-INTRANSITIVE` — the goal is mis-cut; back to grouping |
 | `06-new-issue-arrives/` | one new issue on an already-ranked board | two levels exist to avoid re-cutting | `INCREMENTAL-PLACE` — one goal + one position, no re-rank |
+| `08-feature-is-the-ranked-unit/` | eight of eleven cards are slice cards on an nWave board | ranking a unit that is about to become a table row | stop at READ; consolidate first |
 | `07-homeless-issue/` | an issue fits no goal | unassigned is visible; a wrong goal is not | `LEAVE-UNASSIGNED` |
 
 ## The two sharpest

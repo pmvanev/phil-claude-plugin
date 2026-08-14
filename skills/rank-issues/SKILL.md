@@ -44,6 +44,11 @@ than an unranked one.
 List the unranked issues with their current column order, and say plainly that the order shown may
 never have been chosen. Exclude anything already ordered upstream.
 
+**Detect slice cards here.** In an nWave repo the ranked unit is the feature card, so cards carrying
+`slice NN`, or sitting as sub-issues of another card, mean the board predates one-issue-per-feature. Say so
+and stop: ranking them produces an order over a unit that is going away, and `phil:groom-set`'s
+consolidation is what comes first.
+
 ### 2. GOALS
 
 Ask what goals these issues serve. Propose a grouping from their titles and let the user correct it —
@@ -128,7 +133,7 @@ reads it as taste, and reorders freely.
 
 ## What will go wrong
 
-Four failure modes, each of which reports success:
+Five failure modes, each of which reports success:
 
 - **The order reverses on GitLab.** `move_after_id` is the inverse of GitHub's `afterId` — the
   subject moves *ahead of* the named issue on GitLab, *behind* it on GitHub. Both calls succeed.
@@ -138,6 +143,11 @@ Four failure modes, each of which reports success:
   after it. Write top-down, in one pass.
 - **Re-cutting the whole board** when a single issue arrives. That is the flat order the two-level
   scheme exists to avoid; give the new issue a goal and one position.
+- **Adjusting an order whose unit no longer exists.** On a board that carried slice cards before
+  one-issue-per-feature, the existing order ranked slices. Nudging it forward succeeds, looks ranked, and
+  preserves a sequence over a unit that is now a table row. **Re-derive over the feature cards; do not
+  adjust.** Consolidation (`phil:groom-set`) is the only event that produces this, so it is also the signal
+  to look for it.
 
 ## Known limit — deferred work has no outcome
 

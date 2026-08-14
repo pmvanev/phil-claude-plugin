@@ -11,7 +11,7 @@ sloppy ones and misses the expensive ones, because the costly defects live *betw
 **Four commands, and the splits between them are the guarantee.** `/phil:groom-issues` reads and
 reports — it holds no write tool at all, so read-only is enforced rather than declared.
 `/phil:groom-fix` applies the mechanical column inside a scope the user picks, and can change no card's
-existence. `/phil:groom-set` resolves the defects between issues — merge, split, close, group — and asks
+existence. `/phil:groom-set` resolves the defects between issues — merge, split, close, group, consolidate — and asks
 before every one. `/phil:groom-ask` fills in a card that says too little, asking, suggesting, and
 writing what the user sanctions. Do not improvise any of them.
 
@@ -145,7 +145,7 @@ and `/phil:groom-ask` on the semantic one (*Eliciting the semantic content*, bel
 |---|---|
 | A relative file link (404s on GitHub) | No purpose stated |
 | An issue reference wrapped in markdown that should be bare | No way to tell when it is done |
-| A single-valued family carrying two values — `wave: *` always, a project-local family where declared | Session scratch in the body |
+| A single-valued family carrying two values — `wave: *` always, a project-local family where declared | Session scratch typed **outside** a generated region |
 | A missing cross-reference whose target is unambiguous | A second copy of forge-kept state the body's argument leans on |
 | A second copy of forge-kept state that only restates it | Deciding which of those two a copy is |
 | A `## Chain` line naming an issue that does not name back | Which end of a one-sided chain is right |
@@ -297,24 +297,35 @@ reports each with its evidence and stops; resolving them is `/phil:groom-set`, a
   independently demonstrable, so it was cardable — and this family's own split would have cut a feature into
   exactly these cards. **Grooming now meets the wreckage of its own earlier advice**, and none of the four
   classes above fires on it: not duplicates (a decomposition has no overlapping content to quote), not
-  oversized (each card is small and demonstrable), not overcome by events, not ungrouped (they are grouped
-  already). A board full of them reports **clean**, correctly and uselessly.
+  oversized (each card is small and demonstrable), not overcome by events, and — in shapes (a) and (b) — not
+  ungrouped, because a parent groups them. A board full of them reports **clean**, correctly and uselessly.
+
+  **In shape (c) *ungrouped effort* also fires, and this class supersedes it.** With no parent and no closed
+  original, nothing on the forge groups the cards, so both are true — but ungrouped effort's resolution
+  proposes a **milestone**, which is a goal, where the right answer is a feature card. Where
+  decomposed-feature evidence reaches offer tier, offer only this one. Offering both invites a goal filed
+  around work that needs a different kind of container.
 
   **The evidence is ranked, because consolidating is irreversible:**
 
   | Signal | What it licenses |
   |---|---|
   | A real parent/child edge (sub-issues) | **Offer.** The forge asserts it; nothing is inferred. |
-  | Bodies naming the same `docs/feature/<id>/` | **Offer.** The artifacts assert it. |
+  | Bodies naming the same `docs/feature/<id>/`, **confirmed present in the repo** | **Offer**, once confirmed. |
   | `slice NN` in the titles | **Report, never offer.** A naming convention is a habit, not a fact. |
   | A shared milestone | **Nothing at all.** A milestone is a goal and holds unrelated work by design. |
+
+  **Tier 2 needs the repository, not the body's word for it.** *Overcome by events* already refuses to treat
+  board prose as evidence about the world — the claim "is settled in the repository or not at all" — and a body
+  naming a path is board prose. Confirm the directory exists with `git ls-tree`, which this command holds.
+  Unconfirmed, tier 2 drops to report-only alongside a title.
 
   Quote the evidence rather than characterising it. *"These look like slices of one feature"* is the finding
   restating its own conclusion.
 
 ## Resolving the set-level candidates — `/phil:groom-set`
 
-The four above are the only operations here, and each asks. What follows is what the question has to
+The five above are the only operations here, and each asks. What follows is what the question has to
 contain to be answerable, and what the apply owes afterwards.
 
 **The ask must have the same arity as the finding.** This is the rule the whole step turns on. Two
@@ -349,8 +360,9 @@ the board for the closed number and fix each mention — a merge that leaves fiv
 tombstone has moved the confusion rather than removed it.
 
 **Closing sets Status on a project board** — the mechanism and its comment-dropping hazard are
-`phil:issue-board`'s, under *A status write can close the issue underneath you*. Where the project has the
-closed-item workflow enabled — it is on for this repo — the card lands in Done by itself, and this command holds no `gh project
+`phil:issue-board`'s, under *A status write can close the issue underneath you*. Where the project has the **closed → Done**
+workflow enabled — a different setting from the Done → close one this repo declares, and one nothing here has
+verified — the card lands in Done by itself, and this command holds no `gh project
 item-edit` to put it anywhere else. Say so when you close; a card the user expected to keep triaging
 has just left the queue.
 
@@ -426,34 +438,63 @@ one. Propose it, hand over the exact call, and stop.
 as superseded or kept it as the container, so the target of a consolidation may already exist, may exist
 closed, or may not exist at all:
 
-| Shape | Target | The risk |
+| Shape | Target | Can this command complete it? |
 |---|---|---|
-| **(a)** An open parent exists | Absorb the children into its roster, then close them | Lowest. Still ask. |
-| **(b)** No parent, but a closed original is findable | That closed card is probably the right feature card | **A closed card is not in the list you just read**, so this shape is the one a session misses and resolves as (c) — minting a duplicate of a card that already exists |
-| **(c)** Neither | Consolidation requires *creating* the feature card | A create, so its cross-references take the two-pass discipline |
+| **(a)** An open parent exists | Close the children under it | **Yes.** Lowest risk, and it still asks. |
+| **(b)** No parent, but a closed original is findable | That closed card is the feature card | **No — the reopen is not in this command's grant.** Report `REFUSE-UNGRANTED` and hand over the calls. |
+| **(c)** Neither | The feature card must be *created* | **Yes**, with the two-pass discipline for its cross-references. |
 
-**Search closed issues before concluding (c).** Never guess between the three; name which one the evidence
-shows and put it in the question.
+**Search closed issues before concluding (c).** The scan reads `--state open`, so shape (b) is **invisible to
+it** — a second read is required, and skipping it is how (b) gets resolved as (c), minting a duplicate of a
+card that already exists while the original's history sits behind a tombstone:
 
-**In shape (b), reopening carries its own defect.** `gh issue reopen` restores the issue and **not** the
-Status field, so the card lands OPEN while sitting in Done — a combination no board view flags. Set the field
-by hand afterwards and read it back. (`phil:issue-board`; the same asymmetry `CLAUDE.md` records for this
-repo.)
+```sh
+gh issue list -R <owner/repo> --state closed --search "<feature id>"
+```
 
-**Remove the edge, then close the child. Never the reverse.** A closed sub-issue still counts toward its
-parent's completion, so closing children first renders the feature **100% done** while the work continues.
-Measured 2026-08-14: adding a child gave `1/0`, closing it gave `1/1 · 100%`, removing the edge gave `0/0` —
-so removal genuinely drops the child rather than hiding it, and the order is the whole safeguard.
+Never guess between the three. Name which one the evidence shows, and put it in the question.
 
-**The rollup counts *closed*, not *done*, and that is worse than it sounds.** A card closed as won't-build is
-indistinguishable from one closed as shipped. Observed on this repo's board: a parent reporting `3/3 · 100%`
-where one child had been deliberately **not** built and closed anyway. So a consolidation that closes
-children does not merely inflate a number — it produces an inflation nobody can read as one. Say what the
-rollup will show, before the user answers.
+**Shape (b) is proposed, never performed.** Reopening is not something this command holds, and that is
+deliberate rather than an oversight: it is the milestone case again — *propose it, hand over the exact call,
+and stop*. Two calls, because `gh issue reopen` restores the issue and **not** its Status field, so the card
+would otherwise sit OPEN inside Done, a combination no board view flags:
 
-**Every closed child carries a pointer comment, posted *before* the close** — naming the feature card and the
-roster row it became. Auto-close-on-Done drops a comment posted afterwards, and a closed card with no pointer
-is a dead end for the next reader who finds it.
+```sh
+gh issue reopen <n> -R <owner/repo>
+# then set Status by hand — this command holds no `gh project item-edit`
+```
+
+**The roster is not this command's to write.** A feature card's roster lives inside the `nwave:status`
+markers and is generated by `phil:nwave-issue-board` from the artifacts. Do not "absorb" children into it —
+that is a write into a generated region, which this file forbids and `REFUSE-GENERATED` names. The children's
+state reaches the card at the next refresh, from the artifacts, without anything being typed here.
+
+**Remove the edge, then post the pointer comment, then close. In that order, per child.** Three rules
+compressed into one sequence, because stating them separately permits every wrong permutation:
+
+1. **Remove the parent edge** (`gh issue edit <parent> --remove-sub-issue <n>`). A closed sub-issue still
+   counts toward its parent's completion, so closing first renders the feature **100% done** while the work
+   continues.
+2. **Post the pointer comment**, naming the feature card and the slice it became. A closed card with no
+   pointer is a dead end for whoever finds it later.
+3. **Close the child**, with the reason **in the same call** — the form *Overcome by events* already uses,
+   which satisfies the ordering by construction and needs no claim about what drops a later comment. The
+   observed hazard is narrower than "a comment after a close is lost": it is a `gh issue close -c` against an
+   issue a **Status write** had already closed, which is `phil:issue-board`'s under *A status write can close
+   the issue underneath you*. Do not restate it more broadly than it was measured.
+
+**Move what would be lost before closing anything.** A slice card carries acceptance criteria, chain lines
+and prose that the roster does not. Consolidating four cards and keeping only four pointer comments loses
+every done-condition on them — the same duty *Merge* carries, and it binds harder here because there are N
+children rather than one.
+
+**The rollup counts *closed*, not *done*, and this command cannot read it.** A card closed as won't-build is
+indistinguishable from one closed as shipped: observed on this repo's board, a parent reporting `3/3 · 100%`
+where one child had been deliberately **not** built and closed anyway. So consolidation does not merely
+inflate a number — it produces an inflation nobody can read as one. **Say what the rollup will show before
+the user answers**, and hand over the read rather than claiming to have made it, because `subIssuesSummary`
+is GraphQL-only and no `gh api` is granted here. The mechanism and the measurement are
+`phil:issue-board`'s, under *A parent's "N of M done" counts different things on each forge*.
 
 ### A declined candidate leaves no trace
 
@@ -472,7 +513,9 @@ reads as what it is: the board is the only record, and it is re-read every time.
 Measured on this repo's board on 2026-08-13, thirteen open issues: **two candidates, both declined, and
 nothing written.** One partial overlap (two cards adding checks to the same priority ladder) and one
 ungrouped pair (the board's only two typesetting cards, with no milestone naming that goal). No
-duplicates, no oversized cards, no work overcome by events.
+duplicates, no oversized cards, no work overcome by events, and no decomposed features — every slice card on
+it was already closed, which is why that class was found by reasoning about consumers' boards rather than by
+reading this one.
 
 Read that result carefully, because the obvious reading is wrong. The run's output was not *nothing* —
 it was two questions, one of which named a seam the board did not previously hold: both cards leave the
@@ -490,7 +533,8 @@ for a rare run, it is the sentence most runs end on.
 Lead with the shape of the board, not the findings:
 
 ```
-57 issues read · 52 clean · 3 with body defects · 2 duplicate candidates · 1 oversized
+57 issues read · 51 clean · 3 with body defects · 2 duplicate candidates · 1 oversized ·
+1 decomposed feature (4 cards)
 ```
 
 Then the defects, grouped by issue, each citing its rule and evidence. Then the cross-issue
@@ -641,9 +685,19 @@ with `LEAVE-SEMANTIC` alongside whenever a semantic defect was reported and left
 
 `/phil:groom-set` (the set-level loop) reports `ASK-SET-LEVEL` before any write, then exactly one of:
 
-`APPLY-MERGE` · `APPLY-SPLIT` · `APPLY-CONSOLIDATE` · `DECLINE-NO-TRACE` · `REFUSE-UNVERIFIED`
+`APPLY-MERGE` · `APPLY-SPLIT` · `APPLY-CONSOLIDATE` · `DECLINE-NO-TRACE` · `REFUSE-UNVERIFIED` ·
+`REFUSE-RESLICE` · `REFUSE-UNGRANTED`
 
 with `REDERIVE-BETWEEN` alongside whenever an apply invalidated a later candidate.
+
+**`REFUSE-RESLICE`** — a split was asked for over a *feature*, which means re-slicing its roadmap and not
+changing which cards exist. Name the operation asked for and the one that would be needed.
+
+**`REFUSE-UNGRANTED`** — the resolution needs a call this command does not hold: shape (b)'s reopen, a Status
+write, or a rollup read. **Hand over the exact calls and stop.** This is the milestone pattern generalised —
+*propose, hand over, stop* — and it refuses to **act**, never to **report**. A run that silently does less
+than it said, or that reports `APPLY-CONSOLIDATE` for a shape it could only half-complete, is the failure
+this outcome exists to prevent.
 
 **`APPLY-CONSOLIDATE` must name which of the three shapes it took** — an open parent, a reopened closed
 original, or a newly created card — because the three have different blast radii and the report is the only
@@ -697,7 +751,12 @@ All four commands:
 - Claim completeness over a partial read.
 - Let a rule that could not be evaluated pass for a rule that was satisfied.
 - Report a missing generated line as a body defect.
-- Merge, split, close, or group without an explicit answer to a question that offered the outcome.
+- Merge, split, close, group, or consolidate without an explicit answer to a question that offered the
+  outcome.
+- Report a **generated** projection as a body defect. Session state inside the `nwave:status` markers is
+  intended; only typed scratch outside them is a finding.
+- Report a card as oversized on its size, its section count, or the presence of a generated block, or propose
+  splitting a feature card. The rule is demonstrability, and a size-keyed reading oscillates the board.
 
 `/phil:groom-issues` (the scan) additionally:
 

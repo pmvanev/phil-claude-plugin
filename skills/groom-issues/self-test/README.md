@@ -99,8 +99,9 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `35-genuinely-oversized-still-caught/` | four unrelated jobs in a card **shorter** than 34's | passing a real defect because it is short | `REPORT-DEFECT` + `SURFACE-CANDIDATE` — seam named |
 | `36-decomposed-feature-offered/` | four slice cards, real parent edge, one feature directory | acting on conclusive evidence without asking; closing before un-parenting | `ASK-SET-LEVEL` + `APPLY-CONSOLIDATE` — shape (a) |
 | `37-title-evidence-reports-only/` | `slice NN` titles and a shared milestone, nothing else | consolidating on a naming habit | `SURFACE-CANDIDATE` — reported, **not** offered |
-| `38-closed-original-is-the-target/` | the feature card exists and is **closed**, so the open list misses it | minting a duplicate of a card that already exists | `APPLY-CONSOLIDATE` — shape (b), reopen + Status hazard |
-| `39-rollup-counts-closed-not-done/` | #9 reads `3/3 100%`; one child was deliberately not built (**measured**) | reading 100% as three-of-three built | `NOT-A-DEFECT` + `REPORT-UNEVALUATED` |
+| `38-closed-original-is-the-target/` | the feature card exists and is **closed**, so the open list misses it | minting a duplicate; and expecting a call the grant lacks | `REFUSE-UNGRANTED` — shape (b) proposed, not performed |
+| `39-rollup-counts-closed-not-done/` | #9 reads `3/3 100%`; one child was deliberately not built (**measured**) | reading 100% as three-of-three built; claiming a read the grant cannot make | `REPORT-UNEVALUATED` — with the reason |
+| `40-feature-split-refused/` | a split asked for over a feature card with a six-row roster | creating cards for roster rows on request | `REFUSE-RESLICE` — names both operations |
 
 ## The sharpest
 
@@ -230,3 +231,36 @@ only in a skill's prose.
 ways**: act-after-asking, report-only, and act-on-a-target-you-had-to-go-looking-for. A rule that collapses any
 two of them is a gate failure — `37` is where an over-eager rule closes real cards on a naming habit, and `38`
 is where a literal-minded one mints a duplicate because the card it needed was not in the list it read.
+
+## The sites checklist — read this before amending a rule
+
+Two consecutive review passes measured the same defect: an amendment updates the narrative and misses the
+other sites, because this family states every rule three or four times and nothing lists where. Round 1 hit
+2 of 6 on one change; round 2 hit 6 of 14. **The remedy is a list, not a restructure.**
+
+When a rule changes, the edit is not done until each of these has been checked:
+
+| # | Site |
+|---|---|
+| 1 | `SKILL.md` frontmatter `description` — loads into every session |
+| 2 | `SKILL.md` narrative intro — the four-command summary |
+| 3 | `SKILL.md` the standard, or the *does not contain* list |
+| 4 | `SKILL.md` the defect table — the classification a session reads from |
+| 5 | `SKILL.md` the operating section for the owning command |
+| 6 | `SKILL.md` the cross-issue candidates list, and any "the N above" count |
+| 7 | `SKILL.md` reporting — the example output |
+| 8 | `SKILL.md` the measured-population paragraph |
+| 9 | `SKILL.md` decision outcomes — including whether a new stop needs a new outcome |
+| 10 | `SKILL.md` must-never-do — the all-commands list **and** the per-command list |
+| 11 | `commands/<name>.md` frontmatter `description` — it loads *before* the skill |
+| 12 | `commands/<name>.md` body, and its `allowed-tools` if the rule requires a new call |
+| 13 | `self-test/` — a fixture per fold-back, plus this README's row and outcome vocabulary |
+| 14 | `docs/product/journeys/groom-issues.yaml` — step, output, and an error path |
+| 15 | `docs/product/jobs.yaml` — the functional dimension's class list |
+| 16 | The sibling skill that owns the mechanism, and its reciprocal citation |
+
+**Site 12 is the one nobody checks.** A rule can be perfectly written and still unexecutable, because the
+command's grant does not hold the call it requires — and `scripts/check-readonly-commands.py` cannot see it:
+that script verifies a `mutates: false` command grants nothing dangerous, never that a `mutates: true` command
+grants what its skill demands. Round 2 shipped four such instructions and one unpassable fixture before a
+review caught them.

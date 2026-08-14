@@ -1,0 +1,13 @@
+{
+  "fixture_id": "GROOM-SELFTEST-40",
+  "phase": "SET-LEVEL",
+  "situation": "#26 is a feature card with a six-row slice roster. The user asks to split it, reasoning that six slices is a lot for one card. Splitting a story would create cards; splitting a FEATURE means re-slicing its roadmap under docs/feature/<id>/slices/, which changes no cards at all.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "issue": 26,
+  "user_request": "split #26 into its slices",
+  "expected_decision": [
+    "REFUSE-RESLICE"
+  ],
+  "expected_guard": "names the operation asked for and the one that would be needed; creates no card; edits no file"
+}

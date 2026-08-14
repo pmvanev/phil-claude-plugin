@@ -8,7 +8,8 @@ summary: >
   Robin runs the grooming session on a board that has been accumulating. One cheap scan derives a
   defect table fresh — no stored marker is consulted or written — and reports it. Robin scopes what
   to work. Mechanical defects are fixed inside that scope; every cross-issue judgement (merge, split,
-  close, group) is presented with evidence and applied only if Robin says so.
+  close, group, consolidate) is presented with evidence and applied only if Robin says so. Where a
+  resolution needs a call the command does not hold, it hands the call over and stops.
 
 steps:
   - id: invoke
@@ -20,8 +21,8 @@ steps:
       One call per forge fetches every issue with its body, labels and milestone. The defect table is
       derived fresh against the house-default standard; no marker is read, because none exists.
     output: >
-      "57 clean, 3 with body defects, 2 duplicate candidates, 1 oversized" — plus the evidence behind
-      each finding
+      "51 clean, 3 with body defects, 2 duplicate candidates, 1 oversized, 1 decomposed feature (4 cards)"
+      — plus the evidence behind each finding
     emotion: relief — the size of the problem is known, and it is usually smaller than feared
   - id: scope
     action: >
@@ -57,7 +58,8 @@ steps:
     # producing a body Robin never composed.
   - id: decide-set-level
     action: >
-      For each cross-issue candidate — duplicate, oversized, overcome by events, ungrouped — present
+      For each cross-issue candidate — duplicate, oversized, overcome by events, ungrouped, or a feature
+      decomposed into slice cards under retired rules — present
       the evidence and ask. Nothing here is applied unasked, because each is expensive to undo.
     output: A decision per candidate; applied or declined, and declined leaves no trace
     emotion: confidence — nothing irreversible happened without me
@@ -130,7 +132,33 @@ error_paths:
     failure: The issue changed between the scan and the write
     recovery: Re-read before writing, and report the change rather than overwriting it silently
   - step: decide-set-level
-    failure: Robin declines a merge, split, close, or grouping
+    failure: A set of cards looks like a decomposed feature, but only their titles tie them together
+    recovery: >
+      Report it and offer nothing. A `slice NN` naming convention is a habit, followed inconsistently and
+      borrowed across features; a shared milestone is not evidence at all, because a milestone is a goal and
+      holds unrelated work by design. Only a real parent edge, or a confirmed shared docs/feature/<id>/
+      directory, licenses an irreversible close
+  - step: decide-set-level
+    failure: The feature card a consolidation needs is CLOSED, so the scan never saw it
+    recovery: >
+      Search closed issues before concluding none exists. The scan reads open issues, so the evidence in
+      context says "create one" — and creating one mints a duplicate of the real card while the original's
+      history sits behind a tombstone. Reopening is not this command's to perform: hand over the reopen and the
+      Status write and stop, because gh issue reopen restores the issue and not the field
+  - step: decide-set-level
+    failure: Consolidating would close children that still carry a parent edge
+    recovery: >
+      Remove each edge first, then post the pointer comment, then close. A closed sub-issue still counts toward
+      its parent's completion, so closing first renders the feature 100% done while the work continues — and the
+      rollup counts closed rather than done, so the inflation is unreadable as inflation
+  - step: decide-set-level
+    failure: Robin asks to split a FEATURE rather than a story
+    recovery: >
+      Refuse and say which operation was asked for. Splitting a story creates cards; splitting a feature means
+      re-slicing its roadmap under docs/feature/<id>/slices/, which changes no cards and is not this command's
+      to do
+  - step: decide-set-level
+    failure: Robin declines a merge, split, close, grouping, or consolidation
     recovery: >
       Leave the card untouched and record nothing. ACCEPTED COST — because the defect table is
       re-derived every run and no marker is stored, a declined candidate WILL be proposed again next

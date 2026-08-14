@@ -331,7 +331,12 @@ real links, never as the mechanism you rely on.
   ```sh
   gh issue edit 123 -R owner/repo --add-blocked-by 200 --add-blocking 300,301
   gh issue edit 100 -R owner/repo --add-sub-issue 123,124   # or: --parent 100 on the child
+  gh issue edit 100 -R owner/repo --remove-sub-issue 123    # or: --remove-parent on the child
   ```
+
+  **The edge can be removed as well as added** — `--remove-sub-issue` / `--remove-parent`, and GraphQL
+  `removeSubIssue`. Verified on `gh` 2.97.0, 2026-08-14. This matters because *removing* the edge is the only
+  way to stop a child counting toward its parent's completion; see the next section.
 
   Each flag takes an issue number or a URL, so links cross repositories. It is one edge read from
   both ends — `blockedBy` and `blocking` are both fields on `Issue` in GraphQL — so the reverse side
@@ -355,6 +360,18 @@ gh api graphql -f query='query{ repository(owner:"<o>",name:"<r>"){ issue(number
 
 Verified on `gh` 2.97.0, 2026-08-12: a parent with three open sub-issues and no checkboxes in its
 body returned `{total: 3, completed: 0, percentCompleted: 0}` alongside `trackedIssues.totalCount: 0`.
+
+**`completed` counts CLOSED children, and closing one is what increments it.** Measured 2026-08-14 on a live
+parent: adding an open child gave `{1, 0, 0}`, **closing that child** gave `{1, 1, 100}`, and **removing the
+edge** gave `{0, 0, 0}`. Two consequences worth having before you rely on the number:
+
+- **A child closed for any reason counts as completed.** A won't-build close and a shipped close are the same
+  value here. Observed on `pmvanev/phil-claude-plugin`: parent #9 reads `3/3 · 100%` while one of its three
+  children was deliberately **not** built and closed anyway. The counter is doing what it documents; the
+  difference survives only in prose elsewhere.
+- **To stop a child counting, remove the edge — closing it does the opposite.** Anything that consolidates
+  children into a parent must un-parent before closing, or it renders the parent complete while the work
+  continues.
 What the issue page renders when *both* counters are non-zero is unverified — check it before relying
 on either to be the one displayed.
 
@@ -389,6 +406,15 @@ children under one *would* buy the count — but **do not**. The milestone slot 
 spent on the goal (see *A milestone is a goal*), and trading the backlog's only durable ordering for
 a progress bar is a bad exchange. Accept that GitLab has no reliable feature-level count, and read
 the children's live states instead of a summed one.
+
+**Reopening restores the issue and not the field.** `gh issue reopen` puts an issue back to OPEN and leaves
+Status wherever the close left it — so a card reopened out of Done sits **OPEN inside Done**, and no board view
+groups on that combination or flags it. Setting the field back is a separate `gh project item-edit`, and a
+command that holds no such verb can only hand the call over. The asymmetry is the same one the paragraph above
+describes from the other direction: **the two facts are coupled on the way in and independent on the way out.**
+
+Check for it after any reopen — an open issue sitting in Done, or a closed one outside it, is always a defect,
+and the single board read that lists items with their Status already returns both halves.
 
 ## Leave a chain when you pivot
 

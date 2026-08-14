@@ -14,8 +14,8 @@
     "actually_built": 2
   },
   "expected_decision": [
-    "NOT-A-DEFECT",
     "REPORT-UNEVALUATED"
   ],
-  "expected_guard": "the rollup is reported as counting closed rather than done; it is not corrected, and not treated as a body defect"
+  "expected_guard": "the rollup is named as a check this command cannot make, with the reason; it is not read, not corrected, and not reported as a body defect",
+  "grant_note": "subIssuesSummary is GraphQL-only and commands/groom-issues.md grants no `gh api`. The measurement below was taken by hand, out of band."
 }

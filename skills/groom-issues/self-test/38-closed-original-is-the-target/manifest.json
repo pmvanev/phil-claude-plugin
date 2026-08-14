@@ -12,7 +12,8 @@
   "closed_original": 61,
   "expected_decision": [
     "ASK-SET-LEVEL",
-    "APPLY-CONSOLIDATE"
+    "REFUSE-UNGRANTED"
   ],
-  "expected_guard": "shape (b) found by searching closed issues; the reopen/Status hazard stated; no new card minted"
+  "expected_guard": "shape (b) found by a closed-state search; the reopen and Status calls handed over, not performed; no new card minted",
+  "grant_note": "commands/groom-set.md holds no `gh issue reopen` and no `gh project item-edit`, so this shape can be proposed and never completed."
 }

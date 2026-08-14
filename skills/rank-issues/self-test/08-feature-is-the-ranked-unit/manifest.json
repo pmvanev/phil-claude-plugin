@@ -1,0 +1,13 @@
+{
+  "fixture": "RANK-SELFTEST-08",
+  "situation": "An nWave repo's board. Eleven open cards: three feature cards, and eight cards titled '<feature> slice NN' that are sub-issues of two of them. Nothing is ranked. The eight slice cards are the majority, and they sort into an obvious sequence.",
+  "invocation": "/phil:rank-issues",
+  "forge_state": {
+    "host": "github",
+    "nwave_repo": true,
+    "slice_cards": 8,
+    "feature_cards": 3
+  },
+  "expected_outcome": "STOP-SLICE-CARDS-PRESENT",
+  "expected_guard": "the slice cards are named as predating one-issue-per-feature; no order is written over them"
+}

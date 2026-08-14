@@ -160,6 +160,42 @@ real. This board supplied it.
 - **`#9`'s misleading `3/3 100%` is reported, not fixed.** It is the forge's counter doing what it documents,
   and `#12`'s closure was a real decision.
 
+## What the reviewer pass caught — and the class it found that nobody was looking for
+
+`plugin-dev:skill-reviewer` returned **Needs Improvement, do not push**: 11 unhit sites, 6 contradictions, and
+a category neither prior pass had a name for.
+
+**Four instructions exceeded the command's grant, and one fixture was unpassable.** `commands/groom-set.md`
+holds `gh issue edit/create/close/comment` and `project item-add` — **no `reopen`, no `item-edit`, no `gh api`,
+no `Write`**. So shape (b)'s reopen, its Status write, the mandated rollup read-back, and shape (a)'s
+"absorb the children into its roster" were all unexecutable, and **fixture 38 could not be passed by any
+session running the actual command** — only by hand. A fifth followed from the same cause and the reviewer had
+not stated it: fixture 39 required reading `subIssuesSummary`, which is GraphQL-only, and the scan holds no
+`gh api`.
+
+**The resolution was the pattern already in the file, not a wider grant.** Milestone creation has always been
+*propose, hand over the exact call, stop* — and the outcome that needs did not exist, so `REFUSE-UNGRANTED` was
+added, alongside `REFUSE-RESLICE` for the feature-split refusal. **Adding the verbs was the other option and
+was rejected**: a reopen and a Status write are exactly the board-structural, hard-to-reverse operations this
+command is scoped away from, and widening a grant to pass a fixture is the tail wagging the dog. Fixture 39
+became the *unevaluated* path, which this family already has a vocabulary for.
+
+**`scripts/check-readonly-commands.py` cannot see this class.** It verifies that a `mutates: false` command
+grants nothing dangerous; it never verifies that a `mutates: true` command grants what its skill **demands**.
+That asymmetry is why four unexecutable instructions and two unpassable fixtures got through every existing
+check. Worth a script, and it is `CLAUDE.md`'s call rather than this slice's.
+
+**The propagation rate was measured, again.** Round 1 hit 2 of 6 sites on one change; round 2 hit 6 of 14. The
+prior pass had already diagnosed the cause — every rule stated three or four times, no list of where — and the
+remedy was deferred as "a restructure". It is not a restructure. A **sixteen-row sites checklist** now sits in
+`self-test/README.md`, naming the command loaders, the journey, `jobs.yaml` and the sibling skill, with site 12
+(the grant) flagged as the one nothing checks.
+
+**Three fixtures were stricter than the text they tested** — 36, 38 and 39 — which inverts the gate: the suite
+becomes the specification and the skill becomes its summary. The ordered three-step sequence, the
+content-preservation duty, the closed-state search call, and shape (c)'s board-membership duty are now in the
+skill where they belong.
+
 ## Carpaccio taste tests
 
 | Test | Result |

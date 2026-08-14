@@ -352,7 +352,8 @@ jobs:
       functional: >
         Bring every issue to a stated standard — a body that says what and why, links that
         resolve, correct single-valued labels — and resolve the defects that live BETWEEN
-        issues (duplicates, oversized cards, work overcome by events, ungrouped effort),
+        issues (duplicates, oversized cards, work overcome by events, ungrouped effort, a feature
+        decomposed into slice cards under retired rules),
         surfacing evidence for each rather than applying judgement calls unasked.
       emotional: >
         Trust that the board says what it means; relief from the dread of a backlog nobody has
