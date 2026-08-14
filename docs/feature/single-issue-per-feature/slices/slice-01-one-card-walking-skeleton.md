@@ -79,11 +79,39 @@ A SPIKE would build the same card and call it a probe.
 `documentation` + `enhancement` (both, per the multi-valued declaration) · `subIssuesSummary {0, 0}`,
 confirming no sub-issues, which is the paradigm.
 
-**KPI-1 is NOT YET MEASURED, and cannot be measured by the author.** The timed read needs a reader who
-has not seen the feature; I wrote the card. This is the same weakness the `nwave-issue-board` suite already
-names about itself — *"the grader was also the author"*. Splitting the KPI is the honest fix: **legibility**
-(can a cold reader name the four facts from the card alone?) is testable by any fresh reader; **speed**
-(≤30 s) needs a human with a clock. Neither is claimed here.
+**PASS on what this slice shipped.** Measured by the owner, 2026-08-14: **under 30 s**, naming the wave
+(*"a big check by the wave"*) and the current slice (*"the right icons in the slice/status table"*).
+
+**Volunteered, and not in any AC:** *"I like that the artifacts are all linked **and summarized**."* The
+summarising is what made the links useful — a bare list of six URLs would have cost the reader the thirty
+seconds the KPI is about. Worth promoting into slice 02's normative projection contract, because nothing
+currently requires it.
+
+**Not measured by the author.** The grader problem the `nwave-issue-board` suite already names about
+itself — *"the grader was also the author"* — applies to the card, so the read was the owner's, not mine.
+
+### Finding 7 — KPI-1 was mis-scoped as this slice's oracle
+
+KPI-1 asks a reader to name **four** facts: wave, current slice, current step, and why work stopped. This
+slice was only ever going to ship **two** of them:
+
+| Fact | On the card? | Why |
+|---|---|---|
+| Wave | ✓ | |
+| Current slice | ✓ | |
+| Current step | **never** | No `roadmap.json`; DELIVER does not run here (finding 2) |
+| Why work stopped | not yet | The `why` and the stack are **slice 04**, explicitly in this slice's OUT scope |
+
+So a strict reading of KPI-1 fails a slice that did everything it promised. The KPI is a **whole-feature**
+measure and was borrowed as a per-slice oracle without being cut down. Restate it as:
+
+- **Slice 01's oracle** — wave and current position, under 30 s. **Met.**
+- **Slice 04's oracle** — the same read, plus *why work stopped*, under 30 s. Not yet attempted.
+- **Drop "current step" in this repo**, or make it conditional on a roadmap existing. It stands for real
+  nWave product repos and is unreachable here.
+
+The lesson matches finding 2's shape: **a measure written for the feature will over-claim against the
+slice that carries only part of it**, and the failure is silent, because the slice looks like it missed.
 
 ### Six findings, five of which the design could not have predicted
 

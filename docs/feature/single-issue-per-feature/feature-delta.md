@@ -361,14 +361,23 @@ AC2 — A dependency uncovered during ranking is written as a real forge link, a
 
 | # | KPI | Target | Measurement |
 |---|---|---|---|
-| KPI-1 | Time to comprehension | ≤ **30 s** to name wave, current slice, current step, and why work stopped | Timed read of the slice-01 card by a reader who has not seen the feature; n≥1, self-reported and recorded in the slice brief |
+| KPI-1a | Time to comprehension — position | ≤ **30 s** to name wave and current slice | **MET 2026-08-14** — owner's timed read of card #26, under 30 s. Recorded in slice 01's brief |
+| KPI-1b | Time to comprehension — reasoning | ≤ **30 s** to name the above **plus why work stopped** | Slice 04's oracle; not yet attempted |
 | KPI-2 | Cards per feature | Exactly **1** (from 1 + N) | Board query: items whose parent is the feature |
 | KPI-3 | Projection staleness | Block timestamp within **one boundary** of the last artifact change | Compare block timestamp to the last commit touching the feature's artifacts |
 | KPI-4 | Grooming false positives | **0** correct cards flagged oversized or session-state-bearing | Run `/phil:groom-issues` after slice 05 and count |
 | KPI-5 | Questions asked on inherit | **0** clarifying questions before resuming | Counted the first time a teammate inherits a card; n=1, honestly labelled |
 
-KPI-1 is slice 01's oracle and the reason [D13] exists. KPI-5 is the premise's own test: if teammates
-never inherit anything, the number is never measured, and that absence is itself the finding.
+**KPI-1 was split on 2026-08-14, after slice 01 measured it.** As originally written it asked for four
+facts — wave, current slice, current step, why work stopped — and slice 01's own OUT scope excluded two of
+them (the `why` is slice 04's; a current *step* requires a `roadmap.json` this repo will never have). A
+strict reading therefore failed a slice that delivered everything it promised. **"Current step" is dropped
+here and stands only for real nWave product repos.** The general lesson, which matches slice 01's finding 2:
+a measure written for the feature over-claims against the slice carrying only part of it, and it fails
+silently, because the slice looks like it missed.
+
+KPI-5 is the premise's own test: if teammates never inherit anything, the number is never measured, and that
+absence is itself the finding.
 
 ## Wave: DISCUSS / [REF] Definition of Ready
 
