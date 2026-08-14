@@ -68,6 +68,45 @@ Reference class: the wave-columns-vs-label decision of 2026-08-10, which was rev
 someone looked at what the board would actually hold. This slice is that same decision re-opened on a
 corrected premise, so it deserves the same "look at it before deciding" treatment.
 
+## Result — 2026-08-14
+
+**Hypothesis resolved by dropping its subject.** The slice asked whether two column families could share
+one Status enum. The owner's answer: **there is only one family.** Wave columns are dropped — not deferred —
+because a board carries non-nWave work and seven wave columns are noise to everyone filing it. So the enum
+question never arises, and [D3] is reversed before implementation.
+
+**The reversal's lesson is bigger than the slice.** It upholds the 2026-08-10 decision *after* [D2] refuted
+that decision's stated reason. The decision was right for a reason nobody wrote down. **Refuting a recorded
+rationale does not refute the ruling it was offered for.** Recorded in `feature-delta.md` under [D3].
+
+### What landed
+
+1. **The feature-level fold, with its owner** — `phil:nwave-slice-status`, plus fixture 13. AC2 met, and it
+   became load-bearing rather than incidental: with the wave off the columns, **the fold is what the columns
+   hold.**
+2. **`Blocked` added to the real board**, option `39094273`, RED. Status went 3 → 4 options, not 3 → 11.
+   Option 3 chosen for the blocked question: blocked is a column, the wave is restated in the block. Its
+   *reason* changed with the wave-column drop — the card is not leaving a wave column, because there never
+   was one; the block is simply the only place the wave appears.
+3. **A near-miss worth recording.** `updateProjectV2Field`'s `singleSelectOptions` is a **full replacement**,
+   and the option `id` is documented as *optional — include this to preserve the option*. Omitting the three
+   existing ids would have dropped `Todo`, `In Progress` and `Done` **and every card's assignment to them**
+   — 25 cards silently destatused by a call that reports success. Read back after: 26 items, 17 Done, 9
+   Todo, **zero without a status.** This belongs in `phil:issue-board` as a forge mechanic; noted here and
+   not yet folded there.
+4. **Fixture 18 — `unknown` and `deferred` write no column.** The fold returns six states; the board has
+   four. The two with no column must never be coerced, and `Todo` is the tempting coercion because a card
+   with an unrecorded feature is usually *already* sitting in it. `Todo` asserts nobody has started;
+   `unknown` asserts nobody has checked. Re-asserting the value the card already had is still asserting it.
+
+### Not done
+
+**AC4's three recorded candidates are moot rather than weighed.** The brief required the blocked decision be
+made against a rendered board with its alternatives recorded. Two of the three assumed wave columns existed;
+with those gone the decision collapsed to "add a Blocked column or don't", and the owner chose to add it.
+The alternatives are recorded in `feature-delta.md` under *Alternatives considered*; nothing was decided by
+implementation order this time.
+
 ## Carpaccio taste tests
 
 | Test | Result |

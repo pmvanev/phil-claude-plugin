@@ -44,10 +44,22 @@ refinement facets added to `keep-a-backlog-trustworthy` and `carry-work-across-s
   rationale was **scoped wrong**: "nWave is worked one feature at a time" is a property of a
   *developer*, not of a repo. With several developers each owning a feature, every conclusion drawn
   from the single-card premise needs re-deriving. (User)
-- **[D3]** **Board columns = the nWave waves, plus a generic to-do/in-progress/blocked/done family**
-  for work nWave is not driving. One board. This reverses the wave-as-label-not-column decision at
-  `docs/evolution/2026-08-10-issue-board.md:130-134`, whose only stated reason was the premise [D2]
-  corrects. (User)
+- **[D3]** ~~**Board columns = the nWave waves**, plus a generic family for work nWave is not driving.~~
+  **REVERSED 2026-08-14, before implementation. The wave is never a column.** Columns stay one generic
+  family — `to do · in progress · blocked · done` — because **a board carries non-nWave work too, and seven
+  wave columns are noise to everyone filing it.** They partition a board along an axis that does not apply
+  to most of what sits on it. The wave lives in the label and the generated block. (User)
+
+  **This is the most instructive reversal in the feature, because it upholds a decision after refuting that
+  decision's stated reason.** The 2026-08-10 record rejected wave columns because *"nWave is worked one
+  feature at a time, so those columns hold a single card between them."* [D2] shows that reason is wrong —
+  it describes a developer, not a repo — and I took the refutation as grounds to reverse the ruling. **It
+  was not.** The decision was right for a reason its record never captured, and the surviving reason is
+  stronger than the one that was written down. **Refuting a recorded rationale does not refute the ruling it
+  was offered for; before reversing a decision, ask what else could have justified it.**
+
+  Consequence: board columns hold the **feature-level state**, not the wave — which is what made the fold
+  ([D10]) load-bearing rather than incidental.
 - **[D4]** **The wave remains a label as well as a column.** Redundant except in exactly one case —
   a blocked card that has left its wave column — which is the case that matters. Whether it leaves is
   open, see slice 03.

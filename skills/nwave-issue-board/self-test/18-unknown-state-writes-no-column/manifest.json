@@ -1,0 +1,17 @@
+{
+  "fixture": "18-unknown-state-writes-no-column",
+  "situation": "A feature with four slice briefs, a roadmap, and no progress record of any kind -- so nwave-slice-status folds the feature state to `unknown`. The card is already on the board sitting in Todo from when it was first added. The board's Status field offers Todo, In Progress, Blocked, Done and nothing that means `unknown`.",
+  "invocation": "refresh the board for token-refresh",
+  "forge_state": {
+    "host": "github",
+    "status_options": [
+      "Todo",
+      "In Progress",
+      "Blocked",
+      "Done"
+    ],
+    "card_current_column": "Todo"
+  },
+  "feature_state_from_owner": "unknown",
+  "expected_outcome": "NO-COLUMN-WRITTEN"
+}

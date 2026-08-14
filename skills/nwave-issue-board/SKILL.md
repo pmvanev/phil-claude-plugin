@@ -127,13 +127,20 @@ Keep **blocked** off the wave label. When the blocker is another issue, use the 
 link and leave the chain line, both per `phil:issue-board`. A label carries only what no link can
 express — waiting on a person, a decision, or an outside event.
 
-**Whether the wave becomes a board column is deliberately unsettled here.** Making the feature the card
-is what reopens the question — with several developers each owning a feature, wave columns would hold
-real cards rather than the single card that got them rejected in the first place. But that decision is
-`docs/feature/single-issue-per-feature/slices/slice-03-wave-columns-and-blocked.md`'s, it has three
-recorded candidates, and its brief requires it be **decided against a rendered board** rather than by
-whichever option someone implemented first. Two things follow and belong to that slice, not this
-section: what a feature's column state is folded from, and whether a blocked card leaves its wave column.
+**The wave is never a column. Settled 2026-08-14, and the reason is about the board's other readers.**
+A board carries non-nWave work too — ordinary stories, bugs, chores — and seven wave columns are noise to
+everyone filing those. They partition a board along an axis that does not apply to most of what sits on it.
+So the columns stay one generic family, `to do · in progress · blocked · done`, legible to every reader,
+and **the block is the only place a feature's wave appears** beyond its label.
+
+**This upholds the 2026-08-10 decision after that decision's stated reason had been refuted, and the
+sequence is the lesson.** Wave columns were originally rejected because *"nWave is worked one feature at a
+time, so those columns hold a single card between them."* That reason is wrong — it describes a developer,
+not a repo — and correcting it looked like grounds to reverse the decision. It was not. The decision was
+right for a reason its record never captured, and refuting a recorded rationale does not refute the ruling
+it was offered for. **Before reversing a decision, ask what else could have justified it.**
+
+Board columns therefore hold the **feature-level state** from `phil:nwave-slice-status`, not the wave.
 
 **Do not fold a feature-level state here. Ask for one.** `phil:nwave-slice-status` owns every derivation
 over these files and, as of 2026-08-14, exposes a feature-level state on request under *The feature-level
@@ -146,6 +153,27 @@ derivation invented by the skill that had just delegated derivation away. It was
 at nothing and the local copy was the only description available. Both halves are fixed; the shape is worth
 remembering, because a delegation to a capability that does not exist reads exactly like a delegation that
 works.
+
+**Six states, four columns — and two of them must never be coerced.** The fold returns `blocked`, `done`,
+`in progress`, `deferred`, `unknown` and `to do`; a board carries four:
+
+| State | Column |
+|---|---|
+| `blocked` | Blocked |
+| `done` | Done |
+| `in progress` | In Progress |
+| `to do` | Todo |
+| `deferred` | **no column — do not write one** |
+| `unknown` | **no column — do not write one** |
+
+**Leave the card's column untouched for those two and say so in the block.** Writing `Todo` for an
+`unknown` feature is the cardinal lie of the sibling skill committed at feature scale: it reports work
+nobody has assessed as work nobody has started, in the one place the whole team reads. `deferred` fails the
+same way more quietly — `Todo` invites someone to pick up a feature its own artifacts set aside.
+
+A mapping from more states to fewer columns is exactly where a coercion looks like tidiness. There is no
+column that means *I do not know*, and inventing one is not this skill's call; the honest move is to write
+nothing and let the timestamped block carry what is true.
 
 ## The order of the cards is the order of the work
 
