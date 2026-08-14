@@ -80,6 +80,17 @@ A card move on GitHub is three steps, not one:
 
 1. `gh project item-add` — once, to make the issue a project item. An issue that was never added
    has no field to set, so editing it does nothing.
+
+   **Create and add in the same breath.** An issue created with `gh issue create` is *not* a project
+   item, so it has no Status and is **invisible in any kanban grouped by Status** — present in the issue
+   list, absent from the board. Nothing catches it: a board reader cannot see a card that is not on the
+   board, so a grooming scan reports the board clean while the card sits outside it. Observed
+   2026-08-14, on two cards created by hand and found only when a later ranking run counted ten issues
+   against eight board items.
+
+   Read Status back after adding rather than assuming it is empty. On a project with an
+   add-to-project workflow enabled, `item-add` lands the card in the workflow's column — observed as
+   `Todo` on `pmvanev/phil-claude-plugin` — so "newly added therefore unset" is not safe either way.
 2. `gh project item-list` and `gh project field-list` — to resolve the item and field IDs.
 3. `gh project item-edit` — which in practice wants node IDs (`--id`, `--field-id`,
    `--project-id`).
@@ -172,6 +183,13 @@ Two behaviors come from the schemas' own description fields, and both are the ki
 no-op and is not: `afterId` **omitted or null moves the item to the top**, and `positionInList` is
 0-based with `-1` meaning the end of the list. The `afterId`-omitted behavior is **confirmed by a run**
 (GitHub, `gh` 2.97.0) — it moved a card from last to first. `positionInList` is still description-only.
+
+**`afterId` set to an item id is also confirmed by a run** (GitHub, `gh` 2.97.0, 2026-08-14): it places
+the subject *immediately after* the named item, and the read-back matched the intended sequence exactly.
+Worth knowing what that buys under a two-level scheme, because it is more than it looks: **within-goal
+order is board position restricted to that goal's members**, so a single well-chosen move can correct one
+goal's internal order while leaving every other goal's untouched. Ranking ten issues across three goals
+took one mutation.
 
 **Sub-issue order is a separate order** from any column's. Repositioning it is a third mutation —
 `reprioritizeSubIssue(issueId, subIssueId, afterId | beforeId)` — and setting a card's board

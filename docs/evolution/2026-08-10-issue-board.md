@@ -361,8 +361,14 @@ is the standing weakness of driving this suite at all.
   board* / *Reading back* / *Operating*, demoting today's sections to `###` — is zero content change
   and was not taken. Forward pointers were added instead. Revisit if a seventeenth section has nowhere
   obvious to go.
-- Neither ordering mutation has been run against a real board. The first person to reorder a real
-  column should confirm the `afterId`-null and `positionInList` semantics and upgrade the markers.
+- ~~Neither ordering mutation has been run against a real board. The first person to reorder a real
+  column should confirm the `afterId`-null and `positionInList` semantics and upgrade the markers.~~
+
+  **GitHub's is now confirmed twice.** `afterId` omitted moves a card to the top (an earlier run), and
+  `afterId` set to an item id places the subject immediately after it — exercised 2026-08-14 by a real
+  `/phil:rank-issues` session over ten issues in three goals, read back against intent and matching.
+  `positionInList` and GitLab's `issueMoveList` remain schema-only. Markers upgraded in
+  `skills/issue-board/SKILL.md`.
 - ~~`agents/adversarial-reviewer.md` frontmatter has an unquoted `description` containing
   `Pattern lineage: …`; a plain YAML scalar cannot contain `: `, and a strict parser drops the agent.
   Predates this work.~~
