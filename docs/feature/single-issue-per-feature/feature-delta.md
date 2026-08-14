@@ -205,7 +205,8 @@ Ordered by **learning leverage** — the riskiest assumption first, so a failure
 | 03 | Wave columns and the blocked question | The one-board design |
 | 04 | The diversion stack, projected (carries the ADR-013 amendment) | The local-authoritative surface [D7] |
 | 05 | Grooming and ranking hold (carries the `jobs.yaml` facets) | That the shipped defect oracle needs no change |
-| 06 | Consolidate the existing board | That consolidation is possible without the parent lying about completion |
+| ~~06~~ | ~~Consolidate the existing board~~ — **subsumed by 07**, scoped to one board when the problem is general | — |
+| 07 | The decomposed-feature defect class | That the class is identifiable enough to act on; if not, it collapses to a finding |
 
 Briefs at `docs/feature/single-issue-per-feature/slices/slice-NN-*.md`.
 
