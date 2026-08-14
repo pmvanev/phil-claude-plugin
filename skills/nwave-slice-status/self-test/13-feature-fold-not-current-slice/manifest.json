@@ -1,0 +1,15 @@
+{
+  "fixture": "13-feature-fold-not-current-slice",
+  "walking_skeleton": false,
+  "situation": "Six slices. Slices 01-05 are done; slice 06 has no recorded progress at all, so it is `not started` and it is the current slice. A caller asks for the FEATURE-level state in order to place the card in a board column. Reading the current slice alone answers `to do`; the fold answers `in progress`.",
+  "invocation": "/phil:nwave-slice-status bulk-import --feature-state",
+  "artifacts": {
+    "docs/feature/bulk-import/slices/": "slice-01-*.md through slice-06-*.md, none deferred",
+    "docs/feature/bulk-import/deliver/roadmap.json": {
+      "phases": "01 through 06, 3 to 5 steps each"
+    },
+    "docs/feature/bulk-import/deliver/execution-log.json": "COMMIT/PASS for every step of phases 01-05; no events for phase 06"
+  },
+  "expected_state": "in progress",
+  "expected_guard": "the fold reads every slice, not the current one; five-of-six done never renders as `to do`"
+}

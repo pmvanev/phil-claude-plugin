@@ -135,10 +135,17 @@ recorded candidates, and its brief requires it be **decided against a rendered b
 whichever option someone implemented first. Two things follow and belong to that slice, not this
 section: what a feature's column state is folded from, and whether a blocked card leaves its wave column.
 
-**Do not fold a feature-level state here.** `phil:nwave-slice-status` owns every derivation over these
-files, and it does not currently expose a feature-level state at all — it emits a per-slice table and a
-count. A fold written here would be this skill's recurring defect in its exact historical form: a
-derivation invented by the skill that had just delegated derivation away.
+**Do not fold a feature-level state here. Ask for one.** `phil:nwave-slice-status` owns every derivation
+over these files and, as of 2026-08-14, exposes a feature-level state on request under *The feature-level
+state, on request* — `blocked` · `done` · `in progress` · `deferred` · `unknown` · `to do`, folded over
+**every** slice. Publish what it returns.
+
+A fold written here instead would be this skill's recurring defect in its exact historical form: a
+derivation invented by the skill that had just delegated derivation away. It was written here, once, on
+2026-08-14, and removed the same day — while the owner had no such fold at all, so the delegation pointed
+at nothing and the local copy was the only description available. Both halves are fixed; the shape is worth
+remembering, because a delegation to a capability that does not exist reads exactly like a delegation that
+works.
 
 ## The order of the cards is the order of the work
 

@@ -35,6 +35,7 @@ plugin's established way to test a skill.
 | `10-slices-only-roster-kept/` | `slices/` present, no `deliver/` at all (**the real mobile-web-standards case**) | keeps the roster instead of discarding it as "no record" | `ROSTER-ONLY` |
 | `11-inert-cross-check-skipped/` | roadmap-level `implementation_scope`, one shared `test_file` (**the real phil-work case**) | skips a git check that cannot discriminate, and says so | `CROSS-CHECK-SKIPPED` |
 | `12-blocked-step-surfaced/` | `.develop-progress.json` records a failure at the current step | reports `blocked`, never re-runs the failing test | `BLOCKED` |
+| `13-feature-fold-not-current-slice/` | five of six slices done; the sixth is current **and** not started | folds the feature state over every slice, never over the current one | `in progress` |
 
 `01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `07`, `08`,
 `11` — the bug classes that ship silently because their output is indistinguishable from a correct

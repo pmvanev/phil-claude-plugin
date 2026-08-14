@@ -169,6 +169,36 @@ Feature: 5 of 9 done · resume with: /nw-continue admin-field-triage
 Always label what a count counts. A bare "5 of 9" above a four-row table cannot be reconciled with
 what the reader sees.
 
+### The feature-level state, on request
+
+A count is not a state. `5 of 9 done` says how much is finished; it does not say what the feature *is*,
+which is what a caller placing it in a board column needs. **Emit a feature-level state only when asked
+for one**, and derive it by this fold — in this order, because the order is the content:
+
+| Test, applied in order | State |
+|---|---|
+| The current slice is `blocked` | `blocked` |
+| Every slice that is not `deferred` is `done` | `done` — note any deferred slices |
+| Any slice is `done` or `current` | `in progress` |
+| Every slice is `deferred` | `deferred` |
+| Any slice is `unknown`, and none is `done` or `current` | `unknown` |
+| Otherwise — every slice `not started` or `next` | `to do` |
+
+**Order matters most at the third row, and that row is the whole reason this fold is written down.** A
+feature with five of six slices `done` and the sixth `not started` must fold to `in progress`. Reading only
+the current slice gives `to do`, which reports nearly-finished work as untouched — the same lie as
+publishing `unknown` as `not started`, one level up. Any caller tempted to look at the current slice alone
+is reproducing that defect at feature scale, where it is read by more people.
+
+**`unknown` sits below `done`/`current` deliberately.** A feature with three slices done and one
+unrecorded is in progress, not unknown; the unrecorded slice is a `Notes` entry, not a verdict on the
+feature. But where nothing is known, `unknown` is the answer and **never `to do`** — the cardinal rule of
+this skill applied to the fold.
+
+This state is a derivation, so it belongs here rather than in whatever publishes it. Two derivations over
+the same files drift apart, and a publisher that folds locally is inventing a status while claiming to
+delegate one. `phil:nwave-issue-board` consumes this and renders it; it does not compute it.
+
 Notes stays empty when the sources agree. Put drift, missing artifacts, and ambiguity there — one
 short clause each, not a paragraph.
 
@@ -195,7 +225,7 @@ The user asked where they are; they can see it.
 
 ## Self-test (regression gate)
 
-`skills/nwave-slice-status/self-test/` holds golden fixtures that pin these behaviors: the table rendered
+`skills/nwave-slice-status/self-test/` holds thirteen golden fixtures that pin these behaviors: the table rendered
 from agreeing sources (01, walking skeleton), a narrative `progress.md` whose fixture and findings
 tables must never be read as step records (02), `unknown` reported instead of `not started` when the
 record is empty (03), disagreeing sources named rather than resolved and a deferred slice never
@@ -215,3 +245,9 @@ file says not to build it. Every other failure misinforms; that one directs.
 Whenever this skill or `commands/nwave-slice-status.md` changes, drive the fixtures per
 `self-test/README.md` and confirm each produces its `expected.md` decision. Every failure mode here
 is silent: the wrong answer arrives as a clean, confident table.
+
+Fixture `13` pins the feature-level fold added 2026-08-14, and it is the one whose failure travels
+furthest: a wrong step row is a line in a table someone is reading closely, while a wrong feature state is
+a card's position on a board, read at a glance by people who will not open it. Five of six slices done,
+the sixth current and not started — the fold answers `in progress`, and reading the current slice alone
+answers `to do`.
