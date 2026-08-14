@@ -25,6 +25,6 @@ item-edit` — Status and position are not this command's to set — and no bare
 exists; where the right container does not exist yet, it proposes one, hands you the exact call, and
 stops. A goal invented inside a grooming run is a goal nobody agreed to.
 
-**Every one of the four asks, every time.** Merge, split, close and group are the four candidate
-classes, and no population size, no obviousness, and no run of prior approvals converts any of them
+**Every one of the five asks, every time.** Merge, split, close, group and consolidate are the five
+candidate classes, and no population size, no obviousness, and no run of prior approvals converts any of them
 into a default. That is the whole discipline of this command.

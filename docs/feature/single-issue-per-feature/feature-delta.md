@@ -376,9 +376,9 @@ AC2 — A dependency uncovered during ranking is written as a real forge link, a
 |---|---|---|---|
 | KPI-1a | Time to comprehension — position | ≤ **30 s** to name wave and current slice | **MET 2026-08-14** — owner's timed read of card #26, under 30 s. Recorded in slice 01's brief |
 | KPI-1b | Time to comprehension — reasoning | ≤ **30 s** to name the above **plus why work stopped** | **MET 2026-08-14** — owner's timed read of #26 after the first live `/phil:handoff` projection; all four facts named, under 30 s |
-| KPI-2 | Cards per feature | Exactly **1** (from 1 + N) | Board query: items whose parent is the feature |
-| KPI-3 | Projection staleness | Block timestamp within **one boundary** of the last artifact change | Compare block timestamp to the last commit touching the feature's artifacts |
-| KPI-4 | Grooming false positives | **0** correct cards flagged oversized or session-state-bearing | Run `/phil:groom-issues` after slice 05 and count |
+| KPI-2 | Cards per feature | Exactly **1** (from 1 + N) | **MET 2026-08-14** — #26 is the only card; `subIssuesSummary` reads `{0, 0}` |
+| KPI-3 | Projection staleness | Block timestamp within **one boundary** of the last artifact change | **FAILED 2026-08-14** — #26's block read `00:00Z` while five slices had landed; see below |
+| KPI-4 | Grooming false positives | **0** correct cards flagged oversized or session-state-bearing | **MET 2026-08-14** — a full scan at 0.53.0 reported #26 clean: no oversized finding on the board's longest card, no session-state finding on its projection |
 | KPI-5 | Questions asked on inherit | **0** clarifying questions before resuming | Counted the first time a teammate inherits a card; n=1, honestly labelled |
 
 **KPI-1 was split on 2026-08-14, after slice 01 measured it.** As originally written it asked for four
@@ -390,7 +390,24 @@ a measure written for the feature over-claims against the slice carrying only pa
 silently, because the slice looks like it missed.
 
 KPI-5 is the premise's own test: if teammates never inherit anything, the number is never measured, and that
-absence is itself the finding.
+absence is itself the finding. **It is unmeasured at close, deliberately** — it needs a teammate to inherit a
+card, and no amount of work by the author produces the measurement.
+
+### KPI-3 failed, and the failure is the finding
+
+**Measured in the wild rather than by a fixture.** The owner read #26 and asked whether the feature had not
+just been completed — because the card said `Todo` and its block, generated at `00:00Z`, showed **slice 01 as
+current**, listed retired slice 06, and omitted slice 07 entirely. Five slices stale.
+
+**The feature's own answer to staleness was a timestamp**: *"a projection that states when it was made is
+honestly stale; one that does not is indistinguishable from current."* Today shows that argument is only half
+true. A timestamp makes staleness **legible**; it does not make it **noticed**. Nobody compares the timestamp
+to the artifacts, and the grooming oracle — the one thing whose job is noticing what a board gets wrong —
+reported the card **clean**, correctly, because no rule evaluates a block's age.
+
+**Accepted rather than fixed here**, and recorded as a failure rather than rounded off. *Refresh at
+boundaries* is a discipline, and KPI-3 asks a discipline to hold without a mechanism, which is what failed.
+The mechanism is a separate capability and is carded.
 
 ## Wave: DISCUSS / [REF] Definition of Ready
 

@@ -95,6 +95,20 @@ Reference class: the 2026-08-13 rule-4 fold-back, which touched `groom-issues` a
 because one asserted the rule and the other owned the declaration it read. Same shape, with `CLAUDE.md` as
 the third party.
 
+## Result — 2026-08-14
+
+**Hypothesis CONFIRMED: the shipped oracle needed no change.** Verified against a live `/phil:groom-issues`
+scan at 0.53.0, which reported #26 — the longest card on the board, carrying a generated projection — as
+**clean**: no oversized finding, no session-state finding. Both reversals hold against real data, and
+**KPI-4 is met on that evidence.**
+
+The oversized rule's text was not modified, which was AC2 and the whole point: a size-keyed reading would
+have proposed splitting a consolidated feature every run, and fixture 34 exists to stop a future reader
+making it one.
+
+Also landed: the `groom-set` split divergence, `rank-issues`' unit change, and the three deferred follow-ups
+— including moving `glab`'s `-O` vs `-F` trap into `phil:issue-board`, where a forge mechanic belongs.
+
 ## Carpaccio taste tests
 
 | Test | Result |
