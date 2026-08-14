@@ -402,6 +402,17 @@ jobs:
     #   anxiety (elicitation): (E) A tool that writes a purpose it inferred. The refusal in
     #     phil:groom-fix is correct and must survive — the gap is not permission to invent, it is a
     #     scribe. Elicitation asks the human and writes THEIR answer.
+    #     NARROWED 2026-08-14 (scribe → editor, owner reversal). The anxiety stands; its SUBJECT changes
+    #     from "what the session may write" to "what the session may write UNSEEN". Elicitation now
+    #     presents the card, offers a suggestion or two, and may write a clean rewrite rather than a
+    #     transcript — because the hazard was never that the session drafted, it was that a drafted
+    #     sentence is indistinguishable from a dictated one once written. Per-field provenance
+    #     (you wrote / you accepted my suggestion / you edited my suggestion / I rephrased your answer)
+    #     plus answer-beside-written-form is what restores the distinction, and it covers a path verbatim
+    #     never did: a session that offered a draft and got a nod satisfied the old rule while producing
+    #     a body nobody composed. An UNLABELLED field is now the defect; a drafted one is not.
+    #     phil:groom-fix's refusal is untouched — it never asks, so it may never draft.
+    #     See docs/feature/groom-issues/feature-delta.md § Slice 04 amendment — scribe to editor.
     #   habit (elicitation): opening the forge in a browser to fix a body by hand, losing the
     #     session's context; or leaving the card and letting the finding recur.
     # Observed 2026-08-13: all three commands hold AskUserQuestion and all three use it only for

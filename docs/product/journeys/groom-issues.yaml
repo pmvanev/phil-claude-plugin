@@ -38,16 +38,23 @@ steps:
   - id: elicit-semantic
     # Added by DISCUSS wave, slice 04 (2026-08-13, issue #25). `/phil:groom-ask`.
     action: >
-      For a card the scan reported as failing rules 1 or 2 — no purpose stated, no way to tell when
-      it is done — ask Robin what the card is for and how they will know it is finished, then write
-      those answers into the body. One card at a time. The session supplies the questions and the
-      structure; Robin supplies every word of content.
+      For a card the scan reported as failing rules 1 or 2, PRESENT the card — what it is, what it
+      already says, which rule failed — then ask only for what the scan reported missing, offering a
+      suggestion or two Robin can accept, edit or replace. Write the result as a clean card rather than a
+      transcript, with a provenance label on every field. One card at a time. A rule that passed is never
+      rewritten.
     output: >
-      A body Robin dictated, written back to the card — or, on a decline, nothing at all and no
-      record that it was offered
+      A body Robin sanctioned, each field labelled `you wrote` / `you accepted my suggestion` /
+      `you edited my suggestion` / `I rephrased your answer`, with the answer shown beside the written
+      form wherever the two differ — or, on a decline, nothing at all and no record that it was offered
     emotion: >
       relief again, of a different kind — the findings I could only look at are now the ones I can
-      finish, and nothing was written that I did not say
+      finish, and I can see exactly which words are mine and which are the tool's
+    # Amended 2026-08-14 (scribe → editor). The original required every word to come from Robin and
+    # forbade any suggestion. The invariant is swapped, not dropped: what matters is that Robin can SEE
+    # what the session contributed, not that it contributed nothing. Verbatim never covered the
+    # suggestion path — a session that offered a draft and got a nod satisfied the old rule while
+    # producing a body Robin never composed.
   - id: decide-set-level
     action: >
       For each cross-issue candidate — duplicate, oversized, overcome by events, ungrouped — present
@@ -80,11 +87,16 @@ shared_artifacts:
     source: scope
     consumed_by: [fix-mechanical, decide-set-level, elicit-semantic]
   - name: elicited_body_content
-    source: Robin, via the questions asked at elicit-semantic   # NEVER the session
+    source: >
+      Robin sanctions it; the session may draft it. Joint, and the provenance label per field is what
+      keeps the two distinguishable.
     consumed_by: [elicit-semantic]
-    # The single source is the human. A session that infers a purpose from the title, the labels,
-    # or a sibling card has manufactured the artifact it was supposed to collect — and the result
-    # is indistinguishable from a dictated one once written.
+    # Amended 2026-08-14. This entry previously read `source: Robin ... # NEVER the session`, on the
+    # reasoning that an inferred purpose is indistinguishable from a dictated one once written. That
+    # reasoning was right about the HAZARD and wrong about the remedy: indistinguishability is what the
+    # provenance label fixes, and forbidding the session to draft also forbade the suggestions that make
+    # a title-only card answerable at all. What must never happen is a field written WITHOUT a label, or
+    # a suggestion adopted on silence — an unlabelled field is the defect, not a drafted one.
   # DELIBERATELY NOT an artifact: any "groomed" marker — no label, no timestamp block. A stored
   # marker becomes a second authority the moment a human edits a groomed issue, which is what
   # phil:issue-board forbids under "One system of record per scope".
@@ -139,6 +151,18 @@ error_paths:
       side: there the correct content lives at the generator, here it lives nowhere — a purpose is not
       derivable from any artifact, which is why elicitation exists. Writing just outside the markers to
       place the content is the same defect one line over
+  - step: elicit-semantic
+    failure: Robin's reply is neither an answer nor a decline — "ok", "sure", "sounds right"
+    recovery: >
+      Treat it as unanswered and ask once more, naming what is still needed. Never resolve the ambiguity
+      by composing. Load-bearing since 2026-08-14: with a suggestion on the table, an ambiguous reply
+      plausibly reads as ACCEPT, so the misreading now has a concrete draft to adopt — and adopting it
+      would produce a body Robin never sanctioned while every visible rule looked satisfied
+  - step: elicit-semantic
+    failure: A suggestion was offered and Robin said nothing about it
+    recovery: >
+      Write nothing. A suggestion is adopted only on an explicit accept, edit or replacement; silence is
+      not consent, and this is the one path where the tool's own words could reach the card unnoticed
   - step: elicit-semantic
     failure: Robin answers one question but not the other
     recovery: >

@@ -313,14 +313,108 @@ remain unverified. `/phil:groom-ask` cannot be run as a command until the plugin
 
 Two findings from that exercise, both about the skill rather than about any card:
 
-1. **`AskUserQuestion` is the wrong tool for elicitation, and the skill only implies it.** Its options are
-   authored by the session, so a human picking one is selecting from inventions rather than dictating
-   content — exactly what *the human supplies every word* forbids. The other three commands use it for
-   **consent**, where authored options are correct. The skill notes the consent/content distinction but
-   never says the tool itself does not carry over. It should say so.
+1. ~~**`AskUserQuestion` is the wrong tool for elicitation, and the skill only implies it.**~~ Its options
+   are authored by the session, so a human picking one is selecting from inventions rather than dictating
+   content — exactly what *the human supplies every word* forbids.
+
+   **REVERSED the same day.** This was correct under the design as shipped and is wrong under the
+   scribe→editor amendment below: offering suggestions is now required, and `AskUserQuestion` is the apt
+   tool for it, with free text as the escape hatch. Struck rather than deleted, because the claim is
+   already in commit `4192385` and a reader arriving from that commit needs to find the reversal, not a
+   silent absence.
 2. **Nothing covers an ambiguous non-answer.** Fixtures 25-28 cover both-answered, declined, body-moved and
    partial. A reply that is neither an answer nor a decline — "ok" — has no rule and no fixture. The
    correct rule is to treat ambiguity as unanswered, ask once more, and never resolve it by composing;
    without it, the tempting move is to read assent as licence to draft. Candidate fixture 32.
 
 Neither is folded in yet.
+
+## Wave: DISCUSS / [REF] Slice 04 amendment — scribe to editor (2026-08-14)
+
+Owner reversal, taken through `nw-discuss` as an amendment pass. **Design only** — the `SKILL.md` and
+fixture edits are a separate authoring step with `plugin-dev` consulted, per `CLAUDE.md`'s build path.
+
+Telemetry not emitted: `scripts/shared/telemetry.py` does not exist in this install and the wave forbids
+writing JSONL directly. No Tier-2 expansion was triggered by this pass, so none is rendered.
+
+### The instruction
+
+1. *(additive)* The prompt must not assume familiarity with the card — present what it is, what it says,
+   and which rule failed.
+2. *(reversal)* Offer a suggestion or two on how to fill the gap.
+3. *(reversal)* Do not take the user's words verbatim — write a clean card following the card-writing
+   principles, based on their answers.
+
+### The invariant is swapped, not dropped
+
+**What matters is that the human can SEE what the session contributed — not that the session contributed
+nothing.** Verbatim was one mechanism for that visibility. Two replace it, and together they cover more:
+
+- **Per-field provenance**, from a fixed set: `you wrote` · `you accepted my suggestion` ·
+  `you edited my suggestion` · `I rephrased your answer`. **A field written without a label is the
+  defect.**
+- **Answer beside written form** wherever the two differ, so a rewrite is inspectable rather than
+  asserted.
+
+This is stronger than verbatim, not weaker, because verbatim never contemplated the suggestion path at
+all — a session that offered a draft and got a nod would have satisfied the old rule while producing a
+body the human never composed.
+
+### Anxiety (E) is narrowed, not abandoned
+
+`jobs.yaml`, elicitation facet, quoted verbatim:
+
+> (E) A tool that writes a purpose it inferred. The refusal in `phil:groom-fix` is correct and must
+> survive — the gap is not permission to invent, it is a scribe. Elicitation asks the human and writes
+> THEIR answer.
+
+Its **subject changes** from *what the session may write* to *what the session may write unseen*. The
+`groom-fix` refusal is untouched: that command still may not draft a purpose, because it never asks.
+
+### Eight rules that survive unchanged
+
+Stated explicitly, because a reversal read as general licence is how the rest of the boundary erodes:
+
+1. Nothing is written before an answer or a decline.
+2. A decline writes nothing and records nothing (D6); the finding returns next run.
+3. One card per invocation. No batch, no apply-to-all.
+4. Re-read immediately before writing; refuse a moved body — now handing back **both** the answers and
+   any draft.
+5. `REFUSE-GENERATED` — elicited prose never lands inside a generated region.
+6. Ask only what the scan reported missing.
+7. **A rule that passed is never rewritten.** The session may rephrase what it elicited; a purpose that
+   already satisfies rule 1 is out of reach. This is the new boundary, and fixture 30's *"neither
+   re-asked nor rewritten"* is where it is already pinned.
+8. A partial answer stays partial. Suggesting the missing half is now permitted; **silently supplying it
+   is not** — the difference is a visible, refusable offer.
+
+### The ambiguous non-answer is now load-bearing
+
+Recorded earlier today as candidate fixture 32, after a real dogfood reply of "ok". Under the old design
+that reply was merely unanswerable. **Under this one it plausibly reads as *accept your suggestion*** — so
+the tempting misreading now has a concrete thing to adopt, and adopting it would produce a body the human
+never sanctioned while every visible rule appeared satisfied. The rule is required rather than tidy: treat
+ambiguity as unanswered, ask once more, never resolve it by composing.
+
+### Consequences for the authoring step
+
+- **C7 is rewritten** from *collected, never composed* to the visibility constraint above. C8 (no batch)
+  survives; C9 (partial stays partial) survives with rule 8's clarification.
+- **Fixture 25 is rewritten.** Its entire subject is verbatim plus no polishing.
+- **Fixture 28 amended** — partial plus a refused suggestion for the withheld half.
+- **New fixtures**: a suggestion declined in favour of the human's own words; a rewrite whose
+  transformation is shown; and 32, the ambiguous non-answer.
+- **Fixtures 26, 27, 29, 30, 31 survive**, 27 with the widened hand-back and 30 as the pin for rule 7.
+- **`WRITE-ELICITED` gains the provenance report**; an unlabelled field fails.
+- The journey's `elicited_body_content` artifact stops being sourced from Robin alone.
+
+The slice brief is now 130 lines against the ≤100 guideline, ~22 of which are the `Changed Assumptions`
+section the back-propagation contract requires on top of a standard brief. Stated rather than trimmed into
+inaccuracy, as with `single-issue-per-feature` slices 05 and 06.
+
+### Also corrected
+
+Slice 04's **AC1 still described asking for both the purpose and the done-condition**, which this
+morning's *ask only what the scan reported missing* fold-back had already superseded — the fold-back
+amended the skill and the journey but not the slice brief. Fixed in the same pass. A fold-back that
+updates the normative text and leaves the brief behind is how a brief becomes the stale authority.

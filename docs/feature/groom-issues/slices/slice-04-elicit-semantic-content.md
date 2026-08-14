@@ -26,8 +26,19 @@ content it is forbidden to author, and that the boundary survives contact with a
 
 ## IN scope
 
-- **Elicit and write.** Ask for the purpose and the done-condition of one card; write the answers
-  into the body. Every word of content comes from the human.
+- **Present the card before asking.** The prompt states what the card is, what it already says, and
+  which rule failed. A question that assumes the reader remembers the card gets a worse answer, or
+  none. *(Amended 2026-08-14.)*
+- **Elicit, suggest, and write.** Ask only for what the scan reported missing, **offer a suggestion or
+  two**, and write the result. The human accepts, edits, or replaces every suggestion, and the written
+  form may be a clean rewrite rather than a transcript. *(Amended 2026-08-14 — the original required
+  every word to come from the human.)*
+- **Every field carries a provenance label** from a fixed set: `you wrote` · `you accepted my
+  suggestion` · `you edited my suggestion` · `I rephrased your answer`. A field written without one is
+  the defect. This is what replaces the verbatim rule — see *Changed Assumptions*.
+- **A rule that passed is never rewritten.** The session may rephrase what it elicited; a purpose that
+  already satisfies rule 1 is out of reach. This is the boundary that stops "write a clean card"
+  becoming "rewrite the card".
 - **One card at a time.** No batch, no apply-to-all. The content differs every time, so a
   population-scaled offer has nothing to scale over — and slice 02 already measured that a
   scale-shaped offer over a small population is ceremony.
@@ -38,8 +49,10 @@ content it is forbidden to author, and that the boundary survives contact with a
 
 ## OUT scope
 
-- **Inventing any content.** Not from the title, not from the labels, not from a sibling card. The
-  refusal in `/phil:groom-fix` is correct and survives intact; this slice does not relax it.
+- **Writing anything the human has not seen.** Suggestions are permitted; *adopting* one without an
+  explicit accept is not, and neither is supplying a withheld half. `/phil:groom-fix`'s refusal to draft
+  a purpose unasked survives intact — this slice relaxes what may be *offered*, never what may be
+  written unseen. *(Amended 2026-08-14; the original forbade inventing any content at all.)*
 - **The mechanical column** — `/phil:groom-fix` owns it.
 - **Changing which cards exist** — `/phil:groom-set` owns that, and this command holds no `create`,
   no `close`, no `gh api`.
@@ -48,10 +61,14 @@ content it is forbidden to author, and that the boundary survives contact with a
 
 ## Acceptance criteria
 
-1. Given a card failing rules 1 and 2, when the command runs, then the user is asked what the card is
-   for and how they will know it is done, and **nothing is written before both answers or a decline**.
-2. Given answers, then the body is written from those answers alone, and the report states which
-   field came from which answer so an invented sentence would be visible.
+1. Given a card failing rule 1, rule 2, or both, when the command runs, then the card is **presented**
+   — what it is, what it already says, which rule failed — the user is asked **only for what the scan
+   reported missing**, and **nothing is written before an answer or a decline**.
+2. Given answers, then the body is written from those answers, **each field carrying a provenance
+   label**, and the report shows the answer beside the written form wherever the two differ — so a
+   sentence the human did not sanction is visible.
+2b. Given a suggestion is offered, then it is marked as the session's, and **nothing is written unless
+   the user accepts, edits, or replaces it.** Silence or an ambiguous reply is not an acceptance.
 3. Given a decline, then no body is written, no label is set, no comment is posted, and no record of
    the offer exists anywhere — and the report says the finding will return next run.
 4. Given the body moved between the scan and the write, then the write is refused, what moved is
@@ -88,3 +105,26 @@ re-read gate, which is this slice minus the elicitation.
 | Disproves a pre-commitment? | Yes — that the mechanical/semantic split is a complete design. |
 | Synthetic data only? | Real board first; synthetic only if it holds no failing card, and labelled. |
 | Duplicate of another slice at scale? | No. 02 writes derivable content; this writes dictated content. |
+
+## Changed Assumptions — 2026-08-14 (scribe → editor)
+
+**Original, verbatim** from this brief's *Learning hypothesis* and IN/OUT scope:
+
+> **Confirms** that the missing piece is a scribe rather than permission — that a session can collect
+> content it is forbidden to author
+
+> - **Elicit and write.** Ask for the purpose and the done-condition of one card; write the answers into
+>   the body. Every word of content comes from the human.
+> - **Inventing any content.** Not from the title, not from the labels, not from a sibling card.
+
+**New assumption.** The missing piece is a scribe **and** a drafting hand. The session may suggest, and
+may rewrite an answer into a clean card, provided the human sees and sanctions what it contributed.
+
+**The invariant swapped, not dropped.** What matters is that the human can **see** what the session
+contributed — not that the session contributed nothing. Verbatim was one mechanism for that visibility;
+per-field provenance plus answer-beside-written-form is a stronger one, because it also covers the
+suggestion path that verbatim never contemplated.
+
+Full rationale, the eight rules that survive unchanged, and the consequence list are in
+`../feature-delta.md` under *Slice 04 amendment — scribe to editor*.
+
