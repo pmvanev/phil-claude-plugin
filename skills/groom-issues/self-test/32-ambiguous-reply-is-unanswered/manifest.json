@@ -1,0 +1,15 @@
+{
+  "fixture_id": "GROOM-SELFTEST-32",
+  "situation": "#2 states its purpose and lacks a done-condition — rule 2 only. The card is presented, one question is asked, and two suggestions are offered. The user replies with the single word 'ok'. MEASURED: this is a real reply from the slice-04 dogfood on 2026-08-14, not a constructed one.",
+  "forge": "github",
+  "command": "/phil:groom-ask",
+  "issue": 2,
+  "findings": ["rule 2 — no way to tell when it is done"],
+  "rules_passing": ["rule 1 — purpose stated in the opening paragraph"],
+  "suggestions_offered": {
+    "done_when": ["the rule exists in rules/ and review-code cites it on a real violation", "the priority tier is chosen and recorded"]
+  },
+  "user_response": "ok",
+  "expected_decision": ["ASK-CONTENT", "ASK-CONTENT"],
+  "expected_guard": "nothing is written; the reply is treated as unanswered and the question is asked once more, naming what is still needed"
+}

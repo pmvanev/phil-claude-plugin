@@ -26,7 +26,13 @@ Slice 04, the elicitation loop — `/phil:groom-ask`:
 `ASK-CONTENT` · `WRITE-ELICITED` · `WRITE-PARTIAL` — reusing `DECLINE-NO-TRACE`, `STALE-REREAD` and
 `REFUSE-GENERATED`, which mean the same things they mean elsewhere. `ASK-CONTENT` precedes every
 outcome, including the decline and the refusal: a run that wrote a body without it wrote one nobody
-dictated.
+sanctioned.
+
+**Both write outcomes are incomplete without provenance** (amended 2026-08-14). Each written field carries
+one of `you wrote` · `you accepted my suggestion` · `you edited my suggestion` · `I rephrased your answer`,
+and **an unlabelled field fails the outcome regardless of how the body reads**. This replaced the verbatim
+rule, and it is stricter: verbatim was silent on the suggestion path, so a session that offered a draft and
+got a nod satisfied it while producing a body nobody composed.
 
 **`ASK-SET-LEVEL` precedes every apply in slice 03**, and is encoded that way — fixtures `18`, `19`, `21`
 and `22` carry it in the array form alongside their terminal outcome, as `13` does for `LEAVE-SEMANTIC`.
@@ -85,6 +91,8 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `29-no-batch-elicitation/` | five failing cards, four looking interchangeable | one answer written to five cards | `ASK-CONTENT` — one card, and name the queue |
 | `30-ask-only-what-is-missing/` | purpose stated, done-condition absent; rule 2 only (**measured**) | asking for a rule that passed, and overwriting prose that satisfies it | `WRITE-ELICITED` — one question, one field |
 | `31-elicited-prose-not-in-generated-region/` | the whole body is an `nwave:status` block | placing dictated prose where a generator will overwrite it | `REFUSE-GENERATED` — refuse, and hand the answers back |
+| `32-ambiguous-reply-is-unanswered/` | a suggestion is on the table and the reply is "ok" (**measured**) | reading assent as acceptance and writing an unsanctioned body | `ASK-CONTENT` twice — nothing written, say what is needed |
+| `33-suggestion-replaced-not-adopted/` | both purpose suggestions are wrong about the direction of the problem | a rejected framing surviving as residue in the card | `WRITE-ELICITED` — `you wrote` + `you edited my suggestion` |
 
 ## The sharpest
 
@@ -105,7 +113,7 @@ failing it means the session tried to acquire one. In `11` the session *has* the
 merely unstated, and nothing but the rule stands between it and four correct edits. A suite containing
 only `08` proves the guarantee where it is structural and never tests it where it is a decision.
 
-**`16`, `23` and `30` are the three fixtures here that are measurements rather than constructions.** `16`'s
+**`16`, `23`, `30` and `32` are the four fixtures here that are measurements rather than constructions.** `16`'s
 numbers came off this repo's real board after slice 01 had been dogfooded twice, and they contradict the
 slice brief: the mechanical column held one defect, not a queue, and the maintainer had authored it that
 same session. It pins proportionate scoping — but its more important job is to stop a future reader from
@@ -124,6 +132,14 @@ two questions regardless of what the scan found, and **nothing in the suite coul
 says the population is *partial*: three cards fail rule 2 (#1, #2, #3) and none fail rule 1. Against the
 only population ever observed, a two-question loop is wrong every time. Four fixtures agreeing with each
 other is not coverage when they share the assumption under test.
+
+`32` is the fourth, and it is a measurement of a *reply* rather than a board. The single word "ok" is what
+the maintainer actually typed when the slice-04 dogfood asked its question on 2026-08-14. **On that morning
+the reply was merely unanswerable; by the afternoon it was dangerous**, because the scribe→editor amendment
+put a suggestion on the table for it to be read as accepting. Nothing else in the suite reaches that shape:
+`25` has an explicit accept, `26` an explicit decline, `28` an explicit refusal of one half, `33` an
+explicit replacement. An ambiguous reply is the gap between them — and it is the one a real user produced
+first, before any of the constructed cases were exercised at all.
 
 **`17` carries slice 03's whole bet, and it is a bet about the question rather than the evidence.** The
 slice was written to disprove that set-level defects can be surfaced with actionable evidence, and `07`

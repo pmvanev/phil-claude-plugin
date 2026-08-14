@@ -1,0 +1,18 @@
+{
+  "fixture_id": "GROOM-SELFTEST-33",
+  "situation": "#58 has an empty body; rules 1 and 2 both fail. The session offers two suggestions per field, drawn from the title and a sibling card. The user rejects both purpose suggestions as wrong about the intent, types their own purpose, and edits the second done-condition suggestion rather than accepting it.",
+  "forge": "github",
+  "command": "/phil:groom-ask",
+  "issue": 58,
+  "findings": ["rule 1 — no purpose stated", "rule 2 — no way to tell when it is done"],
+  "suggestions_offered": {
+    "purpose": ["the cache is never invalidated on write", "reads return stale data after an update"],
+    "done_when": ["a write invalidates the cache", "a test proves a read after a write returns the new value"]
+  },
+  "user_response": {
+    "purpose": "rejects both — 'neither of those is it. the cache is fine; the problem is we invalidate too aggressively and lose the hit rate'",
+    "done_when": "edits suggestion 2 — 'a test proves a read after an unrelated write still hits the cache'"
+  },
+  "expected_decision": ["ASK-CONTENT", "WRITE-ELICITED"],
+  "expected_guard": "the rejected suggestions appear nowhere in the body; labels are `you wrote` and `you edited my suggestion`"
+}

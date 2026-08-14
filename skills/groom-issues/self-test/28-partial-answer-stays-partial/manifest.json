@@ -1,10 +1,12 @@
 {
   "fixture_id": "GROOM-SELFTEST-28",
-  "situation": "The user states the purpose clearly but says they do not yet know what done looks like — it depends on what the retry audit finds.",
+  "situation": "The user states the purpose clearly but says they do not yet know what done looks like — it depends on what the retry audit finds. The session offers a done-condition suggestion anyway; the user declines it explicitly, because the shape of done is genuinely not settled.",
   "forge": "github",
   "command": "/phil:groom-ask",
   "issue": 47,
   "user_answers": {"purpose": "retries fire on 4xx and burn the rate limit", "done_when": null},
+  "suggestions_offered": {"done_when": ["only 5xx and timeouts retry, with a test for each"]},
+  "user_response_to_suggestion": "declined — 'no, that presumes the answer the audit is supposed to give'",
   "expected_decision": ["ASK-CONTENT", "WRITE-PARTIAL"],
-  "expected_guard": "write the answered field only; never infer the withheld one to make the body look complete"
+  "expected_guard": "write the answered field only; a declined suggestion for the withheld half leaves no residue, and the body is not completed to look finished"
 }

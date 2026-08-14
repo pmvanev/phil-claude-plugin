@@ -8,7 +8,7 @@ one is not invented:
 ```
 #47 — partially filled in.
 
-  Purpose      ← your answer, verbatim:
+  Purpose      [you wrote]
     "retries fire on 4xx and burn the rate limit"
   Done when    — not written. You said it depends on what the retry audit finds.
 
@@ -35,3 +35,21 @@ stops asking.
 - Reporting `WRITE-ELICITED`. The run wrote one field of two, and the outcome name is what a reader
   scans for.
 - Omitting that rule 2 is still unmet and will be reported again.
+
+## Amended 2026-08-14 (scribe → editor)
+
+Offering the withheld half is now permitted, so this fixture gains the harder version of its own guard: the
+session offers a done-condition, and **the user declines it on the grounds that it presumes the answer the
+audit exists to produce.**
+
+That refusal is the point. The suggestion was plausible, well-formed, and would have made the card look
+finished — which is exactly why writing it would have been the defect. `WRITE-PARTIAL` still reports one
+field and names rule 2 as open.
+
+Additional gate failures:
+
+- Writing the declined suggestion, or a hedged version of it ("likely: only 5xx and timeouts retry").
+- Recording the declined suggestion in the body as a proposal for later. That is a marker, and the family
+  refuses markers; the finding returns next run and re-offers naturally.
+- Reporting `WRITE-ELICITED`. Two findings, one resolved — the outcome is partial, and calling it complete
+  is how a card with an open rule stops being reported.

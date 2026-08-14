@@ -398,6 +398,8 @@ ambiguity as unanswered, ask once more, never resolve it by composing.
 
 ### Consequences for the authoring step
 
+- **`commands/groom-ask.md`** — the entry point, which loads *before* the skill. **This line was missing
+  from the first version of this list, and its absence is exactly why the file was missed.**
 - **C7 is rewritten** from *collected, never composed* to the visibility constraint above. C8 (no batch)
   survives; C9 (partial stays partial) survives with rule 8's clarification.
 - **Fixture 25 is rewritten.** Its entire subject is verbatim plus no polishing.
@@ -411,6 +413,63 @@ ambiguity as unanswered, ask once more, never resolve it by composing.
 The slice brief is now 130 lines against the ≤100 guideline, ~22 of which are the `Changed Assumptions`
 section the back-propagation contract requires on top of a standard brief. Stated rather than trimmed into
 inaccuracy, as with `single-issue-per-feature` slices 05 and 06.
+
+### What the reviewer pass caught
+
+`plugin-dev:skill-reviewer` ran over the authored result and returned **Needs Improvement**. The design was
+sound and the design docs were correctly back-propagated; **the propagation into normative text was
+incomplete in one file entirely and two fixtures partially.** All of the following are fixed.
+
+**The one that would have shipped a contradiction:** `commands/groom-ask.md` still read *"It composes
+nothing: every word is yours"* in its frontmatter and *"This command is a scribe, and the distinction is
+the whole design"* in its body. It is the **entry point and loads before the skill**, so a session would
+have read the retired rule first. A conservative resolution silently reverts the change and fails fixtures
+25, 32 and 33; a liberal one ignores an explicit written prohibition in the command it was invoked as.
+
+**The old guarantee survived 420 lines from the edit.** `SKILL.md`'s rationale for the command existing at
+all still said *"the guarantee it needs is not did you consent but did you compose this"* — both halves
+false under the amendment, since a suggestion exists before the human says anything. The axis (*where the
+content comes from*) survives; the guarantee is now consent **plus provenance**.
+
+**The section contradicted itself on the unit of sanction.** *"The human sanctions every word"* is not what
+the `I rephrased your answer` path delivers: the session picks the words and discloses afterwards. Stated
+precisely now — **the human sanctions the claim; the session may choose the words** — plus the fidelity
+constraint that only fixture 25 carried: rephrasing is a tidying licence, not a modelling one. A rewrite
+that changes what the card asserts is composition wearing a truthful label, and it is the one failure the
+provenance rule cannot catch alone.
+
+**`ASK-CONTENT` had no legal standalone form**, so fixtures 29 and 32 both required an outcome the grammar
+forbade — and the only terminal outcome reachable was `DECLINE-NO-TRACE`, which records a refusal that did
+not happen. Now stated as a terminal state, with the two-ask limit and its fall-through promoted out of
+fixture 32 into the skill.
+
+**Fixtures 28 and 30 still printed `← your answer, verbatim`** — the retired shape, which the skill now
+calls the defect. Converted to `[you wrote]`, and fixture 30 gained the unlabelled-field gate failure it
+lacked.
+
+**Under-specification, all satisfiable in letter while violating intent:** the action→label mapping was
+never stated (`replace` → `you wrote`) though fixture 33 penalises getting it wrong; no rule covered
+accept-then-polish; the accept criterion was a closed list of three tokens, and a naming criterion would
+have collapsed where only one suggestion is offered — so the criterion is now positive (*name it or restate
+its text*, never a bare affirmation, even with one suggestion on the table).
+
+**Also fixed, predating this change:** a drifted forge claim at `SKILL.md:354` asserted a comment is dropped
+after a close "once the project's close workflow has run". Neither `phil:issue-board` nor `CLAUDE.md`
+establishes that direction — both observed Status-first. The advice was right and the mechanism was
+invented. Corrected with the observation cited to its owner.
+
+**Left as follow-ups, not fixed here:** three unattributed restatements of `phil:issue-board` mechanics in
+the `/phil:groom-set` section (two-pass seeding, `item-add` before Status, close-sets-Status), and one
+genuine forge mechanic living in the wrong skill — `glab`'s `-O`/`--output` versus `-F`, which silently
+returns a human-readable table. That belongs in `issue-board` and is not there.
+
+**The structural finding worth keeping.** The reviewer's diagnosis of *why* the command file was missed: this
+file states every rule three or four times — narrative, decision outcomes, must-never-do — so **every
+amendment is a five-site edit with no checklist of the sites**, and this one hit three. The provenance rule
+alone landed in four places with three different scopings. That is a stronger argument than the word count,
+and it is not fixed by a `references/` split, which would add a fifth location. The proposal on the table is
+to declare **one normative site per rule** and demote the others to an index. Not taken here — it is a
+restructure, and bundling one into an amendment is the defect this repo has already recorded twice.
 
 ### Also corrected
 

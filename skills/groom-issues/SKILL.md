@@ -1,6 +1,6 @@
 ---
 name: groom-issues
-description: Skill bundle for the phil:groom-issues, phil:groom-fix, phil:groom-set and phil:groom-ask commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, resolves the defects between issues (merge, split, close, group) by asking before each one, and fills in a card that says too little from answers the user dictates. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
+description: Skill bundle for the phil:groom-issues, phil:groom-fix, phil:groom-set and phil:groom-ask commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, resolves the defects between issues (merge, split, close, group) by asking before each one, and fills in a card that says too little from the user's answers and its own suggestions, labelling where every field's words came from. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
 ---
 
 # Groom issues — say what is wrong with a board
@@ -12,8 +12,8 @@ sloppy ones and misses the expensive ones, because the costly defects live *betw
 reports — it holds no write tool at all, so read-only is enforced rather than declared.
 `/phil:groom-fix` applies the mechanical column inside a scope the user picks, and can change no card's
 existence. `/phil:groom-set` resolves the defects between issues — merge, split, close, group — and asks
-before every one. `/phil:groom-ask` fills in a card that says too little, from answers the user
-dictates. Do not improvise any of them.
+before every one. `/phil:groom-ask` fills in a card that says too little, asking, suggesting, and
+writing what the user sanctions. Do not improvise any of them.
 
 The splits are not tidiness. A single command carrying the report in context is the design where a write
 gets computed against remembered text instead of read text, and where read-only holds only as long as
@@ -27,9 +27,14 @@ on them is the habit carried into the others.
 
 `/phil:groom-ask` splits on a different axis again: not how far a write reaches, but **where the content
 comes from**. Everything the other three write is derivable — an absolute URL, a mirrored chain line, a
-milestone the user picked from a list. What this one writes exists nowhere until a human says it. That is
-why it is a separate command and not a mode: the guarantee it needs is not *did you consent* but *did you
-compose this*, and no scoping enforces that.
+milestone the user picked from a list. What this one writes is not derivable from anything: no artifact
+holds why a card is wanted. That is why it is a separate command and not a mode. The guarantee it needs is
+consent **plus provenance** — *did you sanction this claim, and is it on the record whose words carried
+it* — and no scoping enforces either.
+
+An earlier draft of this paragraph named the guarantee as *did you compose this* rather than *did you
+consent*. That was retired on 2026-08-14: the command may now suggest and may rephrase, so composition is
+no longer the discriminator. What survives is that the words' origin is never in doubt.
 
 **REQUIRED BACKGROUND: `phil:issue-board`.** Every forge mechanic — `-R` targeting, label semantics,
 absolute-URL rules, dependency links, generated blocks — lives there. Do not guess any of it here.
@@ -126,7 +131,8 @@ forgetting and the user starts asking for the marker this rule exists to refuse.
 Every finding names the rule it violates and quotes the evidence. A finding without both is an
 opinion, and this skill does not report opinions.
 
-Classify each, because `/phil:groom-fix` acts only on the first column:
+Classify each, because the columns have different actors: `/phil:groom-fix` acts on the mechanical column,
+and `/phil:groom-ask` on the semantic one (*Eliciting the semantic content*, below). Neither crosses.
 
 | Mechanical — one right answer | Semantic — needs a human |
 |---|---|
@@ -346,9 +352,16 @@ file, the reversing decision — reachable here through `git log` and the workin
 leave it standing. Closing a live card because another card said the work was done is the one
 irreversible mistake on this board that nobody notices for months.
 
-On approval, close with the reason **in the same call** (`gh issue close -c`). A comment posted after
-the close is silently dropped once the project's close workflow has run, so the reason vanishes and the
-card carries no account of why it went.
+On approval, close with the reason **in the same call** (`gh issue close -c`), so the account of why it
+went cannot be separated from the going. The observed hazard runs the other way round — a Status write to
+Done closes the issue, and a `gh issue close -c` afterwards reports "already closed" and drops its comment —
+and it is `phil:issue-board`'s to state, under *A status write can close the issue underneath you*. Comment
+first, then close or set Status; the same-call form satisfies that ordering by construction.
+
+*(Corrected 2026-08-14: this paragraph previously asserted that a comment posted after a close is dropped
+"once the project's close workflow has run" — a claim in the close-first direction that neither
+`phil:issue-board` nor this repo's `CLAUDE.md` establishes. Both observed the Status-first case. The
+advice was right and the mechanism was invented.)*
 
 ### Ungrouped effort
 
@@ -440,14 +453,51 @@ is reported every run and resolvable by none of them, so a board of title-only c
 identical report forever. That is *this tool teaches people to stop running it* reached from the
 other side — not manufactured findings, but real findings with no exit.
 
-**The refusal was never the problem; the missing scribe was.** `/phil:groom-fix` declining to draft a
-purpose is the boundary working exactly as designed, and nothing here relaxes it. What this adds is
-somewhere for the content to come from.
+**The refusal was never the problem; the missing editor was.** `/phil:groom-fix` declining to draft a
+purpose is the boundary working exactly as designed, and nothing here relaxes it — that command never
+asks, so it may never draft. What this adds is somewhere for the content to come from.
 
-**The session supplies the questions and the structure. The human supplies every word.** Do not infer
-a purpose or a done-condition from the title, the labels, a sibling card, or the repository. An
-inferred purpose is indistinguishable from a dictated one the moment it is written, which is why the
-rule has to hold at the point of asking rather than at the point of review.
+**Present the card before asking.** State what it is, what it already says, and which rule failed. A
+question that assumes the reader remembers the card gets a worse answer, or none — and the reader is
+often being asked about work a past self filed.
+
+**The human sanctions every claim; the session may choose the words.** That is the unit, and stating it
+precisely matters — an earlier draft said *sanctions every word*, which the rephrasing path below does not
+deliver and cannot. Suggest one or two ways to fill the gap, **marked as the session's**, let the human
+accept, edit, or replace, and write the result as a clean card in the house voice rather than a transcript.
+
+**What must never happen is a claim reaching the card unsanctioned, or a word reaching it untraceable.**
+An inferred sentence is indistinguishable from an authored one *once written*, so the remedy is not to
+forbid drafting — it is to make every field's origin legible and every rewrite inspectable:
+
+- **Each field written carries a provenance label**, from exactly this set, and the human's action decides
+  which: accepted a suggestion unchanged → `you accepted my suggestion`; changed one → `you edited my
+  suggestion`; **rejected the suggestions and supplied their own, or answered with none offered** →
+  `you wrote`; answered in their own words and the session tidied them → `I rephrased your answer`.
+  **A field written without a label is the defect**, however well the body reads. A field left alone
+  because its rule passed is not written and takes no label.
+- **Never combine labels, and never rephrase an accepted suggestion.** If a suggestion is accepted, the
+  written form **is** the suggestion, quoted — otherwise no single label is true, and both available ones
+  lie in a different direction.
+- **Show the answer beside the written form wherever the two differ**, for `I rephrased your answer` and
+  `you edited my suggestion` alike, and quote the suggestion for `you accepted my suggestion`. A rewrite
+  the reader cannot inspect is an assertion.
+- **Rephrasing is a tidying licence, not a modelling one.** Fix grammar, punctuation and register; never
+  introduce a concept the human did not use, and never narrow or widen the claim. A rewrite that changes
+  what the card asserts is composition wearing a truthful label — the one failure the provenance rule
+  cannot catch on its own.
+- **An accept must name the suggestion or restate its text.** A bare affirmation — "ok", "sure", "yep",
+  "sounds right", "that works" — is never an accept. This holds **even when only one suggestion was
+  offered**, where a naming rule would otherwise be satisfied by accident: the reply is equally likely to
+  mean *I have read the question and will answer it*.
+- **A reply that is neither an accept, an edit, a replacement, nor a decline is unanswered.** Ask once
+  more, naming what is still needed. **After a second unanswered ask, treat it as a decline** — say so,
+  write nothing, record nothing. Two asks is the limit; a third is the nagging that teaches people to
+  stop running the tool.
+
+**A rule that passed is never rewritten.** The session may rephrase what it elicited; a purpose that
+already satisfies rule 1 is out of reach, however much tidier it could be. This is the boundary that
+stops *write a clean card* becoming *rewrite the card*.
 
 **Ask only what the scan reported missing.** Rules 1 and 2 fail independently, so derive the questions
 from the findings — one question per missing rule, and none for a rule that passed. Asking for a
@@ -463,7 +513,8 @@ in the suite failed when it asked for both, which is why fixture `30` exists.
 Note what the family did before this. All four commands hold `AskUserQuestion`, and the other three
 use it only for **consent** — pick a scope, pick the surviving card of a merge. None of them ever
 asks what an issue is *for*. Elicitation is a different use of the same tool, and its absence is why
-the semantic column had no exit.
+the semantic column had no exit. Here the options are the **suggestions**, and free text is the escape
+hatch that keeps *the human sanctions every word* true rather than nominal.
 
 **One card per invocation.** No batch, no apply-to-all. The content differs every time, so a
 population-scaled offer has nothing to scale over — and a bulk offer would collect one answer and
@@ -471,18 +522,19 @@ write it as though it were several. Slice 02 measured what a scale-shaped offer 
 population: it becomes ceremony, and ceremony is what teaches people to click through a gate.
 
 **A partial answer is written partially.** One field given and one withheld writes the one given, and
-says which is still missing. Completing the body by inferring the other half is the failure this whole
-step is shaped against, and it is most tempting precisely here, where the body looks nearly done. A
-card with a purpose and no done-condition is a smaller defect than one with neither.
+says which is still missing. **Offering** the withheld half is permitted; *supplying* it because the body
+looks nearly done is not, and the difference is a visible, refusable suggestion. A card with a purpose and
+no done-condition is a smaller defect than one with neither.
 
-**Report which answer became which field.** Not decoration: it is what makes an invented sentence
-visible. "Wrote the body" cannot be contradicted by a reader; "the purpose is your first answer
-verbatim, the done-condition your second, nothing else was added" can.
+**Report provenance per field.** Not decoration: it is what makes an unsanctioned sentence visible.
+"Wrote the body" cannot be contradicted by a reader; a per-field label, with the answer shown beside the
+written form wherever they differ, can — the reader knows what they said, and any sentence they did not
+sanction stands out.
 
 **Re-read immediately before writing, and refuse a body that moved.** Slice 02's rule, and it binds
 harder here — the text at risk is prose a human wrote, not a link that would have 404'd. Report what
-moved and show the elicited answers back, so a refused write does not also lose what was just
-dictated.
+moved and hand back **both the answers and any draft**, so a refused write does not also lose what was
+just collected.
 
 **A decline writes nothing and records nothing.** No body, no label, no comment, no note. Same D6 cost
 as a declined set-level candidate, and this is the third surface that pays it: say at the decline that
@@ -517,6 +569,14 @@ with `REDERIVE-BETWEEN` alongside whenever an apply invalidated a later candidat
 
 `WRITE-ELICITED` · `WRITE-PARTIAL` · `DECLINE-NO-TRACE` · `STALE-REREAD` · `REFUSE-GENERATED`
 
+**`ASK-CONTENT` standing alone is a legal terminal state, and it is the only one that resolves nothing.**
+A run that asked and received no answer, no edit, no replacement and no decline reports `ASK-CONTENT`
+again and stops — the unanswered case (fixture `32`) and the named-queue case (fixture `29`). This is the
+counterpart of `REFUSE-UNVERIFIED` below: both are outcomes where the run correctly ends without the
+thing it exists to produce. **Do not reach for `DECLINE-NO-TRACE` to obtain a terminal outcome** — it
+records that the user refused, and a user who simply has not answered yet did not refuse. That
+substitution is available, plausible, and false.
+
 `DECLINE-NO-TRACE`, `STALE-REREAD` and `REFUSE-GENERATED` are the same outcomes the other commands
 report, meaning the same things — a decline that stores nothing, a body that moved since the read, and
 a write whose target belongs to a generator.
@@ -536,7 +596,12 @@ there, because an unconfirmed candidate is not put to a vote.
 
 **`ASK-CONTENT` differs in kind from the other two.** They collect consent — a scope, a survivor.
 It collects *content*, and the content is the deliverable. A run reporting `WRITE-ELICITED` without
-`ASK-CONTENT` wrote a body nobody dictated.
+`ASK-CONTENT` wrote a body nobody sanctioned.
+
+**`WRITE-ELICITED` and `WRITE-PARTIAL` are incomplete without provenance.** Each written field carries one
+of `you wrote` · `you accepted my suggestion` · `you edited my suggestion` · `I rephrased your answer`, and
+an unlabelled field fails the outcome regardless of how the body reads. Where a label is
+`I rephrased your answer` or `you edited my suggestion`, the answer appears beside the written form.
 
 ## What this skill must never do
 
@@ -568,12 +633,18 @@ All four commands:
 
 `/phil:groom-ask` (the elicitation loop) additionally:
 
-- Compose any part of a body. Not from the title, the labels, a sibling card, or the repository.
-- Complete a partial answer by inferring the half that was withheld.
+- **Write any word the human has not sanctioned.** Drafting is permitted; adopting a draft on silence,
+  on "ok", or on any reply that is neither an accept, an edit, nor a replacement is not.
+- **Write a field without a provenance label**, or claim `I rephrased your answer` without showing the
+  answer beside the written form.
+- Ask a question without first presenting the card and the rule that failed.
+- **Rewrite a rule that passed.** A purpose already satisfying rule 1 is out of reach; only what this run
+  elicited may be rephrased.
+- Complete a partial answer by supplying the withheld half. Offering it is permitted; writing it unasked
+  is not.
 - **Ask for a rule the scan reported as passing.** The questions come from the findings.
 - Offer a batch, an apply-to-all, or "the same again for the next card".
-- Write without showing which answer became which field.
-- Overwrite a body that moved since the read, or discard the elicited answers when refusing.
+- Overwrite a body that moved since the read, or discard the answers and any draft when refusing.
 - **Write elicited prose inside a generated region, or just outside it to approximate placement.**
 - Touch a mechanical defect, a label, a link, or which cards exist. Those have their own commands.
 

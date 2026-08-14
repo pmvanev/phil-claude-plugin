@@ -6,7 +6,8 @@
   "issue": 47,
   "body_at_scan": "",
   "body_now": "two paragraphs added by another author, 4 minutes ago",
-  "user_answers": {"purpose": "...", "done_when": "..."},
+  "user_answers": {"purpose": "accepted the session's suggestion", "done_when": "own words, which the session had rephrased into the house voice"},
+  "draft_pending": "the rephrased done-condition, not yet written",
   "expected_decision": ["ASK-CONTENT", "STALE-REREAD"],
-  "expected_guard": "refuse the write, say what moved, and show the elicited answers back so they are not lost"
+  "expected_guard": "refuse the write, say what moved, and hand back BOTH the answers and the pending draft so neither is lost"
 }

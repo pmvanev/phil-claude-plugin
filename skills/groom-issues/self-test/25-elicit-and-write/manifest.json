@@ -1,14 +1,19 @@
 {
   "fixture_id": "GROOM-SELFTEST-25",
-  "situation": "#47 is titled 'fix the retry thing' and has an empty body. The scan reported it as failing rules 1 and 2. The user answers both questions: the purpose is that retries currently fire on 4xx responses and burn the rate limit; done is when only 5xx and timeouts retry, with a test for each.",
+  "situation": "#47 is titled 'fix the retry thing' and has an empty body. The scan reported it as failing rules 1 and 2. The card is presented, two suggestions are offered per field, and the user accepts the suggested purpose as-is, then answers the done-condition in their own words in a form that needs tidying into the house voice.",
   "forge": "github",
   "command": "/phil:groom-ask",
   "issue": 47,
   "findings": ["rule 1 — no purpose stated", "rule 2 — no way to tell when it is done"],
-  "user_answers": {
-    "purpose": "retries currently fire on 4xx responses and burn the rate limit",
-    "done_when": "only 5xx and timeouts retry, with a test for each"
+  "card_presented": true,
+  "suggestions_offered": {
+    "purpose": ["retries fire on 4xx responses and burn the rate limit", "the retry policy is not configurable per endpoint"],
+    "done_when": ["only 5xx and timeouts retry, with a test for each", "retry counts are asserted in a test"]
+  },
+  "user_response": {
+    "purpose": "accepted suggestion 1 unchanged",
+    "done_when": "own words: 'when 4xx stops retrying at all and theres a test proving 5xx still does'"
   },
   "expected_decision": ["ASK-CONTENT", "WRITE-ELICITED"],
-  "expected_guard": "every word written traces to an answer; the report says which answer became which field"
+  "expected_guard": "every field carries a provenance label; the rephrased field shows the answer beside the written form"
 }

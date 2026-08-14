@@ -8,7 +8,7 @@ done-condition — and the body gains one field:
 ```
 #2 — rule 2 reported. Rule 1 passes; not asked.
 
-  Done when    ← your answer, verbatim:
+  Done when    [you wrote]
     "phil:groom-issues reads the families from CLAUDE.md and reports rule 4
      evaluated rather than unevaluated on this board"
 
@@ -41,3 +41,8 @@ Rewriting this fixture with an empty body would restore the hole it exists to cl
   user was still made to answer for nothing.
 - Omitting the line that says rule 1 was not asked. A reader cannot otherwise tell whether the loop
   skipped it by rule or by accident.
+- **Writing the done-condition without a provenance label** (added 2026-08-14). One written field still
+  means one label; a single-field write is not an exemption, and this fixture is the smallest case where
+  the label could plausibly be dropped as noise.
+- **Labelling the untouched purpose.** It was not written by this run, so it takes no label — the line
+  naming it as already-stated is prose, not a provenance entry.

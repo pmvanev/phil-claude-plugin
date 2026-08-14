@@ -36,3 +36,15 @@ and less carefully next time.
 - Refusing without showing the answers back.
 - Reporting "the body changed" without saying what changed and when.
 - Re-asking both questions from scratch, as though nothing had been said.
+
+## Amended 2026-08-14 (scribe → editor)
+
+The hand-back widens: a refused write must return **both the answers and any pending draft**. Under the
+original design there was only one thing to lose — what the user typed. Now a rephrasing the user already
+sanctioned can be lost too, and losing it costs the same exchange twice, because re-collecting it means
+re-offering, re-editing and re-approving.
+
+The `you accepted my suggestion` field matters most here and is the easiest to drop: the user's
+contribution to it was a single word, so a hand-back that prints only "what you typed" silently discards
+the field they agreed to. Print every field with its provenance label, exactly as `WRITE-ELICITED` would
+have.
