@@ -90,8 +90,15 @@ A well-formed issue has:
 
 And it does **not** contain:
 
-- **Session scratch or working state.** It belongs in the git-ignored local surface (ADR-013); a
-  board is world-readable.
+- **Session scratch or working state *typed outside a generated region*.** A board is world-readable, and
+  hand-written scratch belongs in the git-ignored local surface (ADR-013).
+
+  **Scoped 2026-08-14, not deleted.** Session state **inside** the `nwave:status` markers is now intended:
+  ADR-013's deferred *partitioned local + board* option ships, so `/phil:handoff` projects the why, the next
+  action and the diversion stack there — generated, timestamped, write-only, with the local file still the
+  single authority. What remains a defect is *typed* scratch outside the markers, which is what the original
+  rule was about. **Reporting a generated projection as a body defect would flag the correct shape**, and it
+  would flag it on the one card most likely to have been maintained properly.
 - **Hand-written content inside a generated region** — anything between `nwave:status` markers is
   regenerated, so a hand edit is destroyed on the next refresh and disagrees with its source until
   then.
@@ -113,9 +120,9 @@ gh issue list -R <owner/repo> --state open --json number,title,body,labels,miles
 glab issue list -R <group/project> --output json --per-page 100
 ```
 
-On `glab`, the JSON flag is **`-O`/`--output`**. `-F` is `--output-format` and takes
-`details|ids|urls` — hand it `json` and it silently returns the human-readable table. Both commands
-return bodies populated, so there is no N+1 and no reason to fetch issues individually.
+On `glab` the JSON flag is `-O`/`--output`, **not `-F`** — the mechanism and its silent failure are
+`phil:issue-board`'s, under *`glab`'s JSON flag is `-O`, and `-F` fails silently*. Both commands return
+bodies populated, so there is no N+1 and no reason to fetch issues individually.
 
 **Never read or write a grooming marker.** No `groomed` label, no timestamp block, no state file. The
 defect table is re-derived on every run. A stored marker becomes a second authority the moment
@@ -271,7 +278,15 @@ reports each with its evidence and stops; resolving them is `/phil:groom-set`, a
 
 - **Duplicates** — quote the overlapping content from both. Partial overlap is the real case and is
   not automatically a merge; it may be a split or a dependency.
-- **Oversized** — a card carrying work that cannot be demonstrated on its own. Name the seam.
+- **Oversized** — a card carrying work that **cannot be demonstrated on its own**. Name the seam.
+
+  **Demonstrability, not size, and the distinction is load-bearing.** A card holding a whole feature is
+  large and demonstrable, so it passes — and on a board where one issue *is* one feature, it is the intended
+  shape. Judging by size instead would report every correctly-formed card, and worse: it would propose
+  splitting a consolidated feature back into slices every run, because this family stores no marker, so a
+  declined split returns forever and only has to be accepted once. **Do not "fix" this rule toward size.**
+  Verified 2026-08-14 against `phil:issue-board`'s own granularity rule, whose split clause is about two
+  halves occupying different columns *at the same time* — that is, about concurrency.
 - **Overcome by events** — the work landed another way, or the decision behind it was reversed.
 - **Ungrouped effort** — a card belonging to a larger effort that says so nowhere. A milestone is a
   goal (`phil:issue-board`); do not invent a second convention.
@@ -312,17 +327,25 @@ separate and comes last, because until the close lands there is no settled answe
 the board for the closed number and fix each mention — a merge that leaves five cards pointing at a
 tombstone has moved the confusion rather than removed it.
 
-**Closing sets Status on a project board.** Where the project has the closed-item workflow enabled — it
-is on for this repo — the card lands in Done by itself, and this command holds no `gh project
+**Closing sets Status on a project board** — the mechanism and its comment-dropping hazard are
+`phil:issue-board`'s, under *A status write can close the issue underneath you*. Where the project has the
+closed-item workflow enabled — it is on for this repo — the card lands in Done by itself, and this command holds no `gh project
 item-edit` to put it anywhere else. Say so when you close; a card the user expected to keep triaging
 has just left the queue.
 
 ### Split
 
+**"Split" means two different operations now, and this command performs only one of them.** Splitting a
+**story** creates cards, as below. Splitting a **feature** on a board where one issue is one feature means
+re-slicing its roadmap — a change to `docs/feature/<id>/slices/`, not to which cards exist — and this
+command has no business there. Refuse it and say which operation was asked for; the roster inside the
+feature's card is where its parts live, and adding cards for them undoes the paradigm rather than
+implementing it. See `phil:nwave-issue-board`.
+
 **Numbers are assigned at creation, so the cross-references are a second pass.** Create the new cards
 first, collect the numbers the forge hands back, then write the `## Chain` lines. Writing a reference
 during creation means writing a number that does not exist yet, and the forge will render it as a link
-to whatever else claims it.
+to whatever else claims it. *(Mechanism: `phil:issue-board`, Bulk seeding needs two passes.)*
 
 **Nothing is inherited.** Labels, milestone, and the chains that pointed at the original do not follow
 the split — they are carried deliberately or not at all, and both are decisions. State what you are
@@ -334,7 +357,8 @@ is not finished until it is answered — an original left open beside its own pi
 duplicate this command exists to find.
 
 **A created issue is not a board card.** `gh issue create` puts an issue in the repo and nowhere on the
-project; a card that was never `item-add`ed has no Status and is invisible in a kanban grouped by it.
+project; a card that was never `item-add`ed has no Status and is invisible in a kanban grouped by it
+(`phil:issue-board`, *GitHub does not work the same way*).
 Add each new card to the project, and report that its Status is unset — placing it in the queue is
 `phil:rank-issues`, which is a decision about order and not this command's.
 

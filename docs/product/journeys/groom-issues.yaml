@@ -108,10 +108,19 @@ error_paths:
       Paginate; if the read is still partial, say so and refuse to report "N clean" — a completeness
       claim over a partial read is the one output that actively misleads
   - step: scan
-    failure: An issue body contains session state or other scratch
+    failure: An issue body contains session state or other scratch TYPED OUTSIDE a generated region
     recovery: >
-      Flag it as a body defect. ADR-013 puts session state in a git-ignored local file precisely
-      because a board is world-readable
+      Flag it as a body defect. ADR-013 puts hand-written session state in a git-ignored local file
+      precisely because a board is world-readable
+    # SCOPED 2026-08-14, not deleted. The original read: "An issue body contains session state or other
+    # scratch -> Flag it as a body defect. ADR-013 puts session state in a git-ignored local file
+    # precisely because a board is world-readable." That is now too wide. ADR-013's deferred
+    # "partitioned local + board" option ships, so /phil:handoff projects the why, the next action and the
+    # diversion stack INSIDE the nwave:status markers -- generated, timestamped, write-only, with the local
+    # file still the single authority. Flagging that would report the correct shape as a defect, on the one
+    # card most likely to have been maintained properly. Typed scratch outside the markers is still a defect,
+    # which is what the rule was always about.
+    # See docs/feature/single-issue-per-feature/slices/slice-05-grooming-and-ranking-hold.md
   - step: fix-mechanical
     failure: A fix would edit inside a generated region (e.g. the `nwave:status` block)
     recovery: >

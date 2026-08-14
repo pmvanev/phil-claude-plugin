@@ -447,6 +447,21 @@ version), it is temporary, and it must be stated out loud in the transcript ever
 
 An expired certificate is a defect to fix, not a setting to work around.
 
+## `glab`'s JSON flag is `-O`, and `-F` fails silently
+
+`-O`/`--output` takes `json`. **`-F` is `--output-format` and takes `details|ids|urls`** — hand it `json`
+and it does not error: it returns the human-readable table. A caller that parses the result finds no JSON
+and concludes the issues have no bodies, or that the list is empty.
+
+```sh
+glab issue list -R <group/project> --output json --per-page 100   # correct
+glab issue list -R <group/project> -F json                       # silently returns a table
+```
+
+This is the characteristic shape of every trap in this file — a wrong guess that reports success — and it
+lived in `phil:groom-issues` until 2026-08-14, which is a forge mechanic in a skill whose charter says it
+owns none.
+
 ## `glab api graphql` answers introspection with the whole schema
 
 This skill sends readers to live schemas to confirm mutation signatures. On `glab` 1.112.0, that

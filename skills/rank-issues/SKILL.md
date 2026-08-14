@@ -26,6 +26,11 @@ One flat order across a whole backlog has to be re-cut every time an issue arriv
 | Between goals | milestone **due date** | **yes** |
 | Within a goal | board **position** | needs a re-rank, but only inside that one goal |
 
+**In an nWave repo the ranked unit is the FEATURE card, not a slice.** One issue is one feature there
+(`phil:nwave-issue-board`), so a feature holds one position and its slices hold none — they are rows in
+its roster. **An order inherited from a board that carried slice cards must be re-derived, not adjusted**:
+it ranked a unit that no longer exists, and nudging it forward preserves a sequence whose subject changed.
+
 A new issue then costs a goal assignment and one position — not a re-cut. **A milestone is a goal**
 on both forges; that mapping is settled in `phil:issue-board` and is not renegotiated here.
 

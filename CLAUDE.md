@@ -130,7 +130,15 @@ artifacts already own.
 - Status is a project **field**, not a label. An issue must be `gh project item-add`ed before any
   field can be set; editing one that was never added does nothing.
 - IDs: project `PVT_kwHOANPp-M4Bf-px` · Status field `PVTSSF_lAHOANPp-M4Bf-pxzhaNnGs` · options
-  Todo `f75ad846`, In Progress `47fc9ee4`, Done `98236657`.
+  Todo `f75ad846`, In Progress `47fc9ee4`, Done `98236657`, Blocked `39094273`.
+- **`updateProjectV2Field`'s `singleSelectOptions` is a FULL REPLACEMENT.** The per-option `id` is
+  documented as *"optional — include this to preserve the option"*, so omitting an existing id drops that
+  option **and every card's assignment to it**. Adding `Blocked` on 2026-08-14 meant passing all three
+  existing ids back; getting it wrong would have destatused 25 cards with a call that reports success.
+  Read the input shape before writing, and read the item statuses back after.
+- **The wave is a label, never a column.** Seven wave columns are noise to everyone filing non-nWave work,
+  which is most of this board. Decided 2026-08-14, reversing a reversal — and the lesson generalises:
+  *refuting a decision's recorded rationale does not refute the decision.*
 - **Auto-close on Done is ENABLED.** Setting Status=Done closes the issue; a `gh issue close -c`
   afterwards reports "already closed" and **silently drops the comment**. Post the closing
   comment first, then set Status. Moving Done→Todo does not reopen — use `gh issue reopen`.

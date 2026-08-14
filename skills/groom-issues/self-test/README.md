@@ -93,6 +93,8 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `31-elicited-prose-not-in-generated-region/` | the whole body is an `nwave:status` block | placing dictated prose where a generator will overwrite it | `REFUSE-GENERATED` — refuse, and hand the answers back |
 | `32-ambiguous-reply-is-unanswered/` | a suggestion is on the table and the reply is "ok" (**measured**) | reading assent as acceptance and writing an unsanctioned body | `ASK-CONTENT` twice — nothing written, say what is needed |
 | `33-suggestion-replaced-not-adopted/` | both purpose suggestions are wrong about the direction of the problem | a rejected framing surviving as residue in the card | `WRITE-ELICITED` — `you wrote` + `you edited my suggestion` |
+| `34-feature-card-is-not-oversized/` | the longest card on the board, correctly shaped, with a generated projection | a size-keyed oversized rule flagging the intended shape | `REPORT-CLEAN` — no oversized, no session-state finding |
+| `35-genuinely-oversized-still-caught/` | four unrelated jobs in a card **shorter** than 34's | passing a real defect because it is short | `REPORT-DEFECT` + `SURFACE-CANDIDATE` — seam named |
 
 ## The sharpest
 
@@ -202,3 +204,11 @@ what is between its markers.
 
 Drive each fixture by giving the session the situation in `manifest.json` and comparing the decisions
 reached against `expected.md`. Model-driven; there is no CI runner in this plugin.
+
+**`34` and `35` are the newest opposite-resolving pair, and they are deliberately counter-sized.** The clean
+card is the **longest** on the board; the defective one is **shorter**. Any heuristic keyed on length, body
+size, section count or the presence of a generated block gets both backwards, and silently: the correct
+shape is flagged and the real defect passes. The discriminator is the rule exactly as written — *can this be
+demonstrated on its own?* — which is why `34`'s last gate failure is **modifying that rule's text to make
+the fixture pass**. An earlier design for the slice proposed doing exactly that, and it would have caused a
+consolidate→split oscillation, because this family stores no marker and a declined split returns every run.

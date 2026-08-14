@@ -1,0 +1,13 @@
+{
+  "fixture_id": "GROOM-SELFTEST-34",
+  "phase": "SCAN",
+  "situation": "#26 is a feature card on a board where one issue is one feature. Its body is long: a purpose, a done-condition, six linked artifacts, and a generated nwave:status block holding a six-row slice roster, a current-slice step table, and a projected why/next/stack. It is the LONGEST card on the board by a wide margin, and it is correctly shaped.",
+  "forge": "github",
+  "command": "/phil:groom-issues",
+  "issue": 26,
+  "body_shape": "long, structured, carries a generated projection",
+  "expected_decision": [
+    "REPORT-CLEAN"
+  ],
+  "expected_guard": "no oversized finding, and no session-state finding for the projected block"
+}

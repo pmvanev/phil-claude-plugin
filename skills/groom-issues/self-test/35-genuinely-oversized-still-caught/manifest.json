@@ -1,0 +1,14 @@
+{
+  "fixture_id": "GROOM-SELFTEST-35",
+  "phase": "SCAN",
+  "situation": "#31 is titled 'auth cleanup' and its body lists four unrelated jobs: rotate the signing key, migrate the session store, add rate limiting to the login endpoint, and rewrite the password-reset email. It is SHORTER than #26. No single demonstration shows it working, because there is no single 'it'.",
+  "forge": "github",
+  "command": "/phil:groom-issues",
+  "issue": 31,
+  "body_shape": "short, unstructured, four unrelated jobs",
+  "expected_decision": [
+    "REPORT-DEFECT",
+    "SURFACE-CANDIDATE"
+  ],
+  "expected_guard": "oversized is reported with the seam named, on a card shorter than the clean one in 34"
+}
