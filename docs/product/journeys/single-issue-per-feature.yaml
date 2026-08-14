@@ -1,0 +1,141 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: single-issue-per-feature (2026-08-14)
+
+id: single-issue-per-feature
+name: Understand a feature's state in seconds, and hand it over without a briefing
+persona: morgan-feature-owner
+job: make-in-flight-work-transferable
+summary: >
+  Morgan opens a feature issue — their own, or a colleague's — and within seconds reads the wave, the
+  current slice, which steps are done, which one is in flight, and why work stopped. The reasoning and
+  the diversion stack arrive as a one-way projection of the last handoff, honestly timestamped. Morgan
+  claims the card; the routing line names the command that owns the work rather than inviting inline
+  work. A mid-work diversion is pushed onto the local stack and reaches the issue at the next boundary.
+
+steps:
+  - id: open
+    action: Morgan opens the feature issue in the forge — one card, one feature
+    output: The generated block, above any human prose, with its generation timestamp
+    emotion: uncertain — this is a feature I put down last night, or one I have never seen
+  - id: read-position
+    action: >
+      Read the block: the `Wave:` line, the `Work this with:` routing line, the slice roster in array
+      order, and the current slice's step table with `✓ ▶ ·` glyphs and a two-line description per row.
+      Steps outside the current slice are not enumerated; their slice files are linked.
+    output: >
+      Wave, current slice, current step and per-step state — the four facts, in under thirty seconds
+    emotion: oriented — I know where this is without opening the repo
+  - id: read-why
+    action: >
+      Read the projected why, the intended next action, and the diversion stack, each stamped with when
+      it was captured. Where no snapshot was projected, the stack reads `unknown`.
+    output: The reasoning that was never an artifact, or an honest statement that it was not captured
+    emotion: informed — I know why it stopped, not just where
+  - id: claim
+    action: Morgan takes the feature — assignee set, column position acknowledged
+    output: An owned card; a competing claim is detected and surfaced, not resolved
+    emotion: committed — this is mine now, and the board says so
+  - id: work
+    action: >
+      The routing line names the owning command. Work happens under it, not inline in the session that
+      read the card.
+    output: The owning command running, or an explicit statement of which command owns the work
+    emotion: trust — it is being done the right way, not the fast way
+  - id: divert
+    action: >
+      Something learned mid-work diverts Morgan to a second task, and a devops-style script has to land
+      before that. Frames are pushed onto the local stack; the issue is refreshed at the next boundary,
+      never per push.
+    output: A stack whose innermost frame is where attention actually is, each frame timed
+    emotion: unbothered — the detour is recorded rather than remembered
+  - id: put-down
+    action: >
+      `/phil:handoff` writes the local snapshot first, then refreshes the projection. A session that
+      advanced nothing writes neither.
+    output: A local snapshot plus a re-stamped projection — or nothing at all, stated
+    emotion: relief — the reasoning is held somewhere a teammate can reach
+  - id: refresh
+    action: >
+      At boundaries — slice start, slice end, wave change, roadmap resequenced, handoff — the block
+      regenerates between its markers. Prose outside them survives; a human edit inside them is
+      replaced and the replacement noted.
+    output: A projection that is either current or visibly stale
+    emotion: trust — staleness is legible, so the card can be believed
+
+emotional_arc: >
+  uncertain → oriented → informed → committed → trust → unbothered → relief → trust  # upward
+  # `informed` is a distinct beat from `oriented`: position is derivable from artifacts, the why never
+  # was. The two are separated because only the second requires this feature to exist.
+
+shared_artifacts:
+  - name: slice_status_table
+    source: phil:nwave-slice-status      # never re-derived; two derivations over the same files drift
+    consumed_by: [read-position]
+  - name: feature_state (fold over slices)
+    source: phil:nwave-slice-status      # NEW derivation, lands with its owner (D10), not in the mapping
+    consumed_by: [open, claim]           # decides the column
+  - name: wave_label
+    source: the feature's artifacts
+    consumed_by: [read-position, claim]  # both the column and the routing line derive from it
+  - name: roster_order
+    source: roadmap.json phases[]; slice-number order plus a provisional line where absent
+    consumed_by: [read-position]
+  - name: diversion_stack
+    source: .session-handoff.md          # THE SINGLE AUTHORITY (D7) — the issue holds a projection
+    consumed_by: [read-why, refresh]
+  - name: why + next_action
+    source: .session-handoff.md
+    consumed_by: [read-why]
+  # DELIBERATELY NOT an artifact: any status typed into the issue; any markdown checkbox (D8, fixture
+  # 15 — ticked by hand while work completes on its own); and the WHERE (file, step, branch), which is
+  # derived at read time by the skills that already own it.
+
+error_paths:
+  - step: open
+    failure: The block is missing entirely
+    recovery: >
+      Say so. A card with no projection is a card whose state is unknown, and unknown is not
+      "not started" — the same rule the mapping already applies to a step
+  - step: read-position
+    failure: No roadmap.json exists, so there is no authoritative slice order
+    recovery: >
+      Order by slice number and carry `Order: slice number, provisional until /nw-roadmap` beside the
+      roster. A provisional order that admits it gets corrected; one that does not gets worked
+  - step: read-position
+    failure: The feature has 22 phases and every step would not fit legibly
+    recovery: >
+      Render the roster plus the CURRENT slice's steps only (D9). The hundreds-of-issues argument
+      inverts rather than disappearing: one unreadable description is the same defect in a new shape
+  - step: read-why
+    failure: No snapshot was ever projected — the owner never ran /phil:handoff
+    recovery: >
+      Render `unknown`, never an empty stack. ACCEPTED COST of a single authority (D7): a teammate sees
+      only what the last handoff projected. An empty stack reads as "no diversions", which is a
+      different and false claim
+  - step: read-why
+    failure: A frame was pushed and never popped
+    recovery: Mark it open-since, so a stale stack is visible rather than quietly wrong
+  - step: claim
+    failure: Two people claim the same feature
+    recovery: >
+      Detect and surface. Arbitration is out of scope, inherited verbatim from session-handoff v1 —
+      more likely now that features are the unit of ownership, and still the honest boundary
+  - step: work
+    failure: An agent reads the card and starts doing the work inline
+    recovery: >
+      The `Work this with:` line names the owning command. A feature card is a poorer invitation to
+      inline work than a slice card was, which weakens this failure mode without removing it
+  - step: put-down
+    failure: The forge call fails while refreshing the projection
+    recovery: >
+      The local snapshot is already written and stands. Report the projection as un-refreshed rather
+      than losing the authority to a network error
+  - step: refresh
+    failure: A human typed inside the generated markers
+    recovery: >
+      Replace it and note what it said. A human recording something no artifact can hold is preserved;
+      a human overwriting something the artifacts own is not — the shipped 04/11 discriminator
+  - step: refresh
+    failure: Grooming flags the correctly-shaped card as oversized or as carrying session state
+    recovery: >
+      Slice 05. Until it lands, the false positives are expected and must not be chased as defects in
+      this journey

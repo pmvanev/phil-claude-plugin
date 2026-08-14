@@ -1,0 +1,31 @@
+# Persona (SSOT) — bootstrapped by DISCUSS wave, feature: single-issue-per-feature (2026-08-14)
+
+id: morgan-feature-owner
+name: Morgan
+role: >
+  Owns a whole feature end-to-end on a board that other feature owners also work from, and is both the
+  person who hands one over and the person who inherits one. Distinct from the two adjacent personas,
+  and the distinction is why this file exists: Kai (session-handoff) hands the baton to their OWN next
+  session; Robin (groom-issues) curates cards without working them. Neither is the developer who picks
+  up a colleague's half-done feature.
+goals:
+  - Open a feature's issue and know within seconds where the work stands
+  - Put a feature down at night and pick it up in the morning without re-briefing
+  - Hand a feature to a teammate who can resume it without asking a question
+  - Be diverted mid-work without paying to reconstruct where attention was
+frustrations:
+  - Slice cards are never independently assignable, so a shared board shows N cards nobody else can pick up
+  - >
+    The reasoning lives in .session-handoff.md, which is git-ignored and machine-local — ADR-013 states
+    the consequence outright: "Nothing is shared with a teammate"
+  - The diversion stack — task A to B to a devops script C and back — is recorded in no artifact, by design
+  - Knowing a feature's state means cloning the repo and running a command, or asking the owner in chat
+mental_model:
+  - "A feature is the unit somebody owns; a slice is not something you hand to another person"
+  - "If understanding the state takes more than seconds, nobody will check it and the board goes unread"
+  - "A projection that says when it was made is honestly stale; one that does not is indistinguishable
+    from current"
+  - "Absent state must say unknown — an empty stack reads as no diversions, which is a different claim"
+vocabulary:
+  - feature card, wave column, projection, generated block, diversion stack, frame, push and pop,
+    current slice, glanceability, transferable, inherit, one system of record

@@ -323,6 +323,23 @@ jobs:
     # Relationship to deliver-invisible-work-with-discipline (phil-work): distinct outcome.
     # phil-work owns discipline WITHIN one initiative and says nothing about the session boundary;
     # this job owns continuity ACROSS that boundary, for nWave and non-nWave work alike.
+    #
+    # Cross-person facet (DISCUSS, feature single-issue-per-feature, 2026-08-14):
+    # The job is unchanged — Kai wants the next session to resume without a re-briefing — but the
+    # premise behind its SURFACE changed, and one validated force becomes a deliberate trade.
+    #   anxiety (C), as originally recorded: "Session scratch published to a board is visible to
+    #     everyone who reads the board." STILL TRUE, and no longer avoided. Teammates were confirmed
+    #     real on 2026-08-14, and ADR-013's own consequence line — "Nothing is shared with a teammate.
+    #     Accepted for v1; the partitioned option above is the documented path if that need appears" —
+    #     names this the trigger. The trade: .session-handoff.md keeps in-flight scratch and remains the
+    #     single authority; a generated, delimited, timestamped PROJECTION carries into the issue only
+    #     what a teammate needs. Nothing is read back, so anxiety (B) — two authorities drift — is
+    #     answered structurally rather than by discipline.
+    #   functional (cross-person): the five categories of lost state are unchanged, but category 1
+    #     (the why) and category 2 (the how) must now reach a DIFFERENT PERSON, not only a later
+    #     session. Category 5 (the where) is still derived and still must not be re-recorded.
+    #   habit (cross-person): asking the feature's owner in chat what state it is in.
+    # See docs/feature/single-issue-per-feature/feature-delta.md § Upstream changes.
 
   - id: keep-a-backlog-trustworthy
     # Registered by DISCUSS wave, feature: groom-issues (2026-08-12)
@@ -371,4 +388,108 @@ jobs:
     # Grooming settles what each card MEANS; ranking settles what order they go in. Ranking's
     # own precondition names grooming as advice rather than a gate — a messy board can be
     # ranked, just worse.
+    #
+    # Elicitation facet (DISCUSS, feature groom-issues slice 04, 2026-08-13, issue #25):
+    # The job is unchanged — Robin wants a board that says what it means — but the forces gain a
+    # dimension the original wave did not name. Refined dimensions for the elicitation facet:
+    #   functional (elicitation): the semantic half of the standard must have an EXIT. Rules 1 and 2
+    #     (a purpose, a way to tell when it is done) are the two a title-only card fails, and they
+    #     are precisely the two no automated pass may resolve — so on the original design they are
+    #     reported forever and resolved never.
+    #   push (elicitation): a real finding with no route to resolution is indistinguishable from one
+    #     a human read and chose to leave, because D6 stores no marker. The board that most needs
+    #     grooming produces the most durable report and the least change.
+    #   anxiety (elicitation): (E) A tool that writes a purpose it inferred. The refusal in
+    #     phil:groom-fix is correct and must survive — the gap is not permission to invent, it is a
+    #     scribe. Elicitation asks the human and writes THEIR answer.
+    #   habit (elicitation): opening the forge in a browser to fix a body by hand, losing the
+    #     session's context; or leaving the card and letting the finding recur.
+    # Observed 2026-08-13: all three commands hold AskUserQuestion and all three use it only for
+    # CONSENT — pick a scope, pick a merge survivor. None ever asks what an issue is FOR.
+    #
+    # Paradigm facet (DISCUSS, feature single-issue-per-feature, 2026-08-14):
+    # The job is unchanged — Robin wants a board that says what it means — but the DEFECT ORACLE is
+    # paradigm-dependent in two places, and on the one-issue-per-feature paradigm both fire against
+    # correctly-shaped cards.
+    #   functional (paradigm): "oversized card" cannot be judged on size once a whole feature is one
+    #     issue by design. The discriminator becomes STRUCTURE: a feature card is large and carries a
+    #     generated projection; an oversized card is large and unstructured.
+    #   push (paradigm): a heuristic that flags every correct card teaches people to stop running the
+    #     tool — the same failure as manufacturing work on a clean board, arrived at from the other side.
+    #   anxiety (paradigm): (F) An oracle loosened to stop the false positives stops catching the real
+    #     ones. The fixture pair must resolve opposite ways, in the style of 04/11.
+    # Session state in a body is currently a defect — journeys/groom-issues.yaml error path at `scan`,
+    # citing ADR-013 on world-readability. REVERSED AND SCOPED, not deleted: inside the generated
+    # markers it is intended; typed scratch outside them is still a defect.
+    # See docs/feature/single-issue-per-feature/slices/slice-05-grooming-and-ranking-adapt.md.
+
+  - id: make-in-flight-work-transferable
+    # Registered by DISCUSS wave, feature: single-issue-per-feature (2026-08-14)
+    job_story: >
+      When a feature I own is in flight on a board other developers also work from, I want the issue
+      itself to carry the whole feature — where it stands, what is next, and why work stopped where it
+      did — so I can put it down at night and pick it up in the morning, and a teammate can take it
+      over without asking me anything.
+    dimensions:
+      functional: >
+        One issue per feature carrying a generated roadmap projection, the current position with
+        per-step state, the diversion stack, and blockers as real forge links; the board column
+        expresses the wave, so process position and work state are both legible without opening the repo.
+      emotional: >
+        Confidence that putting work down does not lose it; relief from being the single point of
+        knowledge on a feature; freedom to be diverted without paying to reconstruct where attention was.
+      social: >
+        A teammate takes over cleanly; being someone whose in-flight work is legible rather than
+        personal; a board the team reads rather than one developer's private queue.
+    four_forces:
+      push: >
+        Slice cards are never independently assignable, so N cards of one feature crowd a shared board
+        while telling a teammate nothing actionable. The reasoning lives in .session-handoff.md, which is
+        git-ignored and machine-local — ADR-013 states the consequence outright: "Nothing is shared with
+        a teammate." The diversion stack (task A to B to a devops script C and back) is recorded in no
+        artifact, by design. roadmap.json holds the plan and is invisible to anyone outside the repo.
+      pull: >
+        One issue that IS the feature: a generated roadmap projection showing what is next, a stack
+        showing where attention actually is, blockers as forge links, and a column that says which wave
+        it is in — self-contained enough that resumption is reading one page. ADR-013 already named this
+        the likely end state and deferred it.
+      anxiety: >
+        (A) Session scratch on a world-readable board — the validated anxiety C of
+        carry-work-across-session-boundaries, now a deliberate trade rather than a force avoided.
+        (B) Two authorities over one fact, with the forge copy carrying the widest audience — answered
+        structurally by keeping the local file authoritative and never reading the projection back.
+        (C) A stack that goes stale because a pop was never recorded, which beats no stack the way a
+        stale handoff beats none (Kai's central force, inherited). (D) One card per feature stops showing
+        what is MOVING — the slice-card design's own rationale, inverted. (E) A block large enough for a
+        22-phase roadmap trades hundreds of cards for one unreadable page.
+      habit: >
+        Slice cards nobody else picks up; the reasoning on one laptop; asking the feature owner in chat
+        what state it is in; re-deriving position from git log and /phil:nwave-slice-status.
+    opportunity_score: >
+      highest of three adjacent jobs — importance high (teammates confirmed real 2026-08-14),
+      satisfaction very low (no mechanism exists; ADR-013 explicitly declined it). Scored against
+      keep-a-backlog-trustworthy (medium: groom-issues ships) and
+      carry-work-across-session-boundaries (medium: solo case solved, cross-person half at zero).
+    status: validated
+    personas: [morgan-feature-owner]
+    features: [single-issue-per-feature]
+    # The premise correction this job rests on (DISCUSS, 2026-08-14). nwave-issue-board makes the SLICE
+    # the card, justified as "nWave is worked one feature at a time" — but that is a property of a
+    # DEVELOPER, not of a repo. With several developers each owning a feature, every conclusion drawn
+    # from the single-card premise needs re-deriving, including the wave-as-label-not-column reversal of
+    # 2026-08-10, whose only stated reason was that premise.
+    # Relationship to carry-work-across-session-boundaries (session-handoff): SIBLING, distinct outcome.
+    # That job carries work across a SESSION boundary for one person; this one carries a feature across a
+    # PERSON boundary, and the session case falls out as the degenerate form where both people are you.
+    # Relationship to keep-a-backlog-trustworthy (groom-issues): sequential, as grooming and ranking
+    # already are. This job decides what a card IS; that one decides whether it says what it means.
+    # Load-bearing constraints (DISCUSS, 2026-08-14):
+    #   C1 SINGLE-AUTHORITY-PER-FACT, not "the forge stores nothing" — the reframe that lets a projection
+    #      exist without inverting the one-way rule.
+    #   C2 Generated, delimited, timestamped, never read back.
+    #   C3 No hand-ticked state: glyphs, never checkboxes (fixture 15).
+    #   C4 Bounded description — roster plus the CURRENT slice's steps only.
+    #   C5 Derivation stays with its owner (phil:nwave-slice-status).
+    #   C6 Absent state renders as `unknown`, never as a benign default.
+    #   C7 No per-push forge writes; refresh at boundaries only.
 
