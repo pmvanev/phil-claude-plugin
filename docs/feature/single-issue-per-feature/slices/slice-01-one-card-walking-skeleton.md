@@ -73,6 +73,52 @@ GitLab re-measurement stays on the open list in `feature-delta.md`.
 The uncertainty is entirely about how a rendered page reads, which is what the slice itself answers.
 A SPIKE would build the same card and call it a probe.
 
+## Result — card built 2026-08-14 as issue #26
+
+`https://github.com/pmvanev/phil-claude-plugin/issues/26` · project 3, Status=Todo · labels
+`documentation` + `enhancement` (both, per the multi-valued declaration) · `subIssuesSummary {0, 0}`,
+confirming no sub-issues, which is the paradigm.
+
+**KPI-1 is NOT YET MEASURED, and cannot be measured by the author.** The timed read needs a reader who
+has not seen the feature; I wrote the card. This is the same weakness the `nwave-issue-board` suite already
+names about itself — *"the grader was also the author"*. Splitting the KPI is the honest fix: **legibility**
+(can a cold reader name the four facts from the card alone?) is testable by any fresh reader; **speed**
+(≤30 s) needs a human with a clock. Neither is claimed here.
+
+### Six findings, five of which the design could not have predicted
+
+1. **No `Work this with:` line is possible for this feature.** The wave→command table covers DISCOVER
+   through DELIVER. This repo authors prose with `plugin-dev` instead of running DESIGN/DISTILL/DELIVER,
+   and **that path has no row** — so the rule *no label, no line* fires and the card carries no routing.
+   The routing table does not cover the build path of the repo that owns it.
+2. **The step table never arrives, so promising it would lie.** *Fill in two stages* defers step rows
+   until `/nw-roadmap` writes `roadmap.json`, and fixture 07 requires the card to *say* the table is
+   coming. **DELIVER never runs here**, so that sentence would be an unkeepable promise. The card says so
+   instead, and the slice roster carries the two-line descriptions the step table would have. **Fixture 07
+   assumes the roadmap eventually arrives** — true in an nWave product repo, false in this one.
+3. **Absolute links 404 until the branch merges.** The artifacts exist only on
+   `board-paradigm-and-groom-foldbacks`, and `phil:issue-board` requires absolute `blob/main` URLs because
+   relative paths 404 on GitHub. Linked to `main` anyway — a branch URL rots when the branch is deleted —
+   with one line saying where they live meanwhile. **Any card created before its artifacts merge has this
+   problem, and nothing in either skill mentions it.**
+4. **Slice 06 may be nearly empty, and this is the sharpest finding.** The design assumed the board holds
+   live feature-plus-slice groups. It does not: `session-handoff` #9, `groom-issues` #5, and **every slice
+   card (#10-#15) are CLOSED.** No open feature on this board has slice children. So consolidation has
+   almost nothing live to consolidate, and the hazard slice 06 was built around — closing children
+   inflating a parent's rollup to 100% — **is moot for parents that are already closed and done.**
+   Re-scope slice 06 before starting it; the likely answer is that closed cards are the record of how the
+   work went and must not be retro-consolidated at all.
+5. **The board has three Status options — `Todo`, `In Progress`, `Done` — and no `blocked`.** Slice 03's
+   framing assumes blocked is already a column; it is not. Adding the wave family takes the field from 3
+   options to about 11, which is a larger and more disruptive change to existing cards than the brief
+   implied.
+6. **`gh project item-add` exited 0 with no output**, exactly as `phil:issue-board` records under *Verify
+   the end state*. The GraphQL read-back is what established the item landed. The documented behaviour
+   held; noted because it is the first time this repo has exercised it rather than cited it.
+
+**Not a finding, but worth stating:** the projection was hand-built, so this exercised **the prose, not the
+command** — and `/phil:*` loads 0.27.0 while this tree is 0.40.0. No claim here is a claim about a command.
+
 ## Carpaccio taste tests
 
 | Test | Result |
