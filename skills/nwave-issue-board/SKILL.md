@@ -234,7 +234,9 @@ disagreeing sources, and missing artifacts are recorded, and dropping it on the 
 sends the cleanest-looking version of the table to the largest audience.
 
 **The roster and the current slice's steps are the only tables in the block.** Header lines precede them:
-`Wave:`, the generation timestamp, `Work this with:` where the routing table has a row, and `Order:`.
+`Wave:`, the generation timestamp, `Work this with:` where the routing table has a row, and `Order:`. Below
+them, when a snapshot has been projected, come the `Why` / `Next` / `Stack` sections described under
+*Project the reasoning, not just the position*.
 
 ```
 <!-- nwave:status:begin -->
@@ -267,6 +269,46 @@ different order and does not override it.
 **Only the current slice's steps appear.** Every step of every slice in one description is the
 hundreds-of-issues problem inverted — one page nobody can read instead of one hundred cards nobody can
 scan. Other slices link to their briefs from the roster.
+
+## Project the reasoning, not just the position
+
+Everything above tells a reader **where** a feature is. None of it says **why it stopped there**, and that
+is the half no artifact holds — which is exactly why `/phil:handoff` records it locally. Publish it here so
+a reader who is not its author can act on it.
+
+`phil:session-handoff` hands over three things from `.session-handoff.md`, each with the snapshot's capture
+timestamp: the **why** (decisions reached, approaches ruled out), the **next action**, and the **work
+stack** — the diversion chain, innermost last. Render them below the tables:
+
+```
+Why (captured 2026-08-14T02:07Z)
+- Ruled out re-running JTBD for the slice: a second job statement over a validated job is the
+  duplicate-authority defect this feature exists to detect.
+- Work stopped mid-dogfood, deliberately, not because it failed.
+
+Next — finish the dogfood on #2, asking only the missing done-condition.
+
+Stack
+1. Slice 04 elicitation — the task in hand · open since 2026-08-13T21:10Z
+2. └ The observed population was partial, so the rule needed changing first · open since 02:02Z
+```
+
+Four rules, and the first is the one that makes this legal:
+
+- **Write-only, like everything else in the block.** `/phil:resume` reads the local snapshot; nothing reads
+  this. The local file stays the single authority, so no second authority exists to drift — which is the
+  whole reason the reasoning can live on a board at all.
+- **Absent renders as `unknown`, never as empty.** A card whose owner never ran `/phil:handoff` has no
+  projection: say `Stack: unknown — no snapshot projected`. **Empty asserts there were no diversions**,
+  which is a claim about the work; `unknown` is a claim about the record.
+- **A frame open longer than one boundary is marked.** A push that was never popped is stale, and a stale
+  stack is worse than none for the same reason a stale snapshot is: the next reader trusts it.
+- **The capture timestamp is the snapshot's, not the block's.** They differ whenever a refresh happens
+  without a capture, and a reader deciding whether to trust the reasoning needs the age of the reasoning.
+
+**The accepted cost:** a teammate sees only what the last capture projected. That is the price of one
+authority, it is smaller than it looks — a projection can only lag if work continued after the handoff —
+and it is stated rather than discovered.
 
 ## A card that does not say how to work it gets worked the wrong way
 

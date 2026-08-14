@@ -36,6 +36,8 @@ them.
 | `08-unknown-owner-asks/` | no owner determinable | slice-02 AC4 | unknown is stated, never defaulted (C5) | `ASK-OWNER` — work not begun |
 | `09-claim-and-basis/` | a card was claimed for a stated reason | slice-03 AC1, AC2 — **slice not built** | the session→card link survives | `CAPTURE` carrying claim + basis |
 | `10-competing-claim/` | two snapshots claim one card | slice-03 AC4 — **slice not built** | detection without resolution (C6) | `REPORT-CLAIM-CONFLICT` — neither discarded |
+| `11-local-write-precedes-projection/` | the forge is unreachable mid-capture | single-issue-per-feature slice-04 AC1 | the snapshot is written first, so a forge failure never costs the authority | `CAPTURE` + `PROJECTION-UNREFRESHED` |
+| `12-absent-stack-renders-unknown/` | a teammate inherits a card whose owner never captured | slice-04 AC2 | absent renders `unknown`; empty asserts there were no diversions | `RECONSTRUCT` — three sections `unknown` |
 
 ## The two sharpest fixtures
 

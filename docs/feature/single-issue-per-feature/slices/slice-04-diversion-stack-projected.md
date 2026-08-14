@@ -71,6 +71,48 @@ AC2 and AC4 are the two that must not be waved through.
 Reference class: `session-handoff` slices 01-03, which shipped the snapshot, the routing line, and the
 claimed-card link at roughly this size each.
 
+## Result — 2026-08-14
+
+**Authored; not yet exercised.** The stack format, the projection step, the ADR amendment and two fixtures
+landed. No run has produced a projection, so ACs 1-6 are unverified and **KPI-1b is not measured.**
+
+### What landed
+
+1. **The stack in the snapshot** — a new recordable category alongside the why and the next action, and it
+   earned its own row rather than folding into the why: the why is reasoning, the stack has a **shape**
+   (what to return to, and in what order). Frames are innermost-last, numbered, each carrying what it is,
+   why it was pushed, and when. **A frame is popped by deleting its line**, so the file is the stack rather
+   than a log of stack operations — which is what keeps it from growing without bound.
+2. **The projection step in CAPTURE**, ordered local-write-first, plus `PROJECTED` /
+   `PROJECTION-UNREFRESHED` as additional outcomes. A `CAPTURE` carrying neither, on work that has a card,
+   is a run that skipped the card silently — and nothing else would reveal it, because the snapshot is
+   written either way.
+3. **`nwave-issue-board` gained *Project the reasoning, not just the position*** — the publisher's half.
+   Everything the block carried until now says *where*; this says *why it stopped there*.
+4. **ADR-013 amended, not superseded**, quoting its own deferral line and its own consequence line as the
+   trigger. AC7 met.
+5. **Fixtures 11 and 12.**
+
+### The bug I introduced and caught in the same pass
+
+I numbered the stack collection **6b** — after step 6, which writes the file. **A stack collected after the
+write is a stack the snapshot does not contain.** Moved to 3c, with the other payload collection, and the
+step now says why it lives there. Worth recording because the ordering read as plausible: 6b sat directly
+above the projection step, which is where the stack is *used*, and the write between them was invisible.
+**Appending a step next to where its output is consumed rather than where its input is gathered is how this
+class of bug looks from inside.**
+
+### Not done
+
+- **KPI-1b unmeasured** — the same read as KPI-1a plus *why work stopped*. It needs a projection to exist
+  and a reader who has not seen the feature.
+- **`plugin-dev:command-development` could not be consulted.** It fails to load: its frontmatter injects
+  `bash .../scripts/test.sh`, which is absent from the installed copy. That is issue #23 reproducing, with
+  a detail worth adding to it — `skill-development` loads fine, so the fault is specific to this skill's
+  script reference. `commands/handoff.md` was edited on `skill-development`'s guidance instead, and the
+  deviation is recorded here rather than left invisible.
+- **`skill-reviewer` has not run** over `session-handoff` or the publisher's new section.
+
 ## Carpaccio taste tests
 
 | Test | Result |

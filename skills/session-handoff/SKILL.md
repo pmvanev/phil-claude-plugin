@@ -1,6 +1,6 @@
 ---
 name: session-handoff
-description: Skill bundle for the phil:handoff and phil:resume commands — carries work across the session boundary. Records only what a fresh session cannot derive (the reasoning, the intended next action), stamps a tree fingerprint, and on read-back states a current/stale verdict before presenting anything, then names the command that owns the work without running it. Refuses to record state an artifact already owns.
+description: Skill bundle for the phil:handoff and phil:resume commands — carries work across the session boundary. Records only what a fresh session cannot derive (the reasoning, the intended next action, the diversion stack), stamps a tree fingerprint, refreshes a write-only projection of that record onto the feature's card so a teammate can read it, and on read-back states a current/stale verdict before presenting anything, then names the command that owns the work without running it. Refuses to record state an artifact already owns, and never reads the projection back.
 ---
 
 # Session handoff — capture and resume
@@ -27,6 +27,7 @@ The finding is in
 | **The next action** — what the session was about to do | **Yes** | Partly inferable, and a wrong inference is costlier than none. |
 | The where — file, step, branch, commit, wave | **No** | Already owned by the artifacts. Derive it at read-back via the read-only `nwave-slice-status` skill and git. |
 | **The entry point** — which command owns the work | **Yes** | The card describes work, not method. Nothing else records it. |
+| **The work stack** — the diversion chain, innermost first | **Yes** | Where attention actually is. No artifact holds it, and unlike the why it has a *shape* that matters: what to return to, and in what order. |
 | The claimed card and its basis | **No — tested, not built** | The board's top Todo answers *what is next*; the basis is what **the why** already records. |
 
 ## The snapshot
@@ -52,7 +53,20 @@ owner: /nw-execute
 ## Next
 
 Verify the wave-to-command table against a real run.
+
+## Stack
+
+1. Wave-to-command table — the task in hand · open since 2026-08-12T14:05Z
+2. └ Fixture 07 contradicted it, so it had to be settled first · open since 16:40Z
+3.   └ The fixture runner needed a flag it did not have · open since 17:05Z
 ```
+
+**The stack is innermost-last, numbered, and each frame carries what it is, why it was pushed, and when.**
+Read bottom-up to find where attention is; read top-down to find what it was diverted from. A frame is
+popped by deleting its line, so the file is the stack rather than a log of stack operations.
+
+**Omit the section entirely when nothing was diverted.** An empty `## Stack` heading reads as a claim that
+the work was straightforward, which is a different thing from no claim at all.
 
 The delimited header is machine-readable with `grep`/`sed`; the body is prose for a human. Read the
 fingerprint from the header, never by parsing the prose.
@@ -74,6 +88,11 @@ fingerprint from the header, never by parsing the prose.
    label using the table in `skills/nwave-issue-board/SKILL.md` — that skill owns the wave label and
    owns the mapping. Do not restate the table here; a second copy is a second authority. Omit
    `owner:` entirely when no wave label applies. Most work has no owner, and that is not a defect.
+3c. **Collect the work stack**, if the session was diverted. One frame per diversion, innermost last, each
+   with what it is, why it was pushed, and when. A diversion that was closed before the session ended
+   leaves no frame — the stack records where attention *is*, not where it has been. **Collected here, with
+   the other payload, because step 6 writes the file**: a stack gathered after the write is a stack the
+   snapshot does not contain.
 4. **Refuse the derivable.** If wave, slice, step, branch, or file position comes up, leave it out.
    Say plainly that it is left out because it is derived at read-back. This is not an optimisation;
    recording it is the defect.
@@ -83,7 +102,25 @@ fingerprint from the header, never by parsing the prose.
 6. **Write `.session-handoff.md`**, overwriting any previous snapshot outright — never merging into
    it. There is one snapshot per repository root, so a competing snapshot would need a second worktree
    on the same repo; that case was examined with slice 03 and left unhandled deliberately.
-7. **Report** `CAPTURE`, and echo what was recorded so a mistake is visible immediately.
+7. **Refresh the projection on the feature's card, if the work has one.** Local file first, always: the
+   snapshot is the authority and a failed forge call must never cost it. Publishing is
+   `phil:nwave-issue-board`'s — hand it the why, the next action and the stack with their capture
+   timestamp, and let it own the block. **Never read the card back.** A forge failure leaves the snapshot
+   intact and is reported as an un-refreshed projection, not as a failed capture.
+8. **Report** `CAPTURE`, and echo what was recorded so a mistake is visible immediately. Say whether the
+   projection was refreshed, and where it was not.
+
+**The projection exists because a teammate cannot read this file.** `.session-handoff.md` is git-ignored
+and machine-local by ADR-013, whose consequences state outright that *"nothing is shared with a
+teammate"* — accepted for v1, with the partitioned local-plus-board option named as the documented path
+if that need appeared. It appeared. The partition is exactly as that ADR wrote it: **this file stays the
+single authority; the card carries a generated, timestamped, write-only projection of it.** Nothing is
+read back, so no second authority exists to drift.
+
+**The cost, stated so nobody discovers it as a bug:** a teammate sees only what the last `/phil:handoff`
+projected. Where no snapshot was ever projected, the card's stack section must render `unknown` — never
+empty. An empty stack asserts *no diversions*, which is a claim; `unknown` asserts *nobody wrote it down*,
+which is the truth.
 
 ### NO-OP
 
@@ -200,12 +237,19 @@ capture, always at read-back*.
 
 Report the outcome by name, every run — one per phase:
 
-`CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `RESUME-CURRENT` · `RESUME-STALE` · `RECONSTRUCT` ·
-`ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER`
+`CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `PROJECTED` · `PROJECTION-UNREFRESHED` · `RESUME-CURRENT` ·
+`RESUME-STALE` · `RECONSTRUCT` · `ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER`
 
 A capture run reports exactly one of `CAPTURE` or `NO-OP`. `REFUSE-DERIVABLE` is **additional**:
 report it alongside `CAPTURE` whenever derivable state was offered and left out, naming what was left
-out. A read-back run reports exactly one of `RESUME-CURRENT`, `RESUME-STALE`, or `RECONSTRUCT`, **and**
+out.
+
+`PROJECTED` and `PROJECTION-UNREFRESHED` are **also additional**, and only one of them appears, only
+alongside `CAPTURE`, and only when the work has a card. **A `CAPTURE` with neither is a capture that
+silently skipped the card** — which is the whole failure this pair exists to make visible, because the
+snapshot is written either way and the run looks successful. `PROJECTION-UNREFRESHED` names what went
+wrong and states that the snapshot stands regardless; a `NO-OP` never projects, because there is nothing
+to project. A read-back run reports exactly one of `RESUME-CURRENT`, `RESUME-STALE`, or `RECONSTRUCT`, **and**
 exactly one of `ROUTE`, `ROUTE-LIVE-WINS`, or `ASK-OWNER` — the freshness verdict and the owner are
 independent facts, and a stale snapshot still has an owner worth naming.
 
@@ -213,6 +257,15 @@ independent facts, and a stale snapshot still has an owner worth naming.
 
 - Write the snapshot anywhere but the repo root, or commit it.
 - Present a stale snapshot as current, or bury the verdict beneath the content.
+- **Refresh the projection before the snapshot is written.** Local first, always — a forge call that
+  succeeds while the local write fails leaves the authority behind its own copy.
+- **Read the projection back, at capture or at read-back.** `/phil:resume` reads this file and the
+  artifacts, never the card. The projection is write-only; that is what keeps it from being a second
+  authority.
+- **Render an absent stack as empty.** Where nothing was projected, the card says `unknown`. Empty
+  asserts there were no diversions.
+- **Publish the block itself.** `phil:nwave-issue-board` owns the block's format, its markers and its
+  timestamp; hand it the content.
 - Record wave, slice, step, branch, or file position.
 - Write a snapshot for a session that advanced nothing.
 - Invent a next action that was not stated.
@@ -231,3 +284,9 @@ the situation in its `manifest.json` and comparing the decision reached against 
 that whenever this file or either command loader changes. Every failure mode here is
 silent — a snapshot that records too much looks more complete, and a stale one presented as current
 looks like a smooth resume.
+
+Fixtures `11` and `12` were added 2026-08-14 with the board projection, and they pin its two properties
+that fail silently. `11` — the snapshot is written **before** any forge call, so an unreachable forge
+leaves a stale card that says it is stale, never an authority trailing its own copy. `12` — a card whose
+owner never captured renders `unknown`, not an empty stack: empty is a claim about the work, `unknown` is
+a claim about the record, and a teammate acts differently on each while the two render almost identically.

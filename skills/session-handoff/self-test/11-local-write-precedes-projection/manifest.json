@@ -1,0 +1,18 @@
+{
+  "fixture_id": "SH-SELFTEST-11",
+  "phase": "WIND-DOWN",
+  "situation": "A session reached two decisions and formed a next action, and the work has a feature card. The forge is unreachable -- the refresh call fails after the local snapshot has been written.",
+  "session_advanced_work": true,
+  "decisions_made": [
+    "ruled out X because Y",
+    "settled Z against the rendered board"
+  ],
+  "next_action": "finish the dogfood on #2",
+  "card": 26,
+  "forge_reachable": false,
+  "expected_decision": [
+    "CAPTURE",
+    "PROJECTION-UNREFRESHED"
+  ],
+  "expected_guard": "slice-04 AC1 -- local write precedes the projection; a forge failure never costs the authority"
+}

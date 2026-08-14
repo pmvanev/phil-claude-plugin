@@ -1,0 +1,10 @@
+{
+  "fixture_id": "SH-SELFTEST-12",
+  "phase": "BOOTSTRAP",
+  "situation": "A teammate opens feature card #26 to inherit the work. Its owner has never run /phil:handoff, so no projection exists. The card carries a full generated position block -- roster, current slice, wave -- and no Why, Next or Stack section.",
+  "snapshot_exists": false,
+  "projection_exists": false,
+  "reader": "a teammate, not the owner",
+  "expected_decision": "RECONSTRUCT",
+  "expected_guard": "slice-04 AC2 -- absent renders as `unknown`, never as an empty stack"
+}

@@ -81,3 +81,59 @@ drift. The snapshot would corrupt the staleness signal it depends on.
   documented path if that need appears.
 - Open (→ DELIVER): whether `.session-handoff.md` should be per-repo or per-worktree, given
   `EnterWorktree` and workflow isolation put multiple trees on one initiative.
+
+## Amendment — the partitioned option is adopted (2026-08-14)
+
+Status: accepted · Feature: `single-issue-per-feature`, slice 04 · **Amends, does not supersede.** The
+decision stands: the snapshot remains a single git-ignored root dotfile. What changes is that the second
+half of this ADR's own alternatives list now ships.
+
+### The trigger is this ADR's own consequence line
+
+Quoted verbatim from *Consequences* above:
+
+> (−) Nothing is shared with a teammate. Accepted for v1; the partitioned option above is the documented
+> path if that need appears.
+
+And from *Alternatives considered*:
+
+> **Partitioned local + board**, per `phil:issue-board`'s *One system of record per scope* — local owns
+> in-flight detail, the forge owns what others see, the issue number is the only join. This is the likely
+> end state and is **deferred, not rejected**.
+
+The need appeared. On 2026-08-14 the owner confirmed that teammates are real or imminent, which validated a
+premise no persona or job in `docs/product/` had carried — every one of them described a single developer
+working with AI agents. `make-in-flight-work-transferable` and `morgan-feature-owner` were registered to
+close that gap, and this ADR's deferred path is the surface they need.
+
+### What is adopted, exactly as written
+
+**Local owns in-flight detail; the forge carries what others need; the join is the issue number.**
+`/phil:handoff` writes `.session-handoff.md` **first**, then refreshes a generated, delimited, timestamped
+projection of the why, the next action, and the work stack onto the feature's card. `/phil:resume` is
+unchanged and reads only the local file.
+
+### Why the original anxieties do not fire
+
+- **Anxiety C — session scratch is world-readable.** Still true, and now a **deliberate trade** rather than
+  a force avoided. The local file keeps in-flight scratch; the projection carries only what a teammate needs
+  to resume. Recorded as a facet on `carry-work-across-session-boundaries` in `docs/product/jobs.yaml`.
+- **Anxiety B — two authorities drift.** Answered *structurally*, not by discipline: the projection is
+  **write-only**. Nothing reads it back, at capture or at read-back, so there is no second authority to
+  disagree. This is also why the original rejection of the board *for in-flight scratch* still holds — what
+  was rejected was reading state back from an issue, and that is not what this does.
+- **The concurrency argument that decided this ADR is untouched.** The snapshot stays uncommitted, so no
+  merge conflict enters the resume path and the fingerprint remains a clean staleness oracle.
+
+### Accepted cost
+
+A teammate sees only what the last `/phil:handoff` projected. A projection can lag only if work continued
+after the handoff, so the window is narrow — but where no capture ever ran, the card must render the stack
+as `unknown` and never as empty. Empty asserts there were no diversions; `unknown` asserts nobody wrote them
+down.
+
+### Still out of scope
+
+Multi-session and multi-person arbitration. Competing claims are **detected, not resolved** — the v1
+boundary, inherited unchanged. Two people claiming one feature is more likely now, and detection is still
+the honest limit.
