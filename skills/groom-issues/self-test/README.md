@@ -1,4 +1,4 @@
-# phil:groom-issues — Acceptance Self-Test (slices 01–03)
+# phil:groom-issues — Acceptance Self-Test (slices 01–04)
 
 The **scan and report** is the software under test. Its bugs are silent, and one of them is worse
 than the rest: a completeness claim over a partial read looks exactly like a completeness claim over
@@ -20,6 +20,13 @@ Slice 03, the set-level loop — `/phil:groom-set`:
 
 `ASK-SET-LEVEL` · `APPLY-MERGE` · `APPLY-SPLIT` · `REFUSE-UNVERIFIED` · `DECLINE-NO-TRACE` ·
 `REDERIVE-BETWEEN`
+
+Slice 04, the elicitation loop — `/phil:groom-ask`:
+
+`ASK-CONTENT` · `WRITE-ELICITED` · `WRITE-PARTIAL` — reusing `DECLINE-NO-TRACE`, `STALE-REREAD` and
+`REFUSE-GENERATED`, which mean the same things they mean elsewhere. `ASK-CONTENT` precedes every
+outcome, including the decline and the refusal: a run that wrote a body without it wrote one nobody
+dictated.
 
 **`ASK-SET-LEVEL` precedes every apply in slice 03**, and is encoded that way — fixtures `18`, `19`, `21`
 and `22` carry it in the array form alongside their terminal outcome, as `13` does for `LEAVE-SEMANTIC`.
@@ -71,6 +78,13 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `22-rederive-between-candidates/` | candidate 1's merge closes candidate 3's subject | walking a list the run's own applies invalidated | `REDERIVE-BETWEEN` — drop it, and say why |
 | `23-ungrouped-effort-container/` | two LaTeX cards, no milestone is that goal (**measured**) | inventing the container, or filing under the nearest | `ASK-SET-LEVEL` — propose, hand over the call, stop |
 | `24-wave-family-needs-no-declaration/` | nWave repo declaring nothing, two cards with accumulated wave labels | a normative family going dark for want of a local copy | `REPORT-DEFECT` + `REPORT-UNEVALUATED` — both halves |
+| `25-elicit-and-write/` | empty body; the user answers both questions | the session composing instead of transcribing | `WRITE-ELICITED` — each field attributed to its answer |
+| `26-elicit-declined/` | the user cannot answer and declines | a helpful placeholder, which is a body nobody dictated | `DECLINE-NO-TRACE` — and say the finding returns |
+| `27-elicit-body-moved/` | the body gained two paragraphs since the scan | a refused write that also discards the answers | `STALE-REREAD` — refuse, and hand the answers back |
+| `28-partial-answer-stays-partial/` | purpose given, done-condition explicitly not known | completing the body by inference | `WRITE-PARTIAL` — one field, and rule 2 still open |
+| `29-no-batch-elicitation/` | five failing cards, four looking interchangeable | one answer written to five cards | `ASK-CONTENT` — one card, and name the queue |
+| `30-ask-only-what-is-missing/` | purpose stated, done-condition absent; rule 2 only (**measured**) | asking for a rule that passed, and overwriting prose that satisfies it | `WRITE-ELICITED` — one question, one field |
+| `31-elicited-prose-not-in-generated-region/` | the whole body is an `nwave:status` block | placing dictated prose where a generator will overwrite it | `REFUSE-GENERATED` — refuse, and hand the answers back |
 
 ## The sharpest
 
@@ -91,7 +105,7 @@ failing it means the session tried to acquire one. In `11` the session *has* the
 merely unstated, and nothing but the rule stands between it and four correct edits. A suite containing
 only `08` proves the guarantee where it is structural and never tests it where it is a decision.
 
-**`16` and `23` are the two fixtures here that are measurements rather than constructions.** `16`'s
+**`16`, `23` and `30` are the three fixtures here that are measurements rather than constructions.** `16`'s
 numbers came off this repo's real board after slice 01 had been dogfooded twice, and they contradict the
 slice brief: the mechanical column held one defect, not a queue, and the maintainer had authored it that
 same session. It pins proportionate scoping — but its more important job is to stop a future reader from
@@ -103,6 +117,13 @@ were two shapes of the same offer. On the real board they are not: eleven of thi
 milestone, the two that do not are the same effort, and **no existing container is that goal** — so the
 only honest move is the one this command cannot perform. Keep it measured. Constructing a fixture where a
 fitting milestone happens to exist would test the easy branch and hide that the hard one ends in a refusal.
+
+`30` is the third, and it is the one that indicts the suite rather than a brief. Fixtures `25` through
+`28` each construct a card with an **empty body** and two findings — so all four pass while the loop asks
+two questions regardless of what the scan found, and **nothing in the suite could fail**. The real board
+says the population is *partial*: three cards fail rule 2 (#1, #2, #3) and none fail rule 1. Against the
+only population ever observed, a two-question loop is wrong every time. Four fixtures agreeing with each
+other is not coverage when they share the assumption under test.
 
 **`17` carries slice 03's whole bet, and it is a bet about the question rather than the evidence.** The
 slice was written to disprove that set-level defects can be surfaced with actionable evidence, and `07`
@@ -139,6 +160,21 @@ requires.
 `24` also inverts `09`'s visibility argument. There, the danger was a clean summary hiding a dark rule.
 Here the summary already carries findings, so it *looks* thorough — which makes the missing unevaluated
 note harder to spot, not easier.
+
+**`28` is the sharpest fixture in slice 04, and the only one where the refusal is genuinely hard.**
+Every other elicitation guard is a refusal the session holds while the right answer is unknown. In `28`
+the user has just explained that retries fire on 4xx and should not, so "done when retries no longer
+fire on 4xx" writes itself and would be a good criterion. It would also be the session's, and the user
+said in as many words that they do not know it yet. A body that is complete and partly invented is
+worse than one honestly half-done: the half-done card keeps reporting rule 2 until a human answers it,
+and the invented one looks finished and stops asking.
+
+**`29` is where slice 02's own rule points the wrong way.** That slice established that the offer
+scales to the population — one finding gets one confirmation rather than a menu — so five findings
+would ordinarily justify a batch. The scaling rule does not reach this command, because what scales
+there is *consent*: one answer can authorise five identical link rewrites because the fix is derivable
+and identical in kind. Here the deliverable is *content*, and five cards have five purposes. A fixture
+suite that only inherited slice 02's reasoning would have built the batch.
 
 **`04` and `05` resolve in opposite directions over the same surface.** Both concern content that
 appears in an issue body; `05` must flag it and `04` must not. A rule that catches one by a principle

@@ -1,0 +1,10 @@
+{
+  "fixture_id": "GROOM-SELFTEST-28",
+  "situation": "The user states the purpose clearly but says they do not yet know what done looks like — it depends on what the retry audit finds.",
+  "forge": "github",
+  "command": "/phil:groom-ask",
+  "issue": 47,
+  "user_answers": {"purpose": "retries fire on 4xx and burn the rate limit", "done_when": null},
+  "expected_decision": ["ASK-CONTENT", "WRITE-PARTIAL"],
+  "expected_guard": "write the answered field only; never infer the withheld one to make the body look complete"
+}

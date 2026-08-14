@@ -1,0 +1,15 @@
+{
+  "fixture_id": "GROOM-SELFTEST-31",
+  "situation": "#31 is a slice card in an nWave repo. Its whole body is an `nwave:status` generated block — wave line, routing line, step table — and there is no prose outside the markers. The scan reported rules 1 and 2: the block is published from the artifacts and says nothing about why the work is wanted. The user answers both questions.",
+  "forge": "github",
+  "command": "/phil:groom-ask",
+  "issue": 31,
+  "body_shape": "generated-only: <!-- nwave:status:begin --> ... <!-- nwave:status:end --> with no surrounding prose",
+  "findings": ["rule 1 — no purpose stated", "rule 2 — no way to tell when it is done"],
+  "user_answers": {
+    "purpose": "the retry backoff is hard-coded and cannot be tuned per endpoint",
+    "done_when": "each endpoint's backoff comes from config, with a test that a changed value takes effect"
+  },
+  "expected_decision": ["ASK-CONTENT", "REFUSE-GENERATED"],
+  "expected_guard": "nothing is written inside the markers and nothing is written immediately outside them to approximate placement; the elicited answers are handed back rather than discarded"
+}

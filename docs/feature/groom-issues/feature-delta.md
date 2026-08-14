@@ -155,3 +155,172 @@ actively misleads; and a fix that would edit inside a generated region is refuse
 ### Upstream changes
 
 None. No prior wave ran for this feature.
+
+---
+
+# DISCUSS — slice 04 (2026-08-13)
+
+A second DISCUSS pass on the same feature, run against issue #25 after all three planned slices had
+shipped. Density: lean + ask-intelligent. The 2026-08-12 wave's decisions D1–D7 are **consumed, not
+re-derived**; only what slice 04 adds is recorded below.
+
+## Wave: DISCUSS / [REF] Pre-requisites
+
+SSOT read: `jobs.yaml` (7 jobs), `journeys/groom-issues.yaml`, `personas/robin-backlog-curator.yaml`.
+`vision.md`, `project-brief.md` and `stakeholders.yaml` do not exist in this repo; no DISCOVER or
+DIVERGE wave ran for this feature. No contradiction found with prior evidence — the slice is
+consistent with D5 (loop pacing), D6 (no marker) and D7 (the body standard it helps a card satisfy).
+
+## Wave: DISCUSS / [REF] Persona and JTBD
+
+Unchanged: `robin-backlog-curator`, job `keep-a-backlog-trustworthy` (`status: validated`). The job
+was **consumed rather than re-run** — a second job statement covering work an existing validated job
+already owns would be the duplicate-authority defect this feature exists to detect. An *elicitation
+facet* is recorded on the job in `jobs.yaml`, following the mobile-facet precedent on
+`catch-ux-violations-while-building-ui`.
+
+The facet's new force, which the original wave did not name: **a real finding with no route to
+resolution is indistinguishable from one a human read and chose to leave**, because D6 stores no
+marker. The board that most needs grooming produces the most durable report and the least change.
+
+## Wave: DISCUSS / [REF] Locked decisions
+
+- **[D8]** **Elicitation is a fourth command, not a mode of an existing one.** `/phil:groom-ask`.
+  Consistent with the blast-radius split already established: this one writes bodies from dictated
+  content, which is neither derivable (02) nor set-changing (03). (User, name confirmed 2026-08-13.)
+- **[D9]** **The session supplies the questions; the human supplies every word of content.** No
+  inference from the title, the labels, or a sibling card. The refusal in `/phil:groom-fix` is not
+  relaxed — the gap was never permission to invent, it was the absence of a scribe.
+- **[D10]** **One card at a time. No batch, no apply-to-all**, in any form. The content differs per
+  card, so a population-scaled offer has nothing to scale over; slice 02 already measured that a
+  scale-shaped offer over a small population is ceremony, and ceremony is what teaches people to
+  click through a consent gate.
+- **[D11]** **A partial answer is written partially.** One field given and one withheld writes the
+  one given. Completing the body by inventing the missing half is the failure the whole slice is
+  shaped against, and it is most tempting exactly here.
+- **[D12]** **A decline leaves no trace and the finding returns**, per D6. Same accepted cost as a
+  declined set-level candidate, and it is now the third place this cost is paid — worth stating once
+  per surface rather than assuming the user carries it over.
+
+## Wave: DISCUSS / [REF] Driving ports
+
+| Port | Surface | Slice |
+|---|---|---|
+| `/phil:groom-ask` | Slash command — the per-card elicitation loop | 04 |
+
+Fourth port. The DISCUSS wave planned one and the tool grants forced four; the reasoning is recorded
+under *Driving ports* above. This port's grant is `mutates: true`, `Bash` scoped to issue **read and
+edit** verbs only — no `create`, no `close`, no `gh api`.
+
+## Wave: DISCUSS / [REF] Journey
+
+SSOT: `docs/product/journeys/groom-issues.yaml`, extended rather than replaced. New step
+`elicit-semantic` between `fix-mechanical` and `decide-set-level`; the journey already models each
+command as a step, so a separate journey for one job and one persona would have restated the scan as
+a precondition and created two authorities over one flow.
+
+Emotional arc gains a beat: **wary → relief → control → momentum → relief(again) → confidence →
+trust**. The second relief is a different feeling from the first — the first is learning the size of
+the problem, this one is learning the findings have an exit.
+
+Three error paths added, and the third is the sharp one: **the user answers one question and not the
+other.** New shared artifact `elicited_body_content`, whose single source is recorded as *Robin, via
+the questions asked* — never the session.
+
+## Wave: DISCUSS / [REF] Scope assessment
+
+**RIGHT-SIZED — 0 of 5 oversized signals fire.** One bounded context (elicitation), one shippable
+outcome, one command plus three fixtures, no new abstraction, well under two weeks. `## Scope
+Assessment: PASS`.
+
+## Wave: DISCUSS / [REF] Out-of-scope
+
+- **Inventing any content**, from any source. D9.
+- **Batch or apply-to-all**, in any form. D10.
+- The mechanical column (`/phil:groom-fix`) and the set-level column (`/phil:groom-set`).
+- Rules 3, 4 and 5 — links, labels and chains are not what a title-only card is missing.
+- **Deliberately deferred, from #25's own out-of-scope**: a bare-title card yields two findings and
+  silence on rules 3–5, because those rules have no candidate to judge. The report is technically
+  correct and reads as though the card were mostly fine. Whether that warrants a change to the
+  reporting rules is its own question and its own card.
+
+## Wave: DISCUSS / [REF] Wave decisions summary
+
+### Requirements summary
+
+- **Primary job:** unchanged — make a board trustworthy. This slice closes the semantic column's exit.
+- **Feature type:** infrastructure/tooling (D1, inherited).
+- **Walking skeleton:** not applicable — shipped as slice 01.
+
+### Constraints established
+
+- **C7 — Content is collected, never composed.** The session may structure and prompt; every word of
+  the written body traces to an answer the human gave.
+- **C8 — No batch.** One card per elicitation, always.
+- **C9 — A partial answer is honoured partially.** Never completed by inference.
+
+### Upstream changes
+
+The 2026-08-12 wave's *Slices and order* table listed three slices and described the split as
+complete. It is now four. Recorded here rather than by editing that table, so the original split
+stays readable as what was decided at the time.
+
+## Wave: DISCUSS / [REF] Slice 04 fold-back — the dogfood measurement (2026-08-14)
+
+Two rules folded into `skills/groom-issues/SKILL.md` after the slice-04 dogfood, with the fixtures that
+would have caught each. Route 1 per `CLAUDE.md`; plugin version 0.36.0 → 0.37.0.
+
+**The measurement.** Scanned this repo's real board for rule 1 and rule 2 failures:
+
+| | Cards failing |
+|---|---|
+| Rule 1 — no purpose stated | **0** |
+| Rule 2 — no way to tell when it is done | **3** (#1, #2, #3) |
+
+Every failing card already states a purpose and lacks only a done-condition. **The population is
+partial, not empty.**
+
+**Fold-back 1 — ask only what the scan reported missing.** The shipped text said to ask "what the card
+is for, and how they will know it is done — the two things rules 1 and 2 require", which asks both
+regardless of the findings. Against the only population ever observed that is ceremony on the answered
+half, and it invites overwriting a purpose that passes. Fixture `30` pins it.
+
+**Why the suite could not catch this.** Fixtures `25`-`28` each construct a card with an **empty body**
+and two findings, so all four pass while the loop asks two questions. They share the assumption under
+test, which is why four agreeing fixtures were not coverage. This is the third time on this feature that
+the real board contradicted a constructed population — `16` and `23` are the other two — and the pattern
+is now consistent enough to state as a habit: **a fixture built to a brief's expected shape tests the
+brief, not the world.**
+
+**Fold-back 2 — `REFUSE-GENERATED` belongs to `/phil:groom-ask`.** `/phil:groom-fix` refuses to write
+inside a generated region; the elicitation loop was never given the equivalent, at any of the three
+levels where the rule lives — the decision outcomes, the must-never-do list, or the journey's error
+paths. A card can carry a full `nwave:status` block and still state no purpose, because the block is
+published from the artifacts and says nothing about why the work is wanted. Fixture `31` pins it, and
+distinguishes itself from `15`: there the correct content exists at the generator, here it exists
+nowhere, so the remedy is a refusal that hands the answers back rather than a redirection.
+
+This second fold-back was surfaced by the DISCUSS wave for `single-issue-per-feature`, which makes a
+generated block the shape of **every** feature card rather than an occasional one. The gap was reachable
+before that change and is not created by it.
+
+### Still outstanding on slice 04
+
+**The write path has never executed.** A by-hand exercise of the working-tree prose at 0.37.0 reached
+`ASK-CONTENT` and then `DECLINE-NO-TRACE`, so AC1 and AC2 — write from the answers, attribute each field —
+remain unverified. `/phil:groom-ask` cannot be run as a command until the plugin updates past 0.27.0.
+**Issue 25 stays open**: the slice is authored and its read path exercised, not proven.
+
+Two findings from that exercise, both about the skill rather than about any card:
+
+1. **`AskUserQuestion` is the wrong tool for elicitation, and the skill only implies it.** Its options are
+   authored by the session, so a human picking one is selecting from inventions rather than dictating
+   content — exactly what *the human supplies every word* forbids. The other three commands use it for
+   **consent**, where authored options are correct. The skill notes the consent/content distinction but
+   never says the tool itself does not carry over. It should say so.
+2. **Nothing covers an ambiguous non-answer.** Fixtures 25-28 cover both-answered, declined, body-moved and
+   partial. A reply that is neither an answer nor a decline — "ok" — has no rule and no fixture. The
+   correct rule is to treat ambiguity as unanswered, ask once more, and never resolve it by composing;
+   without it, the tempting move is to read assent as licence to draft. Candidate fixture 32.
+
+Neither is folded in yet.

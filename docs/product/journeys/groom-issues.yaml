@@ -35,6 +35,19 @@ steps:
       accumulated single-valued labels, missing cross-links. Each change is reported as it is made.
     output: Per-issue changes, each stating what changed and why it was safe
     emotion: momentum — the boring half is disappearing without me deciding anything
+  - id: elicit-semantic
+    # Added by DISCUSS wave, slice 04 (2026-08-13, issue #25). `/phil:groom-ask`.
+    action: >
+      For a card the scan reported as failing rules 1 or 2 — no purpose stated, no way to tell when
+      it is done — ask Robin what the card is for and how they will know it is finished, then write
+      those answers into the body. One card at a time. The session supplies the questions and the
+      structure; Robin supplies every word of content.
+    output: >
+      A body Robin dictated, written back to the card — or, on a decline, nothing at all and no
+      record that it was offered
+    emotion: >
+      relief again, of a different kind — the findings I could only look at are now the ones I can
+      finish, and nothing was written that I did not say
   - id: decide-set-level
     action: >
       For each cross-issue candidate — duplicate, oversized, overcome by events, ungrouped — present
@@ -48,7 +61,10 @@ steps:
     output: A closing summary; the board itself is the record
     emotion: trust — the board now says what it means
 
-emotional_arc: wary → relief → control → momentum → confidence → trust  # upward
+emotional_arc: >
+  wary → relief → control → momentum → relief(again) → confidence → trust  # upward
+  # The second relief (elicit-semantic) is a different feeling from the first. The first is
+  # learning the size of the problem; this one is learning the findings have an exit.
 
 shared_artifacts:
   - name: house_default_body_standard
@@ -62,7 +78,13 @@ shared_artifacts:
     consumed_by: [decide-set-level]
   - name: agreed_scope
     source: scope
-    consumed_by: [fix-mechanical, decide-set-level]
+    consumed_by: [fix-mechanical, decide-set-level, elicit-semantic]
+  - name: elicited_body_content
+    source: Robin, via the questions asked at elicit-semantic   # NEVER the session
+    consumed_by: [elicit-semantic]
+    # The single source is the human. A session that infers a purpose from the title, the labels,
+    # or a sibling card has manufactured the artifact it was supposed to collect — and the result
+    # is indistinguishable from a dictated one once written.
   # DELIBERATELY NOT an artifact: any "groomed" marker — no label, no timestamp block. A stored
   # marker becomes a second authority the moment a human edits a groomed issue, which is what
   # phil:issue-board forbids under "One system of record per scope".
@@ -93,6 +115,36 @@ error_paths:
       re-derived every run and no marker is stored, a declined candidate WILL be proposed again next
       run. That is the price of having no second authority; it is not a bug, and the report should
       say so plainly rather than let it read as the tool forgetting
+  - step: elicit-semantic
+    failure: Robin declines to fill the card in, or cannot answer right now
+    recovery: >
+      Write nothing and record nothing. Same accepted cost as a declined set-level candidate — the
+      finding returns next run, because the defect table is re-derived and D6 stores no marker
+  - step: elicit-semantic
+    failure: The body changed between the scan and the write
+    recovery: >
+      Re-read immediately before writing and refuse to overwrite. Same rule as fix-mechanical, and
+      it matters more here: the body being replaced is prose a human wrote
+  - step: elicit-semantic
+    failure: The scan reported only one of rules 1 and 2 as failing
+    recovery: >
+      Ask only for what was reported missing. Measured 2026-08-14 on the real board: three cards fail
+      rule 2 and none fail rule 1, so the observed population is partial rather than empty. Asking for a
+      purpose the card already states is ceremony on the answered half, and invites overwriting prose
+      that passes
+  - step: elicit-semantic
+    failure: The body is entirely a generated region, so dictated prose has nowhere legitimate to go
+    recovery: >
+      Refuse, and hand the elicited answers back. Same rule as fix-mechanical, reached from the other
+      side: there the correct content lives at the generator, here it lives nowhere — a purpose is not
+      derivable from any artifact, which is why elicitation exists. Writing just outside the markers to
+      place the content is the same defect one line over
+  - step: elicit-semantic
+    failure: Robin answers one question but not the other
+    recovery: >
+      Write what was given and leave the rest. A card with a purpose and no done-condition is a
+      smaller defect than one with neither, and inventing the missing half to make the body look
+      complete is the exact failure this step exists to avoid
   - step: report
     failure: Nothing is wrong with the board
     recovery: >

@@ -1,0 +1,12 @@
+{
+  "fixture_id": "GROOM-SELFTEST-27",
+  "situation": "The user answered both questions. The re-read immediately before writing shows the body is no longer empty — someone added two paragraphs of context four minutes ago.",
+  "forge": "github",
+  "command": "/phil:groom-ask",
+  "issue": 47,
+  "body_at_scan": "",
+  "body_now": "two paragraphs added by another author, 4 minutes ago",
+  "user_answers": {"purpose": "...", "done_when": "..."},
+  "expected_decision": ["ASK-CONTENT", "STALE-REREAD"],
+  "expected_guard": "refuse the write, say what moved, and show the elicited answers back so they are not lost"
+}

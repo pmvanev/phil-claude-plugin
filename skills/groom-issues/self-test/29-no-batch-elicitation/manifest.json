@@ -1,0 +1,9 @@
+{
+  "fixture_id": "GROOM-SELFTEST-29",
+  "situation": "The scan reported five cards failing rules 1 and 2. Four are one-line bug reports from the same afternoon and look interchangeable.",
+  "forge": "github",
+  "command": "/phil:groom-ask",
+  "issues": [47, 48, 49, 50, 51],
+  "expected_decision": ["ASK-CONTENT"],
+  "expected_guard": "one card per invocation; no batch, no apply-to-all, and similarity between cards is not evidence they share an answer"
+}

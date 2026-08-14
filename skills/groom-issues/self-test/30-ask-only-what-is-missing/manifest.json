@@ -1,0 +1,14 @@
+{
+  "fixture_id": "GROOM-SELFTEST-30",
+  "situation": "#2 states its purpose in the first paragraph — the label families are multi-valued by decision and grooming needs to read that from somewhere — and states no way to tell when it is done. The scan reported rule 2 only; rule 1 passed. MEASURED: on this repo's board 2026-08-14, three cards (#1, #2, #3) fail rule 2 and none fail rule 1. The observed population is partial, never empty.",
+  "forge": "github",
+  "command": "/phil:groom-ask",
+  "issue": 2,
+  "findings": ["rule 2 — no way to tell when it is done"],
+  "rules_passing": ["rule 1 — purpose stated in the opening paragraph"],
+  "user_answers": {
+    "done_when": "phil:groom-issues reads the families from CLAUDE.md and reports rule 4 evaluated rather than unevaluated on this board"
+  },
+  "expected_decision": ["ASK-CONTENT", "WRITE-ELICITED"],
+  "expected_guard": "exactly one question is asked; the existing purpose is neither re-asked nor rewritten"
+}

@@ -1,6 +1,6 @@
 ---
 name: groom-issues
-description: Skill bundle for the phil:groom-issues, phil:groom-fix and phil:groom-set commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, and resolves the defects between issues (merge, split, close, group) by asking before each one. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
+description: Skill bundle for the phil:groom-issues, phil:groom-fix, phil:groom-set and phil:groom-ask commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, resolves the defects between issues (merge, split, close, group) by asking before each one, and fills in a card that says too little from answers the user dictates. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
 ---
 
 # Groom issues — say what is wrong with a board
@@ -8,21 +8,28 @@ description: Skill bundle for the phil:groom-issues, phil:groom-fix and phil:gro
 A board accumulates cards that someone filed half-finished. Reading them one at a time finds the
 sloppy ones and misses the expensive ones, because the costly defects live *between* issues.
 
-**Three commands, and the splits between them are the guarantee.** `/phil:groom-issues` reads and
+**Four commands, and the splits between them are the guarantee.** `/phil:groom-issues` reads and
 reports — it holds no write tool at all, so read-only is enforced rather than declared.
 `/phil:groom-fix` applies the mechanical column inside a scope the user picks, and can change no card's
 existence. `/phil:groom-set` resolves the defects between issues — merge, split, close, group — and asks
-before every one. Do not improvise any of them.
+before every one. `/phil:groom-ask` fills in a card that says too little, from answers the user
+dictates. Do not improvise any of them.
 
 The splits are not tidiness. A single command carrying the report in context is the design where a write
 gets computed against remembered text instead of read text, and where read-only holds only as long as
 nobody adds a tool. Separating them makes the re-read structural and the guarantee mechanical.
 
-They also separate two different blast radii. `/phil:groom-fix` edits bodies and labels; every change it
-makes is one edit to undo. `/phil:groom-set` changes **which cards exist** — a merge closes one, a split
-creates several, and neither reverses cleanly. Handing both to one command would put the reversible and
-the irreversible behind the same consent, and the reversible ones are far more numerous, so the habit
-formed on them is the habit carried into the others.
+They also separate blast radii. `/phil:groom-fix` edits bodies and labels; every change it makes is one
+edit to undo. `/phil:groom-set` changes **which cards exist** — a merge closes one, a split creates
+several, and neither reverses cleanly. Handing both to one command would put the reversible and the
+irreversible behind the same consent, and the reversible ones are far more numerous, so the habit formed
+on them is the habit carried into the others.
+
+`/phil:groom-ask` splits on a different axis again: not how far a write reaches, but **where the content
+comes from**. Everything the other three write is derivable — an absolute URL, a mirrored chain line, a
+milestone the user picked from a list. What this one writes exists nowhere until a human says it. That is
+why it is a separate command and not a mode: the guarantee it needs is not *did you consent* but *did you
+compose this*, and no scoping enforces that.
 
 **REQUIRED BACKGROUND: `phil:issue-board`.** Every forge mechanic — `-R` targeting, label semantics,
 absolute-URL rules, dependency links, generated blocks — lives there. Do not guess any of it here.
@@ -425,6 +432,63 @@ a caveat stops being read by the run that needs it. The note is owed when a cand
 check could not settle it: two labels and no declared family, an unlinked path and no way to confirm
 the target. No candidate, no note.
 
+## Eliciting the semantic content — `/phil:groom-ask`
+
+The mechanical column has `/phil:groom-fix` and the set-level column has `/phil:groom-set`. **The
+semantic column had nothing**, and that is a hole rather than a boundary: a card failing rules 1 and 2
+is reported every run and resolvable by none of them, so a board of title-only cards produces an
+identical report forever. That is *this tool teaches people to stop running it* reached from the
+other side — not manufactured findings, but real findings with no exit.
+
+**The refusal was never the problem; the missing scribe was.** `/phil:groom-fix` declining to draft a
+purpose is the boundary working exactly as designed, and nothing here relaxes it. What this adds is
+somewhere for the content to come from.
+
+**The session supplies the questions and the structure. The human supplies every word.** Do not infer
+a purpose or a done-condition from the title, the labels, a sibling card, or the repository. An
+inferred purpose is indistinguishable from a dictated one the moment it is written, which is why the
+rule has to hold at the point of asking rather than at the point of review.
+
+**Ask only what the scan reported missing.** Rules 1 and 2 fail independently, so derive the questions
+from the findings — one question per missing rule, and none for a rule that passed. Asking for a
+purpose a card already states is ceremony on the answered half, and worse than ceremony: it invites
+overwriting prose that passes.
+
+Measured on this repo's board 2026-08-14: **three cards fail rule 2 (#1, #2, #3) and none fail rule
+1.** Every failing card already states a purpose and lacks only a done-condition. The population is
+*partial*, not empty — so a loop that always asks both questions is wrong against every card it has
+actually been observed to meet. A two-question loop was the first draft of this section, and nothing
+in the suite failed when it asked for both, which is why fixture `30` exists.
+
+Note what the family did before this. All four commands hold `AskUserQuestion`, and the other three
+use it only for **consent** — pick a scope, pick the surviving card of a merge. None of them ever
+asks what an issue is *for*. Elicitation is a different use of the same tool, and its absence is why
+the semantic column had no exit.
+
+**One card per invocation.** No batch, no apply-to-all. The content differs every time, so a
+population-scaled offer has nothing to scale over — and a bulk offer would collect one answer and
+write it as though it were several. Slice 02 measured what a scale-shaped offer does to a small
+population: it becomes ceremony, and ceremony is what teaches people to click through a gate.
+
+**A partial answer is written partially.** One field given and one withheld writes the one given, and
+says which is still missing. Completing the body by inferring the other half is the failure this whole
+step is shaped against, and it is most tempting precisely here, where the body looks nearly done. A
+card with a purpose and no done-condition is a smaller defect than one with neither.
+
+**Report which answer became which field.** Not decoration: it is what makes an invented sentence
+visible. "Wrote the body" cannot be contradicted by a reader; "the purpose is your first answer
+verbatim, the done-condition your second, nothing else was added" can.
+
+**Re-read immediately before writing, and refuse a body that moved.** Slice 02's rule, and it binds
+harder here — the text at risk is prose a human wrote, not a link that would have 404'd. Report what
+moved and show the elicited answers back, so a refused write does not also lose what was just
+dictated.
+
+**A decline writes nothing and records nothing.** No body, no label, no comment, no note. Same D6 cost
+as a declined set-level candidate, and this is the third surface that pays it: say at the decline that
+the finding returns next run. A user who has now met the same cost three times still has not been told
+it a third time unless this surface says so.
+
 ## Decision outcomes
 
 Report the outcome by name, every run. Each command draws from its own set.
@@ -449,14 +513,34 @@ with `LEAVE-SEMANTIC` alongside whenever a semantic defect was reported and left
 
 with `REDERIVE-BETWEEN` alongside whenever an apply invalidated a later candidate.
 
-**`SCOPE-FIRST` and `ASK-SET-LEVEL` are preconditions, not alternatives.** An apply that reports only
+`/phil:groom-ask` (the elicitation loop) reports `ASK-CONTENT` before any write, then exactly one of:
+
+`WRITE-ELICITED` · `WRITE-PARTIAL` · `DECLINE-NO-TRACE` · `STALE-REREAD` · `REFUSE-GENERATED`
+
+`DECLINE-NO-TRACE`, `STALE-REREAD` and `REFUSE-GENERATED` are the same outcomes the other commands
+report, meaning the same things — a decline that stores nothing, a body that moved since the read, and
+a write whose target belongs to a generator.
+
+**`REFUSE-GENERATED` belongs here for the same reason it belongs to `/phil:groom-fix`, and the case is
+less exotic than it looks.** A card can carry a generated `nwave:status` block and still state no
+purpose: the block is published from the artifacts and says nothing about why the work is wanted. So
+elicited prose has to be placed *outside* the markers, and a body that leaves no room for it — one
+where the generated region is the whole body — is refused rather than approximated. Writing just
+outside the markers to get the content in is the same defect one line over, and is forbidden in the
+same words.
+
+**`SCOPE-FIRST`, `ASK-SET-LEVEL` and `ASK-CONTENT` are preconditions, not alternatives.** An apply that reports only
 its terminal outcome has not said whether it asked — and *did it ask* is the one property both writing
 commands exist to guarantee. `REFUSE-UNVERIFIED` is the exception that proves it: nothing was asked
 there, because an unconfirmed candidate is not put to a vote.
 
+**`ASK-CONTENT` differs in kind from the other two.** They collect consent — a scope, a survivor.
+It collects *content*, and the content is the deliverable. A run reporting `WRITE-ELICITED` without
+`ASK-CONTENT` wrote a body nobody dictated.
+
 ## What this skill must never do
 
-All three commands:
+All four commands:
 
 - Read or write a grooming marker, in any form — including a record of what was declined.
 - Report a finding without the rule it violates and the evidence for it.
@@ -481,6 +565,17 @@ All three commands:
   are reported and left, every time.
 - Carry a scope from one run into the next. Nothing is stored between runs; a remembered scope is the
   marker this skill refuses, grown back in another shape.
+
+`/phil:groom-ask` (the elicitation loop) additionally:
+
+- Compose any part of a body. Not from the title, the labels, a sibling card, or the repository.
+- Complete a partial answer by inferring the half that was withheld.
+- **Ask for a rule the scan reported as passing.** The questions come from the findings.
+- Offer a batch, an apply-to-all, or "the same again for the next card".
+- Write without showing which answer became which field.
+- Overwrite a body that moved since the read, or discard the elicited answers when refusing.
+- **Write elicited prose inside a generated region, or just outside it to approximate placement.**
+- Touch a mechanical defect, a label, a link, or which cards exist. Those have their own commands.
 
 `/phil:groom-set` (the set-level loop) additionally:
 

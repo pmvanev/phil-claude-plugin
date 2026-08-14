@@ -1,0 +1,10 @@
+{
+  "fixture_id": "GROOM-SELFTEST-26",
+  "situation": "Same card as fixture 25. The user declines — they cannot remember what it was for and would rather look it up later.",
+  "forge": "github",
+  "command": "/phil:groom-ask",
+  "issue": 47,
+  "user_answers": null,
+  "expected_decision": ["ASK-CONTENT", "DECLINE-NO-TRACE"],
+  "expected_guard": "no body, no label, no comment, no note anywhere — and the report says the finding returns next run"
+}

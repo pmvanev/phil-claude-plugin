@@ -16,6 +16,7 @@ End the report by naming the command that acts on each column, with its count:
 
 - *"3 mechanical findings; `/phil:groom-fix` applies them inside a scope you pick"*
 - *"2 set-level candidates; `/phil:groom-set` resolves them, asking before each"*
+- *"4 semantic findings; `/phil:groom-ask` fills a card in from your answers, one at a time"*
 
 Name them; do not run either, and do not offer to. Naming a command with a count is a handover; running
 it is the consent step that command owns, taken by the one session that has not asked.
