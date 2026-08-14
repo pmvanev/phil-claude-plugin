@@ -27,105 +27,140 @@ issue is ever written back into `docs/feature/`.
 
 | nWave artifact | Forge object |
 |---|---|
-| Feature — `docs/feature/<id>/` | Parent issue. Carries the wave. |
-| Slice — `slices/slice-NN-*.md`, or roadmap phase `NN` | One issue each, child of the feature. **These are the cards that move.** |
-| Step — `roadmap.json` step `NN-MM` | A row in that slice's issue. Never its own issue. |
+| Feature — `docs/feature/<id>/` | **One issue. This is the card that moves.** Carries the wave. |
+| Slice — `slices/slice-NN-*.md`, or roadmap phase `NN` | A row in the feature's generated roster. Never its own issue. |
+| Step — `roadmap.json` step `NN-MM` | A row in the feature's step table, **for the current slice only**. Never its own issue. |
 
-Slices are the cards because a slice crosses columns in a day while a feature would sit still for
-weeks. Steps stay rows because a 22-phase feature would otherwise mint hundreds of issues — that
-size is real, not hypothetical.
+**The feature is the card because the feature is what somebody owns.** A slice is never independently
+assignable to a second developer, so slice cards crowd a shared board with N items nobody but the
+feature's owner can pick up — while the one thing a teammate needs, *which features are in flight and
+who has them*, is the thing the board does not say.
+
+**This reverses the earlier mapping, and the reversal is a premise correction rather than a change of
+taste.** Slices were the cards because *"nWave is worked one feature at a time"* — true, but that is a
+property of a **developer**, not of a repo. With several developers each owning a feature, several are in
+flight, and every conclusion drawn from the single-card premise has to be re-derived. The full record is
+in `docs/feature/single-issue-per-feature/feature-delta.md`.
+
+**Split a feature into slice cards only when two people work it concurrently.** That is
+`phil:issue-board`'s rule under *Choosing what becomes an issue* — split when two halves would sit in
+different columns at the same time — and concurrency is now the only thing that produces it.
+
+Steps and slices both stay rows for the reason steps always did: a 22-phase feature would otherwise mint
+hundreds of issues, and that size is real. **The inverted form of that argument binds too** — every step
+of every slice in one description is unreadable in a different way, which is why the step table is scoped
+to the current slice.
 
 `roadmap.json` supplies **ids and order** — of the steps inside a slice, and of the slices
 themselves. It is not the status source, but neither is it
 forbidden as one: a project that maintains a per-step `status` field is a case
 `nwave-slice-status` already handles. Take whatever it returns.
 
-## Attach slices to the feature natively
+## The roster is generated, and it is the same instrument as the step table
 
-GitHub carries the feature→slice edge as a real sub-issue relationship; the commands and the `gh`
-version they were verified against are in `phil:issue-board` under *Dependencies depend on the
-tier*. Use them rather than describing the hierarchy in prose.
+Slices are not issues, so **no sub-issue relationship is created for them and no forge rollup applies.**
+Both forges' parent-completion mechanisms — GitHub's `subIssuesSummary`, GitLab's
+`taskCompletionStatus` — count children this mapping no longer creates. `phil:issue-board` still owns
+what they measure; nothing here reads them.
 
-Where the forge maintains the parent's rollup, **do not also hand-write a slice roster table into
-the feature description** — that is a second copy of something the forge already keeps, and the
-hand-written copy is the one that goes stale.
+**An earlier version of this skill forbade a hand-written roster, and that ban does not transfer.** It
+was scoped to the case where the forge already computed the roster from sub-issues, making a written copy
+a second tally that would disagree. Once slices stop being issues, nothing computes it — and a
+**generated, delimited, timestamped** roster is the same instrument as the step table that already ships,
+carrying the same guarantees.
 
-On GitHub that rollup is free and exact: because slices are sub-issues, the feature issue reports
-`N of M` and draws a bar without anything being published to it — the mechanism, and the count
-observed from a three-slice parent, are in `phil:issue-board` under *A parent's "N of M done" counts
-different things on each forge*. **Slices done over slices total is therefore already on the board,
-and the generated block must not restate it** — a hand-written count is a second tally of a number
-the forge computes, and it is the one that will disagree.
+Both forges are now identical on this point, which removes the asymmetry the old design had to work
+around: no epics, no Premium tier question, no second seeding pass, and no per-forge rollup divergence.
 
-`glab issue update` exposes no parent or child flag, and GitLab hierarchy means epics, which are
-Premium and group-scoped. So on GitLab the feature description carries a roster table of bare `#N`
-references, and that is the only *project-scoped* rollup available. Two things govern it:
+**Never write the roster as `- [ ] ` checkboxes**, on either forge. GitLab will report a completion count
+from them and GitHub will count them under `trackedIssues`, so the temptation is real and the mechanism
+works. **A checkbox is ticked by hand while work completes on its own**, so the two diverge the first time
+anyone forgets, and what the feature then displays is the state of the checkboxes rather than the state of
+the work. Plain rows with generated glyphs, always.
 
-- Keep the references **bare**. `#N` renders live state; a markdown link freezes it. The reasoning
-  is in `phil:issue-board` under *Link what the forge cannot resolve*.
-- Slice numbers exist only after the issues are created, so the roster is a **second pass** — see
-  *Bulk seeding needs two passes* in `phil:issue-board`.
+**Per-row status is a glyph, from exactly this set:** `✓` done · `▶` current · `·` not started ·
+`⊘` deferred · `?` unknown. Generated from what `phil:nwave-slice-status` returns, never typed.
 
-**On GitLab there is no *project-scoped* slices-done count, and the obvious way to manufacture one is
-a trap.** Writing the roster as `- [ ] #N` checkboxes does make GitLab report a completion count —
-the mechanism is real, and `phil:issue-board` records it under *A parent's "N of M done" counts
-different things on each forge*. But a checkbox is ticked by hand while a slice issue closes on its
-own, so the two diverge the first time anyone forgets, and what the feature displays is the state of
-the checkboxes, not the state of the work. Leave the roster as bare references: they render each
-slice's live state, and an unsummed column of true states beats a summed count of stale ones. A milestone named for the feature *would* buy the bar, and
-**that option is closed**: the one milestone an issue can carry is spent on the goal, per
-`phil:issue-board` under *A milestone is a goal*. A feature gets no reliable completion count on
-GitLab, and the honest response is to read the slices' live states rather than manufacture a summed
-one.
+**Every roster row carries a two-line description of what that slice does** — not just its name. The
+name is a label the owner recognises; a reader inheriting the feature needs to know what the slice
+achieves without opening its brief. Measured 2026-08-14: a reader named a card's wave and current
+position inside thirty seconds against a roster carrying those descriptions.
 
-## Wave is a fact about the feature, not a column
+**Summarise what you link.** Where the block or the surrounding description points at artifacts — the
+delta, the slice briefs, the journey — give each a clause saying what it holds. Observed in the same
+read: *"I like that the artifacts are all linked **and summarized**."* Six bare URLs would have consumed
+the whole thirty-second budget the projection exists to fit inside.
 
-Do not build a board with discuss · design · distill · deliver columns. nWave is worked one feature
-at a time, so those columns hold a single card between them — a progress readout wearing a board's
-clothes, and five columns to maintain for it.
+## Wave is the column, and also stays a label
 
-Record the wave as a label on the feature issue — `wave::deliver`, or `wave: deliver` where scoped
-labels are unavailable — and restate it in the generated block.
+**The board columns are the waves** — `discover · diverge · discuss · design · devops · distill ·
+deliver` — plus a generic `to do · in progress · blocked · done` family for work nWave is not driving.
+One board serves both populations.
+
+**This reverses the earlier rule, on the same premise correction as the mapping.** Wave columns were
+rejected because *"nWave is worked one feature at a time, so those columns hold a single card between
+them — a progress readout wearing a board's clothes."* With several developers each owning a feature,
+those columns hold real cards and the board answers the question a teammate actually has: who is where in
+the process.
+
+**Record the wave as a label as well** — `wave::deliver`, or `wave: deliver` where scoped labels are
+unavailable — and restate it in the generated block. That is redundant with the column in exactly one
+case, which is the case that matters: **a blocked card has left its wave column**, and without the label
+nothing on the board says which wave it will return to.
 
 **The wave label is single-valued and must be swapped, not added.** Where scoped labels are
 unavailable, nothing enforces that, so a feature walked from DISCUSS to DELIVER accumulates four
 wave labels and the record of where it stands becomes unreadable while every command reported
 success. Remove the old wave in the same call that adds the new one.
 
-**The board that earns its keep is the slice board** — to do · in progress · blocked · done — because
-slices are what cross columns inside DELIVER.
+**A feature's column state is a fold over its slices, and `phil:nwave-slice-status` owns that
+derivation** — never this skill. No slice started → `to do`; any started and not all done → `in
+progress`; the current slice blocked → `blocked`; all done → `done`. **Never fold from the current slice
+alone**: a feature with five of six slices done and the sixth not started would render as `to do`,
+reporting near-finished work as untouched, which is the same lie as publishing `unknown` as `not started`.
 
 Keep **blocked** off the wave label. When the blocker is another issue, use the forge's dependency
 link and leave the chain line, both per `phil:issue-board`. A label carries only what no link can
 express — waiting on a person, a decision, or an outside event.
 
+**Adding the wave family is a real change to an existing board, not a free one.** A project whose Status
+field holds three options goes to about eleven, and every existing card is re-sorted against them.
+Observed on this repo's board 2026-08-14: `Todo`, `In Progress`, `Done`, and no `blocked` at all. Look at
+what the board holds before adding columns to it — the decision this section reverses was itself reversed
+mid-session by someone doing exactly that.
+
 ## The order of the cards is the order of the work
 
-`roadmap.json` fixes both orders: `phases[]` for the slice cards, `phases[].steps[]` for the rows
-inside one. Publish both. A to-do column in a different order is a second schedule, and the one
-people act on is the one on the board. The mechanics for setting a position are in
-`phil:issue-board` under *A column is a queue, so its order is a claim*.
+`roadmap.json` fixes both orders: `phases[]` for the roster rows, `phases[].steps[]` for the step rows
+inside the current slice. Publish both.
 
-- **Array order, not id order.** Where anything else implies a different sequence — the slice
-  numbers, a dependency noted in a slice file — the array still decides, as it does for the rows.
-- **Before `/nw-roadmap` there is no schedule.** Order the cards by slice file number ascending,
-  which is the best available guess, and say so beside the roster on GitLab, or in the feature
-  issue's description outside the status block on GitHub: `Order: slice number, provisional until
-  /nw-roadmap`. A provisional order that admits it gets corrected; one that does not gets worked.
-  When the roadmap lands, replace that line with the array order rather than leaving both standing.
-- **GitLab** — the roster table rows carry the same order. It is the only rollup there, so it is
-  also the only place the order is legible away from the board.
-- **GitHub** — the board column and the parent's sub-issue list are two orders, and setting one
-  leaves the other alone. Each needs its own write, per issue and per sub-issue; neither follows
-  from the order the issues were created in. Both mutations are in `phil:issue-board`, which also
-  records their exercise status — both GitHub mutations are confirmed by a run as of 2026-08-12;
-  GitLab's is still schema-only.
-- **A deferred slice takes no position, because it takes no card.** The top of a to-do column
-  assigns work to whoever reads it next.
+**Slice order is now a table fact, not a board fact**, and that retires a whole class of work the old
+mapping needed. There is no per-slice card to position, so **the two-orders problem is gone**: GitHub's
+board column and sub-issue list no longer disagree, because there is no sub-issue list, and GitLab needs
+no second seeding pass, because there are no slice numbers to wait for. Both ordering mutations the old
+design depended on — `reprioritizeSubIssue` and its GitLab counterpart — **were never exercised against a
+real board**, and nothing here needs them now.
+
+What remains is the order of the **feature** cards within a column, which is `phil:issue-board`'s under
+*A column is a queue, so its order is a claim*.
+
+- **Array order, not id order.** Where anything else implies a different sequence — the slice numbers, a
+  dependency noted in a slice file — the array still decides.
+- **Before `/nw-roadmap` there is no schedule.** Order the roster rows by slice file number ascending,
+  the best available guess, and say so beside them: `Order: slice number, provisional until /nw-roadmap`.
+  A provisional order that admits it gets corrected; one that does not gets worked. When the roadmap
+  lands, replace that line with the array order rather than leaving both standing.
+- **Where `/nw-roadmap` will never run, say that instead of promising it.** A repo that authors prose
+  rather than executing DELIVER has no roadmap coming, so `provisional until /nw-roadmap` describes a
+  correction that will never arrive. Write `Order: slice number — final; /nw-roadmap does not run in this
+  repo`. Observed in this plugin's own repo, where the build path is authoring with `plugin-dev`.
+- **A deferred slice takes a row and a `⊘` glyph, not a position.** It is visible as deferred rather than
+  absent — an improvement on the old mapping, where a deferred slice took no card and so left no trace
+  at all.
 
 Reposition on the boundaries in *Refresh at boundaries* below — including a roadmap that was
 resequenced, which is a boundary precisely because nothing else about the feature moved. Order and
-status go stale together, and a card whose column changed but whose row did not is the half-updated
+status go stale together, and a card whose column changed but whose roster did not is the half-updated
 case.
 
 ## Publishing does not overwrite what it cannot know
@@ -152,15 +187,25 @@ Publish `nwave-slice-status`'s table **with its `Notes` column intact**. Notes i
 disagreeing sources, and missing artifacts are recorded, and dropping it on the way to the forge
 sends the cleanest-looking version of the table to the largest audience.
 
+**The block carries the roster, then the current slice's steps — and nothing else.**
+
 ```
 <!-- nwave:status:begin -->
 Wave: DELIVER · generated 2026-08-10T21:04Z
 Work this with: /nw-execute
 
+| Slice | What it does | Status | Notes |
+|---|---|---|---|
+| 01 | Captures a masked url_shape and derives a page ref from it.<br>Disproves the masking approach if the ref cannot be rebuilt. | ✓ done | |
+| 02 | Maps a captured payload onto its projection.<br>The first slice to cross a context boundary. | ▶ current | |
+| 03 | Backfills historical captures.<br>Deferred until the projection settles. | ⊘ deferred | out of scope, per its brief |
+
+Current slice 02 — steps:
+
 | Step | What it does | Status | Notes |
 |---|---|---|---|
-| 01-01 | Derives a page ref from a masked url_shape | done | |
-| 01-02 | Maps a captured payload to its projection | current | ⚠ no commit found |
+| 02-01 | Maps a captured payload to its projection | ✓ done | |
+| 02-02 | Rejects a payload whose shape has drifted | ▶ current | ⚠ no commit found |
 <!-- nwave:status:end -->
 ```
 
@@ -169,8 +214,12 @@ update, so regenerating without markers destroys any prose a human added — con
 your forge before relying on it. When the markers are absent, append the block rather than rewriting
 the description.
 
-Row order is `phases[].steps[]` array order. A step's `deps` may imply a different order and does
-not override it.
+Roster order is `phases[]` array order; step order is `phases[].steps[]`. A step's `deps` may imply a
+different order and does not override it.
+
+**Only the current slice's steps appear.** Every step of every slice in one description is the
+hundreds-of-issues problem inverted — one page nobody can read instead of one hundred cards nobody can
+scan. Other slices link to their briefs from the roster.
 
 ## A card that does not say how to work it gets worked the wrong way
 
@@ -207,6 +256,12 @@ Three rules:
   routing line the label does not support.
 - **No label, no line.** A card outside a wave gets no `Work this with:` line — emit nothing rather
   than guess. Most cards on a mixed board are not nWave work.
+- **No row, no line — and say why.** This table covers the seven nWave waves and nothing else. A repo
+  whose build path leaves those waves has no owning command here, so emit no line **and state that the
+  table does not cover it**, rather than leaving a reader to wonder whether the line was omitted or
+  forgotten. Observed in this plugin's own repo 2026-08-14: it runs DISCUSS and then authors prose with
+  `plugin-dev`, so a post-DISCUSS feature has no row, and the card says so in as many words. **The
+  routing table does not cover the build path of the repo that owns it.**
 - **This line names; it does not launch.** It tells a reader which command owns the work. Nothing
   here runs anything.
 
@@ -222,14 +277,21 @@ never read back. The artifacts remain the only place a status is decided.
 Step rows cannot exist before `/nw-roadmap` writes `roadmap.json` in DELIVER — earlier waves have no
 step ids at all. Do not invent them.
 
-1. **Before DELIVER** — feature issue and wave label. Open slice issues as soon as
-   `slices/slice-NN-*.md` exists and attach them to the parent. Before that, say the roster is not
-   yet known.
-2. **After `/nw-roadmap`** — generate each slice issue's step table.
+1. **Before DELIVER** — the feature issue, its wave label and column, and the **roster**, generated as
+   soon as `slices/slice-NN-*.md` exists. Before that, say the roster is not yet known.
+2. **After `/nw-roadmap`** — add the current slice's step table, and refresh it as the current slice
+   changes.
 
-A slice issue opened in stage 1 **says that its step table arrives with the roadmap**. An issue
-carrying neither a table nor that line reads as a slice with no steps, which is the same false
-impression the invented rows would have given, arrived at by omission.
+A card in stage 1 **says that its step table arrives with the roadmap**. A card carrying neither a table
+nor that line reads as a feature with no steps, which is the same false impression the invented rows
+would have given, arrived at by omission.
+
+**Where `/nw-roadmap` will never run, that sentence becomes a promise nothing will keep — so do not write
+it.** A repo that authors prose rather than executing DELIVER gets no `roadmap.json` ever, and a card
+saying the table is coming misinforms every future reader. Write instead that the roster is the finest
+granularity that will exist, and let it carry the two-line descriptions the step table would have carried.
+Observed in this plugin's own repo 2026-08-14. **Stage 2 is conditional on DELIVER running, and the
+two-stage rule was written assuming it always would.**
 
 A slice file marked `DEFERRED` or out of scope is not a card. Honor the marker; `nwave-slice-status`
 treats it as overriding every other source.
@@ -253,24 +315,36 @@ end-to-end publish (01, walking skeleton), the `Notes` column surviving the trip
 `unknown` published as `unknown` rather than `not started` (03), a human-set state outranking a
 regenerated one (04), hand-written prose surviving a refresh that must replace the whole description
 (05), a wave label swapped rather than accumulated (06), no step rows invented before `/nw-roadmap`
-(07), a deferred slice never given a card (08), native sub-issues used instead of a hand-written
-roster (09), the GitLab roster written in a second pass as bare references (10), the forge never
-writing back to the artifacts (11), status decided by `nwave-slice-status` rather than folded here
-(12), the column positioned in `phases[]` order rather than the creation order that looks just as
-deliberate (13), an order guessed before `/nw-roadmap` published as a guess (14), and a GitLab roster
-left as bare references rather than converted to checkboxes to manufacture a progress bar (15), and
-the `Work this with:` routing line derived from the wave label — emitted for a labelled card, and
-withheld entirely for one with no label rather than guessed (16).
+**and no promise of a table where DELIVER will never run** (07), a deferred slice given a `⊘` row
+rather than omitted (08), a generated roster with no sub-issue created even where native hierarchy is
+available (09), the forge never writing back to the artifacts (11), status decided by
+`nwave-slice-status` rather than folded here (12), roster rows ordered by `phases[]` rather than by the
+slice numbers that agree with each other (13), an order guessed before `/nw-roadmap` published as a
+guess — **or as final where no roadmap is coming** (14), a roster kept as generated glyphs rather than
+converted to checkboxes to manufacture a progress bar (15), the `Work this with:` routing line derived
+from the wave label — emitted for a labelled card, withheld for one with no label, and **withheld with
+an explanation for a wave the table does not cover** (16), and the projection bounded to the roster plus
+the current slice's steps on a 22-phase feature (17).
+
+**Numbering has a gap at 10, and it is deliberate.** `10-gitlab-roster-second-pass` was retired on
+2026-08-14: it pinned a roster written in a second pass as bare `#N` references, because slice numbers
+existed only after the issues were created. No slice issues are created now, so there is nothing to wait
+for and no second pass to get wrong. Retired rather than renumbered, so the gap is a question a reader can
+answer from `self-test/README.md` instead of a silent renumbering that makes every prior reference wrong.
 
 Fixtures 04 and 11 are deliberately adjacent and resolve opposite ways: a person recording something
 no artifact can hold is preserved; a person overwriting something the artifacts own is not. Getting
 one of them right by a rule that gets the other wrong is a gate failure.
 
-Fixture 08 is the sharpest case — positionally the deferred slice *is* next, and a card on a board
-does not misinform someone, it assigns them. Fixtures 13 and 14 are the same mechanism weaker: a
-position is an instruction, whether or not anyone chose it. Fixture 15 is that mechanism in the
-reporting register — a hand-ticked checkbox, like a card for deferred work, is correct on the day it
-is written and authoritative long after.
+**Fixture 08 inverted on 2026-08-14 and is the clearest example of what a paradigm change does to a
+suite.** It used to assert that a deferred slice gets *no card*, because a card on a board does not
+misinform someone — it assigns them. With no slice cards the danger is gone and the opposite defect
+appears: omitting the row erases a slice that existed, was considered, and was set aside. **The rule
+reversed because its mechanism did, and its old reasoning was never wrong.** Fixtures 13 and 14 are the
+same mechanism weaker: an order is an instruction whether or not anyone chose it. Fixture 15 is that
+mechanism in the reporting register — a hand-ticked checkbox is correct on the day it is written and
+authoritative long after. Fixture 17 is the size case: a bound is what keeps the read achievable at 94
+steps.
 
 Fixtures 02 and 12 pin the two faults this skill actually shipped in its first draft: a three-column
 block that dropped the drift warning, and a locally invented rule forbidding a status source its

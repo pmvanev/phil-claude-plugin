@@ -29,3 +29,23 @@ if it is *derived* rather than typed.
   wave change that should have rewritten it, which is the drift the delimited block exists to prevent.
 - A line that *launches* rather than names. This line tells a reader which command owns the work;
   nothing in this skill runs anything.
+
+## Amended 2026-08-14 — the wave with no row
+
+This fixture pins two branches: a labelled card gets its `Work this with:` line, and an unlabelled one gets
+none rather than a guess. **A third branch exists and had no coverage.**
+
+A repo may carry a wave label the routing table does not cover, because the table maps the seven nWave waves
+and this repo's build path leaves them — DISCUSS runs, then prose is authored with `plugin-dev`. So a
+post-DISCUSS feature has a *legitimate* wave and no owning command.
+
+**Third expected branch:** emit **no line**, and **state that the table does not cover this build path.**
+Additional gate failures:
+
+- Guessing a command. `/nw-design` is the next wave in the table and is exactly wrong here.
+- Emitting nothing at all, silently. Indistinguishable from the no-label case, and a reader cannot tell
+  whether the line was withheld by rule or forgotten.
+- Citing `plugin-dev` as though it were a wave command. It is a skill consulted while authoring, not an
+  entry point that owns the work.
+
+The finding behind this branch: **the routing table does not cover the build path of the repo that owns it.**

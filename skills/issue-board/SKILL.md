@@ -538,6 +538,12 @@ two halves would sit in different columns at the same time. When the right split
 ask rather than guess — the cost of asking is one question, and the cost of guessing is a backlog
 someone has to re-cut by hand.
 
+**Read the split clause as being about concurrency, because that is what it means.** Two halves sit in
+different columns at the same time only when two people are working them at once. So a decomposition
+nobody works in parallel — however cleanly it divides — is *one* issue with the parts written inside it,
+and splitting it produces cards only their author can pick up. Ask who would hold each half; if the answer
+is the same person, it is one card.
+
 An **nWave** project answers this question for you, because its artifacts already name the units —
 feature, slice, step. Use `phil:nwave-issue-board` for that mapping. Everywhere else, use the rule
 above.
@@ -555,6 +561,10 @@ cannot be discovered:
 - Tier: Premium (scoped labels swap server-side; real `blocks` links) | Free (swap manually with
   `--unlabel`; `relates_to` only)
 - Status lives in `status::` labels — swap, never add a board list
+- Column families: `<name>` (e.g. the nWave waves) + `<name>` (e.g. to do · in progress · blocked ·
+  done). **One board's status field holds one enum**, so two families share it and every card sorts
+  against all of them. Record how many options the field has before adding any — a field going from 3 to
+  11 re-sorts every existing card.
 - Label families: `<name>` single-valued — swap, never add · `<a>` + `<b>` multi-valued by decision.
   Nothing on a forge records this, so grooming reports the rule **unevaluated** for any family not
   listed here. `wave: *` needs no entry — `phil:nwave-issue-board` declares it single-valued for

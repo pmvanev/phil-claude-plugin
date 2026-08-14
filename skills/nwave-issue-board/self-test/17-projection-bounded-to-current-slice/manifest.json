@@ -1,0 +1,15 @@
+{
+  "fixture": "17-projection-bounded-to-current-slice",
+  "situation": "A 22-phase feature. roadmap.json holds 22 phases with 3 to 6 steps each -- 94 steps in total. Slice 07 is current. Rendering every step of every slice would produce a description no reader can scan.",
+  "invocation": "refresh the board for bulk-import",
+  "artifacts": {
+    "docs/feature/bulk-import/deliver/roadmap.json": {
+      "phases": 22,
+      "steps_total": 94
+    }
+  },
+  "forge_state": {
+    "host": "github"
+  },
+  "expected_outcome": "PROJECTION-BOUNDED"
+}

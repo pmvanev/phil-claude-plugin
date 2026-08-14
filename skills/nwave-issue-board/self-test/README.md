@@ -12,9 +12,9 @@ like failures. They look like a board that is up to date.
 
 These fixtures feed the skill known project and forge states and assert each produces the correct
 **decision outcome** (`PUBLISHED` / `NOTES-PRESERVED` / `UNKNOWN-PUBLISHED` / `HUMAN-STATE-KEPT` /
-`BLOCK-DELIMITED` / `WAVE-SWAPPED` / `NO-ROWS-BEFORE-ROADMAP` / `DEFERRED-NOT-A-CARD` /
-`NATIVE-HIERARCHY` / `TWO-PASS-BARE-REFS` / `ONE-WAY` / `OWNER-DECIDES` / `ORDER-FOLLOWS-ROADMAP` /
-`ORDER-STATED-AS-PROVISIONAL` / `ROSTER-NOT-CHECKBOXES`).
+`BLOCK-DELIMITED` / `WAVE-SWAPPED` / `NO-ROWS-BEFORE-ROADMAP` / `DEFERRED-ROW-NOT-OMITTED` /
+`GENERATED-ROSTER` / `ONE-WAY` / `OWNER-DECIDES` / `ROSTER-ORDER-FOLLOWS-ROADMAP` /
+`ORDER-STATED-AS-PROVISIONAL` / `ROSTER-NOT-CHECKBOXES` / `PROJECTION-BOUNDED`).
 
 This suite is the **acceptance + regression gate** for `skills/nwave-issue-board/SKILL.md`. Run it
 whenever that file changes, and whenever either skill it delegates to changes — `phil:issue-board`
@@ -25,21 +25,22 @@ and intent mirror `skills/nwave-slice-status/self-test/`.
 
 | Fixture | Situation | Guard under test | Expected outcome |
 |---|---|---|---|
-| `01-publish-happy-path/` | feature, two slices, roadmap and log agree; GitHub (**walking skeleton**) | publishes the block, attaches slices natively, writes nothing back | `PUBLISHED` |
+| `01-publish-happy-path/` | feature, two slices, roadmap and log agree; GitHub (**walking skeleton**) | publishes the block as one card, writes nothing back | `PUBLISHED` |
 | `02-notes-column-survives/` | a step is recorded done with no commit touching its files | the `Notes` drift marker reaches the forge, not just the terminal | `NOTES-PRESERVED` |
 | `03-unknown-published-as-unknown/` | roadmap present, no status recorded anywhere | publishes `unknown`; never `not started` | `UNKNOWN-PUBLISHED` |
 | `04-human-state-outranks-refresh/` | issue says *awaiting input — waiting on Sam*; log says the step ran | preserves the human state; does not overwrite with a derived one | `HUMAN-STATE-KEPT` |
 | `05-no-markers-append/` | issue description is hand-written prose, no `nwave:status` markers | appends the block; never rewrites the description | `BLOCK-DELIMITED` |
 | `06-wave-swaps-not-accumulates/` | feature moves DISTILL → DELIVER on a forge without scoped labels | removes the old wave in the same call that adds the new | `WAVE-SWAPPED` |
-| `07-no-rows-before-roadmap/` | feature is in DESIGN; `slices/` exists, `roadmap.json` does not | opens slice issues, invents no step rows | `NO-ROWS-BEFORE-ROADMAP` |
-| `08-deferred-slice-not-a-card/` | slice 03 is marked DEFERRED and is positionally next | opens no card for it | `DEFERRED-NOT-A-CARD` |
-| `09-native-hierarchy-no-roster/` | GitHub, where the parent rolls up its children | attaches sub-issues; writes no duplicate roster table | `NATIVE-HIERARCHY` |
-| `10-gitlab-roster-second-pass/` | GitLab, four slices created in one run | roster written after numbers exist, as bare `#N` | `TWO-PASS-BARE-REFS` |
+| `07-no-rows-before-roadmap/` | feature is in DESIGN; `slices/` exists, `roadmap.json` does not | generates the roster, invents no step rows, and says whether a table is coming **or never will be** | `NO-ROWS-BEFORE-ROADMAP` |
+| `08-deferred-slice-is-a-row/` | slice 03 is marked DEFERRED and is positionally next | gives it a `⊘` row rather than omitting it, and points at 04 | `DEFERRED-ROW-NOT-OMITTED` |
+| `09-generated-roster-no-subissues/` | GitHub, where native hierarchy is available and tempting | creates no slice issue; generates the roster instead | `GENERATED-ROSTER` |
 | `11-forge-never-writes-back/` | issue was hand-edited to `done`; the log disagrees | treats the artifacts as authoritative; changes no file | `ONE-WAY` |
 | `12-owner-decides-status/` | `roadmap.json` carries a per-step `status` field (**the real edd-loop case**) | publishes what `nwave-slice-status` returns, not a local fold | `OWNER-DECIDES` |
-| `13-order-follows-roadmap/` | `phases[]` reads 01, 03, 02, 04; slice and issue numbers both ascend; GitHub | positions the column by array order, not by the numbers that agree with each other | `ORDER-FOLLOWS-ROADMAP` |
+| `13-roster-order-follows-roadmap/` | `phases[]` reads 01, 03, 02, 04; the slice numbers ascend and agree with each other | orders the roster rows by array order, not by the numbers that agree | `ROSTER-ORDER-FOLLOWS-ROADMAP` |
 | `14-guessed-order-says-so/` | DESIGN wave, three slices, no `roadmap.json`; GitLab | orders by slice number and marks the order provisional | `ORDER-STATED-AS-PROVISIONAL` |
-| `15-roster-not-checkboxes/` | GitLab, two of four slices closed, a slices-done count is wanted | keeps the roster as bare refs; manufactures no hand-maintained count | `ROSTER-NOT-CHECKBOXES` |
+| `15-roster-not-checkboxes/` | two of four slices done, a slices-done count is wanted | keeps generated glyphs; manufactures no hand-ticked count, on either forge | `ROSTER-NOT-CHECKBOXES` |
+| `16-routing-line-from-wave-label/` | a labelled card, an unlabelled one, and **a wave the routing table does not cover** | derives the line, withholds it, or withholds it *and says the table does not cover this path* | `ROUTING-LINE-DERIVED` |
+| `17-projection-bounded-to-current-slice/` | 22 phases, 94 steps, slice 07 current | renders 22 roster rows plus 4 step rows; never all 94 | `PROJECTION-BOUNDED` |
 
 `01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `05`, `11`,
 `12` — the bug classes that ship silently because the published artifact is indistinguishable from a
@@ -47,9 +48,12 @@ correct one: honesty stripped on the way out, missing knowledge published as kno
 escalation erased by a refresh, hand-written prose destroyed by a whole-body write, artifacts
 corrupted from the forge, and a status computed here instead of asked for.
 
-Fixture `08` carries the suite's worst failure. Slices 01 and 02 are done, so positionally slice 03
-*is* next — and its own file says not to build it. A card on the board for deferred work does not
-misinform someone; it assigns them.
+Fixture `08` **inverted on 2026-08-14 and is worth reading as a pair with its own history.** It used to
+carry the suite's worst failure: slices 01 and 02 done, slice 03 positionally next and marked deferred, and
+a card for it would not misinform someone — it would assign them. There are no slice cards now, so the
+danger is gone and the *opposite* defect appears: omitting the row erases a slice that existed, was
+considered, and was set aside. The rule reversed because its mechanism did, which is the shape every
+inverted fixture here takes.
 
 Fixtures `13` and `14` belong with `08` rather than with the reporting fixtures, whatever their
 numbering suggests. Position is an instruction to whoever reads the column next. An order nobody

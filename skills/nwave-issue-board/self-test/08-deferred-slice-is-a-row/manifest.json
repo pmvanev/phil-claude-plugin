@@ -1,0 +1,12 @@
+{
+  "fixture": "08-deferred-slice-is-a-row",
+  "situation": "Five slices. slice-03 is marked DEFERRED in its brief and is positionally next after slice-02 completes. Under the old mapping it got no card at all, so it left no trace on the board.",
+  "invocation": "refresh the board for token-refresh",
+  "artifacts": {
+    "docs/feature/token-refresh/slices/slice-03-*.md": "marked DEFERRED"
+  },
+  "forge_state": {
+    "host": "github"
+  },
+  "expected_outcome": "DEFERRED-ROW-NOT-OMITTED"
+}

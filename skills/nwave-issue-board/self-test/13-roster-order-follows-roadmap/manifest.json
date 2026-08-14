@@ -1,0 +1,15 @@
+{
+  "fixture": "13-roster-order-follows-roadmap",
+  "situation": "Four slices, all open, none done. roadmap.json lists its phases in array order 01, 03, 02, 04 -- slice 02 was resequenced behind 03 after a spike. The slice file numbers say 01, 02, 03, 04 and agree with each other, so the wrong order looks just as deliberate as the right one.",
+  "invocation": "refresh the board for token-refresh",
+  "artifacts": {
+    "docs/feature/token-refresh/deliver/roadmap.json": {
+      "phases": "array order 01, 03, 02, 04"
+    }
+  },
+  "forge_state": {
+    "host": "github",
+    "issues": "#100 only -- the feature; no slice issues exist"
+  },
+  "expected_outcome": "ROSTER-ORDER-FOLLOWS-ROADMAP"
+}

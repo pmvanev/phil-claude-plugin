@@ -8,7 +8,9 @@ Everything this skill does correctly, once.
 **Checkable assertions (all must hold):**
 
 1. One parent issue for the feature, carrying a wave label for DELIVER.
-2. One issue per slice — two of them — attached to the parent as sub-issues, per the commands in
+2. **No slice issue.** Two roster rows in the feature's block, each with a glyph and a two-line
+   description. What the retired version of this step required — one issue per slice, attached as
+   sub-issues — is now a gate failure; the commands for it remain in
    `phil:issue-board`. Not one issue per step.
 3. Each slice issue's description carries a `nwave:status` block delimited by
    `<!-- nwave:status:begin -->` / `<!-- nwave:status:end -->`, with a timestamp.
@@ -19,3 +21,12 @@ Everything this skill does correctly, once.
 
 **Gate failure (blocks the skill change):** an issue per step; OR a status computed locally; OR a
 block written without markers or without a timestamp; OR any write under `docs/feature/`.
+
+## Amended 2026-08-14 (feature is the card)
+
+The walking skeleton no longer creates slice issues. One card, one generated block carrying the roster and
+the current slice's steps. `subIssuesSummary` stays `{0, 0}` — verified on the real board when card #26 was
+built, which is this fixture executed by hand.
+
+Additional gate failures: creating a slice issue; reading a parent rollup; a roster row without a two-line
+description; a step table for a slice that is not current.

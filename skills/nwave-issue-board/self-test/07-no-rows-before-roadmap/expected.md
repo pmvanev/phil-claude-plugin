@@ -16,3 +16,22 @@ be written from them. Those steps would have invented ids, match nothing in any 
 
 **Gate failure (blocks the skill change):** any step row published before `roadmap.json` exists; OR
 slice issues withheld because the roadmap is missing, which delays the half that is knowable.
+
+## Amended 2026-08-14 — the branch where the roadmap never arrives
+
+This fixture requires the card to **say** its step table arrives with `/nw-roadmap`, because a card carrying
+neither a table nor that line reads as a feature with no steps.
+
+**That sentence assumes the roadmap eventually arrives.** In a repo whose build path leaves the nWave waves
+— authoring prose with `plugin-dev`, for instance — DELIVER never runs, `roadmap.json` is never written, and
+the promise is one nothing will keep. Observed in this plugin's own repo, 2026-08-14.
+
+**Second expected branch.** Where DELIVER will not run, the card states that **the roster is the finest
+granularity that will ever exist**, and the roster carries the two-line descriptions the step table would
+have carried. Additional gate failures:
+
+- Writing "the step table arrives with the roadmap" in a repo where it will not. A promise nobody will keep
+  misinforms every future reader, and it is indistinguishable from a promise that is merely late.
+- Silently omitting both sentences. That is the original defect this fixture exists to catch, reached by the
+  other route.
+- Inventing step ids to fill the gap.

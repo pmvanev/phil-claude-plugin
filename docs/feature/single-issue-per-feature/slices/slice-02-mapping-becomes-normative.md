@@ -71,6 +71,40 @@ its two new fixtures, then the three realignments.
 Reference class: the 2026-08-12 amendment, which touched both skills and moved the suite from fourteen
 fixtures to fifteen in one pass.
 
+## Result — 2026-08-14
+
+**Hypothesis CONFIRMED: the change is containable.** `phil:issue-board` needed exactly the two edits this
+brief permitted — the concurrency reading in *Choosing what becomes an issue*, and a column-families entry
+in the per-project template. No forge mechanic moved, and the delegation boundary held.
+
+**More fixtures were affected than this brief predicted.** It named 09, 13 and 14. The actual set:
+
+| Fixture | Change |
+|---|---|
+| `01` | Amended — the skeleton creates no slice issue |
+| `07` | Amended — added the branch where `/nw-roadmap` never runs |
+| `08` | **Renamed and inverted** — `deferred-slice-not-a-card` → `deferred-slice-is-a-row` |
+| `09` | **Renamed and inverted** — `native-hierarchy-no-roster` → `generated-roster-no-subissues` |
+| `10` | **Retired** — no second pass exists to get wrong |
+| `13` | Renamed — the assertion moved from the board column to the roster rows |
+| `14` | Amended — no slice issues created; added the "order is final" form |
+| `15` | Amended — forge-neutral now, and glyphs are the stated alternative |
+| `16` | Amended — added the wave-with-no-routing-row branch |
+| `17` | **New** — the projection bounded at 94 steps |
+
+Ten of sixteen touched against three predicted. The under-estimate has one cause worth naming: **the brief
+counted fixtures that assert the mapping, and missed the ones that assert something else *through* it.**
+`15` is about hand-ticked state, not hierarchy — but it reached that subject via a GitLab roster of bare
+`#N` references, and those references only existed because slices were issues. A fixture's subject and its
+scaffolding are different things, and only the subject is obvious from its name.
+
+**Numbering has a deliberate gap at 10.** Retired rather than renumbered, so the gap is a question a reader
+can answer from the suite README instead of a silent renumbering that invalidates every prior reference.
+
+**Estimate:** the brief said ~1.5 days and flagged it as the over-the-one-day failure. Landed in one
+session, because the fixture work turned out to be mechanical once the mapping was settled — the ratio the
+brief got wrong was rules-to-fixtures, not the total.
+
 ## Carpaccio taste tests
 
 | Test | Result |

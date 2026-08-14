@@ -1,0 +1,10 @@
+{
+  "fixture": "09-generated-roster-no-subissues",
+  "situation": "GitHub. One feature with four slice briefs on disk. GitHub carries parent/child natively and would show a completed-children count -- so the tempting move is to open four slice issues and let the forge compute the rollup, which is what this skill used to prescribe.",
+  "invocation": "put access-control on the board",
+  "forge_state": {
+    "host": "github",
+    "hierarchy": "native sub-issues available and unused"
+  },
+  "expected_outcome": "GENERATED-ROSTER"
+}

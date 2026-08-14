@@ -1,6 +1,6 @@
 # Expected outcome — fixture 15 (a count that is maintained by hand is not a rollup)
 
-**Where it fails silently.** GitLab really will report `2 of 4` from a roster written as `- [ ] #101`
+**Where it fails silently.** Both forges really will report `2 of 4` from a roster written as `- [ ] `
 checkboxes, and on the day it is written the number is correct. But a checkbox is ticked by a person
 and a slice issue is closed by the work, so the two authorities diverge the first time anyone forgets
 one of them — and what the feature displays is the state of the checkboxes. The failure is invisible
@@ -16,9 +16,9 @@ set to Free would pass for the weaker reason that nothing was available anyway.
 
 **Checkable assertions (all must hold):**
 
-1. The roster in the feature description stays a list of **bare `#N` references**. No `- [ ]` or
+1. The roster stays **plain rows carrying generated glyphs** (`✓ ▶ · ⊘ ?`). No `- [ ]` or
    `- [x]` markers are introduced anywhere in it.
-2. No slices-done count is written into the feature description or the generated block — on GitLab
+2. No slices-done count is written into the block — on either forge
    the honest answer is the roster's live states, not a total.
 3. The closed slices are not hand-marked. `#101` and `#102` already render as closed; nothing
    restates it.
@@ -31,3 +31,19 @@ set to Free would pass for the weaker reason that nothing was available anyway.
 **Gate failure (blocks the skill change):** a roster converted to checkboxes to manufacture a
 progress bar; OR a slices-done count written into the description or the generated block on GitLab;
 OR a closed slice hand-marked in the roster.
+
+## Amended 2026-08-14 (both forges, and the glyph is the alternative)
+
+This fixture was GitLab-specific, because GitHub's sub-issue rollup made the checkbox trap unnecessary
+there. **Slices are no longer issues, so no forge computes a rollup and the trap is now identical on
+both.** The fixture is forge-neutral, and it gained load rather than losing it: it is the only thing
+standing between a wanted number and a hand-ticked one.
+
+The alternative is now explicit. The old version said to keep bare `#N` references, which rendered live
+state because they pointed at real issues. There are no slice issues to point at, so the roster carries
+**generated glyphs** instead — derived from `phil:nwave-slice-status` on every refresh, and therefore
+incapable of going stale the way a tick does.
+
+Additional gate failure: writing bare `#N` references for slices. They no longer exist, so the reference
+renders as plain text — which `phil:issue-board` records as the free wrong-number check, here firing on
+every row.
