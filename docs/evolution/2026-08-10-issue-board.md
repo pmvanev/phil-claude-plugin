@@ -363,6 +363,17 @@ is the standing weakness of driving this suite at all.
   obvious to go.
 - Neither ordering mutation has been run against a real board. The first person to reorder a real
   column should confirm the `afterId`-null and `positionInList` semantics and upgrade the markers.
-- `agents/adversarial-reviewer.md` frontmatter has an unquoted `description` containing
+- ~~`agents/adversarial-reviewer.md` frontmatter has an unquoted `description` containing
   `Pattern lineage: …`; a plain YAML scalar cannot contain `: `, and a strict parser drops the agent.
-  Predates this work.
+  Predates this work.~~
+
+  **RESOLVED, and this record was stale for four days.** The separator is an em dash, not a colon —
+  byte-verified 2026-08-14 as `e2 80 94` — so the scalar is legal and the agent registers. It was fixed
+  in commit `c287fc2` ("session-handoff: iterate on plugin-dev reviewer findings"), which changed
+  `Pattern lineage: ` to `Pattern lineage — `. The defect was real; the follow-up was never retired
+  when it was cured.
+
+  Found by a `plugin-dev:plugin-validator` pass that was asked to check it precisely *because* this line
+  claimed it was broken. **A follow-up nobody closes is indistinguishable from an open defect**, and this
+  one sat in a file whose job is to record what execution overturned. Left struck rather than deleted so
+  the four-day gap between the fix and the record is visible.
