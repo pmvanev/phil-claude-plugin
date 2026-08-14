@@ -259,6 +259,13 @@ When a rule changes, the edit is not done until each of these has been checked:
 | 15 | `docs/product/jobs.yaml` — the functional dimension's class list |
 | 16 | The sibling skill that owns the mechanism, and its reciprocal citation |
 
+**Sites 11 and 12 are the ones nobody checks, and the checklist caught them on its own first outing.** An
+audit run immediately after this list was written found **five** command loaders still carrying retired
+enumerations — `groom-issues`, `groom-set`, `rank-issues`, `nwave-slice-status` and `resume`. Two of them had
+been *believed* updated: the script that edited them aborted on an assertion before reaching the write, and the
+re-run covered only the skill. **A batch edit that fails partway leaves no trace in the file it did not reach**,
+so verify the text rather than trusting the tool's own report.
+
 **Site 12 is the one nobody checks.** A rule can be perfectly written and still unexecutable, because the
 command's grant does not hold the call it requires — and `scripts/check-readonly-commands.py` cannot see it:
 that script verifies a `mutates: false` command grants nothing dangerous, never that a `mutates: true` command
