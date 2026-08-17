@@ -68,7 +68,7 @@ this repo's own, whose section is the hand-written one slice 02 exists to coexis
 |---|---|---|
 | 1 | **PASS** | Mechanical check, not assertion: all 9 forge-issued ids and URLs inside the markers were matched against `probe.json`; zero unmatched. Prose above the section byte-intact. |
 | 2 | **PASS** | Zero questions asked. One remote, target confirmed before any call. |
-| 3 | **PARTIAL — detection PASS, asking unverified** | Revised after the first PARTIAL verdict: ambiguity **detection** was moved out of prose into `--list-targets`, which makes no forge call. Verified against a **real two-remote checkout** (`origin` plus a fork `upstream`) → `status: ambiguous`, both candidates returned, note reads *ASK which board, never pick*; and against this repo → `status: ok` with `confirm_required: true` regardless. Seven tests cover it, including the two false positives that would destroy the question: fetch+push of one URL counting as two targets (which would call every repo on earth ambiguous), and https/ssh spellings of one repo. **Still unverified: the asking**, which lives in CONFIRM, is prose, and needs a run of the command as a command. |
+| 3 | **PARTIAL — detection PASS; `ok`-path asking PASS; `ambiguous`-path asking CLOSED BY DECISION, never exercised** | Ambiguity **detection** was moved out of prose into `--list-targets`, which makes no forge call. Verified against a **real two-remote checkout** (`origin` plus a fork `upstream`) → `status: ambiguous`, both candidates returned, note reads *ASK which board, never pick*; and against this repo → `status: ok` with `confirm_required: true` regardless. Seven tests cover it, including the two false positives that would destroy the question: fetch+push of one URL counting as two targets (which would call every repo on earth ambiguous), and https/ssh spellings of one repo. **The asking was then split by evidence** — see the closing-run record below. |
 | 4 | **PASS, without touching real auth** | Four unit tests: missing scope → `gh auth refresh -s project`; unparseable `gh auth status` → refuses rather than assuming the scope (C6); `gh` absent → refuses; scope present → proceeds. Stripping the operator's live scope would have been the only alternative. |
 | 5 | **PASS — KPI-1 = 0.8** (8/10, target ≥ 0.5) | Computed by the script, not by eye. Covered: forge-and-repo, project-and-board-ids, tier, status-mechanism, column-families, builtin-workflows, docs-root, nwave-mapping. Uncovered: `label-families`, `local-task-system` — both slice 03's, both correctly *declared*, not guessed. |
 
@@ -161,6 +161,46 @@ Left for the closing run, in order:
    that `Bash(python3:*)` matches without prompting. The validator's note applies: the prompt symptom
    is only observable after the update, which is why it is worth doing before slice 02 builds on it.
 4. `/phil:board-setup` in this repo → must report `SECTION-EXISTS` and write nothing (fixture 03).
+
+### The closing run — executed 2026-08-17, and what it did not close
+
+Steps 1, 2 and 4 are **done**. 0.56.0 is installed (`installPath` ends `/0.56.0`) and a restart applied
+it — evidenced by `phil:board-setup` appearing in the session's skill list at all, which 0.55.0 could
+not produce.
+
+**Step 4 PASSES.** `/phil:board-setup` ran as a released command against this repo: CONFIRM returned
+`status: ok` with one candidate and asked before any forge call; PROBE returned `status: ok` and
+recomputed **KPI-1 = 0.8**, unchanged; PLACE found `## Issue board` at `CLAUDE.md:139` and stopped with
+`SECTION-EXISTS`. The file is byte-unchanged — `md5sum` `aed09b0c534206579e6da87d120e9226` before and
+after, `git status --porcelain` empty on both sides.
+
+**`Bash(python3:*)` matches without prompting** — step 3's second purpose, and it is closed. Both
+`probe-board.py` invocations executed with no permission dialog, so the shipped spelling does not carry
+the defect the validator caught in the `${CLAUDE_PLUGIN_ROOT}` version.
+
+**Step 3's remaining purpose — the `ambiguous`-path asking — was SKIPPED BY AN EXPLICIT DECISION on
+2026-08-17, with the risk named and accepted.** It is not closed by evidence and must not be read as
+passing. Recording it precisely, because the distinction is the difference between two defensible
+readings:
+
+- **What did run as a command:** the CONFIRM question itself, on the `ok` path. It presented the single
+  candidate and waited for an answer rather than proceeding — so the asking *machinery* in CONFIRM is no
+  longer pure prose. That is stronger than the pre-run position of "never exercised at all".
+- **What did not run:** the `ambiguous` branch — presenting two candidates and refusing to prefer
+  `origin`. That branch's *detection* is tested seven ways and its *presentation* has never executed.
+- **Why it was skipped:** exercising it needs a Claude Code session rooted in a two-remote checkout,
+  because `--list-targets` reads `git remote -v` from the session's working directory and the Bash cwd
+  does not persist across a command. That is a session-launch action, not something the run could
+  perform on its own.
+- **The fixture exists and reproduces the condition**, so the cost of closing this later is one session
+  launch, not a rebuild: a git repo with `origin` → `pmvanev-fork/phil-claude-plugin` and `upstream` →
+  `pmvanev/phil-claude-plugin`, carrying a `CLAUDE.md` with no board section, returns `status: ambiguous`
+  with both candidates and the note *ASK which board, never pick*.
+
+**The exposure this accepts.** If the `ambiguous` branch mis-presents — picks silently, prefers `origin`,
+or presents one candidate — nothing here would catch it, and the failure is the exact one the feature
+exists to prevent: reading the wrong board successfully. Slice 02 builds on this probe. Anyone who finds
+that defect later should find this paragraph first, and should not be surprised.
 
 ### Deviation from repo standards, recorded rather than hidden
 
