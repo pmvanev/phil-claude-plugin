@@ -1,0 +1,17 @@
+{
+  "fixture_id": "BS-SELFTEST-02",
+  "phase": "PROBE -> refusal",
+  "situation": "The probe returns status: refused. Two variants must behave identically on the file and differently in the report: (a) refusal.fix = \"gh auth refresh -s project\" for a missing project scope; (b) refusal.fix = null for a board that cannot be identified because the owner has two open projects and neither is linked to the repo.",
+  "probe_status": "refused",
+  "variants": [
+    { "reason": "`gh auth` is missing the `project` scope...", "fix": "gh auth refresh -s project" },
+    { "reason": "owner owns 2 open projects and none is linked to the repository...", "fix": null }
+  ],
+  "expected_decision": ["REFUSED"],
+  "expected_guard": "the target CLAUDE.md is byte-identical before and after, in BOTH variants; variant (a) reports the fix verbatim; variant (b) says no fix is known and does NOT invent one",
+  "must_not": [
+    "write a partial region containing whatever the probe did return before refusing",
+    "print `None` at the reader when fix is null",
+    "tell the user to pass the board explicitly — no flag accepts one"
+  ]
+}

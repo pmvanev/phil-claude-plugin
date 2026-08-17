@@ -24,3 +24,26 @@ mental_model:
 vocabulary:
   - grooming, defect table, well-formed body, duplicate, oversized, overcome by events,
     set-level pass, mechanical vs semantic, house default, one system of record
+
+# Setup facet — added by DISCUSS wave, feature: board-setup-block (2026-08-14, issue #32).
+# Robin one step earlier: before a card can mean what it says, the board's own constants have to be
+# known. A ninth persona ("the adopter") was considered and rejected — the adopter and the curator are
+# the same human at t=0 and t=1, and two files about one person's goals must then be kept in agreement.
+setup_facet:
+  goals:
+    - Learn the instance's hazards from a file rather than from a call that reported success
+    - Never be asked for a value the forge could have answered
+    - See, for every line, whether it was probed, declared, or assumed
+  frustrations:
+    - The per-project template has no author, so every constant arrives by hand as it is discovered
+    - Six of this board's seven recorded hazards were written down only after they had already bitten
+    - The dangerous constants are exactly the ones where a wrong guess reports success
+    - A check whose input nobody helps you write reports `unevaluated`, which reads as clean
+  mental_model:
+    - A wrong forge target does not error — it succeeds against someone else's board
+    - Prose I wrote after being bitten cannot be regenerated, so nothing generated may sit on top of it
+    - An assumption written as a fact is the same defect as an inferred declaration, one register quieter
+    - Anything irreversible is mine to decide, not the tool's — applied to a declaration, not just a card
+  vocabulary:
+    - probed, declared, assumed, provenance label, delimited region, partially probeable,
+      instance constant, silent-success hazard, drift report

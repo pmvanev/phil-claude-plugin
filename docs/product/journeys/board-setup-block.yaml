@@ -1,0 +1,231 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: board-setup-block (2026-08-14)
+
+id: board-setup-block
+name: Write down what the board would otherwise teach you by contact
+persona: robin-backlog-curator
+job: know-a-boards-hazards-before-contact
+summary: >
+  Robin runs the setup command in a repo whose forge instance nobody has operated before. The forge
+  target is confirmed rather than inferred. One probe pass discovers everything discoverable and reports
+  each value beside the call that produced it. The repo's CLAUDE.md is read before anything is written.
+  Only then is Robin asked anything, and only for what no forge records — with the board's own contents
+  shown as evidence and never adopted as an answer. The probed region is written between markers;
+  everything outside them belongs to a human permanently, and drift out there is reported, never fixed.
+
+steps:
+  - id: invoke
+    action: Robin runs `/phil:board-setup` in a repo
+    output: The command states what it will read and what it may write, and writes nothing yet
+    emotion: wary — I do not know what this instance will do to me, which is the whole reason I am here
+
+  - id: locate
+    action: >
+      Derive the forge and the repo from the git remote and CONFIRM with Robin rather than infer.
+      Multiple remotes, a fork, or no forge remote at all produce a question or a stop, never a guess.
+    output: A named target — `gh -R <owner>/<repo>` or `glab -R <group>/<project>`
+    emotion: >
+      relief — issue #12 exists in every repo, so the one hazard that mutates a stranger's board
+      successfully is closed before the first call
+
+  - id: probe
+    action: >
+      One pass over the forge: tier; the project, its Status field and every option id; the enabled
+      built-in workflows; the default branch and the docs root; whether `docs/feature/` or `.nwave/`
+      make this an nWave repo. Each value is reported beside the call that produced it.
+    output: >
+      A table of discovered facts with their provenance — and, separately, the values the API answered
+      only partly (a workflow's `enabled` without its configured trigger statuses)
+    emotion: >
+      recognition — it found things nobody had written down, including a workflow this repo had been
+      operating under for six weeks
+
+  - id: read-existing
+    action: >
+      Read the repo's CLAUDE.md before writing. Classify it: no section at all, a section with no
+      markers, a marked region that is current, or a marked region that is stale.
+    output: A verdict, and for a configured repo a line-by-line account of what the probe confirms, contradicts, or cannot evaluate
+    emotion: control — nothing has been written yet, and I can see what would be
+
+  - id: elicit
+    action: >
+      Ask only for what no forge records — the label families, and confirmation of any value the probe
+      could only half-answer. The labels actually in use are displayed as EVIDENCE beneath the question
+      and are never pre-selected. One question at a time.
+    output: >
+      Declarations attributed to Robin, written outside the markers; and for each half-probed value,
+      either a confirmation Robin gave or an assumption that stays labelled as one
+    emotion: ownership — the judgements are mine and the file says so
+
+  - id: write
+    action: >
+      Replace only what is between the markers. Insert the region if it is absent, creating the section
+      or the file when needed. Leave every byte outside the markers exactly as it was.
+    output: The written file, and a diff scoped to the region
+    emotion: trust — the prose I wrote is still the prose I wrote
+
+  - id: report
+    action: >
+      State the three categories separately — what was probed, what Robin declared, what remains
+      assumed — plus any drift outside the markers that was reported and not corrected, and anything
+      declined and what stays unevaluated as a result.
+    output: A closing summary; the file itself is the record
+    emotion: confidence — the next board call will do what it says
+
+emotional_arc: >
+  wary → relief → recognition → control → ownership → trust → confidence  # upward
+  # `recognition` is the turn: the run stops being a form to fill in the moment the probe surfaces a
+  # constant nobody had recorded. On this repo's own board, that was `Item closed: enabled`.
+
+shared_artifacts:
+  - name: target_repo
+    source: the git remote, CONFIRMED by Robin   # never inferred alone
+    consumed_by: [probe, write, report]
+  - name: probed_facts
+    source: the forge, via one probe pass         # never typed by a human
+    consumed_by: [read-existing, write, report]
+  - name: half_probed_values
+    source: >
+      the forge, partially. The API answers part of the question and cannot answer the rest —
+      `ProjectV2Workflow` exposes `enabled` and not the configured trigger statuses.
+    consumed_by: [elicit, write, report]
+  - name: elicited_declarations
+    source: Robin                                 # NEVER inferred from board contents
+    consumed_by: [write, report]
+  - name: assumed_values
+    source: >
+      the command, labelled as assumptions. Distinct from probed_facts and from elicited_declarations,
+      and the label is what keeps it distinct — an unlabelled line is the defect.
+    consumed_by: [write, report]
+  - name: existing_block
+    source: the repo's CLAUDE.md
+    consumed_by: [read-existing, write]
+    # Content OUTSIDE the markers is read-only forever. The command may report on it and ask about it;
+    # it may never write it.
+  # DELIBERATELY NOT an artifact: any label family inferred from the labels in use. Inferring one makes
+  # the board's habits audit themselves, which groom-issues forbids, and mints exactly the declaration
+  # rule 4 was supposed to read.
+  # DELIBERATELY NOT an artifact: a separate "configured" marker or timestamp file. The region IS the
+  # record — a second marker becomes a second authority the moment someone edits the file, which
+  # phil:issue-board forbids under "One system of record per scope".
+
+error_paths:
+  - step: locate
+    failure: Several remotes, a fork, or a remote whose host is ambiguous
+    recovery: >
+      Ask which is the target. Never infer — issue #12 exists in every repo, so a wrong target does not
+      error, it succeeds against somebody else's board
+
+  - step: locate
+    failure: No forge remote at all
+    recovery: Stop and write nothing. There is nothing to probe, and a block of elicited values only would be a form
+
+  - step: probe
+    failure: >
+      `gh auth` lacks the `project` scope, or `glab` is not authenticated
+    recovery: >
+      Name the exact fix (`gh auth refresh -s project`) and write nothing. A partial block is worse than
+      none, because the missing lines are indistinguishable from constants that do not apply
+
+  - step: probe
+    failure: Several projects could be the board, or none is returned
+    recovery: >
+      Ask which. An empty `gh project list` is not proof of an empty account — Projects v2 reads lag
+      writes and under-report, and this is exactly how a duplicate board gets built alongside the real one
+
+  - step: probe
+    failure: The single-select field carrying the columns is not called `Status`
+    recovery: >
+      Present the fields found and ask which one it is. Assuming the name writes an id that reports
+      success against the wrong field
+
+  - step: probe
+    failure: The API answers the question only partly
+    recovery: >
+      Record the answered half as probed and the rest as an ASSUMPTION that states what is not knowable
+      and why. `projectV2 { workflows { name enabled } }` returns `Auto-close issue: enabled`;
+      `ProjectV2Workflow` has no field for the configured trigger statuses, so `Done` is assumed.
+      Collapsing the two into one confident sentence is the same defect as an inferred label family,
+      one register quieter
+
+  - step: probe
+    failure: The forge is GitLab, so there is no Projects v2 and no built-in workflows to read
+    recovery: >
+      Record `not applicable on this forge`, never `none enabled`. Absent must not render as a benign
+      default — the same discipline as `unknown` never being published as `not started`
+
+  - step: read-existing
+    failure: An `## Issue board` section exists with no markers at all — this repo's own case
+    recovery: >
+      Do NOT wrap the existing content in markers. Insert the region and leave every existing line
+      alone. Wrapping would claim ownership of prose the command cannot regenerate, and the next run
+      would replace hazards recorded after contact with whatever the probe happens to return
+
+  - step: read-existing
+    failure: A `begin` marker with no `end`, or nested markers
+    recovery: Refuse and report. The region's extent is never guessed; a guess here deletes prose
+
+  - step: read-existing
+    failure: A hand-written line outside the markers states a fact the region now owns, and disagrees with it
+    recovery: >
+      Report the contradiction and offer to retire the line — applied only on an explicit answer.
+      This is the limit of the human-outranks-the-generator asymmetry: a stale FACT is still not the
+      command's to correct in place, because correcting it silently is how a generator learns to reach
+      outside its region. The offer is the seam
+
+  - step: read-existing
+    failure: The repo has no CLAUDE.md at all
+    recovery: >
+      Create it with the section, and say so. A repo adopting the plugin with no CLAUDE.md is the target
+      case, not an edge case — but creating a file is louder than editing one, so it is reported as a
+      creation rather than folded into the diff summary
+
+  - step: elicit
+    failure: >
+      The labels in use strongly suggest a family — exactly one `wave: *` label per issue, say
+    recovery: >
+      Show it as evidence beneath the question. Never pre-select it, never default to it, never write it
+      on silence. An inferred family is the board's habits auditing themselves
+
+  - step: elicit
+    failure: Robin's declaration contradicts what the labels suggest
+    recovery: >
+      Write Robin's answer and record the disagreement beside it. This repo is the worked example:
+      `bug` + `documentation` + `enhancement` co-occur on #2 and #4 and that is a decision, not a defect.
+      Resolving the disagreement is not the command's to do
+
+  - step: elicit
+    failure: Robin declines to declare a family
+    recovery: >
+      Write nothing for it and say in the report that `phil:groom-issues` rule 4 will keep reporting
+      `unevaluated` for that family. ACCEPTED COST, and the report states it plainly rather than letting
+      silence read as success — the same cost, for the same reason, as a declined groom-ask card
+
+  - step: elicit
+    failure: Robin's reply is neither an answer nor a decline — "ok", "sure", "sounds right"
+    recovery: >
+      Treat it as unanswered and ask once more, naming what is still needed. With a suggestion on the
+      table an ambiguous reply plausibly reads as ACCEPT, and adopting it would write a declaration
+      Robin never made while every visible rule looked satisfied
+
+  - step: write
+    failure: CLAUDE.md changed between the read and the write
+    recovery: Re-read immediately before writing and refuse. The content being protected is prose a human wrote
+
+  - step: write
+    failure: The write would place a probed value outside the markers to sit beside related prose
+    recovery: >
+      Refuse. Tidiness is exactly how the region's boundary erodes, and a probed value outside the
+      markers is unreachable by the next refresh — it becomes stale prose the command itself created
+
+  - step: report
+    failure: Nothing changed
+    recovery: >
+      Report `unchanged` and stop. Re-stamping the timestamp is not a change and must not be presented
+      as one; churn manufactured to justify the run is how a setup tool teaches people to stop running it
+
+  - step: report
+    failure: The run wrote the probed region but every elicited question was declined
+    recovery: >
+      Report it as partially configured and name what is unevaluated. A block that is half a block must
+      not read as a finished one — the completeness claim over a partial read is the output that
+      actively misleads

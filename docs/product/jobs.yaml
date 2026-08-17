@@ -385,6 +385,17 @@ jobs:
     status: validated
     personas: [robin-backlog-curator]
     features: [groom-issues]
+    # Setup facet (DISCUSS, feature board-setup-block, 2026-08-14, issue #32):
+    # The job is unchanged — Robin wants a board that says what it means — but one of its checks has an
+    # input with no author, and that is a DIFFERENT job (know-a-boards-hazards-before-contact) rather
+    # than a facet of this one. Recorded here only as the dependency:
+    #   push (setup): rule 4 is checkable ONLY where the project declares its label families, and absent
+    #     a declaration it reports `unevaluated` — which reads as clean to anyone not looking for it. So
+    #     the check most likely to go dark is the one whose input nothing helps anyone write.
+    #   The remedy is NOT to loosen rule 4 or to let grooming infer a family from the labels in use; that
+    #     would make the board's habits audit themselves, which this job's anxiety (C) already forbids.
+    # phil:groom-issues is UNCHANGED by that feature. What changes is that its input gains an author.
+    # See docs/feature/board-setup-block/feature-delta.md [D3].
     # Relationship to the ranking work (phil:rank-issues, #8): sequential, not overlapping.
     # Grooming settles what each card MEANS; ranking settles what order they go in. Ranking's
     # own precondition names grooming as advice rather than a gate — a messy board can be
@@ -504,4 +515,81 @@ jobs:
     #   C5 Derivation stays with its owner (phil:nwave-slice-status).
     #   C6 Absent state renders as `unknown`, never as a benign default.
     #   C7 No per-push forge writes; refresh at boundaries only.
+
+  - id: know-a-boards-hazards-before-contact
+    # Registered by DISCUSS wave, feature: board-setup-block (2026-08-14, issue #32)
+    job_story: >
+      When I point the plugin's board tooling at a repo whose forge instance nobody has operated before,
+      I want everything discoverable to be discovered and everything undiscoverable to be asked — each
+      written down and labelled with which it was — so the instance's hazards are learned from a file
+      rather than from a call that reported success while doing the wrong thing.
+    dimensions:
+      functional: >
+        Probe the forge for everything it can answer (tier, project, Status field and option ids, enabled
+        built-in workflows, docs root, whether the repo is nWave), elicit only what no forge records
+        (label families), label every written line as probed, declared or assumed, and write the probed
+        half into the repo's CLAUDE.md inside markers that cannot reach the prose around them.
+      emotional: >
+        Confidence the next board call will do what it says rather than something adjacent and silent;
+        relief from the "did that just close something?" dread; trust that the file says where each line
+        came from, so a stale one is visible as stale.
+      social: >
+        A repo a teammate can operate on day one instead of inheriting as tribal knowledge; being someone
+        whose setup is inspectable rather than remembered.
+    four_forces:
+      push: >
+        phil:issue-board ends with a Per-project setup TEMPLATE and nothing writes it. Every entry in this
+        repo's block was added by hand as each constant was discovered, and SIX OF SEVEN were recorded
+        only after the thing they document had already gone wrong. The constants are precisely the ones
+        where a wrong guess REPORTS SUCCESS: an inferred remote mutating another repo's #12, a Status
+        write that also closes the issue and silently drops the comment queued behind it, a
+        updateProjectV2Field call whose singleSelectOptions is a full replacement and would have
+        destatused 25 cards. And phil:groom-issues rule 4 reads a declaration nothing helps anyone write,
+        so the check most likely to go dark is the one whose input has no author.
+      pull: >
+        One command that discovers what is discoverable, asks only what no forge records, labels which is
+        which, refuses to overwrite what a human decided, and can be re-run without churning the file.
+      anxiety: >
+        (A) A generator that INFERS a label family invents the declaration rule 4 was supposed to read —
+        the board's habits auditing themselves, which groom-issues forbids in as many words. THE force
+        the design is built against. (B) A regenerated block that overwrites hard-won prose: this repo's
+        block is mostly hazards recorded after contact and no probe can reproduce a line of it —
+        countered structurally by the delimited region rather than by care. (C) A block that goes stale,
+        where an option id that no longer exists reads exactly like one that does (the shape of issue
+        #31). (D) A probe that reports a fact it only PARTLY has — "Auto-close issue: enabled" is probed,
+        "Done is what fires it" is not, and one confident sentence spanning both is (A) one register
+        quieter. (E) Ceremony on a repo that was already configured — countered by a re-run that writes
+        zero bytes and says `unchanged`.
+      habit: >
+        Filling the template in by hand as each constant is discovered; copying another repo's block and
+        editing the ids; or skipping it and finding out.
+    opportunity_score: >
+      importance high — every adopting repo pays, and the failures are all silent-success class.
+      satisfaction ZERO — nothing writes the block at all; the template is the whole of the current
+      solution. Scored against keep-a-backlog-trustworthy (medium: groom-issues ships, but its rule 4 is
+      dark without this) and make-in-flight-work-transferable (medium-high: shipping). Highest of the
+      three FOR A REPO NOT YET CONFIGURED — which is the honest scoping, because this repo is already
+      configured and its seven entries ARE the record of the failure.
+    status: validated
+    personas: [robin-backlog-curator]
+    features: [board-setup-block]
+    # Relationship to keep-a-backlog-trustworthy (groom-issues): SIBLING, distinct outcome, and the
+    # boundary is worth holding. That job is about what a CARD means; this one is about whether the
+    # INSTANCE will do what the call says. They meet at exactly one point — rule 4's declaration — and
+    # the meeting is a dependency, not an overlap: this feature gives that check an author and changes
+    # nothing about the check.
+    # Why no new persona: the adopter and the curator are the same human at t=0 and t=1. Robin's file
+    # already carries the load-bearing line — "anything irreversible is mine to decide, not the tool's" —
+    # and this feature's central refusal is that line applied to a declaration rather than a card.
+    # Load-bearing constraints (DISCUSS, 2026-08-14):
+    #   C1 PROBE-DON'T-ASK. Asking for a value the forge can answer is the current failure, not a fix.
+    #   C2 The probed region is delimited, generated, timestamped, and placed AMONG prose it may never
+    #      touch — the inverse of nwave-issue-board's block, where nothing human belongs.
+    #   C3 THREE categories, each labelled: probed / declared / assumed. An UNLABELLED line is the
+    #      defect — the same shape groom-ask reached on 2026-08-14, where an unlabelled field rather
+    #      than a drafted one became the thing to forbid.
+    #   C4 Never infer a declaration. Evidence beside the question; never in the answer.
+    #   C5 Outside the markers the command may report and ask, and may not write.
+    #   C6 Absent renders as `unknown` or `not applicable`, never as a benign default.
+    #   C7 Silence is not consent — no offer adopted without an explicit answer.
 

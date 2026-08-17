@@ -88,6 +88,21 @@ Only the skill's prose separated them, and no validator reads that. Hence the de
 
 Adding a verb to the allowlist is a promise that it has no writing mode. Check before adding one.
 
+**A `Bash(...)` grant may not contain a path or a variable.** `allowed-tools` does **not** interpolate
+`${CLAUDE_PLUGIN_ROOT}`, and permission rules are literal prefix matches — so
+`Bash(python3 ${CLAUDE_PLUGIN_ROOT}/scripts/x.py:*)` matches nothing. The command still works; it just
+prompts on every run, and a prompt reads as normal. Worse, such a grant *looks* narrower than any real
+grant could be, so the command's own prose ends up claiming a boundary nothing enforces. To scope a
+command to one script, grant the interpreter, put the path in the invocation instruction, and carry the
+real intent in prose — the `adversarial-review` pattern above. Checked by
+`scripts/check-readonly-commands.py` for **every** command, not only `mutates: false` ones.
+
+Written 2026-08-17, when `board-setup` shipped exactly that grant. A survey of 211 `Bash()` grants
+across this repo and every installed plugin found it the only one carrying a slash or a variable; the
+other 210 name a bare executable. **The first version of the check silently passed** — the function was
+written and never called, which is this board's recurring defect reproduced inside the fix for it. Test
+that a new check fails on the input that motivated it before trusting a green run.
+
 ## Which copy is under test
 
 **The released copy is what a `/phil:*` command runs — never this working tree.** Claude Code loads
@@ -142,6 +157,13 @@ artifacts already own.
 - **Auto-close on Done is ENABLED.** Setting Status=Done closes the issue; a `gh issue close -c`
   afterwards reports "already closed" and **silently drops the comment**. Post the closing
   comment first, then set Status. Moving Done→Todo does not reopen — use `gh issue reopen`.
+- **The mirror workflow is ENABLED too: closing an issue sets Status=Done.** So `gh issue close` is a
+  board write, and a card closed from the CLI never sits outside Done long enough for the open-in-Done
+  check below to see it. Both directions are readable — `projectV2 { workflows { name enabled } }`
+  returns `Auto-close issue` and `Item closed` as enabled — which is how this line got written on
+  2026-08-14, after six weeks in which only the forward direction was recorded. The API exposes
+  `name` and `enabled` and **not** the configured trigger statuses, so *which* status fires the
+  close is an assumption (`Done`), not a probed fact.
 - **A closing keyword in a commit message closes the card *and* sets Status=Done.** It fires on the
   bare `#N` and the rest of the sentence is never read: `fixed #22's unlinked path` closed #22 on
   2026-08-13, in a commit whose subject was another issue's slice. Write `issue 22` or `the #22 body`

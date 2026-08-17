@@ -1,0 +1,14 @@
+{
+  "fixture_id": "BS-SELFTEST-03",
+  "phase": "PLACE",
+  "situation": "The target CLAUDE.md already has a hand-written `## Issue board` section — this plugin's own repo is the case. The probe would succeed.",
+  "target_has_issue_board_section": true,
+  "probe_status": "ok",
+  "expected_decision": ["SECTION-EXISTS"],
+  "expected_guard": "nothing is written, and the stop names slice 02 as the owner of coexisting with prose rather than reading as a failure",
+  "must_not": [
+    "append a second `## Issue board` section",
+    "insert the region into the existing section — that is slice 02, which owns the placement and drift rules",
+    "edit, reflow or retire any hand-written bullet"
+  ]
+}
