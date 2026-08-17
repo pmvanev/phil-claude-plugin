@@ -1,0 +1,22 @@
+{
+  "fixture_id": "BS-SELFTEST-06",
+  "phase": "DRIFT",
+  "situation": "A hand-written line states a Status field id that no longer matches the forge — the field was recreated, and the prose still carries the old `PVTSSF_` token.",
+  "classify_state": "section-no-markers",
+  "probe_status": "ok",
+  "expected_decision": [
+    "WROTE-BESIDE-PROSE"
+  ],
+  "expected_guard": "the contradicting line is reported in full with its line number, and is NOT edited; the retire offer is made and applied only on an explicit answer",
+  "must_not": [
+    "edit, correct or reflow the contradicting line",
+    "retire it without an explicit answer",
+    "treat silence or a non-answer as consent",
+    "also file the line under `confirms` because another id on it matched"
+  ],
+  "expected_report_lines": [
+    "DRIFT",
+    "REPORTED-NOT-WRITTEN"
+  ],
+  "report_lines_why": "this fixture runs against this repo's real board, whose probe returns two half_probed workflow entries — the same two fixture 01 sees. A fixture expecting no REPORTED-NOT-WRITTEN here would assert that the same input reports differently."
+}

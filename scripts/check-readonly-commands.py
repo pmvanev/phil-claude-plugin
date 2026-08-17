@@ -100,9 +100,12 @@ def main() -> int:
 
         # Runs for EVERY command regardless of `mutates`, because an unmatchable grant is a defect
         # in any command: it prompts on every run while looking narrower than a real grant could be.
-        grants_syntax_checked += len(grants)
+        # Count only what the matchability check actually inspects. Counting every grant — `Read`,
+        # `Glob`, `Skill` and the rest — reported 204 where 43 `Bash(...)` grants exist, overstating
+        # coverage roughly fivefold. A number nobody can reconcile is how a check stops being read.
         for grant in grants:
             if grant.startswith("Bash("):
+                grants_syntax_checked += 1
                 problem = check_grant_is_matchable(path.name, grant)
                 if problem:
                     failures.append(problem)

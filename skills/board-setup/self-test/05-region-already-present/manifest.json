@@ -1,0 +1,19 @@
+{
+  "fixture_id": "BS-SELFTEST-05",
+  "phase": "CLASSIFY",
+  "situation": "A well-formed region already exists in the target, written by an earlier run. Its values may or may not still match the forge.",
+  "classify_state": "region-present",
+  "probe_status": "ok",
+  "expected_decision": [
+    "REGION-PRESENT"
+  ],
+  "expected_guard": "nothing is written, and the stop names slice 05 as the owner of re-run and staleness rather than reading as a failure",
+  "must_not": [
+    "rewrite, refresh or regenerate the existing region",
+    "compare the region's values against the probe and 'fix' a stale one",
+    "append a second region",
+    "report the stop as an error"
+  ],
+  "expected_report_lines": [],
+  "report_lines_why": "stops at CLASSIFY, before DRIFT runs — no report line is due, and emitting one would claim a step that did not happen"
+}

@@ -1,14 +1,24 @@
 {
   "fixture_id": "BS-SELFTEST-03",
   "phase": "PLACE",
-  "situation": "The target CLAUDE.md already has a hand-written `## Issue board` section — this plugin's own repo is the case. The probe would succeed.",
+  "situation": "The target CLAUDE.md already has a hand-written `## Issue board` section — this plugin's own repo is the case. The probe succeeds. Slice 02 is built, so this is now the main path rather than a boundary.",
   "target_has_issue_board_section": true,
+  "classify_state": "section-no-markers",
   "probe_status": "ok",
-  "expected_decision": ["SECTION-EXISTS"],
-  "expected_guard": "nothing is written, and the stop names slice 02 as the owner of coexisting with prose rather than reading as a failure",
+  "expected_decision": [
+    "WROTE-BESIDE-PROSE"
+  ],
+  "expected_guard": "the region is inserted immediately after the heading, every byte outside the markers is unchanged, and the three drift bucket counts are reported",
+  "supersedes": "the slice-01 expectation of `SECTION-EXISTS`, which was this fixture's answer until slice 02 shipped the thing it pointed at",
   "must_not": [
+    "report `SECTION-EXISTS` — that outcome is retired, and a run emitting it is running the old skill",
     "append a second `## Issue board` section",
-    "insert the region into the existing section — that is slice 02, which owns the placement and drift rules",
-    "edit, reflow or retire any hand-written bullet"
-  ]
+    "edit, reflow or retire any hand-written bullet without an explicit answer",
+    "insert a blank line of its own around the region — that is a byte outside the markers"
+  ],
+  "expected_report_lines": [
+    "DRIFT",
+    "REPORTED-NOT-WRITTEN"
+  ],
+  "report_lines_why": "this fixture runs against this repo's real board, whose probe returns two half_probed workflow entries — the same two fixture 01 sees. A fixture expecting no REPORTED-NOT-WRITTEN here would assert that the same input reports differently."
 }

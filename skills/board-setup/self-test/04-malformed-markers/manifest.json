@@ -1,0 +1,18 @@
+{
+  "fixture_id": "BS-SELFTEST-04",
+  "phase": "CLASSIFY",
+  "situation": "The target's `## Issue board` section contains a `begin` marker with no `end` — a half-written region, a bad merge, or a human who deleted the closing line.",
+  "classify_state": "markers-malformed",
+  "probe_status": "ok",
+  "expected_decision": [
+    "MALFORMED-MARKERS"
+  ],
+  "expected_guard": "the file is byte-unchanged and the reason names which marker shape was found",
+  "must_not": [
+    "scan forward to the next heading, the next blank line, or end-of-file to infer where the region ends",
+    "insert a closing marker to repair the file",
+    "write the region anywhere, including above or below the malformed one"
+  ],
+  "expected_report_lines": [],
+  "report_lines_why": "stops at CLASSIFY, before DRIFT runs — no report line is due, and emitting one would claim a step that did not happen"
+}

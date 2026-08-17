@@ -2,14 +2,21 @@
   "fixture_id": "BS-SELFTEST-01",
   "phase": "CONFIRM -> PROBE -> PLACE -> WRITE",
   "situation": "A repo with one git remote and a CLAUDE.md that has no `## Issue board` section. The probe returns status: ok with 11 facts, 2 half_probed entries and 2 not_probeable entries.",
-  "remotes": ["origin git@github.com:owner/repo.git"],
+  "remotes": [
+    "origin git@github.com:owner/repo.git"
+  ],
   "target_has_issue_board_section": false,
   "probe_status": "ok",
-  "expected_decision": ["WROTE", "REPORTED-NOT-WRITTEN"],
+  "expected_decision": [
+    "WROTE"
+  ],
   "expected_guard": "every value inside the markers appears in the probe JSON; the two half-probed workflow trigger statuses are REPORTED and not written; the report says the declared and assumed totals are necessarily zero because neither slice is built",
   "must_not": [
     "write `Done` as the trigger status — that is assumed, and slice 04 owns the label",
     "ask any question beyond confirming the forge target",
     "drop the five facts that carry no template_field"
+  ],
+  "expected_report_lines": [
+    "REPORTED-NOT-WRITTEN"
   ]
 }

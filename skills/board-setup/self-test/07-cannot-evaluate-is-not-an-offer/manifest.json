@@ -1,0 +1,22 @@
+{
+  "fixture_id": "BS-SELFTEST-07",
+  "phase": "DRIFT",
+  "situation": "The section's prose is mostly hazards recorded after contact — `Auto-close on Done is ENABLED`, `a closing keyword in a commit closes the card`. The probe confirms a status-close workflow is on but cannot say which status fires it, and says nothing at all about commit keywords.",
+  "classify_state": "section-no-markers",
+  "probe_status": "ok",
+  "expected_decision": [
+    "WROTE-BESIDE-PROSE"
+  ],
+  "expected_guard": "those lines land in `cannot evaluate`, no retire offer is made for any of them, and the large cannot-evaluate count is reported as the correct result rather than apologised for",
+  "must_not": [
+    "call a line `contradicts` because no probed fact supports it",
+    "offer to retire a `cannot evaluate` line",
+    "infer that `Done` fires the workflow from the fact that a workflow is enabled",
+    "describe the report as incomplete or low-confidence because most lines could not be judged"
+  ],
+  "expected_report_lines": [
+    "DRIFT",
+    "REPORTED-NOT-WRITTEN"
+  ],
+  "report_lines_why": "this fixture runs against this repo's real board, whose probe returns two half_probed workflow entries — the same two fixture 01 sees. A fixture expecting no REPORTED-NOT-WRITTEN here would assert that the same input reports differently."
+}

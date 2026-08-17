@@ -1,17 +1,17 @@
 ---
 name: board-setup
-description: Use when recording a repo's issue-board constants in its `CLAUDE.md` on GitHub — the forge and repo, the project and Status field ids, every single-select option id, the enabled built-in workflows, the tier, the docs root and whether the repo is nWave — or when asked to "record the board constants", "write the issue board section", "probe the board", or "why grooming cannot evaluate rule 4". Writes probed facts into a delimited region and labels every line with where it came from. Never infers a declaration from the labels in use, and never writes to the forge.
+description: Use when recording a repo's issue-board constants in its `CLAUDE.md` on GitHub — the forge and repo, the project and Status field ids, every single-select option id, the enabled built-in workflows, the tier, the docs root and whether the repo is nWave — or when asked to "record the board constants", "write the issue board section", "probe the board", "add the board block to a repo that already documents its board", "check whether the hand-written board notes match the forge" (for a repo not yet carrying a generated region — re-checking a configured one is slice 05), or "why grooming cannot evaluate rule 4". Writes probed facts into a delimited region beside hand-written prose without altering a byte of it, reports where that prose agrees with the forge, disagrees, or cannot be judged, and labels every generated line with where it came from. Never infers a declaration from the labels in use, and never writes to the forge.
 ---
 
 # Board setup — probe, label, write
 
-Discover a repo's board constants and write them down **before** they are learned by contact. This
-plugin's own `CLAUDE.md` is the evidence: most of the hazards in its `## Issue board` section were
-written *after* the thing they document had already gone wrong — two of them still carry the date
-they were learned. Each was paid for by a call that reported success while doing something else.
+Discover a repo's board constants and write them down **before** they are learned by contact.
 
-So probe everything discoverable, ask for what is not, and **label every line with where it came
+Probe everything discoverable, ask for what is not, and **label every line with where it came
 from**. A line whose origin cannot be told is the defect here — not a line that is missing.
+
+Why that is the thesis, and why this plugin's own `CLAUDE.md` is the evidence for it:
+`${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/provenance-model.md`.
 
 ## Three categories, and every line carries one
 
@@ -21,23 +21,18 @@ from**. A line whose origin cannot be told is the defect here — not a line tha
 | **assumed** | the forge returned *half* of it | inside the markers, labelled — **slice 04** |
 | **declared** | only a human can say it | **outside** the markers, attributed — **slice 03** |
 
-The third category is not decoration. `projectV2 { workflows { name enabled } }` returns
-`Auto-close issue: enabled`, so the hazard is discoverable — but `ProjectV2Workflow` exposes
-`createdAt, enabled, fullDatabaseId, id, name, number, project, updatedAt` and **no field for the
-configured trigger statuses**. "A status→close workflow is on" is probed; "`Done` fires it" is
-assumed. A block saying *"Auto-close on Done is ENABLED"* is one confident sentence spanning a fact
-and a guess.
+The third category is not decoration: *"Auto-close on Done is ENABLED"* is one confident sentence
+spanning a fact and a guess, because the forge reports that the workflow is on and never which
+status fires it. The field-level derivation is in `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/provenance-model.md`.
 
 ## The probe is a script, and that is the point
 
 Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/probe-board.py --repo OWNER/REPO`. It emits JSON: every
 value paired with the exact query that produced it, in a fixed field order.
 
-**Never type a value this script could return, and never fill a gap it left.** The script exists
-because AC1 — *no value inside the markers was typed by a human* — is a property code can hold and
-prose can only request. In the finished file a remembered id is indistinguishable from a probed one,
-which is this feature's own failure mode turned on itself. A value that did not come out of the
-JSON does not go inside the markers.
+**Never type a value this script could return, and never fill a gap it left.** A value that did not
+come out of the JSON does not go inside the markers, because in the finished file a remembered id is
+indistinguishable from a probed one.
 
 **Read `status` first.** On `refused`, **write nothing** and report `refusal.reason`, then
 `refusal.fix` **when it is non-null** — `fix` is nullable, and printing `None` at a reader is worse
@@ -69,10 +64,9 @@ generated 2026-08-17T14:44Z · do not edit inside these markers
 <!-- phil:board-setup:v1:end -->
 ```
 
-**The markers are bare and versioned; the timestamp is the first line inside.** This follows
-`nwave-issue-board`'s generated-block convention, and the reason is mechanical: the marker is the
+**The markers are bare and versioned; the timestamp is the first line inside.** The marker is the
 string slice 05 must match on to find the region again, so it must not be the string that changes
-every run. A version token lets a later slice recognise a region written by an earlier one.
+every run.
 
 **Every bullet names the query that produced it**, with the queries listed once each at the foot —
 several constants come from one call, and repeating a GraphQL document per bullet buries the values
@@ -85,14 +79,99 @@ it exists to source. Two shapes need a rule:
 
 **Everything outside the markers belongs to a human, permanently.**
 
+## Where the region goes, and why it looks tight
+
+**Immediately after the `## Issue board` heading, contributing no blank line of its own.** The line
+that already followed the heading terminates the `end` marker, so excising the region returns the
+file byte-for-byte. A blank line inserted for readability is a byte outside the markers that was not
+there before, so the `end` marker sits directly above the first hand-written line with no breathing
+room. That cost is accepted: readability outside the markers is not this command's to spend.
+
+Placement is **deterministic** — the position derives from the heading's line number and nothing
+else. No scan for a "good spot", no reading of the prose.
+
+## The reader, the placer and the drift report are a script
+
+`python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py` owns classification, placement, line
+arithmetic and the diff. Same reasoning as the probe: **AC1 is a property code can hold and prose
+can only request.** A region placed one line off still looks placed, and a reflowed bullet still
+reads as English — every failure here is silent.
+
+| Call | Does | Writes? |
+|---|---|---|
+| `--file F --classify` | names the state, returns the region extent and a `sha256` | no |
+| `--file F --drift PROBE.json` | the three buckets | no |
+| `--file F --place REGION.md --expect-sha S` | inserts, re-checking `S` first | yes |
+| `--file F --retire N --expect-sha S` | deletes exactly one whole line | yes |
+
+The `sha256` from `--classify` is passed back to every writing call, so a file that moved between
+read and write is refused rather than overwritten.
+
+**`PROBE.json` and `REGION.md` are intermediates, and they never touch the target repo.** Write both
+to the session's scratch directory and pass absolute paths. Left unqualified they default into the
+repo root, which contradicts this command's whole contract — *one local file changes* — and leaves
+untracked litter in someone else's tree. The target repo gains exactly one modified file:
+`CLAUDE.md`.
+
+## Five states, and only three are written to
+
+| State | Means | Do |
+|---|---|---|
+| `file-absent` | no `CLAUDE.md` at all | **create it**, carrying the section and the region, and say that it was created |
+| `no-section` | no `## Issue board` at all | append the section — slice 01's path |
+| `section-no-markers` | hand-written prose, no region | **insert**, then report drift |
+| `region-present` | a region is already there | **stop.** Slice 05 owns re-run and staleness |
+| `markers-malformed` | `begin` without `end`, `end` without `begin`, nested, or out of order | **refuse**, file untouched |
+
+`### Issue board` is never the section. A heading deeper than h2 belongs to something else, and
+inserting board constants under an unrelated parent is a silent misplacement.
+
+## The drift report, and the bucket that keeps it honest
+
+Three buckets over the prose **outside** the markers:
+
+- **confirms** — a probed value appears verbatim on the line.
+- **contradicts** — a token of a *known shape* (`PVT_…`, `PVTSSF_…`, a docs-root URL) appears and
+  matches no probed value. Contradiction wins the line outright; a line carrying one right id and
+  one wrong one is a wrong line.
+- **cannot evaluate** — everything else, and it is the honest bucket. A line the probe says nothing
+  about is **never** `contradicts`. Most of a real board section lands here, and that is the correct
+  result rather than a weak one: the hazards are prose recorded after contact, and no forge records
+  them.
+
+Two rules the first dogfood run bought, both of which had made the report *look* better than it was:
+
+- **A probed scalar shorter than six characters is not evidence.**
+- **Fact values are walked to full depth**, so ids nested inside a fact still count.
+
+Line numbers are counted over the file with the region excised, so the report is identical before
+and after placement. **The generated region agreeing with the probe is a tautology, not a
+confirmation**, and must never appear in `confirms`.
+
+The incidents behind all three rules are in
+`${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/drift-and-retire.md`. **Read it before changing
+the evidence floor, the flattening depth, or any retire-offer rule** — each number there was bought
+by a false result on a real board.
+
+## The retire offer
+
+For a **contradicting** line stating a fact the region now owns, offer to remove it. Rules:
+
+- **Applied only on an explicit answer.** Silence writes nothing and records nothing — no "no
+  objection raised" path exists.
+- **One whole line, deleted.** Never rewritten, reflowed, or partially edited. Deleting a line is
+  reviewable in a diff; rewriting one is an edit nobody asked for.
+- **Never offered for `cannot evaluate`.** There is no evidence the line is wrong, so there is
+  nothing to retire it in favour of.
+- **Never offered for a line inside the markers.** The region is regenerated, not retired.
+
 ### The facts with no template field still get written
 
 Five facts carry no `template_field`: `default-branch`, `fork`, `project-discovery`, `board-view`,
-`other-single-select-fields`. They are not surplus and must not be dropped — *how* the board was
-found is itself a constant, and a repo whose project is unlinked is a repo where
-`gh project item-add` is the only way a card ever arrives. Write them as bullets in the same region,
-after the template-shaped ones, each carrying its provenance and Q-number like any other. `fork` and
-`other-single-select-fields` appear only when the forge returned them.
+`other-single-select-fields`. **They are not surplus and must not be dropped.** Write them as
+bullets in the same region, after the template-shaped ones, each carrying its provenance and
+Q-number like any other. `fork` and `other-single-select-fields` appear only when the forge returned
+them. Why *how the board was found* is itself a constant: `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/provenance-model.md`.
 
 ## The flow
 
@@ -115,27 +194,30 @@ after the template-shaped ones, each carrying its provenance and Q-number like a
    `upstream` are two repos with two boards, and the one that matters is usually not the one you
    pushed to. This is the only question slice 01 may ask, and it happens before the probe runs.
 2. **PROBE.** One pass of the script. Report each value beside the call that found it.
-3. **PLACE.** Slice 01 targets a `CLAUDE.md` with **no** `## Issue board` section. Append the
-   section containing only the region. Create the file if absent, and say which happened.
-4. **WRITE**, then **REPORT** — naming what was left out and who owns it. In slice 01 the declared
-   and assumed totals are **necessarily zero**, because neither is built; say so rather than
-   printing a bare `0` that invites filling.
+3. **CLASSIFY.** `--classify` the target. Branch on the state per the five-state table above, and
+   keep the `sha256` it returns — every writing call needs it back. On `file-absent` the `sha256`
+   is `null`, and that is the only case where a writing call may be given no `--expect-sha`.
+4. **PLACE.** On `file-absent`, the file is created carrying the section and the region. On
+   `no-section`, append the section containing only the region. On `section-no-markers`, insert
+   after the heading. Say which of the three happened. On the other two states, stop.
+5. **DRIFT.** `--drift` against the probe JSON. Report all three bucket counts, and list the
+   contradictions in full — a count alone hides which line is wrong.
+6. **OFFER**, only for contradictions, one line at a time, per the retire rules above. No
+   contradictions means no question: a run with nothing to ask must ask nothing.
+7. **WRITE**, then **REPORT** — naming what was left out and who owns it. The declared and assumed
+   totals are still **necessarily zero**, because slices 03 and 04 are not built; say so rather
+   than printing a bare `0` that invites filling.
 
-**Scope is the repo you are in** — one `CLAUDE.md`, the one in the working tree, never a sibling
+**Scope is the working tree's `CLAUDE.md`** — one `CLAUDE.md`, the one in the working tree, never a sibling
 checkout. Confirming the forge target is required; the file target is not negotiable.
 
 ## What the probe reaches, and what it cannot
 
-Measured against `phil:issue-board`'s *Per-project setup* template, which owns the block's content:
-the probe reaches every field except **`label-families`** and **`local-task-system`**, both slice
-03's, both correctly *declared* rather than guessed. The slice brief owns the KPI-1 reading; the
-durable fact is which two fields no forge can answer.
-
-`phil:issue-board` owns the template and the forge mechanics; `phil:nwave-issue-board` owns the
-artifact→issue mapping. On GitHub the **tier comes out of the probe as *not applicable*** — the
-bullet exists because GitLab gates scoped labels and real `blocks` links behind Premium, and GitHub
-gates neither, so there is no GitHub tier call to make and none to invent. When GitLab lands
-(slice 06) the probe calls `phil:issue-board`'s tier check rather than restating it.
+The probe reaches every field of `phil:issue-board`'s *Per-project setup* template except
+**`label-families`** and **`local-task-system`** — both slice 03's, both correctly *declared* rather
+than guessed. `phil:issue-board` owns the template and the forge mechanics;
+`phil:nwave-issue-board` owns the artifact→issue mapping. Coverage detail and the GitHub tier
+reasoning: `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/provenance-model.md`.
 
 **`/phil:claude-md` does not know this region exists.** It revises `CLAUDE.md` against a checklist
 including line budgets and "no long explanations", so running it over a configured repo can compress
@@ -144,24 +226,23 @@ re-run this command after any `/phil:claude-md` pass and check the region surviv
 
 ## Decision outcomes
 
-Report the outcome by name, every run. Exactly one:
+Report **exactly one terminal outcome** by name, every run:
 
-`WROTE` · `AMBIGUOUS-TARGET` · `REFUSED` · `SECTION-EXISTS` · `REPORTED-NOT-WRITTEN`
+`WROTE` · `WROTE-BESIDE-PROSE` · `AMBIGUOUS-TARGET` · `REFUSED` · `REGION-PRESENT` ·
+`MALFORMED-MARKERS`
 
-The discriminator is **who stopped it**, because the script has one failure state and the model has
-another:
+**Two report lines are not outcomes, and both accompany a terminal one.** `DRIFT` names the three
+bucket counts on any run reaching step 5. `REPORTED-NOT-WRITTEN` names the half-probed values on any
+run where the probe returned some. Neither can stand alone, and a run emitting one as its verdict
+has not reported an outcome.
 
-- **`WROTE`** — names the file and the field count.
-- **`AMBIGUOUS-TARGET`** — resolved by the model at CONFIRM, *before* the script runs: two remotes,
-  or a fork. A question, never a guess.
-- **`REFUSED`** — the script returned `status: refused`. Report `refusal.reason` verbatim and
-  `refusal.fix` when non-null. Includes every case the script cannot resolve: a missing `project`
-  scope, more than one candidate project, no board at all, a project with no `Status` field, a forge
-  error. The file is byte-unchanged.
-- **`SECTION-EXISTS`** — the target already has an `## Issue board` section. Slice 02 owns coexisting
-  with prose; until it ships this stops, changing nothing.
-- **`REPORTED-NOT-WRITTEN`** — accompanies `WROTE` for the half-probed values: reported to the
-  human, kept out of the file until slice 04 ships the labelling that would make them honest.
+**`SECTION-EXISTS` is retired.** It was slice 01's boundary marker, and slice 02 is the thing it
+pointed at; a run that still reports it is running the old skill.
+
+The discriminator is **who stopped the run**, because the script has one failure state and the model
+has another. `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/outcomes.md` gives each outcome's
+meaning, what it must name, and the fixture contradiction that split the report lines out. Read it
+before adding an outcome or changing what one reports.
 
 ## What this skill must never do
 
@@ -174,10 +255,21 @@ another:
 - **Write to the forge.** This command reads the forge and writes one local file. It creates no
   project, no field, no option, no label. `updateProjectV2Field`'s full-replacement hazard is a
   reason to *record* a field's shape, never to modify it.
-- **Touch anything outside the markers**, on any path including failure.
-- **Guess a region's extent.** A `begin` marker with no `end` is refused, file unchanged. (S2 AC4 —
-  slice 02's criterion, kept here as defence; its presence is not evidence that placement among
-  prose is built.)
+- **Touch anything outside the markers**, on any path including failure — with exactly one
+  exception, the retire offer, which deletes one whole line on an explicit answer and nothing else.
+- **Guess a region's extent.** A `begin` marker with no `end` is refused, file unchanged (S2 AC4).
+- **Rewrite, reflow or reformat a hand-written line.** Reporting it is the whole job. The only
+  permitted change is deleting one whole line, on an answer.
+- **Call a line `contradicts` without a probed value to point at.** Absence of evidence is
+  `cannot evaluate`. Upgrading it makes the board's habits audit themselves.
+- **Offer to retire a `cannot evaluate` line**, or treat silence as consent.
+- **Rewrite an existing region.** That is slice 05's, and doing it here is undefined behaviour that
+  reports success.
+- **Leave `PROBE.json`, `REGION.md` or any other intermediate in the target repo.** They belong in
+  the session's scratch directory. One file changes, and it is `CLAUDE.md`.
+- **Place, insert or retire a line by hand.** `region-place.py` owns every write to the target,
+  including creating an absent file. The `Write`/`Edit` grant exists for the script's output path,
+  not as a fallback when a call refuses.
 - **Relay a fix the product cannot honour**, or print a null `fix`.
 - **Restate `phil:issue-board`'s template or its tier probe.** That skill owns both.
 - **Claim a re-run is safe.** Slice 05 owns re-run behaviour; running twice is undefined until it
@@ -185,40 +277,29 @@ another:
 
 ## Slice boundary — what is not built yet
 
-Slice 01 ships CONFIRM → PROBE → PLACE → WRITE against a `CLAUDE.md` with no `## Issue board`
-section. Deliberately absent, and not an oversight to improvise:
+Slices 01 and 02 ship CONFIRM → PROBE → CLASSIFY → PLACE → DRIFT → OFFER → WRITE, against a
+`CLAUDE.md` with no section **or** with a hand-written one. Deliberately absent, and not an
+oversight to improvise:
 
 | Not built | Owner | Consequence today |
 |---|---|---|
-| Coexisting with hand-written prose; drift reporting | slice 02 | The target must have no such section |
 | Eliciting label families | slice 03 | Grooming keeps reporting rule 4 **unevaluated**, and the report says so |
 | The `assumed` label and confirm offer | slice 04 | Half-probed values are reported, never written |
-| Safe re-run, staleness, vanished option ids | slice 05 | Running twice is undefined |
+| Safe re-run, staleness, vanished option ids | slice 05 | A file that already has a region stops with `REGION-PRESENT` |
 | GitLab (`glab`) | slice 06 | GitHub only; a GitLab repo is refused, not half-served |
 
-**A question in slice 01 is a defect** beyond confirming the forge target — the whole measurement is
-what comes out with none.
+**Only two questions are permitted**: confirming the forge target, and the retire offer on a
+contradicting line. Anything else asked is a defect — the measurement is what comes out without it.
 
 ## Acceptance
 
-Two halves, automated to different degrees, and the difference matters:
+Two halves: the scripts are unit-tested, and the prose is model-driven against the seven fixtures in
+`self-test/`. **Drive the fixtures whenever this file or the command loader changes.**
 
-- **The script is tested.** `tests/test_probe_board.py` covers the refusal paths, `project` scope
-  detection, and both ambiguity directions — including AC4, which is otherwise unverifiable without
-  stripping the operator's live `gh` scope.
-- **The prose is model-driven.** There is no CI runner in this plugin. `self-test/` holds the
-  fixtures; drive each by giving this skill the situation in its `manifest.json` and comparing the
-  decision reached against its `expected.md`. Do that whenever this file or the command loader
-  changes.
+`self-test/README.md` explains how to drive them, what each manifest key means, why
+`expected_decision` and `expected_report_lines` are separate keys, and how AC3 splits across the two
+halves.
 
-AC3 splits across the two halves, and the split is the point: **detecting** ambiguity is tested
-(`--list-targets` over a real two-remote checkout returns `ambiguous` with both candidates), while
-**asking** is prose and stays unverified until the command runs as a command. Detection was moved out
-of prose for exactly the reason the probe is a script: a property code holds beats one a model is
-asked to honour.
-
-`docs/feature/board-setup-block/slices/slice-01-probe-and-write.md` holds the criteria and the KPI-1
-reading.
-
-Every failure mode here is silent. A block with a remembered id looks exactly like a probed one, and
-a partial block looks more complete than a refusal.
+Every failure mode here is silent. A block with a remembered id looks exactly like a probed one, a
+partial block looks more complete than a refusal, and a drift report that judged nothing looks like
+one that found nothing wrong.
