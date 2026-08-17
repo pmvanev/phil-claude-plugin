@@ -1,0 +1,17 @@
+{
+  "fixture_id": "BS-SELFTEST-09",
+  "phase": "ELICIT",
+  "situation": "Nine issues on the board carry more than one member of a label family. Robin declares that family SINGLE-valued, contradicting observed use.",
+  "classify_state": "section-no-markers",
+  "probe_status": "ok",
+  "expected_decision": ["DECLARED"],
+  "expected_report_lines": ["DRIFT"],
+  "expected_guard": "the declaration is written exactly as given, and the disagreement is recorded beside it with the contradicting issue numbers named",
+  "must_not": [
+    "refuse the declaration because the labels disagree",
+    "ask again to confirm — the answer was unambiguous, and re-asking an answered question reads as disbelief",
+    "resolve the disagreement in either direction",
+    "silently drop the observation, leaving a later reader unable to see the answer looked odd",
+    "adjust the declaration toward what the labels suggest"
+  ]
+}

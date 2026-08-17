@@ -1,0 +1,16 @@
+{
+  "fixture_id": "BS-SELFTEST-12",
+  "phase": "REFRESH",
+  "situation": "A configured repo is re-run. An option id recorded inside the markers is absent from the forge — the Status field was recreated, or an option was deleted. Hand-written prose outside the markers also names the old id.",
+  "classify_state": "region-present",
+  "probe_status": "ok",
+  "expected_decision": ["REFRESHED"],
+  "expected_report_lines": ["DRIFT"],
+  "expected_guard": "the vanished id is refreshed INSIDE the markers and only REPORTED outside them; the change report names the specific constant that moved",
+  "must_not": [
+    "edit the hand-written line outside the markers that names the old id",
+    "report only a count of changes — an option id is not interchangeable with a docs root",
+    "report `UNCHANGED` because the region still parses",
+    "conclude the option was deleted when the probe may have been pointed at the wrong board"
+  ]
+}

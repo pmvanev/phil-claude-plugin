@@ -18,10 +18,14 @@ SKILL_DIR = Path(__file__).resolve().parent.parent / "skills" / "board-setup"
 FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
 # The terminal outcomes and the two report lines, per SKILL.md's `## Decision outcomes`.
-TERMINAL = {"WROTE", "WROTE-BESIDE-PROSE", "AMBIGUOUS-TARGET", "REFUSED", "REGION-PRESENT",
-            "MALFORMED-MARKERS"}
-REPORT_LINES = {"DRIFT", "REPORTED-NOT-WRITTEN"}
-RETIRED = {"SECTION-EXISTS"}
+TERMINAL = {"WROTE", "WROTE-BESIDE-PROSE", "REFRESHED", "UNCHANGED", "DECLARED",
+            "AMBIGUOUS-TARGET", "REFUSED", "MALFORMED-MARKERS"}
+REPORT_LINES = {"DRIFT", "REPORTED-NOT-WRITTEN", "UNEVALUATED"}
+
+# Two outcomes have been retired by later slices, each by the slice that shipped the thing it was
+# deferring to. They may appear in a `must_not` or a `supersedes` — never as an expectation. This test
+# file caught the drift when slices 03-06 landed, which is the only reason it exists.
+RETIRED = {"SECTION-EXISTS", "REGION-PRESENT"}
 
 
 def test_fixtures_exist():

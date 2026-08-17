@@ -48,6 +48,46 @@ declaration produced this way is what `phil:groom-issues` rule 4 needs.
 5. Every elicited line is attributed; an unattributed line is the defect (C3).
 6. KPI-4: rule 4 reports *evaluated* on a repo this slice configured.
 
+## Outcome — authored 2026-08-17
+
+| AC | Verdict | Evidence |
+|---|---|---|
+| 1 | **PASS** | `derive_label_evidence` is tested adversarially against itself: a forbidden-key test asserts no family carries `single_valued`, `multi_valued`, `likely`, `confidence`, `inferred`, `suggested_answer` or `default`. The payload states in its own `note` that it holds no answer. |
+| 2 | **PASS (unit), NOT dogfooded** | `test_a_declaration_contradicting_the_evidence_is_written_as_given_with_the_disagreement`. This repo's real answers both *agreed* with observed use, so the path is covered by test and fixture 09, not by the live run. Recorded rather than claimed. |
+| 3 | **PASS** | A family absent from `answers` is absent from the output; `render_declarations` returns `None` when nothing was declared. Fixture 08 pins that no "declined" line is written. |
+| 4 | **PASS by design** | The ambiguous-reply rule is prose in `SKILL.md` and fixture 08. Not code-enforceable — the ambiguity is in a human's reply, not in a value. |
+| 5 | **PASS** | Every declared line carries `*(you declared · <date>)*`; tested. |
+| 6 | **DEFERRED** | KPI-4 needs `/phil:groom-issues` run against a repo this slice configured, and the released plugin is behind the working tree. The declared region exists in this repo's `CLAUDE.md`, so the measurement is available to the next session. |
+
+### Learning hypothesis — CONFIRMED, against a real human
+
+**Both questions were answered from the evidence offered, with no forge UI opened.** That is the
+hypothesis, and it was tested the only way it can be: by asking a person.
+
+- `(unprefixed)` — `bug`, `documentation`, `enhancement`; counts 7/11/22; co-occurring pairs
+  documentation+enhancement 6×, bug+documentation 3×; nine issues carrying more than one →
+  **multi-valued by decision**.
+- `wave` — one member in use, no co-occurrence observed → **single-valued**.
+
+Both answers match what `CLAUDE.md` already declared by hand, which is a consistency signal and
+**not** the test. The test was answerability, and the co-occurrence counts plus the issue numbers were
+what made it answerable — a reader can check `#2` and `#4` themselves in seconds.
+
+**The `wave` question needed a caveat the evidence could not supply.** Zero observed co-occurrence is
+consistent with single-valued but does not demonstrate it, because only one member is in use. That was
+stated in the option rather than left for the answerer to notice — evidence that under-determines an
+answer must say so, or it argues for a conclusion it cannot support.
+
+### Two findings
+
+**A `co_occurrence` keyed by pairs is not JSON-serialisable**, and the first real run died on
+`TypeError: keys must be str … not tuple`. Rendered as a list of `{"pair": [...], "count": n}`.
+
+**The test that should have caught it was vacuous.** It read
+`assert pairs[k] == 3 if isinstance(pairs, dict) else True` — which is `True` whenever the guard is
+false, so it passed by not testing. *A conditional inside an assertion can make a test pass by
+declining to run.* Replaced with an explicit round-trip test.
+
 ## Dependencies
 
 Slices 01 and 02 — the region must exist and coexist before anything is written beside it.

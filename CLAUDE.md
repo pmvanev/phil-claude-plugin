@@ -138,10 +138,10 @@ artifacts already own.
 
 ## Issue board
 <!-- phil:board-setup:v1:begin -->
-generated 2026-08-17T20:12Z · do not edit inside these markers
+generated 2026-08-17T20:47Z · do not edit inside these markers
 
-Probed from the forge. Every bullet names the query that produced it; the queries are listed
-once each at the foot. Nothing here was typed by hand.
+Every line below carries its provenance and the query that produced it. Nothing here
+was typed by a human; `assumed` lines say what is not knowable and why.
 
 - Forge: GitHub at github.com — use `gh -R pmvanev/phil-claude-plugin` on every call *(probed · Q1)*
   issue #12 exists in every repo, so an inferred remote mutates the wrong one successfully
@@ -150,18 +150,22 @@ once each at the foot. Nothing here was typed by hand.
   an issue must be `gh project item-add`ed before any field can be set; editing one that was never added does nothing
 - Columns: Status options (4) on field `PVTSSF_lAHOANPp-M4Bf-pxzhaNnGs` — Todo `f75ad846` · In Progress `47fc9ee4` · Done `98236657` · Blocked `39094273` *(probed · Q4)*
   `updateProjectV2Field`'s `singleSelectOptions` is a FULL REPLACEMENT — omitting any of these 4 ids drops that option and every card's assignment to it, with a call that reports success
-- Workflows: Built-in workflows enabled — Auto-add sub-issues to project · Auto-close issue · Item added to project · Item closed · Pull request linked to issue · Pull request merged *(probed · Q6)*
+- Workflows: enabled — Auto-add sub-issues to project · Auto-close issue · Item added to project · Item closed · Pull request linked to issue · Pull request merged *(probed · Q5)*
   a status write is also an issue write when one of these is on, and the reverse
 - Tier: not applicable on GitHub *(probed · Q1)*
   the tier bullet exists because GitLab gates scoped labels and `blocks` links behind Premium; GitHub gates neither, so no tier-dependent convention applies here
 - Docs root: https://github.com/pmvanev/phil-claude-plugin/blob/main/ *(probed · Q1)*
   GitHub emits relative paths verbatim in issue bodies and they 404
-- nWave: nWave repo — .nwave, docs/feature present; see `phil:nwave-issue-board` for the artifact to issue mapping *(probed · Q7)*
+- nWave: nWave repo — .nwave, docs/feature present; see `phil:nwave-issue-board` for the artifact to issue mapping *(probed · Q6)*
 - Default branch: main *(probed · Q1)*
 - How the board was found: NOT linked to the repository; found via the user's projects *(probed · Q2+Q3)*
   `repository.projectsV2` was empty, so the board was resolved from the user's one open project; a card reaches this board only via an explicit `gh project item-add`
-- Views: Views — 2 "View 2" https://github.com/users/pmvanev/projects/3/views/2 *(probed · Q5)*
+- Views: 2 "View 2" https://github.com/users/pmvanev/projects/3/views/2 *(probed · Q7)*
   the LAYOUT is probed; which view a human calls `the kanban` is not
+- `Auto-close issue` is enabled on this project, and **`Done` is assumed to fire it** *(assumed · Q5)*
+  not knowable: which Status option fires it — `ProjectV2Workflow` exposes createdAt, enabled, fullDatabaseId, id, name, number, project, updatedAt — and no field for the configured trigger statuses
+- `Item closed` is enabled on this project, and **`Done` is assumed to fire it** *(assumed · Q5)*
+  not knowable: which Status option fires it — `ProjectV2Workflow` exposes createdAt, enabled, fullDatabaseId, id, name, number, project, updatedAt — and no field for the configured trigger statuses
 
 **Queries**
 
@@ -169,14 +173,20 @@ once each at the foot. Nothing here was typed by hand.
 - `Q2` — `{ repository(owner:"pmvanev", name:"phil-claude-plugin"){ projectsV2(first:20){ nodes { id number title url closed } } } }  → returned []`
 - `Q3` — `{ user(login:"pmvanev"){ projectsV2(first:50){ totalCount nodes { id number title url closed } } } }`
 - `Q4` — `{ user(login:"pmvanev"){ projectV2(number:3){ fields(first:50){ nodes { __typename ... on ProjectV2SingleSelectField { id name options { id name } } ... on ProjectV2Field { id name dataType } } } } } }`
-- `Q5` — `{ user(login:"pmvanev"){ projectV2(number:3){ views(first:20){ nodes { number name layout } } } } }`
-- `Q6` — `{ user(login:"pmvanev"){ projectV2(number:3){ workflows(first:50){ nodes { name enabled } } } } }`
-- `Q7` — `git ls-tree -d --name-only HEAD docs/feature .nwave`
+- `Q5` — `{ user(login:"pmvanev"){ projectV2(number:3){ workflows(first:50){ nodes { name enabled } } } } }`
+- `Q6` — `git ls-tree -d --name-only HEAD docs/feature .nwave`
+- `Q7` — `{ user(login:"pmvanev"){ projectV2(number:3){ views(first:20){ nodes { number name layout } } } } }`
 
-**Not probeable — a human must declare these.** `label-families` (slice 03) · `local-task-system` (slice 03)
-
-**Half-probed, deliberately not written as fact.** `Auto-close issue` is enabled on this project — unknown: which Status option fires it · slice 04 owns the `assumed` label.
+**Not probeable — only a human can declare these.** `label-families` (slice 03) · `local-task-system` (slice 03). Any answer appears in the *declared* region below, never here.
 <!-- phil:board-setup:v1:end -->
+<!-- phil:board-setup:declared:v1:begin -->
+generated 2026-08-17T20:47Z · declarations, not probed facts — a human's answers
+
+Nothing here was probed or inferred. `phil:groom-issues` rule 4 reads this region.
+
+- Label family **(unprefixed)** (`bug`, `documentation`, `enhancement`): **multi-valued by decision** *(you declared · 2026-08-17)*
+- Label family **wave** (`wave: discuss`): **single-valued** *(you declared · 2026-08-17)*
+<!-- phil:board-setup:declared:v1:end -->
 - Forge: GitHub — pass `-R pmvanev/phil-claude-plugin` on every `gh` call. Issue #12 exists in every
   repo, so an inferred remote mutates the wrong one successfully.
 - Board: user project 3, `phil plugin`. The kanban is view 2 —

@@ -23,6 +23,25 @@ So "a status→close workflow is on" is probed, and "`Done` fires it" is assumed
 *"Auto-close on Done is ENABLED"* is one confident sentence spanning a fact and a guess, and the
 whole point of the three categories is that the two must not be spelled the same way.
 
+## The fourth value, which is not a category
+
+`unread` — the forge would not answer. It is **not** a fourth provenance category, because it is not a
+kind of knowledge: it is the absence of both a fact and a guess. So it never enters the markers under
+any label, and the renderer drops it rather than spelling it as either.
+
+It is not forge-specific in principle, though GitLab is where it first appeared: `projects/<id>` reads
+unauthenticated while `projects/<id>/labels` returns 401, so the read failed *partially*. A partial
+failure is the kind that renders as a plausible value — `{"labels": [], "count": 0}`, which on GitLab
+states the project has no board.
+
+The sentinel is `None`, never `[]`. **An empty collection is an answer and an unread one is not**, and
+a codebase whose thesis is that two things must not be spelled the same way cannot afford to spell
+these two the same way.
+
+Note the naming collision, which is deliberate but worth knowing: `refresh_region` also refuses with
+the word *unread* when handed no rendered region, meaning "I cannot tell you whether anything changed".
+Different subject, same honesty.
+
 ## Why the probe is a script
 
 AC1 — *no value inside the markers was typed by a human* — is a property code can hold and prose can

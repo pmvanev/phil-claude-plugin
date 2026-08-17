@@ -10,13 +10,17 @@
   "expected_decision": [
     "WROTE"
   ],
-  "expected_guard": "every value inside the markers appears in the probe JSON; the two half-probed workflow trigger statuses are REPORTED and not written; the report says the declared and assumed totals are necessarily zero because neither slice is built",
+  "expected_guard": "the region is written with every value out of the probe JSON; the two half-probed workflow triggers are written as `assumed` naming what is not knowable and why; the label-family question is asked with evidence beneath it",
   "must_not": [
-    "write `Done` as the trigger status — that is assumed, and slice 04 owns the label",
-    "ask any question beyond confirming the forge target",
-    "drop the five facts that carry no template_field"
+    "type any value the probe could have returned",
+    "write `Done` as though it were probed — it is `assumed`, and the line must say what is not knowable and why",
+    "infer a label family from the labels in use, at any confidence",
+    "write a line for a family the human declined",
+    "hand-write the region instead of rendering it — determinism is what makes the next run write zero bytes"
   ],
   "expected_report_lines": [
-    "REPORTED-NOT-WRITTEN"
-  ]
+    "DRIFT",
+    "UNEVALUATED"
+  ],
+  "supersedes": "the slice-01 expectation that half-probed values are REPORTED and not written, and that no question beyond the forge target may be asked. Slices 03 and 04 shipped both; a run obeying the old expectation is running an old skill"
 }

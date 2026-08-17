@@ -1,12 +1,12 @@
 ---
-description: "Write a repo's board constants into its CLAUDE.md before they are learned by contact — probing the forge for the project and Status field ids, every option id, the enabled workflows, the tier and the docs root, into a delimited region where every line names the query that produced it. Reads the forge; never writes to it."
+description: "Write a repo's board constants into its CLAUDE.md before they are learned by contact — probing GitHub or GitLab for the project and Status field ids, every option id, the enabled workflows, the tier and the docs root, into a delimited region where every line names the query that produced it and carries `probed` or `assumed`. Asks only what no forge records, coexists with prose it cannot regenerate, and re-runs writing zero bytes when nothing moved. Reads the forge; never writes to it."
 argument-hint: "[<owner/repo>]"
 mutates: true
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(python3:*), AskUserQuestion, Skill
 ---
 
 Load the `board-setup` skill at `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/SKILL.md` and run
-CONFIRM → PROBE → CLASSIFY → PLACE → DRIFT → OFFER → WRITE → REPORT.
+CONFIRM → PROBE → CLASSIFY → PLACE/REFRESH → DRIFT → ELICIT → OFFER → WRITE → REPORT.
 
 `$ARGUMENTS`, when present, is the forge target. Confirm it against the git remote rather than
 trusting it; when absent, derive a candidate from the remote and **confirm it before any call**.
@@ -18,6 +18,17 @@ which makes no forge call, then the probe once the target is confirmed:
 ```
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/probe-board.py --list-targets
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/probe-board.py --repo OWNER/REPO
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/probe-board.py --repo GROUP/PROJ --host gitlab.com
+```
+
+**Render both regions with the renderer, never by hand.** Determinism is what makes a re-run write
+zero bytes, and a model cannot hold it — ordering and wording drift, every run diffs, and the diffs
+stop being read:
+
+```
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/render-block.py --probe PROBE.json --stamp UTC_MINUTE
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/render-block.py --probe PROBE.json --stamp UTC_MINUTE \
+    --declarations ANSWERS.json --declared-only
 ```
 
 **Classify, place and diff with the second script, never by hand** — placement and line arithmetic
@@ -28,6 +39,8 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --classif
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --drift PROBE.json
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --place REGION.md --expect-sha SHA
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --retire LINE --expect-sha SHA
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --refresh REGION.md --expect-sha SHA
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --declare DECL.md --expect-sha SHA
 ```
 
 Pass back the `sha256` that `--classify` returned. A file that moved between read and write is
@@ -58,28 +71,58 @@ every run while *looking* narrow. `scripts/check-readonly-commands.py` now fails
 path or a variable, so that mistake cannot be made again quietly.
 
 The intent the grant cannot express lives here and in the skill's prose, the pattern `CLAUDE.md`
-already documents for `adversarial-review`. **This command runs exactly two programs, and only one of
-them writes:**
+already documents for `adversarial-review`. **This command runs exactly three programs, and only one
+of them writes:**
 
-- `probe-board.py` — **reads only.** The forge and the git remotes; it creates no project, field,
-  option or label, and writes no file.
-- `region-place.py` — **writes exactly one file**, the `CLAUDE.md` passed as `--file`, and only under
-  `--place` or `--retire`. `--classify` and `--drift` write nothing. Every write is guarded by
-  `--expect-sha` and by a byte-identity check on the content outside the markers, run before anything
-  reaches disk.
+- `probe-board.py` — **reads only.** The forge (`gh` / `glab`) and the git remotes. It creates no
+  project, field, option, label or issue, and writes no file.
+- `render-block.py` — **reads only.** A pure function of probe JSON plus a timestamp; it writes
+  nothing and makes no call of any kind.
+- `region-place.py` — **writes exactly one file**, the `CLAUDE.md` passed as `--file`. It writes under
+  `--place`, `--refresh`, `--declare` and `--retire`, and **never** under `--classify` or `--drift`.
+  Every write is guarded by `--expect-sha`; `--place` and `--refresh` additionally run a byte-identity
+  check on the content outside both regions before anything reaches disk. `--declare` inserts a new
+  region and `--retire` deletes one sanctioned line, so neither can satisfy that check by
+  construction — each is guarded instead by refusing to touch any line inside either region.
 
-Both use list-argv `subprocess` with no `shell=True` and no interpolation into command strings.
-Adding a mutating call to either would widen this command's reach without changing a line of
-frontmatter — **the two scripts are the boundary, and reviewing them is how the boundary is kept.**
+**Only `probe-board.py` runs a subprocess at all**, through a single `run()` chokepoint: list-argv, no
+`shell=True`, no interpolation, 60s timeout, non-zero exit becomes a refusal. `render-block.py` and
+`region-place.py` make no call of any kind. Adding a mutating call to any of the three would widen this
+command's reach without changing a line of frontmatter — **the three scripts are the boundary, and
+reviewing them is how the boundary is kept.**
 
-**Slices 01 and 02.** The target may be a `CLAUDE.md` with no `## Issue board` section or with a
-hand-written one; a file that already contains a region stops with `REGION-PRESENT`, because safe
-re-run is slice 05's.
+**The model also writes intermediates** — `PROBE.json`, `REGION.md`, `ANSWERS.json`, `DECL.md` — under
+the same `Write` grant. They go to the session's scratch directory and **never** into the target repo,
+which gains exactly one modified file. Stated here because an auditor checking the grant against this
+paragraph would otherwise find writes it does not predict.
 
-**Content outside the markers is byte-identical on every path**, including failure and refusal. The
-one exception is the retire offer: one whole line, deleted, on an explicit answer. Silence is not an
-answer, and no line is ever rewritten or reflowed.
+`Bash(python3:*)` also permits shell redirection: `python3 anything.py > /any/path` matches the same
+literal prefix, so the grant can write any path with none of the three scripts involved. Smaller than
+`python3 -c` in practice, but this paragraph's job is completeness.
 
-Ask exactly two things and no more — the forge target, and the retire offer on a contradicting line.
-Any other question is a defect. Report half-probed values rather than writing them, and say plainly
-that grooming will keep reporting rule 4 **unevaluated** until slice 03 ships the elicitation.
+**This paragraph is the compensating control for the over-wide `Bash(python3:*)` grant, and it is the
+thing most likely to go quietly stale.** It has already been caught wrong once: it claimed one
+read-only program after a second, writing one had been added. When the script set or its write
+surface changes, this list changes in the same commit.
+
+**All six slices.** The target may be absent, sectionless, hand-written, or already configured; the
+forge may be GitHub or GitLab. A file already carrying a region is **refreshed**, writing zero bytes
+when the board has not moved.
+
+**Ask exactly three things and no more**: the forge target, the label-family question per family, and
+the retire offer on a contradicting line. A label family is **never** inferred from the labels in use —
+that would mint the very declaration `phil:groom-issues` rule 4 exists to read. A decline writes
+nothing at all, not even a note that it was declined.
+
+**Content outside both regions is byte-identical on every path**, including failure and refusal, with
+two sanctioned exceptions and no others:
+
+- the **retire offer** — one whole line, deleted, on an explicit answer;
+- the **declared region** — inserted once on an answer, contributing one newline as its own
+  terminator.
+
+Silence is never an answer, and no existing line is ever rewritten or reflowed.
+
+Half-probed values are now **written as `assumed`**, stating what is not knowable and why. Every line
+inside the markers carries exactly one of `probed` / `assumed`; a value the forge would not return
+carries `unread` and never enters the region at all.

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "BS-SELFTEST-08",
+  "phase": "ELICIT",
+  "situation": "The label-family question is asked with real evidence beneath it. Robin declines to declare one family, and answers the other.",
+  "classify_state": "section-no-markers",
+  "probe_status": "ok",
+  "expected_decision": ["DECLARED"],
+  "expected_report_lines": ["DRIFT", "UNEVALUATED"],
+  "expected_guard": "the declined family appears in NO written line, and the report names it as staying `unevaluated` for `phil:groom-issues` rule 4",
+  "must_not": [
+    "write a line recording that the family was declined — a `declined` line is still a line, and rule 4 would read a declaration no human made",
+    "carry the declined family into the declared region in any form",
+    "infer the declined family's valuedness from co-occurrence counts",
+    "treat the answered family's value as evidence about the declined one",
+    "report success without naming what stayed unevaluated"
+  ]
+}

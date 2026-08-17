@@ -1,0 +1,16 @@
+{
+  "fixture_id": "BS-SELFTEST-13",
+  "phase": "OFFER",
+  "situation": "A configured repo carrying both regions. A line inside the DECLARED region contains a URL or id-shaped token that does not match anything the probe returned.",
+  "classify_state": "region-present",
+  "probe_status": "ok",
+  "expected_decision": ["UNCHANGED"],
+  "expected_report_lines": ["DRIFT"],
+  "expected_guard": "the declared region is invisible to the drift report, so no declared line is ever offered for retirement, and `retire_line` refuses one outright",
+  "must_not": [
+    "file a declared line as `contradicts`",
+    "offer to retire a declared line",
+    "delete a declared line even on an explicit answer — it is the one thing here that cannot be regenerated",
+    "let the declared region shift the line numbers the drift report cites"
+  ]
+}

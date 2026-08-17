@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Probe a GitHub forge for the board constants a repo's `CLAUDE.md` must record.
+"""Probe a GitHub or GitLab forge for the board constants a repo's `CLAUDE.md` must record.
 
 Emits JSON on stdout: every value paired with the exact query that produced it, in a fixed
 field order. Nothing here interprets, places, or writes — `skills/board-setup/SKILL.md` owns
@@ -15,8 +15,12 @@ close, turned on the feature itself.
 Three provenance categories, per feature-delta [D5]:
 
     probed      the forge returned it
-    assumed     the forge returned half of it (see `half_probed`) — NEVER written by slice 01
-    declared    only a human can say it (see `not_probeable`) — slice 03 elicits these
+    assumed     the forge returned half of it, or it is derived from a proxy. Written inside the
+                markers, labelled, stating what is not knowable and why
+    declared    only a human can say it (see `not_probeable`). Written in a SEPARATE region,
+                attributed, and never regenerated
+    unread      the forge would not answer. Neither a fact nor a guess, so it is reported and
+                never written inside the markers at all
 
 A refusal writes nothing. `status: refused` with a `fix` is always better than a partial block:
 a block that is silently missing its Status field id reads exactly like one whose board has no
@@ -66,8 +70,12 @@ def run(argv: list[str]) -> str:
     except subprocess.TimeoutExpired:
         raise Refusal(f"`{' '.join(argv[:2])}` timed out after 60s")
     if proc.returncode != 0:
-        err = (proc.stderr or proc.stdout).strip().splitlines()
-        detail = err[0] if err else f"exit {proc.returncode}"
+        # Take the first line carrying actual information. `glab` prints a bare "ERROR" banner line
+        # before the real message, and a refusal whose reason reads `failed: ERROR` tells the reader
+        # nothing they did not already know — the point of a refusal is its reason.
+        lines = [l.strip() for l in (proc.stderr + "\n" + proc.stdout).splitlines() if l.strip()]
+        informative = [l for l in lines if l.strip(" :").upper() not in ("ERROR", "ERR", "FATAL")]
+        detail = informative[0] if informative else (lines[0] if lines else f"exit {proc.returncode}")
         raise Refusal(f"`{' '.join(argv[:3])}` failed: {detail}")
     return proc.stdout
 
@@ -128,6 +136,317 @@ def derive_targets(remote_output: str) -> list[dict]:
         elif name == "origin":
             seen[key]["remote"] = name
     return list(seen.values())
+
+
+def derive_label_evidence(issues: list[dict]) -> dict:
+    """Gather what a human needs to answer the label-family question, and **no answer**.
+
+    Slice 03 exists to make one thing impossible: inferring whether a family is single- or
+    multi-valued from the labels in use ([D6]). Nothing on a forge records it, so inferring it makes
+    the board's habits audit themselves and mints the very declaration `phil:groom-issues` rule 4
+    exists to read.
+
+    So this returns counts, co-occurrence and the issue numbers that carry more than one — and never
+    a verdict, a default, a preselection or a confidence. Two groupings, and the distinction is
+    load-bearing:
+
+    - **syntactic prefix** — `wave: discuss` and `status::doing` group under `wave` and `status`
+      because the label's *name* says so. That is a fact about the string, not a claim about
+      behaviour.
+    - **candidate grouping, unconfirmed** — unprefixed labels cannot be grouped syntactically, so
+      the grouping itself is part of the question rather than an input to it.
+
+    A family whose labels never co-occur is reported with an empty `issues_with_multiple` rather
+    than dropped. Absence of co-occurrence is evidence *for* single-valued and it is the human's to
+    weigh; dropping the family would answer the question by omission.
+    """
+    counts: dict[str, int] = {}
+    for issue in issues:
+        for label in issue.get("labels", []):
+            counts[label] = counts.get(label, 0) + 1
+
+    def prefix_of(label: str) -> str | None:
+        for sep in ("::", ":"):
+            if sep in label:
+                head = label.split(sep, 1)[0].strip()
+                if head:
+                    return head
+        return None
+
+    groups: dict[str, dict] = {}
+    for label in sorted(counts):
+        p = prefix_of(label)
+        key = p if p else "(unprefixed)"
+        grouping = "syntactic prefix" if p else "candidate grouping, unconfirmed"
+        groups.setdefault(key, {"name": key, "members": [], "grouping": grouping})
+        groups[key]["members"].append(label)
+
+    families = []
+    for key, g in groups.items():
+        members = set(g["members"])
+        co: dict[tuple[str, str], int] = {}
+        multiple = []
+        for issue in issues:
+            present = sorted(members & set(issue.get("labels", [])))
+            if len(present) > 1:
+                multiple.append(issue["number"])
+                for i, a in enumerate(present):
+                    for b in present[i + 1:]:
+                        co[(a, b)] = co.get((a, b), 0) + 1
+        families.append({
+            "name": key,
+            "members": g["members"],
+            "grouping": g["grouping"],
+            "counts": {m: counts[m] for m in g["members"]},
+            # A list of pairs, not a dict keyed by one: a tuple key is not JSON-serialisable, and
+            # this payload exists to be serialised.
+            "co_occurrence": [{"pair": list(pair), "count": n}
+                              for pair, n in sorted(co.items(), key=lambda kv: (-kv[1], kv[0]))],
+            "issues_with_multiple": multiple,
+        })
+
+    return {
+        "families": families,
+        # Stated in the payload, not only in this docstring, because the payload is what a later
+        # reader sees. A consumer that treats co-occurrence as an answer has misread it.
+        "note": ("evidence only — this holds NO answer. Whether a family is single- or multi-valued "
+                 "is never recorded by a forge and must never be inferred from these counts. "
+                 "Co-occurrence is evidence to show beneath a question, never the answer to it."),
+    }
+
+
+# --- slice 06: GitLab ---------------------------------------------------------------------
+#
+# Same region shape, different calls. The shape is the hypothesis: if GitLab needed different
+# sections or a different provenance model, one command serving both forges would be the wrong unit
+# and the honest answer would be two commands.
+#
+# `phil:issue-board` owns these call spellings. Two of them punish a wrong guess silently:
+# The JSON flag differs per subcommand — see `gitlab_calls` — and a GitLab docs root is
+# `/-/blob/<branch>/` rather than GitHub's `/blob/<branch>/`.
+
+CONNECTION_WORDS = ("could not connect", "connection refused", "timeout", "timed out",
+                    "temporary failure in name resolution", "network is unreachable")
+
+
+def with_retry(call, attempts_allowed: int = 3):
+    """Retry a *connectivity* failure; never retry anything else.
+
+    Slice 06 AC5: a single failure is usually the network, and concluding "no board" from one timeout
+    against a self-hosted instance records a wrong answer permanently. But a 401 is not flaky —
+    retrying it three times only delays the real answer, so the retry is scoped to failures whose
+    reason reads like connectivity.
+    """
+    last = None
+    for attempt in range(attempts_allowed):
+        try:
+            return call()
+        except Refusal as r:
+            last = r
+            if not any(w in r.reason.lower() for w in CONNECTION_WORDS):
+                raise
+    raise Refusal(f"{last.reason} — after {attempts_allowed} attempts",
+                  fix="check network reachability and any certificate caveat for a self-hosted "
+                      "instance before concluding anything about the board")
+
+
+def gitlab_docs_root(host_url: str, slug: str, default_branch: str) -> str:
+    """GitLab's blob path carries a `/-/` segment GitHub's does not.
+
+    Getting this wrong produces links that 404, which is precisely the failure the `docs-root` fact
+    exists to prevent.
+    """
+    return f"{host_url.rstrip('/')}/{slug}/-/blob/{default_branch}/"
+
+
+def gitlab_calls(slug: str) -> list[str]:
+    """The calls this adapter makes, as strings, so the region can name each one.
+
+    **The JSON flag differs per subcommand, and the blanket rule is wrong.** Verified 2026-08-17
+    against `glab --help` output, after `glab api … -O json` failed with
+    `Unknown shorthand flag: 'O' in -O`:
+
+    - `glab api` — takes **no** output flag. It prints JSON natively.
+    - `glab repo view` — the flag is **`-F`/`--output`** (`text`, `json`). `-O` does not exist here.
+    - `glab issue list` — the flag is **`-O`/`--output`**. `-F` here is `--output-format`, a
+      different flag taking `details`/`ids`/`urls`.
+
+    `phil:issue-board` records "glab's JSON flag is `-O`; `-F` fails silently" as a blanket rule.
+    That holds for `issue list` and is wrong for the other two — exactly the remembered-constant
+    failure this whole feature exists to prevent, sitting inside this plugin's own skill.
+    """
+    encoded = slug.replace("/", "%2F")
+    return [
+        f"glab repo view {slug} -F json",
+        f"glab api projects/{encoded}",
+        f"glab api projects/{encoded}/labels",
+        f"glab issue list -R {slug} --all -O json",
+    ]
+
+
+def gitlab_facts(host: str, slug: str, default_branch: str, tier: str,
+                 labels: list[str] | None, project_id) -> list[dict]:
+    """The same `template_field` set GitHub produces, with GitLab's values and calls.
+
+    Two things are deliberately *not* defaults:
+
+    - **Projects v2 workflows render as `not applicable on this forge`**, never `none enabled`
+      (AC4/C6). GitLab has no Projects-v2 workflow system to be empty, and "none enabled" is a false
+      statement about a mechanism that does not exist.
+    - **A Free instance gets a Free-shaped block.** Scoped labels and real `blocks` links are gated
+      behind Premium, so writing a scoped-label convention on Free documents a workflow the reader
+      cannot perform.
+    """
+    host_url = f"https://{host}"
+    repo_q, proj_q, labels_q, _issues_q = gitlab_calls(slug)
+
+    # `labels=None` means UNREAD, and it is not the same as `labels=[]`. On GitLab the label set *is*
+    # the board, so rendering an unread set as `count: 0` states that the project has no columns —
+    # the single most misleading thing this fact can say. Found against a real project, where
+    # `projects/X` reads unauthenticated but `projects/X/labels` returns 401.
+    labels_unread = labels is None
+    scoped = None if labels_unread else sorted(
+        l for l in labels if "::" in l and l.split("::", 1)[0] == "status")
+
+    tier_value = (
+        f"{tier} — scoped labels and real `blocks` links are Premium features. Board state is a "
+        f"`status::` label, swapped by hand: `glab issue update --unlabel old --label new`."
+        if tier == "Free" else
+        f"{tier} — scoped labels enforce single-valuedness natively and real `blocks` links are "
+        f"available."
+    )
+
+    return [
+        fact("forge-and-repo", f"GitLab at {host} — use `glab -R {slug}` on every call", repo_q,
+             note="`glab`'s JSON flag differs per subcommand: `glab api` takes none, `glab repo "
+                  "view` uses `-F json`, `glab issue list` uses `-O json`. On `issue list`, `-F` is "
+                  "`--output-format` and silently returns a table",
+             template_field="forge-and-repo"),
+        fact("project-and-board-ids", {"id": project_id, "slug": slug,
+                                       "url": f"{host_url}/{slug}"}, proj_q,
+             template_field="project-and-board-ids"),
+        fact("status-mechanism",
+             "a `status::` scoped LABEL, not a project field — GitLab has no Projects v2 Status "
+             "field", labels_q,
+             note="on Free the scope is a naming convention only; nothing stops two `status::` "
+                  "labels coexisting, so the swap must be explicit",
+             template_field="status-mechanism"),
+        fact("column-families",
+             ({"mechanism": "status:: labels", "labels": None, "count": None,
+               "unread": "the labels endpoint could not be read — this is NOT a project with no "
+                         "status:: labels, and must never be reported as one"}
+              if labels_unread else
+              {"mechanism": "status:: labels", "labels": scoped, "count": len(scoped)}),
+             labels_q,
+             provenance="unread" if labels_unread else "probed",
+             template_field="column-families"),
+        fact("builtin-workflows", "not applicable on this forge — GitLab has no Projects v2 "
+                                  "workflow system, so there is none to enumerate and none to "
+                                  "report as disabled", proj_q,
+             template_field="builtin-workflows"),
+        fact("tier", tier_value, proj_q, provenance="assumed",
+             note="not knowable directly: the REST API returns no tier field, so this is inferred "
+                  "from `issues_enabled` and `iterations_access_level`. Confirm it against the "
+                  "instance's plan before relying on a Premium-only convention",
+             template_field="tier"),
+        fact("docs-root", gitlab_docs_root(host_url, slug, default_branch), repo_q,
+             note="GitLab blob paths carry a `/-/` segment; GitHub's do not",
+             template_field="docs-root"),
+        fact("nwave-mapping", "see `phil:nwave-issue-board` for the artifact to issue mapping",
+             "git ls-tree -d --name-only HEAD docs/feature .nwave",
+             template_field="nwave-mapping"),
+    ]
+
+
+def probe_gitlab(host: str, slug: str) -> dict:
+    """Probe a GitLab project. Same region shape as GitHub, different calls.
+
+    **The live path is unexercised.** `glab auth status` returned 401 in the environment where this
+    was authored and no GitLab project was available, so `gitlab_facts` and every refusal are unit
+    tested against faked output while the end-to-end run is not. Slice 06's brief records which of
+    its acceptance criteria remain open, and this docstring says so here because a reader of the code
+    should not have to find the brief to learn it.
+
+    A GitLab repo is refused rather than half-served, per the slice boundary: a partial block reads
+    exactly like a complete one.
+    """
+    if shutil.which("glab") is None:
+        raise Refusal("`glab` is not installed or not on PATH",
+                      fix="install glab, or pass a GitHub target instead")
+
+    repo_q, proj_q, labels_q, issues_q = gitlab_calls(slug)
+
+    def api(path: str) -> dict:
+        # `glab api` takes NO output flag — it prints JSON natively, and `-O json` is rejected with
+        # `Unknown shorthand flag: 'O' in -O`.
+        out = with_retry(lambda: run(["glab", "api", path]))
+        try:
+            return json.loads(out)
+        except json.JSONDecodeError:
+            raise Refusal("glab api returned output that is not JSON",
+                          fix="`glab api` needs no output flag; check the endpoint path")
+
+    project = api(f"projects/{slug.replace('/', '%2F')}")
+    labels_raw = api(f"projects/{slug.replace('/', '%2F')}/labels")
+
+    # `None`, never `[]`. An unreadable label list is not an empty one, and on GitLab that
+    # distinction is the difference between "this board has no columns" and "nobody could look".
+    labels = ([l.get("name") for l in labels_raw if isinstance(l, dict) and l.get("name")]
+              if isinstance(labels_raw, list) else None)
+    default_branch = project.get("default_branch") or "main"
+
+    # Tier is probed, never assumed. `phil:issue-board` owns the check; a scoped-label convention
+    # written on a Free instance documents a workflow the reader cannot perform.
+    tier = "Premium" if project.get("issues_enabled") and project.get("iterations_access_level") \
+        not in (None, "disabled") else "Free"
+
+    facts = gitlab_facts(host=host, slug=slug, default_branch=default_branch, tier=tier,
+                         labels=labels, project_id=project.get("id"))
+
+    # `-O json` here, and NOT `-F`: on `issue list`, `-F` is `--output-format` taking
+    # details/ids/urls, so `-F json` would be a different flag with an invalid value.
+    issues_raw = with_retry(lambda: run(
+        ["glab", "issue", "list", "-R", slug, "--all", "-O", "json"]))
+    try:
+        issues = [{"number": i.get("iid"), "labels": i.get("labels", [])}
+                  for i in json.loads(issues_raw)]
+        evidence = derive_label_evidence(issues)
+        evidence["query"] = issues_q
+        evidence["issues_read"] = len(issues)
+    except (json.JSONDecodeError, TypeError, KeyError) as e:
+        evidence = {"families": None, "issues_read": None,
+                    "unread": f"could not read the project's labels: {e}",
+                    "note": "evidence UNREAD — not the same as a project with no labels"}
+
+    covered = {f["template_field"] for f in facts if f["template_field"]}
+    return {
+        "schema": "board-setup-probe/v1",
+        "forge": "gitlab",
+        "probe_time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
+        "host": host,
+        "repo": slug,
+        "status": "ok",
+        "live_path_unexercised": ("authored against a 401 `glab auth`; gitlab_facts and the refusals "
+                                 "are unit tested, the end-to-end run is not"),
+        "elicitation_evidence": evidence,
+        "facts": facts,
+        "half_probed": [],
+        "not_probeable": [
+            {"field": "label-families", "template_field": "label-families",
+             "why": "nothing on a forge records whether a family is single- or multi-valued",
+             "owner": "slice 03"},
+            {"field": "local-task-system", "template_field": "local-task-system",
+             "why": "a working preference, not a forge fact", "owner": "slice 03"},
+        ],
+        "kpi_1": {
+            "template_fields": len(TEMPLATE_FIELDS),
+            "populated_without_human_input": len(covered),
+            "fraction": round(len(covered) / len(TEMPLATE_FIELDS), 2),
+            "target": 0.5,
+            "covered": sorted(covered),
+            "uncovered": sorted(set(TEMPLATE_FIELDS) - covered),
+        },
+    }
 
 
 def require_project_scope() -> None:
@@ -214,12 +533,19 @@ def pick_project(host: str, owner: str, repo: str, facts: list[dict]) -> dict:
 
 
 def fact(field: str, value, query: str, note: str | None = None,
-         template_field: str | None = None) -> dict:
+         template_field: str | None = None, provenance: str = "probed") -> dict:
+    """One fact, paired with the exact call that produced it.
+
+    `provenance` defaults to `probed` because that is what a fact normally is, but it is a parameter
+    rather than a constant: `unread` exists so a value the forge would not return is never spelled
+    the same way as one it returned as empty. The renderer refuses to write anything not labelled
+    `probed` or `assumed` inside the markers.
+    """
     return {
         "field": field,
         "value": value,
         "query": query,
-        "provenance": "probed",
+        "provenance": provenance,
         "note": note,
         "template_field": template_field,
     }
@@ -381,7 +707,7 @@ def probe(host: str, slug: str) -> dict:
                        "name, number, project, updatedAt — and no field for the configured "
                        "trigger statuses",
                 "query": wf_q,
-                "assumption_slice_04_would_write": "Done",
+                "assumed_value": "Done",
             })
 
     # --- not probeable at all ------------------------------------------------------------
@@ -404,8 +730,28 @@ def probe(host: str, slug: str) -> dict:
         },
     ]
 
+    # --- slice 03: evidence for the questions no forge answers ---------------------------
+    # Fetched here rather than in a second script because it is the same board, read once. It is
+    # deliberately NOT a fact: facts go inside the markers, and this goes beneath a question.
+    labels_q = (f"gh issue list -R {slug} --state all --limit 200 --json number,labels")
+    try:
+        raw = json.loads(run(labels_q.split()))
+        issues = [{"number": i["number"], "labels": [l["name"] for l in i.get("labels", [])]}
+                  for i in raw]
+        evidence = derive_label_evidence(issues)
+        evidence["query"] = labels_q
+        evidence["issues_read"] = len(issues)
+    except (Refusal, json.JSONDecodeError, KeyError) as e:
+        # A failed evidence read must never render as "no families found" — that is an answer, and
+        # the one answer this must never give. C6: absence is reported as unread, not as empty.
+        evidence = {"families": None, "query": labels_q, "issues_read": None,
+                    "unread": f"could not read the board's labels: {e}",
+                    "note": "evidence UNREAD — this is not the same as a board with no labels, and "
+                            "must not be reported as though no family exists"}
+
     covered = {f["template_field"] for f in facts if f["template_field"]}
     return {
+        "elicitation_evidence": evidence,
         "schema": "board-setup-probe/v1",
         "probe_time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
         "host": host,
@@ -431,6 +777,9 @@ def main() -> int:
     ap.add_argument("--repo", metavar="OWNER/REPO",
                     help="the forge target, CONFIRMED with the human before this runs")
     ap.add_argument("--host", default="github.com")
+    ap.add_argument("--forge", choices=("github", "gitlab"), default=None,
+                    help="the forge to probe. Inferred from --host when omitted; a GitLab host "
+                         "with --forge github (or the reverse) is refused rather than half-served.")
     ap.add_argument("--list-targets", action="store_true",
                     help="enumerate candidate forge targets from the git remotes and exit; makes "
                          "no forge call. Run this at CONFIRM, before --repo is known.")
@@ -467,6 +816,28 @@ def main() -> int:
                           "refusal": {"reason": "--repo must be OWNER/REPO", "fix": None}},
                          indent=2))
         return 2
+    inferred = "gitlab" if "gitlab" in args.host else "github"
+    if args.forge and args.forge != inferred:
+        # Promised by --forge's help text and never implemented: the mismatch probed the wrong forge
+        # and reported `status: ok`. A wrong forge reads a wrong board successfully, which is the
+        # failure mode this whole command exists to close.
+        print(json.dumps({"schema": "board-setup-probe/v1", "status": "refused",
+                          "refusal": {"reason": f"--forge {args.forge} contradicts --host "
+                                                f"{args.host}, which implies {inferred}",
+                                      "fix": "pass a --host matching the forge, or drop --forge "
+                                             "and let the host decide"}}, indent=2))
+        return 1
+    forge = args.forge or inferred
+    if forge == "gitlab":
+        try:
+            print(json.dumps(probe_gitlab(args.host, args.repo), indent=2))
+        except Refusal as r:
+            print(json.dumps({"schema": "board-setup-probe/v1", "status": "refused",
+                              "forge": "gitlab",
+                              "refusal": {"reason": r.reason, "fix": r.fix}}, indent=2))
+            return 1
+        return 0
+
     try:
         print(json.dumps(probe(args.host, args.repo), indent=2))
         return 0

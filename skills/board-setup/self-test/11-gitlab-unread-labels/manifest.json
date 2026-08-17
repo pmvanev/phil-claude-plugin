@@ -1,0 +1,17 @@
+{
+  "fixture_id": "BS-SELFTEST-11",
+  "phase": "PROBE",
+  "situation": "A GitLab project. `projects/<id>` reads successfully; `projects/<id>/labels` returns 401. On GitLab the `status::` label set IS the board.",
+  "forge": "gitlab",
+  "probe_status": "refused",
+  "expected_decision": ["REFUSED"],
+  "expected_report_lines": [],
+  "expected_guard": "the refusal names the labels endpoint and its 401; nothing is written, and no fact reports an empty label set",
+  "must_not": [
+    "render `count: 0` or `labels: []` — an unread set is not an empty one, and on GitLab that states the project has no board",
+    "write a partial block from the facts that did read",
+    "report Projects-v2 workflows as `none enabled` — GitLab has no such mechanism to be empty",
+    "retry the 401 — an auth failure is not a flaky network",
+    "use `-O json` on `glab api`, which rejects it outright"
+  ]
+}

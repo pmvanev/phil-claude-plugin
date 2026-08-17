@@ -44,6 +44,45 @@ that names no specific value.
    an escalation to fact.
 5. KPI-2: 100% of lines correctly classified by a fresh reader in under 60 seconds.
 
+## Outcome — authored 2026-08-17
+
+| AC | Verdict | Evidence |
+|---|---|---|
+| 1 | **PASS** | `test_every_fact_line_carries_exactly_one_provenance`. The AC's phrase *"every line"* was made mechanical rather than reinterpreted per run: **a fact line is a bullet before the `**Queries**` header**; everything after is apparatus and carries no provenance by design. Recorded because "every line" is the kind of phrase a later reader holds code to. |
+| 2 | **PASS** | Each assumed line renders `not knowable: <what> — <why>`, naming `ProjectV2Workflow`'s field list. Tested. |
+| 3 | **PASS by construction** | Confirming moves a family into the *declared* region via `--declare`; there is no code path from a half-probed value to a `probed` one. |
+| 4 | **PASS** | Declining leaves the assumption in the probed region, still labelled `assumed`. No escalation exists to perform. |
+| 5 | **PASS — KPI-2 met** | Measured on a real fresh reader who had not generated the block: both `assumed` lines identified, boundary judged correctly drawn, well under 60s. |
+
+### Learning hypothesis — CONFIRMED
+
+[D5]'s three-category taxonomy **survives contact with a reader.** The distinction is not one only the
+author can see: a reader who had not run the command picked out the two guesses and confirmed the
+boundary was drawn in the right place.
+
+That matters because the honest fallback, had it failed, was S6-style invariant advice naming no
+specific value — a strictly worse product. The taxonomy #32 got two-thirds right is now complete and
+legible rather than merely complete.
+
+### The line that carries the whole slice
+
+```
+- `Auto-close issue` is enabled on this project, and **`Done` is assumed to fire it** *(assumed · Q5)*
+  not knowable: which Status option fires it — `ProjectV2Workflow` exposes createdAt, enabled,
+  fullDatabaseId, id, name, number, project, updatedAt — and no field for the configured trigger statuses
+```
+
+Compare what this repo's hand-written prose said for six weeks: *"Auto-close on Done is ENABLED."* One
+confident sentence spanning a fact and a guess, with nothing marking the seam.
+
+### A third provenance value appeared, and it is not written at all
+
+`unread` — a value the forge would not return. Found on GitLab, where `projects/<id>` reads
+unauthenticated and `projects/<id>/labels` returns 401. It is neither a fact nor a guess but the
+absence of both, so `render-block.py` **refuses to write it inside the markers**; it belongs in the
+report, where the reader can see the read failed. Writing it as either category would launder a failed
+read into content.
+
 ## Dependencies
 
 Slices 01 (probe) and 03 (the question machinery the confirm offer reuses).

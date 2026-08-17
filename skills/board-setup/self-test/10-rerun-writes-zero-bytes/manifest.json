@@ -1,0 +1,21 @@
+{
+  "fixture_id": "BS-SELFTEST-10",
+  "phase": "REFRESH",
+  "situation": "A configured repo is run a second time. The board has not changed. The clock has.",
+  "classify_state": "region-present",
+  "probe_status": "ok",
+  "expected_decision": [
+    "UNCHANGED"
+  ],
+  "expected_report_lines": [
+    "DRIFT"
+  ],
+  "expected_guard": "zero bytes written, `git diff --stat` empty, and the stamp NOT refreshed",
+  "must_not": [
+    "report `REGION-PRESENT` — that outcome is retired, and a run emitting it is running the old skill",
+    "refresh the timestamp — re-stamping is not a change, and writing one costs the zero-bytes guarantee",
+    "present a restamp as a change in the report",
+    "render `unchanged` when the probe could not be read — those are the two most different answers this step can give"
+  ],
+  "report_lines_why": "DRIFT runs on a refresh as well as a placement: the hand-written prose can drift while the region is current, and that is the common case. The earlier justification — 'stops at CLASSIFY, before DRIFT runs' — died with the stop it referred to"
+}

@@ -1,19 +1,22 @@
 {
   "fixture_id": "BS-SELFTEST-05",
   "phase": "CLASSIFY",
-  "situation": "A well-formed region already exists in the target, written by an earlier run. Its values may or may not still match the forge.",
+  "situation": "A well-formed region already exists in the target, written by an earlier run, and the board has not changed since.",
   "classify_state": "region-present",
   "probe_status": "ok",
   "expected_decision": [
-    "REGION-PRESENT"
+    "UNCHANGED"
   ],
-  "expected_guard": "nothing is written, and the stop names slice 05 as the owner of re-run and staleness rather than reading as a failure",
+  "expected_guard": "zero bytes written, the stamp not refreshed, and the drift report still produced over the surrounding prose",
   "must_not": [
-    "rewrite, refresh or regenerate the existing region",
-    "compare the region's values against the probe and 'fix' a stale one",
+    "report `REGION-PRESENT` — retired, and a run emitting it is running the old skill",
+    "refresh the timestamp on a no-change run",
     "append a second region",
-    "report the stop as an error"
+    "report the outcome as an error"
   ],
-  "expected_report_lines": [],
-  "report_lines_why": "stops at CLASSIFY, before DRIFT runs — no report line is due, and emitting one would claim a step that did not happen"
+  "expected_report_lines": [
+    "DRIFT"
+  ],
+  "report_lines_why": "DRIFT runs on a refresh as well as a placement: the hand-written prose can drift while the region is current, and that is the common case. The earlier justification — 'stops at CLASSIFY, before DRIFT runs' — died with the stop it referred to",
+  "supersedes": "the slice-02 expectation of `REGION-PRESENT`, which was this fixture's answer until slice 05 shipped the re-run it was deferring to"
 }

@@ -1,6 +1,6 @@
 # Driving the board-setup self-test fixtures
 
-Seven fixtures, model-driven rather than automated. There is no CI runner in this plugin, so
+Twelve fixtures, model-driven rather than automated. There is no CI runner in this plugin, so
 `tests/test_self_test_fixtures.py` does not collect these: drive each one by giving the
 `board-setup` skill the situation in its `manifest.json` and comparing the decision reached against
 its `expected.md`. Do that whenever `SKILL.md` or `commands/board-setup.md` changes.
@@ -25,7 +25,7 @@ in local text manipulation inherits that excuse, so slice 02 did not carry it ov
 | Key | Means |
 |---|---|
 | `expected_decision` | the **one** terminal outcome. Never more than one |
-| `expected_report_lines` | `DRIFT` and `REPORTED-NOT-WRITTEN`, which accompany a terminal outcome and never stand alone |
+| `expected_report_lines` | `DRIFT`, `UNEVALUATED` and `REPORTED-NOT-WRITTEN` — each accompanies a terminal outcome and never stands alone |
 | `expected_guard` | the property that must hold, stated so a passing-but-wrong run is visible |
 | `must_not` | the specific wrong answers, usually the tempting ones |
 | `supersedes` | present when a fixture's expectation was deliberately changed by a later slice |
@@ -42,7 +42,7 @@ entirely. Same input, three different reported shapes.
 as a command. Detection was moved out of prose for exactly the reason the probe is a script: a
 property code holds beats one a model is asked to honour.
 
-No fixture covers `AMBIGUOUS-TARGET`, so one of six terminal outcomes has no fixture. That is
+No fixture covers `AMBIGUOUS-TARGET`, so one of eight terminal outcomes has no fixture. That is
 disclosed rather than missed — reproducing it needs a session rooted in a two-remote checkout,
 because `--list-targets` reads `git remote -v` from the session's working directory.
 

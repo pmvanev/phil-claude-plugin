@@ -491,20 +491,41 @@ version), it is temporary, and it must be stated out loud in the transcript ever
 
 An expired certificate is a defect to fix, not a setting to work around.
 
-## `glab`'s JSON flag is `-O`, and `-F` fails silently
+## `glab`'s JSON flag differs per subcommand — check before you type it
 
-`-O`/`--output` takes `json`. **`-F` is `--output-format` and takes `details|ids|urls`** — hand it `json`
-and it does not error: it returns the human-readable table. A caller that parses the result finds no JSON
-and concludes the issues have no bodies, or that the list is empty.
+**There is no blanket rule.** This section asserted one until 2026-08-17 (*"the JSON flag is `-O`, and
+`-F` fails silently"*), and it was right about exactly one of the three subcommands below.
+
+| Subcommand | JSON flag | What the other flag does there |
+|---|---|---|
+| `glab issue list` | **`-O` / `--output`** `json` | `-F` is `--output-format`, taking `details\|ids\|urls` |
+| `glab repo view` | **`-F` / `--output`** `json` | `-O` **does not exist** |
+| `glab api` | **none** — prints JSON natively | `-O` is **rejected**: `Unknown shorthand flag: 'O' in -O` |
 
 ```sh
 glab issue list -R <group/project> --output json --per-page 100   # correct
 glab issue list -R <group/project> -F json                       # silently returns a table
+glab repo view <group/project> -F json                           # correct — -O is not a flag here
+glab api projects/<url-encoded-path>                             # correct — no output flag at all
 ```
 
-This is the characteristic shape of every trap in this file — a wrong guess that reports success — and it
-lived in `phil:groom-issues` until 2026-08-14, which is a forge mechanic in a skill whose charter says it
-owns none.
+**On `issue list`, `-F json` does not error**: it returns the human-readable table. A caller that
+parses the result finds no JSON and concludes the issues have no bodies, or that the list is empty.
+That is the characteristic shape of every trap in this file — a wrong guess that reports success.
+
+**Verified against `glab --help`, not from memory**, which is how the blanket rule was caught. It was
+found by `phil:board-setup`'s GitLab adapter, whose first call — `glab api … -O json` — failed
+outright, and even then only became visible after the refusal message was made informative: the code
+had been reporting `failed: ERROR`, because `glab` prints a bare `ERROR` banner before the real
+message. **A refusal whose reason is uninformative hides the defect that caused it.**
+
+The lesson generalises past `glab`: a flag verified on one subcommand is evidence about that
+subcommand. This entry lived in `phil:groom-issues` until 2026-08-14 — a forge mechanic in a skill
+whose charter says it owns none — and being moved here did not make it correct.
+
+Checked by `tests/test_gitlab_probe.py::test_the_json_flag_is_correct_per_subcommand_not_blanket`,
+which is the fixture this fold-back required: without it the next author re-derives the blanket rule
+from the one subcommand where it holds.
 
 ## `glab api graphql` answers introspection with the whole schema
 

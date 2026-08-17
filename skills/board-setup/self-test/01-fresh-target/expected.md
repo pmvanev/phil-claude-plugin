@@ -25,3 +25,17 @@ No question is asked beyond confirming the target.
 This is the only path where a wrong result still looks like a success. A region containing a
 remembered id, a guessed trigger status, or a dropped fact renders identically to a correct one; the
 file gives no signal. The fixture is the signal.
+
+
+## Superseded expectations — recorded, not deleted
+
+This fixture originally asserted that half-probed values are **reported and not written**, and that
+**no question beyond the forge target** may be asked. Both were correct when slices 03 and 04 did not
+exist, and both are now wrong:
+
+- `Done` is written, labelled `assumed`, naming `ProjectV2Workflow`'s missing field as the reason.
+- The label-family question is asked, with counts, co-occurrence and issue numbers beneath it.
+
+**A fixture that fails a correct implementation is worse than no fixture**, because the failure looks
+like a regression and the honest fix looks like a violation. This was caught by review rather than by a
+run, which is why the `supersedes` field exists at all.

@@ -44,6 +44,41 @@ is what turns it from a scaffolder into a check.
 5. The report distinguishes *nothing changed* from *nothing could be read* — a probe failure never
    renders as `unchanged`.
 
+## Outcome — authored 2026-08-17
+
+| AC | Verdict | Evidence |
+|---|---|---|
+| 1 | **PASS — KPI-3 met on the real board** | A second run, re-probed and re-rendered with a fresh stamp, wrote **zero bytes**; `md5sum` identical either side, `status: unchanged`, `stamp_only: true`. |
+| 2 | **PASS, and DECIDED** | See below — the brief required a decision, not a mechanism. |
+| 3 | **PASS** | `refresh_region` replaces only the probed region; the declared region and all prose are outside what it touches, tested. Fixture 12 pins the report-outside/refresh-inside split. |
+| 4 | **PASS** | `--expect-sha` re-checked immediately before the write; a mismatch refuses with the file untouched. |
+| 5 | **PASS** | `refresh_region` refuses outright when handed no rendered region, rather than reporting `unchanged`. A probe that could not be read is not a board that did not move. |
+
+### The timestamp question — DECIDED, not left open
+
+**The stamp is not refreshed on a no-change run.**
+
+The brief offered two options and required one be chosen. They are not equivalent: excluding the stamp
+from the *comparison* while still *writing* it would satisfy AC2 and **fail KPI-3**, because writing a
+stamp writes bytes. So the two requirements are really one, and only this answer satisfies both.
+
+### The renderer had to move into the repo, and that was a gap slices 01–02 left
+
+**Determinism is unreachable while a model does the rendering.** Ordering, spacing and wording drift
+run to run, so every run produces a diff, the diffs stop being read, and the block decays into #31's
+unnoticed-stale state *while looking maintained*.
+
+Slices 01 and 02 shipped no renderer — the region was assembled by a model reading the probe JSON, and
+AC1 held only by after-the-fact value matching. `scripts/render-block.py` now makes the region a pure
+function of `(probe, stamp)`, which is what KPI-3 stands on. **A gap that only the fifth slice's
+requirement made visible**, and an argument for ordering slices by learning rather than by convenience.
+
+### Learning hypothesis — CONFIRMED
+
+Habitual re-running is safe, so the command is a **check** rather than a scaffolder. That is the
+difference between something run once at adoption and something run whenever the board is touched — and
+issue #31 exists precisely because nothing currently notices a stale generated block.
+
 ## Dependencies
 
 Slices 01–04. There has to be something to re-run, and all three provenance categories must exist before
