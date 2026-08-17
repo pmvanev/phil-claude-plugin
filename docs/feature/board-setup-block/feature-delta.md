@@ -506,8 +506,10 @@ None. No DISCOVER or DIVERGE artifacts exist for this feature; nothing prior is 
   **The 2026-08-17 run adds two more to the same fold-back:** that `repository.projectsV2` can be empty
   while a board exists (so the owner-level route is required, not optional), and that `views.layout`
   makes the kanban view probeable.
-- **`plugin-dev:command-development` cannot be invoked as a skill.** Its `SKILL.md` embeds
-  `` !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/script.sh` `` — a placeholder copied from its own documented
-  example — and the installed copy has no `scripts/` directory, so the Skill tool fails on the shell
-  pattern before the body loads. Read the file directly instead; the consult is unaffected. Worth a card
-  against the upstream plugin, not against this feature. Found 2026-08-17.
+- **`plugin-dev:command-development` cannot be invoked as a skill — this is issue #23 recurring, not a
+  new finding.** Its `SKILL.md` embeds `` !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/script.sh` `` — a
+  placeholder inside its own fenced documentation — and the installed copy has no `scripts/` directory,
+  so the Skill tool executes the pattern and fails before the body loads. Read the file directly; the
+  consult is unaffected. **Corrected 2026-08-17:** first recorded here as "worth a card", which was
+  wrong — #23 already describes it exactly, is open, and sits fourth in board position. This slice is a
+  second sighting, which is evidence for its priority rather than a reason to file again.
