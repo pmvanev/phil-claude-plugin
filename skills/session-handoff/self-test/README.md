@@ -10,8 +10,9 @@ regression-tested here.
 These fixtures feed the spine known situations and assert each produces the correct **decision
 outcome**:
 
-`CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `RESUME-CURRENT` · `RESUME-STALE` · `RECONSTRUCT` ·
-`ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER` · `REPORT-CLAIM-CONFLICT`
+`CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `PROJECTED` · `PROJECTION-UNREFRESHED` · `RESUME-CURRENT` ·
+`RESUME-STALE` · `RECONSTRUCT` · `ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER` · `BOARD-AGREES` ·
+`BOARD-DIVERGES` · `BOARD-UNREADABLE` · `REPORT-CLAIM-CONFLICT`
 
 This suite is the acceptance + regression gate for `skills/session-handoff/SKILL.md`. Format and intent mirror `skills/edd/self-test/`, `skills/work/self-test/`, and
 `skills/refactor-tests/self-test/` — this plugin's established way to test a skill.
@@ -38,6 +39,9 @@ them.
 | `10-competing-claim/` | two snapshots claim one card | slice-03 AC4 — **slice not built** | detection without resolution (C6) | `REPORT-CLAIM-CONFLICT` — neither discarded |
 | `11-local-write-precedes-projection/` | the forge is unreachable mid-capture | single-issue-per-feature slice-04 AC1 | the snapshot is written first, so a forge failure never costs the authority | `CAPTURE` + `PROJECTION-UNREFRESHED` |
 | `12-absent-stack-renders-unknown/` | a teammate inherits a card whose owner never captured | slice-04 AC2 | absent renders `unknown`; empty asserts there were no diversions | `RECONSTRUCT` — three sections `unknown` |
+| `13-board-diverges-from-snapshot/` | the tree matches the snapshot exactly, but the board's in-flight card is different work | **#24** done-when | the freshness verdict cannot see the board; detect and do **not** resolve | `RESUME-CURRENT` + `BOARD-DIVERGES` |
+| `14-board-agrees-with-snapshot/` | snapshot and the In Progress card name the same work, while a *different* card tops Todo | **#24** done-when | agreement is reported out loud; `In Progress` outranks top Todo | `RESUME-CURRENT` + `BOARD-AGREES` |
+| `15-board-unreadable-says-so/` | the repo has no board — the common case in the wild | **#24** | a check that cannot run says so, and never defaults to agreement | `RESUME-CURRENT` + `BOARD-UNREADABLE` |
 
 ## The two sharpest fixtures
 
@@ -48,6 +52,11 @@ mode — it is the observed state of this repo's own hand-written `continue.md` 
 a dozen commits behind. If fixture 04 passes while 01 fails, the feature is merely incomplete; if 04
 fails while 01 passes, the feature is actively dangerous.
 
+**`13` and `14` are the same kind of pair, one paradigm later.** A spine that always reports
+`BOARD-AGREES` passes `14` and fails `13`; one that always reports `BOARD-DIVERGES` passes `13` and
+fails `14`. Only an actual comparison passes both — which is the whole point of adding the agreeing
+case, since a detector silent on agreement is indistinguishable from one that never runs.
+
 **`03` and `05` resolve in opposite directions and must not be satisfied by one rule.** In `03` the
 spine is offered derivable state and must refuse it; in `05` the spine has no snapshot and must go and
 derive that same class of state. A rule that gets one right by getting the other wrong — "never
@@ -57,11 +66,28 @@ read-back.
 ## Running
 
 Drive each fixture by giving the spine the situation in `manifest.json` and comparing the decision it
-reaches against `expected.md`. Fixtures 01-05 cover slice 01 and should pass against the current `SKILL.md`. Fixtures 06-10 cover
-slices 02 and 03, which are not built, and are expected to fail — that is genuine RED (the behaviour
-is unimplemented), not BROKEN (the harness is faulty), because the fixtures are prose inputs with no
-imports to resolve.
+reaches against `expected.md`.
+
+| Fixtures | Status against the current `SKILL.md` |
+|---|---|
+| `01`–`08` | slices 01 and 02 — **must pass** |
+| `09`–`10` | slice 03, tested and deliberately **not built** — expected to fail, permanently |
+| `11`–`12` | the board projection — **must pass** |
+| `13`–`15` | the board divergence check, #24 — **must pass** |
+
+A failure in `09`–`10` is genuine RED (the behaviour is unimplemented and will stay so), not BROKEN
+(the harness is faulty) — the fixtures are prose inputs with no imports to resolve. Do not "fix" them
+by building slice 03; its hypothesis was tested and held.
+
+**Fixtures `01`, `04`, `06`, `07`, `08` and `10` predate the board triple and supply no `board_state`,
+so a read-back over them reports `BOARD-UNREADABLE`. That is a pass, not a failure.** It is also what
+the spine should do — a fixture that says nothing about a board is a situation with no board in it.
+Recorded here because the alternative failure modes are both silent: a driver that scores the extra
+outcome as a mismatch retires six working fixtures, and one that ignores the triple on any fixture not
+expecting it stops testing the triple at all. `05` and `12` are `RECONSTRUCT`, which reports no triple
+by design.
 
 Run the whole suite whenever `SKILL.md`, either command loader, or `skills/nwave-issue-board/SKILL.md`
 changes — the last because slice 02's routing line lives inside its generated block, so this skill's
-correctness is partly that skill's.
+correctness is partly that skill's. Add `phil:issue-board` to that list for `13`–`15`: they depend on
+how a board is read, and on `In Progress` and top-Todo meaning what that skill says they mean.

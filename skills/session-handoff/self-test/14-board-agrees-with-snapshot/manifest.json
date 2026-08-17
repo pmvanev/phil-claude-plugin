@@ -1,0 +1,24 @@
+{
+  "fixture_id": "SH-SELFTEST-14",
+  "phase": "BOOTSTRAP",
+  "situation": "A session moved its card to In Progress, worked it, and captured before stopping. The recorded next action and the board's in-flight card name the same work. A different card sits at the top of Todo, so a check that compared against Todo alone would report a false divergence.",
+  "snapshot_present": true,
+  "tree_fingerprint_at_capture": "375c91c",
+  "tree_fingerprint_at_readback": "375c91c",
+  "commits_between": 0,
+  "working_tree_dirty": true,
+  "working_tree_dirty_at_capture": true,
+  "next_action_recorded": "write the two divergence fixtures, then fold the check into SKILL.md",
+  "board_state": {
+    "readable": true,
+    "in_progress": [
+      { "card": 24, "title": "/phil:resume checks the snapshot against the tree, never against the board — a divergence about what is in flight goes undetected" }
+    ],
+    "todo_in_board_order": [
+      { "card": 29, "title": "The work stack has no live view: no push, no pop, no show" },
+      { "card": 31, "title": "A stale generated block is legible but unnoticed" }
+    ]
+  },
+  "expected_decision": "RESUME-CURRENT + BOARD-AGREES",
+  "expected_guard": "#24 — agreement is REPORTED, so the check cannot pass by never firing; and In Progress outranks top Todo as the board's in-flight claim"
+}

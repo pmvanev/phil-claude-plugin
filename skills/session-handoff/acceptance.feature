@@ -15,9 +15,13 @@
 # snapshot. A stale snapshot presented as current looks like a smooth resume — and is the exact
 # failure this repo's own continue.md exhibits today.
 #
-# Decision outcomes the spine must produce:
-#   CAPTURE · NO-OP · REFUSE-DERIVABLE · RESUME-CURRENT · RESUME-STALE · RECONSTRUCT ·
-#   ROUTE · ROUTE-LIVE-WINS · ASK-OWNER · REPORT-CLAIM-CONFLICT
+# Decision outcomes the spine must produce (SKILL.md "Decision outcomes" is authoritative):
+#   CAPTURE · NO-OP · REFUSE-DERIVABLE · PROJECTED · PROJECTION-UNREFRESHED · RESUME-CURRENT ·
+#   RESUME-STALE · RECONSTRUCT · ROUTE · ROUTE-LIVE-WINS · ASK-OWNER ·
+#   BOARD-AGREES · BOARD-DIVERGES · BOARD-UNREADABLE · REPORT-CLAIM-CONFLICT
+#
+# REPORT-CLAIM-CONFLICT belongs to slice 03, which was tested and deliberately not built; it is kept
+# here because its scenario is kept. Every other outcome above is live.
 
 Feature: Carry work across the session boundary without a re-briefing
   As Kai, a developer carrying multi-session work,
@@ -100,3 +104,32 @@ Feature: Carry work across the session boundary without a re-briefing
     When one of them picks the work up
     Then the competition is reported
     And neither claim is discarded
+
+  # --- Issue #24 — the board is the other record of what is in flight -------------------------
+  # The residual slice 03 left standing: not "record which card was claimed", but "notice when the
+  # two records of what is in flight disagree".
+
+  @issue-24 @error @fixture(13-board-diverges-from-snapshot) @contract-shape:pure-function
+  Scenario: The work moved on even though the code did not
+    Given a resume point that still matches the state of the work in progress
+    But the team's shared record names a different piece of work as the one in hand
+    When a fresh session picks it up
+    Then it still says the resume point matches
+    And it reports that the two records of what is in hand disagree
+    And it names both pieces of work and where each came from
+    And it does not choose between them
+
+  @issue-24 @fixture(14-board-agrees-with-snapshot) @contract-shape:bounded-change
+  Scenario: Agreement is stated, so silence never has to be interpreted
+    Given a resume point naming the same work the team's shared record has in hand
+    When a fresh session picks it up
+    Then it says the two records agree
+    And it names the piece of work they agree on
+
+  @issue-24 @error @fixture(15-board-unreadable-says-so) @contract-shape:pure-function
+  Scenario: A comparison that could not be made is admitted, never assumed
+    Given a resume point in a project that keeps no shared record of work in hand
+    When a fresh session picks it up
+    Then it says the comparison could not be made, and why
+    And it does not report the two records as agreeing
+    And it still presents the resume point and names the owner

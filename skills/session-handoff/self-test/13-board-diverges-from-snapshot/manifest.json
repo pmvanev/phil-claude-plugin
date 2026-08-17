@@ -1,0 +1,22 @@
+{
+  "fixture_id": "SH-SELFTEST-13",
+  "phase": "BOOTSTRAP",
+  "situation": "The recorded next action names a dogfood run that an intervening session already completed. The board's in-flight card is different work entirely. The tree has not moved since capture, so the freshness verdict is CURRENT. This is the real 2026-08-13 observation that carded #24, replayed.",
+  "snapshot_present": true,
+  "tree_fingerprint_at_capture": "8c7b4a3",
+  "tree_fingerprint_at_readback": "8c7b4a3",
+  "commits_between": 0,
+  "working_tree_dirty_at_capture": false,
+  "working_tree_dirty": false,
+  "next_action_recorded": "dogfood /phil:groom-issues against this repo's own board",
+  "board_state": {
+    "readable": true,
+    "in_progress": [],
+    "todo_in_board_order": [
+      { "card": 15, "title": "groom-issues slice 03 — set-level operations, all ask-first" },
+      { "card": 23, "title": "plugin-dev skills cannot be loaded — the Skill loader executes the `!`cmd`` examples they document" }
+    ]
+  },
+  "expected_decision": "RESUME-CURRENT + BOARD-DIVERGES",
+  "expected_guard": "#24 — the tree verdict cannot see the board; the divergence is named and NOT resolved"
+}

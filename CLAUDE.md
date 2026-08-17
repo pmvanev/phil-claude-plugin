@@ -132,6 +132,19 @@ the session snapshot (`.session-handoff.md`, git-ignored and machine-local) and 
 whether it is current or stale against the tree, then names the command that owns the work without
 running it. With no snapshot it reconstructs from the artifacts and says that is what it did.
 
+**It also checks the snapshot against the board**, reporting `BOARD-AGREES`, `BOARD-DIVERGES` or
+`BOARD-UNREADABLE` on every read-back that has a recorded next action. The tree and the board are two
+records of what is in flight and they fail in opposite directions; the freshness verdict can only see
+one of them. It names both sides of a divergence and **never resolves it** — neither source is
+authoritative, so picking one discards the other's work while reporting success.
+
+That is why `resume` declares **`mutates: true` while writing nothing**: reading Projects v2 needs
+`gh api graphql`, which can carry a mutation, and `gh project item-list` — the read-only alternative —
+can under-report, which in a divergence detector means a missed divergence. The grant is still narrow
+(no `Write`, no `Edit`, no bare `Bash`) and the read-only intent lives in the command's prose and the
+skill's never-do list. Sanctioned 2026-08-17 for issue #24; the enforced guarantee became a declared
+one, and that trade is stated rather than discovered.
+
 Put a session down with `/phil:handoff`. It records only what a fresh session cannot derive — the
 decisions, the approaches ruled out, the intended next action — and refuses to copy anything the
 artifacts already own.

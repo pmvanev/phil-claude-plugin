@@ -1,6 +1,6 @@
 ---
 name: session-handoff
-description: Skill bundle for the phil:handoff and phil:resume commands — carries work across the session boundary. Records only what a fresh session cannot derive (the reasoning, the intended next action, the diversion stack), stamps a tree fingerprint, refreshes a write-only projection of that record onto the feature's card so a teammate can read it, and on read-back states a current/stale verdict before presenting anything, then names the command that owns the work without running it. Refuses to record state an artifact already owns, and never reads the projection back.
+description: Skill bundle for the phil:handoff and phil:resume commands — carries work across the session boundary. Records only what a fresh session cannot derive (the reasoning, the next action, the diversion stack), stamps a tree fingerprint, and projects a write-only copy onto the feature's card. On read-back it states a current/stale verdict against the tree, reports whether the board agrees about what is in flight — naming a divergence and never resolving it — and then names the owning command without running it. Refuses to record derivable state, and never reads its own projection back.
 ---
 
 # Session handoff — capture and resume
@@ -13,11 +13,15 @@ the derivable becomes a second authority over the same fact, and the two drift.
 
 Slices 01 and 02. **The claimed-card link was slice 03, and was tested and deliberately not built** —
 its hypothesis (*the board already carries enough*) held. Do not improvise it, and do not read its
-absence as an oversight to correct: `In Progress` is unused in this workflow, the board's top Todo card
-answers *what is next*, and the basis for a claim is what the `Why` section is already for. Recording
-it as a field would duplicate prose that carries it, which is the drift this skill exists to prevent.
-The finding is in
+absence as an oversight to correct: the board's top Todo card answers *what is next*, and the basis for
+a claim is what the `Why` section is already for. Recording it as a field would duplicate prose that
+carries it, which is the drift this skill exists to prevent. The finding is in
 [`slice-03-claimed-card-link.md`](https://github.com/pmvanev/phil-claude-plugin/blob/main/docs/feature/session-handoff/slices/slice-03-claimed-card-link.md).
+
+**One residual survived that investigation and shipped separately: the board divergence check below**
+(issue #24, 2026-08-17). It is the narrow thing slice 03's verdict left standing — not *record which
+card was claimed*, but *notice when the two records of what is in flight disagree*. It records nothing
+and resolves nothing, so it does not reopen slice 03.
 
 ## What is worth recording
 
@@ -143,6 +147,10 @@ from the command having failed.
 3. **Compare against the tree now** — current short HEAD, and current dirty state.
 4. **Branch on the comparison**, and state the verdict *first*:
 
+The emitted order is **verdict → board triple (step 5) → content (step 6) → owner (step 7)**, and the
+steps below appear in that order. Both checks come before any content, because a reader who has seen
+the briefing has already started believing it.
+
 **`RESUME-CURRENT`** — the commit matches **and** the dirty flag matches. Say the resume point is
 current, then present the why and the next action. When both were and are dirty, add one line: the
 fingerprint records only *that* the tree was dirty, not what was in it, so uncommitted work may have
@@ -165,15 +173,95 @@ The shape is what matters, not these values: both fingerprints, the distance bet
 tree state. Report the distance in whatever unit is available — commit count is best; a bare
 "different" is acceptable; silence is not.
 
-Then, and only then, show the recorded content clearly marked as historical. Do **not** present the
-recorded next action as the thing to do now; offer it as what was intended at the time, for the
-reader to judge.
-
 A confidently-followed stale snapshot is the worst outcome this skill can produce. It is worse than
 having no snapshot, because the next session acts on it. Never soften the verdict to "may be out of
 date" when the fingerprint proves it is.
 
-### Naming the owner
+### 5. The board is the other record of what is in flight
+
+**The freshness verdict compares the snapshot against the tree. It can never compare it against the
+board, and the board is where the rest of the team records the same fact.** So a snapshot can be
+`RESUME-CURRENT` — same commit, same clean tree, every check green — while the board says something
+different is in flight, and nothing says so.
+
+Observed 2026-08-13 and carded as #24: the snapshot's `Next` named a dogfood run; the board's top Todo
+was #15, different work entirely. It was harmless, because the dogfood had happened in an intervening
+session. **A human noticed it. Nothing else could have.**
+
+The two sources fail in opposite directions and a session cannot tell which it is holding:
+
+- **Snapshot ahead of the board** — work was claimed and the card never moved. Following the board
+  restarts work already under way.
+- **Board ahead of the snapshot** — the card advanced in another session. Following the snapshot
+  redoes spent work.
+
+Report one of three outcomes, **beside the freshness verdict and before the recorded content** — on
+`RESUME-CURRENT` and `RESUME-STALE` alike. `RECONSTRUCT` reports none of them: with no snapshot there
+is no recorded next action, so there is nothing to compare. Reporting the board's in-flight card there
+as *reconstructed position* is defensible and is deliberately **out of scope** for #24, not argued
+against.
+
+**`BOARD-AGREES`** — the recorded next action and the board's in-flight claim name the same work. One
+line, naming the card:
+
+```
+BOARD-AGREES — snapshot Next and the board's in-flight card (#24, In Progress) name the same work.
+```
+
+**Report agreement out loud.** A detector silent on the agreeing branch is indistinguishable from one
+that is broken, mis-wired, or reading an empty board — the *check nobody runs reports compliance by
+staying quiet* defect this repository keeps rediscovering.
+
+**`BOARD-DIVERGES`** — they name different work. Name **both**, label each with its source, and stop:
+
+```
+BOARD-DIVERGES — the two records of what is in flight disagree.
+  snapshot Next (captured 2026-08-13T21:10Z):
+    dogfood /phil:groom-issues against this repo's own board
+  board, top Todo (no card In Progress):
+    #15 groom-issues slice 03 — set-level operations, all ask-first
+Neither is authoritative over the other. Resolve before proceeding.
+```
+
+**`BOARD-UNREADABLE`** — there is no board, or it cannot be reached. Name the reason, and say plainly
+what was not checked:
+
+```
+BOARD-UNREADABLE — no board constants in CLAUDE.md and no `project` scope on the token.
+The snapshot's Next was NOT checked against a board.
+```
+
+Most repositories carrying this skill have no board, so **this is the branch that runs most often**. An
+unreadable board is not an agreeing board, for the same reason an absent stack renders `unknown` rather
+than empty: one is a claim about the record, the other a claim about the work.
+
+Four rules govern the comparison:
+
+- **The board's in-flight claim is the `In Progress` card where one exists, and the top Todo card
+  otherwise.** Comparing against the top Todo alone reports a session that correctly claimed its card
+  as diverging from whatever sits above it. Where `In Progress` goes unused the branch never fires.
+  The reasoning is in `self-test/14-board-agrees-with-snapshot/expected.md`.
+- **The match is semantic, not string equality, so bias toward reporting divergence.** The outcome is
+  advisory and resolves nothing: a false positive costs the reader one line, a false negative is the
+  silent failure the check exists to kill.
+- **Detect; never resolve.** Do not prefer one source, do not drop the other, do not rank them. Neither
+  is authoritative over the other, and picking one silently discards the other's work while reporting
+  success — the same boundary slice 03 drew for competing claims.
+- **Read the board; never write it.** No card is moved, no Status is set, no comment is posted to make
+  the two agree. Reconciling is a human's act — and where the forge's mirror workflows are enabled, a
+  Status write is also an issue write, so there is no small correction available here either.
+
+**`phil:issue-board` owns how a board is read**, including which call is trustworthy on each forge and
+which under-reports. Delegate to it rather than inlining the mechanics; an under-reporting read here is
+a **missed divergence**, the one failure this check cannot notice about itself. The repository's own
+`CLAUDE.md` supplies the board's constants.
+
+### 6. Then, and only then, the content
+
+Show the recorded content clearly marked as historical. Do **not** present the recorded next action as
+the thing to do now; offer it as what was intended at the time, for the reader to judge.
+
+### 7. Naming the owner
 
 After the verdict and the content, name the command that owns the work — on every read-back path,
 including `RECONSTRUCT`.
@@ -225,9 +313,16 @@ At read-back, fetch the derivable from its owner rather than the snapshot:
 | Where an nWave feature stands — wave, slice, step | the `nwave-slice-status` skill | yes |
 | Branch, HEAD, working-tree state | `git` | yes |
 
-Every delegate on this path must be read-only. That is the selection criterion, not a coincidence.
+Both delegates are read-only, and **enforced** so: the `nwave-slice-status` skill writes nothing, and
+`/phil:resume`'s `git` grants are scoped to read-only subcommands.
 
 Delegate; do not re-derive. These own their answers and have their own correctness gates.
+
+**The board is not in this table**, and the distinction is worth keeping sharp. These two rows answer
+*what to look up instead of recording* — the snapshot was always at risk of duplicating them. The board
+answers something else entirely: *what to cross-check the snapshot against*. Nothing here was ever
+tempted to record it. Step 5 owns that read; `commands/resume.md` owns why its grant makes the command
+declare `mutates: true` while writing nothing.
 
 Note the asymmetry, which is deliberate: at **capture** this state must be refused, and at
 **read-back** it must be actively fetched. The rule is not "never touch position" — it is *never at
@@ -238,7 +333,8 @@ capture, always at read-back*.
 Report the outcome by name, every run — one per phase:
 
 `CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `PROJECTED` · `PROJECTION-UNREFRESHED` · `RESUME-CURRENT` ·
-`RESUME-STALE` · `RECONSTRUCT` · `ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER`
+`RESUME-STALE` · `RECONSTRUCT` · `ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER` · `BOARD-AGREES` ·
+`BOARD-DIVERGES` · `BOARD-UNREADABLE`
 
 A capture run reports exactly one of `CAPTURE` or `NO-OP`. `REFUSE-DERIVABLE` is **additional**:
 report it alongside `CAPTURE` whenever derivable state was offered and left out, naming what was left
@@ -253,15 +349,29 @@ to project. A read-back run reports exactly one of `RESUME-CURRENT`, `RESUME-STA
 exactly one of `ROUTE`, `ROUTE-LIVE-WINS`, or `ASK-OWNER` — the freshness verdict and the owner are
 independent facts, and a stale snapshot still has an owner worth naming.
 
+**A third independent triple** joins them on the two paths that have a recorded next action to check:
+`RESUME-CURRENT` and `RESUME-STALE` each report exactly one of `BOARD-AGREES`, `BOARD-DIVERGES`, or
+`BOARD-UNREADABLE`. `RECONSTRUCT` reports none — with no snapshot there is nothing to compare.
+
+**These are independent of the freshness verdict, and coercing one into the other is a gate failure.**
+A board divergence is not staleness: the tree may be untouched while the work has moved on, which is
+exactly the case #24 was filed for. Report both, and let them disagree.
+
 ## What this skill must never do
 
 - Write the snapshot anywhere but the repo root, or commit it.
 - Present a stale snapshot as current, or bury the verdict beneath the content.
 - **Refresh the projection before the snapshot is written.** Local first, always — a forge call that
   succeeds while the local write fails leaves the authority behind its own copy.
-- **Read the projection back, at capture or at read-back.** `/phil:resume` reads this file and the
-  artifacts, never the card. The projection is write-only; that is what keeps it from being a second
-  authority.
+- **Read the projection block back, at capture or at read-back.** The projection is write-only; that is
+  what keeps it from being a second authority.
+
+  **The boundary is the block, not the card.** Read-back reads the board's *Status, position and card
+  title* — that is the divergence check, and those facts are the board's own, never a copy of anything
+  this skill wrote. It must never read back the `Why` / `Next` / `Stack` it projected, because those
+  **are** a copy, and a snapshot reconciled against its own projection has become two authorities.
+  Stated on 2026-08-17: until then the rule read "never the card", which the divergence check made
+  false while the real invariant went unwritten.
 - **Render an absent stack as empty.** Where nothing was projected, the card says `unknown`. Empty
   asserts there were no diversions.
 - **Publish the block itself.** `phil:nwave-issue-board` owns the block's format, its markers and its
@@ -270,23 +380,33 @@ independent facts, and a stale snapshot still has an owner worth naming.
 - Write a snapshot for a session that advanced nothing.
 - Invent a next action that was not stated.
 - **Run** the owning command. Naming it is the whole of routing here; `/phil:resume` starts nothing.
+- **Resolve a board divergence.** Detect it, name both sides, stop. Preferring one source discards the
+  other's work while reporting success.
+- **Write to the board during read-back.** No card moved, no Status set, no comment. The projection at
+  CAPTURE step 7 is the **only** sanctioned board write in this skill; read-back has none.
+- **Report `BOARD-AGREES` for a board that could not be read**, or report nothing at all. Unreadable is
+  a claim about the record; agreement is a claim about the work.
 - Record a claimed card or its basis as a field. Tested and not built; the why already carries the basis.
 - Restate the wave → command table. `skills/nwave-issue-board/SKILL.md` owns it; derive from there.
 
 ## Acceptance
 
-`acceptance.feature` is the scenario SSOT; `self-test/` holds ten golden fixtures. Slices 01 and 02
-must pass fixtures **01–08**. Fixtures **09–10** cover slice 03 and are expected to fail until it ships.
+`acceptance.feature` is the scenario SSOT. **`self-test/README.md` is the fixture register** — it holds
+the roster, the must-pass set, what each fixture pins, and the driving rules. Read it before driving the
+suite; do not drive from this section alone, and do not maintain a second roster here.
+
+That split is deliberate and was earned twice. This paragraph carried its own fixture count, said
+"ten" when there were twelve, and went stale again inside the commit that corrected it. A roster in two
+places is a roster that disagrees with itself.
+
+One rule is worth repeating because getting it wrong retires working fixtures: **the fixtures that
+predate the board triple supply no `board_state`, so a read-back over them reports `BOARD-UNREADABLE`,
+and that is a pass.** The register says which ones and why.
 
 The suite is **model-driven, not automated** — there is no CI runner in this plugin, and
-`tests/test_self_test_fixtures.py` does not cover these fixtures. Drive each one by giving this skill
+`tests/test_self_test_fixtures.py` does not drive these fixtures. Drive each one by giving this skill
 the situation in its `manifest.json` and comparing the decision reached against its `expected.md`. Do
-that whenever this file or either command loader changes. Every failure mode here is
-silent — a snapshot that records too much looks more complete, and a stale one presented as current
-looks like a smooth resume.
-
-Fixtures `11` and `12` were added 2026-08-14 with the board projection, and they pin its two properties
-that fail silently. `11` — the snapshot is written **before** any forge call, so an unreachable forge
-leaves a stale card that says it is stale, never an authority trailing its own copy. `12` — a card whose
-owner never captured renders `unknown`, not an empty stack: empty is a claim about the work, `unknown` is
-a claim about the record, and a teammate acts differently on each while the two render almost identically.
+that whenever this file, either command loader, `skills/nwave-issue-board/SKILL.md` or
+`skills/issue-board/SKILL.md` changes. Every failure mode here is silent — a snapshot that records too
+much looks more complete, a stale one presented as current looks like a smooth resume, and a divergence
+check that never fires looks like a board that always agrees.

@@ -1,0 +1,18 @@
+{
+  "fixture_id": "SH-SELFTEST-15",
+  "phase": "BOOTSTRAP",
+  "situation": "A snapshot exists and the tree matches it, but the repository has no board: its CLAUDE.md declares no project id and no Status field, so there is nothing to query. This is the COMMON case in the wild — most repositories using this skill have no forge board at all.",
+  "snapshot_present": true,
+  "tree_fingerprint_at_capture": "375c91c",
+  "tree_fingerprint_at_readback": "375c91c",
+  "commits_between": 0,
+  "working_tree_dirty_at_capture": false,
+  "working_tree_dirty": false,
+  "next_action_recorded": "finish the extract-method pass on the parser",
+  "board_state": {
+    "readable": false,
+    "reason": "no board constants in CLAUDE.md — no project id and no Status field, so there is no board to query"
+  },
+  "expected_decision": "RESUME-CURRENT + BOARD-UNREADABLE",
+  "expected_guard": "#24 — a check that cannot run says so; it never reports agreement by default, and never stays quiet"
+}

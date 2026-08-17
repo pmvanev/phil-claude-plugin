@@ -143,6 +143,15 @@ against the *board*.
 That gap is not "record which card was claimed." It is "notice when the two records of what is in
 flight disagree." Carded separately.
 
+**Carded as #24 and shipped 2026-08-17** as the board divergence check in `SKILL.md` — outcomes
+`BOARD-AGREES` · `BOARD-DIVERGES` · `BOARD-UNREADABLE`, pinned by fixtures `13`–`15`. It detects and
+never resolves, and records nothing, so it does not reopen this slice: no claimed card is stored, no
+board state is written, and the comparison is made fresh at read-back from sources that already own
+their answers. **Finding 1 above was falsified in passing** — `In Progress` *is* used in this workflow
+as of 2026-08-17, so the check reads it where present and falls back to the top Todo card otherwise.
+That is a widening of #24's literal done-when, which named only the top Todo and would have reported
+a false divergence against a correctly-claimed card.
+
 ### What happens to the fixtures
 
 `self-test/09-claim-and-basis/` and `10-competing-claim/` pin a slice that was tested and deliberately
