@@ -12,11 +12,15 @@ CONFIRM → PROBE → PLACE → WRITE → REPORT.
 trusting it; when absent, derive a candidate from the remote and **confirm it before any call**.
 Issue `#12` exists in every repo, so an inferred target reads the wrong board successfully.
 
-**Probe with the script, never from memory**, and invoke it by this exact spelling:
+**Probe with the script, never from memory**, and invoke it by these exact spellings — targets first,
+which makes no forge call, then the probe once the target is confirmed:
 
 ```
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/probe-board.py --list-targets
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/probe-board.py --repo OWNER/REPO
 ```
+
+A `--list-targets` status of `ambiguous` — two remotes, or a fork — is a **question**, never a pick.
 
 A relative path would resolve against the target repo, where the script does not exist. Every value
 inside the markers comes out of that JSON; a value typed from recall is indistinguishable in the

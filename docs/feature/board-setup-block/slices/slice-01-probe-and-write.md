@@ -68,7 +68,7 @@ this repo's own, whose section is the hand-written one slice 02 exists to coexis
 |---|---|---|
 | 1 | **PASS** | Mechanical check, not assertion: all 9 forge-issued ids and URLs inside the markers were matched against `probe.json`; zero unmatched. Prose above the section byte-intact. |
 | 2 | **PASS** | Zero questions asked. One remote, target confirmed before any call. |
-| 3 | **PARTIAL — the honest verdict** | The *ambiguity-refuses* shape is unit-tested in both directions (two linked projects; two owner projects), and each refuses naming the fix. The **two-remote path through the command's CONFIRM step is NOT exercised** — that step is prose the model performs, so testing it needs a released command run against a checkout with an extra remote. Carried to slice 02, which touches placement anyway. |
+| 3 | **PARTIAL — detection PASS, asking unverified** | Revised after the first PARTIAL verdict: ambiguity **detection** was moved out of prose into `--list-targets`, which makes no forge call. Verified against a **real two-remote checkout** (`origin` plus a fork `upstream`) → `status: ambiguous`, both candidates returned, note reads *ASK which board, never pick*; and against this repo → `status: ok` with `confirm_required: true` regardless. Seven tests cover it, including the two false positives that would destroy the question: fetch+push of one URL counting as two targets (which would call every repo on earth ambiguous), and https/ssh spellings of one repo. **Still unverified: the asking**, which lives in CONFIRM, is prose, and needs a run of the command as a command. |
 | 4 | **PASS, without touching real auth** | Four unit tests: missing scope → `gh auth refresh -s project`; unparseable `gh auth status` → refuses rather than assuming the scope (C6); `gh` absent → refuses; scope present → proceeds. Stripping the operator's live scope would have been the only alternative. |
 | 5 | **PASS — KPI-1 = 0.8** (8/10, target ≥ 0.5) | Computed by the script, not by eye. Covered: forge-and-repo, project-and-board-ids, tier, status-mechanism, column-families, builtin-workflows, docs-root, nwave-mapping. Uncovered: `label-families`, `local-task-system` — both slice 03's, both correctly *declared*, not guessed. |
 
@@ -139,6 +139,28 @@ than probed — the template asks how many families share the field, which is a 
 0.7 rather than 0.8. The option *count* is probed and the second family is emitted separately as
 `other-single-select-fields`, so 0.8 stands; the stricter reading also passes, and is recorded here so
 the number is not mistaken for the only defensible one.
+
+### Closing S1 — what is done and what needs a session restart
+
+AC3's detection half was closed by moving it into `--list-targets` (above). What remains is not
+buildable from here:
+
+**S1's pitch names `/phil:board-setup` as the entry point, and the command has never executed as a
+command.** Every value and every write in this slice is real, but the sequencing was driven by a
+session following the skill. The installed plugin is 0.55.0 and contains none of these files, so no
+released command could have run, and `claude plugin update` pulls from the marketplace — which resolves
+to GitHub `pmvanev/phil-claude-plugin`, default branch, **public**. So closing S1 requires publishing
+this work and then a **session restart** (`claude plugin update` states "restart required to apply").
+Neither is available from inside the session that wrote it.
+
+Left for the closing run, in order:
+
+1. Publish 0.56.0 so the marketplace resolves it.
+2. `claude plugin update phil` and restart.
+3. `/phil:board-setup` in the prepared two-remote fork checkout → confirms AC3's asking half **and**
+   that `Bash(python3:*)` matches without prompting. The validator's note applies: the prompt symptom
+   is only observable after the update, which is why it is worth doing before slice 02 builds on it.
+4. `/phil:board-setup` in this repo → must report `SECTION-EXISTS` and write nothing (fixture 03).
 
 ### Deviation from repo standards, recorded rather than hidden
 

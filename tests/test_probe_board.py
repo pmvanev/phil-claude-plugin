@@ -148,6 +148,62 @@ def test_organization_owner_uses_the_organization_scope(monkeypatch):
     assert "organization's projects" in facts[0]["value"]
 
 
+# --- CONFIRM: target derivation (AC3's detection half) -----------------------------------
+
+FETCH_PUSH = "{n}\t{u} (fetch)\n{n}\t{u} (push)\n"
+
+
+def remotes(*pairs):
+    return "".join(FETCH_PUSH.format(n=n, u=u) for n, u in pairs)
+
+
+def test_one_remote_yields_one_target():
+    t = pb.derive_targets(remotes(("origin", "git@github.com:pmvanev/phil-claude-plugin.git")))
+    assert t == [{"remote": "origin", "host": "github.com", "repo": "pmvanev/phil-claude-plugin"}]
+
+
+def test_fetch_and_push_of_the_same_url_is_one_target_not_two():
+    """The dangerous false positive: every remote prints twice, so naive counting says 'ambiguous'
+    for every repo on earth and the question stops meaning anything."""
+    assert len(pb.derive_targets(remotes(("origin", "git@github.com:o/r.git")))) == 1
+
+
+def test_a_fork_yields_two_targets(monkeypatch):
+    """AC3's real case. origin and upstream are different repos with different boards, and the
+    board that matters is usually not the one you pushed to."""
+    t = pb.derive_targets(remotes(
+        ("origin", "git@github.com:pmvanev/phil-claude-plugin.git"),
+        ("upstream", "https://github.com/someone-else/phil-claude-plugin.git"),
+    ))
+    assert len(t) == 2
+    assert {x["repo"] for x in t} == {"pmvanev/phil-claude-plugin",
+                                      "someone-else/phil-claude-plugin"}
+
+
+def test_two_unrelated_remotes_yield_two_targets():
+    t = pb.derive_targets(remotes(("origin", "git@github.com:a/one.git"),
+                                  ("mirror", "git@gitlab.com:b/two.git")))
+    assert len(t) == 2
+    assert {x["host"] for x in t} == {"github.com", "gitlab.com"}
+
+
+def test_https_and_ssh_spellings_of_one_repo_collapse_to_one_target():
+    t = pb.derive_targets(remotes(("origin", "git@github.com:o/r.git"),
+                                  ("https", "https://github.com/o/r.git")))
+    assert len(t) == 1
+
+
+def test_no_remotes_yields_no_targets():
+    assert pb.derive_targets("") == []
+
+
+def test_unparseable_and_deep_paths_are_skipped_not_guessed():
+    """A GitLab subgroup path is not OWNER/REPO; emitting it as a target would send `gh -R` at a
+    slug it cannot address. Skipped, so the human is asked instead."""
+    assert pb.derive_targets(remotes(("weird", "file:///srv/git/repo.git"))) == []
+    assert pb.derive_targets(remotes(("sub", "git@gitlab.com:group/sub/proj.git"))) == []
+
+
 # --- KPI-1's denominator is the template, not the probe's reach --------------------------
 
 def test_kpi1_denominator_is_the_ten_template_fields():

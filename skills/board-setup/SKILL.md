@@ -96,11 +96,24 @@ after the template-shaped ones, each carrying its provenance and Q-number like a
 
 ## The flow
 
-1. **CONFIRM the forge target.** Derive it from the git remote and **confirm it with the human
-   before any call**. Never infer it: issue `#12` exists in every repo, so an inferred remote reads
-   — and would mutate — the wrong one successfully. Two remotes, or a fork, produces a question
-   rather than a guess. This is the only question slice 01 may ask, and it happens before the script
-   runs.
+1. **CONFIRM the forge target.** Enumerate the candidates mechanically — it makes no forge call:
+
+   ```
+   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/probe-board.py --list-targets
+   ```
+
+   Then **confirm with the human before any call**, on every `status`:
+
+   | `status` | Do |
+   |---|---|
+   | `ok` | one candidate — confirm it anyway. `confirm_required` is always true |
+   | `ambiguous` | **ask** which board, presenting the candidates. Never pick, and never prefer `origin` |
+   | `none` | no parseable remote — ask for the target |
+
+   Never infer: issue `#12` exists in every repo, so an inferred remote reads — and would mutate —
+   the wrong one successfully. **A fork is the case that looks fine and is not**: `origin` and
+   `upstream` are two repos with two boards, and the one that matters is usually not the one you
+   pushed to. This is the only question slice 01 may ask, and it happens before the probe runs.
 2. **PROBE.** One pass of the script. Report each value beside the call that found it.
 3. **PLACE.** Slice 01 targets a `CLAUDE.md` with **no** `## Issue board` section. Append the
    section containing only the region. Create the file if absent, and say which happened.
@@ -196,8 +209,13 @@ Two halves, automated to different degrees, and the difference matters:
 - **The prose is model-driven.** There is no CI runner in this plugin. `self-test/` holds the
   fixtures; drive each by giving this skill the situation in its `manifest.json` and comparing the
   decision reached against its `expected.md`. Do that whenever this file or the command loader
-  changes. Slice 01 AC3 is recorded **PARTIAL** for exactly this reason: the two-remote path runs
-  through CONFIRM, which is prose.
+  changes.
+
+AC3 splits across the two halves, and the split is the point: **detecting** ambiguity is tested
+(`--list-targets` over a real two-remote checkout returns `ambiguous` with both candidates), while
+**asking** is prose and stays unverified until the command runs as a command. Detection was moved out
+of prose for exactly the reason the probe is a script: a property code holds beats one a model is
+asked to honour.
 
 `docs/feature/board-setup-block/slices/slice-01-probe-and-write.md` holds the criteria and the KPI-1
 reading.

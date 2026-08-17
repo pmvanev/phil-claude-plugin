@@ -91,6 +91,45 @@ def graphql(query: str) -> dict:
     return payload["data"]
 
 
+GIT_URL = re.compile(
+    r"^(?:git@(?P<h1>[^:]+):|(?:https?|ssh)://(?:[^@/]+@)?(?P<h2>[^/:]+)(?::\d+)?/)"
+    r"(?P<slug>[^\s]+?)(?:\.git)?$"
+)
+
+
+def derive_targets(remote_output: str) -> list[dict]:
+    """Turn `git remote -v` output into distinct forge targets, newest-name-first.
+
+    CONFIRM must never *infer* a target — issue `#12` exists in every repo, so an inferred remote
+    reads the wrong board successfully. But whether a repo is ambiguous is a fact about its
+    remotes, and a fact is testable. So detection lives here and the asking stays with the human:
+    this returns the candidates and says nothing about which to pick.
+
+    A fork is the case that matters and the one a single-remote check misses: `origin` plus
+    `upstream` are two different repos with two different boards, and the board that matters is
+    usually not the one you pushed to.
+    """
+    seen: dict[tuple[str, str], dict] = {}
+    for line in remote_output.splitlines():
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        name, url = parts[0], parts[1]
+        m = GIT_URL.match(url)
+        if not m:
+            continue
+        host = m.group("h1") or m.group("h2")
+        slug = m.group("slug")
+        if slug.count("/") != 1:
+            continue
+        key = (host, slug)
+        if key not in seen:
+            seen[key] = {"remote": name, "host": host, "repo": slug}
+        elif name == "origin":
+            seen[key]["remote"] = name
+    return list(seen.values())
+
+
 def require_project_scope() -> None:
     """Slice 01 AC4: a missing `project` scope names the exact fix and writes nothing."""
     if shutil.which("gh") is None:
@@ -389,11 +428,40 @@ def probe(host: str, slug: str) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Probe a GitHub board for the constants a repo's CLAUDE.md must record.")
-    ap.add_argument("--repo", required=True, metavar="OWNER/REPO",
+    ap.add_argument("--repo", metavar="OWNER/REPO",
                     help="the forge target, CONFIRMED with the human before this runs")
     ap.add_argument("--host", default="github.com")
+    ap.add_argument("--list-targets", action="store_true",
+                    help="enumerate candidate forge targets from the git remotes and exit; makes "
+                         "no forge call. Run this at CONFIRM, before --repo is known.")
     args = ap.parse_args()
 
+    if args.list_targets:
+        try:
+            targets = derive_targets(run(["git", "remote", "-v"]))
+        except Refusal as r:
+            print(json.dumps({"schema": "board-setup-targets/v1", "status": "refused",
+                              "refusal": {"reason": r.reason, "fix": r.fix}}, indent=2))
+            return 1
+        print(json.dumps({
+            "schema": "board-setup-targets/v1",
+            "status": "ok" if len(targets) == 1 else "ambiguous" if targets else "none",
+            "targets": targets,
+            # An explicit instruction, because the dangerous branch is the one that looks fine:
+            # a fork yields two plausible targets and picking either silently is the failure.
+            "confirm_required": True,
+            "note": ("exactly one candidate — still confirm it with the human before any call"
+                     if len(targets) == 1 else
+                     "more than one candidate: ASK which board, never pick" if targets else
+                     "no parseable git remote — ask for the target"),
+        }, indent=2))
+        return 0
+
+    if not args.repo:
+        print(json.dumps({"status": "refused", "schema": "board-setup-probe/v1",
+                          "refusal": {"reason": "--repo is required unless --list-targets is given",
+                                      "fix": None}}, indent=2))
+        return 2
     if "/" not in args.repo:
         print(json.dumps({"status": "refused", "schema": "board-setup-probe/v1",
                           "refusal": {"reason": "--repo must be OWNER/REPO", "fix": None}},
