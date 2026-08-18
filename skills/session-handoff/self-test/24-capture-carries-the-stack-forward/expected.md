@@ -6,7 +6,7 @@
 
 ```
 1. Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 2
-2. └ The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z · crossed 1
+2. └ The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z · crossed 2
 ```
 
 Two things happened and nothing else: **every `crossed` went up by one**, and **nothing else moved.**
@@ -24,8 +24,10 @@ timestamps would be lies, and the record of when a diversion actually started �
 holds — would be quietly replaced by the time of the last wind-down. This is exactly the header bug
 (re-stamping `commit:` disables `RESUME-STALE`), one level down.
 
-**Frame 1 reaches `crossed 2` and becomes stale on the next read.** That is the rule working end to end:
-a diversion open through two separate sessions ending, marked at the third pick-up.
+**Both frames reach `crossed 2` and become stale on the next read.** That is the rule working end to end:
+diversions open through two separate sessions ending, marked at the next pick-up. They move together
+because `CAPTURE` increments every frame in the file — which is why `parent ≥ child` holds by
+construction, and why the start state has both at `1` rather than a parent ahead of its child.
 
 **A frame is appended only for a diversion the session took, did not close, and that is not already
 present.** Neither applies here, so the stack gains no frame.
@@ -35,7 +37,8 @@ present.** Neither applies here, so the stack gains no frame.
 - Any change to a frame's what, why, or `open since`.
 - Dropping frame 2 because the account omitted it.
 - Rewriting frame 1's reason to match the account.
-- Not incrementing `crossed`, or incrementing by anything but one, or incrementing only the innermost.
+- Not incrementing `crossed`, incrementing by anything but one, or incrementing only some frames.
+- Producing a child whose `crossed` exceeds its parent's. Unreachable under this rule.
 - Setting a new frame's `crossed` to anything but 0 — not applicable here, and a fixture that passes by
   rewriting both counters to 0 has failed.
 - Reporting `NO-OP`. A decision and a next action were both stated.

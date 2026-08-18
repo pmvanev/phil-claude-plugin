@@ -149,3 +149,66 @@ def test_the_divergent_and_agreeing_cases_both_exist():
     assert "BOARD-DIVERGES" in expected, "no fixture covers the divergent case"
     assert "BOARD-AGREES" in expected, "no fixture covers the agreeing case"
     assert "BOARD-UNREADABLE" in expected, "no fixture covers the unreadable board"
+
+
+# ---------------------------------------------------------------------------
+# Frame-format invariants (live-work-stack slice 02, 2026-08-18)
+#
+# `crossed` counts wind-downs a frame has survived: written 0 by push, incremented by CAPTURE for
+# every frame already in the file. Two invariants follow, and both were violated by four fixtures
+# before the third review pass caught them by reading — nothing here was checking.
+#
+# That is this board's recurring defect in its sharpest form: fixture 26 encoded a state no sequence
+# of pushes and captures can produce, AND its prose drew the opposite lesson from it, so a correct
+# implementation would have failed its gate. A fixture that pins an unreachable state is worse than
+# no fixture; it teaches the inverse of the rule.
+
+FRAME_RE = re.compile(r"open since (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z).*?crossed (\d+|\?)\s*$")
+
+
+def _stacks(manifest: Path):
+    """Yield (label, header, stack) for the manifest and any run_a/run_b sub-cases."""
+    d = json.loads(manifest.read_text())
+    for key in (None, "run_a", "run_b"):
+        src = d if key is None else d.get(key)
+        if not isinstance(src, dict):
+            continue
+        stack = src.get("snapshot_stack")
+        if not stack:
+            continue
+        header = src.get("snapshot_header") or d.get("snapshot_header") or {}
+        yield (manifest.parent.name + (f"/{key}" if key else ""), header, stack)
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda m: m.parent.name)
+def test_crossed_never_increases_with_depth(manifest: Path):
+    """`CAPTURE` increments every frame together, so a child cannot outrank its parent."""
+    for label, _header, stack in _stacks(manifest):
+        counts = []
+        for frame in stack:
+            m = FRAME_RE.search(frame)
+            counts.append(int(m.group(2)) if m and m.group(2).isdigit() else None)
+        for i in range(len(counts) - 1):
+            a, b = counts[i], counts[i + 1]
+            assert a is None or b is None or b <= a, (
+                f"{label}: crossed increases with depth {counts} — unreachable: a frame cannot have "
+                f"been present at a capture its parent missed"
+            )
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda m: m.parent.name)
+def test_crossed_zero_means_pushed_since_the_last_capture(manifest: Path):
+    """A frame predating a real `captured:` was in the file at that capture, so it is at least 1."""
+    for label, header, stack in _stacks(manifest):
+        captured = header.get("captured")
+        if not captured or captured == "never":
+            continue
+        for frame in stack:
+            m = FRAME_RE.search(frame)
+            if not m or not m.group(2).isdigit():
+                continue
+            if m.group(1) < captured and int(m.group(2)) == 0:
+                pytest.fail(
+                    f"{label}: frame opened {m.group(1)} reads `crossed 0` under `captured: {captured}` "
+                    f"— it was in the file at that capture, so it cannot be 0"
+                )

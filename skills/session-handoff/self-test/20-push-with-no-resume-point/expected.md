@@ -13,7 +13,7 @@ dirty: yes
 
 ## Stack
 
-1. deploy script · the blocker's fix cannot be tested until deploys work · open since 2026-08-18T14:05Z
+1. deploy script · the blocker's fix cannot be tested until deploys work · open since 2026-08-18T14:05Z · crossed 0
 ```
 
 **`Why` and `Next` are absent, not empty.** No section, no heading, no placeholder. A `## Why` with nothing
@@ -44,3 +44,4 @@ says the reasoning and the next action were **never recorded**. Not that they we
 - Emitting empty `## Why` / `## Next` headings.
 - Taking the `NO-OP` path. A diversion is payload; a session that took one advanced something worth recording.
 - Failing to stamp `dirty:` because `git status` was not run. The grant exists for this.
+- Omitting `crossed 0` from the frame. Every pushed frame carries it, including the first.

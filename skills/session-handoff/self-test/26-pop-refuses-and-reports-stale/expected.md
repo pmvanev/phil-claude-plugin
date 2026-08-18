@@ -31,7 +31,7 @@ removes a frame from a stack that may no longer be the one that was read.
 
 ```
 POPPED — the fixture runner · it needed a flag it did not have   ⚠ was stale (crossed 2)
-  back to: Wave-to-command table · the task in hand
+  back to: Wave-to-command table · the task in hand   ⚠ stale (crossed 2)
   stack now 1 deep
 ```
 
@@ -39,15 +39,20 @@ POPPED — the fixture runner · it needed a flag it did not have   ⚠ was stal
 the only signal that the record had drifted from the work — the stack looks healthy afterwards precisely
 because the unhealthy part was removed. The announcement is the last moment anyone can notice.
 
-Note the shape: the **innermost** frame carries `crossed 2` here while its parent carries `crossed 1`.
-That is ordinary — the parent was pushed first but the counters move together at each wind-down, and a
-frame pushed later can only have crossed fewer. A fixture where the deeper frame is the stale one also
-guards against an implementation that assumes staleness accumulates outward.
+Note the shape: **both** frames carry `crossed 2`, which is the only arrangement that lets the innermost
+be stale. `CAPTURE` increments every frame in the file together, so a child can never carry a higher count
+than its parent — `parent ≥ child` is a theorem of the rule, not a coincidence.
+
+An earlier draft of this fixture had the child at `crossed 2` under a parent at `crossed 1`: a state no
+sequence of pushes and captures can produce. Its prose then claimed the fixture *"guards against an
+implementation that assumes staleness accumulates outward"*. It **does** accumulate outward. That gate
+item would have failed a correct implementation, and a reader would have concluded the rule was wrong.
 
 **Gate failures:**
 
 - Run A writing anything, retrying, or merging.
 - Run A omitting either hash, or the frame it did not pop.
 - Run B popping without mentioning the stale mark.
-- Run B popping frame 1 because it "looks older". Innermost only, always.
+- Run B popping frame 1 because it "looks older", or because both are stale. Innermost only, always.
+- Accepting a stack where a child's `crossed` exceeds its parent's. That state is unreachable.
 - Either run reporting the other's outcome.

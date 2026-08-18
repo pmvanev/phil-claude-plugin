@@ -76,6 +76,13 @@ and fails `17`. Only a content comparison passes both. `16` exists because the t
 previous session's snapshot is what the file is for, so an authorship check blocks every session after
 the first on its first push.
 
+**The `crossed` fixtures pin a state machine, and `tests/test_session_handoff_fixtures.py` now enforces
+its two invariants** — `crossed` never increases with depth, and `crossed 0` means pushed since the last
+capture. Four fixtures violated one or the other and passed everything, because nothing was checking. `26`
+was the worst: it encoded a child outranking its parent — unreachable under the rule — and its prose then
+drew the opposite lesson, so a **correct** implementation would have failed its gate. A fixture pinning an
+unreachable state is worse than no fixture; it teaches the inverse of the rule.
+
 **`19` pins a distinction both cases render as nothing.** An absent record and an empty stack look
 identical on screen, so the cheap implementation satisfies both with one branch and looks correct.
 

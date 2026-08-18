@@ -5,20 +5,29 @@
   "verb": "pop",
   "run_a": {
     "snapshot_present": true,
-    "snapshot_stack": ["Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 0"],
+    "snapshot_stack": [
+      "Wave-to-command table \u00b7 the task in hand \u00b7 open since 2026-08-12T14:05Z \u00b7 crossed 0"
+    ],
     "hash_at_read": "a1b2c3d",
     "hash_at_verify": "9f8e7d6"
   },
   "run_b": {
     "snapshot_present": true,
-    "snapshot_header": { "captured": "2026-08-14T09:00Z", "commit": "083c953", "dirty": "no" },
+    "snapshot_header": {
+      "captured": "2026-08-14T09:00Z",
+      "commit": "083c953",
+      "dirty": "no"
+    },
     "snapshot_stack": [
-      "Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 1",
-      "The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z · crossed 2"
+      "Wave-to-command table \u00b7 the task in hand \u00b7 open since 2026-08-12T14:05Z \u00b7 crossed 2",
+      "The fixture runner \u00b7 it needed a flag it did not have \u00b7 open since 2026-08-12T17:05Z \u00b7 crossed 2"
     ],
     "hash_at_read": "a1b2c3d",
     "hash_at_verify": "a1b2c3d"
   },
-  "expected_decision": ["WRITE-REFUSED", "POPPED"],
+  "expected_decision": [
+    "WRITE-REFUSED",
+    "POPPED"
+  ],
   "expected_guard": "pop carries the SAME compare-and-swap as push (fixture 17 pins push only), and pop announces a stale frame it is closing"
 }

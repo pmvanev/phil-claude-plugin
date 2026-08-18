@@ -6,9 +6,13 @@
   "push_what": "fixture runner",
   "push_why": "the runner needs a flag it does not have",
   "snapshot_present": true,
-  "snapshot_stack": ["wave-to-command table -- the task in hand"],
+  "snapshot_stack": [
+    "Wave-to-command table \u00b7 the task in hand \u00b7 open since 2026-08-12T14:05Z \u00b7 crossed 0"
+  ],
   "hash_at_read": "a1b2c3d",
   "hash_at_verify": "9f8e7d6",
-  "expected_decision": ["WRITE-REFUSED"],
+  "expected_decision": [
+    "WRITE-REFUSED"
+  ],
   "expected_guard": "slice-01 AC3 -- a changed file refuses, reports both hashes, writes nothing, and never retries"
 }

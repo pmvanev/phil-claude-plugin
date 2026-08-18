@@ -4,9 +4,11 @@ Reference for `skills/session-handoff/SKILL.md`. Everything here is addressed to
 the skill, not to a session running it. The rules themselves live in `SKILL.md` and are authoritative;
 if the two ever disagree, `SKILL.md` wins and this file is stale.
 
-Split out 2026-08-18 on `plugin-dev:skill-reviewer`'s finding: the file had reached 5,656 words with the
-justification interleaved with the procedure, so a session executing `push` was reading incident
-narratives on the way past. The split is by **kind**, not by path — nothing loads a fraction of a
+Split out 2026-08-18 in two passes on `plugin-dev:skill-reviewer`'s findings. The first, at 5,656 words,
+moved the board-divergence narrative and the core design history out; the second, after slice 02 pushed the
+file back to 5,896, moved the rest and tightened the procedure prose to under 5,000. Both had the same
+cause: justification interleaved with procedure, so a session executing `push` read incident narratives on
+the way past. The split is by **kind**, not by path — nothing loads a fraction of a
 `SKILL.md`, so splitting the three paths into three files would simply mean loading all three.
 
 ## The claimed-card link was tested and deliberately not built
@@ -104,3 +106,39 @@ A frame's staleness becomes *true* at the next pick-up. Leaving the mark to `sho
 only by someone who ran `/phil:stack` — i.e. someone who already remembered the frame. Issue #29's
 done-when is that a never-popped frame is *visible*, and `commands/resume.md` promises the stack in as
 many words, so BOOTSTRAP renders it.
+
+## Why read-back names the owner and never runs it
+
+`/phil:resume` has no `Write`, no `Edit`, and read-only `Bash`. Running the owner would route around all
+three — `/nw-execute` writes code. This mirrors `nwave-slice-status`, which prints the resume command as
+text and never runs it. `/nw-continue` is refused for the same reason plus one more: it computes much the
+same position and then *launches the next wave*, which is the side effect `nwave-slice-status` exists to
+avoid.
+
+## Why a reconstructed briefing must be labelled
+
+A recorded briefing carries reasoning that was witnessed. A reconstructed one carries position inferred
+from files. They have different warranties, and blurring them invents confidence the reader has no way to
+audit — the same failure as presenting a stale snapshot as current, arrived at from the other side.
+
+## Why `ROUTE-LIVE-WINS` reports the disagreement instead of settling it
+
+Silently preferring the live wave label hides that the snapshot has drifted — the one signal that would
+tell the reader their capture habit is falling behind. The live value still wins; what is refused is
+winning *quietly*.
+
+## Why "the boundary is the block, not the card"
+
+The never-do list forbids reading the projection back, and until 2026-08-17 that rule read *"never the
+card"* — which the #24 divergence check made false the moment it shipped, while the real invariant went
+unwritten. Read-back reads the board's **Status, position and card title**: those are the board's own
+facts, not a copy of anything this skill wrote. What it must never read back is the `Why` / `Next` /
+`Stack` it projected, because those **are** a copy, and a snapshot reconciled against its own projection
+has become the two authorities the whole design exists to prevent.
+
+## Why a `push` may stamp a header it did not inherit
+
+The header rule says `push` and `pop` reproduce the header byte-for-byte. The one exception is a `push`
+that *creates* the snapshot: there is no prior header to reproduce, so `commit:` and `dirty:` are stamped
+from the tree and `captured:` is written `never`. Without the exception the never-do list reads as
+forbidding the behaviour fixture 20 pins.

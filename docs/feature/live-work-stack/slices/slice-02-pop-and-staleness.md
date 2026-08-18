@@ -141,6 +141,43 @@ paraphrased, one omitted entirely, and the file must win.
   changing *only* line endings is invisible. Not fixtured — that would test git's determinism, not this
   skill.
 
+### The third reviewer pass, which was not a formality
+
+Both reviewers ran again after the compression. Between them, seven more defects — the trend across three
+passes was 4, 10, 7, so the assumption that a smaller change is a cleaner one stayed wrong.
+
+**The `crossed` rule was sound; its worked examples were not.** Four fixtures and the canonical snapshot in
+`SKILL.md` encoded states no sequence of pushes and captures can produce. Fixture 26 was the worst: a child
+at `crossed 2` under a parent at `crossed 1`, which is unreachable because `CAPTURE` increments every frame
+together — and its prose then claimed it *"guards against an implementation that assumes staleness
+accumulates outward"*. Staleness **does** accumulate outward. That gate item would have failed a correct
+implementation, and a reader would have concluded the rule was wrong.
+
+**Two invariants were true of the design and stated nowhere**, which is why the examples drifted:
+`crossed` never increases with depth; `crossed 0` means pushed since the last capture. Both are now in
+`SKILL.md`, and both are enforced by `tests/test_session_handoff_fixtures.py` — verified by reintroducing
+fixture 26's defect and watching the check fail, per `CLAUDE.md`'s rule about the `board-setup` check that
+was written and never called.
+
+**A rule lived only in the tests.** `WRITE-REFUSED` must echo the frame it did not record — asserted by
+fixtures 17 and 26 and by `acceptance.feature`, and absent from `SKILL.md`. A session following the skill
+would have failed two must-pass fixtures.
+
+**`CAPTURE` was not idempotent.** Running `/phil:handoff` twice for one wind-down took every open frame
+from 0 to 2 and marked the whole stack stale inside a single session — the false alarm the threshold was
+designed to prevent, arriving from the other side. Now: increment only where the capture records something
+new.
+
+**The compression introduced a false claim.** Rewriting *"`show` computes an age from it"* into *"`show`
+and the staleness rule both read it"* asserted that staleness reads `open since`, which contradicts the
+rule twelve lines below and would produce exactly the behaviour fixture 22 forbids. Its pre-existing twin
+in `push` step 3 — missed by all three passes until now — said the same thing.
+
+Also: a frame carrying no `crossed` had no defined reading, and a must-pass fixture supplied one; fixture
+20 omitted `crossed 0` while fixture 23 made omitting it a gate failure; `BOOTSTRAP`'s emitted-order
+sentence had no position for the stack step it calls mandatory; and `references/why-these-rules.md`
+duplicated its own section about not duplicating things.
+
 ### Not done
 
 - **KPI-1.** Unmeasured. The plugin loads 0.58.0, so `/phil:stack` is not invokable here yet.

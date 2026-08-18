@@ -18,9 +18,11 @@ not read its absence as an oversight to correct — the reasoning is in `referen
 
 Justification lives beside the procedure, not inside it. Read these when **changing** this skill:
 
-- **`references/why-these-rules.md`** — why the guard is content and not identity, why whole-file
-  regeneration is safe, why the snapshot is per-worktree, why the projection is write-only, and what
-  slice 03 settled.
+- **`references/why-these-rules.md`** — the design history behind these rules: why the concurrency guard
+  is content and not identity, why whole-file regeneration is safe, why the snapshot is per-worktree, why
+  the projection is write-only, **why the stale threshold is two**, why read-back names the owner without
+  running it, why a reconstructed briefing must be labelled, why *the boundary is the block, not the
+  card*, why a `push` may stamp a header it did not inherit, and what slice 03 settled.
 - **`references/board-divergence.md`** — the #24 check's reasoning, its worked output for all three
   branches, and why each of its four rules is drawn where it is.
 
@@ -62,8 +64,8 @@ Verify the wave-to-command table against a real run.
 ## Stack
 
 1. Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 2
-2. └ Fixture 07 · it contradicted the table, so it had to be settled first · open since 2026-08-12T16:40Z · crossed 0
-3.   └ The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z · crossed 0
+2. └ Fixture 07 · it contradicted the table, so it had to be settled first · open since 2026-08-12T16:40Z · crossed 1
+3.   └ The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z · crossed 1
 ```
 
 **The stack is innermost-last, numbered, and each frame carries what it is, why it was pushed, when, and
@@ -72,37 +74,47 @@ it was diverted from. A frame is popped by deleting its line, so the file is the
 of stack operations.
 
 **Every frame stamps the full `YYYY-MM-DDTHH:MMZ`, including the deeper ones.** The abbreviated form this
-format shipped with — a bare `16:40Z` on frames 2 and 3 — was a readability nicety while the stack was
-only ever rendered. `show` computes an age from it, so it is machine input now, and a frame open across a
-handoff has very likely crossed midnight.
+format shipped with was a readability nicety while the stack was only rendered; `show` and BOOTSTRAP
+step 5b subtract an **age** from it now, and a frame carried across a handoff has likely crossed midnight.
+The staleness rule does **not** read it — that is `crossed`'s job, and the two must not be conflated.
 
-**`crossed` counts the wind-downs a frame has survived.** A frame is written `crossed 0` by `push`, and
-`CAPTURE` increments it for every frame already in the file. It is the only piece of frame state anything
-but `push` writes, and it exists because the staleness rule below has no other discriminator.
+**`crossed` counts the wind-downs a frame has survived.** `push` writes `0`; `CAPTURE` adds 1 to every
+frame already in the file. `CAPTURE` is the only thing besides `push` that writes any frame field, and
+`crossed` is the only field it writes.
 
-**Omit the section entirely when nothing was diverted.** An empty `## Stack` heading reads as a claim that
-the work was straightforward, which is a different thing from no claim at all.
+Two invariants follow, and a snapshot breaking either is corrupt rather than merely odd:
 
-**A frame with `crossed` of 2 or more is marked `⚠ stale`.** A push that was never popped is stale, and a
-stale frame is worse than no frame because the reader trusts it — the same shape as a stale snapshot, one
-level down.
+- **`crossed` never increases with depth.** Every frame present at a capture increments together, and a
+  child cannot have been present at a capture its parent missed. `parent ≥ child`, always.
+- **`crossed 0` means pushed since the last capture.** A frame whose `open since` predates a non-`never`
+  `captured:` was in the file at that capture, so it is at least 1.
 
-**Two, not one**, and `crossed` is stored rather than derived, for reasons that are not obvious —
-`references/why-these-rules.md` § *Why the stale threshold is two*.
+**A capture that records nothing new does not increment.** `/phil:handoff` run twice for one wind-down —
+a correction, a second look — is not two wind-downs. Increment only where this capture's why or next
+action differs from what is on disk. Without that, running handoff twice takes every open frame from 0
+to 2 and marks the whole stack stale inside one session: the false alarm the threshold exists to
+prevent, arriving from the other side.
 
-**Nothing is marked while every frame reads `crossed 0`**, which is the whole of a session that has not
-wound down yet, including the push-created snapshot.
+**A frame carrying no `crossed` reads as unknown, never as 0.** Render `crossed ?` and never mark it. The
+field is hand-editable and snapshots predate it; treating absent as zero under-reports silently, which is
+the failure the mark exists to catch.
 
-No age threshold is defined, and inventing one would be guessing — `crossed` counts wind-downs, never
-elapsed time. Every frame renders its age, so a frame that is merely old stays visible for a human to
-judge without the tool claiming anything about it.
+**Omit the section entirely when nothing was diverted.** An empty heading claims the work was
+straightforward, which is a different thing from no claim at all.
 
-**The mark is computed at render time and never written to the file.** `⚠ stale` appears in `show` and in
-`pop`'s report; the snapshot stores `crossed` and nothing else. A stored mark would be a second piece of
-derived state that `push`'s byte-for-byte reproduction would then carry forward after it went wrong.
+**A frame with `crossed` of 2 or more is marked `⚠ stale`.** Two, not one: every frame carried across a
+boundary has survived one, so marking at one marks the normal case. Why the threshold is two, and why
+`crossed` is stored rather than derived: `references/why-these-rules.md` § *Why the stale threshold is two*.
 
-**This rule's source is here**, beside the recorder. `skills/nwave-issue-board/SKILL.md` states it again
-for the projected copy and cites this file; if the two disagree, this one wins.
+**Never mark on age.** `crossed` counts wind-downs, not elapsed time. A frame open three days inside one
+session is `crossed 0` and is where attention still is. Every frame renders its age so a human can judge
+what the tool will not.
+
+**The mark is computed at render time and never written to the file.** The snapshot stores `crossed`;
+`⚠ stale` appears only in `show` and `pop`'s report.
+
+**This rule's source is here.** `skills/nwave-issue-board/SKILL.md` restates it for the projected copy;
+if the two disagree, this one wins.
 
 The delimited header is machine-readable with `grep`/`sed`; the body is prose for a human. Read the
 fingerprint from the header, never by parsing the prose.
@@ -123,11 +135,11 @@ write   the whole file
 ```
 
 `git hash-object`, not `sha256sum` or `shasum`: git is already required to resolve the path, and the
-coreutils spelling differs between Linux and macOS. Never pass `-w` — that writes the object into the
-database, which is why the verb is not on `check-readonly-commands.py`'s read-only allowlist.
+coreutils spelling differs across platforms. Never pass `-w` — it writes to the object database, which is
+why the verb is off `check-readonly-commands.py`'s read-only allowlist.
 
-Where no file exists at `read`, there is no `h1`; `verify` instead asserts the file is **still** absent.
-A file that appeared in between is another writer's, and the same refusal applies.
+Where no file exists at `read` there is no `h1`; `verify` asserts the file is **still** absent, and a file
+that appeared in between is another writer's.
 
 **The delimited header belongs to CAPTURE alone.** `push` and `pop` reproduce `captured:`, `commit:`,
 `dirty:` and `owner:` **byte-for-byte** and never re-derive them. This is the single most destructive
@@ -141,7 +153,11 @@ capture.
 
 **A failed compare-and-swap refuses and reports. It never retries and never loops.** Retrying resolves a
 competing write by overwriting it, which is arbitration; competing claims are **detected, not resolved**
-here. Report `WRITE-REFUSED` with both hashes and stop.
+here.
+
+Report `WRITE-REFUSED` with both hashes **and the frame that was not recorded** — the pushed frame, or
+the popped one — then stop. The reason for a diversion exists only in the human's head at that moment, so
+a refusal that swallows it costs exactly what this feature was built to catch.
 
 The file is **per-worktree**, not per-repo — `git rev-parse --show-toplevel` returns a linked worktree's
 own root.
@@ -151,45 +167,36 @@ Why regeneration is safe, why the guard is content rather than identity, and whe
 
 ## CAPTURE — `/phil:handoff`
 
-1. **Decide whether anything happened.** The payload is the why and the next action. If neither can
-   be stated — no decision reached, no next action formed — take the `NO-OP` path below, **however
-   many files changed**. File churn alone is derivable from git and is not a reason to write a
-   snapshot.
+1. **Decide whether anything happened.** The payload is the why and the next action. If neither can be
+   stated, take the `NO-OP` path below, **however many files changed** — churn is derivable from git.
 
-   `$ARGUMENTS`, when present, is the session's own account of what it was doing. Treat it as raw
-   material for the why and the next action, never as the record itself — it is subject to every rule
-   below, including the refusal of derivable state it may contain.
+   `$ARGUMENTS`, when present, is the session's own account. Raw material for the why and the next
+   action, never the record itself, and subject to every rule below.
 2. **Collect the why.** State the decisions reached and, critically, the approaches **ruled out and
    why**. A decision without its discarded alternatives invites the next session to re-propose them.
 3. **Collect the next action** — one sentence, concrete enough to start from.
-4. **Record the owning command**, when the work has one. Derive it from the feature issue's wave
-   label using the table in `skills/nwave-issue-board/SKILL.md` — that skill owns the wave label and
-   owns the mapping. Do not restate the table here; a second copy is a second authority. Omit
-   `owner:` entirely when no wave label applies. Most work has no owner, and that is not a defect.
+4. **Record the owning command**, when the work has one. Derive it from the feature issue's wave label
+   using the table in `skills/nwave-issue-board/SKILL.md`, which owns both. Omit `owner:` entirely when
+   no wave label applies — most work has no owner, and that is not a defect.
 5. **Carry the work stack forward, and increment it.** The frames already in `.session-handoff.md` are
-   **authoritative**. Reproduce each one's what, why and `open since` **byte-for-byte**, and add 1 to its
-   `crossed`. Do not re-derive `open since` from the session's account or from the clock: re-stamping it
-   makes every frame postdate its own capture, and `⚠ stale` becomes unreachable for ever after — the
-   header rule's failure, one level down.
+   **authoritative**: reproduce each one's what, why and `open since` **byte-for-byte**, and add 1 to its
+   `crossed`. Never re-derive `open since` from the account or the clock — that makes every frame
+   postdate its own capture and `⚠ stale` unreachable for ever after.
 
-   Append a frame only for a diversion the session took and did **not** close, that is not already in the
-   file; new frames are written `crossed 0`. A diversion closed before the session ended leaves no frame —
-   the stack records where attention *is*, not where it has been. **Collected here, with the other payload,
-   because step 8 writes the file**: a stack gathered after the write is a stack the snapshot does not
-   contain.
-6. **Refuse the derivable.** If wave, slice, step, branch, or file position comes up, leave it out.
-   Say plainly that it is left out because it is derived at read-back. This is not an optimisation;
-   recording it is the defect.
+   Append a frame only for a diversion the session took, did **not** close, and that is not already
+   present; new frames are `crossed 0`. A diversion closed before the session ended leaves no frame.
+   **Done here, not after step 8**: a stack gathered after the write is not in the snapshot.
+6. **Refuse the derivable.** If wave, slice, step, branch or file position comes up, leave it out and
+   say so. Recording it is the defect, not an optimisation missed.
 7. **Stamp the header.** `captured:` is the current time in UTC at minute precision
    (`2026-08-12T17:30Z`); `commit` is `git rev-parse --short HEAD`; `git status --porcelain`
    non-empty means `dirty: yes`.
 8. **Write `.session-handoff.md`** whole, under the compare-and-swap in *Writing the snapshot* above.
    Never merge into a snapshot that changed beneath this session.
-9. **Refresh the projection on the feature's card, if the work has one.** Local file first, always: the
-   snapshot is the authority and a failed forge call must never cost it. Publishing is
-   `phil:nwave-issue-board`'s — hand it the why, the next action and the stack with their capture
-   timestamp, and let it own the block. **Never read the card back.** A forge failure leaves the snapshot
-   intact and is reported as an un-refreshed projection, not as a failed capture.
+9. **Refresh the projection on the feature's card, if the work has one.** Local file first, always — a
+   failed forge call must never cost the authority. Hand `phil:nwave-issue-board` the why, the next
+   action and the stack with their capture timestamp; it owns the block. **Never read the card back.** A
+   forge failure is an un-refreshed projection, not a failed capture.
 10. **Report** `CAPTURE`, and echo what was recorded so a mistake is visible immediately. Say whether the
    projection was refreshed, and where it was not.
 
@@ -232,27 +239,21 @@ reproduced byte-for-byte; `show` writes nothing.
    <N>. <indent><└ if N>1><what> · <why> · open since <YYYY-MM-DDTHH:MM>Z · crossed 0
    ```
 
-   Frame 1 carries no `└` and no indent. **Every frame carries the full date**, deeper ones included —
-   `show` subtracts from it and the staleness rule reads it, so a bare `HH:MMZ` is undecidable.
+   Frame 1 carries no `└` and no indent. **Every frame carries the full date**, deeper ones included,
+   because `show` subtracts an age from it. Staleness is `crossed`'s, never this field's.
 4. **Write the whole file** under the compare-and-swap.
 5. **Report** `PUSHED`, echoing the frame and the new depth, so a mistyped reason is visible at once.
 
 **Where no snapshot exists, create one carrying the stack alone.** A diversion is payload, so this is
 not the `NO-OP` case — but the why and the next action are **absent**, never invented.
 
-Such a file still needs a header, and `push` is not a capture, so it cannot stamp one as CAPTURE does.
-Write `captured: never` and stamp `commit:` and `dirty:` from the tree at creation — the one sanctioned
-exception to the header rule, because there is no prior header to reproduce. `captured: never` is the
-load-bearing token: a fingerprint exists, and no payload was ever captured against it.
+Such a file still needs a header. Write `captured: never` and stamp `commit:` and `dirty:` from the tree
+— the one sanctioned exception to the header rule, since there is no prior header to reproduce.
+`captured: never` is the load-bearing token: a fingerprint exists, and no payload was ever captured
+against it. What read-back does with that is *Read-back over `captured: never`* below.
 
-**What BOOTSTRAP does with it** is stated in full at *Read-back over `captured: never`* below, because it
-is not obvious: the freshness verdict works, the board triple cannot, and the why is *never recorded*
-rather than empty. A read-back over
-such a snapshot presents the stack and says the why was never captured.
-
-**Never refresh the projection from `push`.** The card is refreshed at boundaries, by `/phil:handoff`.
-A forge write per push would put the board on the critical path of a mid-session note and publish
-in-flight scratch a frame at a time.
+**Never refresh the projection from `push`.** The card is refreshed at boundaries, by `/phil:handoff`;
+a forge write per push would put the board on the critical path of a mid-session note.
 
 ### show — `/phil:stack`, bare
 
@@ -263,41 +264,29 @@ in-flight scratch a frame at a time.
    working rather than asserting a judgement.
 3. **Report** `SHOWN`, or one of the two empties below.
 
-**`unknown` and `none` are different answers and must not be collapsed.** No snapshot at all → `unknown`:
-nobody wrote anything down. A snapshot with no `## Stack` → `none`: a session recorded its state and had
-no diversions to record. `unknown` is a claim about the record; `none` is a claim about the work.
-
-Read bottom-up for where attention is; read top-down for what it was diverted from.
+**`unknown` and `none` are different answers and must not be collapsed.** No snapshot at all →
+`unknown` (a claim about the record). A snapshot with no `## Stack` → `none` (a claim about the work).
 
 ### pop — `/phil:stack pop`
 
 1. **Read the whole snapshot** and take `h1`.
-2. **Delete the innermost frame only** — the last line of `## Stack`. A frame is popped by deleting its
-   line, which is what keeps the file a stack rather than a log of stack operations, and what keeps it
-   from growing without bound. Popping anything else is editing the stack rather than navigating it: do
-   that by hand, which the prose format allows on purpose.
+2. **Delete the innermost frame only** — the last line of `## Stack`. Popping anything else is editing
+   the stack rather than navigating it; do that by hand, which the prose format allows on purpose.
 3. **Remove the `## Stack` section entirely** when the last frame goes. An empty heading asserts the work
-   was straightforward, which is a different claim from no claim.
+   was straightforward.
 4. **Write the whole file** under the compare-and-swap, header reproduced byte-for-byte.
 5. **Report** `POPPED`, naming the frame now in hand and the new depth. **Where the popped frame was
-   marked `⚠ stale`, say so** — a frame that outlived a boundary and is closed silently takes with it the
-   only signal that the record had drifted from the work.
+   `⚠ stale`, say so** — closed silently, it takes with it the only signal that the record had drifted.
 
-**Popping nothing is not an error, and the two nothings are different**, exactly as they are for `show`:
+**Popping nothing is not an error, and the two nothings are different**, exactly as for `show`: no
+snapshot at all → `STACK-UNKNOWN`; a snapshot with no `## Stack` → `STACK-EMPTY`. Either way **write
+nothing**, and take no hash. Collapsing them asserts a fact about the work when the record is what is
+absent.
 
-- **No snapshot at all** → `STACK-UNKNOWN`. Nobody wrote anything down; this says nothing about whether
-  there were diversions.
-- **A snapshot with no `## Stack`** → `STACK-EMPTY`. A session recorded its state and had none to record.
-
-Either way **write nothing** — do not rewrite the file to prove it was read, and do not take a hash to
-find out. Collapsing the two into "the stack is empty" asserts a fact about the work when the record is
-what is absent.
-
-**Popping the last frame off a push-created snapshot leaves a file with a header and nothing else.** That
-is the placeholder this skill refuses elsewhere, so **delete the snapshot** in that one case: no `## Why`,
-no `## Next`, no `## Stack`, and `captured: never` — nothing was ever captured, and the only thing the
-file held has just been popped. Report `POPPED` and say the snapshot was removed. Where a `## Why` or a
-`## Next` exists, the file stays: a capture happened, and its payload is not the stack's to discard.
+**Popping the last frame off a push-created snapshot** — no `## Why`, no `## Next`, `captured: never` —
+would leave a header and nothing else, which is the placeholder this skill refuses. **Delete the snapshot**
+in that one case and say so. Where a `## Why` or `## Next` exists the file stays: a capture happened, and
+its payload is not the stack's to discard.
 
 ## BOOTSTRAP — `/phil:resume`
 
@@ -308,7 +297,7 @@ file held has just been popped. Report `POPPED` and say the snapshot was removed
 3. **Compare against the tree now** — current short HEAD, and current dirty state.
 4. **Branch on the comparison**, and state the verdict *first*:
 
-The emitted order is **verdict → board triple (step 5) → content (step 6) → owner (step 7)**, and the
+The emitted order is **verdict → board triple (5) → stack (5b) → content (6) → owner (7)**, and the
 steps below appear in that order. Both checks come before any content, because a reader who has seen
 the briefing has already started believing it.
 
@@ -348,12 +337,12 @@ Report exactly one of `BOARD-AGREES`, `BOARD-DIVERGES`, `BOARD-UNREADABLE` — *
 verdict and before the recorded content** — on `RESUME-CURRENT` and `RESUME-STALE` alike. `RECONSTRUCT`
 reports none: with no snapshot there is no recorded next action to compare.
 
-- **`BOARD-AGREES`** — one line naming the card. **Report agreement out loud**; a detector silent on the
-  agreeing branch is indistinguishable from one that never fires.
+- **`BOARD-AGREES`** — one line naming the card. **Report agreement out loud** — a detector silent on
+  agreement is indistinguishable from one that never fires.
 - **`BOARD-DIVERGES`** — name **both** sides, label each with its source, and stop.
-- **`BOARD-UNREADABLE`** — name the reason and say plainly that the next action was not checked. Most
-  repositories carrying this skill have no board, so this branch runs most often. An unreadable board is
-  not an agreeing board.
+- **`BOARD-UNREADABLE`** — name the reason and say the next action was not checked. Most repositories
+  carrying this skill have no board, so this branch runs most often, and an unreadable board is not an
+  agreeing board.
 
 Four rules govern the comparison:
 
@@ -424,10 +413,7 @@ including `RECONSTRUCT`.
 owner: /nw-execute  (wave: deliver)  → run it to continue
 ```
 
-**Name it; never run it.** `/phil:resume` has no `Write`, no `Edit`, and read-only `Bash`, and
-running the owner would route around all three — `/nw-execute` writes code. This mirrors
-`nwave-slice-status`, which prints the resume command as text and never runs it. A read-back reports;
-it does not start work.
+**Name it; never run it.** A read-back reports; it does not start work.
 
 **`ROUTE-LIVE-WINS`** — the recorded `owner:` disagrees with what the feature's current wave label
 implies. **The live label wins**, and the disagreement is reported rather than quietly settled:
@@ -437,9 +423,6 @@ owner: /nw-execute  (wave: deliver)
   recorded as /nw-distill — the wave advanced since this snapshot was written
 ```
 
-Silently preferring the live value hides that the snapshot has drifted, which is the one signal that
-would tell the reader their capture habit is falling behind.
-
 **`ASK-OWNER`** — no `owner:` recorded and no wave label to derive one from. Say the owner is unknown
 and ask. **Do not begin the work.** This is the common case on a mixed board, not an edge case: most
 cards are not nWave work, and the absence of a label is not permission.
@@ -448,13 +431,9 @@ cards are not nWave work, and the absence of a label is not permission.
 `nwave-slice-status` skill for a feature's wave, slice, and step state, and git for the branch and
 recent commits.
 
-**Never invoke `/nw-continue` here.** It computes much the same position and then *launches the next
-wave* — `skills/nwave-slice-status/SKILL.md` exists because of that side effect. Read-back starts
-nothing. Present that, and **label it as reconstructed rather than recorded** — including
-that the *why* is unavailable, because nothing derives it.
-
-A recorded briefing carries reasoning that was witnessed. A reconstructed one carries position
-inferred from files. They have different warranties; blurring them invents confidence.
+**Never invoke `/nw-continue` here** — it launches the next wave. **Label the briefing reconstructed,
+not recorded**, including that the *why* is unavailable, because nothing derives it. The two carry
+different warranties; `references/why-these-rules.md` says why blurring them invents confidence.
 
 ## Deriving, not duplicating
 
@@ -470,15 +449,11 @@ Both delegates are read-only, and **enforced** so: the `nwave-slice-status` skil
 
 Delegate; do not re-derive. These own their answers and have their own correctness gates.
 
-**The board is not in this table**, and the distinction is worth keeping sharp. These two rows answer
-*what to look up instead of recording* — the snapshot was always at risk of duplicating them. The board
-answers something else entirely: *what to cross-check the snapshot against*. Nothing here was ever
-tempted to record it. Step 5 owns that read; `commands/resume.md` owns why its grant makes the command
-declare `mutates: true` while writing nothing.
+**The board is not in this table** — these rows answer *what to look up instead of recording*; the board
+answers *what to cross-check against*. Step 5 owns that read.
 
-Note the asymmetry, which is deliberate: at **capture** this state must be refused, and at
-**read-back** it must be actively fetched. The rule is not "never touch position" — it is *never at
-capture, always at read-back*.
+The asymmetry is deliberate: **never at capture, always at read-back.** The rule is not "never touch
+position".
 
 ## Decision outcomes
 
@@ -505,63 +480,65 @@ exactly one of `ROUTE`, `ROUTE-LIVE-WINS`, `ASK-OWNER` — freshness and owner a
 snapshot and a working fingerprint, and still nothing to compare. The exemption is the criterion, not
 the shape.
 
-**These are independent of the freshness verdict, and coercing one into the other is a gate failure.**
-A board divergence is not staleness: the tree may be untouched while the work has moved on, which is
-exactly the case #24 was filed for. Report both, and let them disagree.
+**A board divergence is not staleness**, and coercing one into the other is a gate failure: the tree may
+be untouched while the work has moved on. Report both, and let them disagree.
 
 **A stack run reports exactly one** of `PUSHED`, `POPPED`, `SHOWN`, `STACK-EMPTY`, `STACK-UNKNOWN` or
-`WRITE-REFUSED`, and reports none of the capture or read-back outcomes — the three paths do not
-interleave. `STACK-EMPTY` and `STACK-UNKNOWN` are separate for the reason the projection keeps `none`
-and `unknown` separate: one is a claim about the work, the other about the record. `WRITE-REFUSED` is
-terminal on its run; nothing is written and nothing is retried.
+`WRITE-REFUSED`, and none of the capture or read-back outcomes — the three paths do not interleave.
+`WRITE-REFUSED` is terminal: nothing written, nothing retried.
 
 ## What this skill must never do
 
-- Write the snapshot anywhere but the repo root, or commit it.
-- Present a stale snapshot as current, or bury the verdict beneath the content.
-- **Refresh the projection before the snapshot is written.** Local first, always — a forge call that
-  succeeds while the local write fails leaves the authority behind its own copy.
-- **Read the projection block back, at capture or at read-back.** The projection is write-only; that is
-  what keeps it from being a second authority.
+Grouped by what they govern, mostly one line each. Where a rule's reasoning is not self-evident it lives
+in `references/why-these-rules.md`, or `references/board-divergence.md` for the board rules — but every
+rule below stands without reading either.
 
-  **The boundary is the block, not the card.** Read-back reads the board's *Status, position and card
-  title* — that is the divergence check, and those facts are the board's own, never a copy of anything
-  this skill wrote. It must never read back the `Why` / `Next` / `Stack` it projected, because those
-  **are** a copy, and a snapshot reconciled against its own projection has become two authorities.
-  Stated on 2026-08-17: until then the rule read "never the card", which the divergence check made
-  false while the real invariant went unwritten.
-- **Render an absent stack as empty.** Where nothing was projected, the card says `unknown`. Empty
-  asserts there were no diversions.
-- **Publish the block itself.** `phil:nwave-issue-board` owns the block's format, its markers and its
-  timestamp; hand it the content.
+**The snapshot**
+
+- Write it anywhere but the repo root, or commit it.
+- Write one for a session that advanced nothing.
 - Record wave, slice, step, branch, or file position.
-- Write a snapshot for a session that advanced nothing.
 - Invent a next action that was not stated.
-- **Run** the owning command. Naming it is the whole of routing here; `/phil:resume` starts nothing.
-- **Resolve a board divergence.** Detect it, name both sides, stop. Preferring one source discards the
-  other's work while reporting success.
-- **Write to the board during read-back.** No card moved, no Status set, no comment. The projection at
-  CAPTURE step 9 is the **only** sanctioned board write in this skill; read-back has none.
-- **Report `BOARD-AGREES` for a board that could not be read**, or report nothing at all. Unreadable is
-  a claim about the record; agreement is a claim about the work.
-- Record a claimed card or its basis as a field. Tested and not built; the why already carries the basis.
-- Restate the wave → command table. `skills/nwave-issue-board/SKILL.md` owns it; derive from there.
-- **Merge into a snapshot that changed beneath this session**, on any path. Regenerate whole, or refuse.
-- **Retry a refused write.** Retrying resolves a competing write by overwriting it, which is arbitration.
-- **Re-derive the header on a `push`.** `captured:`, `commit:`, `dirty:` and `owner:` are CAPTURE's and are
-  reproduced byte-for-byte. Re-stamping `commit:` makes `RESUME-STALE` unreachable for ever after.
+- Record a claimed card or its basis as a field. Tested and not built; the why carries the basis.
+- Restate the wave → command table. `skills/nwave-issue-board/SKILL.md` owns it.
+
+**Writing, on any path**
+
+- **Merge into a snapshot that changed beneath this session.** Regenerate whole, or refuse.
+- **Retry a refused write.** Retrying overwrites a competing write, which is arbitration.
+- **Re-derive the header on a `push` or `pop`.** `captured:`, `commit:`, `dirty:`, `owner:` are CAPTURE's,
+  reproduced byte-for-byte. Re-stamping `commit:` makes `RESUME-STALE` unreachable for ever after. The one
+  exception is a `push` **creating** the file, which has no prior header.
+- **Re-derive a frame's `open since`**, including at `CAPTURE`. The file is authoritative for frames
+  already in it; re-stamping makes every frame postdate its capture and `⚠ stale` unreachable.
+
+**The stack**
+
 - **Push a frame with no reason.** The reason is the payload; the what is half-derivable from the diff.
-- **Push from a hook.** No hook can see why a human left a task — the ground on which the `Stop` hook was
-  deferred.
-- **Close a frame the human did not close.** No expiry, no auto-pop, no timeout. A frame the tool closed
-  is a frame whose reason nobody read; marking it stale is the honest limit.
+- **Push from a hook.** No hook can see why a human left a task.
 - **Pop a frame other than the innermost.**
-- **Re-derive a frame's `open since`**, on any path, including `CAPTURE`. The file is authoritative for
-  frames already in it. Re-stamping makes every frame postdate its capture and `⚠ stale` unreachable.
-- **Write `⚠ stale` into the snapshot.** The mark is computed at render time; the file stores `crossed`.
-- **Mark on age.** `crossed` counts wind-downs. A frame open three days inside one session is `crossed 0`
-  and is not stale — it is where attention still is.
-- **Write to the forge from `/phil:stack`.** The card is refreshed at boundaries, by `/phil:handoff`.
+- **Close a frame the human did not close.** No expiry, no auto-pop, no timeout.
+- **Write `⚠ stale` into the snapshot.** The mark is render-time; the file stores `crossed`.
+- **Mark on age.** `crossed` counts wind-downs, not elapsed time.
+- **Write to the forge from `/phil:stack`.**
+
+**The board and the projection**
+
+- **Refresh the projection before the snapshot is written.** Local first, always.
+- **Read the projection block back**, at capture or read-back. It is write-only. *The boundary is the
+  block, not the card*: read-back reads the board's Status, position and card title — the board's own
+  facts — and never the `Why`/`Next`/`Stack` this skill projected.
+- **Render an absent stack as empty.** `unknown` is a claim about the record; empty about the work.
+- **Publish the block itself.** `phil:nwave-issue-board` owns its format, markers and timestamp.
+- **Resolve a board divergence.** Detect, name both sides, stop.
+- **Write to the board during read-back.** The projection at CAPTURE step 9 is the only sanctioned board
+  write in this skill.
+- **Report `BOARD-AGREES` for a board that could not be read**, or report nothing at all.
+
+**Read-back**
+
+- Present a stale snapshot as current, or bury the verdict beneath the content.
+- **Run** the owning command. Naming it is the whole of routing here.
 
 ## Acceptance
 
@@ -575,13 +552,9 @@ One rule is worth repeating because getting it wrong retires working fixtures: *
 predate the board triple supply no `board_state`, so a read-back over them reports `BOARD-UNREADABLE`,
 and that is a pass.** The register says which ones and why.
 
-The suite is **model-driven** for the decisions — judging whether a read-back reached the right
-outcome is not automatable here. It is **not uncovered**: `tests/test_session_handoff_fixtures.py`
-structurally guards every fixture, asserting each is registered and names only outcomes this file
-defines. It does not drive them. (`tests/test_self_test_fixtures.py` is a different suite, covering
-`refactor-tests`/`refactor`, not these.) Drive each one by giving this skill
-the situation in its `manifest.json` and comparing the decision reached against its `expected.md`. Do
-that whenever this file, any of the three command loaders, `skills/nwave-issue-board/SKILL.md` or
-`skills/issue-board/SKILL.md` changes. Every failure mode here is silent — a snapshot that records too
-much looks more complete, a stale one presented as current looks like a smooth resume, and a divergence
-check that never fires looks like a board that always agrees.
+The suite is **model-driven** for the decisions; `tests/test_session_handoff_fixtures.py` structurally
+guards every fixture but does not drive them. Drive each by giving this skill the situation in its
+`manifest.json` and comparing the decision reached against its `expected.md` — whenever this file, any
+of the three command loaders, `skills/nwave-issue-board/SKILL.md` or `skills/issue-board/SKILL.md`
+changes. **Every failure mode here is silent**, which is why it is regression-tested rather than
+eyeballed.

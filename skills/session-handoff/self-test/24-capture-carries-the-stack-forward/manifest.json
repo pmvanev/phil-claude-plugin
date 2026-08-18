@@ -3,18 +3,26 @@
   "phase": "WIND-DOWN",
   "situation": "A session ends while two diversions are still open. It reached a decision and formed a next action, so a capture happens. The session's own account of the stack is deliberately WRONG -- it paraphrases one frame's reason and omits the other entirely.",
   "session_advanced_work": true,
-  "decisions_made": ["settled the threshold at two wind-downs"],
+  "decisions_made": [
+    "settled the threshold at two wind-downs"
+  ],
   "next_action": "add the nesting fixture",
   "snapshot_present": true,
-  "snapshot_header": { "captured": "2026-08-12T13:00Z", "commit": "083c953", "dirty": "no" },
+  "snapshot_header": {
+    "captured": "2026-08-12T18:00Z",
+    "commit": "083c953",
+    "dirty": "no"
+  },
   "snapshot_stack": [
-    "Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 1",
-    "The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z · crossed 0"
+    "Wave-to-command table \u00b7 the task in hand \u00b7 open since 2026-08-12T14:05Z \u00b7 crossed 1",
+    "The fixture runner \u00b7 it needed a flag it did not have \u00b7 open since 2026-08-12T17:05Z \u00b7 crossed 1"
   ],
   "session_account_of_stack": [
-    "Wave-to-command table · working through the routing table · open since about 2pm"
+    "Wave-to-command table \u00b7 working through the routing table \u00b7 open since about 2pm"
   ],
   "now": "2026-08-12T19:00Z",
-  "expected_decision": ["CAPTURE"],
+  "expected_decision": [
+    "CAPTURE"
+  ],
   "expected_guard": "the FILE is authoritative for existing frames -- what/why/open-since byte-for-byte, crossed incremented; the session's account never overrides it"
 }
