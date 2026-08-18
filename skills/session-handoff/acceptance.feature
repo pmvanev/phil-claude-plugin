@@ -19,14 +19,10 @@
 #   CAPTURE · NO-OP · REFUSE-DERIVABLE · PROJECTED · PROJECTION-UNREFRESHED · RESUME-CURRENT ·
 #   RESUME-STALE · RECONSTRUCT · ROUTE · ROUTE-LIVE-WINS · ASK-OWNER ·
 #   BOARD-AGREES · BOARD-DIVERGES · BOARD-UNREADABLE · REPORT-CLAIM-CONFLICT ·
-#   PUSHED · SHOWN · STACK-EMPTY · STACK-UNKNOWN · WRITE-REFUSED
+#   PUSHED · POPPED · SHOWN · STACK-EMPTY · STACK-UNKNOWN · WRITE-REFUSED
 #
-# Two are deliberately absent rather than overlooked:
-#   REPORT-CLAIM-CONFLICT belongs to slice 03, tested and deliberately not built; it is kept here
-#     because its scenario is kept.
-#   POPPED belongs to live-work-stack slice 02, briefed and not built. Its scenario is NOT here — the
-#     outcome arrives with the verb.
-# Every other outcome above is live.
+# REPORT-CLAIM-CONFLICT belongs to slice 03, tested and deliberately not built; it is kept here because
+# its scenario is kept. Every other outcome above is live.
 
 Feature: Carry work across the session boundary without a re-briefing
   As Kai, a developer carrying multi-session work,
@@ -142,7 +138,7 @@ Feature: Carry work across the session boundary without a re-briefing
   # --- live-work-stack (issue #29), slice 01: the stack gains operations -------------------------
   # The stack was persisted from 2026-08-14 and had no operations: it was recorded only when the
   # session was put down, which is when Kai has stopped needing it. These scenarios are the live view.
-  # `pop` is slice 02 and has no scenario here.
+  # Slice 02 adds pop and the stale-frame mark.
 
   @issue-29 @happy @fixture(16-push-preserves-payload) @contract-shape:pure-function
   Scenario: A diversion is recorded the moment it is taken, onto a record someone else left
@@ -169,7 +165,7 @@ Feature: Carry work across the session boundary without a re-briefing
     When it asks where it is
     Then it is shown every level, what each one is, why it was entered, and how long it has been open
     And the level it is currently at is marked
-    And no level is judged stale, because judging that is not yet possible from what is recorded
+    And no level is judged stale, because none of them has outlived a wind-down
 
   @issue-29 @error @fixture(19-unknown-is-not-none) @contract-shape:pure-function
   Scenario: Nothing written down and nothing to write down are different answers
@@ -188,3 +184,52 @@ Feature: Carry work across the session boundary without a re-briefing
     Then a resume point is created carrying the diversion alone
     And the reasoning and the next action are marked as never recorded, not as empty
     And the record says plainly that no state of play has been captured against it
+
+  @issue-29 @happy @fixture(21-pop-to-the-parent) @contract-shape:pure-function
+  Scenario: Coming back from a detour puts the thing it interrupted back in hand
+    Given a session three diversions deep
+    When it closes the innermost one
+    Then that level is dropped
+    And it is told what it is back to, by name
+    And the reasoning, the next action and the freshness stamp are left exactly as they were
+
+  @issue-29 @error @fixture(22-never-popped-frame-is-stale) @contract-shape:pure-function
+  Scenario: A diversion left open across a wind-down stops looking current
+    Given a diversion that was open before the session was last put down, and is open still
+    When a session asks where it is
+    Then that level is marked, because it has now outlived two of them
+    And a level that has outlived only one is not marked, because carrying work across one is the point
+    And a level that has outlived none is not marked however old it is, because age is not the measure
+
+  @issue-29 @happy @fixture(23-push-onto-an-open-frame) @contract-shape:pure-function
+  Scenario: A diversion taken during a diversion nests under it
+    Given a session already one diversion deep
+    When it records a second one
+    Then the new level sits beneath the first, not beside it
+    And the level it interrupted is left exactly as it was
+
+  @issue-29 @happy @fixture(24-capture-carries-the-stack-forward) @contract-shape:pure-function
+  Scenario: Putting the session down carries open diversions forward without rewriting them
+    Given a session ending while two diversions are still open
+    And the session's own account of them is incomplete and imprecise
+    When it is put down
+    Then every open diversion is carried forward exactly as it was recorded
+    And each is counted as having survived one more wind-down
+    And none is dropped because the account failed to mention it
+
+  @issue-29 @error @fixture(25-pop-nothing-two-ways) @contract-shape:pure-function
+  Scenario: Closing a diversion when there is none says which nothing it found
+    Given no record exists at all
+    When a session closes a diversion
+    Then it says nobody has written anything down
+    But given a record that was left with no diversions
+    Then it says there were none
+    And neither writes anything
+
+  @issue-29 @error @fixture(26-pop-refuses-and-reports-stale) @contract-shape:pure-function
+  Scenario: Closing a diversion obeys the same write rules as opening one
+    Given a record that changed after it was read
+    When a session closes a diversion
+    Then it refuses and records nothing, exactly as opening one would
+    But given the diversion being closed had outlived two wind-downs
+    Then closing it says so, because otherwise the drift leaves with it

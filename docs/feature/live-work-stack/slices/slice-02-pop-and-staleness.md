@@ -18,9 +18,9 @@ sufficient without an expiry policy.
 
 - **`/phil:stack pop`** — deletes the innermost frame, names the frame now in hand, and writes the
   whole file back, same authority and same session guard as slice 01.
-- **Staleness marking.** A frame open across a `/phil:handoff` capture is marked in the trace. This
-  reuses `nwave-issue-board`'s existing wording — *a frame open longer than one boundary is marked* —
-  rather than minting an age threshold, and makes it readable locally instead of only on the card.
+- **Staleness marking.** A frame is marked once it has survived **two** wind-downs, counted by a per-frame
+  `crossed` written `0` by `push` and incremented by `CAPTURE`. Not an age threshold, and not one
+  boundary — see the Result below for why one marks the normal case.
 - **[D4] recorded**: the rule now lives in `skills/session-handoff/SKILL.md` beside the recorder,
   with `nwave-issue-board` keeping its own copy for the projection. Issue #29's Done-when asserted
   this rule was *"already in `session-handoff`"*; it was not, and the correction is the slice.
@@ -42,8 +42,8 @@ sufficient without an expiry policy.
    `Next` byte-identical.
 2. `/phil:stack pop` on an empty or absent stack says so and **writes nothing** — not an error, and
    not a rewritten file.
-3. A frame open across a `/phil:handoff` capture is marked in the bare `/phil:stack` trace on the
-   next read. A fixture pins the boundary crossing.
+3. A frame at `crossed` 2 or more is marked in the bare `/phil:stack` trace; one at `crossed 1` is not,
+   however old. Fixtures pin both sides, and pin that `CAPTURE` increments without re-deriving `open since`.
 4. Every frame in the trace carries its age, marked or not.
 5. `skills/session-handoff/SKILL.md` states the staleness rule, and `nwave-issue-board`'s copy is
    reconciled with it rather than left to drift — one rule, stated in both places, with the
@@ -58,6 +58,95 @@ Slice 01. Pop needs frames to pop, the session guard, and the whole-file writer.
 ~1 day, most of it the boundary-crossing fixture (AC3), which needs a capture between two reads.
 
 Reference class: slice 01, minus the header change and plus one fixture.
+
+## Result — 2026-08-18
+
+**Authored; not yet exercised.** `pop` and the stale-frame mark landed with six fixtures (`21`-`26`).
+**KPI-1 stays unmeasured** — no real diversion has been pushed or popped, which is the gap this feature
+was raised to close, and it cannot close on authored prose.
+
+### The design call I got wrong, and the reversal
+
+The brief said *"a frame open longer than one boundary is marked"*. Slice 01's review found the count
+uncomputable — the header carries one `captured:`, overwritten at every capture — so I decided, without
+asking, to **drop the count and keep the bit**: mark any frame whose `open since` predates `captured:`.
+
+`plugin-dev:skill-reviewer` refuted it. **`CAPTURE` stamps `captured:` at wind-down, so every frame open
+at that moment necessarily predates it.** The rule therefore marked *every frame carried across a
+boundary* — which is exactly what this feature exists to do. It fired on the designed behaviour and the
+abandoned frame alike, with the same glyph and the same "worse than no frame" warning.
+
+**A mark that fires on the normal case is a decoration, not an alarm**, and a decoration is what people
+stop reading — this board's recurring defect wearing a different hat. `N > 1` was the discriminator and
+I threw it away while keeping the alarm.
+
+**Reversed on decision:** `crossed` is now stored per frame, written `0` by `push`, incremented by
+`CAPTURE`, marked at `≥ 2`. The cost is the thing the first decision refused — `CAPTURE` becomes a writer
+of frame state — and that refusal turned out to be a preference, not a law. `CAPTURE` already regenerates
+the whole file.
+
+**Why fixture 22 could not catch it.** Its run A had exactly one frame predating the capture and one
+after: the shape that makes the rule look selective. No fixture in the suite contained a frame present at
+its own capture, which is the ordinary state of a resumed session. Rewritten to three frames at `crossed`
+2 / 1 / 0, all more than a day old, with the middle one — carried across one wind-down — asserted
+**unmarked**.
+
+### The second header bug, one level down
+
+`CAPTURE` step 5 read *"collect the work stack… each with what it is, why it was pushed, and when"*,
+sourced from the session's account, on a path that regenerates the whole file while holding a `date`
+grant. Nothing said the file was authoritative for frames already in it. A conforming implementation
+would re-stamp every `open since`, making each frame postdate its own capture — and `⚠ stale`
+unreachable for ever after. **Identical in shape to the `commit:` bug the header rule exists to prevent,
+and it was unwritten.** Fixture 24 pins it with a deliberately wrong session account: one frame
+paraphrased, one omitted entirely, and the file must win.
+
+### Also corrected
+
+- **`push` still specified the abbreviated `<HH:MM>Z`** for deeper frames, which the format section had
+  retired two screens earlier — making the staleness comparison *undecidable for every frame past the
+  first*. No fixture could catch it: every manifest supplies stacks as input, so nothing asserted the
+  format `push` writes. Fixture 23 does now.
+- **`BOOTSTRAP` never rendered the stack**, though `commands/resume.md` promises it and staleness only
+  becomes true at pick-up. Added as step 5b.
+- **`captured: never` made the board triple unproduceable** — `BOARD-UNREADABLE` is false when the board
+  reads fine, `BOARD-AGREES` is unproduceable with no next action. The exemption now keys on the
+  criterion (no recorded next action) rather than the shape (no snapshot). Step 5c.
+- **`pop` on empty vs absent** collapsed the `unknown`/`none` distinction the skill forbids twenty lines
+  earlier. Fixture 25. Popping the last frame off a push-created snapshot now deletes the file rather
+  than leaving the placeholder the skill refuses.
+- **Fixture 21 asserted two things it could not detect** — its hashes were equal, so an implementation
+  that never hashes passed, and its header predated every frame, so the stale-pop branch never ran.
+  Fixture 26 covers both.
+- **The `references/` split had copied, not moved** — ~200 words verbatim in both files, which is the
+  defect the split was performed to remove. Cut.
+- **A regression from earlier this session:** removing the Windows toast hook left `README.md` still
+  advertising it and `hooks/refactor-loop/README.md` still instructing readers to join a `Stop` array
+  that no longer exists. Both fixed.
+- Two dangling relative paths inside `references/`; the Acceptance section naming the wrong test file
+  (`tests/test_session_handoff_fixtures.py` guards these fixtures and was named nowhere).
+
+### Process notes, against this slice
+
+- **The `references/` split was not in this brief's IN scope**, and `CLAUDE.md` says refactoring and
+  behaviour commits are separate. It should have been committed on its own *before* slice 02 began. By
+  the time the validator raised it the two were interleaved across the same paragraphs, so splitting
+  would have been artificial surgery. Recorded rather than tidied away.
+- **`SKILL.md` is 5,896 words** against a <5,000 ceiling, up from 5,020 after the split, because slice 02
+  added real rules (`crossed`, 5b, 5c, pop's branches). `references/` holds 1,856. A further pass is owed
+  before anything else is added.
+- **DESIGN open question 2 discharged by probe:** `git hash-object` normalises line endings under
+  `autocrlf=true`/`input`, but stays a pure function of content and config, so an unchanged file hashes
+  the same twice and the compare-and-swap produces no spurious refusals. Residue: a competing write
+  changing *only* line endings is invisible. Not fixtured — that would test git's determinism, not this
+  skill.
+
+### Not done
+
+- **KPI-1.** Unmeasured. The plugin loads 0.58.0, so `/phil:stack` is not invokable here yet.
+- **A third reviewer pass has not run** over these fixes. Two passes found ten defects between them and
+  the second found more than the first; assuming the third would find none is the assumption this repo
+  keeps being wrong about.
 
 ## Carpaccio taste tests
 

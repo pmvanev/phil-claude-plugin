@@ -1,0 +1,20 @@
+{
+  "fixture_id": "SH-SELFTEST-23",
+  "phase": "STACK",
+  "situation": "A session already one diversion deep hits a second blocker and pushes again. This is the nesting case: the new frame goes UNDER the open one, not beside it.",
+  "verb": "push",
+  "push_what": "the fixture runner",
+  "push_why": "it needed a flag it did not have",
+  "snapshot_present": true,
+  "snapshot_header": { "captured": "2026-08-12T13:00Z", "commit": "083c953", "dirty": "no" },
+  "snapshot_why": ["ruled out the carve-out because it reintroduces two writers"],
+  "snapshot_next": "author slice 02",
+  "snapshot_stack": [
+    "Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 0"
+  ],
+  "now": "2026-08-12T17:05Z",
+  "hash_at_read": "a1b2c3d",
+  "hash_at_verify": "a1b2c3d",
+  "expected_decision": ["PUSHED"],
+  "expected_guard": "#29 done-when 'push while a frame is open' -- the new frame nests innermost-last with the indent and elbow; the open frame is untouched; new frame is crossed 0"
+}

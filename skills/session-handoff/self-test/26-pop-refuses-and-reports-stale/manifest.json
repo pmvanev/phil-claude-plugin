@@ -1,0 +1,24 @@
+{
+  "fixture_id": "SH-SELFTEST-26",
+  "phase": "STACK",
+  "situation": "Two pop runs the other pop fixture cannot reach. Run A: the file changes between read and write, so pop must refuse exactly as push does. Run B: the frame being popped is marked stale, which pop must say out loud.",
+  "verb": "pop",
+  "run_a": {
+    "snapshot_present": true,
+    "snapshot_stack": ["Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 0"],
+    "hash_at_read": "a1b2c3d",
+    "hash_at_verify": "9f8e7d6"
+  },
+  "run_b": {
+    "snapshot_present": true,
+    "snapshot_header": { "captured": "2026-08-14T09:00Z", "commit": "083c953", "dirty": "no" },
+    "snapshot_stack": [
+      "Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 1",
+      "The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z · crossed 2"
+    ],
+    "hash_at_read": "a1b2c3d",
+    "hash_at_verify": "a1b2c3d"
+  },
+  "expected_decision": ["WRITE-REFUSED", "POPPED"],
+  "expected_guard": "pop carries the SAME compare-and-swap as push (fixture 17 pins push only), and pop announces a stale frame it is closing"
+}

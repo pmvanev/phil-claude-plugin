@@ -1,6 +1,6 @@
 ---
 description: "Where am I, and why: push a diversion the moment you take it, show the trace at any depth, pop the innermost frame when you come back. Operates on the same snapshot /phil:handoff writes, without ending the session."
-argument-hint: "[push \"<what>\" \"<why>\"]"
+argument-hint: "[push \"<what>\" \"<why>\"] | [pop]"
 mutates: true
 allowed-tools: Read, Write, Bash(git rev-parse:*), Bash(git status:*), Bash(git hash-object:*), Bash(date:*), AskUserQuestion, Skill
 ---
@@ -9,10 +9,8 @@ Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handof
 path. The snapshot format, the compare-and-swap rule, the decision outcomes and the never-do list govern
 this path exactly as they govern CAPTURE and BOOTSTRAP.
 
-No argument shows the stack. `push` takes what is being entered and why it is being entered.
-
-**`pop` is slice 02 and is not built.** Asking for it is answered by saying so, not by hand-editing the
-file on the user's behalf.
+No argument shows the stack. `push` takes what is being entered and why it is being entered. `pop`
+takes nothing and drops the innermost frame only.
 
 There is no `Glob` or `Grep` grant: all verbs operate on one path resolved by `git rev-parse
 --show-toplevel`, and a grant with nothing to use it on weakens the argument the rest of this file makes

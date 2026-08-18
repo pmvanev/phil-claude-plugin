@@ -295,8 +295,8 @@ Why (captured 2026-08-14T02:07Z)
 Next — finish the dogfood on #2, asking only the missing done-condition.
 
 Stack
-1. Slice 04 elicitation — the task in hand · open since 2026-08-13T21:10Z
-2. └ The observed population was partial, so the rule needed changing first · open since 02:02Z
+1. Slice 04 elicitation · the task in hand · open since 2026-08-13T21:10Z · crossed 2   ⚠ stale
+2. └ The observed population · it was partial, so the rule needed changing first · open since 2026-08-14T02:02Z · crossed 0
 ```
 
 **One writer owns the whole block, and it regenerates it entire from two sources.** Position comes from
@@ -318,8 +318,18 @@ Five rules, and the first is the one that makes this legal:
 - **Absent renders as `unknown`, never as empty.** A card whose owner never ran `/phil:handoff` has no
   projection: say `Stack: unknown — no snapshot projected`. **Empty asserts there were no diversions**,
   which is a claim about the work; `unknown` is a claim about the record.
-- **A frame open longer than one boundary is marked.** A push that was never popped is stale, and a stale
-  stack is worse than none for the same reason a stale snapshot is: the next reader trusts it.
+- **A frame whose `crossed` is 2 or more is marked `⚠ stale`.** A push that survived two wind-downs is
+  stale, and a stale stack is worse than none for the same reason a stale snapshot is: the next reader
+  trusts it.
+
+  **The rule's source is `skills/session-handoff/SKILL.md` § The snapshot**, which owns the stack and the
+  counter. Stated again here because the projection must be able to explain its own markings; if the two
+  disagree, the recorder wins.
+
+  **The threshold is two, not one, and that is the whole rule.** Every frame carried across a wind-down
+  has survived one, so marking at one marks the normal case. `crossed` is stored per frame — written `0`
+  by `push`, incremented by `CAPTURE` — because no comparison against the header can recover the count.
+  **Render `crossed` verbatim; never compute it here.** The block is a projection.
 - **The capture timestamp is the snapshot's, not the block's.** They differ whenever a refresh happens
   without a capture, and a reader deciding whether to trust the reasoning needs the age of the reasoning.
 

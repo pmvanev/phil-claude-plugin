@@ -29,12 +29,12 @@ return.
 
 ## Why this needs human follow-up
 
-The plugin already ships a `Stop` hook in `hooks/hooks.json` (the toast/chime notifier). The
-G10 hook is **also** a `Stop` hook (interactive path only). If you wire it, they must
-**coexist** — add a second entry to the `Stop` array, do not replace it. Because clobbering
-`hooks/hooks.json` (or a user's `settings.json`) is easy to get wrong, wiring is a deliberate
-human step. Recommended: run the **`update-config`** skill with the merge below, then verify
-with `/hooks`.
+`hooks/hooks.json` ships **no `Stop` hook** — the toast/chime notifier that used to live there was
+removed in 0.60.0. The G10 hook is a `Stop` hook (interactive path only), so wiring it *creates* the
+`Stop` array rather than joining one. If a later hook adds a `Stop` entry, they must **coexist**: add
+a second entry, do not replace. Because clobbering `hooks/hooks.json` (or a user's `settings.json`) is
+easy to get wrong, wiring is a deliberate human step. Recommended: run the **`update-config`** skill
+with the merge below, then verify with `/hooks`.
 
 ## The merge for the Workflow path (G2 only)
 

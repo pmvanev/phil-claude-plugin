@@ -1,0 +1,19 @@
+{
+  "fixture_id": "SH-SELFTEST-21",
+  "phase": "STACK",
+  "situation": "A session three diversions deep closes the innermost detour and pops. The snapshot carries a Why, a Next and a header from an earlier capture.",
+  "verb": "pop",
+  "snapshot_present": true,
+  "snapshot_header": { "captured": "2026-08-12T13:00Z", "commit": "083c953", "dirty": "no" },
+  "snapshot_why": ["ruled out the carve-out because it reintroduces two writers"],
+  "snapshot_next": "author slice 02",
+  "snapshot_stack": [
+    "Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z",
+    "Fixture 07 · it contradicted the table, so it had to be settled first · open since 2026-08-12T16:40Z",
+    "The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z"
+  ],
+  "hash_at_read": "a1b2c3d",
+  "hash_at_verify": "a1b2c3d",
+  "expected_decision": ["POPPED"],
+  "expected_guard": "slice-02 AC1 -- depth 3 -> 2, the frame now in hand is named, Why/Next/header byte-identical"
+}

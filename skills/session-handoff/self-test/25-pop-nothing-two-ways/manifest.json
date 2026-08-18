@@ -1,0 +1,16 @@
+{
+  "fixture_id": "SH-SELFTEST-25",
+  "phase": "STACK",
+  "situation": "Two pop runs with nothing to pop. Run A: no snapshot exists at all. Run B: a snapshot exists, was written by a capture, and has no ## Stack section.",
+  "verb": "pop",
+  "run_a": { "snapshot_present": false },
+  "run_b": {
+    "snapshot_present": true,
+    "snapshot_header": { "captured": "2026-08-12T17:30Z", "commit": "083c953", "dirty": "no" },
+    "snapshot_why": ["ruled out the carve-out"],
+    "snapshot_next": "author slice 02",
+    "snapshot_stack": []
+  },
+  "expected_decision": ["STACK-UNKNOWN", "STACK-EMPTY"],
+  "expected_guard": "slice-02 AC2 -- pop on nothing writes NOTHING, and the two nothings do not collapse into one answer"
+}

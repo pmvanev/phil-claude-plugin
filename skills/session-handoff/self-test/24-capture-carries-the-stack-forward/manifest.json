@@ -1,0 +1,20 @@
+{
+  "fixture_id": "SH-SELFTEST-24",
+  "phase": "WIND-DOWN",
+  "situation": "A session ends while two diversions are still open. It reached a decision and formed a next action, so a capture happens. The session's own account of the stack is deliberately WRONG -- it paraphrases one frame's reason and omits the other entirely.",
+  "session_advanced_work": true,
+  "decisions_made": ["settled the threshold at two wind-downs"],
+  "next_action": "add the nesting fixture",
+  "snapshot_present": true,
+  "snapshot_header": { "captured": "2026-08-12T13:00Z", "commit": "083c953", "dirty": "no" },
+  "snapshot_stack": [
+    "Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 1",
+    "The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z · crossed 0"
+  ],
+  "session_account_of_stack": [
+    "Wave-to-command table · working through the routing table · open since about 2pm"
+  ],
+  "now": "2026-08-12T19:00Z",
+  "expected_decision": ["CAPTURE"],
+  "expected_guard": "the FILE is authoritative for existing frames -- what/why/open-since byte-for-byte, crossed incremented; the session's account never overrides it"
+}

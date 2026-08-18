@@ -586,17 +586,22 @@ world; the commands only route. `S1 ⇢ S3` is ADR-014's delegated derivation, u
 
 Deferred to DISTILL/DELIVER, deliberately:
 
-1. **What counts as "one boundary" when no `/phil:handoff` runs for days?** The staleness rule marks a
-   frame that survived a capture. A session that never captures never marks anything, so a stack can
-   go stale invisibly. Slice 02's own learning hypothesis is what tests this; if it fires, the answer
-   is an age threshold, and DESIGN deliberately did not invent one now.
-2. **`core.autocrlf` and the hash.** `git hash-object` normalises line endings under some configs. On
-   a Windows checkout the read hash and the write hash could differ for reasons unrelated to a
-   competing write, turning DDD-1 into a spurious refusal. Needs one fixture on the repo's WSL2 host
-   before slice 01 closes.
-3. **Whether `pop` should echo the popped frame's age.** A frame open three days that is popped
-   silently loses the one signal that the stack had drifted. Cheap to add; left to DELIVER because it
-   is a rendering choice, not a contract.
+1. **What counts as "one boundary" when no `/phil:handoff` runs for days?** **→ Partly answered by
+   slice 02: the count is dropped, the bit is kept.** `⚠ stale` means *open across a capture*, derived
+   from `open since` < `captured:`; `captured: never` marks nothing. The original concern stands and is
+   now explicit rather than latent: **a session that never captures never marks anything**, so a stack
+   can still go stale invisibly. No age threshold was invented. Whether one is needed is what slice 02's
+   learning hypothesis tests in use.
+2. **`core.autocrlf` and the hash.** ~~Needs one fixture before slice 01 closes.~~ **→ Answered by
+   probe, 2026-08-18: not a defect.** `git hash-object` *normalises* under `autocrlf=true`/`input` — a
+   CRLF file and its LF twin hash identically — but it stays a pure function of content and config, so
+   an unchanged file hashes the same twice and the compare-and-swap produces no spurious refusals. The
+   residue: a competing write changing *only* line endings is invisible to the guard. Not fixtured; a
+   fixture there tests git's determinism, not this skill.
+3. **Whether `pop` should echo the popped frame's age.** **→ Answered by slice 02: it echoes the
+   *staleness*, not the age.** Where the popped frame carried `⚠ stale`, `pop` says so — a frame that
+   outlived a boundary and is closed silently takes with it the only signal the record had drifted. The
+   raw age was not added; the mark is what the reader acts on.
 
 ## Wave: DESIGN / [REF] Changed Assumptions
 

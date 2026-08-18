@@ -12,11 +12,8 @@ outcome**:
 
 `CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `PROJECTED` · `PROJECTION-UNREFRESHED` · `RESUME-CURRENT` ·
 `RESUME-STALE` · `RECONSTRUCT` · `ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER` · `BOARD-AGREES` ·
-`BOARD-DIVERGES` · `BOARD-UNREADABLE` · `REPORT-CLAIM-CONFLICT` · `PUSHED` · `SHOWN` · `STACK-EMPTY` ·
-`STACK-UNKNOWN` · `WRITE-REFUSED`
-
-`POPPED` is absent for the same reason `REPORT-CLAIM-CONFLICT` is present: the outcome tracks the verb.
-`pop` is briefed in live-work-stack slice 02 and not built, and no fixture here expects it.
+`BOARD-DIVERGES` · `BOARD-UNREADABLE` · `REPORT-CLAIM-CONFLICT` · `PUSHED` · `POPPED` · `SHOWN` ·
+`STACK-EMPTY` · `STACK-UNKNOWN` · `WRITE-REFUSED`
 
 This suite is the acceptance + regression gate for `skills/session-handoff/SKILL.md`. Format and intent mirror `skills/edd/self-test/`, `skills/work/self-test/`, and
 `skills/refactor-tests/self-test/` — this plugin's established way to test a skill.
@@ -51,6 +48,12 @@ them.
 | `18-show-at-depth/` | three deep, snapshot the only input | slice-01 AC2, **KPI-3** | every frame ages from a full timestamp; **nothing is judged stale** | `SHOWN` |
 | `19-unknown-is-not-none/` | no snapshot vs. a snapshot with no diversions | slice-01 AC5 | `unknown` is about the record, `none` is about the work | `STACK-UNKNOWN` / `STACK-EMPTY` |
 | `20-push-with-no-resume-point/` | a push is the first thing ever recorded | slice-01 AC4 | the snapshot is created; `Why`/`Next` absent not empty; `captured: never` | `PUSHED` |
+| `21-pop-to-the-parent/` | the innermost detour closes | slice-02 AC1 | depth drops by one, the parent is **named**, payload and header untouched | `POPPED` |
+| `22-never-popped-frame-is-stale/` | three old frames, `crossed` 2 / 1 / 0 | slice-02 AC3/AC4, **#29 done-when** | mark at `crossed`≥2 only — one wind-down is normal, and **age is never the oracle** | `SHOWN` |
+| `23-push-onto-an-open-frame/` | pushing while a frame is already open | **#29 done-when** | the nesting case: indent, elbow, innermost-last, parent untouched | `PUSHED` |
+| `24-capture-carries-the-stack-forward/` | a wind-down through an open stack, with a **wrong** session account | `CAPTURE` step 5 | the **file** is authoritative for existing frames; `crossed` increments; `open since` never re-derived | `CAPTURE` |
+| `25-pop-nothing-two-ways/` | pop with no snapshot, vs pop with no stack | slice-02 AC2 | the two nothings do not collapse, and neither writes | `STACK-UNKNOWN` / `STACK-EMPTY` |
+| `26-pop-refuses-and-reports-stale/` | pop against a changed file; pop of a stale frame | pop's CAS + step 5 | the two branches fixture `21` asserts but cannot detect | `WRITE-REFUSED` / `POPPED` |
 
 ## The two sharpest fixtures
 
@@ -76,6 +79,17 @@ the first on its first push.
 **`19` pins a distinction both cases render as nothing.** An absent record and an empty stack look
 identical on screen, so the cheap implementation satisfies both with one branch and looks correct.
 
+**`22`'s middle frame is the whole fixture.** All three frames are more than a day old and one is marked.
+The frame at `crossed 1` has survived a wind-down — which is what carrying a diversion across a boundary
+*means* — and must not be marked. An earlier rule compared `open since` against `captured:` and marked
+every carried frame, firing on the designed behaviour and the abandoned frame alike. A near-constant
+alarm is one people stop reading, which is this board's recurring defect wearing a different hat.
+
+**`24` is the counterpart on the capture side, and its input is deliberately wrong.** The session's own
+account of the stack paraphrases one frame and omits another; the file must win. A capture that trusts
+the account deletes a frame with no mechanism beyond an omission, on a path that regenerates the whole
+file.
+
 **`03` and `05` resolve in opposite directions and must not be satisfied by one rule.** In `03` the
 spine is offered derivable state and must refuse it; in `05` the spine has no snapshot and must go and
 derive that same class of state. A rule that gets one right by getting the other wrong — "never
@@ -94,6 +108,7 @@ reaches against `expected.md`.
 | `11`–`12` | the board projection — **must pass** |
 | `13`–`15` | the board divergence check, #24 — **must pass** |
 | `16`–`20` | the live stack, #29 slice 01 — **must pass** |
+| `21`–`26` | pop and staleness, #29 slice 02 — **must pass** |
 
 A failure in `09`–`10` is genuine RED (the behaviour is unimplemented and will stay so), not BROKEN
 (the harness is faulty) — the fixtures are prose inputs with no imports to resolve. Do not "fix" them
@@ -105,10 +120,9 @@ the spine should do — a fixture that says nothing about a board is a situation
 Recorded here because the alternative failure modes are both silent: a driver that scores the extra
 outcome as a mismatch retires six working fixtures, and one that ignores the triple on any fixture not
 expecting it stops testing the triple at all. `05` and `12` are `RECONSTRUCT`, which reports no triple
-by design. **`16`–`20` are stack-path fixtures and report no capture or read-back outcome at all** —
-no freshness verdict, no board triple. A driver expecting one of those on every fixture scores all four
-as failures. None expects `POPPED`: `pop` is slice 02 and unbuilt, and unlike `09`–`10` it has no standing
-fixture — it is briefed, not tested-and-shelved.
+by design. **`16`–`23` and `25`–`26` are stack-path fixtures and report no capture or read-back outcome at all** —
+no freshness verdict, no board triple. A driver expecting one of those on every fixture scores all nine
+as failures. `24` is a WIND-DOWN fixture and reports `CAPTURE` normally.
 
 Run the whole suite whenever `SKILL.md`, either command loader, or `skills/nwave-issue-board/SKILL.md`
 changes — the last because slice 02's routing line lives inside its generated block, so this skill's

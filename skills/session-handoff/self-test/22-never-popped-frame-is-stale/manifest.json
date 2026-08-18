@@ -1,0 +1,16 @@
+{
+  "fixture_id": "SH-SELFTEST-22",
+  "phase": "STACK",
+  "situation": "One show run over a stack whose three frames have survived different numbers of wind-downs. Frame 1 has crossed two, frame 2 one, frame 3 none. All three are old; only one is stale.",
+  "verb": "show",
+  "snapshot_present": true,
+  "snapshot_header": { "captured": "2026-08-14T09:00Z", "commit": "083c953", "dirty": "no" },
+  "snapshot_stack": [
+    "Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z · crossed 2",
+    "Fixture 07 · it contradicted the table, so it had to be settled first · open since 2026-08-12T16:40Z · crossed 1",
+    "The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z · crossed 0"
+  ],
+  "now": "2026-08-14T17:30Z",
+  "expected_decision": ["SHOWN"],
+  "expected_guard": "slice-02 AC3/AC4 -- mark at crossed>=2 ONLY; frame 2 (crossed 1, survived one wind-down) is NOT marked; frame 3 is 48h old and NOT marked. Age is never the oracle."
+}
