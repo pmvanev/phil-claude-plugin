@@ -412,6 +412,50 @@ the only planned edit to an existing skill.
 C4 System Context and Container diagrams: `docs/feature/session-handoff/feature-delta.md`
 (`## Wave: DESIGN / [REF] C4 — …`).
 
+### live-work-stack
+
+One new command — `/phil:stack` (`push` · `pop` · bare = show) — over an **extended**
+`skills/session-handoff/SKILL.md`, giving the work stack the operations it never had. `session-handoff`
+made the stack persistent; this makes it *live*. The sibling framing holds: the boundary commands own
+what crosses the session edge, `/phil:stack` owns what happens inside it.
+
+**Status:** DESIGNED (2026-08-18) — not yet implemented. DISCUSS + DESIGN complete;
+`docs/feature/live-work-stack/feature-delta.md` holds the full record, with two slice briefs in
+`docs/feature/live-work-stack/slices/`. Board: #29.
+
+**Pattern:** modular prose skill, ports-and-adapters — the same lineage, unchanged. No paradigm
+declared; prose with Bash adapters.
+
+**The design axis (DISCUSS):** the stack had a format, a persistence step and a projection, but no
+operations — it was recorded only at wind-down, which is when it stops being useful. Confirmed by the
+2026-08-14 dogfood, which recorded an empty stack and stated that the feature's headline mechanism was
+still unexercised.
+
+**Write authority (D1/D2):** one file, one writer, **whole-file regeneration** on every operation. Not
+a second file, and not a carve-out in `/phil:handoff`'s overwrite rule — the carve-out would have
+reintroduced on the file side the two-writers-in-one-region defect that `single-issue-per-feature`
+slice 04 had just fixed on the card side. The overwrite rule turned out to say less than it appeared
+to: its stated rationale is entirely about a competing worktree, so it forbade arbitration, not reading.
+
+**Safety oracle:** **compare-and-swap** (DDD-1). `git hash-object` at read, re-hashed immediately
+before write; a change refuses and reports both hashes. Where `session-handoff`'s oracle is the
+staleness verdict *across* the boundary, this feature's is lost-update detection *within* it. It
+replaced a proposed `session:` identity field, which would have refused the primary path — resuming a
+previous session's snapshot is what the file is for, so an authorship check blocks every session after
+the first.
+
+**Reuse (DDD-5):** EXTEND `session-handoff`; the single CREATE NEW is the command loader, and a loader
+is the inbound surface rather than logic. `/phil:handoff`, `/phil:resume`, the projection and
+`nwave-slice-status` are all composed unchanged — KPI-5 asserts a session that never pushes sees no
+behavioural difference at all.
+
+**v1 boundaries:** no hook and no auto-push (the reason is the payload and no hook can see it — ADR-014's
+ground); no auto-expiry (a frame the tool closed is a frame whose reason nobody read); popping only the
+innermost frame; and competing writes **detected, not resolved**, inherited verbatim from slice 03.
+
+C4 System Context and Container diagrams: `docs/feature/live-work-stack/feature-delta.md`
+(`## Wave: DESIGN / [REF] C4 — …`).
+
 ### ADRs
 
 - [ADR-001](adr-001-refactor-tests-reuse-boundaries.md) — refactor-tests: new command + reuse boundaries.
@@ -427,4 +471,6 @@ C4 System Context and Container diagrams: `docs/feature/session-handoff/feature-
 - [ADR-011](adr-011-adversarial-review-hard-soft-oracle-honesty-label.md) — adversarial-review: hard/soft split generalized to prose oracles; mechanical `sound-gate`/`draft-signal` honesty label.
 - [ADR-012](adr-012-adversarial-review-adversary-judge-separation.md) — adversarial-review: separate the adversary from the judge (builder → adversary → judge triple); independent per-finding verification.
 - [ADR-013](adr-013-session-handoff-snapshot-surface.md) — session-handoff: snapshot is a git-ignored root-dotfile runtime artifact; breaks ADR-006/009's committed lean because a per-session snapshot has concurrent writers.
+  **Amended 2026-08-14** (`single-issue-per-feature`): the deferred partitioned local+board option ships as a write-only projection.
+  **Amended 2026-08-18** (`live-work-stack`): writes go from once-per-session to many; a `git hash-object` compare-and-swap replaces the deferral, and the per-repo/per-worktree question closes as per-worktree by construction.
 - [ADR-014](adr-014-session-handoff-reuse-boundaries-delegated-derivation.md) — session-handoff: CREATE NEW spine with delegated derivation; two commands; hook deferred behind a payload-visibility SPIKE.

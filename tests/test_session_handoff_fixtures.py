@@ -38,7 +38,16 @@ ADDITIONAL = {"REFUSE-DERIVABLE", "PROJECTED", "PROJECTION-UNREFRESHED"}
 # it; nothing else may.
 UNBUILT = {"REPORT-CLAIM-CONFLICT"}
 
-LIVE = CAPTURE_TERMINAL | FRESHNESS | OWNER | BOARD | ADDITIONAL
+# The stack path (`/phil:stack`, live-work-stack slice 01). Terminal and self-contained: a stack run
+# reports exactly one of these and NONE of the sets above — the three paths do not interleave, which
+# is why this is its own set rather than an addition to CAPTURE_TERMINAL.
+STACK = {"PUSHED", "SHOWN", "STACK-EMPTY", "STACK-UNKNOWN", "WRITE-REFUSED"}
+
+# POPPED is NOT here. `pop` is live-work-stack slice 02, briefed and not built, and unlike
+# REPORT-CLAIM-CONFLICT it has no standing fixture — so admitting the outcome early would let a
+# fixture expecting it pass this check before anything could produce it.
+
+LIVE = CAPTURE_TERMINAL | FRESHNESS | OWNER | BOARD | ADDITIONAL | STACK
 KNOWN = LIVE | UNBUILT
 
 

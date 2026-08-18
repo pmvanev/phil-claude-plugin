@@ -1,0 +1,13 @@
+{
+  "fixture_id": "SH-SELFTEST-20",
+  "phase": "STACK",
+  "situation": "No snapshot exists at the worktree root. A session takes a diversion and pushes a frame -- the first thing ever recorded for this work.",
+  "verb": "push",
+  "push_what": "deploy script",
+  "push_why": "the blocker's fix cannot be tested until deploys work",
+  "snapshot_present": false,
+  "tree_commit": "7e63578",
+  "tree_dirty": true,
+  "expected_decision": ["PUSHED"],
+  "expected_guard": "slice-01 AC4 -- a push creates the snapshot; Why and Next are ABSENT not invented; the header records `captured: never` because a push is not a capture"
+}

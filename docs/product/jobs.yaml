@@ -308,7 +308,7 @@ jobs:
     opportunity_score: not-scored   # single new job; priority by default
     status: validated
     personas: [kai-session-relay]
-    features: [session-handoff]
+    features: [session-handoff, live-work-stack]
     # The design axis (DISCUSS, 2026-08-12): five categories of lost state, ranked by whether a
     # fresh session can recover them unaided. Anything recoverable that a snapshot ALSO records
     # becomes a second authority that can drift (anxiety B).
@@ -340,6 +340,36 @@ jobs:
     #     session. Category 5 (the where) is still derived and still must not be re-recorded.
     #   habit (cross-person): asking the feature's owner in chat what state it is in.
     # See docs/feature/single-issue-per-feature/feature-delta.md § Upstream changes.
+    #
+    # Live-view facet (DISCUSS, feature live-work-stack, 2026-08-18, issue #29):
+    # The job is unchanged — Kai wants to resume without a re-briefing — but every force above is
+    # about the session BOUNDARY, and one of the five categories has a failure that lives entirely
+    # INSIDE a session. The work stack (category 1's shape, registered 2026-08-14) is recorded only
+    # when the session is put DOWN, which is precisely when Kai has stopped needing it.
+    #   functional (live-view): the stack gains OPERATIONS, not just a format — push at the moment of
+    #     diversion, show on demand at any depth, pop on return. A frame's AGE becomes readable,
+    #     because a frame pushed and never popped is the failure mode.
+    #   push (live-view): three frames deep in a detour there is no command to run, and
+    #     .session-handoff.md is empty because no handoff has happened yet. Confirmed by dogfood on
+    #     2026-08-14: the first live /phil:handoff recorded an EMPTY stack because the session ended
+    #     at a slice boundary rather than inside a detour, and slice 04 recorded at the time that
+    #     "the feature's headline mechanism is still unexercised".
+    #   pull (live-view): capture the reason for leaving while it is still in Kai's head, rather than
+    #     reconstructing it at wind-down; and answer "where am I and why" without scrolling the
+    #     transcript.
+    #   anxiety (live-view): (A) restated one level down — a frame pushed and never popped is WORSE
+    #     than no stack, because the reader trusts it. This is the parent job's anxiety A applied to
+    #     a frame instead of to a snapshot, and it is why staleness marking is in scope rather than
+    #     deferred. (B) two writers on .session-handoff.md — answered structurally by [D1]: push and
+    #     pop regenerate the WHOLE file, so there is one writer, not two. (C) ceremony, the parent's
+    #     anxiety D one level down — a frame for every two-minute detour costs more than the detour;
+    #     answered by push being optional and never prompted for.
+    #   habit (live-view): holding the return path in working memory; scrolling the transcript to
+    #     recover why a file is open; re-deriving intent from git diff.
+    # The overwrite rule is AMENDED rather than carved out: it was written against merging ANOTHER
+    # session's snapshot, and its stated rationale is entirely about a competing worktree. A session
+    # rebuilding its own snapshot was never what it forbade. See feature-delta.md [D1] and [D2].
+    # See docs/feature/live-work-stack/feature-delta.md.
 
   - id: keep-a-backlog-trustworthy
     # Registered by DISCUSS wave, feature: groom-issues (2026-08-12)

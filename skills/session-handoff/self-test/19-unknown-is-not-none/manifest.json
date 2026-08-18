@@ -1,0 +1,10 @@
+{
+  "fixture_id": "SH-SELFTEST-19",
+  "phase": "STACK",
+  "situation": "Two runs of the bare show verb. Run A: no snapshot exists at the worktree root at all. Run B: a snapshot exists, was written by a capture, and has no ## Stack section because that session was never diverted.",
+  "verb": "show",
+  "run_a": { "snapshot_present": false },
+  "run_b": { "snapshot_present": true, "snapshot_stack": [] },
+  "expected_decision": ["STACK-UNKNOWN", "STACK-EMPTY"],
+  "expected_guard": "slice-01 AC5 -- unknown and none are different answers and must never be collapsed"
+}

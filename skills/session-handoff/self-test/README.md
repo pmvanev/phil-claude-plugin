@@ -12,7 +12,11 @@ outcome**:
 
 `CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `PROJECTED` · `PROJECTION-UNREFRESHED` · `RESUME-CURRENT` ·
 `RESUME-STALE` · `RECONSTRUCT` · `ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER` · `BOARD-AGREES` ·
-`BOARD-DIVERGES` · `BOARD-UNREADABLE` · `REPORT-CLAIM-CONFLICT`
+`BOARD-DIVERGES` · `BOARD-UNREADABLE` · `REPORT-CLAIM-CONFLICT` · `PUSHED` · `SHOWN` · `STACK-EMPTY` ·
+`STACK-UNKNOWN` · `WRITE-REFUSED`
+
+`POPPED` is absent for the same reason `REPORT-CLAIM-CONFLICT` is present: the outcome tracks the verb.
+`pop` is briefed in live-work-stack slice 02 and not built, and no fixture here expects it.
 
 This suite is the acceptance + regression gate for `skills/session-handoff/SKILL.md`. Format and intent mirror `skills/edd/self-test/`, `skills/work/self-test/`, and
 `skills/refactor-tests/self-test/` — this plugin's established way to test a skill.
@@ -42,6 +46,11 @@ them.
 | `13-board-diverges-from-snapshot/` | the tree matches the snapshot exactly, but the board's in-flight card is different work | **#24** done-when | the freshness verdict cannot see the board; detect and do **not** resolve | `RESUME-CURRENT` + `BOARD-DIVERGES` |
 | `14-board-agrees-with-snapshot/` | snapshot and the In Progress card name the same work, while a *different* card tops Todo | **#24** done-when | agreement is reported out loud; `In Progress` outranks top Todo | `RESUME-CURRENT` + `BOARD-AGREES` |
 | `15-board-unreadable-says-so/` | the repo has no board — the common case in the wild | **#24** | a check that cannot run says so, and never defaults to agreement | `RESUME-CURRENT` + `BOARD-UNREADABLE` |
+| `16-push-preserves-payload/` | a push onto a snapshot a **previous** session wrote | live-work-stack slice-01 AC1, AC3 | payload **and header** survive byte-identical, **and the primary path is not refused** | `PUSHED` |
+| `17-competing-write-refused/` | the file changes between read and write | slice-01 AC3 | compare-and-swap refuses, reports both hashes, never retries | `WRITE-REFUSED` |
+| `18-show-at-depth/` | three deep, snapshot the only input | slice-01 AC2, **KPI-3** | every frame ages from a full timestamp; **nothing is judged stale** | `SHOWN` |
+| `19-unknown-is-not-none/` | no snapshot vs. a snapshot with no diversions | slice-01 AC5 | `unknown` is about the record, `none` is about the work | `STACK-UNKNOWN` / `STACK-EMPTY` |
+| `20-push-with-no-resume-point/` | a push is the first thing ever recorded | slice-01 AC4 | the snapshot is created; `Why`/`Next` absent not empty; `captured: never` | `PUSHED` |
 
 ## The two sharpest fixtures
 
@@ -56,6 +65,16 @@ fails while 01 passes, the feature is actively dangerous.
 `BOARD-AGREES` passes `14` and fails `13`; one that always reports `BOARD-DIVERGES` passes `13` and
 fails `14`. Only an actual comparison passes both — which is the whole point of adding the agreeing
 case, since a detector silent on agreement is indistinguishable from one that never runs.
+
+**`16` and `17` are a third such pair, and `16` is the counter-intuitive one.** A spine that refuses
+every write it did not originate passes `17` and fails `16`; one that writes unconditionally passes `16`
+and fails `17`. Only a content comparison passes both. `16` exists because the tempting wrong guard —
+*is this snapshot mine?* — reads as the more careful design while breaking the primary path: resuming a
+previous session's snapshot is what the file is for, so an authorship check blocks every session after
+the first on its first push.
+
+**`19` pins a distinction both cases render as nothing.** An absent record and an empty stack look
+identical on screen, so the cheap implementation satisfies both with one branch and looks correct.
 
 **`03` and `05` resolve in opposite directions and must not be satisfied by one rule.** In `03` the
 spine is offered derivable state and must refuse it; in `05` the spine has no snapshot and must go and
@@ -74,6 +93,7 @@ reaches against `expected.md`.
 | `09`–`10` | slice 03, tested and deliberately **not built** — expected to fail, permanently |
 | `11`–`12` | the board projection — **must pass** |
 | `13`–`15` | the board divergence check, #24 — **must pass** |
+| `16`–`20` | the live stack, #29 slice 01 — **must pass** |
 
 A failure in `09`–`10` is genuine RED (the behaviour is unimplemented and will stay so), not BROKEN
 (the harness is faulty) — the fixtures are prose inputs with no imports to resolve. Do not "fix" them
@@ -85,7 +105,10 @@ the spine should do — a fixture that says nothing about a board is a situation
 Recorded here because the alternative failure modes are both silent: a driver that scores the extra
 outcome as a mismatch retires six working fixtures, and one that ignores the triple on any fixture not
 expecting it stops testing the triple at all. `05` and `12` are `RECONSTRUCT`, which reports no triple
-by design.
+by design. **`16`–`20` are stack-path fixtures and report no capture or read-back outcome at all** —
+no freshness verdict, no board triple. A driver expecting one of those on every fixture scores all four
+as failures. None expects `POPPED`: `pop` is slice 02 and unbuilt, and unlike `09`–`10` it has no standing
+fixture — it is briefed, not tested-and-shelved.
 
 Run the whole suite whenever `SKILL.md`, either command loader, or `skills/nwave-issue-board/SKILL.md`
 changes — the last because slice 02's routing line lives inside its generated block, so this skill's

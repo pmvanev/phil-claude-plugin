@@ -1,0 +1,101 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: live-work-stack (2026-08-18, issue #29)
+
+id: live-work-stack
+name: Know where attention is, and why, without ending the session
+persona: kai-session-relay
+job: carry-work-across-session-boundaries
+summary: >
+  Kai is working a step, hits a blocker, leaves to address it, and leaves again to fix something the
+  blocker depends on. Three frames deep, the question "where am I and why" has no answer: the stack
+  is recorded only at wind-down, so mid-session it does not exist yet. This journey gives the stack
+  operations — push at the moment of diversion, show on demand at any depth, pop on return — over
+  the snapshot file that already holds it. The session boundary journey (`session-handoff`) is
+  unchanged and consumes whatever frames remain.
+
+# Sibling to journeys/session-handoff.yaml. Same persona, same job, different time axis:
+# session-handoff spans the boundary; this one lives entirely inside a single session.
+
+steps:
+  - id: divert
+    action: >
+      Kai is about to leave the task in hand for something blocking it. Rather than carrying the
+      return path in working memory, they push a frame naming what is being entered and why.
+      The reason is captured while it is still in Kai's head, not reconstructed hours later.
+    output: A frame appended to the stack, echoed back so a mistyped reason is visible at once
+    emotion: about to lose the thread — the reason for leaving is clear now and will not be later
+  - id: descend
+    action: >
+      The diversion has its own blocker. Kai pushes again. Frames nest; the file is the stack, not
+      a log of stack operations, so depth is bounded by real nesting rather than by history.
+    output: A deeper stack, innermost last
+    emotion: held — going deeper is no longer the same as losing the way back
+  - id: orient
+    action: >
+      Mid-detour, at any depth, Kai asks where they are. The stack is shown as a legible trace:
+      what each level is, why it was entered, and how long it has been open — read bottom-up for
+      where attention is, top-down for what it was diverted from.
+    output: The trace, innermost marked, each frame carrying its reason and its age
+    emotion: oriented — the question has an answer that does not require scrolling the transcript
+  - id: return
+    action: >
+      The detour closes. Kai pops the innermost frame and the parent becomes current again. A frame
+      is popped by deleting its line, so nothing accumulates.
+    output: The stack one frame shallower, with the frame now in hand named back
+    emotion: resolved — the return was navigated rather than remembered
+  - id: wind-down
+    action: >
+      The session ends. `/phil:handoff` captures whatever frames remain and projects them, exactly
+      as it does today. This journey changes nothing about that step; it changes only whether the
+      stack has anything in it when the step runs.
+    output: Snapshot and projection, unchanged
+    emotion: relief — the boundary journey takes over with a real stack rather than an empty one
+
+emotional_arc: about-to-lose-the-thread → held → oriented → resolved → relief  # upward
+
+shared_artifacts:
+  - name: frame (what it is · why it was pushed · when)
+    source: divert
+    consumed_by: [orient, return, wind-down]
+  - name: stack (the ordered frames)
+    source: divert            # authority is .session-handoff.md — ONE file, per [D1]
+    consumed_by: [orient, return, wind-down]
+  - name: session id
+    source: divert            # stamped into the snapshot header; the competing-snapshot discriminator
+    consumed_by: [divert, return]
+  # DELIBERATELY NOT a shared artifact: a separate stack file. [D1] keeps one authority; see
+  # docs/feature/live-work-stack/feature-delta.md.
+
+error_paths:
+  - step: divert
+    failure: The snapshot on disk was written by a different session
+    recovery: >
+      Refuse and say whose it is. Never merge — that is arbitration, out of scope since
+      session-handoff slice 03, and the reason the overwrite rule exists at all
+  - step: divert
+    failure: No snapshot exists yet
+    recovery: >
+      Create one carrying the stack alone. A diversion IS payload, so this is not the NO-OP case;
+      the why and the next action are simply absent until a capture states them
+  - step: divert
+    failure: A frame is pushed with no reason
+    recovery: >
+      Ask for it. The reason is the payload — a frame naming only what was entered records the
+      thing Kai could have derived and drops the thing they could not
+  - step: orient
+    failure: No snapshot exists
+    recovery: >
+      Render `unknown`, never `none`. `none` asserts there were no diversions; `unknown` asserts
+      nobody wrote them down. Inherited verbatim from the projection rule
+  - step: orient
+    failure: A frame has been open longer than one boundary
+    recovery: >
+      Mark it. A push that was never popped is stale, and a stale frame is worse than no frame
+      because the reader trusts it — anxiety A, one level down
+  - step: return
+    failure: Pop on an empty stack
+    recovery: Say the stack is empty and write nothing. Popping nothing is not an error to recover from
+  - step: wind-down
+    failure: none introduced by this feature
+    recovery: >
+      `/phil:handoff` is unchanged. It reads the same file it always wrote, so the projection needs
+      no change either — stated explicitly because "no work needed" is a finding, not an omission

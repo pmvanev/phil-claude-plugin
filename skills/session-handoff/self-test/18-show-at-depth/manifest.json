@@ -1,0 +1,16 @@
+{
+  "fixture_id": "SH-SELFTEST-18",
+  "phase": "STACK",
+  "situation": "A session is three diversions deep and asks where it is. The snapshot is the only input -- there is no side-channel state about captures, because the format carries none.",
+  "verb": "show",
+  "snapshot_present": true,
+  "snapshot_header": { "captured": "2026-08-12T13:00Z", "commit": "083c953", "dirty": "no" },
+  "snapshot_stack": [
+    "Wave-to-command table · the task in hand · open since 2026-08-12T14:05Z",
+    "Fixture 07 · it contradicted the table, so it had to be settled first · open since 2026-08-12T16:40Z",
+    "The fixture runner · it needed a flag it did not have · open since 2026-08-12T17:05Z"
+  ],
+  "now": "2026-08-12T17:30Z",
+  "expected_decision": ["SHOWN"],
+  "expected_guard": "slice-01 AC2 -- three frames, each with what/why/age, innermost marked, NOTHING marked stale (staleness is slice 02)"
+}

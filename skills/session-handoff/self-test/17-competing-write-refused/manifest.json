@@ -1,0 +1,14 @@
+{
+  "fixture_id": "SH-SELFTEST-17",
+  "phase": "STACK",
+  "situation": "A session reads the snapshot to push a frame. Between the read and the write, a second session in another worktree writes the same file. The verify hash no longer matches the read hash.",
+  "verb": "push",
+  "push_what": "fixture runner",
+  "push_why": "the runner needs a flag it does not have",
+  "snapshot_present": true,
+  "snapshot_stack": ["wave-to-command table -- the task in hand"],
+  "hash_at_read": "a1b2c3d",
+  "hash_at_verify": "9f8e7d6",
+  "expected_decision": ["WRITE-REFUSED"],
+  "expected_guard": "slice-01 AC3 -- a changed file refuses, reports both hashes, writes nothing, and never retries"
+}

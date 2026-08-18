@@ -5,7 +5,7 @@ allowed-tools: Read, Glob, Grep, Bash(git rev-parse:*), Bash(git status:*), Bash
 ---
 
 Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handoff/SKILL.md`. Follow the BOOTSTRAP path; the
-snapshot format, the deriving rules, the decision outcomes, and the never-do list govern both paths.
+snapshot format, the deriving rules, the decision outcomes, and the never-do list govern all three paths.
 
 **This command writes nothing — not to the repository, and not to the board.** It has no `Write`, no
 `Edit` and no bare `Bash`. Its `git` grants are scoped to read-only subcommands, and its one remaining

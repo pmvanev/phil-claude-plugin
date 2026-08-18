@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion, Skill
 ---
 
 Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handoff/SKILL.md`. Follow the CAPTURE path; the
-snapshot format, the deriving rules, the decision outcomes, and the never-do list govern both paths.
+snapshot format, the deriving rules, the decision outcomes, and the never-do list govern all three paths.
 
 **The local snapshot is written before the card's projection is refreshed, and nothing is ever read back
 from the card.** A forge failure leaves the snapshot standing and is reported as

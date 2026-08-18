@@ -1,0 +1,27 @@
+{
+  "fixture_id": "SH-SELFTEST-16",
+  "phase": "STACK",
+  "situation": "A session is working from a snapshot a PREVIOUS session captured -- it carries a Why with two decisions, a Next action, and no Stack. The session hits a blocker and pushes a frame. The file is unchanged between read and write.",
+  "verb": "push",
+  "push_what": "deploy script",
+  "push_why": "the blocker's fix cannot be tested until deploys work",
+  "snapshot_present": true,
+  "snapshot_written_by": "a previous session",
+  "snapshot_why": [
+    "ruled out the carve-out because it reintroduces two writers",
+    "settled on whole-file regeneration"
+  ],
+  "snapshot_next": "author slice 01",
+  "snapshot_stack": [],
+  "hash_at_read": "a1b2c3d",
+  "hash_at_verify": "a1b2c3d",
+  "expected_decision": [
+    "PUSHED"
+  ],
+  "expected_guard": "slice-01 AC1 + AC3 -- Why, Next AND the header survive byte-identical; and the primary path (push onto a PREVIOUS session's snapshot) must SUCCEED",
+  "snapshot_header": {
+    "captured": "2026-08-12T17:30Z",
+    "commit": "083c953",
+    "dirty": "no"
+  }
+}

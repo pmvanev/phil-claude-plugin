@@ -18,10 +18,15 @@
 # Decision outcomes the spine must produce (SKILL.md "Decision outcomes" is authoritative):
 #   CAPTURE · NO-OP · REFUSE-DERIVABLE · PROJECTED · PROJECTION-UNREFRESHED · RESUME-CURRENT ·
 #   RESUME-STALE · RECONSTRUCT · ROUTE · ROUTE-LIVE-WINS · ASK-OWNER ·
-#   BOARD-AGREES · BOARD-DIVERGES · BOARD-UNREADABLE · REPORT-CLAIM-CONFLICT
+#   BOARD-AGREES · BOARD-DIVERGES · BOARD-UNREADABLE · REPORT-CLAIM-CONFLICT ·
+#   PUSHED · SHOWN · STACK-EMPTY · STACK-UNKNOWN · WRITE-REFUSED
 #
-# REPORT-CLAIM-CONFLICT belongs to slice 03, which was tested and deliberately not built; it is kept
-# here because its scenario is kept. Every other outcome above is live.
+# Two are deliberately absent rather than overlooked:
+#   REPORT-CLAIM-CONFLICT belongs to slice 03, tested and deliberately not built; it is kept here
+#     because its scenario is kept.
+#   POPPED belongs to live-work-stack slice 02, briefed and not built. Its scenario is NOT here — the
+#     outcome arrives with the verb.
+# Every other outcome above is live.
 
 Feature: Carry work across the session boundary without a re-briefing
   As Kai, a developer carrying multi-session work,
@@ -133,3 +138,53 @@ Feature: Carry work across the session boundary without a re-briefing
     Then it says the comparison could not be made, and why
     And it does not report the two records as agreeing
     And it still presents the resume point and names the owner
+
+  # --- live-work-stack (issue #29), slice 01: the stack gains operations -------------------------
+  # The stack was persisted from 2026-08-14 and had no operations: it was recorded only when the
+  # session was put down, which is when Kai has stopped needing it. These scenarios are the live view.
+  # `pop` is slice 02 and has no scenario here.
+
+  @issue-29 @happy @fixture(16-push-preserves-payload) @contract-shape:pure-function
+  Scenario: A diversion is recorded the moment it is taken, onto a record someone else left
+    Given a resume point a previous session left behind, carrying its reasoning and its next action
+    And a session that has picked that work up and is now leaving it for something blocking it
+    When the session records the diversion, naming what it is entering and why
+    Then the diversion is added to the work stack
+    And the previous session's reasoning and next action are left exactly as they were
+    And the freshness stamp is left exactly as it was, because no new state of play was captured
+
+  @issue-29 @error @fixture(17-competing-write-refused) @contract-shape:pure-function
+  Scenario: A record that moved while it was being read is never written over
+    Given a session partway through recording a diversion
+    And the shared record changed after it was read and before it could be written
+    When the session tries to write
+    Then it refuses, and says what it saw before and after
+    And it records nothing
+    And it does not try again, because choosing a winner is not its to do
+    And it says back the diversion it did not record, so the reason is not lost with the attempt
+
+  @issue-29 @happy @fixture(18-show-at-depth) @contract-shape:pure-function
+  Scenario: Several diversions deep, the way back is legible without re-reading the session
+    Given a session three diversions deep
+    When it asks where it is
+    Then it is shown every level, what each one is, why it was entered, and how long it has been open
+    And the level it is currently at is marked
+    And no level is judged stale, because judging that is not yet possible from what is recorded
+
+  @issue-29 @error @fixture(19-unknown-is-not-none) @contract-shape:pure-function
+  Scenario: Nothing written down and nothing to write down are different answers
+    Given no resume point exists at all
+    When a session asks where it is
+    Then it says nobody has written anything down
+    And it does not say there were no diversions, which nobody established
+    But given a resume point that a session left with no diversions to record
+    Then asking the same question says there were none
+
+  @issue-29 @error @fixture(20-push-with-no-resume-point) @contract-shape:pure-function
+  Scenario: A diversion can be the first thing ever recorded
+    Given no resume point exists
+    And a session takes a diversion
+    When it records the diversion
+    Then a resume point is created carrying the diversion alone
+    And the reasoning and the next action are marked as never recorded, not as empty
+    And the record says plainly that no state of play has been captured against it
