@@ -55,9 +55,8 @@ with `/hooks`.
 
 ## Additional entries for the interactive skill path (G10 + G7)
 
-Add these only when running the prose fallback. The G10 entry joins the existing `Stop` array
-as a **second** entry (the notifier keeps its trailing `&`; G10 must NOT have one — its stdout
-JSON decision must be read synchronously):
+Add these only when running the prose fallback. The G10 entry adds a `Stop` array, and must NOT
+carry a trailing `&` — its stdout JSON decision must be read synchronously:
 
 ```json
 {
@@ -66,7 +65,6 @@ JSON decision must be read synchronously):
       { "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/reinject-pinned-constraints.py\"" } ] }
     ],
     "Stop": [
-      { "hooks": [ { "type": "command", "command": "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File ${CLAUDE_PLUGIN_ROOT}/scripts/notify-stop.ps1 &" } ] },
       { "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/anti-premature-exit.py\"" } ] }
     ]
   }
@@ -77,8 +75,7 @@ JSON decision must be read synchronously):
 
 The command uses `python3` (works on macOS/Linux and on this repo's Windows host, Python
 3.14). If `python3` is not on PATH on a given Windows machine, use `python` or `py -3` in the
-command string instead. (The existing `scripts/notify-stop.ps1` stays PowerShell — it is a
-Windows toast/chime notifier, genuinely OS-specific and unrelated to the refactor-loop guards.)
+command string instead.
 
 ## Degradation without the hooks
 
