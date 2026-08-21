@@ -1,0 +1,14 @@
+{
+  "fixture_id": "DECISION-REQUEST-SELFTEST-01",
+  "situation": "The real elicitation emitted during this feature's own DISCUSS wave, 2026-08-21. Three simultaneous decisions were put to the user — research depth, persona-vs-facet, and whether the word budget is a hard ceiling — one of them the meta-question about the ceiling itself. Recorded verbatim as `ask.md`, not reconstructed.",
+  "ask_file": "ask.md",
+  "expected_decision": ["CONFORMS"],
+  "mechanical_assertions": {
+    "word_ceiling": 200,
+    "measured_words": 143,
+    "forbidden_token_count": 0
+  },
+  "why_this_ask": "It is the hardest input the ceiling had met at the time it was locked: three decisions at once, including one about the ceiling. If a hard ceiling were obviously unworkable, it would have failed here.",
+  "expected_guard": "the framing states what is being decided and what turns on it before any option; no internal vocabulary; each option names its own cost",
+  "not_asserted_here": "Whether the ask was WELL FRAMED is a reading, not a count, and this fixture does not pretend to automate it. Only the ceiling and the token absence are mechanical. Slice 02 adds the three failing fixtures; this one pins the conforming baseline."
+}

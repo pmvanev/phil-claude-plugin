@@ -1,8 +1,9 @@
 # Locate the Test Runner
 
-Shared procedure for determining how to run a project's test suite. Referenced by
-`skills/refactor/SKILL.md` and `skills/refactor-loop/SKILL.md` so both detect the runner
-the same way.
+Shared procedure for determining how to run a project's test suite, so every consumer detects
+the runner the same way. The loaders are listed in `skills/shared/README.md` and derived by
+`tests/test_shared_fragment_registry.py` — this header no longer names them, because when it did
+it named `skills/refactor/SKILL.md`, which does not reference this file.
 
 1. **Check CLAUDE.md first.** Read the project's `CLAUDE.md` for a declared test command
    (look for headings or keys like "Test", "Testing", "Test Commands", "test runner", or

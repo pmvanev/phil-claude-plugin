@@ -29,6 +29,13 @@ separates this from the prose that already failed.
 - Fixture *buried-ask* — wording that would pass, placed inside surrounding output. Fails **on placement**.
 - Fixture *conforming* — passes all three checks.
 - The word-count assertion from slice 01, generalised to run over any fixture.
+- **A fixture whose ask genuinely needs a detail block** — added by slice 01's result. [D5] is
+  currently unproven: the one real conforming ask fit 143 words and displaced nothing downward, so the
+  clause that makes the hard ceiling affordable has no instance behind it.
+- **A ruling on ask/detail ORDERING** — also from slice 01. The fragment says detail *"sits below"*; the
+  one real instance put its jargon-bearing context *above* and read better for it. The distinction may be
+  establishing-context (above) vs supporting-detail (below), which the fragment does not draw. Either draw
+  it or delete the positional claim.
 - A decision, recorded, on whether fixtures live beside the fragment in `skills/shared/` or in a
   `self-test/` directory — `skills/shared/` holds no fixtures today, so this slice sets the precedent
   either way and should set it knowingly (feature delta, *Open* item 1).
@@ -52,10 +59,15 @@ separates this from the prose that already failed.
   written after `check-readonly-commands.py`'s first version silently passed.
 - **AC7** If AC3 cannot be met, that is recorded in the Result section and [D9] is amended in the feature
   delta rather than left standing.
+- **AC8** One fixture's ask requires a detail block, and that block carries tokens the ask may not —
+  proving [D5] is a used clause rather than an unexercised escape hatch.
+- **AC9** The ordering question is settled in the fragment: either the establishing/supporting
+  distinction is drawn, or *"sits below"* is removed as an overclaim.
 
 ## Dependencies
 
-**Slice 01** — needs the fragment to test against and its real recorded request for AC5.
+**Slice 01** — needs the fragment to test against and its real recorded request for AC5. Slice 01's
+result also added AC8 and AC9 to this brief; read its *AC5 failed* section before starting.
 
 ## Effort · reference class
 
