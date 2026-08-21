@@ -46,17 +46,40 @@ def tool_grants(tools: str) -> list[str]:
 
 
 def check_grant_is_matchable(name: str, grant: str) -> str | None:
-    """Reject a `Bash(...)` grant carrying a path or a variable.
+    r"""Reject a `Bash(...)` grant carrying a path or a variable.
 
-    Permission rules are literal prefix matches, and `${CLAUDE_PLUGIN_ROOT}` is interpolated in a
-    command's BODY, not in `allowed-tools`. So `Bash(python3 ${CLAUDE_PLUGIN_ROOT}/x.py:*)` matches
-    nothing: the model runs an absolute path that shares no prefix with the literal rule text, and
-    the shell sees an empty variable if it copies the spelling instead.
+    The rule stands; its original rationale did not survive measurement, and the corrected one is
+    below. **`allowed-tools` DOES interpolate `${CLAUDE_PLUGIN_ROOT}`.** Measured 2026-08-21 against
+    the shipped Claude Code 2.1.239, at two sites:
 
-    The failure is silent in the worst way — the command still works, it just prompts for
-    permission on every run, and a prompt reads as normal. Worse, a grant like that *looks*
-    narrower than any real grant could be, so its own documentation ends up claiming a boundary
-    nothing enforces.
+        m = a["allowed-tools"], h = typeof m === "string" ? f(m) : ...
+        f = (Y) => { let W = hOe(Y, {path: o, source: r}); ... }
+        function hOe(e, t) { ... e.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, () => r(t.path)) ... }
+
+    Reproduce with: `strings ~/.local/share/claude/versions/2.1.239 | grep -o '.\{0,220\}\["allowed-tools"\].\{0,300\}'`
+    and the same over `function hOe(`.
+
+    So the earlier claim — that such a grant "matches nothing" and merely prompts on every run — was
+    FALSE on this build. The grant becomes an absolute-path rule, and because a command's body is
+    interpolated by the same function at the same load, an invocation written
+    `${CLAUDE_PLUGIN_ROOT}/x.py` produces the very string the rule now holds. It can match.
+
+    Three reasons the rejection is kept anyway, none of them the original one:
+
+    1. **The grant a human reads is not the grant enforced.** After interpolation it is an absolute,
+       install- and version-specific path. A reviewer auditing `allowed-tools` cannot tell what it
+       permits without knowing the install root — and the whole point of the declaration is that a
+       reader can see the boundary.
+    2. **It matches only one spelling.** Any other route to the same script — a relative path, a
+       `cd` first, a different interpreter path — shares no prefix and silently prompts. The narrow
+       grant is narrow in a way nobody can predict from reading it.
+    3. **De facto convention.** The 2026-08-17 survey of 211 `Bash()` grants across this repo and
+       every installed plugin found exactly one containing a slash or a variable; the other 210 name
+       a bare executable.
+
+    Whether reasons 1-3 are worth an enforced check is now a live question rather than a settled
+    one, because the fact that motivated the check is gone. Recorded here rather than quietly
+    kept — a check whose stated rationale is false is the defect this repo keeps finding.
 
     Added 2026-08-17 after `board-setup` shipped exactly that grant. A survey of 211 `Bash()`
     grants across this repo and every installed plugin found it to be the only one containing a
@@ -66,12 +89,15 @@ def check_grant_is_matchable(name: str, grant: str) -> str | None:
     """
     body = grant[len("Bash("):].rstrip(")")
     if "${" in body:
-        return (f"{name}: `{grant}` interpolates a variable, which `allowed-tools` does not do — "
-                f"the rule can never match, so the command prompts on every run")
+        return (f"{name}: `{grant}` interpolates a variable. `allowed-tools` DOES expand "
+                f"`${{CLAUDE_PLUGIN_ROOT}}` (measured on 2.1.239), so the rule becomes an "
+                f"install-specific absolute path: unreadable to a reviewer and matching only one "
+                f"spelling of the invocation. Grant the interpreter; put the path in the body")
     if "/" in body:
-        return (f"{name}: `{grant}` contains a path — permission rules are literal prefix "
-                f"matches, so this cannot match an absolute-path invocation. Grant the "
-                f"interpreter and put the path in the command body")
+        return (f"{name}: `{grant}` contains a path. Permission rules are literal prefix "
+                f"matches, so the grant covers exactly one spelling of the invocation and "
+                f"silently prompts for every other. Grant the interpreter and put the path in "
+                f"the command body")
     return None
 
 

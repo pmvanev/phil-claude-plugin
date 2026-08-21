@@ -29,6 +29,32 @@ cc = load()
 
 # --- the motivating input: a grant carrying a variable or a path -------------------------
 
+def test_the_check_does_not_rest_on_the_claim_that_was_measured_false():
+    r"""The fixture the fold-back needed, per CLAUDE.md route 1.
+
+    Until 2026-08-21 both this check and CLAUDE.md asserted that `allowed-tools` does NOT interpolate
+    `${CLAUDE_PLUGIN_ROOT}`, and therefore that such a grant "matches nothing". Measured against the
+    shipped Claude Code 2.1.239, that is FALSE: `a["allowed-tools"]` is passed through `hOe`, which
+    does `e.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, () => r(t.path))`. The grant becomes an absolute path
+    and can match, because the command body is interpolated by the same function at the same load.
+
+    This test distinguishes the two claims, which is what a fixture here is for:
+      - the BEHAVIOUR (reject path- and variable-bearing grants) is unchanged and still asserted;
+      - the RATIONALE must no longer say the rule cannot match, or that interpolation does not happen.
+
+    If someone later decides reasons 1-3 in the docstring are not worth enforcing, that is a policy
+    change to make deliberately — not something to rediscover by reading a false explanation.
+    """
+    src = (Path(__file__).resolve().parent.parent
+           / "scripts" / "check-readonly-commands.py").read_text(encoding="utf-8")
+    assert "DOES interpolate" in src, "the corrected fact must be stated where the check lives"
+    assert "2.1.239" in src, "the measurement must name the build it was taken on"
+    for dead in ("which `allowed-tools` does not do",
+                 "the rule can never match",
+                 "matches nothing:"):
+        assert dead not in src, f"refuted rationale still present: {dead!r}"
+
+
 def test_a_grant_with_a_variable_is_rejected():
     """The exact defect `board-setup` shipped: `allowed-tools` does not interpolate, so this
     matches nothing and prompts on every run while looking narrower than any real grant."""

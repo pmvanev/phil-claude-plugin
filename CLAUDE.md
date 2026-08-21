@@ -88,20 +88,41 @@ Only the skill's prose separated them, and no validator reads that. Hence the de
 
 Adding a verb to the allowlist is a promise that it has no writing mode. Check before adding one.
 
-**A `Bash(...)` grant may not contain a path or a variable.** `allowed-tools` does **not** interpolate
-`${CLAUDE_PLUGIN_ROOT}`, and permission rules are literal prefix matches — so
-`Bash(python3 ${CLAUDE_PLUGIN_ROOT}/scripts/x.py:*)` matches nothing. The command still works; it just
-prompts on every run, and a prompt reads as normal. Worse, such a grant *looks* narrower than any real
-grant could be, so the command's own prose ends up claiming a boundary nothing enforces. To scope a
-command to one script, grant the interpreter, put the path in the invocation instruction, and carry the
-real intent in prose — the `adversarial-review` pattern above. Checked by
-`scripts/check-readonly-commands.py` for **every** command, not only `mutates: false` ones.
+**A `Bash(...)` grant may not contain a path or a variable.** To scope a command to one script, grant
+the interpreter, put the path in the invocation instruction, and carry the real intent in prose — the
+`adversarial-review` pattern above. Checked by `scripts/check-readonly-commands.py` for **every**
+command, not only `mutates: false` ones.
 
-Written 2026-08-17, when `board-setup` shipped exactly that grant. A survey of 211 `Bash()` grants
-across this repo and every installed plugin found it the only one carrying a slash or a variable; the
-other 210 name a bare executable. **The first version of the check silently passed** — the function was
-written and never called, which is this board's recurring defect reproduced inside the fix for it. Test
-that a new check fails on the input that motivated it before trusting a green run.
+**The rule stands; the reason it was written does not.** This paragraph used to say `allowed-tools` does
+**not** interpolate `${CLAUDE_PLUGIN_ROOT}`, so such a grant "matches nothing" and merely prompts on
+every run. **Measured 2026-08-21 against the shipped Claude Code 2.1.239: it does interpolate.**
+`a["allowed-tools"]` is passed through `hOe`, and `hOe` does
+`e.replace(/${CLAUDE_PLUGIN_ROOT}/g, () => r(t.path))`. The grant becomes an absolute path, and since a
+command's body is interpolated by the same function at the same load, an invocation written
+`${CLAUDE_PLUGIN_ROOT}/x.py` produces the very string the rule holds. **It can match.**
+
+Three reasons the rule is kept, none of them the original:
+
+1. **The grant a human reads is not the grant enforced.** After interpolation it is an absolute,
+   install- and version-specific path. A reviewer cannot tell what it permits without knowing the
+   install root — and a declaration whose boundary is unreadable defeats its own purpose.
+2. **It covers exactly one spelling.** Any other route to the same script — a relative path, a `cd`
+   first, a different interpreter path — shares no prefix and silently prompts.
+3. **De facto convention.** The 2026-08-17 survey of 211 `Bash()` grants across this repo and every
+   installed plugin found exactly one carrying a slash or a variable; the other 210 name a bare
+   executable.
+
+**Whether those three are worth an enforced check is now open**, because the fact that motivated it is
+gone. Recorded rather than quietly kept: a check whose stated rationale is false is this board's
+recurring defect wearing a different hat. `tests/test_check_readonly_commands.py` pins the distinction —
+the behaviour is asserted, and the three refuted sentences are asserted *absent*, so nobody re-derives
+the old reason from the code.
+
+**The original note is still true of the first version of the check**, and worth keeping for its own
+lesson: it silently passed because the function was written and never called. Test that a new check
+fails on the input that motivated it before trusting a green run.
+
+Written 2026-08-17, when `board-setup` shipped exactly that grant.
 
 ## Which copy is under test
 
