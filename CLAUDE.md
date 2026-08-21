@@ -124,6 +124,28 @@ fails on the input that motivated it before trusting a green run.
 
 Written 2026-08-17, when `board-setup` shipped exactly that grant.
 
+## This file ships to every consumer, and that is accepted
+
+`CLAUDE.md` is copied verbatim into every install — confirmed in the 0.12.0, 0.19.0 and 0.36.0 cache
+snapshots — so strangers receive 19KB of instructions about developing *this* repo, which mean nothing
+in their project. So do `rgr-loop.md`, `docs/`, `tests/` and `pytest.ini`.
+
+**Claude Code warns about it on load:** *"`CLAUDE.md` at the plugin root is not loaded as project
+context. Remove it from the plugin root. To ship context with your plugin, use a skill instead."*
+
+**Decided 2026-08-21: accept it, do not exclude it.** The alternative is a packaging step, and a
+mis-listed exclude removes a file from installs *silently* — a worse failure than the current noise,
+because a missing skill is invisible while a redundant file is merely useless. The official
+`superpowers` plugin ships its dev files the same way.
+
+What this costs, stated so it is not rediscovered as a defect: the warning keeps printing, and it is
+**not** a signal about your working tree. Do not "fix" it by moving this file — `rules/` is the wrong
+home (see *Where a finding about a standard goes*), and a skill would make repo conventions loadable in
+strangers' projects, which is the same defect one layer down.
+
+The one thing that would change this decision: a consumer reporting that shipped dev files caused real
+confusion. Nothing has.
+
 ## Which copy is under test
 
 **The released copy is what a `/phil:*` command runs — never this working tree.** Claude Code loads
