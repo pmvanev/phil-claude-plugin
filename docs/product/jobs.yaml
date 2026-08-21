@@ -623,3 +623,59 @@ jobs:
     #   C6 Absent renders as `unknown` or `not applicable`, never as a benign default.
     #   C7 Silence is not consent — no offer adopted without an explicit answer.
 
+
+  - id: answer-a-tools-question-without-decoding-it
+    job_story: >
+      When a command stops mid-task and hands me a decision only I can make, I want the question
+      posed in language I can act on without first reconstructing the asker's context, so I can
+      decide in one pass instead of spending a turn asking what is actually being asked.
+    dimensions:
+      functional: >
+        State what is being decided and what turns on it, in plain English, with no internal
+        vocabulary, inside a bounded length, and place it where it can be found — before any
+        options are listed.
+      emotional: >
+        Confidence that the answer given is an informed one rather than a guess at a half-understood
+        question; relief from the standing tax of asking what was asked.
+      social: >
+        Decisions on the record that the decider actually understood — and a tool that can be handed
+        to someone without the asker's context and still be answerable.
+    four_forces:
+      push: >
+        Three measured failure modes: a bare numbered list with no framing; a jargon-packed wall in
+        the asker's internal vocabulary; and an adequately-worded request buried in surrounding
+        output. Thirteen commands grant `AskUserQuestion` and not one says a word about how to use it.
+      pull: >
+        The standing manual workaround, which already works — "explain in 200 words of plain English
+        using no jargon or labels what is needed from me" — applied by default rather than typed.
+      anxiety: >
+        (A) A bounded length squeezes a genuinely complicated decision. (B) A standard with no
+        mechanism is the same category as the prose that already failed. (C) A rule that fires on
+        file type is dark at the exact moment a question is asked.
+      habit: >
+        Typing the plain-English demand as a follow-up turn, every time; or answering the
+        half-understood question and finding out later.
+    opportunity_score: high-importance-low-satisfaction
+    status: validated
+    personas: [ari-interrupted-decider]
+    features: [decision-request-standard]
+    # Relationship to every other job in this file: ORTHOGONAL, and that is the finding. Robin, Tess,
+    # Quinn, Avery, Rowan, Kai and Morgan are each asked to decide something by the features they own,
+    # and each becomes Ari at that moment. The job is not a facet of any of them because it is not about
+    # a domain — it is about the POSITION of holding a question without the asker's context. Attaching
+    # it to one persona would imply the other seven do not hit it; all eight do.
+    # Why a NEW persona rather than a facet (contrast board-setup-block, which took the facet route):
+    # there the actor was the same human one step earlier in the same job. Here the actor is any of
+    # eight humans at a moment orthogonal to their job. A facet on one file would be wrong on the
+    # other seven.
+    # Load-bearing constraints (DISCUSS, 2026-08-21):
+    #   C1 The question states what is being decided and what turns on it BEFORE any options.
+    #   C2 Plain English. No internal vocabulary — no wave labels, issue numbers, slice ids, skill
+    #      names, artifact paths — in the ask itself.
+    #   C3 200 words is a HARD CEILING on the ask, countable and failable. Not a target.
+    #   C4 Supporting detail is permitted, unbounded, and SEPARATED from the ask. The ceiling applies
+    #      to the question, never to what a reader may opt into afterwards.
+    #   C5 Placement is part of the asking. Failure mode 3 is a placement defect, not a wording one,
+    #      so a conforming ask that is buried still fails.
+    #   C6 The mechanism is named, and where it cannot be enforced that is STATED rather than implied.
+    #      A convention with no enforcement is what already failed here.

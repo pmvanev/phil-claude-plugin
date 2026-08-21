@@ -1,0 +1,200 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: decision-request-standard (2026-08-21)
+
+id: decision-request-standard
+name: Answer the question without first decoding it
+persona: ari-interrupted-decider
+job: answer-a-tools-question-without-decoding-it
+summary: >
+  Ari is doing something else when a command stops and needs a call. The ask is findable without
+  hunting — set apart from the surrounding output rather than embedded in it. It opens by saying what
+  is being decided and what changes depending on the answer, in language Ari can read cold, and it
+  fits inside a ceiling that can be counted. Options come after the framing, never instead of it.
+  Whatever detail carries the internal vocabulary sits below, separated and optional, so it is
+  available and never in the way. Ari answers, declines, or defers in one pass — and can find the way
+  back to the interrupted work.
+
+steps:
+  - id: interrupted
+    action: >
+      A command stops mid-task because it has reached something only Ari can decide. It says that it
+      has stopped, and it stops CLEANLY — the ask is set apart from the output that preceded it
+      rather than appended to the end of it.
+    output: A visible boundary; Ari can see that a question exists without looking for one
+    emotion: >
+      jolted but oriented — I was doing something else, and I can already see that this is a question
+      and not more progress reporting
+
+  - id: read-the-ask
+    action: >
+      Read what is being decided and what turns on it. Both are stated before any option appears, in
+      plain English, with no internal vocabulary in the ask itself — no wave labels, no issue numbers,
+      no slice ids, no skill names, no artifact paths.
+    output: >
+      A statement Ari can answer from: this is the choice, and this is what changes depending on it
+    emotion: >
+      relief — I understood it on the first read, and I did not have to spend a turn asking what was
+      being asked
+
+  - id: weigh
+    action: >
+      Read the options. Each names its own cost or risk rather than only its benefit, so the trade is
+      visible rather than implied by ordering.
+    output: A set of choices whose differences Ari can actually tell apart
+    emotion: control — the trade is mine to make and I can see both sides of it
+
+  - id: consult-detail
+    action: >
+      OPTIONAL. Drop into the supporting detail — the evidence, the file paths, the internal
+      vocabulary — which sits below the ask, separated, and unbounded.
+    output: Whatever depth Ari asked for, and nothing Ari did not
+    emotion: >
+      trust — the detail was there when I wanted it, and it was not in my way when I did not.
+      This is the step that makes the ceiling honest rather than lossy
+
+  - id: answer
+    action: Answer, decline, or defer. Declining and deferring are first-class and need no decoding either.
+    output: A decision on the record, or an explicit non-decision that stays visible as one
+    emotion: confidence — the answer I gave is an informed one, not a guess at a half-read question
+
+  - id: resume
+    action: >
+      Return to the interrupted work. The ask named what it was interrupting, so the way back does not
+      have to be reconstructed.
+    output: The interrupted task, resumed
+    emotion: continuity — I did not lose the thread I was holding
+
+emotional_arc: >
+  jolted-but-oriented → relief → control → trust → confidence → continuity  # upward
+  # `relief` is the turn: the run stops being an interrogation the moment the ask is legible on the
+  # first read. Everything after it is downstream of that one property. Note that the arc STARTS
+  # negative and must — an interruption is a cost, and a journey that pretends otherwise would design
+  # away the one thing worth minimising.
+
+shared_artifacts:
+  - name: the_ask
+    source: >
+      the asking command, bounded at 200 words — a HARD ceiling, countable and failable, never a target
+    consumed_by: [read-the-ask, weigh, answer]
+    # The ceiling is on the ask ALONE. It is not a budget for the whole turn, and it is not shared with
+    # the supporting detail.
+
+  - name: what_turns_on_it
+    source: the asking command, stated in the ask before any option
+    consumed_by: [read-the-ask, weigh]
+    # DELIBERATELY not optional and deliberately not last. Failure mode 1 is this artifact missing
+    # while the options render fine.
+
+  - name: the_options
+    source: the asking command, each carrying its own cost
+    consumed_by: [weigh, answer]
+
+  - name: supporting_detail
+    source: >
+      the asking command, unbounded, SEPARATED from the ask. Carries the internal vocabulary that C2
+      forbids in the ask itself.
+    consumed_by: [consult-detail]
+    # This is the escape hatch that keeps the hard ceiling from being lossy. Without it, C3 squeezes a
+    # genuinely complicated decision and the ceiling becomes the defect.
+
+  - name: interrupted_context
+    source: the asking command — what this question is interrupting
+    consumed_by: [interrupted, resume]
+
+  # DELIBERATELY NOT an artifact: a summary of the surrounding output. Restating progress inside the ask
+  # is how failure mode 3 gets rebuilt from the inside — the ask grows until it is noise again.
+  # DELIBERATELY NOT an artifact: a recommendation without a stated cost. Marking one option
+  # "(Recommended)" is permitted and useful; presenting it without naming what it costs converts the ask
+  # into a rubber stamp, which is the same defect as a bare option list one register politer.
+
+error_paths:
+  - step: read-the-ask
+    failure: >
+      FAILURE MODE 1, measured. A bare numbered list arrives with no framing at all. The options render;
+      the decision does not. Structurally this is what `AskUserQuestion` does by default — the tool
+      renders options and has no slot that forces framing.
+    recovery: >
+      The framing is not optional and does not live in the tool. It is prose emitted BEFORE the call,
+      and a call made without it is the defect. Fixture-pinned, because the tool will keep making this
+      easy forever.
+
+  - step: read-the-ask
+    failure: >
+      FAILURE MODE 2, measured. Paragraphs in the asker's internal vocabulary — wave labels, issue
+      numbers, slice ids, skill names, artifact paths — as though Ari shares the asker's loaded context.
+    recovery: >
+      Plain English in the ask; every one of those tokens belongs in `supporting_detail`. The rule is
+      not "explain the jargon" — an explained label is still a label Ari must hold — it is "the ask
+      does not need it."
+
+  - step: interrupted
+    failure: >
+      FAILURE MODE 3, measured. The ask is worded well and buried in so much surrounding output that
+      the whole thing reads as noise.
+    recovery: >
+      Treat placement as part of the asking. A conforming ask that is buried STILL FAILS. This is why
+      the ceiling alone does not close the feature: modes 1 and 2 are wording, mode 3 is placement, and
+      a standard that only governs wording would report success on a third of the problem.
+
+  - step: read-the-ask
+    failure: The ask fits 200 words only by dropping what turns on it
+    recovery: >
+      Cut options, or cut to a smaller decision, and move detail below — never the framing. The ceiling
+      exists to force that ordering; if it starts evicting `what_turns_on_it` it is being applied
+      backwards. A decision genuinely too large to frame in 200 words is a decision that should be
+      SPLIT, and the split is the answer rather than a longer ask.
+
+  - step: read-the-ask
+    failure: >
+      The asker has no idea what turns on the answer — it stopped because it was uncertain, not because
+      a real fork exists
+    recovery: >
+      Do not ask. An ask with no stated consequence is a request for reassurance wearing a decision's
+      clothes, and it trains Ari to stop reading asks. Decide it, state the assumption, and carry on —
+      which is what the repo's own standing guidance already says.
+
+  - step: weigh
+    failure: Options that differ in wording and not in outcome
+    recovery: >
+      Collapse them and ask a smaller question. Three restatements of one option is a bare list with
+      extra steps
+
+  - step: consult-detail
+    failure: >
+      The supporting detail grows until it is the wall of text the ceiling was meant to kill — the ask
+      conforms, the turn does not
+    recovery: >
+      ACCEPTED RISK, and named rather than solved. The separation is what is enforceable; the length
+      below it is not. Stating this is the point — an unenforced half presented as enforced is the
+      defect this repo has recorded three times.
+
+  - step: answer
+    failure: Ari's reply is neither an answer nor a decline — "ok", "sure", "sounds right"
+    recovery: >
+      Treat it as unanswered and ask once more, naming what is still needed. With a recommendation on
+      the table an ambiguous reply plausibly reads as ACCEPT, and adopting it records a decision Ari
+      never made while every visible rule looks satisfied. Inherited verbatim from board-setup-block's
+      elicit step — same failure, different question.
+
+  - step: answer
+    failure: Ari defers, and the deferral is silently treated as the recommended option
+    recovery: >
+      A deferral is recorded as a deferral and the work that depended on it is reported as blocked.
+      Silence is not consent — the same rule board-setup-block reached as C7
+
+  - step: resume
+    failure: The ask never said what it was interrupting, so the way back has to be reconstructed
+    recovery: >
+      Name the interrupted work in the ask. This costs one line and is the cheapest artifact in the
+      journey; it is also the one most often dropped, because the asker has never lost the thread
+
+  - step: interrupted
+    failure: >
+      The moment happens OUTSIDE a `/phil:*` command — ordinary conversation, no skill loaded, nothing
+      referencing the standard
+    recovery: >
+      Measured limitation, not a gap to paper over. `rules/` cannot carry this: a globbed rule fires on
+      file type and is dark here (`ux.md`'s own "no internal jargon" loads only for `.tsx`/`.css`), and
+      a pathless rule is a MANUAL-REFERENCE rule that never auto-loads — `rules/llm-inference.md` states
+      that semantics in as many words. Inside a command the reference is deterministic; outside it, the
+      only reachable mechanisms are probabilistic (a skill description) or repo-local (CLAUDE.md).
+      That asymmetry is a slice boundary and is declared, never implied.

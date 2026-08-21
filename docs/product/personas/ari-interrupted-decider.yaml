@@ -1,0 +1,40 @@
+# Persona (SSOT) — bootstrapped by DISCUSS wave, feature: decision-request-standard (2026-08-21)
+
+id: ari-interrupted-decider
+name: Ari
+role: >
+  Developer in a repo using the phil plugin who was doing something else — running a command,
+  mid-refactor, working a board — and gets STOPPED by a question only they can answer. Ari is not
+  the person who wanted to think about this; Ari is the person interrupted to decide it. The
+  distinguishing stance: "I have to be able to answer this without first reconstructing what you
+  are asking." Every other persona in this file becomes Ari the moment a tool stops and asks —
+  Robin approving a merge, Tess approving a rewrite, Quinn approving a plan. What separates Ari is
+  not the domain but the POSITION: holding a question, without the asker's context, and unable to
+  act until the question is legible.
+goals:
+  - Answer in one pass, without a follow-up turn spent asking what is actually being asked
+  - Know what is being decided, and what changes depending on the answer, before seeing options
+  - Keep enough context on the work being interrupted to come back to it
+  - Decline or defer a question without having to first decode it
+frustrations:
+  - A bare numbered list arrives with no statement of what is being decided — the options are
+    legible and the decision is not
+  - The opposite failure — paragraphs in the asker's internal vocabulary, wave labels, issue
+    numbers, slice ids, skill names, artifact paths, as though Ari has the same context loaded
+  - A well-worded question buried in so much surrounding output that the whole thing reads as noise;
+    correct content, zero signal
+  - Having to type "explain in 200 words of plain English with no jargon" as a standing workaround,
+    which works — and is the evidence that the missing thing is small
+  - An answer given to a half-understood question is indistinguishable from an informed one, to
+    everything downstream
+mental_model:
+  - "If I have to ask what you're asking, you haven't asked yet"
+  - "Tell me what turns on this before you tell me the options"
+  - "Your vocabulary is not my vocabulary — I was doing something else a second ago"
+  - "A question I can't see is a question you didn't ask; placement is part of the asking"
+  - "Length is not thoroughness. A long question is usually an un-thought-through one"
+  - "I can always ask for the detail. I can't always find the question"
+vocabulary:
+  - plain English, no jargon, what is being decided, what turns on it, question before options,
+    word ceiling, buried in noise, bare option list, follow-up turn, one pass, decode the question,
+    the ask itself vs the supporting detail
