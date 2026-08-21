@@ -31,7 +31,7 @@ applies is `refactor/rubric.md`.
 This loop is different: it runs a closed proposer/critic/gate cycle against a **separate**
 DAG ledger, `.refactor-loop-ledger.md` in the project root. The two never share a file and
 never collide. Both detect the test runner the same way — see
-`skills/shared/test-runner-detection.md`.
+`${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`.
 
 ## The argument
 
@@ -61,7 +61,7 @@ INIT ─►PROPOSE ─►REVIEW ─►[GUARD]─►APPLY ─►TEST ──green�
 
 ### INIT  (cage)
 
-1. Detect the test runner using `skills/shared/test-runner-detection.md`.
+1. Detect the test runner using `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`.
 2. Run the **baseline suite** as a discrete Bash call and read `$?` directly. Guard **G1**:
    if the exit code is non-zero, the suite is red — go straight to **HALT**. Never refactor
    on a red suite (`rules/refactoring.md` §Safety). This is a `stop`.

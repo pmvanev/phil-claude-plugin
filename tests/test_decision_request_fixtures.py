@@ -59,28 +59,77 @@ def test_the_fragment_carries_no_frontmatter():
     )
 
 
-def test_the_fragment_states_the_ceiling_and_the_separation():
-    """Both halves of [D4]/[D5]. The ceiling alone is unaffordable, so a fragment stating one and not
-    the other is not the standard that was decided."""
+def test_the_fragment_states_the_ceiling_and_what_enters_the_count():
+    """[D4] made unambiguous. The first version said "Count the framing" and then offered "cut
+    options" as the remedy — cutting something the count excluded. Three readers, three counts.
+    A ceiling whose scope is undefined is not countable, whatever it calls itself."""
     body = FRAGMENT.read_text()
     assert "200 words, hard" in body, "the ceiling must be stated as hard, not as a target"
-    assert re.search(r"unbounded.*separated|separated.*unbounded", body, re.S), (
-        "the detail block's separation and unboundedness must both be stated"
+    assert "option label and option description" in body, (
+        "the count's scope must name option labels AND descriptions — the ambiguity that shipped first"
     )
-    assert "outside the count" in body, "the detail block must be excluded from the count explicitly"
+    assert "wc -w" in body, "a countable ceiling must name its counting method"
+    assert "What does not:" in body, "the exclusions must be stated, not implied"
 
 
-def test_the_fragment_states_that_placement_can_fail_on_its_own():
-    """[D9]. A wording-only standard reports success on a third of the reported problem."""
+def test_the_remedy_never_sacrifices_the_framing():
+    """The ordering that keeps the ceiling from being applied backwards."""
     body = FRAGMENT.read_text()
-    assert "buried still fails" in body, "the placement clause must be stated as a failure, not advice"
+    assert "Never cut items 3–5 to fit" in body
+
+
+def test_context_goes_above_and_the_reason_is_stated():
+    """[D5] as amended 2026-08-21. "Sits below" was unimplementable: the tool call blocks, so anything
+    after it arrives once the answer is already given. Detail goes ABOVE, and the fragment must say why
+    — otherwise the next author 'tidies' it back below."""
+    body = FRAGMENT.read_text()
+    assert "Context goes **above**, not below" in body
+    assert "blocks" in body, "the reason the ordering is forced must be stated"
+    assert "bounded in practice, not unbounded" in body, (
+        "the accepted cost of context-above must be stated: length above the ask buries it too"
+    )
+
+
+def test_placement_has_an_observable():
+    """[D9]. Placement was declared failable and given no observable — two instances would emit
+    different separators and both believe they conformed. The marker line is that observable."""
+    body = FRAGMENT.read_text()
+    assert "A marker line" in body
+    assert "Nothing between the framing and the call" in body
+
+
+def test_the_two_ask_cap_is_stated():
+    """Without it the fragment licensed an unbounded re-ask loop that `groom-issues` calls "the nagging
+    that teaches people to stop running the tool" — duplication with drift, on day one."""
+    body = FRAGMENT.read_text()
+    assert "After a second unanswered ask" in body
+    assert "Two asks is the limit" in body
+
+
+def test_no_command_name_exception():
+    """The prose once permitted "naming a command the reader is about to run" while FORBIDDEN matches
+    command names on sight. Prose and oracle must not disagree: one reader follows each."""
+    body = FRAGMENT.read_text()
+    assert "no command names" in body
+    assert "not a violation" not in body, (
+        "an exception in the prose that the oracle does not honour is a contradiction, not a nuance"
+    )
+    # And the claim the fragment makes about the oracle must be true of the oracle.
+    assert FORBIDDEN["skill or command name"].search("run /phil:groom-set next"), (
+        "the fragment tells readers command names are matched on sight — the regex must actually do it"
+    )
 
 
 def test_the_fragment_does_not_overclaim_its_reach():
-    """[D11]. The conversational half is unreachable and must be declared, never implied covered."""
+    """[D11], and the one sentence that should not have shipped: "in force deterministically" claimed
+    compliance where only DELIVERY is guaranteed. Both new-line tests below are quotes from the repo's
+    own test docstrings, which said it correctly before the fragment did."""
     body = FRAGMENT.read_text()
-    assert "Outside a command, it is not" in body
+    assert "Delivery is deterministic" in body and "compliance is not" in body
     assert "must not be described as covered" in body
+    assert "Propagation is incomplete" in body, (
+        "Reach named the gap outside a command and stayed silent on the larger gap on its own side"
+    )
 
 
 def test_fixtures_exist():

@@ -70,7 +70,7 @@ moves until all three pass.
 
 ### 1. Locate the test runner
 
-Follow `skills/shared/test-runner-detection.md` (reuse). Prefer the `CLAUDE.md` test command;
+Follow `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md` (reuse). Prefer the `CLAUDE.md` test command;
 else auto-detect (`package.json`, `pytest.ini`/`pyproject.toml`, `Makefile`, etc.). Run it once
 to confirm it works before touching anything. If none is found, warn and use AskUserQuestion
 before proceeding — refactoring tests without a runnable suite removes even the secondary sanity

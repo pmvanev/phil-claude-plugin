@@ -191,3 +191,95 @@ snapshot, not these edits. **What was exercised is the prose and the tests, in t
 143-word ask is a real ask that a real human answered this session, which is stronger evidence than a
 command run would have given — but it was emitted by a session following the standard as it was being
 written, not by the released `groom-issues`.
+
+---
+
+## Review round — `plugin-dev:skill-reviewer` + `plugin-dev:plugin-validator`, 2026-08-21
+
+Both run at the user's instruction after slice 01 was committed at `f36e603`. Each was given the design
+intent up front (that `skills/shared/` holds no `SKILL.md` by design) so neither spent its pass on that,
+and both were asked to be adversarial rather than encouraging. **Verdict: needs revision — the fragment
+was not fit to propagate.** Every finding below was re-verified against the files before being accepted.
+
+### The reviewer was right about the two decisions the fragment exists to encode
+
+- **[D4]'s ceiling had no defined scope and a self-contradicting remedy.** The fragment said *"Count the
+  framing"*, then offered *"cut options"* as the remedy for exceeding it — cutting something the count
+  excluded. A third line treated the ask as framing **plus option labels**. Three readers, three counts,
+  and the single fixture could not discriminate because its `ask.md` contains no options at all. So the
+  143-word figure was a **framing-only** measurement reported against an *ask* ceiling, and slice 01's
+  own AC1 (*"the ceiling applies to the ask alone"*) was ticked ✓ against prose that said something
+  narrower. **Fixed:** the count now names items 3–5 plus every option label and description, excludes
+  the context block, and names `wc -w` semantics. The remedy cuts descriptions → options → the decision
+  itself, never the framing.
+- **[D5]'s "sits below" was unimplementable against the emission order the same file mandated.** The
+  fragment required emitting framing before the blocking `AskUserQuestion` call; anything genuinely below
+  the option render arrives *after* the answer, where it cannot be opted into, and anything above the call
+  sits between the framing and the options — the buried-ask failure rebuilt from sanctioned parts. Slice
+  01's Result had already recorded this as open and the fragment stated it as settled, with no marker, so
+  an instance loading it at ask time read a decided rule. **Put to the user and answered: context goes
+  ABOVE.** [D5] amended in the feature delta, including the cost the user accepted — context above is
+  *bounded in practice, not unbounded*, because length above the ask buries it by another route.
+
+### Findings accepted and fixed
+
+| # | Defect | Fix |
+|---|---|---|
+| 3 | *"in force deterministically"* claimed compliance where only **delivery** is guaranteed — contradicted by this slice's own test docstrings, which said it correctly first | *Reach* now separates delivery from compliance and names the propagation gap (1 of 6 skills) on its own side |
+| 5 | Header claimed the fragment was *"Referenced by name from the skills that hold `AskUserQuestion`"* — 1 of 6. **The exact defect corrected in the sibling fragment hours earlier** | Header no longer names consumers; the README table and derived test own it |
+| 6 | *"Ask once more, naming what is still needed"* was **byte-identical** in both files, and the fragment omitted the two-ask cap — so it licensed the nagging loop `groom-issues` explicitly forbids. Duplication with drift, day one, in a feature whose shape was justified by *"no duplication"* | Cap moved into the fragment; consumers may tighten and must say so |
+| 7 | The consumer paraphrase was 47 words restating the standard; siblings manage `(reuse).` | Cut to a two-bullet statement of what only this skill knows |
+| 8 | Prose permitted *"naming a command the reader is about to run"*; the oracle matches `/phil:` on sight. Prose and oracle contradicted | Exception deleted — prohibition is absolute, matching the oracle. A test now asserts the regex really does what the prose claims |
+| 9 | The interruption line was required by one section and forbidden by two others, in a sentence whose requirement read as commentary | Now item 3 of an explicit emission order, and counted |
+| 10 | Placement declared failable with **no observable** — [D4] got a counter, [D9] got nothing | A marker line, and nothing between framing and the tool call. Test-asserted |
+| 12 | ~290 of 1,096 words were rationale and provenance | Cut the `rules/` provenance paragraph and the meta-commentary |
+
+**Finding 6's residual duplication is accepted, not closed.** The fragment now owns the generic rule and
+the cap; `groom-issues`' pre-existing affirmation prose stays. Deleting pre-existing behaviour spec from a
+shipped skill is a larger change than this slice should make, and the two no longer disagree. Recorded so
+it is a decision rather than an oversight.
+
+**Finding 4 stands as a declared scope leak.** *Reach* is slice 04's deliverable and shipped here. Slice
+01's OUT-of-scope names the conversational half as slice 04's, and slice 04's SPIKE — the search for a
+mechanism [D6] and [D7] did not rule out — has not run, so the fragment now asserts a conclusion ahead of
+the search that could refute it. Reduced to the minimum honest statement rather than pulled entirely,
+because a fragment silent on its own reach overclaims by omission. **Slice 04 keeps its SPIKE and AC2/AC6;
+its AC1 and AC3 landed early.**
+
+**Two reviewer findings not adopted, with reasons.** Its defence-of-the-kept-paragraph critique was right
+that the stated reason was wrong — the standard never said *"restore context"* — and the paragraph is kept
+on the corrected reason, now written. Its finding 11 (the fragment coins *mode 1/2/3*, the class of
+identifier it forbids) is fixed by naming them instead of numbering them; the failure-mode table survives
+because a reader who does not know the three failures cannot apply the ordering rules.
+
+### The validator found two defects, neither in the fragment
+
+- **A live runtime bug in six pre-existing references, exposed by contrast.** `skills/shared/README.md`
+  mandates `${CLAUDE_PLUGIN_ROOT}/skills/shared/…` because a bare relative path is left literal in a skill
+  body and resolves against **the user's project**, where it does not exist. Four skills and one agent had
+  bare paths at six sites — `adversarial-review`, `refactor-tests`, `redesign-tests`, `refactor-loop` (×2),
+  `agents/adversarial-reviewer`. The new `decision-request` wiring was the only compliant reference in the
+  repo. **All six prefixed.** This means `refactor-loop`, `refactor-tests`, `redesign-tests` and
+  `adversarial-review` could not locate a test runner in a consumer's project.
+- **The registry test written *this slice* certified a narrower claim than its own docstring.**
+  `_loaders()` globbed `skills/*/SKILL.md`, so it could not see `agents/adversarial-reviewer.md` — a real
+  consumer — and the row-match passed green while the table under-reported by one. That is this board's
+  recurring defect reproduced inside the fix for it, for the second time in one slice. **Derivation widened
+  to skills, agents, commands and `references/`; the table's column renamed from *Loaded by* to
+  *Consumers (derived)*; and a new test asserts the reference FORM, not just its presence** — the first
+  version matched a bare path and an absolute one equally, which is why six broken references passed free.
+
+### Not adopted, referred to the user
+
+The validator reports that in Claude Code 2.1.239 `allowed-tools` **does** interpolate
+`${CLAUDE_PLUGIN_ROOT}`, contradicting `CLAUDE.md`'s doctrine that it does not and that such a grant
+"matches nothing". It read the shipped binary and caveats that the doctrine may have been true of an
+earlier build. **Not acted on.** That doctrine was written after a real incident, `check-readonly-commands.py`
+enforces it, and re-measuring is a separate piece of work with its own fixture requirement. Referred rather
+than resolved.
+
+### Suite after the revision
+
+**370 passed, 72 skipped** (was 364 — six new assertions). `check-invariants.py`,
+`check-readonly-commands.py` and `check-product-ssot.py` all clean. Fragment 1,072 words, down from 1,096
+with roughly 290 words of provenance cut and procedure added.

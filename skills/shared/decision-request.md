@@ -3,122 +3,116 @@
 Shared standard for the moment a command stops and needs a call only the human can make — a blocker, an
 architectural choice, which option to take on an issue, whether an irreversible action is sanctioned.
 
-Referenced by name from the skills that hold `AskUserQuestion`. The reference is what puts this in force;
-see *Reach* at the bottom for where it does not reach.
+The consumers are listed in `skills/shared/README.md` and derived by
+`tests/test_shared_fragment_registry.py`. This header does not name them: when the sibling fragment's
+header named its own consumers it named one that did not reference it.
 
-The failure this exists to stop is not a wording preference. Three modes were measured across this repo,
-and all three ship a question the reader cannot act on:
+Three failures are being prevented, and all three ship a question the reader cannot act on: **a bare
+list** (options render, framing absent), **a jargon wall** (the reader must decode the question before
+answering it), and **a buried ask** (correct wording, no signal — a *placement* defect, not a wording
+one).
 
-| Mode | What arrives | Why it fails |
-|---|---|---|
-| **Bare** | A numbered option list, no framing | The options are legible; the decision is not |
-| **Jargon wall** | Paragraphs of internal vocabulary | The reader must reconstruct the question before answering it |
-| **Buried** | Correct wording, embedded in output | Correct content, zero signal — a *placement* defect, not a wording one |
+## Order of emission
 
-## The shape of an ask
+Emit in this order, then call `AskUserQuestion`:
 
-Emit the framing as prose **before** calling `AskUserQuestion`. The tool renders options and has no slot
-that forces framing, so a call made without it reproduces mode 1 by default. Ordering is not stylistic:
+1. **Context** — whatever background, evidence or internal detail the reader may want. Optional.
+2. **A marker line** — a horizontal rule, so the ask's start is unmissable.
+3. **One line naming what this interrupted.** Counted.
+4. **What is being decided.** One sentence. Counted.
+5. **What turns on it** — what actually changes depending on the answer. Counted, and never omitted.
+6. **The tool call.** Nothing between the framing and the call.
 
-1. **State what is being decided.** One sentence.
-2. **State what turns on it** — what actually changes depending on the answer. Not optional, and not last.
-3. **Then the options.**
+Context goes **above**, not below. The tool call renders the options and blocks, so anything emitted
+after it arrives only once the answer is already given, where it cannot be opted into. Anything emitted
+between the framing and the call reconstructs the buried-ask failure out of sanctioned parts.
 
-Write the framing so it can be read cold, by someone who was doing something else a second ago and does
-not share the loaded context.
+Write items 3–5 so they read cold, to someone who was doing something else a second ago and does not
+share the loaded context.
 
 ## The ceiling
 
-**200 words, hard.** Count the framing. Over is a failure, not a warning.
+**200 words, hard.** Over is a failure, not a warning.
 
-The ceiling exists to force the ordering above. If it starts evicting *what turns on it*, it is being
-applied backwards — cut options, or cut to a smaller decision, and move detail below. Never cut the
-framing to fit.
+**What enters the count:** items 3, 4 and 5 above, plus every option label and option description.
+Whitespace-separated tokens — `wc -w` semantics.
 
-A decision genuinely too large to frame in 200 words is a decision to **split**. The split is the answer;
-a longer ask is not.
+**What does not:** the context block (item 1) and the marker.
 
-## The detail block
+When the count is exceeded, cut in this order: option descriptions, then the number of options, then
+split into a smaller decision. **Never cut items 3–5 to fit.** A ceiling that evicts *what turns on it*
+is being applied backwards. A decision too large to frame this way is a decision to split; the split is
+the answer, and a longer ask is not.
 
-Supporting detail is **permitted, unbounded, and separated** from the ask. It sits below, and it is
-outside the count.
+## The context block
 
-This is what makes the ceiling affordable rather than lossy. Without it, the ceiling squeezes a hard
-decision and becomes the defect it was meant to prevent.
+Put every token the ask may not contain here: file paths, issue numbers, label names, internal
+identifiers, evidence, command output.
 
-Every token the ask may not contain belongs here: file paths, issue numbers, label names, internal
-identifiers, evidence, command output. Two constraints on it:
+**It is bounded in practice, not unbounded.** Length above the ask pushes the framing further from the
+prompt, and past some length that is the buried-ask failure with extra steps. There is no countable
+limit — keep it short enough that the framing is still on screen with the options. This is the accepted
+cost of placing context above, chosen over an on-request pointer (which risks the reader never seeing
+evidence that would have changed the answer) and over writing it to a file (which nobody opens).
 
-- The ask must be **answerable without reading the detail**. A consequence stated only in the detail block
-  is a consequence the reader will miss.
-- The detail block is not a place to restate progress. Restating the surrounding output inside the ask is
-  how mode 3 gets rebuilt from the inside.
+Two further rules:
 
-## Forbidden in the ask
+- Items 3–5 must be **answerable without reading the context block.** A consequence stated only in the
+  context is a consequence the reader will miss.
+- Do not restate progress. Item 3 is one line naming what was interrupted; a summary of the work so far
+  is how the buried-ask failure grows back from the inside.
 
-No internal vocabulary in the framing or the option labels. In this plugin that means no wave labels, no
-issue numbers, no slice ids, no decision numbers, no skill names, no command names used as nouns, no file
-or artifact paths.
+## Forbidden in the counted ask
+
+No internal vocabulary in items 3–5, in option labels, or in option descriptions. In this plugin: no
+wave labels, no issue numbers, no slice ids, no decision numbers, no skill names, no command names, no
+file or artifact paths.
 
 **The rule is absence, not explanation.** An explained label is still a label the reader has to hold. If
-the ask needs the token to make sense, the ask is written at the wrong altitude — describe the thing, not
-its identifier.
-
-Naming a command the reader is about to run is not a violation. Naming a command as a shorthand for a
-concept is.
-
-## Placement
-
-**Placement is part of the asking.** A conforming ask that is buried still fails.
-
-Set the ask apart from the output that preceded it, so its existence is visible without hunting. Name what
-the question is interrupting — one line, and the cheapest artifact here, so it is the one most often
-dropped, because the asker never lost the thread.
+the ask needs the token to make sense, it is written at the wrong altitude — describe the thing, not its
+identifier. Name a command in the context block, never in the counted ask; `tests/test_decision_request_fixtures.py`
+matches command names on sight and admits no exception.
 
 ## Options
 
-Each option names its own **cost or risk**, not only its benefit. An option list where every entry reads
-as an upside makes the trade invisible and pushes the reader onto the ordering.
+Name each option's cost or risk, not only its benefit. An option list where every entry reads as an
+upside makes the trade invisible and pushes the reader onto the ordering.
 
-Marking one option recommended is useful and permitted. Presenting a recommendation **without naming what
-it costs** converts the ask into a rubber stamp — mode 1 in a politer register.
+Put the cost in the option **description**, not the label — a label is short and truncates.
+
+Marking one option recommended is useful and permitted. A recommendation whose cost is not named turns
+the ask into a rubber stamp: the bare-list failure in a politer register.
 
 Collapse options that differ in wording and not in outcome. Three restatements of one option is a bare
 list with extra steps.
 
-## Do not ask at all when there is no consequence
+## Do not ask when nothing turns on it
 
-If the answer changes nothing that can be named, do not ask. An ask with no stated consequence is a
-request for reassurance wearing a decision's clothes, and it trains the reader to stop reading asks.
-Decide it, state the assumption, and carry on.
-
-This is the one clause that governs *whether* to ask rather than *how*. It is here because the ceiling
-surfaces it: a framing that cannot state what turns on the answer is usually a question that should not
-have been asked.
+If the answer changes nothing that can be named, do not ask. Decide it, state the assumption, and carry
+on. An ask with no stated consequence is a request for reassurance wearing a decision's clothes, and it
+teaches the reader to stop reading asks.
 
 ## Handling the answer
 
-- **Silence is not consent.** An ambiguous reply — "ok", "sure", "sounds right" — is unanswered. Ask once
-  more, naming what is still needed. With a recommendation on the table an ambiguous reply plausibly reads
-  as acceptance, and adopting it records a decision the human never made while every visible rule looks
-  satisfied.
+- **Silence is not consent.** An ambiguous reply — "ok", "sure", "sounds right" — is unanswered. Ask
+  once more, naming what is still needed. **After a second unanswered ask, treat it as a decline:** say
+  so, and record nothing. Two asks is the limit; a third is nagging, and nagging teaches people to stop
+  running the tool. A consumer may impose a tighter cap and must say so where it does.
 - **A deferral is recorded as a deferral**, and whatever depended on it is reported as blocked. Never
-  silently promote a deferral to the recommended option.
-- **Declining and deferring are first-class** and need no decoding either. Do not make them harder to
-  express than answering.
+  promote a deferral to the recommended option.
+- **Declining and deferring are first-class.** Do not make them harder to express than answering.
 
 ## Reach
 
-Inside a command that references this file, the standard is in force deterministically — the reference is
-loaded with the skill.
+**Delivery is deterministic inside a command that references this file; compliance is not.** The
+reference guarantees the standard is present, never that an ask obeys it. Only the ceiling and the
+forbidden-vocabulary list are mechanically checked. Everything else — the ordering, the placement, the
+option costs, the reply handling — is as unenforced here as anywhere else.
 
-**Outside a command, it is not.** A decision request in ordinary conversation loads nothing, and the
-mechanisms that would reach it are probabilistic or repo-local. That gap is real, is not closed by this
-file, and must not be described as covered. It is stated here rather than left to be discovered by a
-reader whose question arrived as a bare list anyway.
+Two gaps, both open:
 
-`rules/` cannot carry this standard, and the reason is worth recording so it is not re-proposed: a rule
-with a `paths:` glob fires on the file being touched, and a decision request happens regardless of which
-file is open — `rules/ux.md` already carries a *no internal jargon* line and its globs are web-UI file
-types, so it is structurally dark here. A rule with **no** `paths:` is a manual-reference rule that never
-auto-loads; `rules/llm-inference.md` states that semantics explicitly.
+- **Propagation is incomplete.** One of the six skills holding `AskUserQuestion` references this file.
+  Until that changes, most asks in this plugin are governed by nothing.
+- **Outside a command, nothing loads this at all.** A decision request in ordinary conversation reaches
+  no reference. That gap is real, is not closed by this file, and must not be described as covered. The
+  mechanism that might reach it has not been chosen.

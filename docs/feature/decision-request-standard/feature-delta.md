@@ -62,10 +62,21 @@ whose commands ask the most questions) is real and wrong.
 - **[D4]** **200 words is a HARD CEILING on the ask, countable and failable — not a target.** A target
   cannot be measured, and an unmeasurable standard is the same category as the prose that already failed
   here. (User)
-- **[D5]** **Supporting detail is permitted, unbounded, and separated from the ask.** [D4] would
-  otherwise squeeze a genuinely complicated decision, and the ceiling itself would become the defect.
-  The ceiling governs the *question*; what a reader may opt into afterwards is not in the budget.
-  This is what makes [D4] affordable rather than lossy. (User)
+- **[D5]** **Supporting context is separated from the ask, placed ABOVE it, and bounded in practice.**
+  [D4] would otherwise squeeze a genuinely complicated decision. The ceiling governs the question and
+  the options; the context block is outside it.
+  **AMENDED 2026-08-21, after slice 01 review.** The original wording — *"permitted, unbounded, and
+  separated… it sits below"* — was unimplementable and overclaimed on two counts:
+  - **Placement.** `AskUserQuestion` renders the options and *blocks*, so anything emitted after the
+    call arrives only once the answer is given, where it cannot be opted into; anything emitted between
+    the framing and the call reconstructs the buried-ask failure out of sanctioned parts. Context
+    therefore goes **above**. (User, asked and answered 2026-08-21.)
+  - **"Unbounded."** Context above the ask pushes the framing further from the prompt, so past some
+    length it buries the ask by a different route. There is no countable limit, and the fragment says so
+    rather than promising one. The accepted cost of the chosen option, stated in the ask that chose it.
+  Two alternatives were declined with their costs recorded: a one-line pointer with detail on request
+  (risks the reader never seeing evidence that would have changed the answer) and writing detail to a
+  file (nobody opens it). (User)
 - **[D6]** **`rules/` cannot carry this, on the mechanism — measured, not argued.** A rule with a
   `paths:` glob fires on the file being touched, and a decision request happens regardless of which file
   is open. The nearest existing standard proves it: `rules/ux.md`'s own *"no internal jargon"* line loads
@@ -81,8 +92,8 @@ whose commands ask the most questions) is real and wrong.
   the repo that wrote the rule down is the one place that cannot ask a structured question. Meanwhile
   thirteen commands that *can* say nothing at all. (Session, evidenced)
 - **[D8]** **Shape = a shared fragment under `skills/shared/`**, referenced by name from every asking
-  skill. The `test-runner-detection.md` precedent is exact: one fragment, four referencing skills, no
-  duplication. Chosen by elimination — [D6] killed both `rules/` options, [D7] killed per-command prose —
+  skill. The `test-runner-detection.md` precedent is exact: one fragment, five consumers across skills and
+  agents, no duplication. Chosen by elimination — [D6] killed both `rules/` options, [D7] killed per-command prose —
   and by the one property the survivors lack: inside a command the reference is **deterministic**.
   (Session)
 - **[D9]** **Placement is part of the standard, not only wording.** Failure mode 3 is a placement defect;

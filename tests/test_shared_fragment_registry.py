@@ -26,13 +26,38 @@ README = SHARED / "README.md"
 FRAGMENTS = sorted(p for p in SHARED.glob("*.md") if p.name != "README.md")
 
 
+# Every surface that can load a fragment. Scoping this to `skills/*/SKILL.md` was the first version's
+# defect: `agents/adversarial-reviewer.md` is a real consumer of `test-runner-detection.md`, so the
+# derivation under-reported by one and the row-match test passed green anyway — this file's own docstring
+# defect, reproduced inside the fix for it.
+def _consumer_files():
+    yield from (REPO / "skills").glob("*/SKILL.md")
+    yield from (REPO / "skills").glob("*/references/*.md")
+    yield from (REPO / "agents").glob("*.md")
+    yield from (REPO / "commands").glob("*.md")
+
+
+def _consumer_name(path):
+    """`skills/foo/SKILL.md` -> `foo`; `agents/bar.md` -> `agents/bar`; `commands/baz.md` -> `baz`."""
+    if path.name == "SKILL.md":
+        return path.parent.name
+    if path.parent.name in {"agents", "commands"}:
+        return f"{path.parent.name}/{path.stem}"
+    return f"{path.parent.parent.name}/{path.stem}"
+
+
 def _loaders(fragment_name):
-    """Skills whose SKILL.md references the fragment, derived."""
-    return sorted(
-        p.parent.name
-        for p in (REPO / "skills").glob("*/SKILL.md")
+    """Every file referencing the fragment, on any surface. Derived, never trusted."""
+    return sorted({
+        _consumer_name(p) for p in _consumer_files()
         if f"shared/{fragment_name}" in p.read_text()
-    )
+    })
+
+
+# `skills/shared/README.md` mandates the absolute form, because a bare relative path is left literal in
+# a skill body and resolves against the USER's project, where it does not exist. Presence is not enough:
+# the first version of `_loaders` matched both forms, so six broken references passed for free.
+REQUIRED_FORM = "${CLAUDE_PLUGIN_ROOT}/skills/shared/"
 
 
 def _table_rows():
@@ -78,3 +103,22 @@ def test_a_fragment_carries_no_frontmatter(fragment):
     """`skills/shared/` holds no SKILL.md by design, per its README. Frontmatter here would read as a
     registrable skill."""
     assert not fragment.read_text().startswith("---"), f"{fragment.name} carries frontmatter"
+
+
+@pytest.mark.parametrize("fragment", FRAGMENTS, ids=lambda p: p.name)
+def test_every_reference_uses_the_absolute_plugin_path(fragment):
+    """The form, not just the presence. A bare `skills/shared/x.md` in a skill body is not interpolated
+    and resolves against the user's project — so the instruction silently fails at runtime, which is
+    exactly what four skills and one agent were doing until 2026-08-21."""
+    bad = []
+    for p in _consumer_files():
+        text = p.read_text()
+        if f"shared/{fragment.name}" not in text:
+            continue
+        for line in text.splitlines():
+            if f"shared/{fragment.name}" in line and REQUIRED_FORM not in line:
+                bad.append(f"{p.relative_to(REPO)}: {line.strip()[:90]}")
+    assert not bad, (
+        "references must use ${CLAUDE_PLUGIN_ROOT}/skills/shared/<fragment>, per skills/shared/README.md:\n"
+        + "\n".join(bad)
+    )

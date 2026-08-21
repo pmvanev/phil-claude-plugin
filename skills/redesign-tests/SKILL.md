@@ -61,7 +61,7 @@ only**; files matched by other globs are recognized as tests but skipped with a 
 Run these three checks once, **in this order**, before the loop starts.
 
 ### 1. Locate the test runner
-Follow `skills/shared/test-runner-detection.md` (reuse). Prefer the `CLAUDE.md` test command; else
+Follow `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md` (reuse). Prefer the `CLAUDE.md` test command; else
 auto-detect. Run it once to confirm it works before touching anything. If none is found, warn and
 use AskUserQuestion before proceeding — redesigning tests without a runnable suite removes even the
 secondary sanity check.

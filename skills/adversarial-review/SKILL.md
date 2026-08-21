@@ -104,7 +104,7 @@ Determine whether a **deterministic oracle** exists for this target, then run or
 the oracle here (the driver), not the reviewer — the reviewer stays read-only and only *cites* the
 result (ADR-005 lineage: inherit, never re-implement).
 
-- **Code target:** detect a test runner via `skills/shared/test-runner-detection.md`; if one exists,
+- **Code target:** detect a test runner via `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`; if one exists,
   run the suite (and lint/types if present) and capture the result. If a host already ran it, inherit
   that result rather than re-running.
 - **Prose target** (skill / agent / rule / doc): run the deterministic prose checks that apply —

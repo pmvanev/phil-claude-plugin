@@ -135,7 +135,7 @@ human or the host owns the gate.
 
 You do not detect or run oracles — the **caller** (the `/phil:adversarial-review` skill, or a
 composing host) detects a deterministic oracle for the target, **runs or inherits** it (a test suite
-via `skills/shared/test-runner-detection.md`; a prose oracle — self-test pass, dead-link/broken-ref,
+via `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`; a prose oracle — self-test pass, dead-link/broken-ref,
 frontmatter validity, file-length, required-citation), and hands you the captured `oracle_result`.
 Your job is to cite it, not reproduce it (ADR-005 lineage — inherit, never re-implement). No
 `oracle_result` in your input means no oracle ran: soft findings only, `draft-signal`.

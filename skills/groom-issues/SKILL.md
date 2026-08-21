@@ -585,18 +585,17 @@ asks, so it may never draft. What this adds is somewhere for the content to come
 question that assumes the reader remembers the card gets a worse answer, or none — and the reader is
 often being asked about work a past self filed.
 
-**Every ask in this skill follows the shared standard at
-`${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`. Load it before the first `AskUserQuestion`
-call.** It governs the framing, not the content: what is being decided and what turns on it, stated
-before any option, in plain language, inside a hard 200-word ceiling, with the card's identifiers,
-paths and quoted body in a separated detail block beneath rather than in the ask. That standard exists
-because this family is where a bad ask is most expensive — `/phil:groom-set` asks about irreversible
-merges and closes, and this section asks what a card is *for*, which is the only elicitation ask in the
-plugin and therefore the hardest input a ceiling ever gets.
+**Every ask in this skill follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`. Load it
+before the first `AskUserQuestion` call.**
 
-The paragraph above is the local ancestor of that standard and stays, because it says something the
-standard does not: *which* context to restore — the card. The standard says restore it; this says what
-it is here.
+Two things that standard cannot know, which this section owns:
+
+- **The context block is the card.** What it is and what it already says goes above the ask, per the
+  paragraph before this one — the standard requires context, and only this skill knows it is a card.
+- **Rule numbers never reach the counted ask.** `rule 1` and `rule 2` are this skill's internal
+  numbering, and the standard forbids internal identifiers in an ask. Name the gap in plain terms —
+  *it does not say when it is done* — and put the rule number in the context block beside the quoted
+  body.
 
 **The human sanctions every claim; the session may choose the words.** That is the unit, and stating it
 precisely matters — an earlier draft said *sanctions every word*, which the rephrasing path below does not
