@@ -1,0 +1,38 @@
+{
+  "fixture_id": "DECISION-REQUEST-SELFTEST-02",
+  "source": {
+    "log": "0dba0910-8d2c-4f2c-b345-9b4519109ea7.jsonl",
+    "timestamp": "2026-08-13T22:24:41.977Z",
+    "note": "Verbatim. Region tags added by hand; nothing else changed."
+  },
+  "situation": "A real irreversible-action confirmation — push commits and close a card — put to the user behind a sixteen-word lead-in. What is being decided and what turns on it appear nowhere in the framing; the reader learns both from the option list.",
+  "ask_file": "ask.md",
+  "options_file": "options.json",
+  "emission_file": "emission.md",
+  "expected_decision": [
+    "BARE-LIST"
+  ],
+  "expected_findings": [
+    "BARE-LIST",
+    "JARGON-WALL",
+    "BURIED-ASK"
+  ],
+  "mechanical_assertions": {
+    "framing_ceiling": 200,
+    "measured_framing_words": 16,
+    "question_ceiling": 200,
+    "measured_question_words": [
+      74
+    ],
+    "forbidden_token_kinds": [
+      "issue number",
+      "slice id"
+    ],
+    "context_words": 0,
+    "context_carries_forbidden_tokens": false,
+    "framing_pairs": 0,
+    "preview_words": 56
+  },
+  "why_this_ask": "It is the failure mode in its purest real form: the options carry the whole decision. Both counts pass comfortably, which is the point — a bare list is not a length defect and no ceiling would ever catch it.",
+  "co_occurring": "JARGON-WALL and BURIED-ASK also fire. Real asks are not single-mode; the manifest states the exact set rather than the convenient one."
+}

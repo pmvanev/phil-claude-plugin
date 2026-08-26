@@ -590,8 +590,11 @@ before the first `AskUserQuestion` call.**
 
 Two things that standard cannot know, which this section owns:
 
-- **The context block is the card.** What it is and what it already says goes above the ask, per the
-  paragraph before this one — the standard requires context, and only this skill knows it is a card.
+- **The context block is the card.** The standard makes context *optional*; here it is **mandatory** —
+  what the card is and what it already says goes above the ask, per the paragraph before this one.
+  Only this skill knows the context is a card, and only this skill can raise an optional clause to a
+  requirement. Saying the standard "requires" it would put the consumer in contradiction with the file
+  it loads.
 - **Rule numbers never reach the counted ask.** `rule 1` and `rule 2` are this skill's internal
   numbering, and the standard forbids internal identifiers in an ask. Name the gap in plain terms —
   *it does not say when it is done* — and put the rule number in the context block beside the quoted

@@ -21,6 +21,11 @@ skills' `references/`, and fails on disagreement. It also asserts the **form** o
 just its presence — the first version matched a bare relative path and an absolute one equally, so six
 broken references passed for free.
 
+**The form is mandatory in a skill, agent or command BODY** — text a loader interpolates and a session
+acts on. It does not bind prose *about* the fragments: a fixture register or a design document may write
+the readable path, and the form check does not scan those directories. Stated because the next reader
+would otherwise either "fix" those references or widen the check to flag them.
+
 Reference these from a skill by absolute plugin path, so resolution does not depend on the invoking
 session's working directory:
 

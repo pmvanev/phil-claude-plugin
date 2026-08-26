@@ -17,6 +17,9 @@ from pathlib import Path
 CHECKS = [
     ("command mutation declarations", "check-readonly-commands.py"),
     ("product SSOT traceability", "check-product-ssot.py"),
+    # Added 2026-08-26. Nothing ran pytest automatically — no CI exists here — so every check written
+    # as a test reported compliance by staying quiet, which is the defect this runner exists to stop.
+    ("repo test suite", "check-tests.py"),
 ]
 
 

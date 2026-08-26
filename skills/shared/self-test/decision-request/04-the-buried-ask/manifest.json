@@ -1,0 +1,32 @@
+{
+  "fixture_id": "DECISION-REQUEST-SELFTEST-04",
+  "source": {
+    "log": "42253f4e-cee1-43c4-9dd7-d334daaca80a.jsonl",
+    "timestamp": "2026-08-21T20:10:21.879Z",
+    "note": "Verbatim. Region tags added by hand; nothing else changed."
+  },
+  "situation": "A real ask whose wording conforms in every respect — all three framing elements present, no internal vocabulary, both counts met — emitted at the end of a verification report and a six-row table, with no separator between the report and the question.",
+  "ask_file": "ask.md",
+  "options_file": "options.json",
+  "emission_file": "emission.md",
+  "expected_decision": [
+    "BURIED-ASK"
+  ],
+  "expected_findings": [
+    "BURIED-ASK"
+  ],
+  "mechanical_assertions": {
+    "framing_ceiling": 200,
+    "measured_framing_words": 142,
+    "question_ceiling": 200,
+    "measured_question_words": [
+      182
+    ],
+    "forbidden_token_kinds": [],
+    "context_words": 237,
+    "context_carries_forbidden_tokens": true,
+    "framing_pairs": 1
+  },
+  "why_this_ask": "THE fixture that decides whether placement is a real clause or a sentence. It is the only one that fails on exactly one mode, and the mode is placement: change the marker rule and this fixture is the one that moves.",
+  "co_occurring": "None. This is the discriminator."
+}

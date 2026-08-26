@@ -1,0 +1,23 @@
+{
+  "questions": [
+    {
+      "question": "Where should a question's supporting detail go?",
+      "header": "Detail",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Above the question (Recommended)",
+          "description": "Background and evidence first, then the question last, right before the options. Matches the one instance that actually read well today, and needs no extra round trip. Cost: unbounded background still pushes the question down the screen, so a long one recreates the burying problem the limit was meant to fix — which means the detail can't truly be unbounded after all."
+        },
+        {
+          "label": "A one-line pointer, detail on request",
+          "description": "The question says the evidence exists and offers it; you ask if you want it. Keeps the question genuinely short and the detail genuinely unbounded. Cost: an extra round trip exactly when you do want the evidence, and if you don't ask, evidence that would have changed your answer is never seen."
+        },
+        {
+          "label": "Write it to a file and link it",
+          "description": "Detail goes to a scratch file, the question carries the path. Unbounded, never in the way, and survives the conversation. Cost: leaves the conversation to read it — more friction than scrolling, and a file nobody opens is the same as no evidence."
+        }
+      ]
+    }
+  ]
+}

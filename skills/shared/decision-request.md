@@ -3,9 +3,8 @@
 Shared standard for the moment a command stops and needs a call only the human can make — a blocker, an
 architectural choice, which option to take on an issue, whether an irreversible action is sanctioned.
 
-The consumers are listed in `skills/shared/README.md` and derived by
-`tests/test_shared_fragment_registry.py`. This header does not name them: when the sibling fragment's
-header named its own consumers it named one that did not reference it.
+Consumers are listed in `skills/shared/README.md`, derived by
+`tests/test_shared_fragment_registry.py`, and deliberately not repeated here.
 
 Three failures are being prevented, and all three ship a question the reader cannot act on: **a bare
 list** (options render, framing absent), **a jargon wall** (the reader must decode the question before
@@ -18,10 +17,17 @@ Emit in this order, then call `AskUserQuestion`:
 
 1. **Context** — whatever background, evidence or internal detail the reader may want. Optional.
 2. **A marker line** — a horizontal rule, so the ask's start is unmissable.
-3. **One line naming what this interrupted.** Counted.
+3. **One line naming what this interrupted.** Once for the turn. Counted.
 4. **What is being decided.** One sentence. Counted.
 5. **What turns on it** — what actually changes depending on the answer. Counted, and never omitted.
-6. **The tool call.** Nothing between the framing and the call.
+6. **The tool call.** Nothing between the framing and the call, and nothing after it.
+
+**Items 4 and 5 repeat, as a pair, once per question.** A turn putting three questions to the reader is
+three decisions, and each one needs its own statement of what is being decided and its own statement of
+what turns on it. Item 3 is not repeated — one line naming the interruption serves the turn.
+
+Three questions framed by one decision-and-consequence pair is two unframed decisions, whatever the
+total length. Getting this wrong is not a length defect and no ceiling catches it.
 
 Context goes **above**, not below. The tool call renders the options and blocks, so anything emitted
 after it arrives only once the answer is already given, where it cannot be opted into. Anything emitted
@@ -32,17 +38,33 @@ share the loaded context.
 
 ## The ceiling
 
-**200 words, hard.** Over is a failure, not a warning.
+**Two limits, both 200 words, both hard.** Over is a failure, not a warning.
 
-**What enters the count:** items 3, 4 and 5 above, plus every option label and option description.
-Whitespace-separated tokens — `wc -w` semantics.
+- **The framing — 200 words.** Items 3, 4 and 5 together.
+- **Each question — 200 words.** One question's own text plus its option labels and descriptions,
+  counted per question and never summed across them. A turn putting three questions to the reader is
+  three decisions; capping their total would penalise batching the reader benefits from.
 
-**What does not:** the context block (item 1) and the marker.
+Whitespace-separated tokens — `wc -w` semantics. **Outside both counts:** the context block (item 1),
+the marker, and any per-option preview or mock-up pane. A preview is shown beside the options rather
+than read as part of them, so it may carry the tokens the ask may not, and it may never be the only
+place a consequence is stated.
 
-When the count is exceeded, cut in this order: option descriptions, then the number of options, then
-split into a smaller decision. **Never cut items 3–5 to fit.** A ceiling that evicts *what turns on it*
-is being applied backwards. A decision too large to frame this way is a decision to split; the split is
-the answer, and a longer ask is not.
+**Outside the count is not a licence to be long.** A preview is bounded the way the context block is —
+short enough that the option text beside it is still readable. There is no countable limit for either.
+Unbounded detail was struck from this standard once already; it must not come back through the pane.
+
+**One combined limit was tried and refuted by measurement.** A single 200 spanning the framing and every
+option cannot be met: the three real requests this standard was written from measure 564, 324 and 441
+words against it. A framing of 143 words plus nine options under one 200-word limit leaves six words per
+option — so the only way to comply was to delete the cost statements *Options* below requires. Measured
+apart the same requests are modest: framings of 143, 142 and 148, and twenty options between 24 and 66.
+Only the sum was impossible. The corpus behind both numbers is in the self-test register.
+
+When a count is exceeded, cut in this order: **trim** option descriptions — never below the sentence
+naming that option's cost — then the number of options, then split into a smaller decision. **Never cut
+items 3–5 to fit.** A ceiling that evicts *what turns on it*, or the cost that makes an option a real
+choice, is being applied backwards.
 
 ## The context block
 
@@ -70,8 +92,13 @@ file or artifact paths.
 
 **The rule is absence, not explanation.** An explained label is still a label the reader has to hold. If
 the ask needs the token to make sense, it is written at the wrong altitude — describe the thing, not its
-identifier. Name a command in the context block, never in the counted ask; `tests/test_decision_request_fixtures.py`
-matches command names on sight and admits no exception.
+identifier. Name a command in the context block, never in the counted ask.
+
+**This rule is wider than any check of it.** The self-test matches a subset of these tokens, over
+recorded fixtures only: it derives this plugin's hyphenated identifiers from disk, and it deliberately
+does not match single-word names — `work`, `resume`, `refactor` and `design` are all real names here and
+all ordinary English, so matching them failed clean asks on the word "work". A single-word name used *as*
+a name is a violation the check cannot see.
 
 ## Options
 
@@ -81,10 +108,9 @@ upside makes the trade invisible and pushes the reader onto the ordering.
 Put the cost in the option **description**, not the label — a label is short and truncates.
 
 Marking one option recommended is useful and permitted. A recommendation whose cost is not named turns
-the ask into a rubber stamp: the bare-list failure in a politer register.
+the ask into a rubber stamp.
 
-Collapse options that differ in wording and not in outcome. Three restatements of one option is a bare
-list with extra steps.
+Collapse options that differ in wording and not in outcome.
 
 ## Do not ask when nothing turns on it
 
@@ -105,14 +131,30 @@ teaches the reader to stop reading asks.
 ## Reach
 
 **Delivery is deterministic inside a command that references this file; compliance is not.** The
-reference guarantees the standard is present, never that an ask obeys it. Only the ceiling and the
-forbidden-vocabulary list are mechanically checked. Everything else — the ordering, the placement, the
-option costs, the reply handling — is as unenforced here as anywhere else.
+reference guarantees the standard is present, never that an ask obeys it.
+
+Four clauses are mechanically checked, and only **against recorded fixtures** in
+`skills/shared/self-test/decision-request/`: the two ceilings; part of the forbidden-vocabulary list;
+the **presence** — never the adequacy — of items 3–5, one pair per question; and placement.
+
+Everything else here is checked by nobody, and the list is longer than the checked one: every option
+naming its cost, collapsing options that differ only in wording, a recommendation stating its cost, the
+context block's practical bound, the preview's, items 3–5 being answerable without the context, not
+restating progress, not asking when nothing turns on it, and the whole of *Handling the answer*.
+
+**No check reads a live ask.** None can while asks are emitted untagged: a fixture's regions are tagged
+by hand, and position does not identify the framing either — measured across 72 real asks in this repo's
+history, the paragraph immediately before the call runs 82 words or fewer in 70 of them. Emitting the
+tags in flight would make an ask checkable; that has not been chosen, and it is not claimed here to be
+impossible. The fixtures catch a regression in *the standard and in the examples it is measured against*
+— never a malformed ask in flight.
 
 Two gaps, both open:
 
-- **Propagation is incomplete.** One of the six skills holding `AskUserQuestion` references this file.
-  Until that changes, most asks in this plugin are governed by nothing.
+- **Propagation is incomplete.** Most skills holding `AskUserQuestion` do not reference this file — the
+  current count is derived in `skills/shared/README.md` rather than stated here, because a number
+  written into prose becomes a lie the moment the next consumer is wired. Until that changes, most asks
+  in this plugin are governed by nothing.
 - **Outside a command, nothing loads this at all.** A decision request in ordinary conversation reaches
   no reference. That gap is real, is not closed by this file, and must not be described as covered. The
   mechanism that might reach it has not been chosen.

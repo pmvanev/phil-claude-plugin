@@ -1,0 +1,61 @@
+{
+  "questions": [
+    {
+      "question": "How much should we map before writing the standard down?",
+      "header": "Depth",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Cover the bad paths too (Recommended)",
+          "description": "Map the normal case AND the three ways it currently goes wrong — bare list, jargon wall, buried in noise. Costs more discovery time, but those three failures are the whole reason the work exists, and a standard that only describes the good path can't be tested against them."
+        },
+        {
+          "label": "Just the normal path",
+          "description": "Map only the straightforward case: a question is asked, you understand it, you answer. Faster to write. Risk: the standard describes what good looks like without pinning what bad looks like, so nothing catches a regression."
+        },
+        {
+          "label": "Go wide",
+          "description": "Also research how other tools handle interrupting someone for a decision, and map several different kinds of asker. Thorough, but this is a prose standard for one plugin, and the extra breadth probably doesn't change what gets written."
+        }
+      ]
+    },
+    {
+      "question": "Who is this standard for?",
+      "header": "Who",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "A new person, defined here (Recommended)",
+          "description": "Describe a new user: someone mid-task who gets interrupted by a question and has to reconstruct it before they can answer. Matches how every previous feature here was done, and this person's frustration genuinely isn't any existing one's."
+        },
+        {
+          "label": "Reuse an existing one",
+          "description": "Attach this to one of the eight people already described. Cheaper, no new file. Risk: all eight of them hit this problem, so picking one implies the other seven don't."
+        },
+        {
+          "label": "Say it belongs to everyone",
+          "description": "Treat it as applying to all eight existing users at once, with no new person. Honest about the reach. Risk: the traceability check wants a specific named person per piece of work, so this may just fail that check."
+        }
+      ]
+    },
+    {
+      "question": "Is 200 words a hard limit or a rough target?",
+      "header": "Word limit",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Hard ceiling — a test can fail it (Recommended)",
+          "description": "Over 200 words is a defect, countable and testable. Makes the standard enforceable rather than aspirational. Risk: an occasional genuinely complicated decision gets squeezed, so we'd need a stated escape hatch for where the extra detail goes."
+        },
+        {
+          "label": "Rough target, use judgement",
+          "description": "Aim for about 200 words; going over is fine when warranted. Flexible and never squeezes a hard question. Risk: nothing can measure it, so it stays advice — which is the same category as the prose that already failed."
+        },
+        {
+          "label": "Hard ceiling on the question, detail allowed after",
+          "description": "The ask itself must fit 200 words; unlimited supporting detail may follow, clearly separated, for when you want it. Testable and never squeezes. Risk: more moving parts, and the detail section could grow into the wall of text we're trying to kill."
+        }
+      ]
+    }
+  ]
+}

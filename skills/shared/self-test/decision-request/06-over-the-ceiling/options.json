@@ -1,0 +1,26 @@
+{
+  "questions": [
+    {
+      "question": "To compare the snapshot against the board, /phil:resume must read Projects v2 Status + board position. No gh verb that can do that reliably is read-only. Which cost do we pay?",
+      "header": "Grant",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Flip resume to mutates: true (Recommended)",
+          "description": "Grant Bash(gh api graphql:*) and declare mutates: true, carrying the read-only intent in prose — the adversarial-review pattern CLAUDE.md already blesses. The check is faithful: it sees Status, board position, and the top Todo card. Cost: resume.md's line 'the read-only guarantee is enforced rather than merely declared' stops being true. Mitigating: the grant stays narrow — still no Write, no Edit, no bare Bash — so the mutation surface is one verb bounded by prose, tighter than adversarial-review's bare Bash.",
+          "preview": "---\nmutates: true\nallowed-tools: Read, Glob, Grep,\n  Bash(git rev-parse:*), Bash(git status:*),\n  Bash(git rev-list:*), Bash(git log:*),\n  Bash(gh api graphql:*), Skill\n---\n\nThis command never writes. Its only non-git\nverb is `gh api graphql`, used for BOARD READS\nonly — it declares `true` because that verb\ncan carry a mutation, not because it does."
+        },
+        {
+          "label": "Keep mutates: false, use gh issue list",
+          "description": "gh issue list is already on the read-only allowlist. But it returns issues + milestones, not Status and not board position — so resume cannot see 'the top Todo card' or any In Progress card at all. The check degrades to 'is the snapshot's Next inside the earliest-due milestone's open set', which would likely have MISSED the 2026-08-13 case the card was written from. Enforcement preserved; the detector is weaker than its own done-when.",
+          "preview": "allowed-tools: ..., Bash(gh issue list:*)\n\nVisible:   number, title, labels, milestone\nInvisible: Status field  ← the board column\n           board position ← 'top Todo'\n           In Progress    ← 'what is in flight'\n\nThe 2026-08-13 divergence would likely\nread as agreement."
+        },
+        {
+          "label": "Keep mutates: false, allowlist gh project item-list",
+          "description": "gh project item-list is genuinely read-only, so enforcement survives and the check sees Status. But CLAUDE.md forbids it for board reads: it served a stale title for #10 on 2026-08-12 and can under-report. An under-report here means a divergence that exists and is not reported — the exact silent failure this card was written to kill, reintroduced inside its own fix.",
+          "preview": "READ_ONLY_VERBS += \"gh project item-list\"\n\nCLAUDE.md, Issue board:\n  \"Read the board with `gh api graphql`,\n   NEVER `gh project item-list` — item-list\n   served a stale title for #10 and can\n   under-report.\"\n\nUnder-report → missed divergence → silent."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "fixture_id": "DECISION-REQUEST-SELFTEST-05",
+  "source": {
+    "log": "42253f4e-cee1-43c4-9dd7-d334daaca80a.jsonl",
+    "timestamp": "2026-08-21T20:54:41.572Z",
+    "note": "Verbatim. Region tags added by hand; nothing else changed."
+  },
+  "situation": "A real three-part ask that genuinely needed its evidence: agent file counts, an absent licence file, and which installed snapshots carried a copy. All of it sits in a context block above a horizontal rule, and none of it is repeated in the ask.",
+  "ask_file": "ask.md",
+  "options_file": "options.json",
+  "emission_file": "emission.md",
+  "expected_decision": [
+    "CONFORMS"
+  ],
+  "expected_findings": [],
+  "mechanical_assertions": {
+    "framing_ceiling": 200,
+    "measured_framing_words": 148,
+    "question_ceiling": 200,
+    "measured_question_words": [
+      100,
+      91,
+      102
+    ],
+    "context_words": 53,
+    "context_carries_forbidden_tokens": true,
+    "forbidden_token_kinds": [],
+    "framing_pairs": 3
+  },
+  "why_this_ask": "The instance the standard's separated-context clause had been missing since slice 01. Its context block carries an artifact path — a token the ask may not contain — which is what makes the clause a used escape hatch rather than an unexercised one.",
+  "co_occurring": "None. This is the only fixture that passes all four checks with an emission recorded, so it is the passing side of BARE-LIST and BURIED-ASK."
+}

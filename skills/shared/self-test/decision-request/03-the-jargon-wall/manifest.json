@@ -1,0 +1,42 @@
+{
+  "fixture_id": "DECISION-REQUEST-SELFTEST-03",
+  "source": {
+    "log": "29e5f015-3659-4f2e-9f12-d7934d29dae2.jsonl",
+    "timestamp": "2026-08-14T22:07:40.406Z",
+    "note": "Verbatim. Region tags added by hand; nothing else changed."
+  },
+  "situation": "A real four-part wave elicitation whose question text and option descriptions are written in the project's own vocabulary — card numbers, job ids, persona file names, command names, wave names.",
+  "ask_file": "ask.md",
+  "options_file": "options.json",
+  "emission_file": "emission.md",
+  "expected_decision": [
+    "JARGON-WALL"
+  ],
+  "expected_findings": [
+    "BARE-LIST",
+    "JARGON-WALL",
+    "BURIED-ASK"
+  ],
+  "mechanical_assertions": {
+    "framing_ceiling": 200,
+    "measured_framing_words": 26,
+    "question_ceiling": 200,
+    "measured_question_words": [
+      187,
+      141,
+      107,
+      100
+    ],
+    "forbidden_token_kinds": [
+      "artifact path",
+      "issue number",
+      "skill or command name",
+      "slice id"
+    ],
+    "context_words": 123,
+    "context_carries_forbidden_tokens": true,
+    "framing_pairs": 0
+  },
+  "why_this_ask": "Every one of its four questions is inside the per-question ceiling — the worst is 187 of 200 — so this fixture proves the vocabulary rule is doing work the count cannot do.",
+  "co_occurring": "BARE-LIST and BURIED-ASK also fire."
+}

@@ -1,0 +1,40 @@
+{
+  "fixture_id": "DECISION-REQUEST-SELFTEST-06",
+  "source": {
+    "log": "97435e19-3795-407e-bf1d-44939da62477.jsonl",
+    "timestamp": "2026-08-17T22:53:09.356Z",
+    "note": "Verbatim. Region tags added by hand; nothing else changed."
+  },
+  "situation": "The worst single question in this repo's recorded history: 266 words of question text and option descriptions, weighing three ways to grant a command board access. Behind a sixteen-word lead-in.",
+  "ask_file": "ask.md",
+  "options_file": "options.json",
+  "emission_file": "emission.md",
+  "expected_decision": [
+    "OVER-CEILING"
+  ],
+  "expected_findings": [
+    "BARE-LIST",
+    "JARGON-WALL",
+    "BURIED-ASK",
+    "OVER-CEILING"
+  ],
+  "mechanical_assertions": {
+    "framing_ceiling": 200,
+    "measured_framing_words": 16,
+    "question_ceiling": 200,
+    "measured_question_words": [
+      266
+    ],
+    "forbidden_token_kinds": [
+      "artifact path",
+      "issue number",
+      "skill or command name"
+    ],
+    "context_words": 0,
+    "context_carries_forbidden_tokens": false,
+    "framing_pairs": 0,
+    "preview_words": 125
+  },
+  "why_this_ask": "The repaired ceiling needs a real instance that fails it. Six of 134 recorded questions exceed 200 words; this is the worst, and it fails by 33% — closable by trimming descriptions, which is exactly the remedy the standard prescribes.",
+  "co_occurring": "All four modes fire. This ask predates the standard entirely."
+}

@@ -115,9 +115,12 @@ def test_every_reference_uses_the_absolute_plugin_path(fragment):
         text = p.read_text()
         if f"shared/{fragment.name}" not in text:
             continue
-        for line in text.splitlines():
-            if f"shared/{fragment.name}" in line and REQUIRED_FORM not in line:
-                bad.append(f"{p.relative_to(REPO)}: {line.strip()[:90]}")
+        # Per REFERENCE, not per line. Membership was enough before, so appending
+        # ", see also skills/shared/decision-request.md" to an already-compliant sentence passed
+        # clean — one bare path per line, free, in the check written because six of them shipped.
+        for ref in re.findall(r"[\w${}./-]*shared/" + re.escape(fragment.name), text):
+            if not ref.startswith(REQUIRED_FORM):
+                bad.append(f"{p.relative_to(REPO)}: {ref}")
     assert not bad, (
         "references must use ${CLAUDE_PLUGIN_ROOT}/skills/shared/<fragment>, per skills/shared/README.md:\n"
         + "\n".join(bad)

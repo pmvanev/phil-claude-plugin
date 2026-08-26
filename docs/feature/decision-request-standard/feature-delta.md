@@ -59,9 +59,30 @@ whose commands ask the most questions) is real and wrong.
   error-path map. The value of this feature lives entirely in its error paths: the three failure modes
   *are* the feature, and specifying a standard without mapping them would produce fixtures with no
   failure mode behind them. (User)
-- **[D4]** **200 words is a HARD CEILING on the ask, countable and failable — not a target.** A target
-  cannot be measured, and an unmeasurable standard is the same category as the prose that already failed
-  here. (User)
+- **[D4]** **200 words is a HARD CEILING, countable and failable — not a target.** A target cannot be
+  measured, and an unmeasurable standard is the same category as the prose that already failed here.
+  (User)
+  **AMENDED 2026-08-26, after slice 02 measured it. The ceiling stands; its scope was wrong.**
+  Slice 01's revision settled the scope as *the framing plus every option label and description, summed*.
+  That count cannot be met by anything: the three real requests this standard was written from measure
+  **564, 324 and 441** words against it (E9), and the remedy the fragment itself prescribes — cut option
+  text — deletes the cost statements the *Options* section mandates. A framing of 143 words plus nine
+  options under one 200-word limit leaves six words per option.
+  **Now two limits, both 200, both hard:** the framing (items 3–5) and each question with its own
+  options, counted per question and never summed. Measured apart, the same requests are modest and
+  consistent — framings of 143, 142 and 148, and twenty options between 24 and 66 (E9). Across the whole
+  134-question corpus, 128 already fit the per-question limit and the six that do not run 205 to 266
+  (E10), so it is tight rather than arbitrary; the prescribed remedy closes every one of the six without
+  touching a cost statement.
+  **Four alternatives were put to the user with their costs and three declined:** limit the question only
+  (nothing would bound option text, which is where the length actually grew), one raised total limit (it
+  would have to be ~600, which is no longer a question anyone reads in one pass), and make it a target
+  (returns the standard to unenforceable advice — the thing this feature replaces). (User, 2026-08-26)
+  **A fifth scope question the first version never asked: per-option `preview` panes.** The count named
+  labels and descriptions and was silent on preview text, which the reader also sees. Ruled **context** —
+  shown beside the options rather than read as part of them — so it is outside both counts, may carry the
+  tokens the ask may not, and may never be the only place a consequence is stated. Silence is how the
+  first ceiling acquired three readings; this one is written down. (Session, 2026-08-26)
 - **[D5]** **Supporting context is separated from the ask, placed ABOVE it, and bounded in practice.**
   [D4] would otherwise squeeze a genuinely complicated decision. The ceiling governs the question and
   the options; the context block is outside it.
@@ -77,6 +98,12 @@ whose commands ask the most questions) is real and wrong.
   Two alternatives were declined with their costs recorded: a one-line pointer with detail on request
   (risks the reader never seeing evidence that would have changed the answer) and writing detail to a
   file (nobody opens it). (User)
+  **PROVEN 2026-08-26 by a real instance, having been unproven since slice 01.** Slice 01 recorded that
+  the clause making [D4] affordable had no instance behind it: its one conforming ask fit in 143 words
+  and displaced nothing. Slice 02's fixture `05-the-context-block` is a real three-part ask whose
+  context block — 53 words carrying an artifact path, a token the counted ask may not hold — sits above
+  a marker line and is repeated nowhere in the ask. The escape hatch is used, not merely available, and
+  `test_the_context_block_is_exempt_from_the_vocabulary_rule` asserts the exemption directly.
 - **[D6]** **`rules/` cannot carry this, on the mechanism — measured, not argued.** A rule with a
   `paths:` glob fires on the file being touched, and a decision request happens regardless of which file
   is open. The nearest existing standard proves it: `rules/ux.md`'s own *"no internal jargon"* line loads
@@ -99,6 +126,16 @@ whose commands ask the most questions) is real and wrong.
 - **[D9]** **Placement is part of the standard, not only wording.** Failure mode 3 is a placement defect;
   a conforming ask that is buried still fails. A standard governing wording alone would report success on
   a third of the problem. (Session)
+  **STANDS, and is now load-bearing rather than asserted — 2026-08-26.** Slice 02's brief allowed that
+  "correct wording, wrong placement" might not be expressible as a fixture at all, in which case [D9]
+  was a sentence and the standard covered two thirds of the reported problem. Fixture
+  `04-the-buried-ask` is a real ask that fails on placement **and nothing else**: all three framing
+  elements present, zero forbidden tokens, framing 142 of 200, its one question 182 of 200 — emitted
+  after a report and a six-row table with no separator.
+  `test_placement_is_isolated_by_exactly_one_fixture` pins that isolation by name, so a later widening
+  of any other check reports itself instead of quietly dissolving the clause.
+  **What it does not establish:** the check reads a *tagged* emission. Placement cannot be detected in
+  live output, and the fragment's *Reach* section says so.
 - **[D10]** **The reference is enforced by a script, not by convention.** `CLAUDE.md`'s route 2 requires
   a mechanism — *"a convention with no enforcement is exactly the thing that gets noticed twice and
   written down neither time"* — so a command granting `AskUserQuestion` without the reference fails the
@@ -126,6 +163,29 @@ Gathered before any artifact was written. Every number below is a command anyone
 | E6 | `skills/spirit-walk/SKILL.md:66` says *"Explain in the user's terms, not the code's jargon"* — and `commands/spirit-walk.md` grants no `AskUserQuestion`. **The rule exists in the one place that cannot fire it.** | `sed -n '1,8p' commands/spirit-walk.md` |
 | E7 | A pathless rule is a **manual-reference** rule, not an always-on one. `rules/llm-inference.md` says so explicitly and names `definitions.md` as precedent. Two of the nineteen rules are pathless. | `sed -n '1,12p' rules/llm-inference.md` |
 | E8 | **The standard is satisfiable — measured on this wave's own ask.** The three DISCUSS decisions ([D3], [D2], [D4]) were put to the user with a framing of **143 words** and **zero** forbidden tokens, followed by options each naming its own cost. Under the ceiling with 57 words spare, on a three-part question. | `wc -w` on the emitted framing; `grep -oiE` for wave labels, issue numbers, slice ids, D-numbers, tool and path tokens → no matches |
+
+## Wave: DELIVER / [REF] Evidence — slice 02, measured 2026-08-26
+
+Every number below is derived from this machine's own session logs — 33 sessions, **72** real decision
+requests, **134** questions. The corpus was there the whole time; slice 01 measured one ask by hand.
+
+| # | Finding | Method |
+|---|---|---|
+| E9 | **The combined ceiling is unsatisfiable.** The three requests this standard was written from measure **564, 324, 441** words under it. Measured apart: framings **143, 142, 148**; twenty options **24–66**. Only the sum was impossible. | `wc -w` semantics over framing text and every option label + description, recovered verbatim from the logs |
+| E10 | **The per-question 200 is tight, not generous.** Of 134 real questions, **128** fit; the six that do not run **205, 207, 210, 210, 219, 266**. At 250 only one fails; at 300, none. | same count, grouped per question |
+| E11 | **Framing position is not recoverable from raw output.** The paragraph immediately before the tool call runs ≤82 words in **70 of 72** asks — the two exceptions are this feature's own deliberately-framed asks. So a check cannot find the framing without a tag, and no check can read a live ask. | word count of the final paragraph preceding each call |
+| E12 | **All three failure modes exist as real recordings, and co-occur.** Six fixtures drawn from real asks; three fail three or four modes at once. Only one real ask fails on placement alone, and it is the fixture [D9] rested on. | the fixture set and its asserted finding sets |
+| E13 | **The corpus cannot supply a red for eight clauses**: a framing over 200 words, text between framing and call, regions out of order, a framing region *after* the call, pairs fewer than questions, a preview carrying forbidden tokens, a wrong banner or doubled call sentinel, a duplicate empty region. Nobody has ever done most of them. | exhaustive search of the 72-ask corpus |
+
+**E9 is the number that cost a locked decision, and E10 is the one that saved it.** A ceiling refuted by
+measurement could have collapsed to a target — the outcome slice 02's brief anticipated and called
+honest. It did not, because the same measurement showed *both halves* were consistently sized and only
+their sum was impossible. Refuting a decision's scope is not refuting the decision, which is this board's
+recorded lesson in the other direction.
+
+**E11 is the finding with the longest reach.** It is why the standard's checks are honest about being
+fixture-only, and it caps what slice 03's build check can ever claim: that a skill *loads* the standard,
+never that its asks obey it.
 
 **E8 is the cheapest and most load-bearing number here.** [D4]'s stated risk is that a hard ceiling
 squeezes a genuinely complicated decision. The first real test of that was this wave's own elicitation —
@@ -160,11 +220,11 @@ standard, and splitting them into two features would let the unreachable half qu
 ```
 A question arrives  →  Read what it is  →  Weigh the options  →  Get detail if wanted  →  Answer  →  Resume
        │                     │                    │                      │                  │         │
-  set apart from        what is being       each option names       unbounded, below,    answer /   the ask
-  the output that       decided, and        its own cost, not       separated — the      decline /  named what
-  preceded it          what turns on it,    only its benefit       escape hatch that     defer     it was
-  (placement is        in plain English,                            makes the ceiling               interrupting
-  part of asking)      under 200 words                              affordable
+  set apart from        what is being       each option names       separated, ABOVE,    answer /   the ask
+  the output that       decided, and        its own cost, not       bounded in practice  decline /  named what
+  preceded it          what turns on it,    only its benefit       — the escape hatch     defer     it was
+  (placement is        in plain English,                            that makes the                  interrupting
+  part of asking)      framing under 200                            ceiling affordable
 ```
 
 ## Wave: DISCUSS / [REF] Slices and order
@@ -231,8 +291,9 @@ Full journey at `docs/product/journeys/decision-request-standard.yaml`.
 Ari is interrupted, and can *see* that a question exists without hunting for it — the ask is set apart
 from the output that preceded it. It opens with what is being decided and what turns on it, in plain
 English, no internal vocabulary, inside a countable ceiling. Options follow the framing, never replace
-it, and each names its own cost. Supporting detail sits below, separated and unbounded, so it is
-available and never in the way. Ari answers, declines or defers — all three first-class — and the ask
+it, and each names its own cost. Supporting detail sits **above**, separated by a marker line and
+bounded in practice, so it is available and never in the way. **AMENDED 2026-08-26** — "below" and
+"unbounded" were both struck; see [D5].) Ari answers, declines or defers — all three first-class — and the ask
 named what it was interrupting, so the way back is not reconstructed.
 
 Arc: `jolted-but-oriented → relief → control → trust → confidence → continuity` (upward).
@@ -241,9 +302,12 @@ Arc: `jolted-but-oriented → relief → control → trust → confidence → co
 design away the one quantity worth minimising. `relief` is the turn — everything downstream follows from
 the ask being legible on the first read.
 
-**The accepted risk**, recorded in the journey's error paths: the supporting detail below the ask is
-unbounded, so it can grow into the wall of text the ceiling was meant to kill — the ask conforms while
-the turn does not. The separation is enforceable; the length below it is not. Naming that is the point.
+**The accepted risk**, recorded in the journey's error paths: the supporting detail is bounded only in
+practice, so it can grow into the wall of text the ceiling was meant to kill — the ask conforms while
+the turn does not. The separation is enforceable; the length is not. Naming that is the point.
+**AMENDED 2026-08-26:** the detail sits *above* the ask, so excess length buries the framing rather than
+trailing behind it — a worse failure than the one first recorded, and the reason "unbounded" was struck.
+The same bound now applies to per-option preview panes, which were outside every count and every rule.
 An unenforced half presented as enforced is the defect this repo has now recorded three times
 (`check-readonly-commands.py`'s uncalled function, `devon-ui-developer`'s populated-but-absent field,
 rule 4's dark declaration).
@@ -261,20 +325,24 @@ option, so I can answer on the first read.
 Before: a command stops with a numbered list and no statement of what the choice changes, so answering
 costs a follow-up turn asking what was asked.
 After: run `/phil:groom-set` on this board → sees the ask open with the decision and its consequence in
-plain English, under 200 words, options after the framing.
+plain English, framing under 200 words, options after the framing.
 Decision enabled: whether to sanction the irreversible merge, decided in one pass instead of two.
 
 - **AC1** The ask states what is being decided **and** what changes depending on the answer, both before
   the first option appears.
 - **AC2** The ask contains no wave label, issue number, slice id, skill name or artifact path.
-- **AC3** The ask is ≤200 words, counted mechanically. Over is a failure, not a warning ([D4]).
+- **AC3** **AMENDED 2026-08-26.** Two counts, each ≤200 and each mechanical: the framing (items 3–5),
+  and every question with its own option labels and descriptions. Over is a failure, not a warning
+  ([D4]). *As first written — one count over the ask — this AC was unsatisfiable; the fixture filed
+  against it measures 564.*
 - **AC4** Each option names its own cost or risk, not only its benefit.
 - **AC5** The `groom-issues` skill references `skills/shared/decision-request.md` by name at its ask site.
 
 ### S2 — Get the detail without getting the wall
 
-As Ari, I want the jargon-bearing detail available below the ask rather than inside it, so the ceiling
-never costs me information I wanted.
+As Ari, I want the jargon-bearing detail available above the ask and separated from it, rather than
+inside it, so the ceiling never costs me information I wanted. **AMENDED 2026-08-26** (was "below" — the
+question tool blocks, so nothing after it can be opted into).
 
 ### Elevator Pitch
 Before: detail and question arrive fused — either the ask is a jargon wall, or the evidence is missing.
@@ -284,8 +352,9 @@ Decision enabled: whether to answer from the summary or open the evidence first 
 asker's.
 
 - **AC1** Supporting detail is visibly separated from the ask, not interleaved with it.
-- **AC2** Detail is excluded from the 200-word count, and the count is stated as applying to the ask
-  alone.
+- **AC2** Detail is excluded from both counts, and each count's scope is stated. **AMENDED
+  2026-08-26**: per-option preview panes are excluded on the same grounds and bounded on the same
+  terms.
 - **AC3** Internal vocabulary forbidden in the ask by S1/AC2 is **permitted** here.
 - **AC4** The ask is answerable without reading the detail; the detail is never the only place a
   consequence is stated.
@@ -352,7 +421,7 @@ English by hand as before.
 | # | KPI | Target | Method |
 |---|---|---|---|
 | KPI-1 | Follow-up turns spent asking what was asked, per 10 decision requests | **0** (from a standing ~1-per-ask baseline, the workaround Ari types) | Count over the next 10 asks in real sessions; recorded pass or fail |
-| KPI-2 | Asks over the 200-word ceiling | **0** | Mechanical word count in the self-test |
+| KPI-2 | **Conforming** asks over either 200-word ceiling | **0** | Mechanical word count in the self-test. **AMENDED 2026-08-26:** the target is over *conforming* asks — the suite deliberately contains one recorded ask that exceeds the limit (fixture 06), because a ceiling with no red instance is unproven. Counting fixtures would measure the opposite of the target |
 | KPI-3 | Ask sites referencing the fragment | 8 of 8 skills sites; 13 of 13 command grants covered | `scripts/check-decision-request-reference.py` |
 | KPI-4 | A reader with no context can state what is being decided and what turns on it | 100% of asks, under 15s | Timed read by someone who did not run the command |
 | KPI-5 | Failure modes reproducible as fixtures | 3 of 3 | The self-test; mode 3 is the one at risk, being placement rather than wording |
@@ -391,14 +460,18 @@ both recorded. Treat the ticked table as a structure check, not an external gate
 
 ## Wave: DISCUSS / [REF] Open (→ authoring)
 
-Two items, both genuinely open and both deliberately left to authoring rather than guessed here.
+Two items, left to authoring rather than guessed at DISCUSS. The first is now closed.
 
-1. **The fragment's exact filename and whether it is one file or two.**
-   `skills/shared/decision-request.md` is provisional. `plugin-dev:skill-development` owns layout under
-   `skills/`, and is consulted before the file is written. The live question is whether the standard and
-   its three fixtures belong in one fragment or in a fragment plus a `self-test/` directory alongside —
-   `skills/shared/` currently holds no fixtures at all, so slice 02 sets that precedent either way and
-   should set it knowingly.
+1. **RESOLVED 2026-08-26 (slice 02).** The standard stays one file at
+   `skills/shared/decision-request.md`; its fixtures live in
+   `skills/shared/self-test/decision-request/`, one directory per fixture, with a `README.md` register
+   beside them. `plugin-dev:skill-development` and `plugin-structure` were consulted before the layout
+   was set: skills auto-discover on `SKILL.md` and supporting material belongs in subdirectories, so a
+   `self-test/` tree under a `SKILL.md`-less `shared/` is discovered by nothing and registered as
+   nothing. The precedent it matches is `skills/session-handoff/self-test/`, including
+   `README.md`-as-register — which this repo settled deliberately, so following it costs no new
+   convention. Fixtures were **not** folded into the fragment: they are recordings with provenance, and
+   a standard that carries its own test data stops being readable as a standard.
 
 2. **Which probabilistic mechanism slice 04 uses for the conversational half.**
    The candidates are a skill whose *description* triggers on the moment (reaches ordinary conversation,
@@ -437,8 +510,9 @@ Two items, both genuinely open and both deliberately left to authoring rather th
 ### Requirements summary
 
 Primary need: a decision request Ari can answer on the first read — what is being decided and what turns
-on it, in plain English with no internal vocabulary, under a countable 200-word ceiling, set apart from
-surrounding output, with unbounded detail available below and separate. Delivered as one shared fragment
+on it, in plain English with no internal vocabulary, under two countable 200-word ceilings (the framing,
+and each question with its options), set apart from surrounding output, with detail available above and
+separate, bounded in practice. Delivered as one shared fragment
 referenced by every asking skill, enforced by a build check inside a command and declared unenforceable
 outside one.
 
@@ -452,8 +526,13 @@ Feature type: cross-cutting.
 - **C1** What is being decided, and what turns on it, both appear before the first option.
 - **C2** No internal vocabulary in the ask. Not *explained* jargon — absent jargon; an explained label is
   still a label Ari must hold.
-- **C3** 200 words is a hard ceiling on the ask. Countable, failable, not a target.
-- **C4** Supporting detail is unbounded, separated, and outside the count. C3 is unaffordable without it.
+- **C3** **AMENDED 2026-08-26.** 200 words is a hard ceiling, **twice**: on the framing, and on each
+  question with its own options. Countable, failable, not a target. One combined count over both was
+  refuted by measurement (E9) — every real request exceeded it, and its remedy deleted the option costs
+  C-of-*Options* requires.
+- **C4** **AMENDED 2026-08-26.** Supporting detail is separated, placed **above**, outside both counts,
+  and **bounded in practice rather than unbounded**. C3 is unaffordable without it. The same applies to
+  per-option preview panes.
 - **C5** Placement is part of the asking. A conforming ask that is buried still fails.
 - **C6** The mechanism is named, and where it cannot be enforced that is stated rather than implied.
 - **C7** Silence is not consent. An ambiguous reply is unanswered, and a deferral is recorded as one —

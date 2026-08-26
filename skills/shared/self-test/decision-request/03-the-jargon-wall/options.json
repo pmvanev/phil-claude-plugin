@@ -1,0 +1,76 @@
+{
+  "questions": [
+    {
+      "question": "Whose job is #32, and which JTBD does it trace to?",
+      "header": "Job framing",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "New job, Robin extended (Recommended)",
+          "description": "Register a new job — operate a forge without learning its hazards by contact — under the existing persona robin-backlog-curator. The outcome is distinct from keep-a-backlog-trustworthy (that one is about what a card MEANS; this is about whether the instance constants are known before they bite), but the human is the same one who owns the board, so no new persona is minted."
+        },
+        {
+          "label": "New facet of keep-a-backlog-trustworthy",
+          "description": "No new job. Record #32 as a setup facet of Robin's existing job, on the card's own argument that the payoff is groom-issues rule 4 no longer going dark. Cheapest in SSOT churn; risks burying the forge-hazard outcome inside a backlog-hygiene job that never mentions it."
+        },
+        {
+          "label": "New job AND new persona",
+          "description": "The actor is an adopter standing the plugin up on a repo's board for the first time — arguably not Robin, whose mental model is entirely about card meaning. Most faithful to the card's 'the point is the next repo', at the cost of a ninth persona very close to an existing one."
+        }
+      ]
+    },
+    {
+      "question": "What is the provisional driving surface? (DESIGN confirms; DISCUSS needs an entry point for the elevator pitches)",
+      "header": "Driving port",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "New command (Recommended)",
+          "description": "A new /phil:* command that owns probe-and-write, e.g. /phil:board-setup. Clean single responsibility, re-runnable, and nothing else has to grow a mode. Adds a command to the surface area."
+        },
+        {
+          "label": "Add a path to /phil:groom-issues",
+          "description": "Grooming already reads the whole board and already reports rule 4 unevaluated — so it is the command that DETECTS the missing declaration. Folding setup in means the detector can fix what it found; risks making a report-only command a writer, which its own journey forbids."
+        },
+        {
+          "label": "New command + an invariant check",
+          "description": "The command writes the block; a scripts/ check (this repo's stated mechanism-for-a-convention rule) fails when a repo has board work but no declaration. Most in line with CLAUDE.md's 'a convention with no enforcement'; largest slice count."
+        }
+      ]
+    },
+    {
+      "question": "UX research depth for the journey?",
+      "header": "Research depth",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Comprehensive (Recommended)",
+          "description": "Full journey with emotional arc, shared-artifact registry and error-path map — matching groom-issues and single-issue-per-feature. The error paths are where this feature's value is (a stale option ID, a declaration that disagrees with the labels in use), so they want real mapping."
+        },
+        {
+          "label": "Lightweight",
+          "description": "Happy path only: probe, elicit, write. Fastest to DESIGN; the fixtures the card demands (stale section, disagreeing declaration) would then be specified without a mapped failure mode behind them."
+        },
+        {
+          "label": "Deep-dive",
+          "description": "Multiple personas and extensive edge cases — adopter, curator, and a repo where a teammate already hand-wrote half the block. Likely overkill for a single-surface command."
+        }
+      ]
+    },
+    {
+      "question": "Walking skeleton?",
+      "header": "Skeleton",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes — thin end-to-end slice 01 (Recommended)",
+          "description": "Slice 01 probes one real board and writes a block into a repo with no ## Issue board section at all, end to end, and gets dogfooded the same day. It disproves the central bet — that the probeable half is actually probeable — before any elicitation work is built on top of it."
+        },
+        {
+          "label": "No — feature is isolated enough",
+          "description": "Go straight to the full slice split without a skeleton, on the grounds that this repo authors prose and the risk is low. Loses the early disproof of the probe assumption."
+        }
+      ]
+    }
+  ]
+}

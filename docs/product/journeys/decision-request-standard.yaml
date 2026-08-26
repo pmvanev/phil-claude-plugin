@@ -9,7 +9,7 @@ summary: >
   hunting — set apart from the surrounding output rather than embedded in it. It opens by saying what
   is being decided and what changes depending on the answer, in language Ari can read cold, and it
   fits inside a ceiling that can be counted. Options come after the framing, never instead of it.
-  Whatever detail carries the internal vocabulary sits below, separated and optional, so it is
+  Whatever detail carries the internal vocabulary sits above, separated by a marker and optional, so it is
   available and never in the way. Ari answers, declines, or defers in one pass — and can find the way
   back to the interrupted work.
 
@@ -45,7 +45,9 @@ steps:
   - id: consult-detail
     action: >
       OPTIONAL. Drop into the supporting detail — the evidence, the file paths, the internal
-      vocabulary — which sits below the ask, separated, and unbounded.
+      vocabulary — which sits above the ask, separated by a marker line, and bounded in practice.
+      AMENDED 2026-08-26: was "below … unbounded". The question tool blocks, so anything after it
+      arrives once the answer is given; and length above the ask buries the framing by another route.
     output: Whatever depth Ari asked for, and nothing Ari did not
     emotion: >
       trust — the detail was there when I wanted it, and it was not in my way when I did not.
@@ -73,7 +75,9 @@ emotional_arc: >
 shared_artifacts:
   - name: the_ask
     source: >
-      the asking command, bounded at 200 words — a HARD ceiling, countable and failable, never a target
+      the asking command, bounded at 200 words TWICE — the framing, and each question with its own
+      options. Both HARD, countable and failable, never a target. AMENDED 2026-08-26: one combined
+      count over framing-plus-all-options was refuted by measurement; every real request exceeded it
     consumed_by: [read-the-ask, weigh, answer]
     # The ceiling is on the ask ALONE. It is not a budget for the whole turn, and it is not shared with
     # the supporting detail.
@@ -90,7 +94,8 @@ shared_artifacts:
 
   - name: supporting_detail
     source: >
-      the asking command, unbounded, SEPARATED from the ask. Carries the internal vocabulary that C2
+      the asking command, bounded in practice, ABOVE and SEPARATED from the ask. Carries the internal
+      vocabulary that C2
       forbids in the ask itself.
     consumed_by: [consult-detail]
     # This is the escape hatch that keeps the hard ceiling from being lossy. Without it, C3 squeezes a
@@ -138,7 +143,9 @@ error_paths:
   - step: read-the-ask
     failure: The ask fits 200 words only by dropping what turns on it
     recovery: >
-      Cut options, or cut to a smaller decision, and move detail below — never the framing. The ceiling
+      Trim option descriptions — never below the sentence naming that option's cost — then cut the
+      number of options, then split into a smaller decision, and move detail above. Never the framing.
+      The ceiling
       exists to force that ordering; if it starts evicting `what_turns_on_it` it is being applied
       backwards. A decision genuinely too large to frame in 200 words is a decision that should be
       SPLIT, and the split is the answer rather than a longer ask.
@@ -164,7 +171,7 @@ error_paths:
       conforms, the turn does not
     recovery: >
       ACCEPTED RISK, and named rather than solved. The separation is what is enforceable; the length
-      below it is not. Stating this is the point — an unenforced half presented as enforced is the
+      above it is not. Stating this is the point — an unenforced half presented as enforced is the
       defect this repo has recorded three times.
 
   - step: answer

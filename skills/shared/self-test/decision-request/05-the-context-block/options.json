@@ -1,0 +1,57 @@
+{
+  "questions": [
+    {
+      "question": "What license should this project carry?",
+      "header": "License",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "MIT",
+          "description": "Permissive, shortest, most common for tooling of this kind. Anyone may use, modify and redistribute, including commercially, with attribution. Cost: no protection against someone repackaging it closed-source."
+        },
+        {
+          "label": "Apache 2.0",
+          "description": "Permissive like MIT, plus an explicit patent grant and a requirement to state changes. Cost: longer text, slightly more ceremony for contributors."
+        },
+        {
+          "label": "Leave it unlicensed for now",
+          "description": "Change nothing. Cost: with no license stated, others technically have no right to use or redistribute it at all — which is the opposite of what publishing it implies, and the ambiguity sits on every existing install."
+        }
+      ]
+    },
+    {
+      "question": "Should the development-rules file keep shipping to people who install this?",
+      "header": "Ships",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Accept it, and write down why (Recommended)",
+          "description": "Leave the packaging alone and record the decision plus the warning, so it reads as chosen rather than unnoticed. Cost: strangers still receive instructions that mean nothing to them, and the load warning keeps printing."
+        },
+        {
+          "label": "Exclude it from the package",
+          "description": "Add a packaging step so development-only files stay out of installs. Cost: a new mechanism to maintain, and anything mis-listed goes missing from installs silently — a worse failure than the current noise."
+        }
+      ]
+    },
+    {
+      "question": "Add the missing worked examples to the five background helpers?",
+      "header": "Examples",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Not now — file it as its own card (Recommended)",
+          "description": "Record it as separate work. Cost: the helpers stay harder to pick correctly until someone does it."
+        },
+        {
+          "label": "Do it now",
+          "description": "Write examples for all five in this session. Cost: substantial writing across five files unrelated to the current feature, and a badly-chosen example actively mis-trains selection — worse than none."
+        },
+        {
+          "label": "Do just the two used most",
+          "description": "Examples for the two that get invoked most often, card for the rest. Cost: a partly-done convention is the kind of thing that never gets finished."
+        }
+      ]
+    }
+  ]
+}

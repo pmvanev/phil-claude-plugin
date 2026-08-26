@@ -1,0 +1,26 @@
+{
+  "questions": [
+    {
+      "question": "Slice 03 is committed on `main` (2 commits, 0.31.0). Push and close #15?",
+      "header": "Land it",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Push and close #15",
+          "description": "Push both commits to origin/main, post the closing comment on #15, then set Status=Done (comment first — auto-close drops a later one).",
+          "preview": "git push origin main\n\ngh issue comment 15 -R pmvanev/phil-claude-plugin -b '<summary>'\ngh project item-edit ... Status=Done   # auto-closes #15\n\nMatches how slices 01 and 02 landed."
+        },
+        {
+          "label": "Push only",
+          "description": "Push both commits; leave #15 open in Todo so you can review before it leaves the board.",
+          "preview": "git push origin main\n\n#15 stays OPEN, Status=Todo.\nNothing on the board changes."
+        },
+        {
+          "label": "Hold everything",
+          "description": "Nothing leaves this machine. Both commits stay local for you to review or amend.",
+          "preview": "3ad4bda  groom-issues: slice 03 ...  (local)\na48f93b  board: a closing keyword ... (local)\n\nUnpushed. #15 untouched."
+        }
+      ]
+    }
+  ]
+}
