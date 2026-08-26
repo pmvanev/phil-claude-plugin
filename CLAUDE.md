@@ -34,6 +34,22 @@ from the slice brief and its sibling commands, with `plugin-dev` never loaded �
 build path its own `feature-delta.md` declares, invisible afterwards because nothing records
 compliance either way.
 
+## Decision requests are refused in flight here
+
+`decision-request: strict` — this line is the opt-in, read by
+`hooks/decision-request/check-ask.py` at every `AskUserQuestion` call.
+
+The shipped hook enforces the 200-word per-question limit in **every** project. The plain-language
+rule — no issue numbers, file paths or bracketed identifiers inside the question or its options — is
+enforced only where a project opts in, because a filename is internal jargon here and is often the
+clearest possible way to name a decision elsewhere. Measured 2026-08-26: denying on both rules would
+have refused 59 of this repo's 73 recorded asks, and 41 of the 42 distinct matches were genuine.
+
+A denial is not a dead end — the reason names the breach and the remedy, and the ask is rewritten.
+The two clauses it cannot reach (every option naming its cost, and the ask's placement in surrounding
+output) are stated in the hook's own header, because a partial enforcer that hides what it misses
+reads as a complete one.
+
 ## Repo invariants run themselves
 
 `scripts/check-invariants.py` runs the repo's checks at `SessionStart` and reports **only

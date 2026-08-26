@@ -1,5 +1,5 @@
 {
-  "description": "PreToolUse: refactor-loop G2 test-file write-block (no-op unless a refactor-loop run is active).",
+  "description": "PreToolUse: refactor-loop G2 test-file write-block (no-op unless a refactor-loop run is active), and the decision-request standard's two mechanically checkable rules, enforced on every AskUserQuestion call.",
   "hooks": {
     "PreToolUse": [
       {
@@ -8,6 +8,15 @@
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/block-test-file-write.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/decision-request/check-ask.py\""
           }
         ]
       }

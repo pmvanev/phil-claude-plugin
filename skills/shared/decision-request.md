@@ -142,12 +142,15 @@ naming its cost, collapsing options that differ only in wording, a recommendatio
 context block's practical bound, the preview's, items 3–5 being answerable without the context, not
 restating progress, not asking when nothing turns on it, and the whole of *Handling the answer*.
 
-**No check reads a live ask.** None can while asks are emitted untagged: a fixture's regions are tagged
-by hand, and position does not identify the framing either — measured across 72 real asks in this repo's
-history, the paragraph immediately before the call runs 82 words or fewer in 70 of them. Emitting the
-tags in flight would make an ask checkable; that has not been chosen, and it is not claimed here to be
-impossible. The fixtures catch a regression in *the standard and in the examples it is measured against*
-— never a malformed ask in flight.
+**The fixtures read recordings, not live asks.** A fixture's regions are tagged by hand, and position
+does not identify the framing either — measured across 72 real asks in this repo's history, the paragraph
+immediately before the call runs 82 words or fewer in 70 of them. So this suite catches a regression in
+*the standard and in the examples it is measured against*, never a malformed ask in flight.
+
+**Two clauses ARE read live, by a different mechanism** — see *Outside a command* below. An earlier
+version of this section declared that no live request could ever be checked. That was true of the prose
+emitted around a call and false of the call itself, which is structured data; the sentence was written
+before anyone looked, and it is corrected rather than quietly dropped.
 
 **Propagation is complete, and enforced.** Every skill loaded by a command that grants the question tool
 references this file, and `scripts/check-decision-request-reference.py` fails the build otherwise — in
@@ -156,9 +159,32 @@ The consumer list is derived in `skills/shared/README.md` rather than counted he
 prose becomes a lie the moment the next consumer is wired.
 
 **That check is shallow, and its shallowness is the point.** It proves a reference resolves. A skill that
-references this file can still emit a bare option list in the project's own jargon at the end of a wall
-of output and pass green. Nothing measures conformance in flight.
+references this file can still emit a bare option list at the end of a wall of output and pass green —
+its length and its identifiers are caught in flight by the hook below; nothing catches the rest.
 
-**One gap remains open.** Outside a command, nothing loads this at all: a decision request in ordinary
-conversation reaches no reference, because the only signal the check can read is a command's tool grant.
-That gap is real, is not closed by this file, and must not be described as covered.
+### Outside a command
+
+**A tool call is structured data, and that changes what is reachable.** The build check reads a command's
+tool grant, so ordinary conversation is invisible to it. A `PreToolUse` hook is not: it receives the
+question text, every option label and every option description before the call runs, and may refuse it
+with a reason. `hooks/decision-request/check-ask.py` does, in every project that installs this plugin.
+
+Two clauses are enforced there, and only two:
+
+- **The per-question ceiling, everywhere and unconditionally.** Arithmetic — there is no wording it can
+  misjudge.
+- **The plain-language rule, where a project opts in** by carrying `decision-request: strict` in its
+  `CLAUDE.md`, restricted to the three identifier classes that mean nothing in *any* project a reader
+  does not share: an issue number, a file path, a bracketed identifier. Measured over 73 real requests:
+  denying on both rules refuses 81% of them, and inspection showed the matches genuine — a filename is
+  internal jargon here and is often the clearest way to name a decision elsewhere. Unconditional, it
+  would be this plugin refusing a stranger's question for a local reason.
+
+**Two clauses stay unreachable and always will be**: whether each option names its cost, which is
+semantic; and placement, because the framing is prose emitted *before* the call and never enters the
+payload. A denial is not a dead end — the reason names the breach and the remedy, and the request is
+rewritten.
+
+**The gap that remains is compliance, not delivery.** Every other clause in this file — the option costs,
+the placement, the reply handling, the context bound — is unenforced in ordinary conversation exactly as
+it is inside a command. That must not be described as covered.

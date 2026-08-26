@@ -417,20 +417,33 @@ def test_the_fragment_does_not_overclaim_its_reach():
         "an enforced reference check reads as enforced conformance unless the file says otherwise"
     )
     assert "can still emit a bare option list" in body
-    assert "One gap remains open" in body, (
-        "the conversational half is still unreachable; closing one gap must not silence the other"
+    # Slice 04 closed delivery outside a command too, so the remaining gap had to be restated rather
+    # than deleted. Two clauses are structurally unreachable — option costs are semantic, and the
+    # framing never enters the payload — and an enforcer that stops naming what it misses reads as a
+    # complete one. That is the failure this whole section exists to prevent, twice over now.
+    assert "The gap that remains is compliance, not delivery" in body
+    assert "stay unreachable and always will be" in body, (
+        "the two clauses no mechanism can reach must be named where the reach is claimed"
     )
     assert "One of the six skills" not in body and "Propagation is incomplete" not in body, (
         "a hardcoded consumer count, and a stale claim that propagation is unfinished"
     )
-    assert "No check reads a live ask" in body, (
-        "four mechanical checks over fixtures must not read as four checks over live asks"
+    assert "The fixtures read recordings, not live asks" in body, (
+        "the fixture suite must not read as a check over live asks"
     )
-    assert "and none can" not in body and "not claimed here to be impossible" in body, (
-        "'none can' was an impossibility claim the evidence does not support — the region tags are "
-        "HTML comments, so emitting them in flight would make an ask checkable. Foreclosing slice "
-        "04's design space by assertion is the same overclaim this section was written to fix"
+    # The sentence this replaces said no check reads a live ask AND NONE CAN. Slice 04 refuted it the
+    # same day: a tool call is structured data, and a PreToolUse hook reads it. The impossibility claim
+    # must stay gone, and the correction must stay visible — a decision reversed silently is one the
+    # next reader re-derives from the same wrong premise.
+    assert "and none can" not in body, (
+        "the impossibility claim must stay gone. It is quoted nowhere in this file either — a naked "
+        "absent-string assertion cannot tell a claim from a quotation of it, so the correction is "
+        "worded to keep this guard meaningful"
     )
+    assert "written before anyone looked" in body, (
+        "the reversal must be recorded as a reversal, not tidied away"
+    )
+    assert "Two clauses ARE read live" in body
     assert "self-test/decision-request" in body, "the reach claim must name what it was checked against"
     assert "wider than any check of it" in body
 

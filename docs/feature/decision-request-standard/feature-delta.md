@@ -145,6 +145,24 @@ whose commands ask the most questions) is real and wrong.
   `CLAUDE.md` is repo-local and does not ship to consumers. This is stated in the artifact rather than
   papered over, and it is its own slice (04) so that "later slice" and "out of scope" stay
   distinguishable — the lesson [D10] of `board-setup-block`. (Session)
+  **DISPROVED 2026-08-26 by slice 04's SPIKE, and recorded as a reversal.** The premise was reasoned
+  from two measurements — [D6] on globbed rules, E2/E6 on per-command prose — and both still hold.
+  Neither ruled out a **tool-call hook**, and slice 04's brief named that possibility precisely so it
+  would be searched for rather than assumed away.
+  A `PreToolUse` hook receives `tool_name` and `tool_input` and may return `permissionDecision: deny`
+  with a reason the model reads; `matcher` is a regex on the tool name; and this plugin **already
+  shipped one** (`hooks/hooks.json`, matcher `Edit|Write`), so the mechanism was proven in-repo before
+  it was proposed. Delivery outside a command is therefore deterministic, and two clauses are enforced
+  in flight, in ordinary conversation, in consumers' projects.
+  **What survives of [D11]:** *compliance* is still not deterministic, and two of the four mechanical
+  clauses remain structurally unreachable — option costs are semantic, and placement lives in prose the
+  payload never carries (E11). The declaration [D11] required is still made; it is now a narrower and
+  truer one.
+  **What it cost, measured before shipping:** enforcing both reachable clauses everywhere would refuse
+  **59 of 73** recorded requests (81%), and inspection found 41 of 42 distinct matches genuine. The
+  wording clause is therefore opt-in per project and the ceiling is unconditional — 10% at that setting.
+  The user chose "refuse on both"; this split honours it where the complaint originated and declines to
+  impose it on projects that never made it. (User + Session)
 - **[D12]** **Walking skeleton = yes**, WS strategy **C — real local resources**. Slice 01 wires the real
   fragment into a real skill and is dogfooded against this repo's own board the same day. A worked
   example with no live asker would prove the prose parses, which is not the uncertainty. (Session)
@@ -425,7 +443,7 @@ English by hand as before.
 | KPI-3 | Ask sites referencing the fragment | 8 of 8 skills sites; 13 of 13 command grants covered | `scripts/check-decision-request-reference.py` |
 | KPI-4 | A reader with no context can state what is being decided and what turns on it | 100% of asks, under 15s | Timed read by someone who did not run the command |
 | KPI-5 | Failure modes reproducible as fixtures | 3 of 3 | The self-test; mode 3 is the one at risk, being placement rather than wording |
-| KPI-6 | Conformance in ordinary conversation, outside any command | **Not measurable, by construction** | Stated rather than fabricated. [D11] makes this probabilistic; a number here would be theatre |
+| KPI-6 | Conformance in ordinary conversation, outside any command | **Partly measurable as of 2026-08-26** | **AMENDED.** Was "not measurable, by construction" on [D11]'s premise. A `PreToolUse` hook reads the payload, so the *ceiling* and the *plain-language* clauses are now measurable and enforced outside a command — refused before the question renders. The other two clauses stay unmeasurable, and for a structural reason rather than a missing mechanism: option costs are semantic, and the framing is never in the payload. **The unmeasurable half is now smaller and still real** — a number for it would still be theatre |
 
 KPI-6 is the one that matters most to Ari's actual complaint and the one that cannot be measured,
 because the mechanism that would measure it is the mechanism that does not exist. Recording it as
