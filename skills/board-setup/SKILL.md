@@ -94,6 +94,15 @@ generated … · declarations, not probed facts — a human's answers
 - The **probed** region is regenerated freely, every run.
 - The **declared** region is written once on an answer and **never regenerated**. A second
   `--declare` refuses.
+
+**Every ask that fills the declared region follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.**
+Load it before the first `AskUserQuestion` call.
+
+Two things that standard cannot know: what makes a question *un-probeable* is this skill's own finding,
+so the context block carries the probe that failed and why no forge answers it; and the counted ask must
+describe the convention in plain terms — a question about label families that names the families as
+identifiers is asking the reader to hold the vocabulary the answer is supposed to establish.
+
 - Bytes outside **both** regions are byte-identical, save the one newline the declared region
   contributes as its own terminator, and the sanctioned retire deletion.
 

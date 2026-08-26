@@ -409,11 +409,19 @@ def test_the_fragment_does_not_overclaim_its_reach():
     body = _prose()
     assert "Delivery is deterministic" in body and "compliance is not" in body
     assert "must not be described as covered" in body
-    assert "Propagation is incomplete" in body, (
-        "Reach named the gap outside a command and stayed silent on the larger gap on its own side"
+    # Slice 03 closed the propagation gap, so Reach must not still claim it is open — an understated
+    # reach is as wrong as an overstated one, and this section has now been corrected in both
+    # directions. What must NOT disappear is the shallowness of the check that closed it.
+    assert "Propagation is complete, and enforced" in body
+    assert "shallowness is the point" in body, (
+        "an enforced reference check reads as enforced conformance unless the file says otherwise"
     )
-    assert "One of the six skills" not in body, (
-        "a hardcoded consumer count nothing derives becomes false the moment slice 03 wires the second"
+    assert "can still emit a bare option list" in body
+    assert "One gap remains open" in body, (
+        "the conversational half is still unreachable; closing one gap must not silence the other"
+    )
+    assert "One of the six skills" not in body and "Propagation is incomplete" not in body, (
+        "a hardcoded consumer count, and a stale claim that propagation is unfinished"
     )
     assert "No check reads a live ask" in body, (
         "four mechanical checks over fixtures must not read as four checks over live asks"

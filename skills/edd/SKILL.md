@@ -145,7 +145,16 @@ command**, ready for the human.
 ## ADJUDICATE — the human decides
 
 Put each qualitative expectation's executed evidence to the developer via the human-approval port
-(AskUserQuestion + optional review of the artifact in their editor — ADR-002). The developer — never
+(AskUserQuestion + optional review of the artifact in their editor — ADR-002).
+
+**This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
+
+- **The evidence is the context block, verbatim and unsummarised.** It is the thing being judged, so
+  paraphrasing it into the ask both breaks the word limit and replaces what the developer is meant to
+  read. The counted ask names the expectation in plain terms and says what accepting commits to.
+- **Two outcomes only, and neither is a default.** `accept` and `reject` are the answer set; an
+  ambiguous reply is unanswered, and a second unanswered ask blocks done rather than passing it.
+ The developer — never
 you, never the producer — renders the verdict: **accept** or **reject**.
 
 - **accept** → the expectation is met; record the verdict.

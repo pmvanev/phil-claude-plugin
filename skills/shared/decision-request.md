@@ -149,12 +149,16 @@ tags in flight would make an ask checkable; that has not been chosen, and it is 
 impossible. The fixtures catch a regression in *the standard and in the examples it is measured against*
 — never a malformed ask in flight.
 
-Two gaps, both open:
+**Propagation is complete, and enforced.** Every skill loaded by a command that grants the question tool
+references this file, and `scripts/check-decision-request-reference.py` fails the build otherwise — in
+both directions: a grant whose skill carries no reference, and an ask site no granting command can reach.
+The consumer list is derived in `skills/shared/README.md` rather than counted here, because a number in
+prose becomes a lie the moment the next consumer is wired.
 
-- **Propagation is incomplete.** Most skills holding `AskUserQuestion` do not reference this file — the
-  current count is derived in `skills/shared/README.md` rather than stated here, because a number
-  written into prose becomes a lie the moment the next consumer is wired. Until that changes, most asks
-  in this plugin are governed by nothing.
-- **Outside a command, nothing loads this at all.** A decision request in ordinary conversation reaches
-  no reference. That gap is real, is not closed by this file, and must not be described as covered. The
-  mechanism that might reach it has not been chosen.
+**That check is shallow, and its shallowness is the point.** It proves a reference resolves. A skill that
+references this file can still emit a bare option list in the project's own jargon at the end of a wall
+of output and pass green. Nothing measures conformance in flight.
+
+**One gap remains open.** Outside a command, nothing loads this at all: a decision request in ordinary
+conversation reaches no reference, because the only signal the check can read is a command's tool grant.
+That gap is real, is not closed by this file, and must not be described as covered.

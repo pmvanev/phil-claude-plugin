@@ -106,7 +106,16 @@ inherit, not run yourself:
 ### 4. Confirm with the developer
 
 Summarize goal + preservation contract + IN/OUT scope and get explicit confirmation
-(`AskUserQuestion`) before any change. Record the framed decision — write
+(`AskUserQuestion`) before any change.
+
+**This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
+
+- **The context block is the framed contract** — goal, preservation contract, IN/OUT scope, chosen
+  delegate and oracle. The counted ask states what is being sanctioned and what it commits to, in
+  plain terms; the artifact paths and the delegate's name stay above it.
+- **A decline here is not a deferral.** Nothing may change before this answer, so record a decline and
+  stop rather than proceeding on a partial one.
+ Record the framed decision — write
 `docs/work/<slug>/decisions.md` with the goal, the preservation contract, the chosen delegate and
 oracle, and the IN/OUT scope.
 

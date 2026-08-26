@@ -174,6 +174,15 @@ existing style. Do not touch anything the move does not require.
 Pause and ask the developer to **review the uncommitted diff in their IDE/editor** (against git),
 then answer via **AskUserQuestion** with four options:
 
+**This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
+
+- **The diff is in the editor, so it is not in the ask.** The context block names what moved and
+  where to look; the counted ask states what approving asserts — that intent is preserved — and what
+  each other answer costs.
+- **The four outcomes are fixed** and each names its own consequence: `approve` commits, `reject` and
+  `skip` revert, `abort` ends the loop. Do not add a fifth or fold two together.
+
+
 - **approve** → the change preserves intent → commit it (step 7).
 - **reject** → `git checkout -- <files>` revert; mark the item `skipped`; continue.
 - **skip** → same revert as reject; mark `skipped`; continue.

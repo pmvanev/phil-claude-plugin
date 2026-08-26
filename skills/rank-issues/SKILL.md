@@ -51,6 +51,13 @@ consolidation is what comes first.
 
 ### 2. GOALS
 
+**Every ask in this skill follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before
+the first `AskUserQuestion` call.
+
+Two things that standard cannot know: the proposed grouping is the context block, since a user
+correcting a grouping needs to see it in full; and **card numbers never reach the counted ask** — name
+the work in the words its title uses, and keep the numbers above.
+
 Ask what goals these issues serve. Propose a grouping from their titles and let the user correct it —
 proposing is faster than interrogating, and a wrong proposal is corrected in one word.
 

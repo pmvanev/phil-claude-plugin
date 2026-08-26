@@ -87,6 +87,12 @@ Assemble three things, and only these, as the review contract:
 
 1. **Target** — the completed artifact(s) under review. If invoked with no argument, identify what
    was just completed from the conversation; if it is ambiguous, ask the developer what to review
+
+   **That ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
+   The candidate scopes go in the context block — this skill is the only thing that knows what they
+   are — and the counted ask says what turns on the choice: a wrong scope reviews work nobody asked
+   about and misses the work that was done.
+
    (one short question) rather than guessing.
 2. **Intent** — the claim-of-done: what the task was meant to achieve. Stated by the host, given via
    `--intent`, or inferred from context. Show the inferred intent to the developer so they can

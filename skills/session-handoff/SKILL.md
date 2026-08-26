@@ -231,6 +231,13 @@ reproduced byte-for-byte; `show` writes nothing.
 1. **Require the why.** A frame naming only what was entered records the half that is derivable from the
    files being touched and drops the half that is not. Where `<why>` is missing, ask for it; do not infer
    it from the diff and do not write the frame without it.
+
+   **That ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call. So does `ASK-OWNER` below.
+
+   Two things that standard cannot know: the reason for a diversion exists only in the human's head at
+   that moment, so the ask must not offer a guessed one as an option; and the frame's `what` is already
+   on screen, so it belongs in the context block rather than the counted ask.
+
 2. **Read the whole snapshot** and take `h1`.
 3. **Append the frame** innermost-last, numbered, indented one step deeper than its parent, and stamped
    with the **full** current UTC minute plus a zero counter:

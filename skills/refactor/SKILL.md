@@ -36,6 +36,14 @@ Before starting any refactoring, determine how to run tests:
 
 If no test runner is found by either method, warn the user: "No test runner detected. Refactoring without tests is risky. Continue anyway?" Use AskUserQuestion and await confirmation before proceeding.
 
+**This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
+
+- **What turns on it is that nothing will catch a behaviour change.** Say that, not "risky" — the
+  consequence is the whole content of this decision.
+- **The detection attempt goes in the context block**: what was looked for and where. The ask itself
+  names no filenames.
+
+
 ### Load the Backlog
 
 Read `.refactoring-backlog.md`. If it doesn't exist and no inline argument was given, tell the user to run `/phil:review-code` first.

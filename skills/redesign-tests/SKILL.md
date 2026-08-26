@@ -172,6 +172,14 @@ Pause and ask the developer to **review the uncommitted diff in their IDE/editor
 having shown them the **coverage-equivalence claim**. Then answer via **AskUserQuestion** with four
 options:
 
+**This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
+
+- **The coverage-equivalence claim is the context block.** This loop changes behaviour, so the claim is
+  what the developer is actually validating — it goes above the ask in full, never compressed into it.
+- **The counted ask states what approving asserts**: that the rewrite tests the same behaviour the old
+  test did. Test names, file paths and the claim's internals stay in the context.
+
+
 - **approve** → the rewrite preserves the coverage the claim describes → commit it (step 8).
 - **reject** → `git checkout -- <files>` revert; mark `skipped`; continue.
 - **skip** → same revert as reject; mark `skipped`; continue.
