@@ -197,6 +197,11 @@ standard and the six recordings it is measured against still agree — that a ch
 not silently retired a clause. Conformance in flight is unenforced, the fragment's *Reach* section says
 so, and slice 03's build check will only ever prove that a skill *loads* the standard.
 
-Nothing about the recordings shows live checking is *impossible*, and the fragment no longer claims it
-is: the region tags are HTML comments, so a consumer instructed to emit them would make an ask readable
-by a hook. That mechanism has not been chosen, and choosing it is slice 04's question, not this file's.
+**Two clauses are checked in flight, by something outside this suite.**
+`hooks/decision-request/check-ask.py` reads the tool call — which is structured data, not untagged prose
+— and refuses a question that breaches the per-question ceiling, or (where a project opts in) carries a
+portable identifier. So "no check reads a live ask" was true of these fixtures and false of the feature,
+and this paragraph used to say the mechanism had not been chosen. It was chosen the same day.
+
+What no mechanism reaches, here or there: whether each option names its cost, and placement — the
+framing is prose emitted before the call and never enters the payload.

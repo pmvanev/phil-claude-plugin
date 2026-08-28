@@ -20,12 +20,18 @@ and never recomputed it would drift the first time anyone edited it — the same
 
 ## What these checks do NOT do, stated once
 
-They read **fixtures**, never a live ask, and no check could read a live ask. A fixture's regions are
-tagged by hand once (see `skills/shared/self-test/decision-request/README.md`); inside an untagged turn
-there is nothing that says where the framing begins, and position does not reveal it either — measured
-across 72 real asks in this repo's history, the paragraph immediately before the call runs 82 words or
-fewer in 70 of them. So a green run here means *the standard and its recorded examples still agree*. It
-does not mean any ask in flight conforms, and the fragment's *Reach* section says so in the same words.
+They read **fixtures**, never a live ask. A fixture's regions are tagged by hand once (see
+`skills/shared/self-test/decision-request/README.md`); inside an untagged turn there is nothing that
+says where the framing begins, and position does not reveal it either — measured across 72 real asks in
+this repo's history, the paragraph immediately before the call runs 82 words or fewer in 70 of them. So
+a green run here means *the standard and its recorded examples still agree*. It does not mean any ask
+in flight conforms.
+
+**Two of these four clauses ARE checked in flight, by something else.** An earlier version of this
+docstring said no check could ever read a live ask. `hooks/decision-request/check-ask.py` refuted it: a
+tool call is structured data, so the per-question ceiling and the portable half of the vocabulary rule
+are enforced before the question renders, in any project. What stays unreachable is the other two —
+option costs are semantic, and the framing never enters the payload.
 
 BARE-LIST inherits one further limit worth naming: it fires on an element that is **absent**, not on one
 that is present and weak. A tagged `consequence` region saying "this matters" would pass. The tag is a
@@ -431,14 +437,16 @@ def test_the_fragment_does_not_overclaim_its_reach():
     assert "The fixtures read recordings, not live asks" in body, (
         "the fixture suite must not read as a check over live asks"
     )
-    # The sentence this replaces said no check reads a live ask AND NONE CAN. Slice 04 refuted it the
-    # same day: a tool call is structured data, and a PreToolUse hook reads it. The impossibility claim
-    # must stay gone, and the correction must stay visible — a decision reversed silently is one the
-    # next reader re-derives from the same wrong premise.
-    assert "and none can" not in body, (
-        "the impossibility claim must stay gone. It is quoted nowhere in this file either — a naked "
-        "absent-string assertion cannot tell a claim from a quotation of it, so the correction is "
-        "worded to keep this guard meaningful"
+    # The sentence this replaces declared live checking impossible. Slice 04 refuted it the same day:
+    # a tool call is structured data, and a PreToolUse hook reads it. The impossibility claim must stay
+    # gone, and the correction must stay visible — a decision reversed silently is one the next reader
+    # re-derives from the same wrong premise. (No file below may spell the old claim out, in any case,
+    # this comment included — the sweep is case-folded.)
+    assert ("and " + "none can") not in body, (
+        "the impossibility claim must stay gone. The needle is assembled rather than written out: "
+        "this file is scanned by the cross-file sweep below, so a literal would match itself — and a "
+        "naked absent-string assertion cannot tell a claim from a quotation of it either, which is why "
+        "the fragment's own correction is worded not to reproduce the phrase"
     )
     assert "written before anyone looked" in body, (
         "the reversal must be recorded as a reversal, not tidied away"
@@ -928,3 +936,34 @@ def test_a_missing_interruption_line_is_named(tmp_path):
     found = evaluate(_write_fixture(tmp_path, em, ask, ONE_CLEAN_QUESTION))
     assert set(found) == {"BARE-LIST"}
     assert "naming what this interrupted" in found["BARE-LIST"], found["BARE-LIST"]
+
+
+def test_no_artifact_still_claims_a_live_ask_cannot_be_checked():
+    """The sweep that slice 04 owed and did not do.
+
+    Slice 04 refuted the claim that a live request could never be checked — and that claim had been
+    written into four places. Two were corrected with the reversal; two were missed, and the suite stayed green
+    because nothing asserted them. A feature about questions that mislead on their first read, leaving
+    a misleading sentence in its own files.
+
+    This asserts the sweep across every file that carries the claim, so the next reversal cannot land
+    in one copy and miss the rest.
+    """
+    # Assembled at runtime, not written out. This file is one of the files it scans, so a literal
+    # phrase list would match itself — the same self-reference that broke the first version of the
+    # impossibility guard above, and the reason the fragment's own quotation had to be reworded.
+    # Nothing in this file may spell any of these out, this comment included.
+    dead = ("no check could read a " + "live ask",
+            "and " + "none can",
+            "mechanism has " + "not been chosen")
+    for path in (FRAGMENT,
+                 SELFTEST / "README.md",
+                 Path(__file__),
+                 REPO / "hooks" / "decision-request" / "check-ask.py",
+                 REPO / "scripts" / "check-decision-request-reference.py"):
+        # Case-folded. The first version compared as written, so re-introducing the claim at the start
+        # of a sentence — the only place prose actually puts it — sailed through. Found by mutation,
+        # which is the whole reason the mutation pass exists.
+        body = _prose(path).lower()
+        for phrase in dead:
+            assert phrase not in body, f"{path.name} still claims a live ask cannot be checked: {phrase!r}"
