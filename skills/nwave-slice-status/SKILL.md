@@ -177,6 +177,7 @@ for one**, and derive it by this fold — in this order, because the order is th
 
 | Test, applied in order | State |
 |---|---|
+| The roster is empty — no slice files and no roadmap phases | `unknown` |
 | The current slice is `blocked` | `blocked` |
 | Every slice that is not `deferred` is `done` | `done` — note any deferred slices |
 | Any slice is `done` or `current` | `in progress` |
@@ -184,7 +185,7 @@ for one**, and derive it by this fold — in this order, because the order is th
 | Any slice is `unknown`, and none is `done` or `current` | `unknown` |
 | Otherwise — every slice `not started` or `next` | `to do` |
 
-**Order matters most at the third row, and that row is the whole reason this fold is written down.** A
+**Order matters most at the fourth row, and that row is the whole reason this fold is written down.** A
 feature with five of six slices `done` and the sixth `not started` must fold to `in progress`. Reading only
 the current slice gives `to do`, which reports nearly-finished work as untouched — the same lie as
 publishing `unknown` as `not started`, one level up. Any caller tempted to look at the current slice alone
@@ -194,6 +195,16 @@ is reproducing that defect at feature scale, where it is read by more people.
 unrecorded is in progress, not unknown; the unrecorded slice is a `Notes` entry, not a verdict on the
 feature. But where nothing is known, `unknown` is the answer and **never `to do`** — the cardinal rule of
 this skill applied to the fold.
+
+**The first row is the one place `unknown` outranks everything, and it is there because every test below
+it is vacuous over an empty roster.** A feature that finished DISCUSS and was never decomposed has no slice
+files and no roadmap phases, so *"every slice that is not `deferred` is `done`"* is true of nothing — a
+literal reading folds a feature nobody has roadmapped to `done`. That is the costliest cell in this table to
+get wrong: `phil:nwave-issue-board` maps `done` to the Done column, and on a board with auto-close enabled a
+rendering becomes a closed issue. `unknown` is right here for the same reason it is right at step level — an
+empty roster is a fact about the record, not about the work. The *table* path already degrades correctly
+(*Degrade honestly*, fixture 07); only the fold had the hole, because its tests are quantified over slices
+and a quantifier does not object to an empty set.
 
 This state is a derivation, so it belongs here rather than in whatever publishes it. Two derivations over
 the same files drift apart, and a publisher that folds locally is inventing a status while claiming to
@@ -225,7 +236,7 @@ The user asked where they are; they can see it.
 
 ## Self-test (regression gate)
 
-`skills/nwave-slice-status/self-test/` holds thirteen golden fixtures that pin these behaviors: the table rendered
+`skills/nwave-slice-status/self-test/` holds fourteen golden fixtures that pin these behaviors: the table rendered
 from agreeing sources (01, walking skeleton), a narrative `progress.md` whose fixture and findings
 tables must never be read as step records (02), `unknown` reported instead of `not started` when the
 record is empty (03), disagreeing sources named rather than resolved and a deferred slice never
@@ -251,3 +262,8 @@ furthest: a wrong step row is a line in a table someone is reading closely, whil
 a card's position on a board, read at a glance by people who will not open it. Five of six slices done,
 the sixth current and not started — the fold answers `in progress`, and reading the current slice alone
 answers `to do`.
+
+Fixture `14` pins that same fold's other scope error, and it is the only fixture here whose failure
+**mutates** rather than misinforms. Over an empty roster — DISCUSS finished, never decomposed — every test
+below the first is vacuously true, so an unguarded fold answers `done`, `done` maps to the Done column, and
+auto-close turns the rendering into a closed issue. Added 2026-08-31 with the guard row it tests.

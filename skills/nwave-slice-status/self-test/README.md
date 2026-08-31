@@ -14,6 +14,10 @@ outcome** (`STATUS-TABLE` / `NARRATIVE-RECORD` / `UNKNOWN` / `DISAGREEMENT-NAMED
 `ASK-DONT-GUESS` / `NO-STEP-RECORD` / `DRIFT-NOTED` / `COMPLETE` / `ROSTER-ONLY` /
 `CROSS-CHECK-SKIPPED` / `BLOCKED`).
 
+Fixtures `13` and `14` are the exception: they assert a **feature-level state** — `in progress` and
+`unknown` — rather than a decision outcome, because the fold they pin returns one of six states and
+none of the tokens above.
+
 This suite is the **acceptance + regression gate** for `skills/nwave-slice-status/SKILL.md` and
 `commands/nwave-slice-status.md`. Run it whenever either changes. Format and intent mirror
 `skills/adversarial-review/self-test/`, `skills/edd/self-test/`, and `skills/work/self-test/` — the
@@ -36,6 +40,7 @@ plugin's established way to test a skill.
 | `11-inert-cross-check-skipped/` | roadmap-level `implementation_scope`, one shared `test_file` (**the real phil-work case**) | skips a git check that cannot discriminate, and says so | `CROSS-CHECK-SKIPPED` |
 | `12-blocked-step-surfaced/` | `.develop-progress.json` records a failure at the current step | reports `blocked`, never re-runs the failing test | `BLOCKED` |
 | `13-feature-fold-not-current-slice/` | five of six slices done; the sixth is current **and** not started | folds the feature state over every slice, never over the current one | `in progress` |
+| `14-empty-roster-folds-unknown/` | DISCUSS/DESIGN artifacts only — no `slices/`, no `roadmap.json` — and a **feature state** is asked for | the empty-roster row fires before the `done` test; a vacuous quantifier never folds to `done` | `unknown` |
 
 `01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `07`, `08`,
 `11` — the bug classes that ship silently because their output is indistinguishable from a correct
@@ -50,6 +55,12 @@ failure misinforms; this one directs.
 Fixtures `03` and `07` pin the honesty of *absence* in both directions: a record that exists but is
 empty (`unknown`) versus no record at all (`NO-STEP-RECORD`). Collapsing either into "not started" is
 a gate failure, because "not started" is a claim about the work, not about the evidence.
+
+Fixtures `13` and `14` pin the two ways the feature-level fold fails, and both are **scope** errors rather
+than comparison errors: `13` reads too little of the roster — the current slice instead of all of it — and
+`14` reads a roster that is not there, an empty set over which every test below the first is vacuously true.
+`14` is also the only fixture in this suite whose failure *mutates* something: `done` maps to the Done
+column, and a board with auto-close enabled turns that rendering into a closed issue.
 
 ## Layout
 

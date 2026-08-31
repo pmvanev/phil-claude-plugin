@@ -153,6 +153,13 @@ over these files and, as of 2026-08-14, exposes a feature-level state on request
 state, on request* — `blocked` · `done` · `in progress` · `deferred` · `unknown` · `to do`, folded over
 **every** slice. Publish what it returns.
 
+**Or over none.** A feature that finished DISCUSS and was never decomposed has an empty roster, and the fold
+returns `unknown` for it — the guard row added 2026-08-31 for issue #28, because without it every test in
+that fold is vacuously true over an empty set and the honest answer arrives as `done`. Nothing changed on
+this side: the mapping below already refuses a column for `unknown`, and fixture `18` takes the state as its
+*input*, so it holds whatever produced it. Verified rather than assumed, and recorded here so the next reader
+does not re-derive it.
+
 A fold written here instead would be this skill's recurring defect in its exact historical form: a
 derivation invented by the skill that had just delegated derivation away. It was written here, once, on
 2026-08-14, and removed the same day — while the owner had no such fold at all, so the delegation pointed

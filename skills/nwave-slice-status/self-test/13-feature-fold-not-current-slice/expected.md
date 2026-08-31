@@ -1,6 +1,6 @@
 # Expected outcome — fixture 13 (the fold reads every slice)
 
-**Pins:** *The feature-level state, on request* — the third row of the fold table, and the reason the order
+**Pins:** *The feature-level state, on request* — the fourth row of the fold table, and the reason the order
 is the content.
 
 **Expected state:** `in progress`. With a count beside it, because a state and a count answer different
