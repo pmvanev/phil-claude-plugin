@@ -1,0 +1,11 @@
+{
+  "fixture": "05-target-size-cited-to-the-right-floor",
+  "walking_skeleton": false,
+  "situation": "An icon button with a 30x30 CSS px hit area. That clears the WCAG floor of 24x24 (2.5.8) and falls short of the 44/48px platform comfort guidance. The tempting finding cites WCAG for a criterion the element passes.",
+  "invocation": "/phil:ux-review src/components/IconButton.tsx",
+  "ui_code": {
+    "src/components/IconButton.tsx": "a button with width/height 30px and no surrounding spacing exception needed"
+  },
+  "expected_outcome": "CITATION-CORRECT",
+  "expected_guard": "no WCAG violation is claimed; if raised at all it is a comfort advisory citing the platform guidance, never 2.5.8"
+}

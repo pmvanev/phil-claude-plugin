@@ -1,0 +1,11 @@
+{
+  "fixture": "06-contrast-unresolvable-defers-to-runtime",
+  "walking_skeleton": false,
+  "situation": "Body text coloured with `var(--fg-muted)` on `var(--surface-2)`. Neither token resolves in the files under review \u2014 they are set by a theme package at runtime, and both themes ship light and dark values. The contrast ratio is genuinely unknown from the source.",
+  "invocation": "/phil:ux-review src/components/Card.tsx",
+  "ui_code": {
+    "src/components/Card.tsx": "color: var(--fg-muted) on background: var(--surface-2); no token definitions in scope"
+  },
+  "expected_outcome": "RUNTIME-DEFERRED",
+  "expected_guard": "raised as a consider item asking for a rendered check, never asserted as a must-fix contrast failure and never silently passed"
+}

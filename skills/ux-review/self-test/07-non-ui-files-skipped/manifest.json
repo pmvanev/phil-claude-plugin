@@ -1,0 +1,11 @@
+{
+  "fixture": "07-non-ui-files-skipped",
+  "walking_skeleton": false,
+  "situation": "A `--changes` run whose diff touches four files: one component, one test file for that component, one config file, and one pure data-access module. Only the component is UI.",
+  "invocation": "/phil:ux-review --changes",
+  "ui_code": {
+    "git diff HEAD~1 --name-only": "src/components/Toolbar.tsx, src/components/Toolbar.test.tsx, vite.config.ts, src/api/orders.ts"
+  },
+  "expected_outcome": "SCOPE-FILTERED",
+  "expected_guard": "only Toolbar.tsx is read and reviewed; the test, config and data module are skipped and the skip is not reported as a clean result for them"
+}

@@ -1,0 +1,11 @@
+{
+  "fixture": "04-two-d-content-exempt-from-reflow",
+  "walking_skeleton": false,
+  "situation": "A data table of 14 columns that scrolls horizontally at 320 CSS px. Reflow (WCAG 1.4.10) exempts inherently two-dimensional content, and `ux.md` names tables in the exemption. The obvious-looking finding is wrong AND actively harmful: acting on it destroys a compliant table.",
+  "invocation": "/phil:ux-review src/components/LedgerTable.tsx",
+  "ui_code": {
+    "src/components/LedgerTable.tsx": "a semantic <table> with 14 columns in a horizontally scrollable container, with headers and a caption"
+  },
+  "expected_outcome": "EXEMPT-NOT-FLAGGED",
+  "expected_guard": "no reflow finding against the table; the exemption is applied rather than rediscovered"
+}

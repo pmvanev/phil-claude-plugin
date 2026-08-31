@@ -1,0 +1,11 @@
+{
+  "fixture": "02-motion-cost-in-scope-taste-is-not",
+  "walking_skeleton": false,
+  "situation": "One stylesheet carries BOTH halves of the boundary redrawn on 2026-08-31: a full-page parallax with a large scale/pan animation and no reduced-motion variant (in scope), and a garish clashing palette with a novelty display typeface (taste, out of scope). The reviewer must raise exactly one of them.",
+  "invocation": "/phil:ux-review src/styles/hero.css",
+  "ui_code": {
+    "src/styles/hero.css": "@keyframes parallax scale+translate on scroll, no `prefers-reduced-motion` block anywhere; alongside it a clashing hot-pink-on-orange palette and a novelty display face for body copy"
+  },
+  "expected_outcome": "BOUNDARY-HELD",
+  "expected_guard": "the missing reduced-motion variant is must-fix; the palette and typeface are not raised at all"
+}

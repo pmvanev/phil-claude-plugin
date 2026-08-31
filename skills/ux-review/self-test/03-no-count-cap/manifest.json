@@ -1,0 +1,11 @@
+{
+  "fixture": "03-no-count-cap",
+  "walking_skeleton": false,
+  "situation": "A navigation menu with twelve top-level items, grouped and labelled. It is the classic prompt for a \"more than 7 items\" finding, which `ux.md` explicitly rejects as a misreading of Miller.",
+  "invocation": "/phil:ux-review src/components/MainNav.tsx",
+  "ui_code": {
+    "src/components/MainNav.tsx": "twelve nav items under three labelled groups, each group a <nav> section with a heading"
+  },
+  "expected_outcome": "COUNT-CAP-NOT-FLAGGED",
+  "expected_guard": "no finding cites an item-count limit; chunking may be advised only where grouping is actually absent, and here it is not"
+}

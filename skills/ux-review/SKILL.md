@@ -138,3 +138,26 @@ After writing the backlog, report to the user:
 - Hypothetical issues in code you don't fully understand — when uncertain, skip.
 
 **Be precise, not exhaustive.** A backlog with 8 well-identified, traceable findings beats one with 40 vague ones.
+
+---
+
+## Self-test (regression gate)
+
+`skills/ux-review/self-test/` holds golden fixtures that pin these behaviors: the backlog written from
+two unambiguous always-flag defects (01, walking skeleton), the motion/taste boundary held inside a
+single stylesheet (02), an item count never used as a finding (03), the reflow exemption applied to a
+wide table rather than rediscovered as a symptom (04), a 30px target cited to the platform guidance and
+never to WCAG (05), an unresolvable contrast deferred to a rendered check rather than asserted or
+silently passed (06), non-UI files skipped without being reported clean (07), and an obvious two-token
+fix left unapplied because this command reports and does not repair (08).
+
+Whenever this skill, `commands/ux-review.md`, `rules/ux.md` or `rules/ui.md` changes, drive the
+fixtures per `self-test/README.md` and confirm each produces its `expected.md` outcome. The last two
+are in that list because this skill's correctness is defined by them: fixture `02` exists because the
+boundary between `ux.md` and `ui.md` moved on 2026-08-31, and the shorter summary it replaced —
+*"aesthetics are out of scope"* — is now wrong in a way no reader can detect from this file alone.
+
+Every failure mode here is silent, and one is worse than silent. A finding is a **citation**; a wrong
+one arrives in the same table, in the same format, at the same severity as a right one, and a backlog
+is read as a compliance record. Fixture `04` is the case that does not merely misinform — it directs an
+author to break a conformant table, citing a real success criterion while doing so.

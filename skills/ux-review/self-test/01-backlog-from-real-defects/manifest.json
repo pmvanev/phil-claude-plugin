@@ -1,0 +1,11 @@
+{
+  "fixture": "01-backlog-from-real-defects",
+  "walking_skeleton": true,
+  "situation": "A sign-up form with two unambiguous always-flag defects: the email input is labelled only by its `placeholder`, and the submitting view has no loading, empty or error state. Nothing here is a judgement call.",
+  "invocation": "/phil:ux-review src/SignupForm.tsx",
+  "ui_code": {
+    "src/SignupForm.tsx": "an input whose only label is `placeholder=\"Email\"`; a submit handler rendering the data view directly with no loading/empty/error branches"
+  },
+  "expected_outcome": "BACKLOG-WRITTEN",
+  "expected_guard": "both defects are raised as must-fix, each naming the ux.md principle and the preferred form; the backlog is written to .ux-review-backlog.md"
+}
