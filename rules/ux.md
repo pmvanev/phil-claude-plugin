@@ -11,7 +11,9 @@ paths:
 
 Usability and interaction principles — the complement to `ui.md` (visual aesthetics). Flag the violation, name the preferred form. Vendor-neutral, durable heuristics (Nielsen, WCAG 2.2, Laws of UX), not framework rules. Sources: `docs/research/ux/general-ux-design-best-practices.md`; mobile web: `docs/research/ux/mobile-web-best-practices.md`.
 
-Two tiers. **Always-flag** — objective defects; call them out. **Advisory** — judgment calls; offer as guidance, don't hard-block. This rule owns **usability + accessibility**; aesthetics stay in `ui.md`; React-specific a11y stays in `react.md`. Complement those rules — don't restate them.
+Two tiers. **Always-flag** — objective defects; call them out. **Advisory** — judgment calls; offer as guidance, don't hard-block. This rule owns **usability + accessibility**, and — since 2026-08-31 — the motion, effect-cost and
+small-scale legibility guardrails that used to sit in `ui.md`, because those are checkable and the rest
+of that file is build-time advice. The *choice* of aesthetic stays in `ui.md`; React-specific a11y stays in `react.md`. Complement those rules — don't restate them.
 
 ---
 
@@ -26,6 +28,7 @@ Two tiers. **Always-flag** — objective defects; call them out. **Advisory** �
 | Text contrast < 4.5:1 (< 3:1 large text); UI/icon contrast < 3:1 | Meet AA: text ≥ 4.5:1 / 3:1 large; components ≥ 3:1 (1.4.3 / 1.4.11) |
 | Interactive target < 24×24 CSS px with no spacing exception | Target ≥ 24×24px (2.5.8); ~44px for comfortable touch |
 | Icon-only control, image, or region with no accessible name / semantics | Text alternatives, accessible names, semantic structure and headings |
+| Animation, parallax or large scale/pan motion with no reduced-motion variant | Honour the user's reduced-motion preference: drop parallax and large motion, keep an equivalent still state (2.3.3) |
 
 ### State & feedback
 
@@ -64,13 +67,17 @@ Two tiers. **Always-flag** — objective defects; call them out. **Advisory** �
 - **Copy** — plain, audience-appropriate language; action-specific labels ("Save changes", not "OK"); no internal jargon.
 - **Progress & motion** — show progress toward goals; place key items first or last. Use optimistic UI only for reversible, high-confidence actions; roll back visibly on failure.
 - **Aesthetic-usability** — polish raises perceived trust, but never let it mask a real usability defect. Visual polish is `ui.md`'s remit.
+- **Motion & effect budget** — animate compositor-cheap properties (`transform`, `opacity`); heavy blur, live `filter` and stacked shadows or gradients cost frames on low-end phones. Judge the cost against the device, not the design mock. Whether an effect is *worth* its frames is the judgement; whether it respects reduced motion is not, and is flagged above.
+- **Legibility at small sizes** — type and contrast tuned at desktop scale that stop reading on a phone are a regression, not a style choice. Contrast itself is objective and flagged above; the size at which a treatment stops working is the judgement here.
 - **Mobile & touch** — set `<meta name="viewport" content="width=device-width, initial-scale=1">`; prefer fluid units and content-driven breakpoints over device-width guesses; respect `env(safe-area-inset-*)` on notched devices; keep primary actions in thumb reach; never gate essential function behind `:hover` alone (give a tap/focus path, layer hover with `@media (hover: hover)`); set correct `inputmode`/`autocomplete`, keep the focused field visible above the on-screen keyboard, and size form inputs ≥ 16px to avoid iOS auto-zoom.
 
 ## Do not flag
 
 - **Intentional density** in expert/pro tools (dashboards, IDEs, trading UIs) — dense by design, not a defect.
 - **Established conventions** the team has deliberately adopted.
-- **Visual aesthetics** — color, typography, animation, gradients — `ui.md` owns those.
+- **Visual aesthetics** — which colour, which typeface, which gradient, whether an animation is
+  *attractive* — `ui.md` owns those. Its **cost and its reduced-motion variant are flagged here**; only
+  the taste is out of scope.
 - **React-specific accessibility** already covered by `react.md`.
 - **Formatting/style** the formatter owns.
 - A **"max 7 items" limit** — Miller's number is short-term-memory span, not an on-screen cap; advise chunking, never a count.

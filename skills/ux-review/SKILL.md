@@ -5,13 +5,13 @@ description: Skill bundle for phil:ux-review command — UX usability & accessib
 
 # UX Review
 
-You are auditing UI against the usability and accessibility standard in `${CLAUDE_PLUGIN_ROOT}/rules/ux.md`. Your job is to find UX violations and produce a prioritized, actionable backlog. `ux.md` owns usability + accessibility; **aesthetics belong to `ui.md`** and React idioms to `react.md` — do not review against those here.
+You are auditing UI against the usability and accessibility standard in `${CLAUDE_PLUGIN_ROOT}/rules/ux.md`. Your job is to find UX violations and produce a prioritized, actionable backlog. `ux.md` owns usability + accessibility, and since 2026-08-31 the motion, effect-cost and small-scale legibility guardrails that used to sit in `ui.md`. **The taste questions belong to `ui.md`** — which colour, which typeface, whether an animation is attractive — and React idioms to `react.md`; do not review against those here. The split is by checkability, not by subject: an animation's reduced-motion variant and its frame cost are yours, its appeal is not.
 
 `ux.md` is the source of truth for what to flag and how to phrase the fix. It defines two tiers and a "Do not flag" section — mirror them:
 
 - **Always-flag** (objective defects) → severity **must-fix**
 - **Advisory** (judgment calls) → severity **consider**
-- **Do not flag** → never raise (intentional expert-tool density, aesthetics owned by `ui.md`, `react.md`'s a11y bullet, formatter's style, any "max 7 items" cap)
+- **Do not flag** → never raise (intentional expert-tool density, aesthetic *taste* owned by `ui.md` — not an effect's motion variant or frame cost, which are yours — `react.md`'s a11y bullet, formatter's style, any "max 7 items" cap)
 
 ## Parse the Argument
 
@@ -131,10 +131,10 @@ After writing the backlog, report to the user:
 
 ## What NOT to Flag
 
-- Anything in `ux.md`'s **"Do not flag"** section: intentional density in expert/pro tools, established conventions, aesthetics (owned by `ui.md`), React-specific a11y (owned by `react.md`), and formatter-owned style.
+- Anything in `ux.md`'s **"Do not flag"** section: intentional density in expert/pro tools, established conventions, aesthetic taste (owned by `ui.md`), React-specific a11y (owned by `react.md`), and formatter-owned style.
 - A **"max 7 items" (or equivalent) count cap** — `ux.md` explicitly rejects it; at most advise chunking.
 - **Inherently 2-D content** (tables, maps, diagrams, indented code) for reflow, and **orientation-locked views where the orientation is essential** — `ux.md` exempts both. "Mobile-first" is a workflow, not a defect; and don't cite WCAG for sub-44/48px targets (24px is the floor; 44/48px are HIG comfort guidance).
-- Visual/aesthetic preferences (color palettes, typography, animation) — those are `ui.md`'s remit, not a UX defect.
+- Visual/aesthetic *preferences* — which palette, which typeface, whether an animation is attractive — are `ui.md`'s remit, not a UX defect. **A missing reduced-motion variant, an effect that burns frames on a low-end phone, and type that stops reading at mobile scale are not preferences** and are in scope; see `ux.md`'s reduced-motion row and its motion/legibility advisories.
 - Hypothetical issues in code you don't fully understand — when uncertain, skip.
 
 **Be precise, not exhaustive.** A backlog with 8 well-identified, traceable findings beats one with 40 vague ones.

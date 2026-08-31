@@ -21,12 +21,18 @@ cites. `definitions.md` and `llm-inference.md` are declared exceptions — a glo
 reference, applied by nobody on purpose.
 
 **The check verifies a rule is *mentioned*, not that anything *applies* it, and that gap is real.**
-All four of `ui.md`'s mentions are exclusions — `ux.md` and `ux-review` name it to say aesthetics are
-*not* reviewed there — so it passes while nothing applies it. `continuous-delivery.md` hangs on a
-single pointer inside `modern-software-engineering.md`. Telling "go read this" from "do not apply this
-here" is prose judgement; a check that faked it would pass because the field is populated, which is
-the `devon-ui-developer` defect above wearing a different hat. Stated rather than hidden, on the
-pattern of the decision-request hook's header.
+`continuous-delivery.md` hangs on a single pointer inside `modern-software-engineering.md` and passes.
+Telling "go read this" from "do not apply this here" is prose judgement; a check that faked it would
+pass because the field is populated, which is the `devon-ui-developer` defect above wearing a different
+hat. Stated rather than hidden, on the pattern of the decision-request hook's header.
+
+**`ui.md` was that gap's live instance, and is now its worked example.** All eight of its mentions were
+exclusions — `ux.md` and `ux-review` naming it to say aesthetics are reviewed elsewhere, when there was
+no elsewhere. Resolved 2026-08-31 by splitting it **on checkability rather than on subject**: the
+reduced-motion variant, effect budget and small-scale legibility moved into `ux.md`, where a reviewer
+already looks; the taste questions stayed. So a rule that reads as build-time guidance is not a defect
+to wire up — it is a rule whose reviewable part has not been separated yet. `ui.md` now says so in its
+own header, which is better than an entry in a list nobody opens.
 
 ## Key Principles (always apply)
 
