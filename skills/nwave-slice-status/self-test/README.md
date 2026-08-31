@@ -41,12 +41,13 @@ plugin's established way to test a skill.
 | `12-blocked-step-surfaced/` | `.develop-progress.json` records a failure at the current step | reports `blocked`, never re-runs the failing test | `BLOCKED` |
 | `13-feature-fold-not-current-slice/` | five of six slices done; the sixth is current **and** not started | folds the feature state over every slice, never over the current one | `in progress` |
 | `14-empty-roster-folds-unknown/` | DISCUSS/DESIGN artifacts only — no `slices/`, no `roadmap.json` — and a **feature state** is asked for | the empty-roster row fires before the `done` test; a vacuous quantifier never folds to `done` | `unknown` |
+| `15-roadmap-without-slices-still-folds/` | four roadmap phases all recorded COMMIT/PASS; **no `slices/` at all**; a feature state is asked for | the guard tests both sources — either alone is a roster, so it does not fire | `done` |
 
-`01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `07`, `08`,
-`11` — the bug classes that ship silently because their output is indistinguishable from a correct
+`01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `07`, `08`, `11`,
+`14` — the bug classes that ship silently because their output is indistinguishable from a correct
 answer: a table built from the wrong source, missing knowledge reported as known absence, deferred
-work scheduled as next, fabricated structure, unreported drift, and a cross-check whose silence is
-mistaken for corroboration.
+work scheduled as next, fabricated structure, unreported drift, a cross-check whose silence is
+mistaken for corroboration, and a feature nobody decomposed folded to `done`.
 
 Fixture `04` carries the only actively harmful failure in the suite. Slices 01 and 02 are done, so
 positionally slice 03 *is* next — while its own file says "do NOT build in this cycle". Every other
@@ -56,17 +57,23 @@ Fixtures `03` and `07` pin the honesty of *absence* in both directions: a record
 empty (`unknown`) versus no record at all (`NO-STEP-RECORD`). Collapsing either into "not started" is
 a gate failure, because "not started" is a claim about the work, not about the evidence.
 
-Fixtures `13` and `14` pin the two ways the feature-level fold fails, and both are **scope** errors rather
-than comparison errors: `13` reads too little of the roster — the current slice instead of all of it — and
-`14` reads a roster that is not there, an empty set over which every test below the first is vacuously true.
-`14` is also the only fixture in this suite whose failure *mutates* something: `done` maps to the Done
-column, and a board with auto-close enabled turns that rendering into a closed issue.
+Fixtures `13`, `14` and `15` pin the feature-level fold, and the first two are **scope** errors rather than
+comparison errors: `13` reads too little of the roster — the current slice instead of all of it — and `14`
+reads a roster that is not there, an empty set over which the universals are vacuously true and the
+existentials vacuously false. `14` is also the only fixture in this suite whose failure *mutates* something:
+`done` maps to the Done column, and a board with auto-close enabled turns that rendering into a closed issue.
+
+`15` guards the guard. `14` alone cannot tell a correct conjunctive empty-roster test from a broken
+disjunctive one, because both answer `unknown` over an empty roster; only a layout where exactly one clause
+holds separates them. `15` is that layout, and its `expected.md` records which half of the conjunction this
+suite can pin by output and which half it cannot.
 
 ## Layout
 
 Each fixture is self-contained and manifest-driven — no sample repository is checked out. The
 `manifest.json` describes the situation: which artifacts exist, their relevant contents, the
-arguments the skill is invoked with, and the `expected_outcome`. The `expected.md` states the
+arguments the skill is invoked with, and the `expected_outcome` — or `expected_state`, for the two fold
+fixtures. The `expected.md` states the
 decision the skill must produce, the guard that produces it, the checkable assertions, and the
 gate-failure condition that blocks the skill change.
 

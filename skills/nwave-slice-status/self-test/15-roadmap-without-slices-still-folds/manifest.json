@@ -1,0 +1,15 @@
+{
+  "fixture": "15-roadmap-without-slices-still-folds",
+  "walking_skeleton": false,
+  "situation": "A small feature roadmapped directly and never given slice briefs: `roadmap.json` carries four phases, the execution log records COMMIT/PASS for every step of all four, and there is no `slices/` directory at all. A caller asks for the FEATURE-level state. The roster is the roadmap's phases, so it is NOT empty and the guard row must not fire — the honest answer is `done`, and a guard weakened to `no slice files` alone would answer `unknown`.",
+  "invocation": "/phil:nwave-slice-status export-csv --feature-state",
+  "artifacts": {
+    "docs/feature/export-csv/slices/": "ABSENT",
+    "docs/feature/export-csv/deliver/roadmap.json": {
+      "phases": "01 through 04, 2 to 3 steps each"
+    },
+    "docs/feature/export-csv/deliver/execution-log.json": "COMMIT/PASS for every step of all four phases"
+  },
+  "expected_state": "done",
+  "expected_guard": "the empty-roster row tests slice files AND roadmap phases; either source alone is a roster, so the guard does not fire and the `done` test is reached honestly"
+}

@@ -1,13 +1,14 @@
 {
   "fixture": "14-empty-roster-folds-unknown",
   "walking_skeleton": false,
-  "situation": "A feature that has completed DISCUSS and DESIGN and has never been decomposed: no `slices/` directory, no `roadmap.json`, no progress record of any kind. A caller asks for the FEATURE-level state in order to place the card in a board column. The roster is empty, so every test in the fold below the first is quantified over nothing and is vacuously true. This is fixture 07's layout with one flag added, which isolates the fold from the table.",
+  "situation": "A feature that has completed DISCUSS and DESIGN and has never been decomposed: no `slices/` directory, no `roadmap.json`, no progress record of any kind. A caller asks for the FEATURE-level state in order to place the card in a board column. The roster is empty, so every universal test in the fold below the first is vacuously true and every existential is vacuously false. This is fixture 07's layout with one flag added, which isolates the fold from the table.",
   "invocation": "/phil:nwave-slice-status notification-service --feature-state",
   "artifacts": {
     "docs/feature/notification-service/discuss/": "user-stories.md, feature-delta.md",
     "docs/feature/notification-service/design/": "architecture.md",
     "docs/feature/notification-service/deliver/": "ABSENT",
-    "docs/feature/notification-service/slices/": "ABSENT"
+    "docs/feature/notification-service/slices/": "ABSENT",
+    "git_log": "14 commits mentioning 'notification' on the current branch, several shaped like step commits"
   },
   "expected_state": "unknown",
   "expected_guard": "the empty-roster row fires before the `done` test; a fold whose tests are quantified over slices never answers `done` over no slices"

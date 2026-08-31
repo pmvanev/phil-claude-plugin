@@ -15,7 +15,7 @@ These fixtures feed the skill known project and forge states and assert each pro
 `BLOCK-DELIMITED` / `WAVE-SWAPPED` / `NO-ROWS-BEFORE-ROADMAP` / `DEFERRED-ROW-NOT-OMITTED` /
 `GENERATED-ROSTER` / `ONE-WAY` / `OWNER-DECIDES` / `ROSTER-ORDER-FOLLOWS-ROADMAP` /
 `ORDER-STATED-AS-PROVISIONAL` / `ROSTER-NOT-CHECKBOXES` / `ROUTING-LINE-DERIVED` /
-`PROJECTION-BOUNDED`).
+`PROJECTION-BOUNDED` / `NO-COLUMN-WRITTEN` / `WHOLE-BLOCK-REGENERATED`).
 
 This suite is the **acceptance + regression gate** for `skills/nwave-issue-board/SKILL.md`. Run it
 whenever that file changes, and whenever either skill it delegates to changes — `phil:issue-board`
@@ -28,7 +28,7 @@ and intent mirror `skills/nwave-slice-status/self-test/`.
 bare `#N` references, because slice numbers existed only once the slice issues had been created. Slices are
 no longer issues, so there is nothing to wait for and no second pass to get wrong.
 
-Retired rather than renumbered: renumbering would invalidate every reference to fixtures 11 through 17 in
+Retired rather than renumbered: renumbering would invalidate every reference to fixtures 11 through 19 in
 this file, in `SKILL.md`, and in the feature's slice briefs, to save one integer. The gap is a question, and
 this section is its answer.
 
@@ -52,6 +52,8 @@ this section is its answer.
 | `15-roster-not-checkboxes/` | two of four slices done, a slices-done count is wanted | keeps generated glyphs; manufactures no hand-ticked count, on either forge | `ROSTER-NOT-CHECKBOXES` |
 | `16-routing-line-from-wave-label/` | a labelled card, an unlabelled one, and **a wave the routing table does not cover** | derives the line, withholds it, or withholds it *and says the table does not cover this path* | `ROUTING-LINE-DERIVED` |
 | `17-projection-bounded-to-current-slice/` | 22 phases, 94 steps, slice 07 current | renders 22 roster rows plus 4 step rows; never all 94 | `PROJECTION-BOUNDED` |
+| `18-unknown-state-writes-no-column/` | the owner folds `unknown`; the board offers Todo, In Progress, Blocked, Done and nothing that means it | leaves the card's column untouched and says so in the block | `NO-COLUMN-WRITTEN` |
+| `19-block-has-one-writer/` | a slice boundary refreshes the position; the handoff feeding the reasoning has not changed | regenerates the whole block from both sources; edits neither region alone | `WHOLE-BLOCK-REGENERATED` |
 
 `01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `05`, `11`,
 `12` — the bug classes that ship silently because the published artifact is indistinguishable from a

@@ -153,19 +153,17 @@ over these files and, as of 2026-08-14, exposes a feature-level state on request
 state, on request* — `blocked` · `done` · `in progress` · `deferred` · `unknown` · `to do`, folded over
 **every** slice. Publish what it returns.
 
-**Or over none.** A feature that finished DISCUSS and was never decomposed has an empty roster, and the fold
-returns `unknown` for it — the guard row added 2026-08-31 for issue #28, because without it every test in
-that fold is vacuously true over an empty set and the honest answer arrives as `done`. Nothing changed on
-this side: the mapping below already refuses a column for `unknown`, and fixture `18` takes the state as its
-*input*, so it holds whatever produced it. Verified rather than assumed, and recorded here so the next reader
-does not re-derive it.
-
 A fold written here instead would be this skill's recurring defect in its exact historical form: a
 derivation invented by the skill that had just delegated derivation away. It was written here, once, on
 2026-08-14, and removed the same day — while the owner had no such fold at all, so the delegation pointed
 at nothing and the local copy was the only description available. Both halves are fixed; the shape is worth
 remembering, because a delegation to a capability that does not exist reads exactly like a delegation that
 works.
+
+**Or over none.** A feature never decomposed has an empty roster, and the owner's fold returns `unknown` for
+it — a guard added 2026-08-31. Nothing changed here: the mapping below already refuses a column for
+`unknown`, and fixture `18` takes the state as its *input*, so it holds whatever produced it. Checked, not
+assumed. The fold's owner is `phil:nwave-slice-status`; if the two disagree, it wins.
 
 **Six states, four columns — and two of them must never be coerced.** The fold returns `blocked`, `done`,
 `in progress`, `deferred`, `unknown` and `to do`; a board carries four:
@@ -436,7 +434,7 @@ does not is indistinguishable from current.
 
 ## Self-test (regression gate)
 
-`skills/nwave-issue-board/self-test/` holds sixteen fixtures that pin these behaviors: the
+`skills/nwave-issue-board/self-test/` holds golden fixtures that pin these behaviors: the
 end-to-end publish (01, walking skeleton), the `Notes` column surviving the trip to the forge (02),
 `unknown` published as `unknown` rather than `not started` (03), a human-set state outranking a
 regenerated one (04), hand-written prose surviving a refresh that must replace the whole description
@@ -450,7 +448,9 @@ guess — **or as final where no roadmap is coming** (14), a roster kept as gene
 converted to checkboxes to manufacture a progress bar (15), the `Work this with:` routing line derived
 from the wave label — emitted for a labelled card, withheld for one with no label, and **withheld with
 an explanation for a wave the table does not cover** (16), and the projection bounded to the roster plus
-the current slice's steps on a 22-phase feature (17).
+the current slice's steps on a 22-phase feature (17), an `unknown` feature state leaving the card's column
+untouched rather than coerced into one the board happens to offer (18), and the block regenerated entire
+from both its sources rather than one region edited in place (19).
 
 **Numbering has a gap at 10, and it is deliberate.** `10-gitlab-roster-second-pass` was retired on
 2026-08-14: it pinned a roster written in a second pass as bare `#N` references, because slice numbers

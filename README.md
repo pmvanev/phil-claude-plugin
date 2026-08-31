@@ -32,5 +32,9 @@ Everything loads automatically from the plugin directory — no setup step neede
 - **Rules** — architecture, best-simple-system-for-now, claude-md, coding, continuous-delivery, cpp, definitions, llm-inference, modern-software-engineering, python, react, refactoring, refactoring-catalog, technical-communication, testing, typescript, ui, ux, writing
 - **Skills** — `/phil:adversarial-review`, `/phil:ai-eos`, `/phil:board-setup`, `/phil:claude-md`, `/phil:clean-comments`, `/phil:edd`, `/phil:eos`, `/phil:extract-method`, `/phil:groom-issues`, `/phil:groom-fix`, `/phil:groom-set`, `/phil:groom-ask`, `/phil:handoff`, `/phil:rank-issues`, `/phil:red-team-prose`, `/phil:redesign-tests`, `/phil:refactor`, `/phil:refactor-loop`, `/phil:refactor-tests`, `/phil:resume`, `/phil:stack`, `/phil:review-code`, `/phil:nwave-slice-status`, `/phil:spirit-walk`, `/phil:ux-review`, `/phil:work`
 - **Knowledge skills** (auto-load on relevance, no command) — `issue-board` (driving GitLab/GitHub issue boards with `glab` and `gh`), `nwave-issue-board` (mapping an nWave feature, slice, and step onto that board)
-- **Hooks** — `PreToolUse` test-file write-block for the refactor loop (no-op unless a run is active)
+- **Hooks** — `PreToolUse` test-file write-block for the refactor loop (no-op unless a run is active),
+  and a `PreToolUse` check on `AskUserQuestion` that refuses a decision request over 200 words per
+  question. The word limit applies in **every** project; the plain-language rule (no file paths or
+  bracketed identifiers in the question) applies only where a project opts in with
+  `decision-request: strict` in its `CLAUDE.md`.
 - **CLAUDE.md** — global development principles

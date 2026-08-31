@@ -1,6 +1,6 @@
 ---
 name: nwave-slice-status
-description: Use when the user asks where an nWave feature stands — "how many steps are in this slice", "which ones are done", "which one are we on", "what's next", "is slice 03 next", "what was the point of slice 02". Renders a read-only step table from the feature's own artifacts and stops. Prefer over `/nw-continue`, which computes the same thing and then launches the next wave, and over `/nw-buddy`, which answers in prose — this produces a table and starts nothing.
+description: Use when the user asks where an nWave feature stands — "how many steps are in this slice", "which ones are done", "which one are we on", "what's next", "is slice 03 next", "what was the point of slice 02". Renders a read-only step table from the feature's own artifacts and stops. Prefer over `/nw-continue`, which computes the same thing and then launches the next wave, and over `/nw-buddy`, which answers in prose — this produces a table and starts nothing. Also folds a feature-level state over every slice on request — "what state is this feature in", "which column does this card belong in" — for a caller placing the card on a board.
 ---
 
 # Slice Status
@@ -185,7 +185,8 @@ for one**, and derive it by this fold — in this order, because the order is th
 | Any slice is `unknown`, and none is `done` or `current` | `unknown` |
 | Otherwise — every slice `not started` or `next` | `to do` |
 
-**Order matters most at the fourth row, and that row is the whole reason this fold is written down.** A
+**Order matters most at the `in progress` row, and that row is the whole reason this fold is written
+down.** A
 feature with five of six slices `done` and the sixth `not started` must fold to `in progress`. Reading only
 the current slice gives `to do`, which reports nearly-finished work as untouched — the same lie as
 publishing `unknown` as `not started`, one level up. Any caller tempted to look at the current slice alone
@@ -196,8 +197,8 @@ unrecorded is in progress, not unknown; the unrecorded slice is a `Notes` entry,
 feature. But where nothing is known, `unknown` is the answer and **never `to do`** — the cardinal rule of
 this skill applied to the fold.
 
-**The first row is the one place `unknown` outranks everything, and it is there because every test below
-it is vacuous over an empty roster.** A feature that finished DISCUSS and was never decomposed has no slice
+**The empty-roster row is the one place `unknown` outranks everything, and it is there because every test
+below it is vacuous over an empty roster.** A feature that finished DISCUSS and was never decomposed has no slice
 files and no roadmap phases, so *"every slice that is not `deferred` is `done`"* is true of nothing — a
 literal reading folds a feature nobody has roadmapped to `done`. That is the costliest cell in this table to
 get wrong: `phil:nwave-issue-board` maps `done` to the Done column, and on a board with auto-close enabled a
@@ -205,6 +206,12 @@ rendering becomes a closed issue. `unknown` is right here for the same reason it
 empty roster is a fact about the record, not about the work. The *table* path already degrades correctly
 (*Degrade honestly*, fixture 07); only the fold had the hole, because its tests are quantified over slices
 and a quantifier does not object to an empty set.
+
+**Render the state as one line, with the count beside it** — `Feature: <id> — <state> · N of M slices
+done · current slice NN` — because a state and a count answer different questions and a caller placing a
+card needs both. **The empty roster is the one case that carries no count:** `0 of 0 done` reads as
+completion, which is the same lie arithmetically. Say what is missing there and name the command that
+fixes it.
 
 This state is a derivation, so it belongs here rather than in whatever publishes it. Two derivations over
 the same files drift apart, and a publisher that folds locally is inventing a status while claiming to
@@ -236,7 +243,7 @@ The user asked where they are; they can see it.
 
 ## Self-test (regression gate)
 
-`skills/nwave-slice-status/self-test/` holds fourteen golden fixtures that pin these behaviors: the table rendered
+`skills/nwave-slice-status/self-test/` holds golden fixtures that pin these behaviors: the table rendered
 from agreeing sources (01, walking skeleton), a narrative `progress.md` whose fixture and findings
 tables must never be read as step records (02), `unknown` reported instead of `not started` when the
 record is empty (03), disagreeing sources named rather than resolved and a deferred slice never
@@ -265,5 +272,10 @@ answers `to do`.
 
 Fixture `14` pins that same fold's other scope error, and it is the only fixture here whose failure
 **mutates** rather than misinforms. Over an empty roster — DISCUSS finished, never decomposed — every test
-below the first is vacuously true, so an unguarded fold answers `done`, `done` maps to the Done column, and
+the universals below it are vacuously true, so an unguarded fold answers `done`, `done` maps to the Done column, and
 auto-close turns the rendering into a closed issue. Added 2026-08-31 with the guard row it tests.
+
+Fixture `15` tests the guard's *conjunction* — roadmap phases with no `slices/` directory at all, where
+either source alone is a roster and the guard must stay quiet. It exists because `14` cannot fail a guard
+weakened to one clause: both answer `unknown` over an empty roster, so `14` would stay green while the
+fold began publishing `unknown` for finished features.
