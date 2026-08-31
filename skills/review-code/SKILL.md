@@ -9,6 +9,13 @@ You are reviewing code against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/cod
 
 Use `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md` as your dictionary of named refactorings.
 
+**Where a finding is about the shape of the system rather than the shape of the code**, also read
+`${CLAUDE_PLUGIN_ROOT}/rules/best-simple-system-for-now.md` and
+`${CLAUDE_PLUGIN_ROOT}/rules/modern-software-engineering.md`. Both are written to complement the four
+above rather than restate them — BSSN owns the four-word breakdown and the economic case, Farley owns
+the empirical spine and the two measures. Read them when a finding needs that vocabulary, not on every
+run.
+
 **Language idioms.** For each file, also load the matching language rules file and check against it: `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `${CLAUDE_PLUGIN_ROOT}/rules/python.md` (`.py`), `${CLAUDE_PLUGIN_ROOT}/rules/typescript.md` (`.ts/.tsx`), `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (`.tsx/.jsx`). A `.tsx` file is checked against both TypeScript and React rules. These files use path-scoped frontmatter, so only load the ones whose paths match the file under review.
 
 ## Parse the Argument

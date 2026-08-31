@@ -33,6 +33,7 @@ when neither carries one.
 | `admin-field-triage` | That feature; all slices. |
 | `03` or `slice 03` | Slice 03 of the resolved feature. |
 | `admin-field-triage 03` | Both. |
+| `--feature-state` | Emit the feature-level state instead of the tables — see *The feature-level state, on request*. Combines with a feature id; a slice number alongside it is a contradiction, because the fold always reads the whole roster. Say so and ask. |
 | No `docs/feature/` at all | Say so and stop. Suggest `/nw-new`. Do not search elsewhere. |
 
 **"Slice" means one of two things, and you must detect which.** Do not assume:
@@ -173,7 +174,9 @@ what the reader sees.
 
 A count is not a state. `5 of 9 done` says how much is finished; it does not say what the feature *is*,
 which is what a caller placing it in a board column needs. **Emit a feature-level state only when asked
-for one**, and derive it by this fold — in this order, because the order is the content:
+for one** — by the `--feature-state` flag, or by a question that plainly asks for one (*"what state is this
+feature in"*, *"which column does this card belong in"*) — and derive it by this fold, in this order,
+because the order is the content:
 
 | Test, applied in order | State |
 |---|---|

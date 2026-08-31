@@ -1,6 +1,32 @@
 # Global Development Standards
 
-Development and writing standards live in `${CLAUDE_PLUGIN_ROOT}/rules/`. Rules load automatically based on the files you touch — no manual reading required.
+Development and writing standards live in `${CLAUDE_PLUGIN_ROOT}/rules/`. **A skill, command or agent that
+needs one names it and reads it.** Nothing preloads them.
+
+This used to claim they load themselves from the files you touch. **They never have.** Measured
+2026-08-31 against the running Claude Code 2.1.252: the plugin manifest's component list is
+`commands, agents, skills, hooks, outputStyles, themes, mcpServers, lspServers, experimental` — no
+`rules` — and every call site of the rules-directory loader passes `~/.claude/rules`, the managed
+directory, or `<projectRoot>/.claude/rules`. **None passes a plugin root.** This repo has no
+`.claude/rules` either, so the mechanism has never fired here.
+
+**Explicit loading is the design, not a workaround.** Auto-load would push a whole standard into
+context on the chance a file matched; naming one costs nothing until it is needed. The `paths:`
+frontmatter each rule carries is not dead — it takes effect for anyone who copies these files into
+their own `.claude/rules/`, which is the only place that key is read.
+
+**So a rule nothing names is inert**, and `scripts/check-rule-reachability.py` fails the build on one.
+Reachability is transitive: a rule named by a skill is reachable, and so is a rule that reachable rule
+cites. `definitions.md` and `llm-inference.md` are declared exceptions — a glossary and a manual
+reference, applied by nobody on purpose.
+
+**The check verifies a rule is *mentioned*, not that anything *applies* it, and that gap is real.**
+All four of `ui.md`'s mentions are exclusions — `ux.md` and `ux-review` name it to say aesthetics are
+*not* reviewed there — so it passes while nothing applies it. `continuous-delivery.md` hangs on a
+single pointer inside `modern-software-engineering.md`. Telling "go read this" from "do not apply this
+here" is prose judgement; a check that faked it would pass because the field is populated, which is
+the `devon-ui-developer` defect above wearing a different hat. Stated rather than hidden, on the
+pattern of the decision-request hook's header.
 
 ## Key Principles (always apply)
 

@@ -5,7 +5,9 @@ description: Skill bundle for phil:claude-md command — CLAUDE.md review and re
 
 # CLAUDE.md Reviewer
 
-You are revising a project's CLAUDE.md file using the best practices from the `claude-md` rule. Every edit tightens the file without losing essential instructions.
+You are revising a project's CLAUDE.md file using the best practices in
+`${CLAUDE_PLUGIN_ROOT}/rules/claude-md.md`. **Read it first** — it is the standard this skill applies, and
+nothing loads it for you. Every edit tightens the file without losing essential instructions.
 
 ## Parse the Argument
 
