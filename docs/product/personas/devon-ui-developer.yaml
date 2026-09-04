@@ -21,14 +21,14 @@ frustrations:
   - The plugin owned visual aesthetics (`ui.md`) and nothing owned usability or accessibility
   - Defects that are objective and cheap to fix — missing states, placeholder-as-label,
     color-only status, unlabeled controls, sub-24px targets — surfaced in QA or production
-  - Mobile web had no owner beyond a single touch-target line: reflow at 320px, 400% zoom,
-    orientation lock, and gesture-only interactions went unflagged
+  - "Mobile web had no owner beyond a single touch-target line: reflow at 320px, 400% zoom,
+    orientation lock, and gesture-only interactions went unflagged"
   - A rule that nags on every judgment call would be noise on a dense expert tool, so silence
     and over-flagging are both failures
 mental_model:
   - "Aesthetics and usability are different questions — one is taste, the other is checkable"
   - "If it is objective, a tool should catch it in-flow; if it is a judgment call, tell me once"
-  - "It works on my desktop" is not evidence about the device the user is holding
+  - '"It works on my desktop" is not evidence about the device the user is holding'
 vocabulary:
   - WCAG, Nielsen heuristics, a11y, reflow, touch target, focus state, contrast ratio,
     single-pointer alternative, motion actuation, orientation lock

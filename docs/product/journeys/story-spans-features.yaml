@@ -74,7 +74,7 @@ emotional_arc: >
 
 shared_artifacts:
   - name: story_membership
-    source: docs/feature/<id>/feature-delta.md header line — `Story: <slug> · position NN`
+    source: "docs/feature/<id>/feature-delta.md header line — `Story: <slug> · position NN`"
     consumed_by: [read-story-position]
     # ONE AUTHORITY PER FACT: each feature declares its OWN membership. No story file, no forge read-back.
   - name: story_state (fold over features)

@@ -18,7 +18,8 @@ These fixtures feed the skill known project and forge states and assert each pro
 `PROJECTION-BOUNDED` / `NO-COLUMN-WRITTEN` / `WHOLE-BLOCK-REGENERATED` / `STORY-BLOCK-BOUNDED` / `FEATURE-TIER-UNCHANGED` /
 `INDENTED-TREE-REFUSED` / `UNRENDERABLE-STATE-FAILS` / `CONTESTED-CURRENT-NOT-RESOLVED` /
 `ONE-LABEL-CURRENT-FEATURE` / `BACKWARDS-STEP-EXPLAINED` / `NO-ROUTING-ROW-STATED` /
-`TWO-IN-FLIGHT-VISIBLE` / `CURRENT-FEATURE-FROM-OWNER`).
+`TWO-IN-FLIGHT-VISIBLE` / `CURRENT-FEATURE-FROM-OWNER` / `PROSE-STANDARD-APPLIED` /
+`DERIVED-CELLS-UNTOUCHED`).
 
 This suite is the **acceptance + regression gate** for `skills/nwave-issue-board/SKILL.md`. Run it
 whenever that file changes, and whenever either skill it delegates to changes — `phil:issue-board`
@@ -67,6 +68,8 @@ this section is its answer.
 | `27-story-no-routing-row/` | this repo's own story — both members past DISCUSS, on a path the table has no row for | emits no routing line **and says the table does not cover it**; never names a command for the story | `NO-ROUTING-ROW-STATED` |
 | `28-two-in-flight-both-visible/` | two members `in progress` at once — a defect in the card | renders both `▶` rows with `⚠ also in flight`, rather than hiding or refusing the defect | `TWO-IN-FLIGHT-VISIBLE` |
 | `29-current-feature-not-first-in-flight/` | `01 to do · 02 in progress · 03 in progress` — the **discriminating** roster | takes the current feature from the owner (01), not from a local "first in-flight" rule (02); 28's roster makes both answer the same and so pins neither | `CURRENT-FEATURE-FROM-OWNER` |
+| `30-composed-description-under-standard/` | a slice brief with enumerable facts and **no candidate text** — the block must compose the description | composes against `rules/writing.md`: every fact present, no expletive construction, no nominalisation, active voice. **No word count is asserted** | `PROSE-STANDARD-APPLIED` |
+| `31-derived-cells-not-edited/` | one block holding all three kinds of text — composed, rendered, and a `Notes` sentence this skill writes itself | applies the standard to what it composes, leaves rendered values byte-unchanged, and treats its own `Notes` note as composed | `DERIVED-CELLS-UNTOUCHED` |
 
 `01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `05`, `11`,
 `12` — the bug classes that ship silently because the published artifact is indistinguishable from a
@@ -99,7 +102,12 @@ about the evidence, not about the work.
 
 Each fixture is self-contained and manifest-driven — no sample repository is checked out and no forge
 is contacted. The `manifest.json` describes the situation: the local artifacts, the existing forge
-state, the invocation, and the `expected_outcome`. The `expected.md` states the decision the skill
+state, the invocation, and the `expected_outcome`. Some fixtures carry a payload key beside those —
+`owner_returns` for what `phil:nwave-slice-status` hands over (23, 24, 29, 31), `cards` for existing
+forge items (24), and `artifacts.<path>.enumerable_facts` for the facts a composed description must
+cover (30, 31). **A fixture never supplies candidate prose to choose between**: selecting the shorter
+of two given strings is not composing, and a suite that tested selection would be satisfied by the very
+word ceiling the skill refuses. The `expected.md` states the decision the skill
 must produce, the guard that produces it, the checkable assertions, and the gate-failure condition
 that blocks the skill change.
 
@@ -119,3 +127,29 @@ Three assertions apply to every fixture and are not repeated in each file:
 3. **Every forge command names its target** with `-R`, per `phil:issue-board`.
 
 Any fixture that violates one is a gate failure regardless of whether its table is correct.
+
+## Fixtures 30 and 31 — the prose standard, added 2026-09-04
+
+Added with the prose-standard section (issue #40, feature `board-prose-standard`, slice 01). They pin the
+gap that *Generate into a delimited block* leaves open: the bound is stated as a **purpose** — the
+thirty-second read — and enforced as a **count**, so nothing in the skill detects a padded row.
+
+**They exist to kill three degenerate mechanisms, and each dies on a named assertion:**
+
+| Mechanism | Dies on |
+|---|---|
+| Publish the shorter of two candidates | **30** — no candidate text is supplied, so it composes nothing and fails fact coverage |
+| Leave every sentence alone | **30** assertions 3-5, and **31** assertion 5 |
+| Run a pass over the whole block | **31** assertions 1-3, 6 and 7 — rendered values become a second author |
+
+Only the scope boundary the skill states passes all three: **where this skill composes the words the
+standard applies; where it renders words another owner composed, they pass through untouched.**
+
+**The discriminator is who composed the words, never which column they sit in.** Fixture 31 makes that
+concrete with `Notes`: row 03's note came from the owner and is rendered intact, while the note recording
+that a hand-set state was replaced is composed *here* and is therefore in scope. An earlier draft of this
+fixture exempted `Notes` wholesale and was wrong.
+
+**Neither fixture asserts a word count**, because the standard is eleven principles and concision is one.
+A count would pin that one and license the other ten to fail. **The stated cost:** these two are the only
+things pinning the section, which is why they must test composition rather than length.

@@ -71,6 +71,21 @@ duplicate-authority defect this repo has recorded twice.
   regenerates it whole; a standard the writer applies to sentences it composes adds no second writer.
   A standard applied to derived cells would — there is nothing to edit in a glyph, so an editing pass
   over them could only be a second author.
+
+  **CORRECTED 2026-09-04, during slice 01, by `plugin-dev:skill-reviewer` finding C1.** As first written,
+  D4's in-list put the projected `Why` / `Next` / `Stack` inside **`phil:nwave-issue-board`'s** scope.
+  That was wrong, and wrong against this decision's own logic. `phil:session-handoff` step 9 **hands**
+  that prose to the board skill with its capture timestamp; the board skill *renders* it. So it is
+  composed at `session-handoff` — in scope there, which is **slice 03**, exactly as the surface table
+  below already said — and rendered at `nwave-issue-board`, out of scope there. Editing it in the block
+  would make the block a non-deterministic function of an unchanged snapshot published under that
+  snapshot's own timestamp, which fixture 19 gate-fails.
+
+  **The discriminator is who composed the words, never which column or section they sit in.** Stated
+  because the first draft got this wrong by reasoning about *where the text appears*. The correction cuts
+  both ways and adds a surface: the `Notes` sentence `nwave-issue-board` composes itself when recording
+  that a hand-set state was replaced **is** in scope, though `Notes` is otherwise the owner's. Fixture 31
+  pins both halves.
 - **[D5]** **Brevity is a PRINCIPLE. No countable ceiling.** *(Decided 2026-09-04.)* The
   200-word hard ceiling of `answer-a-tools-question-without-decoding-it` C3 is **deliberately not
   copied**, and the discriminator is what the number would protect. There, an unbounded ask is the
@@ -153,7 +168,7 @@ in flight is disturbed.
 
 | Port | Surface | Change |
 |---|---|---|
-| `phil:nwave-issue-board` | Skill | Written sentences name `phil:eos`; [D4]'s in/out boundary stated |
+| `phil:nwave-issue-board` | Skill | Composed sentences name `rules/writing.md`; [D4]'s in/out boundary stated as a refusal, plus the who-composed-the-words discriminator |
 | `phil:issue-board` | Skill | The `## Chain` clause names the standard; `self-test/` created |
 | `phil:session-handoff` | Skill | Projected prose names the standard |
 | `/phil:groom-ask`, `/phil:groom-set` | Commands + `groom-issues` skill | Elicited fields and set-level comments name it; [D6] written here |
@@ -275,7 +290,7 @@ value — the slice composition gate is satisfied and is not being routed around
 |---|---|---|---|
 | KPI-1 | Prose-generating board surfaces naming the standard | 0 of 6 → **6 of 6** | The grep under *The measurement, re-taken*, re-run |
 | KPI-2 | `skills/issue-board/self-test/` entries | 0 → **≥ 1** | `ls` |
-| KPI-3 | Total words across issue #36's seven roster descriptions, re-rendered under the standard | **≤ current**, and the delta reported either way | `wc -w` on before and after |
+| KPI-3 | Total words across issue #36's seven roster descriptions, re-rendered under the standard | **≤ current**, and the delta reported either way | `wc -w` before and after — **measured in slice 01, then found INVALID for the hypothesis; see that outcome** |
 | KPI-4 | Generated surfaces whose output got **longer** | **0** | Word count per surface, before and after |
 | KPI-5 | Structural items in `groom-issues`' *well-formed issue* scan | **4, byte-unchanged** | `diff` against 0.82.0 |
 
@@ -351,3 +366,83 @@ judging-versus-generating distinction will be written where the next author meet
 None. No DISCOVER or DIVERGE wave ran for this card, and no prior feature's assumption is amended — the
 four structural items and the row-count bound both stand, and this feature measures what neither
 measured. Recorded explicitly so the absence reads as checked rather than skipped.
+
+---
+
+## Outcome — slice 01, 2026-09-04
+
+**Build path:** `nw-discuss` produced the brief (committed `87b8c5f`);
+`plugin-dev:skill-development` consulted **before** editing the skill; `plugin-dev:skill-reviewer` and
+`plugin-dev:plugin-validator` both run over the result. The reviewer returned **3 critical + 6 major**
+and its criticals were correct; what shipped is the post-review state.
+
+### What shipped
+
+`skills/nwave-issue-board/SKILL.md` gains *Compose the block's own sentences against the clarity
+standard*: the citation, the in/out lists written as a refusal, the who-composed-the-words
+discriminator, the one-writer compatibility argument, and [D6]. Fixtures 30 and 31 added. Version
+0.82.0 → 0.83.0.
+
+### KPI-3 — measured, then found invalid for the hypothesis
+
+**The number: 150 → 142 words across the seven descriptions. −8 words, −5.3%. Three of seven rows
+unchanged. Zero rows longer (KPI-4 met at this surface).**
+
+**That neither confirms nor disproves [D2], and the reason is that the instrument measures the wrong
+thing.** Three faults, in ascending order of how badly they break it:
+
+1. **A word count measures one of the standard's eleven principles.** `rules/writing.md` asks for active
+   voice, positive form, definite and concrete language, parallel structure for coordinate ideas, related
+   words kept together, and the emphatic word last. Only *omit needless words* shows up in `wc -w`. The
+   three "unchanged" rows already satisfied all eleven — they are **conformant**, not evidence of a null
+   effect, and a count cannot tell those two apart.
+2. **The baseline is near-optimal.** Those seven were composed by a careful session under an explicit
+   *"not overly verbose or mentally taxing"* requirement — the hardest available case for a tightening
+   standard, and not representative of the failure [D2] is meant to prevent.
+3. **The measurer was not independent.** [D2] claims that *a future session reading the citation composes
+   better text*. What was measured is whether the session that had just written the citation could tighten
+   seven sentences it was actively grading. Those are different claims and only the first is [D2].
+
+**Verdict: [D2] is UNPROVEN, not confirmed and not disproven.** Recorded that way because slice 01's AC2
+makes silence the failure it exists to prevent, and "5.3% shorter" reported as a pass would be the same
+failure wearing a number.
+
+**KPI-3 is therefore demoted from evidence to context, and fixture 30 becomes the gate.** A fixture is
+independent of who composes, runs on every change, and — after the reviewer's C2 — supplies a brief with
+**no candidate text**, so it tests composition rather than selection. This is what [D2]'s recorded cost
+predicted in as many words: *"[D9]'s fixture is what separates this instance from those two."* It arrived
+as a measurement rather than a worry.
+
+**A valid future instrument, named so it is not re-improvised:** compose descriptions for one feature
+with the citation present and absent, in sessions that do not know they are being compared. This repo
+cannot run that in one session, which is itself worth knowing before another KPI is written this way.
+
+### What was deliberately not done
+
+- **Issue #36's block was not overwritten.** The card is closed and its block is the record of how that
+  feature went. Re-rendering into it would have destroyed the "before" side of the only measurement the
+  slice had. The seven composed variants live here instead.
+- **AC5 is UNVERIFIED, and this is the honest state.** `nwave-issue-board`'s 30 fixtures have **no
+  automated driver** — `tests/test_self_test_fixtures.py` covers `refactor-tests` and `refactor/`, and no
+  test in the 510-case suite reads this suite. So the green run says nothing about AC5. **Fixture 23 was
+  hand-driven** because the one edit to pre-existing normative text was a dedupe of the glyph rule, which
+  23 is the fixture for; it passes, with every clause it pins preserved. The other 28 were not re-driven.
+- **`SKILL.md` was not split into `references/`.** It is now 8,744 words against an authoring target of
+  1,500-2,000 and a stated maximum of 5,000, with no `references/` directory — the reviewer's M5, and its
+  sharpest form is that the file naming a concision standard is 4.4× the target. Route 3: a card, not a
+  fold-back. The one part fixed here is the defect that would have been quoted back: a near-verbatim
+  restatement of the glyph rule two paragraphs apart, now deduped.
+
+### Two findings outside this feature, both raised by the validator
+
+- **Three unparseable YAML files in `docs/product/`** — `journeys/story-spans-features.yaml` and two
+  instances in `personas/devon-ui-developer.yaml`, all the same defect class: an unquoted `: ` or a
+  leading `"` in a plain scalar. Fixed here because they are two-line quoting fixes on SSOT files.
+  **`scripts/check-product-ssot.py` reported `OK ... all resolve` while two of the files it counted could
+  not be parsed** — it is regex-based by a stated design decision. Whether to add a `yaml.safe_load` pass
+  is a real decision, because it costs that script its declared dependency-free property; it is not taken
+  here. **The defect has now been found three times** (twice in `devon-ui-developer`, once in the
+  journey), plus once self-inflicted and caught during this wave, which is past `CLAUDE.md`'s
+  found-twice threshold.
+- **A parser hides its successors.** Fixing the first YAML error revealed a second in the same file, then
+  a third. One reported failure was three defects.

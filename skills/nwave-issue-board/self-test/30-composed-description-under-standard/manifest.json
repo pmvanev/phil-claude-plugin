@@ -1,0 +1,22 @@
+{
+  "fixture": "30-composed-description-under-standard",
+  "situation": "THE MOTIVATING CASE, from this repo's own board, and it was a COMPOSITION failure. Slice 01 of `story-spans-features` hand-wrote seven two-line roster descriptions onto issue #36 with no prose standard consulted -- under a stated requirement of 'not overly verbose or mentally taxing'. This fixture therefore supplies the slice brief and NO candidate text. The skill must compose the description itself, which is the act that shipped the defect. A fixture offering two variants to choose between would test selection, and selection is passed by 'publish the shorter string' -- the word ceiling D5 refused, arriving as a mechanism.",
+  "invocation": "refresh the board for story-spans-features",
+  "artifacts": {
+    "slices/slice-04-wave-label-under-mixed-waves.md": {
+      "goal": "settle what one single-valued wave label says when a story's member features are in different waves",
+      "learning_hypothesis": "disproves the single-label design if no rule can name one wave for mixed waves; includes the case where the honest answer is that the card itself is wrong",
+      "enumerable_facts": [
+        "the label is single-valued",
+        "the members are in different (mixed) waves",
+        "one of the reachable answers is that the card is wrong"
+      ]
+    }
+  },
+  "forge_state": {
+    "host": "github",
+    "block_present": true
+  },
+  "expected_outcome": "PROSE-STANDARD-APPLIED",
+  "expected_guard": "no candidate text is supplied and no word count is asserted, so neither 'pick the shorter of two strings' nor 'stay under N words' can satisfy this fixture. The assertions are PROPERTIES of composed prose -- fact coverage plus named defects -- which is checkable without a ceiling."
+}

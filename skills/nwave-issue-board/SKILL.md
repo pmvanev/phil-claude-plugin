@@ -126,10 +126,9 @@ already carries: every value the owner can return has a glyph.** A value with no
 never degrade to `·` — that is the unknown-published-as-not-started defect at feature scale, and it is
 worse here because a feature row stands for a whole feature.
 
-**Every value it can return has a glyph, and that is the property to preserve.** A value added there needs
-one added here, or the generator faces a status it cannot render and will downgrade it — and downgrading
-`blocked` or `unknown` to `·` is the *unknown-published-as-not-started* defect wearing a new costume. Never
-invent a glyph for a value the owner does not define; never render a value by omitting its row.
+**A value added to the owner's vocabulary needs a glyph added here**, or the generator faces a status it
+cannot render. Never invent a glyph for a value the owner does not define; never render a value by
+omitting its row.
 
 **Every roster row carries a two-line description of what that slice does** — not just its name. The
 name is a label the owner recognises; a reader inheriting the feature needs to know what the slice
@@ -140,6 +139,59 @@ position inside thirty seconds against a roster carrying those descriptions.
 delta, the slice briefs, the journey — give each a clause saying what it holds. Observed in the same
 read: *"I like that the artifacts are all linked **and summarized**."* Six bare URLs would have consumed
 the whole thirty-second budget the projection exists to fit inside.
+
+### Compose the block's own sentences against the clarity standard
+
+**The standard is `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`. Name it and compose against it; do not run an
+editor as a step.** `phil:eos` applies these same principles when a human invokes it, and is deliberately
+**not** a stage in this skill's flow — a pass over the block is what the one-writer rule below forbids.
+
+**The bound cannot see this.** *Generate into a delimited block* states the bound **as its purpose** —
+the thirty-second read — and this skill enforces it **as a count**, rows enumerated versus rows linked.
+That gap is the whole reason this section exists: a block can satisfy every count the skill can check and
+still spend the entire budget the bound was written to protect, because the budget is spent on words.
+**Nothing here detects a padded row.** Measured 2026-09-04: twelve board-family files named no prose
+standard, while `writing.md` passed its reachability check on five other surfaces' citations.
+
+**The standard is eleven principles, and concision is one of them.** Active voice, positive form,
+definite and concrete language, parallel structure for coordinate ideas, and the emphatic word last are
+**invisible to a word count**. A row can improve materially with zero words removed. Read this section as
+*compose well*, never as *compose short*.
+
+**Composed sentences only — never a rendered value.** In: the two-line descriptions; the summarising
+clause on each linked artifact; the `Notes` sentence this skill writes itself when it records that a
+hand-set state was replaced and what it said (*Publishing does not overwrite what it cannot know*); the
+stage-1 sentence about what granularity will exist; the no-routing-row explanation; and the statement
+that a column was left untouched.
+
+Out: glyphs, header lines, timestamps, table scaffolding, status words returned by
+`phil:nwave-slice-status`, `Notes` text that owner supplied, the verbatim-fixed `Wave note:` clause — and
+**the projected `Why` / `Next` / `Stack`**. That last one is the trap: it reads like prose because it is
+prose, but `phil:session-handoff` step 9 *hands* it here with its capture timestamp. This skill renders
+it. Editing it would make the block a non-deterministic function of an unchanged snapshot, published
+under that snapshot's own timestamp — the projection asserting a fidelity it does not have, which
+fixture 19 gate-fails.
+
+**The discriminator, for any sentence neither list names:** where this skill composes the words, the
+standard applies; where it renders words another owner composed, they pass through untouched.
+Enumerations lag as the block grows; the discriminator does not. *Silence in a rule is a gap, not a
+permission* — so apply the discriminator rather than reading an absent line as an exemption.
+
+**That boundary is what makes a prose standard compatible with one writer.** The block regenerates whole
+from a single writer, and a standard that writer applies to its **own** sentences adds no second author.
+There is nothing to edit in a glyph, so a pass over one could only be a second author — which *Project
+the reasoning, not just the position* forbids outright.
+
+**Judging is taste; generating is not.** Nothing here licenses flagging prose a human wrote. Applying a
+house standard to text this skill composes itself polices nobody. (`phil:groom-issues` refuses to rewrite
+a rule that passed, under *A rule that passed is never rewritten*; the taste/style framing is stated
+there by `board-prose-standard` slice 03, not yet.)
+
+**Brevity is a principle here, not a count.** No word ceiling is set, and fixtures 30 and 31 assert none
+— a fixture counting words would pin one of the eleven principles and license nine failures. **The cost,
+stated because it is real:** those two fixtures are the only things pinning this section, so they must
+test composition rather than length. Fixture 30 supplies a brief and no candidate text for exactly that
+reason.
 
 ## Wave is a label on the feature card
 
@@ -681,6 +733,12 @@ an explanation for a wave the table does not cover** (16), and the projection bo
 the current slice's steps on a 22-phase feature (17), an `unknown` feature state leaving the card's column
 untouched rather than coerced into one the board happens to offer (18), and the block regenerated entire
 from both its sources rather than one region edited in place (19).
+
+**Two were added 2026-09-04 with the prose standard**: a composed roster description held to
+`rules/writing.md` while a padded variant carrying the same facts **gate-fails** (30), and the standard
+refused entry to the derived cells only one writer may render (31). They are adjacent on purpose and
+resolve opposite ways — 30 fails a block whose sentences went unedited, 31 fails one whose glyphs did
+not. A rule that gets one right by a mechanism that gets the other wrong is a gate failure.
 
 **Numbering has a gap at 10, and it is deliberate.** `10-gitlab-roster-second-pass` was retired on
 2026-08-14: it pinned a roster written in a second pass as bare `#N` references, because slice numbers

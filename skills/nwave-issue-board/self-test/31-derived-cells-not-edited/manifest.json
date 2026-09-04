@@ -1,0 +1,23 @@
+{
+  "fixture": "31-derived-cells-not-edited",
+  "situation": "THE INVERSE OF 30, and the boundary that makes a prose standard legal inside a single-writer region. This block contains all three kinds of text at once: (a) a description this skill COMPOSES, (b) values it RENDERS from `phil:nwave-slice-status`, and (c) a `Notes` sentence this skill composes ITSELF because a hand-set forge state contradicted the artifacts. A pass over the whole block 'improves' (b) and becomes a second author. A pass over nothing leaves (a) and (c) unedited and fails 30's assertions.",
+  "invocation": "refresh the board for raw-data-capture",
+  "artifacts": {
+    "slices/slice-02-projection.md": {
+      "goal": "map a captured payload onto its projection; first slice to cross a context boundary",
+      "enumerable_facts": ["maps a captured payload to its projection", "first slice crossing a context boundary"]
+    },
+    "slices/slice-03-backfill.md": "marked DEFERRED -- out of scope per its brief"
+  },
+  "owner_returns": {
+    "row_02": { "status": "current", "notes": "" },
+    "row_03": { "status": "deferred", "notes": "out of scope, per its brief" }
+  },
+  "forge_state": {
+    "host": "github",
+    "block_present": true,
+    "hand_set_state_on_card": "slice 03 typed as `done` by a human, contradicting its DEFERRED marker"
+  },
+  "expected_outcome": "DERIVED-CELLS-UNTOUCHED",
+  "expected_guard": "there is nothing to edit in a glyph, so a pass over one could only be a second author -- and a second writer in one delimited region is what whole-block regeneration forbids. But the `Notes` note about the replaced hand-set value is composed BY THIS SKILL, so it is in scope: the discriminator is who composed the words, never which column they sit in."
+}
