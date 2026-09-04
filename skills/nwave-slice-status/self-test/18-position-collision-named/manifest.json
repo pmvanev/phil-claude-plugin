@@ -1,0 +1,14 @@
+{
+  "fixture": "18-position-collision-named",
+  "walking_skeleton": false,
+  "situation": "Three features declare the same story slug. Two of them claim `position 02`; the third declares no position at all. The declaration is hand-authored and nothing validates it, so this is the expected steady-state defect rather than an exotic one. A caller asks for the story state.",
+  "invocation": "/phil:nwave-slice-status --story-state chat-everywhere",
+  "artifacts": {
+    "docs/feature/bedrock-setup/feature-delta.md": "`Story: chat-everywhere · position 01` — feature folds to `done`",
+    "docs/feature/chat-in-web-ui/feature-delta.md": "`Story: chat-everywhere · position 02` — feature folds to `in progress`",
+    "docs/feature/saved-sessions/feature-delta.md": "`Story: chat-everywhere · position 02` — feature folds to `to do`",
+    "docs/feature/chat-ui-in-extension/feature-delta.md": "`Story: chat-everywhere` with no position — feature folds to `to do`"
+  },
+  "expected_state": "in progress",
+  "expected_guard": "the collision and the missing position are both named in Notes; neither is silently resolved, and neither suppresses the state"
+}

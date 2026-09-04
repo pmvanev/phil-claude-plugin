@@ -1,0 +1,17 @@
+{
+  "fixture": "16-story-fold-mixed-states",
+  "walking_skeleton": false,
+  "situation": "Two features declare `Story: the-boards-unit-of-work` in their feature-delta headers, at positions 01 and 02. Position 01 is a shipped feature whose slices are all done except one that was retired before implementation; position 02 has five slices with the first in flight. A caller asks for the STORY-level state in order to place one card holding both features. This is the real story carried on issue #36.",
+  "invocation": "/phil:nwave-slice-status --story-state the-boards-unit-of-work",
+  "artifacts": {
+    "docs/feature/single-issue-per-feature/feature-delta.md": "header declares `Story: the-boards-unit-of-work \u00b7 position 01`",
+    "docs/feature/single-issue-per-feature/slices/": "7 briefs. Six are done. slice-06 is RETIRED: its H1 ends `\u2014 SUBSUMED BY SLICE 07` and its body's third line reads `Retired 2026-08-14, before implementation`. It carries NO `**Status:**` line and NO `DEFERRED` marker.",
+    "docs/feature/story-spans-features/feature-delta.md": "header declares `Story: the-boards-unit-of-work \u00b7 position 02`",
+    "docs/feature/story-spans-features/slices/": "5 briefs. FROZEN FOR THIS FIXTURE: slice-01 is `current`, slices 02-05 are `not started`. Stated directly rather than read from the tree, because this feature is in flight and its real states will move.",
+    "other_features": "11 further feature directories, none carrying a `Story:` line"
+  },
+  "expected_state": "in progress",
+  "expected_line": "Story: the-boards-unit-of-work \u2014 in progress \u00b7 1 of 2 features done \u00b7 current feature story-spans-features",
+  "expected_guard": "the fold consumes member FEATURE states, never slice statuses; the roster is ordered by declared `position`; and slice-06's heading-level retirement must be honoured, or position 01 folds `in progress` and the count reads `0 of 2` while the story state stays `in progress` and hides it",
+  "expiry_note": "The member rosters above are frozen deliberately. When slices 03-05 of story-spans-features land, the live tree will fold position 02 to `done` and the story to `done`. This fixture asserts the frozen situation, not the tree."
+}

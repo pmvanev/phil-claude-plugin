@@ -1,0 +1,14 @@
+{
+  "fixture": "17-story-empty-roster-conjunction",
+  "walking_skeleton": false,
+  "situation": "TWO invocations, deliberately paired, because a guard weakened to one clause stays green on the other. (A) A slug that no feature-delta declares \u2014 the roster is empty. (B) A slug that two feature-deltas declare, where both features have completed DISCUSS and have no slices and no roadmap, so each member folds to `unknown` \u2014 the roster is populated but every member is unassessed. Both answer `unknown`; only one carries a count.",
+  "invocation": "(A) /phil:nwave-slice-status --story-state no-such-story   (B) /phil:nwave-slice-status --story-state payments-rework",
+  "artifacts": {
+    "case_A": "no feature-delta in docs/feature/ carries `Story: no-such-story`",
+    "case_B_members": "docs/feature/bedrock-setup/feature-delta.md and docs/feature/saved-sessions/feature-delta.md both declare `Story: payments-rework`, positions 01 and 02",
+    "case_B_rosters": "neither member has a slices/ directory or a roadmap.json; both have discuss/ only",
+    "git_log": "commits exist for both members, several shaped like step commits"
+  },
+  "expected_state": "unknown",
+  "expected_guard": "BOTH invocations answer `unknown`, by DIFFERENT rows, and they differ on the count: (A) fires the empty-roster guard and carries NO count; (B) fires the existential `unknown` row and DOES carry a count. A guard covering only one stays green on the other, and the uncovered direction for (A) answers `done`."
+}

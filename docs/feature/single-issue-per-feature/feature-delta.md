@@ -1,5 +1,7 @@
 # Feature Delta — single-issue-per-feature
 
+Story: the-boards-unit-of-work · position 01
+
 Forge: not yet carded · Wave: DISCUSS ✓ (2026-08-14)
 Density: lean + ask-intelligent (`~/.nwave/global-config.json`; the resolver script is absent from this
 install, so the documented cascade default was applied rather than computed — stated rather than implied)
