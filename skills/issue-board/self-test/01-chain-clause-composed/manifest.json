@@ -1,0 +1,18 @@
+{
+  "fixture_id": "01-chain-clause-composed",
+  "situation": "A mid-work pivot, which SKILL.md calls 'the moment the reasoning exists only in your head'. Work is under way on issue 12; issue 47 is then recognised as a blocker -- token refresh has to land before the retry test can be written. Both chain lines must be written BEFORE work starts on 47. NO candidate text is supplied: the clause after the dash must be composed, because composing it is the act under test.",
+  "invocation": "record the pivot from 12 to 47 before starting on 47",
+  "forge_state": {
+    "host": "github",
+    "tier_note": "GitHub writes the reverse EDGE automatically; it never writes the reason",
+    "issue_12": "open, in progress, description has no `## Chain` heading yet",
+    "issue_47": "open, newly recognised as the blocker"
+  },
+  "enumerable_facts": [
+    "token refresh has to land before the retry test can be written",
+    "47 is what 12 is waiting on",
+    "12 is the work that stopped"
+  ],
+  "expected_decision": ["CHAIN-COMPOSED"],
+  "expected_guard": "the forge records the EDGE and the clause after the dash records WHY -- so the clause is COMPOSED and the edge is RENDERED, and the prose standard reaches the clause only. Six issues deep the edge alone tells you what blocked but not what you were in the middle of, which is the whole reason the clause exists."
+}

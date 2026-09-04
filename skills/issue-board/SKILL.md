@@ -463,6 +463,18 @@ And the mirror, in #47's: `Blocks #12 — split out of it on 2026-08-10`.
 The forge records the edge; the clause after the dash records why you stopped. Six issues deep, the
 edge alone tells you what blocked but not what you were in the middle of.
 
+**The clause is composed, so compose it against `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`.** The edge is
+rendered by the forge and there is nothing to compose in a link; the clause is the only part a person
+writes, and it is the only part a reader six issues deep depends on. Facts first, active voice, no
+expletive construction, the emphatic word last. **The standard is eleven principles and concision is one
+of them** — read this as *compose it well*, never as *compose it short*.
+
+**A clause that restates the edge fails.** `Blocked by #47 — blocked by issue 47` satisfies the shape and
+carries nothing the link did not. Pinned by `self-test/01-chain-clause-composed/`.
+
+**Judging is taste; generating is not.** This licenses nothing about chain lines somebody else wrote —
+it governs the one you are about to write.
+
 Where the forge writes the reverse edge for you — GitHub, and GitLab Premium — it writes only the
 edge, never the reason, so the prose line goes on both issues either way. See *Dependencies depend
 on the tier* above for what each forge gives you.
@@ -662,3 +674,24 @@ cannot be discovered:
 - (nWave) see `phil:nwave-issue-board` for the artifact → issue mapping
 - (optional) <local task system> owns in-flight work; issues own the outward-facing tier
 ```
+
+---
+
+## Self-test
+
+`skills/issue-board/self-test/` — **created 2026-09-04**; this was the only board-family skill without a
+suite while five siblings carried 30, 43, 18, 13 and 10 fixtures.
+
+Fixture 01 pins the chain clause: both ends written, under the fixed heading, in the description, before
+work starts on the blocker, with the clause carrying what the edge cannot. It supplies **no candidate
+text** — composing the clause is the act under test, and a fixture offering two variants would test
+selection instead.
+
+**The outcome vocabulary grows with the suite.** One outcome, `CHAIN-COMPOSED`, because there is one
+fixture. Shipping a vocabulary ahead of its fixtures asserts coverage that does not exist.
+
+`tests/test_issue_board_fixtures.py` checks what is automatable — every fixture well-formed, every
+`expected_decision` naming exactly one defined outcome, every defined outcome carrying a fixture. It does
+not judge whether a run reached the right decision, and says so. Drive the fixtures by hand per
+`self-test/README.md` whenever this file changes, and whenever `phil:nwave-issue-board` or
+`phil:nwave-slice-status` changes, since both build on these mechanics.

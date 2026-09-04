@@ -446,3 +446,70 @@ cannot run that in one session, which is itself worth knowing before another KPI
   found-twice threshold.
 - **A parser hides its successors.** Fixing the first YAML error revealed a second in the same file, then
   a third. One reported failure was three defects.
+
+## Outcome — slice 02, 2026-09-04
+
+**Build path:** `plugin-dev:skill-development` consulted in this session before slice 01 and applied
+again here; its findings on suite conventions came from measuring the repo rather than from the guide.
+
+### The hypothesis is answered, and the answer is "neither"
+
+Slice 02 asked whether creating this repo's first board-skill suite from scratch needs a harness that
+does not exist, presuming the sibling pattern was copyable. **Measured at 0.83.0 across all suites:**
+
+- **The convention is partly shared and partly local.** `situation` (158 uses, 8 skills) and
+  `expected_guard` (145 uses, 11 skills) are genuinely shared. Past those it forks into two schemes:
+  `fixture_id` + `expected_decision` (6 skills) and `fixture` + `expected_outcome` (5 skills). **
+  `rank-issues` uses both.**
+- **So "match the sibling convention" was never a followable instruction** — there was no single one to
+  match. The brief assumed one existed. `issue-board` uses `fixture_id` + `expected_decision`, chosen on
+  a mechanical ground rather than taste: the one portable driver in the repo is written against it.
+- **The harness does exist and is copyable.** `tests/test_board_setup_fixtures.py` is the pattern, and
+  its value is that it is **honest about what it cannot do** — *"judging whether a run reached the right
+  decision is not automatable here, and this file does not pretend otherwise."* It checks that fixtures
+  stay well-formed and cite live outcomes, and its docstring records the drift it caught.
+
+### The finding that dwarfed the slice
+
+**8 of 13 suites had no driver at all — 131 fixtures behind no gate**, including `groom-issues`, the
+largest suite in the repo at 43. Every one of those READMEs calls itself a gate; the 510-case suite was
+green and said nothing about any of them.
+
+Slice 01 filed this as issue 42 about `nwave-issue-board` alone — 1 suite, 30 fixtures. **That card was
+corrected the same day**, because a finding filed at one-eighth of its real scope is worse than one filed
+late: it looks handled.
+
+### Scope extended beyond the brief, deliberately
+
+The brief listed a directory, a README, one fixture, the citation and a version bump. **It did not list a
+driver, and one shipped anyway.** Creating a fresh ungated suite would have made the 131 into 132 while
+the card naming that exact defect sat open — reproducing a known defect at the moment of discovering its
+scale. `tests/test_issue_board_fixtures.py` is ~60 lines ported from the board-setup pattern.
+
+**It carries one check the pattern did not have**, because slice 01 earned it: *no fixture may supply
+candidate prose*, and *no fixture may assert a word ceiling*. Those are `[D5]` and reviewer finding C2
+turned into a gate, so the mistake slice 01 shipped and had to be told about cannot recur silently in a
+suite written later.
+
+### The driver was mutation-tested before being trusted
+
+`CLAUDE.md` states the reason in as many words: the first `check-readonly-commands.py` *"silently passed
+because the function was written and never called"*. **Twelve mutations, twelve caught, against a clean
+baseline** — candidate prose injected, an undefined outcome, two outcomes where one is allowed, a word
+ceiling, a deleted `expected.md`, an outcome defined with no fixture, a `fixture_id` that stopped matching
+its directory, `situation` and `expected_guard` removed, a README that stops documenting an outcome, the
+whole suite deleted, and `enumerable_facts` emptied.
+
+**The first verification harness was itself broken and reported twelve clean passes.** Bash word-splitting
+mangled its `cd`, so every "mutation" ran the unmutated tree. It was caught because *"whole suite deleted
+→ 8 passed"* is impossible. **The lesson recurses:** a test of a test needs a case whose expected result
+is obviously impossible, or it certifies nothing. Recorded because the failure mode was identical to the
+one `CLAUDE.md` warns about, one level up, and nothing in the repo would have caught it.
+
+### What is still not verified
+
+`skills/issue-board/self-test/` has one fixture, and one fixture is coverage of one rule. The skill has
+twenty-odd sections of forge mechanics — silent-success hazards, tier gating, two-pass seeding, column
+ordering — and none of them is pinned. The suite exists and is gated; it is not yet a regression net.
+Stated so its existence is not mistaken for coverage, which is the same error as a mention mistaken for
+an application.
