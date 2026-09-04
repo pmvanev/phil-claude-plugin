@@ -156,7 +156,7 @@ error_paths:
   - step: read-story-position
     failure: Two features are in flight at once
     recovery: >
-      Render both `▶` and mark the second `⚠ also in flight`. This is a DEFECT, not a shape: issue-board's
+      Render every in-flight row `▶` and mark every one but the current feature `⚠ also in flight`. This is a DEFECT, not a shape: issue-board's
       split clause says two halves belong in different cards when two people work them at once. Grooming
       reports it; the block does not hide it and does not resolve it
 

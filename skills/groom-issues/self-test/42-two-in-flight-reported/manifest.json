@@ -1,0 +1,12 @@
+{
+  "fixture_id": "GROOM-SELFTEST-42",
+  "phase": "SET-LEVEL",
+  "situation": "Fixture 41's card with one difference: TWO members are `in progress` at once -- the block renders two rows glyphed `\u25b6` and the fold reports both. Two concurrent members means two people, which is the case issue-board's split clause covers. This is the true-positive half of the KPI-4 pair.",
+  "forge": "github",
+  "command": "/phil:groom-issues",
+  "expected_decision": [
+    "REPORT-DEFECT",
+    "SURFACE-CANDIDATE"
+  ],
+  "expected_guard": "exactly ONE finding, quoting BOTH feature names and the two `\u25b6` rows; offered resolution is feature cards under a goal; the oversized rule is not what fires"
+}

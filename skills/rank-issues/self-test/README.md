@@ -26,6 +26,8 @@ person.
 | `05-intransitive-pairwise/` | pairwise returns A>B, B>C, C>A | do not average a contradiction | `REGROUP-INTRANSITIVE` — the goal is mis-cut; back to grouping |
 | `06-new-issue-arrives/` | one new issue on an already-ranked board | two levels exist to avoid re-cutting | `INCREMENTAL-PLACE` — one goal + one position, no re-rank |
 | `08-feature-is-the-ranked-unit/` | eight of eleven cards are slice cards on an nWave board | ranking a unit that is about to become a table row | stop at READ; consolidate first |
+| `09-story-card-is-a-ranked-unit/` | a feature card and a **story** card, both open and unranked | ranks both; the story gets one position and its four members get none; does **not** stop | `RANKED` |
+| `10-story-and-member-both-open/` | a story card **and one of its own members** both carded | stops, names `/phil:groom-set`, ranks nothing; reuses grooming's detector rather than writing a second | `STOP-NAMING-GROOM-SET` |
 | `07-homeless-issue/` | an issue fits no goal | unassigned is visible; a wrong goal is not | `LEAVE-UNASSIGNED` |
 
 ## The two sharpest

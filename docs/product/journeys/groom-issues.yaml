@@ -58,8 +58,9 @@ steps:
     # producing a body Robin never composed.
   - id: decide-set-level
     action: >
-      For each cross-issue candidate — duplicate, oversized, overcome by events, ungrouped, or a feature
-      decomposed into slice cards under retired rules — present
+      For each cross-issue candidate — duplicate, oversized, overcome by events, ungrouped, a feature
+      decomposed into slice cards under retired rules, several features of one story carded
+      separately, or two or more features in flight on one story card — present
       the evidence and ask. Nothing here is applied unasked, because each is expensive to undo.
     output: A decision per candidate; applied or declined, and declined leaves no trace
     emotion: confidence — nothing irreversible happened without me

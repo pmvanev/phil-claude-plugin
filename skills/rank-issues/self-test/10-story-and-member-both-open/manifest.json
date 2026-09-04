@@ -1,0 +1,8 @@
+{
+  "fixture_id": "RANK-SELFTEST-10",
+  "situation": "A story card is open, AND one of its own member features is open as a separate card beside it -- the shape `phil:groom-issues` reports as `features of one story, carded separately`, seen from the ranking side. Ranking both would put one unit in the queue twice.",
+  "forge": "github",
+  "command": "/phil:rank-issues",
+  "expected_decision": ["STOP-NAMING-GROOM-SET"],
+  "expected_guard": "stops and names /phil:groom-set; does NOT rank either; does NOT re-implement grooming's detector"
+}

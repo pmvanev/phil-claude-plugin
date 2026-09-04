@@ -1,0 +1,11 @@
+{
+  "fixture_id": "GROOM-SELFTEST-41",
+  "phase": "SET-LEVEL",
+  "situation": "A correctly-shaped STORY card: one issue holding four nWave features as roster rows, a two-table generated block, a milestone (its goal), and one member `in progress`. It is the largest card on the board and holds several independently demonstrable things. This is the false-positive half of the KPI-4 pair -- fixture 42 is the other half, and getting one right by a rule that gets the other wrong is a gate failure.",
+  "forge": "github",
+  "command": "/phil:groom-issues",
+  "expected_decision": [
+    "REPORT-CLEAN"
+  ],
+  "expected_guard": "zero findings, and specifically no oversized finding and no split proposal -- reached WITHOUT modifying the demonstrability text"
+}

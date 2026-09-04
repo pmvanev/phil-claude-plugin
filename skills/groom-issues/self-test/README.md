@@ -1,4 +1,4 @@
-# phil:groom-issues — Acceptance Self-Test (slices 01–04)
+# phil:groom-issues — Acceptance Self-Test (slices 01–05)
 
 The **scan and report** is the software under test. Its bugs are silent, and one of them is worse
 than the rest: a completeness claim over a partial read looks exactly like a completeness claim over
@@ -20,7 +20,7 @@ Slice 03, the set-level loop — `/phil:groom-set`:
 
 (plus `APPLY-CONSOLIDATE`, added 2026-08-14 with the decomposed-feature class.)
 
-`ASK-SET-LEVEL` · `APPLY-MERGE` · `APPLY-SPLIT` · `REFUSE-UNVERIFIED` · `DECLINE-NO-TRACE` ·
+`ASK-SET-LEVEL` · `APPLY-MERGE` · `APPLY-SPLIT` · `REFUSE-UNVERIFIED` · `REFUSE-CONCURRENT` · `DECLINE-NO-TRACE` ·
 `REDERIVE-BETWEEN`
 
 Slice 04, the elicitation loop — `/phil:groom-ask`:
@@ -102,6 +102,9 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `38-closed-original-is-the-target/` | the feature card exists and is **closed**, so the open list misses it | minting a duplicate; and expecting a call the grant lacks | `REFUSE-UNGRANTED` — shape (b) proposed, not performed |
 | `39-rollup-counts-closed-not-done/` | #9 reads `3/3 100%`; one child was deliberately not built (**measured**) | reading 100% as three-of-three built; claiming a read the grant cannot make | `REPORT-UNEVALUATED` — with the reason |
 | `40-feature-split-refused/` | a split asked for over a feature card with a six-row roster | creating cards for roster rows on request | `REFUSE-RESLICE` — names both operations |
+| `41-story-card-scans-clean/` | a correctly-shaped **story** card: four features as rows, a goal, one member in flight | zero findings — passes on demonstrability, without touching the rule's text | `NO-FINDINGS` |
+| `42-two-in-flight-reported/` | 41's card with **two** members `in progress` at once | exactly one finding, quoting both feature names and both `▶` rows; fires on **concurrency**, not size | `TWO-IN-FLIGHT` |
+| `43-story-members-carded-separately/` | four whole-feature cards whose deltas declare one `Story:` slug | reports the set and offers a **story card**; suppresses ungrouped effort's milestone offer | `STORY-MEMBERS-CARDED-SEPARATELY` |
 
 ## The sharpest
 

@@ -1,6 +1,6 @@
 ---
 name: groom-issues
-description: Skill bundle for the phil:groom-issues, phil:groom-fix, phil:groom-set and phil:groom-ask commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, resolves the defects between issues (merge, split, close, group, consolidate a feature decomposed under retired rules) by asking before each one, and fills in a card that says too little from the user's answers and its own suggestions, labelling where every field's words came from. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
+description: Skill bundle for the phil:groom-issues, phil:groom-fix, phil:groom-set and phil:groom-ask commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, resolves the defects between issues (merge, split, close, group, consolidate a feature decomposed under retired rules or a story spread across feature cards) by asking before each one, and fills in a card that says too little from the user's answers and its own suggestions, labelling where every field's words came from. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
 ---
 
 # Groom issues — say what is wrong with a board
@@ -287,16 +287,74 @@ reports each with its evidence and stops; resolving them is `/phil:groom-set`, a
   declined split returns forever and only has to be accepted once. **Do not "fix" this rule toward size.**
   Verified 2026-08-14 against `phil:issue-board`'s own granularity rule, whose split clause is about two
   halves occupying different columns *at the same time* — that is, about concurrency.
+
+  **A story card is the same argument one level up, and the paragraph is extended rather than edited.**
+  A card holding several nWave features is larger still, holds several demonstrable things, and **passes**
+  — the features are worked sequentially by one owner, so no two of them occupy different columns at
+  once. The oscillation reasoning transfers verbatim: judged by size a story card would be proposed for
+  splitting every run, the family stores no marker, and a declined split has to be declined forever while
+  an accepted one only has to be accepted once. **The wrong shape is caught by the concurrency signal
+  below, which is a different oracle reaching a different verdict — not by loosening this one.**
+- **Two or more features in flight on one story card** — two or more rows **of the feature roster**
+  carry the state word `in progress`. **Quote every such feature by name, with its roster row.**
+
+  **Scope the evidence to the feature roster and read the state WORD, never the glyph.** A story block
+  carries two tables and `▶` means different things in each — `in progress` in the feature roster,
+  `current` in the slice roster (`phil:nwave-issue-board`, *two glyphs are reused, not one*). So a
+  perfectly correct story card with **one** member in flight already renders two `▶` rows: one for that
+  member, one for its current slice. **A check counting `▶` fires on every correct story card**, which is
+  the false positive this class exists not to produce.
+
+  **Stated for any number, not exactly two.** Three concurrent members is reachable, and a rule written
+  at arity two either misses the third or has to be re-derived to include it.
+
+  **The scan reports this and never offers.** The state words are readable from the card's body, but
+  confirming them against the artifacts needs the fold, which the scan cannot run. Report, and name
+  `/phil:groom-set` — the same split as the unlinked-path candidate above. A story
+  is worked sequentially by one owner, so two concurrent members means two people, which is exactly the
+  case `phil:issue-board`'s split clause covers: *"two halves sit in different columns at the same time
+  only when two people are working them at once."* Resolution offered: split into feature cards under a
+  goal. **This is that shipped rule read at a new scale, not a new granularity rule** — which is what
+  lets the oversized rule above stay untouched.
 - **Overcome by events** — the work landed another way, or the decision behind it was reversed.
 - **Ungrouped effort** — a card belonging to a larger effort that says so nowhere. A milestone is a
   goal (`phil:issue-board`); do not invent a second convention.
+
+  **A goal and a story are both containers and they are not interchangeable. The discriminator:
+  a goal holds *cards*; a story holds *feature directories*.** A goal is a milestone — it has a due date,
+  groups unrelated work by design, and survives new cards arriving. A story is itself a card and can never
+  hold another. Positionally: a list of issues is a goal; the inside of one issue is a story. Milestones
+  do not nest, a story is not a milestone, and neither replaces the other.
+- **Features of one story, carded separately** — several open cards that are each a whole **feature**, whose
+  `docs/feature/<id>/feature-delta.md` files declare the **same `Story:` slug**. Directly parallel to
+  *decomposed feature* one level up: the unit that should be one card has been spread across several.
+
+  **Where nothing on the forge groups these cards, *ungrouped effort* also fires and this class supersedes
+  it** — conditional, exactly as the decomposed-feature class states it, because members sharing a
+  milestone *are* grouped and ungrouped effort then does not fire at all — but ungrouped effort's resolution proposes a **milestone**, which is a goal,
+  and the right container here is a **story card**. Where this class's evidence reaches offer tier, offer
+  only this one. Offering both invites a goal filed around work that needs a different kind of container,
+  which is precisely the confusion the discriminator above exists to prevent.
+
+  **Evidence is ranked as decomposed-feature's is**, because consolidating is irreversible: a `Story:`
+  line at column 0 in each member's delta, **confirmed on the default branch with `git ls-tree`**,
+  licenses an **offer**; a shared title prefix or a common milestone licenses a **report only**.
+
+  **`git ls-tree` is `/phil:groom-set`'s grant, not the scan's.** The scan therefore reports the candidate
+  and names the command that can confirm it; it never offers here. The scan surfaces, it never acts.
+
+  **Which class fires is decided by the directory, and the test is written down here so it is not
+  re-invented.** Cards whose bodies name the **same** `docs/feature/<id>/` are a *decomposed feature* —
+  slices of one feature. Cards naming **different** feature directories that declare the **same** `Story:`
+  slug are this class. At most one holds; where the scan cannot tell which, report both and offer
+  neither.
 - **Decomposed feature** — several open cards that are **slices of one feature**, on a board where one issue
   is one feature (`phil:nwave-issue-board`). Report the set with the evidence that ties them together.
 
   **This class exists because the retired rules produced it.** Under the old granularity rule a slice was
   independently demonstrable, so it was cardable — and this family's own split would have cut a feature into
-  exactly these cards. **Grooming now meets the wreckage of its own earlier advice**, and none of the four
-  classes above fires on it: not duplicates (a decomposition has no overlapping content to quote), not
+  exactly these cards. **Grooming now meets the wreckage of its own earlier advice**, and none of the
+  other classes above fires on it: not duplicates (a decomposition has no overlapping content to quote), not
   oversized (each card is small and demonstrable), not overcome by events, and — in shapes (a) and (b) — not
   ungrouped, because a parent groups them. A board full of them reports **clean**, correctly and uselessly.
 
@@ -325,7 +383,7 @@ reports each with its evidence and stops; resolving them is `/phil:groom-set`, a
 
 ## Resolving the set-level candidates — `/phil:groom-set`
 
-The five above are the only operations here, and each asks. What follows is what the question has to
+The operations above are the only ones here, and each asks. What follows is what the question has to
 contain to be answerable, and what the apply owes afterwards.
 
 **The ask must have the same arity as the finding.** This is the rule the whole step turns on. Two
@@ -431,6 +489,50 @@ reversible operation in this whole section — one `--milestone` away from undon
 over a group of cards at once, provided the evidence for each is shown beside it. Creating a container
 cannot: a goal is a commitment about what the board is for, and this command deliberately cannot make
 one. Propose it, hand over the exact call, and stop.
+
+**Before offering a goal, check whether the right container is a story.** A goal holds *cards*; a story
+holds *feature directories*. Where the cards are whole features whose deltas declare one `Story:` slug,
+the container is a **story card** and *features of one story, carded separately* supersedes this class —
+offer that one and not this. A milestone filed around those cards groups them on the board while leaving
+the thing that should be one card as several, which looks like a resolution and is not.
+
+### Consolidate features of one story
+
+Several open cards, each a whole feature, whose deltas declare the same `Story:` slug. The target shape
+is **one story card** whose feature roster holds them as rows.
+
+**Two shapes, and the report must name which it took.** Unlike a decomposed feature there is no
+open-parent shape — a story card is what is being *created*, so nothing groups the members yet:
+
+| Shape | What exists | What to do |
+|---|---|---|
+| (a) A closed story card already exists for this slug | a previous consolidation, or a card closed by mistake | **reopen it** and add the members as roster rows; never mint a second |
+| (b) No story card exists | the common case | propose creating one; hand over the exact call and stop |
+
+**Search closed issues before concluding shape (b).** A story card closed by a prior pass is invisible to
+an open-issues scan and minting a second one splits the story permanently. This is the same search the
+decomposed-feature section mandates, and the never-do list names both tiers for that reason.
+
+**Irreversible, so it is one candidate at a time and never a group offer.** Closing a feature card
+discards its own comments and history.
+
+**The decomposed-feature rollup hazard does NOT transfer, and importing it would be a warrant that
+cannot obtain.** That hazard is *un-parent before closing, or the parent renders complete while the work
+continues* — it presupposes a real parent/child edge, which is that class's defining tier-1 evidence.
+This class is defined by the **absence** of any forge grouping, so there is no edge to remove. Where a
+member does happen to sit as a sub-issue of something, remove that edge first for the shipped reason;
+otherwise the step does not apply.
+
+**Confirm the declarations are pushed before offering.** Evidence is a `Story:` line at column 0 in each
+member's `feature-delta.md` **on the default branch** — `git ls-tree`, not the working tree. A slug that
+exists only locally is invisible to every other reader, and consolidating on it produces a story card
+whose membership nobody else can verify.
+
+**Two or more members in flight at once is a reason NOT to consolidate**, and it is the one case where the
+answer runs the other way: concurrency means two people, which is what makes them separate cards under a
+goal. Report it and do not offer the merge. **Outcome: `REFUSE-CONCURRENT`** — a refusal on verified
+evidence, which is neither `DECLINE-NO-TRACE` (nobody declined) nor `REFUSE-UNVERIFIED` (the evidence is
+good). A terminal stop with no outcome of its own is unreportable.
 
 ### Consolidate a decomposed feature
 
@@ -701,6 +803,7 @@ with `LEAVE-SEMANTIC` alongside whenever a semantic defect was reported and left
 `/phil:groom-set` (the set-level loop) reports `ASK-SET-LEVEL` before any write, then exactly one of:
 
 `APPLY-MERGE` · `APPLY-SPLIT` · `APPLY-CONSOLIDATE` · `DECLINE-NO-TRACE` · `REFUSE-UNVERIFIED` ·
+`REFUSE-CONCURRENT` (members in flight at once, so consolidating them is refused on good evidence) ·
 `REFUSE-RESLICE` · `REFUSE-UNGRANTED`
 
 with `REDERIVE-BETWEEN` alongside whenever an apply invalidated a later candidate.
@@ -713,6 +816,9 @@ write, or a rollup read. **Hand over the exact calls and stop.** This is the mil
 *propose, hand over, stop* — and it refuses to **act**, never to **report**. A run that silently does less
 than it said, or that reports `APPLY-CONSOLIDATE` for a shape it could only half-complete, is the failure
 this outcome exists to prevent.
+
+**For a story consolidation the shapes are two, not three** — a reopened closed story card, or a newly
+created one; there is no open-parent shape, because the story card is what is being created.
 
 **`APPLY-CONSOLIDATE` must name which of the three shapes it took** — an open parent, a reopened closed
 original, or a newly created card — because the three have different blast radii and the report is the only
@@ -771,7 +877,7 @@ All four commands:
 - Report a **generated** projection as a body defect. Session state inside the `nwave:status` markers is
   intended; only typed scratch outside them is a finding.
 - Report a card as oversized on its size, its section count, or the presence of a generated block, or propose
-  splitting a feature card. The rule is demonstrability, and a size-keyed reading oscillates the board.
+  splitting a **feature card or a story card** on size. The rule is demonstrability, and a size-keyed reading oscillates the board.
 
 `/phil:groom-issues` (the scan) additionally:
 
@@ -816,13 +922,13 @@ All four commands:
 - Leave a split's original open beside its own pieces, or its new cards off the project board.
 - **Close a child while its parent edge still exists.** The child then counts toward the parent's completion;
   remove the edge first.
-- **Conclude that no feature card exists without searching closed issues.** A previous split may have closed
+- **Conclude that no feature card or story card exists without searching closed issues.** A previous split may have closed
   the original as superseded, and minting a second one buries the first.
 - **Consolidate on title evidence alone.** `slice NN` in a title is a habit; it licenses a report, never an
   irreversible write. A shared milestone licenses nothing.
 - **Reopen a card and leave its Status unset.** `gh issue reopen` does not restore the field, so the card sits
   OPEN in Done and no view flags it.
-- **Split a feature into slice cards.** Splitting a story creates cards; splitting a feature means re-slicing
+- **Split a feature into slice cards, or a story card on size.** Splitting an ordinary card creates cards; splitting a feature means re-slicing
   its roadmap, which is not this command's to do.
 - Close on board prose alone. The claim that work landed another way is settled in the repository or
   not at all.
