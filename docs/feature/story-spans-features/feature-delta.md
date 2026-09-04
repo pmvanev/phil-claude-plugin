@@ -751,3 +751,60 @@ The predecessor's C1-C7 all bind unchanged; `issue-board`'s concurrency clause i
 amended; A4-A6 of the backbone are untouched; and the diversion stack stays one per person rather than
 one per feature. **A paradigm change that lists only its amendments invites the next reader to assume
 everything else moved too.**
+
+---
+
+## Outcome — all five slices delivered, 2026-09-04
+
+Recorded against the KPIs as declared, not as convenient. **Two are unmeasured and one of those is the
+feature's central claim** — stated plainly, on the predecessor's precedent of recording its own KPI-3 as
+*failed* rather than rounding it off.
+
+| KPI | Target | Result |
+|---|---|---|
+| KPI-1 — both positions in ≤30 s | ≤30 s naming both | **UNMEASURED, and now unobtainable at two features.** The cold read was spent in slice 01 by showing the card before the stopwatch existed. Slice 03 inherited the only remaining chance and had no reader. The owner reviewed the card and approved it, which is weaker than the criterion and is recorded as approval. |
+| KPI-2 — one card, one position per story | exactly 1 and 1 | **MET.** #36 is one card; `rank-issues` gives a story card exactly one position and its members none (fixture 09). |
+| KPI-3 — rows ≤ features + current slices + current steps | ≤12 on slice 01's card | **MET.** 7 rows on the real card; 10 on the four-feature fixture where the product would be 28. |
+| KPI-4 — grooming false **and** true positives | 0 false, 1 of 1 true | **HALF MET.** The false-positive half is real: all three new checks hand-applied to the live board, zero findings. The true-positive half is pinned by fixtures 42/43 but was **not** dogfooded — a detectable wrong card needs fabricated feature directories under `docs/feature/`, which the folds and `check-product-ssot.py` read. Declined, not skipped. |
+| KPI-5 — story/goal confusion | 0 misidentifications, n=1 | **UNMEASURED.** Its blocking dependency was discharged — #36 now carries the goal `Board and session tooling`, so two groupings are on screen — but the reader question was never put before the card was shown. |
+
+### What the feature proved, and what it did not
+
+**Proved.** The two locked hypotheses both held. **C5** — derivation stays with its owner — survived a
+fold whose input type changed: the story tier cost one flag and one declared line, and
+`phil:nwave-issue-board` stayed a renderer. **C10** — extend a shipped oracle, never loosen it — held
+under real pressure: `groom-issues`' demonstrability text is **byte-unchanged**, and the wrong shape is
+caught by a different oracle reaching a different verdict.
+
+**Not proved.** That two stacked rosters can be read in seconds. That is the premise the whole feature
+rests on, and it is undischarged at every scale. The layout is not broken — one reader said so — but *not
+broken* is not *readable in thirty seconds*, and the difference is the whole KPI.
+
+### The pattern this feature kept producing, worth more than any single fix
+
+Five review rounds found real defects in **five of five slices**, and four of them were the same shape:
+**a rule that invents a fact another skill deliberately withholds, pinned by a fixture that cannot detect
+the invention because its scenario makes both the right and wrong rule return the same answer.** Slice 04
+shipped a second definition of `current feature`; slice 05 shipped an evidence spec that fired on its own
+clean fixture. Both were caught only by an adversarial read that was explicitly told to hunt the previous
+round's shape.
+
+**The generalisable lesson: a fixture built by the author of the rule tends to encode the author's
+reading of it.** The discriminating input is the one the author did not think of, and asking for it by
+name — *"what roster makes these two rules disagree?"* — is what produced fixtures 29 and the 41/42 gate.
+
+### Two measurement losses, one cause
+
+KPI-1's cold read (slice 01) and slice 04's wave-transition observation were both lost the same way: **the
+instrument was not in place before the event it measures.** A dogfood that watches a first impression or a
+transition has to be set up first, and a slice ordered late cannot observe a change its own feature made
+early. Recorded here because it cost this feature its headline number.
+
+### Left open, deliberately
+
+- **KPI-1 and KPI-5** need a reader who has not seen the card. No slice can supply one.
+- **KPI-4's firing half** needs a wrong card built from fabricated feature directories.
+- **A validator for the `Story:` declaration.** Named as a `check-invariants.py` candidate in [D9] and
+  never committed to; nothing prevents a position collision, only reports one.
+- **Cross-repository stories.** Nothing in the design crosses a repo boundary.
+- **The four-feature case is a fixture, not a real card.** No four-feature story exists here.
