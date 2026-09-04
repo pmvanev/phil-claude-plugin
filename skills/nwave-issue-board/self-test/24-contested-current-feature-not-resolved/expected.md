@@ -9,7 +9,10 @@ nothing."*
 Current feature: contested — position 02 claimed by chat-in-web-ui and saved-sessions. No slice roster.
 ```
 
-**No slice roster.** Four rows, not ten.
+**No slice roster.** Four rows, not ten. **And no wave label and no routing line** — both derive from
+the current feature and nothing else, so where the owner withholds it the card writes neither and the
+block says which case it is. A wave taken from one of the contenders is the same invention as expanding
+that contender's slices, one line higher up and easier to miss.
 
 **Why this is the recurring defect in its newest costume.** `phil:nwave-slice-status` deliberately
 refuses to resolve a position collision — its own fixture 18 pins that refusal, on the grounds that
@@ -42,6 +45,7 @@ finished story.
   order from a story whose current feature simply was not rendered.
 - Emitting an empty `Current feature NN — slices:` heading with no table under it. A heading promising a
   table that is absent reads as a rendering failure, not as a deliberate refusal.
+- Writing a wave label, or a routing line, taken from either contender.
 - Writing a board column different from the story state because the order is contested. The state is
   quantified over members, not their order; the collision does not change it.
 - Resolving the collision by editing the artifacts. The forge is a projection; nothing here writes to

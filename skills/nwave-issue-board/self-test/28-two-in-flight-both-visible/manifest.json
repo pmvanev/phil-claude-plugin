@@ -1,0 +1,13 @@
+{
+  "fixture": "28-two-in-flight-both-visible",
+  "situation": "Fixture 25's story with two developers: chat-in-web-ui (position 02, DESIGN) and chat-ui-in-extension (position 04, DELIVER) are BOTH `in progress`. Under [D12] this is a defect in the card -- a story is worked sequentially by one owner -- but slice 04 owns only making it VISIBLE. The label has one slot and two candidates.",
+  "artifacts": {
+    "chat-in-web-ui": "position 02 · in progress · `wave: design`",
+    "chat-ui-in-extension": "position 04 · in progress · `wave: deliver`"
+  },
+  "forge_state": {
+    "host": "github"
+  },
+  "expected_outcome": "TWO-IN-FLIGHT-VISIBLE",
+  "expected_guard": "the label takes the FIRST in roster order; the other member's Notes carries `⚠ also in flight`; the block neither hides the ambiguity nor resolves it"
+}

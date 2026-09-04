@@ -1,0 +1,14 @@
+{
+  "fixture": "27-story-no-routing-row",
+  "situation": "This plugin's own real story, `the-boards-unit-of-work`. Both members are past DISCUSS and in authoring with plugin-dev -- a build path the seven-wave routing table has no row for. The shipped `no row, no line -- and say why` rule must hold at the story tier without being re-derived, and the line must never name a command for the STORY.",
+  "artifacts": {
+    "single-issue-per-feature": "position 01 · done · past DISCUSS, authored with plugin-dev",
+    "story-spans-features": "position 02 · in progress · past DISCUSS, authored with plugin-dev · CURRENT"
+  },
+  "forge_state": {
+    "host": "github",
+    "existing_labels": []
+  },
+  "expected_outcome": "NO-ROUTING-ROW-STATED",
+  "expected_guard": "no `Work this with:` line, and the block states that the routing table does not cover this repo's build path -- rather than leaving a reader to wonder whether the line was forgotten"
+}

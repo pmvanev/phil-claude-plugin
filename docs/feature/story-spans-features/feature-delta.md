@@ -2,6 +2,12 @@
 
 Forge: issue #36 · Wave: DISCUSS ✓ (2026-09-04)
 Story: the-boards-unit-of-work · position 02
+
+> **Line references in this document are as of DISCUSS, 2026-09-04, and several have since moved** —
+> slices 02-04 edited the files they point into. Where a citation matters the quoted text is given
+> verbatim beside it; trust the quote, not the number. Recorded rather than rewritten: this is a dated
+> record of what the skills said when the decisions were taken, and renumbering it would make it a
+> record of something else.
 Density: lean + ask-intelligent (`~/.nwave/global-config.json`; the resolver script is absent from this
 install, so the documented cascade default was applied rather than computed — stated rather than implied)
 

@@ -1,0 +1,15 @@
+{
+  "fixture": "29-current-feature-not-first-in-flight",
+  "situation": "THE DISCRIMINATING ROSTER. Position 01 is `to do`; positions 02 and 03 are both `in progress`. The owner's current feature is the first member that is not `done` -- which is 01, a member that has not started. A local `first in-flight member` rule would answer 02. Fixture 28's roster makes both rules answer the same thing and therefore pins neither; this one separates them.",
+  "artifacts": {
+    "bedrock-setup": "position 01 · to do · `wave: discuss`",
+    "chat-in-web-ui": "position 02 · in progress · `wave: design`",
+    "saved-sessions": "position 03 · in progress · `wave: design`"
+  },
+  "owner_returns": "Story: chat-everywhere — in progress · 0 of 3 features done · current feature bedrock-setup",
+  "forge_state": {
+    "host": "github"
+  },
+  "expected_outcome": "CURRENT-FEATURE-FROM-OWNER",
+  "expected_guard": "the label is position 01's wave and the enumerated slice roster is position 01's, because the OWNER names the current feature; a local first-in-flight tie-break would name 02 and produce a block whose header, roster and routing line disagree"
+}
