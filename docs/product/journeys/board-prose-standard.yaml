@@ -1,0 +1,120 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: board-prose-standard (2026-09-04, issue #40)
+#
+# Scoped to text a board surface COMPOSES. journeys/groom-issues.yaml (Robin, structural grooming) and
+# journeys/single-issue-per-feature.yaml + story-spans-features.yaml (Morgan, the generated block) are
+# unchanged: they cover whether a field is PRESENT and whether a row count is BOUNDED. This file covers
+# whether the sentences inside them READ. Steps are not inherited from either, because neither has a
+# step at which prose quality is observed — which is the finding.
+
+id: board-prose-standard
+name: Read composed board text that says it in one pass
+persona: robin-backlog-curator        # EXTENDED 2026-09-04, not a new persona — see that file's prose_facet
+secondary_persona: morgan-feature-owner  # EXTENDED 2026-09-04 — the generated block half
+job: keep-a-backlog-trustworthy       # EXTENDED 2026-09-04 — see the prose facet
+secondary_job: make-in-flight-work-transferable  # EXTENDED 2026-09-04 — see the prose facet
+
+summary: >
+  Robin runs elicitation on a title-only card, answers one question, and reads back a purpose that is the
+  answer tightened rather than the answer padded — with the per-field provenance label still saying which
+  words were whose. Morgan opens a story card and reads roster descriptions where both lines carry
+  information, and names both positions inside the same thirty seconds the row-count bound was built for.
+  Neither had to ask for shorter output, and neither surface judged prose a human wrote.
+
+# The opening beat is `resigned`, deliberately not `uncertain`. Both actors already receive output that
+# passes every check the board has; they arrive having stopped expecting the text to be good. The failure
+# mode this feature acts on is SATISFIED AND PADDED, and an arc opening on doubt would describe a
+# different feature.
+arc: resigned -> surprised -> oriented -> trust
+
+steps:
+  - id: invoke
+    action: >
+      Robin runs `/phil:groom-ask` on a card that has a title and nothing else; or Morgan runs
+      `/phil:handoff`, refreshing the feature card's projection.
+    output: The question asked, or the block regenerated
+    emotion: resigned — the fields will be filled and I will read them twice
+
+  - id: read-composed-text
+    action: >
+      Read the sentences the surface composed — the written purpose and done-condition, or the two-line
+      roster descriptions and the projected Why / Next / Stack prose.
+    output: >
+      Text that satisfies the four structural items AND reads in one pass. Active, no needless words,
+      every word telling.
+    emotion: surprised — this is shorter than what I would have got, and it says more
+
+  - id: check-provenance
+    action: >
+      Robin reads the per-field provenance label beside each written field — you wrote / you accepted my
+      suggestion / you edited my suggestion / I rephrased your answer.
+    output: Which words were whose, unchanged by the standard
+    emotion: oriented — tightened is still labelled, so I can tell a draft from a dictation
+    # The standard changes HOW the field is composed and not WHETHER composition is disclosed. A fifth
+    # provenance value would mean the standard had changed what elicitation may write, which is out of
+    # scope — see the feature delta, S2 AC 2.
+
+  - id: decide
+    action: >
+      Robin decides whether the card is ready to rank from the body alone. Morgan decides which feature
+      to pick up from the roster alone, without opening a brief.
+    output: A decision taken in one read
+    emotion: trust — the board says what it means, and says it once
+
+  - id: author-a-surface
+    action: >
+      A later author opens a board skill to add a surface, and meets the judging-versus-generating
+      distinction at the point the well-formed-issue standard states it.
+    output: >
+      The rule that judging prose a human wrote is taste and out of scope, while applying the house
+      standard to your own output polices nobody.
+    emotion: oriented — I do not have to re-derive which half is in scope
+
+error_paths:
+  - at: read-composed-text
+    failure: >
+      The composed text is unchanged from what it would have been with no standard named. The citation
+      satisfied the reachability check and altered nothing.
+    detection: >
+      KPI-3 — issue #36's seven roster descriptions, word-counted before and after. Two-sided by
+      construction, so a null result is a reported outcome rather than a silent pass.
+    recovery: >
+      [D2] is reported disproven and the mechanism escalates to apply-before-write. Slice 01 exists to
+      reach this verdict before five more surfaces inherit a citation that does nothing.
+
+  - at: read-composed-text
+    failure: >
+      Two sessions compose text of different quality from the same card, and both comply. A named
+      standard is applied by judgement.
+    detection: Not detectable by any check this feature ships.
+    recovery: >
+      ACCEPTED COST, not a defect to fix. One fixture per surface bounds an example; it does not make the
+      standard uniform. Stated here so it is not rediscovered later as a failure of the design.
+
+  - at: read-composed-text
+    failure: The standard is applied to derived cells — a glyph, a timestamp, a header line.
+    detection: >
+      An existing block fixture changes output. Slice 01 AC 5 requires every shipped `nwave-issue-board`
+      fixture to pass unchanged.
+    recovery: >
+      Refused by [D4], stated in the skill as a refusal list rather than a positive scope. There is
+      nothing to edit in a glyph, so an editing pass over one could only be a second writer — which is
+      what the one-writer rule forbids.
+
+  # The next two are guards against this feature harming its NEIGHBOURS rather than failing itself.
+  - at: decide
+    failure: A prose pass lengthens generated output, working against the two cards that want it shorter.
+    detection: KPI-4 — surfaces whose output got longer. Target zero, counted per surface.
+    recovery: >
+      Revert the surface. Slice 03's dogfood runs against issues #34 and #39 specifically, the two
+      neighbours this could most easily harm.
+
+  - at: author-a-surface
+    failure: >
+      The new citations are read as licence to flag prose a human wrote, and grooming starts policing
+      taste — the thing `groom-issues` refused.
+    detection: >
+      KPI-5 — the scan's four structural items, byte-unchanged. A style item appearing there is the
+      symptom.
+    recovery: >
+      [D6] is stated where the author meets it, and [D7] plus KPI-5 make the scan's immutability a
+      measured condition rather than an intention.

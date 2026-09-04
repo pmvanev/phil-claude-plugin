@@ -414,7 +414,7 @@ jobs:
     opportunity_score: not-scored   # single new job; priority by default
     status: validated
     personas: [robin-backlog-curator]
-    features: [groom-issues]
+    features: [groom-issues, board-prose-standard]
     # Setup facet (DISCUSS, feature board-setup-block, 2026-08-14, issue #32):
     # The job is unchanged — Robin wants a board that says what it means — but one of its checks has an
     # input with no author, and that is a DIFFERENT job (know-a-boards-hazards-before-contact) rather
@@ -497,6 +497,32 @@ jobs:
     # by a check that fires rather than by weakening the one that passes.
     # See docs/feature/story-spans-features/slices/slice-05-grooming-and-ranking-recognise-the-story.md.
 
+    #
+    # PROSE FACET (DISCUSS, feature board-prose-standard, 2026-09-04, issue #40).
+    # The job is unchanged — Robin wants a board that says what it means. What changes is that the
+    # standard answering that want is entirely STRUCTURAL, and a body can satisfy all four of its items
+    # while reading badly:
+    #   functional (prose): the four items — purpose present, done-condition present, links resolve,
+    #     labels correct — all ask whether something is THERE. None asks how it READS. A card can pass
+    #     every one and still be passive, padded, and twice the length it needs.
+    #   push (prose): measured 2026-09-04 at 0.82.0 — twelve board-family files, zero references to any
+    #     prose standard, while `rules/writing.md` is cited by five other surfaces and passes the
+    #     reachability check on their strength alone. The tools that WRITE onto cards are precisely the
+    #     ones that name no standard for writing.
+    #   anxiety (prose): (H) The standard gets applied to prose a HUMAN wrote, and grooming starts
+    #     policing taste — anxiety (C) of this job, arriving from the new direction. Answered by the
+    #     discriminator below rather than by leaving the gap open.
+    # THE DISCRIMINATOR, and it is this facet's whole content: judging prose somebody else wrote is
+    # taste and stays out; applying a house standard to your OWN composed output polices nobody. This is
+    # the `ui.md` split — resolved "on checkability rather than on subject" per CLAUDE.md — applied a
+    # second time to a different rule.
+    # The scan is UNTOUCHED: four structural items, no style item, guarded by a KPI rather than by
+    # intention. A style rule added to the scan means the card was misread.
+    # Mechanism is NAMING, not applying (feature [D2]) — with a fixture shipped alongside each citation,
+    # because a mention that changes nothing is this board's recorded defect and the fixture is what
+    # separates this instance from it.
+    # See docs/feature/board-prose-standard/feature-delta.md [D2], [D6], [D7].
+
   - id: make-in-flight-work-transferable
     # Registered by DISCUSS wave, feature: single-issue-per-feature (2026-08-14)
     job_story: >
@@ -546,7 +572,7 @@ jobs:
       carry-work-across-session-boundaries (medium: solo case solved, cross-person half at zero).
     status: validated
     personas: [morgan-feature-owner]
-    features: [single-issue-per-feature, story-spans-features]
+    features: [single-issue-per-feature, story-spans-features, board-prose-standard]
     #
     # STORY TIER FACET (DISCUSS, feature story-spans-features, 2026-09-04, issue #36).
     # EXTENDED, NOT REPLACED — and the choice is the point. The owner of a story is the SAME developer who
@@ -606,6 +632,32 @@ jobs:
     #      issue is a story. The milestone slot stays spent on the goal, and milestones do not nest.
     #   C10 A shipped oracle is EXTENDED at the new scale, never loosened. Where a new shape passes an
     #      existing check vacuously, add a check that fires — do not weaken the one that correctly passes.
+
+    #
+    # PROSE FACET (DISCUSS, feature board-prose-standard, 2026-09-04, issue #40).
+    # The job story is unchanged, and C1-C10 all still bind. What this facet adds is that the block's
+    # bound and the block's PROSE measure different things, and meeting one says nothing about the other:
+    #   functional (prose): C4 and C8 bound the block by ROW COUNT — one expanded path, every sibling a
+    #     link. Rows can be bounded while every cell inside them is padded. The thirty-second read the
+    #     bound exists to protect is spent on words, not on rows.
+    #   push (prose): the live instance is this job's own. Slice 01 of story-spans-features hand-wrote
+    #     SEVEN two-line roster descriptions onto issue #36 with no prose standard consulted — under a
+    #     stated requirement of "not overly verbose or mentally taxing". The one place brevity was the
+    #     explicit acceptance criterion is the place no standard was applied.
+    #   anxiety (prose): (I) An editing pass inside a delimited, regenerated-whole region becomes a
+    #     SECOND WRITER, which C1 and C2 forbid. Answered by scope rather than by refusal: the standard
+    #     reaches the sentences the writer COMPOSES — the two-line descriptions, the summarising clause on
+    #     a linked artifact, the projected Why / Next / Stack — and never the derived cells. There is
+    #     nothing to edit in a glyph, so a pass over one could only be a second author.
+    # C11 COMPOSED SENTENCES ONLY. The standard applies to text the block's writer composes; glyphs,
+    #     header lines, timestamps and every derived cell are out. This is what makes a prose standard
+    #     compatible with one-writer-regenerates-whole rather than in tension with it.
+    # C12 NO COUNTABLE CEILING. The 200-word hard ceiling of answer-a-tools-question-without-decoding-it
+    #     (C3) is deliberately NOT copied: there an unbounded ask IS the failure mode, whereas here the
+    #     surfaces already carry their own bounds (a description declares two lines; the block declares
+    #     its row count). Brevity is a principle. The accepted cost — a principle is not failable — is
+    #     recorded rather than answered.
+    # See docs/feature/board-prose-standard/feature-delta.md [D4], [D5].
 
   - id: know-a-boards-hazards-before-contact
     # Registered by DISCUSS wave, feature: board-setup-block (2026-08-14, issue #32)

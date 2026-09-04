@@ -55,3 +55,27 @@ vocabulary:
   # story tier
   - story card, story roster, feature roster, current feature, membership, position, story vs goal,
     one expanded path, unit of ownership
+
+# Prose facet — added by DISCUSS wave, feature: board-prose-standard (2026-09-04, issue #40).
+# EXTENDED, not replaced. The unit of ownership is untouched; what this facet adds is that the block's
+# ROW BOUND and the block's WORDS are different properties. Morgan's thirty-second budget is spent on
+# words, and the bound protects only the count. The live instance is Morgan's own: seven two-line roster
+# descriptions written onto issue #36 with no standard consulted, under a stated requirement of "not
+# overly verbose or mentally taxing".
+prose_facet:
+  goals:
+    - Pick a feature off the roster from its two lines alone, without opening its brief
+    - Have the thirty seconds the bound protects spent on words that carry information
+    - Read a teammate's projected reasoning without reconstructing the sentence first
+  frustrations:
+    - A bounded block can have every cell inside it padded and still pass every check
+    - The one place brevity was the explicit acceptance criterion is the place no standard was applied
+    - A two-line description that spends a line on framing has half the room it looks like it has
+  mental_model:
+    - Rows are bounded by a count; sentences are bounded by a standard, and I need both
+    - The writer that regenerates the block whole can apply a standard without becoming two writers
+    - There is nothing to edit in a glyph, so a pass over derived cells could only be a second author
+    - A projection I cannot read in one pass is not transferable, whatever its row count says
+  vocabulary:
+    - composed sentence vs derived cell, one-writer rule, row bound vs word budget,
+      two-line description, summarising clause, thirty-second read

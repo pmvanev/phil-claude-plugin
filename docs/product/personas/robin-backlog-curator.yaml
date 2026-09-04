@@ -47,3 +47,29 @@ setup_facet:
   vocabulary:
     - probed, declared, assumed, provenance label, delimited region, partially probeable,
       instance constant, silent-success hazard, drift report
+
+# Prose facet — added by DISCUSS wave, feature: board-prose-standard (2026-09-04, issue #40).
+# Robin one step LATER than the setup facet: the board's constants are known, the cards are structurally
+# well-formed, and the remaining complaint is that reading them still costs two passes. No new persona
+# was created — a "reader of machine-written prose" was considered and rejected, because Robin reads
+# prose that IS this job's output rather than an ask that interrupts it. Contrast
+# ari-interrupted-decider, which was a new persona precisely because that position is orthogonal to any
+# domain; here the role is identical and only the quality bar moved.
+prose_facet:
+  goals:
+    - Read a card's purpose once and decide, rather than parsing it and then deciding
+    - Have my own answer written back tightened, not padded, and still labelled as mine
+    - Trust that a closing comment on an irreversible act will still be legible in six months
+  frustrations:
+    - A body can satisfy all four structural items and still be passive and twice the length it needs
+    - The tools that write onto cards are the only ones that name no standard for writing
+    - Being present and being readable are different properties, and only the first is checked
+    - A citation that satisfies an automated check while changing nothing reads as compliance
+  mental_model:
+    - Judging someone else's prose is taste; applying a house standard to my own output polices nobody
+    - Structural checks and prose standards measure different things — neither implies the other
+    - A standard with no fixture is a mention, and this board has been bitten by mentions twice
+    - Tightening my answer is fine; writing an answer I did not give is not — the label is what separates them
+  vocabulary:
+    - composed vs derived, structural vs prose, judging vs generating, house standard,
+      mention-versus-mechanism, provenance label, two-sided KPI
