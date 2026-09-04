@@ -1,0 +1,15 @@
+{
+  "fixture": "21-feature-tier-block-unchanged",
+  "situation": "TWO arms, because the bound bounds from above and only one arm exercises that. (A) a single feature with a roadmap.json -- fixture 01's exact input. (B) the SAME feature with NO roadmap.json -- fixtures 07 and 14's branch, where the correct rendering is ONE table and a bound written as `exactly one` would wrongly demand two. Both must render byte-identically to what shipped before the story tier existed.",
+  "artifacts": {
+    "docs/feature/url-capture/feature-delta.md": "NO `Story:` line at column 0",
+    "docs/feature/url-capture/slices/": "3 slice briefs; slice 02 current",
+    "docs/feature/url-capture/deliver/roadmap.json": "3 phases",
+    "arm_B": "docs/feature/url-capture/deliver/roadmap.json ABSENT; 3 slice briefs; renders the slice roster and NO step table"
+  },
+  "forge_state": {
+    "host": "github"
+  },
+  "expected_outcome": "FEATURE-TIER-UNCHANGED",
+  "expected_guard": "the restated bound is a ceiling, not a floor; arm B is the branch a floor-reading breaks, and arm A alone cannot detect it"
+}

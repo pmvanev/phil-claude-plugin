@@ -1,4 +1,11 @@
 # Journey (SSOT) — bootstrapped by DISCUSS wave, feature: single-issue-per-feature (2026-08-14)
+#
+# SCOPED 2026-09-04 by DISCUSS wave, feature: story-spans-features (issue #36). This journey describes a
+# FEATURE card and remains exactly correct for one: a feature that declares no story membership takes
+# this path unchanged. Where a feature declares `Story: <slug> · position NN`, the card is the story and
+# journeys/story-spans-features.yaml is the read — it inherits `open`, `claim`, `work`, `divert`,
+# `put-down` and `refresh` from here verbatim and adds the tier above them.
+# WHAT WAS EXTENDED HERE: this comment only. No step, artifact, arc or error path is edited.
 
 id: single-issue-per-feature
 name: Understand a feature's state in seconds, and hand it over without a briefing

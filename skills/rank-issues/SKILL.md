@@ -26,9 +26,11 @@ One flat order across a whole backlog has to be re-cut every time an issue arriv
 | Between goals | milestone **due date** | **yes** |
 | Within a goal | board **position** | needs a re-rank, but only inside that one goal |
 
-**In an nWave repo the ranked unit is the FEATURE card, not a slice.** One issue is one feature there
-(`phil:nwave-issue-board`), so a feature holds one position and its slices hold none — they are rows in
-its roster. **An order inherited from a board that carried slice cards must be re-derived, not adjusted**:
+**In an nWave repo the ranked unit is THE CARD** — a **feature** card, or a **story** card holding
+several features (`phil:nwave-issue-board`). A card holds one position; whatever sits inside it holds
+none. A feature's slices are rows in its roster, and a story's member features are rows in *its* roster.
+*(This read "the ranked unit is the FEATURE card, not a slice" until 2026-09-04. A card may now span
+several features, so "one issue is one feature there" is no longer true.)* **An order inherited from a board that carried slice cards must be re-derived, not adjusted**:
 it ranked a unit that no longer exists, and nudging it forward preserves a sequence whose subject changed.
 
 A new issue then costs a goal assignment and one position — not a re-cut. **A milestone is a goal**
@@ -44,10 +46,25 @@ than an unranked one.
 List the unranked issues with their current column order, and say plainly that the order shown may
 never have been chosen. Exclude anything already ordered upstream.
 
-**Detect slice cards here.** In an nWave repo the ranked unit is the feature card, so cards carrying
-`slice NN`, or sitting as sub-issues of another card, mean the board predates one-issue-per-feature. Say so
-and stop: ranking them produces an order over a unit that is going away, and `phil:groom-set`'s
-consolidation is what comes first.
+**Detect slice cards here.** In an nWave repo the ranked unit is **the card** — a feature card **or** a
+story card, whichever the board carries. Cards carrying `slice NN`, or sitting as sub-issues of another
+card, mean the board predates one-issue-per-feature. Say so and stop: ranking them produces an order over
+a unit that is going away, and `phil:groom-set`'s consolidation is what comes first.
+
+**A story card does not stop the session, and gets exactly one position.** It is a card, so it ranks like
+any other; its member features hold **no** position of their own, because they are rows inside it rather
+than cards on the board.
+
+**Check this one BEFORE the slice-card stop above.** A member feature carded beside its own story *and*
+sitting as that story's sub-issue satisfies both, and the slice-card stop would then report the wrong
+diagnosis — *the board predates one-issue-per-feature* — about a board that does not.
+
+**A story card and one of its own member features both open is a different defect, and it does stop.**
+Say so and stop, naming `/phil:groom-set` — the member should be a row in the story, not a card beside it,
+and ranking both puts one unit in the queue twice. **Reuse `phil:groom-issues`'s *features of one
+story, carded separately* class rather than writing a second detector here** — same evidence, read from
+the other side; two detectors over one defect drift apart. **`phil:groom-issues` is REQUIRED BACKGROUND
+for this section**, alongside `phil:issue-board`.
 
 ### 2. GOALS
 
@@ -152,9 +169,11 @@ Five failure modes, each of which reports success:
   scheme exists to avoid; give the new issue a goal and one position.
 - **Adjusting an order whose unit no longer exists.** On a board that carried slice cards before
   one-issue-per-feature, the existing order ranked slices. Nudging it forward succeeds, looks ranked, and
-  preserves a sequence over a unit that is now a table row. **Re-derive over the feature cards; do not
-  adjust.** Consolidation (`phil:groom-set`) is the only event that produces this, so it is also the signal
-  to look for it.
+  preserves a sequence over a unit that is now a table row. **Re-derive over the cards that exist now —
+  feature cards, story cards, or both; do not adjust.** Consolidation (`phil:groom-set`) is the only event
+  that produces this, so it is also the signal to look for it. **Naming only one tier here would read as
+  permission at the other**, and consolidating features into a story produces exactly this situation one
+  level up: an order that ranked features, over a board that now ranks stories.
 
 ## Known limit — deferred work has no outcome
 

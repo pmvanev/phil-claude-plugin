@@ -232,6 +232,13 @@ and say which one is authoritative.
 
 ### A milestone is a goal, and its due date is the only order that survives
 
+**A goal is not a story, and the discriminator is what each can hold: a goal holds *cards*; a story
+holds *feature directories*.** A goal is this milestone slot — a due date, unrelated work grouped by
+design, an ordering that survives new cards arriving. A story is itself **a card** and can never hold
+another; it groups several nWave features *inside* one issue (`phil:nwave-issue-board`). Positionally:
+a list of issues is a goal, the inside of one issue is a story. Both group several features and they are
+not alternatives — milestones do not nest, and neither replaces the other.
+
 **One issue carries at most one milestone.** Verified on `glab` 1.112.0 (*"Set to `""` or 0 to
 unassign"*) and `gh` 2.97.0 (`--milestone` singular, plus `--remove-milestone`). That slot is spent
 once, so what it means is a real decision — and the decision is: **a milestone is a goal**, on both

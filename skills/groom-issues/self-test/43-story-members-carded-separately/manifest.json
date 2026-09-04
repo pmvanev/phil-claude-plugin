@@ -1,0 +1,12 @@
+{
+  "fixture_id": "GROOM-SELFTEST-43",
+  "phase": "SET-LEVEL",
+  "situation": "Four open cards, each a whole nWave feature, whose feature-delta.md files all declare `Story: chat-everywhere` at column 0 -- confirmed present on the default branch with git ls-tree. Nothing on the forge groups them, so `ungrouped effort` also fires and would propose a MILESTONE. The right container is a story card, and the milestone offer is the failure this fixture pins.",
+  "forge": "github",
+  "command": "/phil:groom-set",
+  "expected_decision": [
+    "SURFACE-CANDIDATE",
+    "APPLY-CONSOLIDATE"
+  ],
+  "expected_guard": "reported as one set; the offered container is a STORY CARD; ungrouped effort is superseded and its milestone offer suppressed"
+}

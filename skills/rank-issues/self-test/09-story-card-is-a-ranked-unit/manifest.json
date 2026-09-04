@@ -1,0 +1,8 @@
+{
+  "fixture_id": "RANK-SELFTEST-09",
+  "situation": "A board holding one feature card and one story card, both open, both unranked. The story card holds four features as roster rows. Before the story tier the ranked unit was the feature card and a card that was not one stopped the session.",
+  "forge": "github",
+  "command": "/phil:rank-issues",
+  "expected_decision": ["RANKED"],
+  "expected_guard": "the session does NOT stop; both cards rank; the story card gets exactly ONE position and its four member features get none"
+}

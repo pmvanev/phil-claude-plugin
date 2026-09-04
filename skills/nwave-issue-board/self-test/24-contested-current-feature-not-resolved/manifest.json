@@ -1,0 +1,12 @@
+{
+  "fixture": "24-contested-current-feature-not-resolved",
+  "situation": "`phil:nwave-slice-status --story-state` returns `current feature contested — position 02 claimed by chat-in-web-ui and saved-sessions`, because two members declare the same position and the owner refuses to invent an order. The story block is built around a single current feature whose slices are enumerated, so the renderer has no member to expand -- and picking one would manufacture the fact the deriver withheld.",
+  "artifacts": {
+    "owner_returns": "Story: chat-everywhere — in progress · 1 of 4 features done · current feature contested — position 02 claimed by chat-in-web-ui and saved-sessions"
+  },
+  "forge_state": {
+    "host": "github"
+  },
+  "expected_outcome": "CONTESTED-CURRENT-NOT-RESOLVED",
+  "expected_guard": "the feature roster renders in full; NO slice roster is rendered; the contested statement replaces the current-feature heading rather than a chosen member"
+}

@@ -1,0 +1,16 @@
+{
+  "fixture": "25-three-waves-one-label",
+  "situation": "A four-feature story whose members sit in THREE different waves: position 01 post-DELIVER, 02 in DESIGN and current, 03 in DISCUSS, 04 with no wave declared. One card, one Status field, one label slot.",
+  "artifacts": {
+    "aws-bedrock-setup": "position 01 · done · past DELIVER",
+    "chat-in-web-ui": "position 02 · in progress · `wave: design` · CURRENT",
+    "saved-sessions": "position 03 · to do · `wave: discuss`",
+    "chat-ui-in-extension": "position 04 · to do · no wave label"
+  },
+  "forge_state": {
+    "host": "github",
+    "existing_labels": ["wave: discuss"]
+  },
+  "expected_outcome": "ONE-LABEL-CURRENT-FEATURE",
+  "expected_guard": "exactly one wave label, equal to the CURRENT feature's wave; the stale `wave: discuss` is removed in the same call that adds `wave: design`"
+}

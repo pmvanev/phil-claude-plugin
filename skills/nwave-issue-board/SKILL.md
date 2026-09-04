@@ -1,6 +1,6 @@
 ---
 name: nwave-issue-board
-description: Use for any GitLab or GitHub board or tracker work in an nWave repo — one holding `.nwave/` or `docs/feature/` — including putting a feature on the tracker as a single card, generating the slice roster and current-slice step table inside it, ordering those rows to match the roadmap, recording which wave a feature is in, or deciding what a feature, slice, and step each become in a forge. Read this before `phil:issue-board` whenever those directories exist. Covers only the mapping; `phil:issue-board` owns the forge mechanics and `phil:nwave-slice-status` owns the status.
+description: Use for any GitLab or GitHub board or tracker work in an nWave repo — one holding `.nwave/` or `docs/feature/` — including putting a feature on the tracker as a single card, generating the slice roster and current-slice step table inside it, ordering those rows to match the roadmap, recording which wave a feature is in, or deciding what a story, feature, slice, and step each become in a forge, putting a multi-feature story on the board as one card. Read this before `phil:issue-board` whenever those directories exist. Covers only the mapping; `phil:issue-board` owns the forge mechanics and `phil:nwave-slice-status` owns the status.
 ---
 
 # nWave Features on a Forge Board
@@ -27,7 +27,8 @@ issue is ever written back into `docs/feature/`.
 
 | nWave artifact | Forge object |
 |---|---|
-| Feature — `docs/feature/<id>/` | **One issue. This is the card that moves.** Carries the wave. |
+| Story — several features declaring one slug | **One issue**, where any feature declares membership. The card that moves. |
+| Feature — `docs/feature/<id>/` | **One issue** where it declares no story; **a row in the story's feature roster** where it does. Carries the wave either way. |
 | Slice — `slices/slice-NN-*.md`, or roadmap phase `NN` | A row in the feature's generated roster. Never its own issue. |
 | Step — `roadmap.json` step `NN-MM` | A row in the feature's step table, **for the current slice only**. Never its own issue. |
 
@@ -103,6 +104,28 @@ skill owns the vocabulary and defines **seven** values; this table is a renderin
 | `deferred` | `⊘` |
 | `unknown` | `?` |
 
+**The feature roster renders a DIFFERENT vocabulary, and conflating them is a defect.** Slice rows carry
+the seven step statuses above; feature rows carry the **six** values `phil:nwave-slice-status` folds —
+there is no `next` at feature level, and `current` is `in progress`:
+
+| Feature state | Glyph |
+|---|---|
+| `done` | `✓` |
+| `in progress` | `▶` |
+| `to do` | `·` |
+| `blocked` | `!` |
+| `deferred` | `⊘` |
+| `unknown` | `?` |
+
+**Two glyphs are reused, not one.** `▶` is `current` at slice level and `in progress` at feature level;
+`·` is `not started` at slice level and `to do` at feature level. **`·` is the more dangerous reuse**,
+because it is the degrade target the no-glyph rule below exists to forbid. Both are safe only because
+the vocabularies never share a table — which is the second ground for refusing an indented tree — and
+because every row prints its state word beside the glyph. **The property to preserve is the one the slice vocabulary
+already carries: every value the owner can return has a glyph.** A value with no glyph must **fail**,
+never degrade to `·` — that is the unknown-published-as-not-started defect at feature scale, and it is
+worse here because a feature row stands for a whole feature.
+
 **Every value it can return has a glyph, and that is the property to preserve.** A value added there needs
 one added here, or the generator faces a status it cannot render and will downgrade it — and downgrading
 `blocked` or `unknown` to `·` is the *unknown-published-as-not-started* defect wearing a new costume. Never
@@ -123,6 +146,35 @@ the whole thirty-second budget the projection exists to fit inside.
 **Record the wave as a label** — `wave::deliver`, or `wave: deliver` where scoped labels are
 unavailable — and restate it in the generated block. The routing table below is keyed on the
 `wave: <name>` form, so use that form wherever the label is written or read.
+
+**On a story card the label is the CURRENT FEATURE's wave** — still exactly one, still swapped never
+added. A story does not have a wave of its own; its members do, and the current one is the only member
+whose wave a reader can act on.
+
+**It is therefore NOT monotonic, and that is correct output rather than a bug.** When the current
+feature finishes and the next begins, the label steps **backwards** — DELIVER to DISCUSS — because a new
+feature starts at the beginning.
+
+**Every story block carries this clause, verbatim, on its own header line — not only the blocks where a
+backwards step just happened:**
+
+```
+Wave note: a story's wave is its current feature's, so it moves backwards when one feature finishes and
+the next begins. That is correct.
+```
+
+**On every story block, and the alternative reading is the one that fails.** A clause emitted only at the
+transition is gone by the next refresh — and the reader who "corrects" the label forwards is by
+construction a *later* reader, so a transition-only clause is absent at exactly the moment it exists for.
+The block is regenerated whole, so there is nowhere for such a clause to persist anyway. Fixed wording,
+because the block is generated and never typed; a clause each run invents is a clause that drifts.
+
+*Rejected: `wave: mixed`.* It names no command, so the routing line dies with it, and it hides which
+member is actually moving — the one fact the label exists to carry.
+
+*Rejected: multi-valuing the label on story cards.* It resurrects the measured four-accumulated-labels
+failure and breaks the single-valued declaration `phil:groom-issues` rule 4 reads, which is normative in
+every nWave repo. **If the story tier needed that declaration changed, the story tier would be wrong.**
 
 **The wave label is single-valued and must be swapped, not added.** Where scoped labels are
 unavailable, nothing enforces that, so a feature walked from DISCUSS to DELIVER accumulates four
@@ -147,6 +199,13 @@ right for a reason its record never captured, and refuting a recorded rationale 
 it was offered for. **Before reversing a decision, ask what else could have justified it.**
 
 Board columns therefore hold the **feature-level state** from `phil:nwave-slice-status`, not the wave.
+
+**A story card's column comes from `--story-state`, asked for exactly as the feature state is.** Same
+rule, same reason, one level up: the fold across features is a derivation, it lands with
+`phil:nwave-slice-status`, and a fold written here would be this skill's recurring defect committed a
+second time in the same file that documents it. Nothing in this skill computes a state — feature or
+story. The six states and the four columns below apply unchanged to a story card, `deferred` and
+`unknown` included.
 
 **Do not fold a feature-level state here. Ask for one.** `phil:nwave-slice-status` owns every derivation
 over these files and, as of 2026-08-14, exposes a feature-level state on request under *The feature-level
@@ -201,6 +260,10 @@ real board**, and nothing here needs them now.
 What remains is the order of the **feature** cards within a column, which is `phil:issue-board`'s under
 *A column is a queue, so its order is a claim*.
 
+- **At the story tier the order is the declared `position`, and the line says so:**
+  `Order: feature position as declared · slice order <as below>`. Where a member declares no position it
+  **sorts last and the line says that too** — `phil:nwave-slice-status` returns it that way and never
+  invents one. Where two members claim one position the owner returns `contested`; see below.
 - **Array order, not id order.** Where anything else implies a different sequence — the slice numbers, a
   dependency noted in a slice file — the array still decides.
 - **Before `/nw-roadmap` there is no schedule.** Order the roster rows by slice file number ascending,
@@ -244,8 +307,66 @@ Publish `nwave-slice-status`'s table **with its `Notes` column intact**. Notes i
 disagreeing sources, and missing artifacts are recorded, and dropping it on the way to the forge
 sends the cleanest-looking version of the table to the largest audience.
 
-**The roster and the current slice's steps are the only tables in the block.** Header lines precede them:
-`Wave:`, the generation timestamp, `Work this with:` where the routing table has a row, and `Order:`. Below
+**At most one feature's slices are enumerated, and — where a `roadmap.json` exists — at most one
+slice's steps. Every other FEATURE is a row with a link.** That is the bound, stated as its purpose
+rather than as a count, because a count does not survive the story tier and a purpose does.
+
+**It bounds from above only.** *At most* is deliberate and load-bearing: a feature before `/nw-roadmap`
+publishes a roster and **no step table at all**, and a card with no slices yet publishes neither. Written
+as *exactly one*, this sentence would make those cards non-compliant — it would convert a ceiling into a
+floor and demand tables the artifacts cannot supply. Two shipped fixtures occupy that branch.
+
+**"Every other feature" means features, and only features.** The bound is scoped at the feature tier
+because that is the only tier a story adds. Non-current *slices* are governed where they always were —
+they are rows in the roster with links to their briefs, unchanged. Naming the tier matters: read as
+ranging over slices, this sentence would put links in a feature-tier roster that has never carried them
+and would break the identity claim below.
+
+**At the feature tier this produces exactly what it always did**, unchanged: one feature, so its slices
+are the one enumerated roster, and its current slice — *if a roadmap exists* — the one enumerated step
+table. A card carrying no story declaration renders byte-identically to what shipped before the story
+tier existed. That identity is the test of a faithful restatement, not a happy accident, and a fixture
+pins it on **both** branches, with and without a roadmap.
+
+At the story tier the same sentence yields the feature roster, the current feature's slice roster, and —
+where a `roadmap.json` exists — the current slice's steps.
+
+**Refusals, written as refusals because a bound stated only positively gets read as a minimum:**
+
+- **No slice roster for any feature but the current one.** Four features of six slices is 24 slice rows
+  on top of the 4 feature rows — 28 — where the bound gives 10. The budget is the **thirty-second read**
+  measured on the predecessor, not a row count: `phil:nwave-slice-status` fixture 17 publishes 26 rows
+  legitimately, because 22 of them are one feature's roster and the bound is about *what is enumerated*,
+  not about how many rows result.
+- **No step table for any slice but the current one.** Unchanged from the feature tier.
+- **No slices indented as sub-rows of the feature roster.** This is the wrong reading of "demoted a
+  level" and it looks like the right one: an indented tree in one table renders the same N×M, flat, with
+  better typography. The correct answer and the failure are one word apart. **Two independent grounds
+  refuse it, and the second survives where the first does not:** it breaches the bound at scale, *and* it
+  puts both glyph vocabularies in one table — `▶ in progress` on a feature row directly above `▶ current`
+  on a slice sub-row — which is exactly the collision the vocabularies are only safe without. The second
+  ground holds even at two features of one slice, where the scale argument evaporates.
+  **The remedy: slices move to a second table scoped to the current feature.** A refusal that does not
+  say what to do instead gets worked around.
+- **No collapsed or `<details>`-wrapped rows.** A disclosure widget does not discharge the bound. Rows a
+  reader must expand are still rows, and a forge that does not render the widget shows all of them.
+- **No per-feature `Why` / `Next` / `Stack`.** A story card carries exactly one, because **a stack
+  belongs to a person, not to a feature**, and the person is the same across the whole story.
+
+**The current feature is bolded *and* linked, exactly like a sibling.** Only its slices are
+enumerated; that is what "current" buys, and it is no reason to withhold its delta from a reader who
+wants the detail behind the roster. Found by regenerating a real card from this rule on 2026-09-04 and
+diffing it against the hand-build: the rule said *every sibling* gets a link and was silent on the
+current row, so the two renderings disagreed. Silence in a rule is a gap, not a permission.
+
+**Every sibling link is summarised, not bare** — one clause saying what it holds. Promoted to a rule
+from the predecessor's slice 01, where a reader volunteered *"I like that the artifacts are all linked
+**and summarized**"* and nothing required it. Six bare URLs consume the whole read budget.
+
+Header lines precede the tables:
+`Wave:`, the generation timestamp, `Work this with:` where the routing table has a row, and `Order:`.
+**A story block additionally carries `Story:` and `State:` above them and the `Wave note:` clause below
+`Wave:`** — five header lines rather than three, and all five are mandatory there. Below
 them, when a snapshot has been projected, come the `Why` / `Next` / `Stack` sections described under
 *Project the reasoning, not just the position*.
 
@@ -268,6 +389,68 @@ Current slice 02 — steps:
 | 02-02 | Rejects a payload whose shape has drifted | ▶ current | ⚠ no commit found |
 <!-- nwave:status:end -->
 ```
+
+**A story card carries one more table and one more header line.** Same markers, same generation
+discipline, same refusals:
+
+```
+<!-- nwave:status:begin -->
+Story: chat-everywhere · 4 features · generated 2026-09-04T17:30Z
+State: in progress — from `phil:nwave-slice-status --story-state chat-everywhere`
+Wave: DESIGN · current feature chat-in-web-ui
+Wave note: a story's wave is its current feature's, so it moves backwards when one feature finishes and
+the next begins. That is correct.
+Work this with: /nw-design · feature chat-in-web-ui
+Order: feature position as declared · slice order by slice number — provisional until /nw-roadmap
+
+| # | Feature | What it does | State | Notes |
+|---|---|---|---|---|
+| 01 | [aws-bedrock-setup](…) | Stands up the model endpoint the other three call.<br>Nothing else can be demoed until this answers. | ✓ done | |
+| 02 | **chat-in-web-ui** — [delta](…) | Puts a chat surface in the web client.<br>The first feature a user can see. | ▶ in progress | |
+| 03 | [saved-sessions](…) | Persists a conversation across reloads.<br>Depends on 02's transcript shape. | · to do | |
+| 04 | [chat-ui-in-extension](…) | Ports the web surface into the extension.<br>Last, because it consumes 02's settled shape. | · to do | no wave declared yet |
+
+Current feature 02 chat-in-web-ui — slices:
+
+| Slice | What it does | Status | Notes |
+|---|---|---|---|
+| 01 | Renders a transcript from a canned response.<br>Disproves the streaming assumption if it fails. | ✓ done | |
+| 02 | Streams a live response into the transcript. | ▶ current | |
+| 03 | Handles a mid-stream disconnect.<br>The first error path a user can hit. | · not started | |
+| 04 | Persists the transcript for the session's life. | · not started | |
+| 05 | Renders markdown in a streamed response. | · not started | |
+| 06 | Adds the stop-generating control. | · not started | |
+<!-- nwave:status:end -->
+```
+
+**Ten rows for a four-feature story** — four features plus the current feature's six slices, and no
+third table because this feature has no `roadmap.json`. The unbounded rendering is 4 + 24 = **28**. The
+other three features contribute one row and one summarised link each, which is the bound doing its work:
+enumerating their slices too would cost eighteen more rows and buy nothing a reader asked for. This is
+the scenario fixture `20` pins, and the two must agree.
+
+**`State:` carries what `--story-state` returned, verbatim.** It is a header line rather than a column
+because it describes the card, not a row. Two of the six states — `deferred` and `unknown` — write **no
+column**, and the block is where that gets said, exactly as at feature tier.
+
+**Where the owner returns a contested or absent current feature, render that and enumerate nothing.**
+`phil:nwave-slice-status` refuses to resolve a position collision, and where every member is `done` it
+omits the current feature entirely. Both cases reach here, and in both the heading becomes a statement
+instead of a subject:
+
+```
+Current feature: contested — position 02 claimed by chat-in-web-ui and saved-sessions. No slice roster.
+Current feature: none — every member is done.
+```
+
+**The header lines follow the same rule: no current feature, no wave label and no routing line.** Both
+derive from the current feature and nothing else, so where the owner withholds it the card writes
+neither, and the block says which case it is. Writing a wave taken from a contender is the same
+invention as expanding that contender's slices, one line higher up and easier to miss.
+
+**Picking one of the contenders so a slice roster can be rendered is this skill's recurring defect in
+its newest costume** — the renderer inventing the exact fact the deriver deliberately withheld. An
+absent slice roster is the honest rendering of an unresolved order.
 
 Replace only what is between the markers. Both forges appear to replace a description wholesale on
 update, so regenerating without markers destroys any prose a human added — confirm that against
@@ -375,14 +558,50 @@ Three rules:
 
 - **The wave label is the source.** Derive the line from the label at generation time; never carry a
   routing line the label does not support.
+- **On a story card there is no member label to read, so the source is the member's own artifact.** A
+  story member has no card — it is a roster row — so it carries no label and the roster has no wave
+  column. Take the wave from the current feature's `docs/feature/<id>/feature-delta.md` header, which is
+  where an nWave feature records it. **`phil:nwave-slice-status` does not return a wave**; asking it for
+  one gets a state. And never derive the routing line from the *story card's own* label, which is this
+  rule's output.
 - **No label, no line.** A card outside a wave gets no `Work this with:` line — emit nothing rather
   than guess. Most cards on a mixed board are not nWave work.
+  **This is the one rule that does NOT transfer unchanged to the story tier.** Its licence for silence is
+  that the card may not be nWave work at all — and a story card is nWave work by definition, so that
+  explanation can never apply there. **A story card with no wave says why it has none**, exactly as the
+  no-row branch does.
 - **No row, no line — and say why.** This table covers the seven nWave waves and nothing else. A repo
   whose build path leaves those waves has no owning command here, so emit no line **and state that the
   table does not cover it**, rather than leaving a reader to wonder whether the line was omitted or
   forgotten. Observed in this plugin's own repo 2026-08-14: it runs DISCUSS and then authors prose with
   `plugin-dev`, so a post-DISCUSS feature has no row, and the card says so in as many words. **The
   routing table does not cover the build path of the repo that owns it.**
+- **On a story card the line names the command AND the feature it applies to** —
+  `Work this with: /nw-design · feature chat-in-web-ui`. A bare command on a multi-feature card asserts
+  the command owns the *story*, and none of them does.
+- **No line ever names a command for the story.** There is no story-scoped wave command, and inventing
+  one — or letting a bare command imply it — sends a reader to run something over a scope it was never
+  written for. The three rules above apply unchanged at this tier: the label is still the source, no
+  label still means no line, and no row still means no line **with the reason stated**. This repo is
+  its own example at the story tier too: both members of its one real story are past DISCUSS on a build
+  path the table has no row for, so its card carries no routing line and says why.
+- **Where two members are `in progress` at once, the label is still the current feature's wave — and
+  this skill does not decide which that is.** `phil:nwave-slice-status` § *The story-level state* already
+  defines it: **the first member, in `position` order, whose state is not `done`** — which is not
+  necessarily the first member that is `in progress`. **Every other in-flight member's Notes cell carries
+  `⚠ also in flight`.**
+
+  **Do not write "the first in-flight member" here.** That is a second definition of `current feature`,
+  and it disagrees with the owner's on a roster like `01 to do · 02 in progress · 03 in progress`, where
+  the owner answers **01** and a first-in-flight rule answers **02**. The block would then name one
+  feature in its header, expand another's slices, and route to a third state of affairs entirely. **A
+  fixture whose roster makes both rules agree pins neither**, which is why the disagreeing roster has a
+  fixture of its own.
+
+  The block neither hides the ambiguity nor resolves it. Two features genuinely in flight is a defect in
+  the card, which `phil:groom-issues` **will** report — that check lands in this feature's slice 05, and
+  **until then the block is the only place the state is visible at all**, which is a stronger reason to
+  render it faithfully, not a weaker one.
 - **This line names; it does not launch.** It tells a reader which command owns the work. Nothing
   here runs anything.
 
@@ -434,7 +653,18 @@ does not is indistinguishable from current.
 
 ## Self-test (regression gate)
 
-`skills/nwave-issue-board/self-test/` holds golden fixtures that pin these behaviors: the
+`skills/nwave-issue-board/self-test/` holds golden fixtures that pin these behaviors. **Ten were added
+2026-09-04 with the story tier**: the bound holding at four features — 10 rows where the product would
+give 24 (20); a single-feature card rendering **byte-unchanged** against the restated bound, which is the
+test that a restatement restated rather than replaced (21); an **indented** feature/slice tree refused,
+which the bound's old count-form would have passed because it is one table (22); a feature state with
+no glyph **failing** rather than degrading to `·` (23); and a **contested** current feature enumerating
+nothing rather than picking a contender, which is the renderer inventing what the deriver withheld (24);
+one wave label across three waves (25); the label stepping **backwards** as correct output, with the
+explanation without which someone repairs it (26); this repo's own no-routing-row case at the story tier
+(27); and two members in flight rendered rather than hidden or refused, because grooming's finding is
+made from that evidence (28); and the roster where the owner's current feature is **not** the first
+member in flight, which is the case fixture 28 cannot separate (29). The rest pin: the
 end-to-end publish (01, walking skeleton), the `Notes` column surviving the trip to the forge (02),
 `unknown` published as `unknown` rather than `not started` (03), a human-set state outranking a
 regenerated one (04), hand-written prose surviving a refresh that must replace the whole description

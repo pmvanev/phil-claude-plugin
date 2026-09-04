@@ -1,0 +1,14 @@
+{
+  "fixture": "26-backwards-step-is-correct",
+  "situation": "Fixture 25's story, refreshed one boundary later. Position 02 (chat-in-web-ui) has finished; position 03 (saved-sessions, `wave: discuss`) is now current. The label must move from `wave: design` to `wave: discuss` -- BACKWARDS in wave order. This is correct, and it is the one rule in this feature whose correct behaviour looks like a bug.",
+  "artifacts": {
+    "chat-in-web-ui": "position 02 · now done",
+    "saved-sessions": "position 03 · now in progress · `wave: discuss` · CURRENT"
+  },
+  "forge_state": {
+    "host": "github",
+    "existing_labels": ["wave: design"]
+  },
+  "expected_outcome": "BACKWARDS-STEP-EXPLAINED",
+  "expected_guard": "the label steps design -> discuss and the block carries the clause explaining why; an unexplained backwards step invites a 'correction' that reintroduces accumulation"
+}

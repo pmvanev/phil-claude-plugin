@@ -1,6 +1,6 @@
 ---
 name: nwave-slice-status
-description: Use when the user asks where an nWave feature stands — "how many steps are in this slice", "which ones are done", "which one are we on", "what's next", "is slice 03 next", "what was the point of slice 02". Renders a read-only step table from the feature's own artifacts and stops. Prefer over `/nw-continue`, which computes the same thing and then launches the next wave, and over `/nw-buddy`, which answers in prose — this produces a table and starts nothing. Also folds a feature-level state over every slice on request — "what state is this feature in", "which column does this card belong in" — for a caller placing the card on a board.
+description: Use when the user asks where an nWave feature stands — "how many steps are in this slice", "which ones are done", "which one are we on", "what's next", "is slice 03 next", "what was the point of slice 02". Renders a read-only step table from the feature's own artifacts and stops. Prefer over `/nw-continue`, which computes the same thing and then launches the next wave, and over `/nw-buddy`, which answers in prose — this produces a table and starts nothing. Also folds a feature-level state over every slice on request — "what state is this feature in", "which column does this card belong in" — and a story-level state over every feature in a story — "what state is this story in", "how far through the story are we" — for a caller placing the card on a board.
 ---
 
 # Slice Status
@@ -34,6 +34,8 @@ when neither carries one.
 | `03` or `slice 03` | Slice 03 of the resolved feature. |
 | `admin-field-triage 03` | Both. |
 | `--feature-state` | Emit the feature-level state instead of the tables — see *The feature-level state, on request*. Combines with a feature id; a slice number alongside it is a contradiction, because the fold always reads the whole roster. Say so and ask. |
+| `--story-state <slug>` | Emit the story-level state — see *The story-level state, on request*. Takes a story slug, never a feature id. A slice number or a feature id alongside it is a contradiction, for the same reason: the fold reads the whole story. Say so and ask. |
+| both `--feature-state` and `--story-state` | Two different questions at two scopes. Do not guess which was meant, and do not emit both. Say so and ask. |
 | No `docs/feature/` at all | Say so and stop. Suggest `/nw-new`. Do not search elsewhere. |
 
 **"Slice" means one of two things, and you must detect which.** Do not assume:
@@ -55,6 +57,7 @@ then its steps, then their status.
 
 | Artifact | Holds | Notes |
 |---|---|---|
+| `docs/feature/<id>/feature-delta.md` header | `Story: <slug> · position NN` — the feature's declaration that it belongs to a story | **Read only for `--story-state`.** One authority per fact: a feature declares its own membership and nothing declares it for that feature. Absent means the feature is in no story, which is the normal case. |
 | `docs/feature/<id>/slices/slice-NN-*.md` | A goal line plus IN/OUT scope prose, one file per slice | The most reliable slice roster, and the best source for the intent line. Often present when `roadmap.json` is not. |
 | `docs/feature/<id>/deliver/roadmap.json` | `phases[].steps[]` — `id`, `name`, `criteria[]`, sometimes `status` | Step structure within a slice, when it exists. |
 | `docs/feature/<id>/deliver/progress.md` | A narrative record, sometimes containing a step table | **Read carefully — see below.** |
@@ -73,7 +76,12 @@ Rendering a fixture table as a step table produces a confident, entirely wrong a
 there is no roadmap at all, report the slice as one row. Do not manufacture sub-steps to fill a table.
 
 **A slice file may declare itself out of scope.** Look for a `**Status:**` line, or a `DEFERRED` /
-`OUT of v<N>` marker in the heading. **That marker overrides every other source.** Report the slice
+`OUT of v<N>` / `RETIRED` / `SUBSUMED BY <slice>` marker in the heading, **or a `Retired <date>` /
+`Superseded by <slice>` line in the first few lines of the body**. **That marker overrides every other
+source.** The heading and body forms are not decoration: measured 2026-09-04, the only retired slice in
+this repo declares itself in its H1 (`— SUBSUMED BY SLICE 07`) and in body prose, and carried neither of
+the two forms this rule listed until then. A scan matching only `**Status:**` and `DEFERRED` counted it
+as not-done and folded a shipped, closed feature to `in progress`. Report the slice
 `deferred` and never as `next` — telling the user to build something its own slice file says to skip
 is the most actively harmful output this skill can produce. A slice present in `slices/` but absent
 from `roadmap.json` is `deferred` when marked and `unknown` otherwise; never `next`, never
@@ -223,10 +231,95 @@ delegate one. `phil:nwave-issue-board` consumes this and renders it; it does not
 Notes stays empty when the sources agree. Put drift, missing artifacts, and ambiguity there — one
 short clause each, not a paragraph.
 
-Then **stop**. No summary of the table, no offer to start the next step, no commentary on progress.
-The user asked where they are; they can see it.
+Then **stop** — after any of the three outputs, the table, the feature state or the story state. No
+summary, no offer to start the next step, no commentary on progress. The user asked where they are;
+they can see it.
 
 ---
+
+### The story-level state, on request
+
+A **story** is several nWave features worked as one piece by one owner, carried on one card. Emit a
+story-level state only when asked — by `--story-state <slug>`, or by a question that plainly asks for
+one (*"what state is this story in"*). `phil:nwave-issue-board` renders this value; it must never
+compute it. The story tier landed in `phil:nwave-issue-board` on 2026-09-04, so that renderer now
+exists and consumes this value; before then the publisher's mapping was defined over feature states
+only. *(This paragraph said the renderer did not exist yet. Shipping it falsified that — the fold-back
+that a route-1 finding lands in **both** skills, not only the one being edited.)*
+
+**Build the roster from the features' own declarations.** Scan `docs/feature/*/feature-delta.md` for
+`Story: <slug> · position NN` — **anchored at column 0, in the file's header region, at most one per
+file**. The story's roster is every feature declaring that slug, in `position` order.
+
+**The anchor is load-bearing, not tidiness.** These files discuss the convention as well as using it, so
+an unanchored match is wrong on the very repo that invented it: `story-spans-features/feature-delta.md`
+holds seven lines matching `Story:` and only the one at column 0 is a declaration. One decoy reads
+`Story: the-boards-unit-of-work · 2 features`, which parses as a second, conflicting declaration of the
+same slug. `**Story:** US-01` also appears in slice briefs elsewhere here for an unrelated concept.
+**A file matching twice at column 0 is a defect** — name both and do not pick.
+
+- **A feature with no `Story:` line is in no story.** That is the normal case and never an error.
+- **A missing `position` sorts last**, and Notes says the order was not declared.
+- **A position collision is named in Notes, never resolved.** Two features claiming position 02 is a
+  fact about the record; picking one invents an order the artifacts do not contain.
+- **Nothing here reads a forge.** Membership lives in `docs/feature/`, so this derivation stays a pure
+  read of artifacts — which is what lets the publisher stay a renderer.
+
+**The fold is the feature fold with features substituted for slices. It is not a second table, and
+must never become one** — two tables over the same seven tests drift, and preventing that drift is why
+this skill owns both folds. Apply *The feature-level state, on request* with exactly these
+substitutions:
+
+| In the feature fold, read | As |
+|---|---|
+| "slice" | "feature" |
+| a slice's status (seven values) | a feature's state, from the feature fold itself (six values) |
+| `current` | `in progress` |
+| `not started` | `to do` — the feature fold returns `to do`, never `not started`; without this row the final test's condition is unmatchable |
+| `next` | **absent** — the feature vocabulary has no such value, so no test can match it |
+| the roster is empty (no slice files, no roadmap phases) | **no feature declares this slug** — the guard row does not survive a literal substitution, and it is the row that matters most |
+
+Each member's state therefore comes from running the feature fold over that feature's own roster. A
+story fold is M feature folds and one application of the same table.
+
+**Render as one line, with the count beside it:**
+
+```
+Story: <slug> — <state> · N of M features done · current feature <id>
+Notes: <one short clause per defect, one per line; omitted entirely when the sources agree>
+```
+
+**`current feature` is the first member, in `position` order, whose state is not `done`.** Omit it
+entirely when every member is `done`.
+
+**Where the position order is contested, the ordinal does not resolve — say so in its place:**
+
+```
+Story: <slug> — <state> · N of M features done · current feature contested — position NN claimed by <a> and <b>
+```
+
+The state is quantified over members, not over their order, so a collision cannot change it. What a
+collision *does* change is `current feature`, the field a reader acts on when asking what to work on
+next. Emitting a winner there — by directory name, by mtime, by discovery order — invents the one fact
+the artifacts do not contain, and the result is indistinguishable from a story whose positions were
+declared correctly. Report the state, withhold the ordinal.
+
+**The guard matters more here, and it must be tested on its conjunction.** The empty-roster row exists
+because every universal below it is vacuously true over an empty set, so an unguarded fold answers
+`done`, `phil:nwave-issue-board` maps `done` to Done, and auto-close turns the rendering into a closed
+issue. One level up, that closed card holds **N features**. Two emptinesses are distinct and resolve
+differently:
+
+- **No feature declares the slug** — the roster is empty. `unknown`, **no count**, and say the slug
+  matched nothing. Guard row.
+- **Features declare the slug but every one folds to `unknown`** — the roster is populated. `unknown`
+  **with a count**, from the existential row, and Notes names the unreadable members.
+
+A guard weakened to one clause stays green on the other, which is why both are pinned.
+
+**A story is never `next`, and never inherits a slice's status directly.** Reading a member's *slice*
+status where its *feature* state is required crosses two vocabularies and produces a value the six-state
+table cannot render.
 
 ## Degrade honestly
 
@@ -263,6 +356,14 @@ evidence.
 Fixture 04 is the one actively harmful case: positionally the deferred slice *is* next, and its own
 file says not to build it. Every other failure misinforms; that one directs.
 
+Fixtures `16`, `17` and `18` pin the **story-level** fold added 2026-09-04. `16` is the happy path over
+the repo's own real story, and it asserts the **count** rather than the state — a member folded wrongly
+leaves the story answering `in progress` either way, so `1 of 2` is the only field that moves. `17` is
+`14` one level up and must not be trimmed on the grounds that `14` covers it: a shared shape is not a
+shared test, and `17` additionally pins the **conjunction** an empty-slug case and an all-unknown-members
+case reach by different rows. `18` pins that a contested `position` withholds the ordinal instead of
+inventing one.
+
 Whenever this skill or `commands/nwave-slice-status.md` changes, drive the fixtures per
 `self-test/README.md` and confirm each produces its `expected.md` decision. Every failure mode here
 is silent: the wrong answer arrives as a clean, confident table.
@@ -273,10 +374,16 @@ a card's position on a board, read at a glance by people who will not open it. F
 the sixth current and not started — the fold answers `in progress`, and reading the current slice alone
 answers `to do`.
 
-Fixture `14` pins that same fold's other scope error, and it is the only fixture here whose failure
-**mutates** rather than misinforms. Over an empty roster — DISCUSS finished, never decomposed — every test
-the universals below it are vacuously true, so an unguarded fold answers `done`, `done` maps to the Done column, and
-auto-close turns the rendering into a closed issue. Added 2026-08-31 with the guard row it tests.
+Fixture `14` pins that same fold's other scope error. Over an empty roster — DISCUSS finished, never
+decomposed — the universals below the guard row are vacuously true, so an unguarded fold answers `done`,
+`done` maps to the Done column, and auto-close turns the rendering into a closed issue. Added 2026-08-31
+with the guard row it tests.
+
+**`14` and `17` are the two fixtures here whose failure *mutates* rather than misinforms, and `17`'s is
+the graver.** Both close an issue by answering `done` over an unassessed roster; `14`'s closed card holds
+one feature, `17`'s holds **N**. *(This paragraph read "`14` … is the only fixture here whose failure
+mutates" until 2026-09-04. Adding `17` falsified it, and the sentence was byte-identical to the version
+where it had been true — which is how a stale claim survives a review: nothing about it changed.)*
 
 Fixture `15` tests the guard's *conjunction* — roadmap phases with no `slices/` directory at all, where
 either source alone is a roster and the guard must stay quiet. It exists because `14` cannot fail a guard

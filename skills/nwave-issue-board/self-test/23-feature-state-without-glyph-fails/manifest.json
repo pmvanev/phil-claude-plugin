@@ -1,0 +1,12 @@
+{
+  "fixture": "23-feature-state-without-glyph-fails",
+  "situation": "`phil:nwave-slice-status` returns a feature state the glyph table does not cover -- simulated here by a seventh value, `superseded`, standing for any value a future version of the owner adds. The generator must FAIL rather than render a glyph it does not have.",
+  "artifacts": {
+    "owner_returns": "position 03 folds to `superseded`, a value not in the six-value feature vocabulary"
+  },
+  "forge_state": {
+    "host": "github"
+  },
+  "expected_outcome": "UNRENDERABLE-STATE-FAILS",
+  "expected_guard": "every value the owner can return has a glyph; an uncovered value fails loudly and is never degraded to `·`"
+}

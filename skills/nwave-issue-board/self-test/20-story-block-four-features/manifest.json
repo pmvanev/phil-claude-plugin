@@ -1,0 +1,18 @@
+{
+  "fixture": "20-story-block-four-features",
+  "situation": "Domain example 1. Four features declare `Story: chat-everywhere` at positions 01-04, with six slices each. Position 02 is current and has no roadmap.json. Rendering every slice of every feature would be 24 rows before a single step, against a thirty-second read. The bound must yield ONE feature roster plus ONE slice roster.",
+  "artifacts": {
+    "docs/feature/aws-bedrock-setup/feature-delta.md": "`Story: chat-everywhere \u00b7 position 01`; feature folds `done`",
+    "docs/feature/chat-in-web-ui/feature-delta.md": "`Story: chat-everywhere \u00b7 position 02`; feature folds `in progress`; 6 slice briefs, slice 02 current; NO roadmap.json",
+    "docs/feature/saved-sessions/feature-delta.md": "`Story: chat-everywhere \u00b7 position 03`; feature folds `to do`; 6 slice briefs",
+    "docs/feature/chat-ui-in-extension/feature-delta.md": "`Story: chat-everywhere \u00b7 position 04`; feature folds `to do`; 6 slice briefs; no wave label"
+  },
+  "forge_state": {
+    "host": "gitlab",
+    "tier": "free"
+  },
+  "story_state_from_owner": "in progress",
+  "expected_outcome": "STORY-BLOCK-BOUNDED",
+  "expected_rows": 10,
+  "expected_guard": "features + the current feature's slices, never the product; 18 unrendered sibling slices each reachable by one summarised link; unbounded would be 4 + 24 = 28"
+}

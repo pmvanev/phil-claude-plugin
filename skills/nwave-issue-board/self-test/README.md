@@ -15,7 +15,10 @@ These fixtures feed the skill known project and forge states and assert each pro
 `BLOCK-DELIMITED` / `WAVE-SWAPPED` / `NO-ROWS-BEFORE-ROADMAP` / `DEFERRED-ROW-NOT-OMITTED` /
 `GENERATED-ROSTER` / `ONE-WAY` / `OWNER-DECIDES` / `ROSTER-ORDER-FOLLOWS-ROADMAP` /
 `ORDER-STATED-AS-PROVISIONAL` / `ROSTER-NOT-CHECKBOXES` / `ROUTING-LINE-DERIVED` /
-`PROJECTION-BOUNDED` / `NO-COLUMN-WRITTEN` / `WHOLE-BLOCK-REGENERATED`).
+`PROJECTION-BOUNDED` / `NO-COLUMN-WRITTEN` / `WHOLE-BLOCK-REGENERATED` / `STORY-BLOCK-BOUNDED` / `FEATURE-TIER-UNCHANGED` /
+`INDENTED-TREE-REFUSED` / `UNRENDERABLE-STATE-FAILS` / `CONTESTED-CURRENT-NOT-RESOLVED` /
+`ONE-LABEL-CURRENT-FEATURE` / `BACKWARDS-STEP-EXPLAINED` / `NO-ROUTING-ROW-STATED` /
+`TWO-IN-FLIGHT-VISIBLE` / `CURRENT-FEATURE-FROM-OWNER`).
 
 This suite is the **acceptance + regression gate** for `skills/nwave-issue-board/SKILL.md`. Run it
 whenever that file changes, and whenever either skill it delegates to changes — `phil:issue-board`
@@ -54,6 +57,16 @@ this section is its answer.
 | `17-projection-bounded-to-current-slice/` | 22 phases, 94 steps, slice 07 current | renders 22 roster rows plus 4 step rows; never all 94 | `PROJECTION-BOUNDED` |
 | `18-unknown-state-writes-no-column/` | the owner folds `unknown`; the board offers Todo, In Progress, Blocked, Done and nothing that means it | leaves the card's column untouched and says so in the block | `NO-COLUMN-WRITTEN` |
 | `19-block-has-one-writer/` | a slice boundary refreshes the position; the handoff feeding the reasoning has not changed | regenerates the whole block from both sources; edits neither region alone | `WHOLE-BLOCK-REGENERATED` |
+| `20-story-block-four-features/` | four features declare one story, six slices each, on **GitLab Free** | renders 4 feature rows + the current feature's 6 slice rows = **10**, never the 24 the product would give | `STORY-BLOCK-BOUNDED` |
+| `21-feature-tier-block-unchanged/` | fixture 01's exact input, replayed against the **restated** bound | a single-feature card renders byte-identically to what shipped before the story tier existed | `FEATURE-TIER-UNCHANGED` |
+| `22-indented-tree-refused/` | fixture 20's story as **one** table with 24 slices indented as sub-rows | refuses it — the bound counts enumerated slices, not tables; the old count-form would have passed this | `INDENTED-TREE-REFUSED` |
+| `23-feature-state-without-glyph-fails/` | the owner returns a feature state the glyph table does not cover | fails loudly, naming the value; never degrades it to `·` | `UNRENDERABLE-STATE-FAILS` |
+| `24-contested-current-feature-not-resolved/` | the owner returns `current feature contested` because two members claim one position | renders the roster and **no** slice roster; never picks a contender to expand | `CONTESTED-CURRENT-NOT-RESOLVED` |
+| `25-three-waves-one-label/` | four members across three waves, one label slot | carries exactly one `wave:` label — the **current feature's** — and swaps rather than adds | `ONE-LABEL-CURRENT-FEATURE` |
+| `26-backwards-step-is-correct/` | the current feature finishes; the next sits in an **earlier** wave | steps the label `design` → `discuss` and explains why in the block; the monotonic "fix" reintroduces accumulation | `BACKWARDS-STEP-EXPLAINED` |
+| `27-story-no-routing-row/` | this repo's own story — both members past DISCUSS, on a path the table has no row for | emits no routing line **and says the table does not cover it**; never names a command for the story | `NO-ROUTING-ROW-STATED` |
+| `28-two-in-flight-both-visible/` | two members `in progress` at once — a defect in the card | renders both `▶` rows with `⚠ also in flight`, rather than hiding or refusing the defect | `TWO-IN-FLIGHT-VISIBLE` |
+| `29-current-feature-not-first-in-flight/` | `01 to do · 02 in progress · 03 in progress` — the **discriminating** roster | takes the current feature from the owner (01), not from a local "first in-flight" rule (02); 28's roster makes both answer the same and so pins neither | `CURRENT-FEATURE-FROM-OWNER` |
 
 `01` is the single walking-skeleton scenario. The **safety core** is `02`, `03`, `04`, `05`, `11`,
 `12` — the bug classes that ship silently because the published artifact is indistinguishable from a

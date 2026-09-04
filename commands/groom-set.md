@@ -1,5 +1,5 @@
 ---
-description: "Resolve the defects that live between issues — duplicates, oversized cards, work overcome by events, effort with no container, a feature decomposed into slice cards under retired rules — one candidate at a time, each surfaced with its evidence and applied only on your answer. Merges, splits, closes and consolidations are irreversible, so none of them happens without a question. Where a resolution needs a call this command does not hold — a reopen, a Status write, a rollup read — it hands the call over and stops."
+description: "Resolve the defects that live between issues — duplicates, oversized cards, work overcome by events, effort with no container, a feature decomposed into slice cards under retired rules, a story spread across feature cards — one candidate at a time, each surfaced with its evidence and applied only on your answer. Merges, splits, closes and consolidations are irreversible, so none of them happens without a question. Where a resolution needs a call this command does not hold — a reopen, a Status write, a rollup read — it hands the call over and stops."
 argument-hint: "[<owner/repo> or <group/project>]"
 mutates: true
 allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(gh issue view:*), Bash(gh issue edit:*), Bash(gh issue create:*), Bash(gh issue close:*), Bash(gh issue comment:*), Bash(gh project item-add:*), Bash(glab issue list:*), Bash(glab issue view:*), Bash(glab issue update:*), Bash(glab issue create:*), Bash(glab issue close:*), Bash(glab issue note:*), Bash(git log:*), Bash(git ls-tree:*), AskUserQuestion, Skill
@@ -25,6 +25,6 @@ item-edit` — Status and position are not this command's to set — and no bare
 exists; where the right container does not exist yet, it proposes one, hands you the exact call, and
 stops. A goal invented inside a grooming run is a goal nobody agreed to.
 
-**Every one of the five asks, every time.** Merge, split, close, group and consolidate are the five
+**Every one of them asks, every time.** Merge, split, close, group and the two consolidations are the
 candidate classes, and no population size, no obviousness, and no run of prior approvals converts any of them
 into a default. That is the whole discipline of this command.
