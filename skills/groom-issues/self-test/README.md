@@ -274,3 +274,20 @@ command's grant does not hold the call it requires — and `scripts/check-readon
 that script verifies a `mutates: false` command grants nothing dangerous, never that a `mutates: true` command
 grants what its skill demands. Round 2 shipped four such instructions and one unpassable fixture before a
 review caught them.
+
+## Fixture 44 — a `you wrote` field is never tightened
+
+Added 2026-09-04 (issue #40, `board-prose-standard` slice 03). That slice brought elicited fields under
+`${CLAUDE_PLUGIN_ROOT}/rules/writing.md`, **per field and keyed on the provenance label**: a drafted
+suggestion and an `I rephrased your answer` rewrite are composed here; a `you wrote` field is the
+human's own words.
+
+`44-you-wrote-field-not-tightened` supplies an answer that is correct but loose — it opens on an
+expletive construction and would tighten cleanly. **Tightening it would leave the label asserting
+`you wrote` over a sentence this session composed**, which is the provenance system reporting success
+with the one thing it exists to record destroyed. The fixture also asserts the standard *did* govern the
+two suggestions drafted in the same run, so a session applying it nowhere pins nothing.
+
+**This suite has no driver** (issue #42), so nothing runs this fixture automatically. Its pair,
+`skills/session-handoff/self-test/27-stack-frame-not-tightened/`, sits in a suite that does.
+

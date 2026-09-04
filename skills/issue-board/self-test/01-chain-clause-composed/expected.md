@@ -23,7 +23,7 @@ but not what you were in the middle of."* And on GitHub, where the reverse edge 
    issue 47` is the degenerate failure: it satisfies the shape and carries nothing the link did not.
 5. **Composed against `rules/writing.md`.** All three `enumerable_facts` present; no expletive
    construction (`there is`, `it should be noted that`, `what this does is`); active voice; the emphatic
-   word last. Concision is one of the standard's eleven principles, not the whole of it.
+   word last. Concision is one of the standard's eleven principles of composition, not the whole of it.
 6. **No word count is asserted anywhere in this fixture**, and none may be introduced to satisfy it.
 7. **The chain is not hand-maintained as blockers close.** The linked issue is authoritative about its
    own state, so nothing here promises to update the line later.

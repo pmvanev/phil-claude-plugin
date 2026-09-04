@@ -126,3 +126,8 @@ Silence is never an answer, and no existing line is ever rewritten or reflowed.
 Half-probed values are now **written as `assumed`**, stating what is not knowable and why. Every line
 inside the markers carries exactly one of `probed` / `assumed`; a value the forge would not return
 carries `unread` and never enters the region at all.
+
+**The `assumed`-line rationales are composed against `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`** — the
+clause saying what is not knowable and why is the only part of that line a reader weighs, and it is the
+only part anyone writes. `probed` lines are rendered from the forge and the standard does not reach
+them. See the skill's table of provenance labels.

@@ -82,6 +82,47 @@ The two clauses it cannot reach (every option naming its cost, and the ask's pla
 output) are stated in the hook's own header, because a partial enforcer that hides what it misses
 reads as a complete one.
 
+## A board surface that names a prose standard ships a fixture with it
+
+Six surfaces in the board family **compose** prose that lands where the whole team reads it — the fields
+`groom-ask` writes, the two-line roster descriptions and summarising clauses in the generated block, the
+projected why/next/stack, the clause after the dash on a `## Chain` line, the ranking basis, the
+`assumed`-line rationales. As of 2026-09-04 each names `rules/writing.md`. **Naming it is the mechanism,
+and naming alone is this board's recorded defect** — `scripts/check-rule-reachability.py` verifies a rule
+is *mentioned*, never that anything *applies* it, and says so in as many words.
+
+**So a citation ships with a fixture that would fail without it** — `nwave-issue-board` 30 and 31,
+`issue-board` 01, `groom-issues` 44, `session-handoff` 27. **Two citations do not yet have one:**
+`groom-set`'s comments on an irreversible operation and `phil:rank-issues`' recorded basis. Stated
+because an unstated gap in a rule about unenforced mentions is that rule failing in its own terms.
+
+**Only fixture 01 is enforced, and the gap is stated rather than implied.**
+`tests/test_issue_board_fixtures.py` guards two rules — **no fixture may supply candidate prose**, and
+**no fixture may assert a word count** — but it globs `skills/issue-board/self-test/` alone. Fixtures 30
+and 31 satisfy both rules *on inspection* and are checked by nothing, because `nwave-issue-board`'s suite
+has no driver and its manifests use the other of the repo's two schemes, so the guard would fail on shape
+before reaching either rule. That is issue #42's territory, and saying "two of those checks are enforced"
+would be this very section's defect committed inside it.
+
+Both rules exist because slice 01 broke them and had to be told: candidate prose turns a composition test
+into a selection test, which is passed by "publish the shorter string" — the word ceiling the standard
+deliberately refuses.
+
+**The discriminator is who composed the words, never where they sit.** Judging prose a human wrote is
+taste and stays out; applying a house standard to text a surface composes itself polices nobody. **At
+`groom-ask` the discriminator is per FIELD**, keyed on the provenance label that already exists: a
+suggestion and an `I rephrased your answer` rewrite are composed, a `you wrote` field is the human's and
+is never touched. Editing one would leave the label asserting the human's words over a session's
+sentence — the provenance system reporting success with the thing it records destroyed.
+
+**Two commands correctly apply no standard and say so:** `groom-issues` reports and composes nothing;
+`groom-fix` never asks, so it may never draft, and where it completes a chain it writes the edge and
+never the clause. **A surface with no citation is otherwise indistinguishable from one that forgot**,
+which is why the absence is stated rather than left implicit.
+
+The shipped scan is untouched — five structural items, no style item. A style rule in the scan is
+*judging*, which the discriminator forbids.
+
 ## Repo invariants run themselves
 
 `scripts/check-invariants.py` runs the repo's checks at `SessionStart` and reports **only

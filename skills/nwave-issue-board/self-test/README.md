@@ -150,6 +150,6 @@ concrete with `Notes`: row 03's note came from the owner and is rendered intact,
 that a hand-set state was replaced is composed *here* and is therefore in scope. An earlier draft of this
 fixture exempted `Notes` wholesale and was wrong.
 
-**Neither fixture asserts a word count**, because the standard is eleven principles and concision is one.
+**Neither fixture asserts a word count**, because the standard is eleven principles of composition and concision is one.
 A count would pin that one and license the other ten to fail. **The stated cost:** these two are the only
 things pinning the section, which is why they must test composition rather than length.

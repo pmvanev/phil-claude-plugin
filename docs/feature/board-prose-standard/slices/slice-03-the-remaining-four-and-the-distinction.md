@@ -38,8 +38,9 @@ supplied, that clause is discovered here and nowhere earlier.
 
 ## OUT scope
 
-- **Any change to the four structural items.** KPI-5 guards it. If this slice adds a style item to the
-  scan, it has misread the card.
+- **Any change to the five structural items.** KPI-5 guards it. If this slice adds a style item to the
+  scan, it has misread the card. *(Corrected from "four" during the slice: there were always five — item 5
+  is the `## Chain` section, and it already demands the reason, not only the edge.)*
 - A fifth provenance label in elicitation. *I rephrased your answer* already covers a tightened write.
 - `phil:ai-eos`, `phil:red-team-prose`, and any new rule in `rules/`.
 - Retro-editing prose already written onto cards. The standard governs what is composed next.
@@ -48,7 +49,7 @@ supplied, that clause is discovered here and nowhere earlier.
 
 1. **KPI-1: 6 of 6.** The grep from the delta's *measurement, re-taken* returns non-zero for all twelve
    files.
-2. **KPI-5: the scan's four structural items are byte-unchanged.** `diff` against 0.82.0.
+2. **KPI-5: the scan's five structural items are byte-unchanged.** `git diff` against the prior commit.
 3. **KPI-4: 0 surfaces longer.** Word count per surface, before and after.
 4. [D6] is stated at the `groom-issues` standard, and it is **one sentence covering all five surfaces**
    — or the counterexample is recorded with the clause it needed.

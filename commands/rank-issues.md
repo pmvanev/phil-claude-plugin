@@ -8,3 +8,9 @@ allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion, Skill
 Load the `rank-issues` skill at `${CLAUDE_PLUGIN_ROOT}/skills/rank-issues/SKILL.md` and run the
 session it describes. Ask through every step before writing anything: a half-ranked board is worse
 than an unranked one.
+
+**The recorded ranking basis is composed against `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`.** A stated
+guess gets corrected and an unstated one gets worked, so the sentence carrying the basis has to be
+readable in one pass. The `## Chain` lines this command writes follow `phil:issue-board`'s convention —
+**cited, never restated** — including the rule that the clause after the dash is composed while the
+forge records the edge.

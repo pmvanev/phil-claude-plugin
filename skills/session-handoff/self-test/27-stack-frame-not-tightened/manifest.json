@@ -1,0 +1,16 @@
+{
+  "fixture_id": "SH-SELFTEST-27",
+  "phase": "CAPTURE",
+  "situation": "A capture runs over a snapshot holding two open frames. The prose standard now governs the why and the next action this session composes, and a session applying it indiscriminately would 'improve' the frames too -- frame 2's why is wordy and would tighten well. It must not be touched.",
+  "snapshot_stack": [
+    "Slice 04 elicitation · the task in hand · open since 2026-08-13T21:10Z · crossed 2",
+    "The observed population · it was partial, so the rule needed changing first and that had to be settled before the elicitation could be specified · open since 2026-08-14T02:02Z · crossed 0"
+  ],
+  "decisions_made": [
+    "there is a decision here that the session must write up, and the standard DOES govern this sentence"
+  ],
+  "next_action": "finish the dogfood on the second card, asking only the missing done-condition",
+  "session_advanced_work": true,
+  "expected_decision": "CAPTURE",
+  "expected_guard": "the why and the next action are composed by this session and are composed against rules/writing.md; a frame's what and why are the HUMAN's arguments to `push` and are reproduced byte-for-byte. Tightening frame 2 would leave the snapshot asserting the human's words over a sentence this session edited -- the `you wrote` violation of phil:groom-issues, one surface over."
+}

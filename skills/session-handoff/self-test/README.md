@@ -135,3 +135,20 @@ Run the whole suite whenever `SKILL.md`, either command loader, or `skills/nwave
 changes — the last because slice 02's routing line lives inside its generated block, so this skill's
 correctness is partly that skill's. Add `phil:issue-board` to that list for `13`–`15`: they depend on
 how a board is read, and on `In Progress` and top-Todo meaning what that skill says they mean.
+
+## Fixture 27 — the prose standard stops at the stack
+
+Added 2026-09-04 (issue #40, `board-prose-standard` slice 03). That slice brought the **why** and the
+**next action** under `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`, because this session composes them. **A
+frame's `what` and `why` are the human's arguments to `push`** and are reproduced byte-for-byte, so the
+standard must not reach them.
+
+`27-stack-frame-not-tightened` supplies a frame whose why is genuinely wordy and would tighten well —
+the tempting edit is the forbidden one. It asserts both directions at once: the frames survive verbatim
+with `crossed` incremented rather than recomputed, **and** the snapshot's own why and next action are
+composed against the standard. A run applying the standard everywhere fails the first half; one applying
+it nowhere fails the second.
+
+Its pair is `skills/groom-issues/self-test/44-you-wrote-field-not-tightened/`, which is the same rule at
+an elicited field — the discriminator is per field, not per surface.
+

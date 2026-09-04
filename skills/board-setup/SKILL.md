@@ -21,6 +21,20 @@ Why that is the thesis, and why this plugin's own `CLAUDE.md` is the evidence fo
 | **assumed** | the forge returned *half* of it, or it is derived from a proxy | inside the markers, labelled, saying what is not knowable |
 | **declared** | only a human can say it | a **separate** region, attributed, never regenerated |
 
+**No line in either region is composed at run time, so no prose standard applies to a session here.**
+Every line — `probed`, `assumed` and its *not knowable … why* clause alike — is emitted by
+`render-block.py` from strings that live in `probe-board.py`. A session that composed one would be
+typing a value the script returns, which *Never type a value this script could return* forbids and
+*Hand-writing a region breaks determinism* explains the cost of.
+
+**The rationale strings are still prose, and `rules/writing.md` still governs them — at build time, in
+`probe-board.py`, by whoever edits them.** That is a different author at a different moment, and the
+distinction matters: a rule that reads as build-time guidance is not a defect to wire up, it is a rule
+whose reviewable part has not been separated yet. `CLAUDE.md` records that shape under `ui.md`.
+
+**`declared` is out for a second, independent reason**: a human wrote it, and judging prose a human
+wrote is taste.
+
 The third category is not decoration: *"Auto-close on Done is ENABLED"* is one confident sentence
 spanning a fact and a guess, because the forge reports that the workflow is on and never which
 status fires it. The field-level derivation is in `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/provenance-model.md`.

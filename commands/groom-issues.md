@@ -20,3 +20,17 @@ End the report by naming the command that acts on each column, with its count:
 
 Name them; do not run either, and do not offer to. Naming a command with a count is a handover; running
 it is the consent step that command owns, taken by the one session that has not asked.
+
+**This command applies no prose standard to anything reaching a board, and that is correct rather than
+an omission.** It does compose: the whole report, every finding sentence with its quoted evidence, the
+handover lines, the checks-that-passed prose. But that output is **terminal-only** — it lands on no
+card, nobody inherits it, and the next run regenerates it. It is outside the board surfaces this
+standard governs.
+
+Every sentence it *evaluates* was written by a human, and judging those is the taste-policing the
+skill's standard refuses — see *Judging prose is taste; composing it is not*. `rules/writing.md` reaches
+the commands in this family that **write to a card** (`groom-ask`, `groom-set`), never the one that
+reads.
+
+Stated in as many words because a surface with no citation is otherwise indistinguishable from one
+that forgot.

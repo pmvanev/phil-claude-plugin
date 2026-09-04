@@ -34,3 +34,19 @@ would collect one answer and write it as though it were several.
 `gh issue create`, no `gh issue close`, no `gh issue comment`, no `gh api` (which permits
 `--method POST` on anything), no `gh project`, and no bare `Bash`. It changes what a card *says*,
 never which cards exist or where they sit.
+
+**The fields it writes are composed against `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`, per field and
+keyed on the provenance label.** A suggestion is composed against it when drafted, and an
+`I rephrased your answer` rewrite is bound by it — that label's tidying licence *is* this standard,
+named rather than newly imposed. **A `you wrote` field is never touched.** Editing one would leave the
+label asserting the human's words over a sentence the session had tightened, which is the provenance
+system reporting success with the very thing it records destroyed.
+
+**`you edited my suggestion` is out too, past the edit** — the human's change is theirs. So two labels
+are in scope and two are not.
+
+Concision is one of the standard's eleven principles of composition; it never buys brevity with content,
+and it adds **no fifth provenance label** — a label for *the human wrote it and I improved it* would
+license exactly the edit this forbids. Naming the standard is the mechanism; it authorises no pass over
+a field already written. Full rule in the skill's *Eliciting the semantic content* — the discriminator it
+extends is in *Judging prose is taste; composing it is not*.

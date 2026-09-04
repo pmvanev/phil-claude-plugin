@@ -148,6 +148,20 @@ holding a live tree and a `git rev-parse` grant, will re-stamp a fingerprint unl
 it and `commit:` always matches `HEAD`, so `RESUME-STALE` never fires again — the worst outcome this skill
 can produce, arrived at by a routine mid-session note.
 
+**The why and the next action are composed by this session, so compose them against
+`${CLAUDE_PLUGIN_ROOT}/rules/writing.md`.** They are written once, here, and `phil:nwave-issue-board`
+renders them verbatim onto the card — so a padded sentence written here is padded on the surface with
+the widest audience. Facts first, active voice, the emphatic word last. **Concision is one of the
+standard's eleven principles of composition and never a licence to drop a decision or a ruled-out
+approach**, because what a fresh session cannot derive is the whole reason the snapshot exists.
+
+**The STACK is excluded, and it is the sharpest case in the family.** A frame's `what` and `why` are the
+human's own arguments to `push`, and *the reason for a diversion exists only in the human's head at that
+moment* — so existing frames are reproduced **byte-for-byte** and a new frame records what the human
+said. Tightening a frame would leave the snapshot asserting the human's words over a sentence this
+session had edited: the same defect `phil:groom-issues` forbids at a `you wrote` field, one surface over.
+Pinned by `self-test/27-stack-frame-not-tightened/`.
+
 `captured:` means *when the payload was captured*, not *when the file was last touched*. A push is not a
 capture.
 

@@ -111,6 +111,43 @@ And it does **not** contain:
   for the live answer, is history: it stays true, and a reader knows what to distrust. Prefer the
   observation where the state is the argument and deleting it would remove the argument.
 
+### Judging prose is taste; composing it is not
+
+**Rules 1, 2 and 5 check that a purpose, a done-condition and a reason are PRESENT. Not one of the five
+items asks how anything READS**, and a body can satisfy every item while being passive, padded and twice
+the length it needs. (Rules 3 and 4 ask neither question: a link's form and a family's cardinality are
+not prose at all.) That gap is deliberate on one side and was an oversight on the other, and the
+discriminator is checkability:
+
+- **Judging prose a human wrote is taste. It stays out.** A scan that flagged someone's style would be
+  the taste-policing this standard's opening sentence refuses, and no rule here licenses it. Presence is
+  all those rules check — never whether what is present is well written.
+- **Composing prose yourself is not taste at all.** Applying a house standard to text this command family
+  writes polices nobody. That is the half nothing covered until 2026-09-04, when twelve board-family
+  files were measured naming no prose standard while `rules/writing.md` was cited by five other surfaces.
+
+**So the standard for composed text is `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`**, and it reaches only
+what the commands this skill bundles compose onto a card: the fields elicitation writes (per the
+provenance clause below) and the comments `groom-set` leaves on an irreversible operation.
+`groom-issues` and `groom-fix` compose nothing that reaches a card and say so in their own files;
+`phil:rank-issues` owns its own surface and its own citation. **Concision is one of the standard's
+eleven principles of composition** — active voice, positive form, concrete language, parallel structure
+and the emphatic word last are the others that bear here. Read it as *compose well*, never as *compose
+short*.
+
+**Naming the standard is the mechanism, and naming is not running an editor as a step.** Nothing here
+authorises a pass over a body already written; the standard governs composition at the moment text is
+drafted.
+
+**The scan is unchanged. No style rule is added to it, and adding one would be a misreading.** A style
+item in the scan is judging, which the first bullet forbids.
+
+**A citation is meant to ship a fixture with it, because a mention that changes nothing is this repo's
+recorded defect — and two of this family's citations do not yet have one.** `self-test/44` pins a
+`you wrote` field left untouched; `groom-set`'s comments on an irreversible operation, and
+`phil:rank-issues`' recorded basis, are cited and unpinned. Named rather than implied: an unstated gap
+in a rule about unenforced mentions is that rule failing in its own terms.
+
 ## Scan once, derive fresh
 
 **One call per forge**, bodies included:
@@ -727,6 +764,18 @@ forbid drafting — it is to make every field's origin legible and every rewrite
   introduce a concept the human did not use, and never narrow or widen the claim. A rewrite that changes
   what the card asserts is composition wearing a truthful label — the one failure the provenance rule
   cannot catch on its own.
+- **The prose standard applies PER FIELD, keyed on the label — and this is the one surface where the
+  discriminator is not per-surface.** `rules/writing.md` governs the text *this session* composes:
+  a suggestion, at the moment it is drafted, and a `I rephrased your answer` rewrite. **It must never
+  touch a `you wrote` field.** Those are the human's own words, and tightening them would leave the
+  label asserting `you wrote` over a sentence the session had edited — the provenance system reporting
+  success while the thing it exists to record is gone. `you edited my suggestion` is out for the same
+  reason past the edit: the human's change is theirs.
+
+  **The tidying licence above already IS that standard, unnamed.** *Fix grammar, punctuation and
+  register; never introduce a concept the human did not use* is `writing.md` restricted to a rewrite —
+  so naming it here adds no rule and grants no new licence. It gives the existing clause a checkable
+  referent, which is the whole of what naming a standard buys.
 - **An accept must name the suggestion or restate its text.** A bare affirmation — "ok", "sure", "yep",
   "sounds right", "that works" — is never an accept. This holds **even when only one suggestion was
   offered**, where a naming rule would otherwise be satisfied by accident: the reply is equally likely to

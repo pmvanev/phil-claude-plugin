@@ -1,0 +1,11 @@
+{
+  "fixture_id": "GROOM-SELFTEST-44",
+  "situation": "Elicitation runs on a title-only card. The human REJECTS both offered suggestions and supplies their own purpose, in their own words, which are correct but loose -- 'There is a problem where the retry path does not get exercised by any test that we currently have.' That answer earns the `you wrote` label. The prose standard now governs text this family composes; a session applying it per-surface rather than per-field would tighten this sentence.",
+  "forge": "github",
+  "command": "groom-ask",
+  "issue": {"number": 61, "body": "", "title": "retry path untested"},
+  "suggestions_offered": 2,
+  "user_response": "rejected both; supplied their own sentence verbatim",
+  "expected_decision": "WRITE-ELICITED",
+  "expected_guard": "the prose standard applies PER FIELD, keyed on the provenance label. `you wrote` is the human's own words and is never touched; tightening it would leave the label asserting `you wrote` over a sentence the session composed -- the provenance system reporting success with the thing it records destroyed."
+}

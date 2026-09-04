@@ -466,7 +466,7 @@ edge alone tells you what blocked but not what you were in the middle of.
 **The clause is composed, so compose it against `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`.** The edge is
 rendered by the forge and there is nothing to compose in a link; the clause is the only part a person
 writes, and it is the only part a reader six issues deep depends on. Facts first, active voice, no
-expletive construction, the emphatic word last. **The standard is eleven principles and concision is one
+expletive construction, the emphatic word last. **The standard is eleven principles of composition and concision is one
 of them** — read this as *compose it well*, never as *compose it short*.
 
 **A clause that restates the edge fails.** `Blocked by #47 — blocked by issue 47` satisfies the shape and

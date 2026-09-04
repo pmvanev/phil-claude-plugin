@@ -28,3 +28,12 @@ stops. A goal invented inside a grooming run is a goal nobody agreed to.
 **Every one of them asks, every time.** Merge, split, close, group and the two consolidations are the
 candidate classes, and no population size, no obviousness, and no run of prior approvals converts any of them
 into a default. That is the whole discipline of this command.
+
+**The comments it leaves are composed against `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`.** A merge,
+split or closing comment is the permanent record of an irreversible act, read months later by someone
+reconstructing why a card went away — so it states the reason in one pass. Facts first, active voice,
+the emphatic word last; concision is one of the standard's eleven principles of composition, never a licence to drop a
+reason to save words.
+
+This governs what this command composes and licenses nothing about prose a human wrote — see the skill's
+*Judging prose is taste; composing it is not*.

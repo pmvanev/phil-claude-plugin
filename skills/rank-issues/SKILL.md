@@ -155,6 +155,16 @@ issue carrying the reason. The mechanics are in `phil:issue-board`; the point he
 which merely *encodes* a dependency has thrown the reason away. The next person sees A above B,
 reads it as taste, and reorders freely.
 
+**Both halves are `phil:issue-board`'s convention — follow it there, including what governs the clause
+after the dash.** That skill owns the fixed heading, the mirror rule, the edge-versus-clause split and
+the standard the clause is composed against; none of it is restated here.
+
+**What this skill owns is the recorded ranking basis, and that is composed — so compose it against
+`${CLAUDE_PLUGIN_ROOT}/rules/writing.md`.** A stated guess gets corrected and an unstated one gets
+worked, so the sentence carrying the basis has to read in one pass. **Concision is one of the
+standard's eleven principles of composition, never a licence to drop the reason a goal ranks where it
+does.** Naming it is the mechanism — nothing here runs an editor as a step over a basis already written.
+
 ## What will go wrong
 
 Five failure modes, each of which reports success:

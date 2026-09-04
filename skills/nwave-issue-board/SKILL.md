@@ -153,7 +153,7 @@ still spend the entire budget the bound was written to protect, because the budg
 **Nothing here detects a padded row.** Measured 2026-09-04: twelve board-family files named no prose
 standard, while `writing.md` passed its reachability check on five other surfaces' citations.
 
-**The standard is eleven principles, and concision is one of them.** Active voice, positive form,
+**The standard is eleven principles of composition, and concision is one of them.** Active voice, positive form,
 definite and concrete language, parallel structure for coordinate ideas, and the emphatic word last are
 **invisible to a word count**. A row can improve materially with zero words removed. Read this section as
 *compose well*, never as *compose short*.
@@ -184,11 +184,11 @@ the reasoning, not just the position* forbids outright.
 
 **Judging is taste; generating is not.** Nothing here licenses flagging prose a human wrote. Applying a
 house standard to text this skill composes itself polices nobody. (`phil:groom-issues` refuses to rewrite
-a rule that passed, under *A rule that passed is never rewritten*; the taste/style framing is stated
-there by `board-prose-standard` slice 03, not yet.)
+a rule that passed, under *A rule that passed is never rewritten*, and states the taste/style framing
+itself under *Judging prose is taste; composing it is not*.)
 
 **Brevity is a principle here, not a count.** No word ceiling is set, and fixtures 30 and 31 assert none
-— a fixture counting words would pin one of the eleven principles and license nine failures. **The cost,
+— a fixture counting words would pin one of the eleven principles of composition and license nine failures. **The cost,
 stated because it is real:** those two fixtures are the only things pinning this section, so they must
 test composition rather than length. Fixture 30 supplies a brief and no candidate text for exactly that
 reason.

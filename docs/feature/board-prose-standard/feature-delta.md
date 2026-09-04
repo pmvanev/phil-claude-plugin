@@ -21,7 +21,7 @@ route is the container; the folds are the work.
 
 - **`robin-backlog-curator`** reads the fields elicitation writes and the comments set-level operations
   leave. Robin's recorded frustration is *"nothing states what a body must contain, so 'appropriate
-  description' is not checkable"* — which the four structural items answered. This feature answers the
+  description' is not checkable"* — which the five structural items answered. This feature answers the
   half that remained: a body can satisfy all four and still be padded.
 - **`morgan-feature-owner`** reads the generated block under a thirty-second budget. The live instance
   is Morgan's: seven two-line roster descriptions on issue #36, written under a stated requirement of
@@ -100,7 +100,7 @@ duplicate-authority defect this repo has recorded twice.
   Judging prose a human wrote is the taste-policing `groom-issues` refused. Applying a house standard to
   your own output polices nobody. **This is the `ui.md` split applied a second time**, and it must be
   written where the next author meets it, not only here.
-- **[D7]** **`groom-issues`' scan is UNCHANGED — four structural items, no style item.** Guarded by
+- **[D7]** **`groom-issues`' scan is UNCHANGED — five structural items, no style item.** Guarded by
   KPI-5 rather than by intention. If this feature ends up adding a style rule to the scan it has been
   misread, and the KPI is what says so.
 - **[D8]** **The card's reachability list is corrected.** It names six citers of `rules/writing.md`;
@@ -131,7 +131,7 @@ Six surfaces. The right-hand column is what [D2] makes each one name.
 | `phil:session-handoff` | The projected `Why` / `Next` / `Stack` prose | Yes — [D4] |
 | `phil:issue-board` | The clause after the dash on a `## Chain` line — *why you stopped* | Yes — [D9]'s fixture subject |
 | `phil:rank-issues` | The recorded ranking basis; the `## Chain` lines it writes per `issue-board` | Yes; chain convention is `issue-board`'s, cited not restated |
-| `phil:board-setup` | The `assumed`-line rationales in the delimited `CLAUDE.md` region | Yes — the `assumed` clause is composed, the probed lines are not |
+| `phil:board-setup` | ~~The `assumed`-line rationales~~ | **No — corrected in slice 03.** `render-block.py` emits every line from strings in `probe-board.py`; nothing is composed at run time and the skill forbids typing what the script returns. The strings are build-time prose |
 
 ## Wave: DISCUSS / [REF] Scope assessment
 
@@ -231,7 +231,7 @@ As Robin, I want the field elicitation writes from my answer to be composed agai
 so that the one field a card is judged on reads in a single pass.
 
 **Elevator Pitch**
-Before: an elicited purpose can satisfy all four structural items and still be twice the length it needs.
+Before: an elicited purpose can satisfy every structural item and still be twice the length it needs.
 After: run `/phil:groom-ask` on a title-only card → the written purpose is the answer tightened, and the
 per-field provenance label still says whose words they were.
 Decision enabled: Robin decides whether the card is ready to rank from the body alone.
@@ -242,7 +242,7 @@ Decision enabled: Robin decides whether the card is ready to rank from the body 
 2. **The provenance labels are unchanged.** *I rephrased your answer* already covers a tightened write;
    no fifth label is added. A standard that needed a new provenance value would be changing what
    elicitation may write, which is out of scope.
-3. **KPI-5**: the scan's four structural items are byte-unchanged. No style item.
+3. **KPI-5**: the scan's five structural items are byte-unchanged. No style item.
 
 ### S3 — Read a set-level comment that says why in one pass
 
@@ -288,11 +288,11 @@ value — the slice composition gate is satisfied and is not being routed around
 
 | # | KPI | Target | Method |
 |---|---|---|---|
-| KPI-1 | Prose-generating board surfaces naming the standard | 0 of 6 → **6 of 6** | The grep under *The measurement, re-taken*, re-run |
+| KPI-1 | Board-family files naming the standard, or stating they apply none and why | 0 of 12 → **12 of 12** | The grep under *The measurement, re-taken*, re-run. **Restated in slice 03:** the original row counted six *composing surfaces*, which turned out to be five — see that outcome |
 | KPI-2 | `skills/issue-board/self-test/` entries | 0 → **≥ 1** | `ls` |
 | KPI-3 | Total words across issue #36's seven roster descriptions, re-rendered under the standard | **≤ current**, and the delta reported either way | `wc -w` before and after — **measured in slice 01, then found INVALID for the hypothesis; see that outcome** |
 | KPI-4 | Generated surfaces whose output got **longer** | **0** | Word count per surface, before and after |
-| KPI-5 | Structural items in `groom-issues`' *well-formed issue* scan | **4, byte-unchanged** | `diff` against 0.82.0 |
+| KPI-5 | Structural items in `groom-issues`' *well-formed issue* scan | **5, byte-unchanged** | `git diff` against the prior commit — **corrected from 4 in slice 03; there were always five** |
 
 **KPI-3 is the one that can fail the feature, and it is two-sided on purpose.** If seven descriptions
 written with no standard and seven written under a named one come out the same, [D2] is disproven and the
@@ -323,7 +323,7 @@ anything would be working against them, so the guard is a number rather than an 
 ## Wave: DISCUSS / [REF] Out-of-scope
 
 - **Flagging the prose of issues a human wrote.** [D6]. The taste-policing `groom-issues` refused.
-- **Changing the four structural items.** [D7], guarded by KPI-5.
+- **Changing the five structural items.** [D7], guarded by KPI-5.
 - **Any new rule in `rules/`.** The standard exists; this is about applying it.
 - **`phil:ai-eos` and `phil:red-team-prose`.** [D3]. Excluded on the skills' own ownership boundaries,
   not on cost.
@@ -364,7 +364,7 @@ judging-versus-generating distinction will be written where the next author meet
 
 ### Upstream changes
 None. No DISCOVER or DIVERGE wave ran for this card, and no prior feature's assumption is amended — the
-four structural items and the row-count bound both stand, and this feature measures what neither
+five structural items and the row-count bound both stand, and this feature measures what neither
 measured. Recorded explicitly so the absence reads as checked rather than skipped.
 
 ---
@@ -513,3 +513,137 @@ twenty-odd sections of forge mechanics — silent-success hazards, tier gating, 
 ordering — and none of them is pinned. The suite exists and is gated; it is not yet a regression net.
 Stated so its existence is not mistaken for coverage, which is the same error as a mention mistaken for
 an application.
+
+## Outcome — slice 03, 2026-09-04
+
+### The hypothesis fired: D6 is one discriminator, not one rule
+
+Slice 03 predicted elicitation would be the counterexample, *"because it writes words a human supplied,
+so 'your own output' is not obviously what it produces."* **It is the counterexample, and the shape is
+better than predicted.**
+
+**The discriminator holds at every surface — but it fired on THREE of them, not one, and the first
+draft of this outcome claimed it "holds unchanged at all six". That claim was wrong**, and
+`plugin-dev:skill-reviewer` refuted it with three criticals. The hypothesis was built to surface exactly
+this, and it surfaced more than the brief predicted:
+
+1. **`groom-ask` — granularity.** The discriminator applies **per field**, keyed on the provenance label
+   that already exists. Predicted by the brief; detailed below.
+2. **`board-setup` — the composer is not the session.** The `assumed` rationale is emitted by
+   `render-block.py` from string literals in `probe-board.py`. The shipped citation told a session to
+   compose text the same skill forbids it to type — *"never type a value this script could return"* —
+   and at the one surface where doing so breaks a determinism guarantee. **The prose is real and
+   `writing.md` still governs it, at build time, in the script, by whoever edits the literals.** That is
+   the `ui.md` class `CLAUDE.md` already describes: a rule whose reviewable part has not been separated
+   from its build-time part. Corrected to *applies none*.
+3. **`session-handoff` — half the surface is the human's.** The why and the next action are composed by
+   the session; **the stack is not.** A frame's `what` and `why` are the human's arguments to `push`,
+   *the reason for a diversion exists only in the human's head at that moment*, and existing frames are
+   reproduced **byte-for-byte**. The shipped citation swept the stack in — the `you wrote` violation of
+   the very clause this slice wrote, one surface over. Now excluded and pinned by `self-test/27`.
+
+**So the count moved: five composing surfaces, not six**, and two of the three counterexamples were
+invisible until someone read the renderer and the push rule rather than the prose.
+
+| Label | Composed by | Standard |
+|---|---|---|
+| `you accepted my suggestion` | the session, at draft time | applies **when the suggestion is drafted**, never after acceptance — an accepted suggestion is quoted verbatim |
+| `I rephrased your answer` | the session | **applies** |
+| `you wrote` | the human | **never touched** |
+| `you edited my suggestion` | the human, past the edit | **never touched** |
+
+**Applying the standard to a `you wrote` field would break the provenance system**, not merely overstep:
+the label would assert the human's words over a sentence the session had tightened. That is the system
+reporting success with the exact thing it exists to record destroyed — the failure mode this repo keeps
+finding, arriving in a new place.
+
+**And the standard was already there at that surface, unnamed.** The existing clause reads *"Rephrasing
+is a tidying licence, not a modelling one. Fix grammar, punctuation and register; never introduce a
+concept the human did not use."* **That is `rules/writing.md` restricted to a rewrite.** So naming it
+adds no rule and grants no licence — it gives an existing clause a checkable referent. This is the
+cleanest vindication [D2]'s naming mechanism gets anywhere in the feature: the rule existed, unnamed,
+and naming it was the whole of the work.
+
+### The count was wrong, in the card and in this document
+
+**`groom-issues`' standard has FIVE structural items, not four.** Item 5 is *"A `## Chain` section when
+blocked or related — the edge **and** the reason it exists, on both ends."* The card's central framing —
+*"all four ask whether something is there"* — was built on a miscount, and this delta repeated it in six
+places. Corrected above; KPI-5's target moves from 4 to 5.
+
+**The framing survives the correction, and item 5 is why it survives interestingly.** Item 5 already
+demands *the reason*, so the scan checks a reason is **present** while the standard governs how it
+**reads** — the presence-versus-quality split this whole feature rests on, sitting inside the very rule
+the card cited as asking presence only. Slice 02 pinned the same clause from the other side, in
+`issue-board`. Two checks, one clause, different questions.
+
+### KPI results
+
+- **KPI-1: 12 of 12, from 0 of 12.** Ten surfaces name `rules/writing.md`. **Two state that they apply
+  none, and why** — `groom-issues` reports and composes nothing; `groom-fix` never asks, so it may never
+  draft, and where it completes a chain it writes the edge and never the clause. That is the card's own
+  second branch, and it is the honest answer for those two. AC1 demanded a non-zero grep for all
+  twelve and **passes as written**, because both refusal statements name `rules/writing.md` in stating
+  what they do not apply. An earlier draft of this outcome called AC1 wrong; that was itself wrong.
+- **KPI-5: 5 items, byte-unchanged.** Verified by `git diff`: 37 lines added, **zero removed**, and the
+  block compared verbatim against the prior commit. The first hash comparison was invalid — the new
+  subsection fell inside the `sed` range — which is worth recording because a hash that moves for a
+  benign reason is indistinguishable from one that moves for a real one.
+- **KPI-4: vacuous at these surfaces, and stated rather than claimed.** No generated output was
+  recomposed in slice 03, so nothing got longer — that is arithmetic, not evidence. The only real
+  measurement remains slice 01's seven descriptions, where zero got longer.
+
+### The dogfood was declined, not skipped
+
+The brief called for running `/phil:groom-ask` against a live card. **That cannot exercise this slice:**
+`/phil:*` commands load the installed snapshot, which is 0.73.0, while these edits are in a 0.85.0
+working tree. A run would have reported on prose written months ago. Hand-driving the skill text would
+exercise **the prose and not the command**, which `CLAUDE.md` requires be said outright.
+
+Declined on the precedent of `story-spans-features` slice 05, whose firing-half dogfood was declined for
+a comparable reason and recorded as such. **The standing cost of dogfooding a working tree through a
+cached command is now visible in three consecutive slices**, and it is not a defect in any of them.
+
+### What the review changed, and why it is recorded rather than quietly fixed
+
+`plugin-dev:skill-reviewer` falsified "slice 03 is done" with **five criticals**, and three of them said
+the shipped citation was **factually wrong about who composes the words** — the one thing [D6] exists to
+get right. That is worth recording plainly: the mechanism of this feature is *naming*, and a name that
+points at the wrong author is worse than no name, because it reads as verified.
+
+| # | What was shipped | Why it was wrong |
+|---|---|---|
+| C1 | `board-setup` told a session to compose the `assumed` rationale | A script emits it; the skill forbids typing it; hand-writing the region breaks determinism |
+| C2 | The same insertion split the provenance table | The `declared` row detached and rendered as literal text, right above *"The third category is not decoration"* |
+| C3 | `session-handoff` swept the stack into the composed set, at step 9 | Frames are the human's words, reproduced byte-for-byte; step 9 is the handover, not the composition point |
+| C4 | `groom-fix` "writes only the missing edge, never the clause" | Fixture 10 pins that mirroring *invents nothing* and that **asking is a gate failure**; as shipped, the fix could not clear its own rule-5 finding |
+| C5 | Two assertions that every citation ships a fixture | Five citations shipped with zero fixtures — the rule violated by the commit asserting it |
+
+**C4 is the one that would have done real damage.** It was a *behaviour* change inside a slice whose
+mechanism is naming, on a file the brief's IN scope never listed, recorded in this delta as a citation.
+The correct justification was available and simpler: `groom-fix` composes nothing because it **quotes**
+the other end's reason — the *renders words another owner composed* branch of [D6].
+
+**C5 is resolved by two fixtures and one honest amendment.** `groom-issues` 44 pins a `you wrote` field
+left untouched; `session-handoff` 27 pins a stack frame reproduced byte-for-byte while the snapshot's own
+why is composed. They are a deliberate pair, and each fails the degenerate mechanism the other passes.
+**Two citations remain unpinned — `groom-set`'s comments and `rank-issues`' basis — and both assertions
+now say so**, because an unstated gap in a rule about unenforced mentions is that rule failing in its own
+terms.
+
+**Fixture 27 was itself defective on first write, and the driver caught it**: frames encoded as objects
+where the suite's format is a string, and the fixture unregistered in its README. `session-handoff` is
+one of the five suites that *has* a driver, and it failed in 0.1 seconds. `groom-issues` has none, so
+fixture 44 was checked by reading. **That contrast, inside one commit, is the whole argument of issue
+42** — measured rather than asserted.
+
+### Two smaller corrections
+
+- **The eleven-principles claim was wrong in six files.** `rules/writing.md` carries eleven *Elementary
+  Principles of Composition* plus four other sections; the citations said the standard **is** eleven
+  principles. Now *"eleven principles of composition"* everywhere, verified against the referent's
+  eleven rows.
+- **Placement drift, recorded because the brief specified otherwise.** The brief said [D6] goes at the
+  standard and *"not in a new section: an author reading the standard meets it there."* It shipped as a
+  new `###` subsection at the end of that section. Defensible — an author reading the standard still
+  reaches it — but it is a deviation and was undocumented until now.
