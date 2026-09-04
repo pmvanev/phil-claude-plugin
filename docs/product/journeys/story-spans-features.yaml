@@ -1,0 +1,175 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: story-spans-features (2026-09-04, issue #36)
+#
+# Scoped to STORY cards. journeys/single-issue-per-feature.yaml is the same journey over a FEATURE card
+# and is unchanged; a feature that declares no story membership still takes that path exactly. This file
+# adds the tier above it, and steps `open`, `claim`, `work`, `divert`, `put-down` and `refresh` are
+# inherited from it verbatim rather than restated — the restate-versus-reference fault this repo has
+# caught three times.
+
+id: story-spans-features
+name: Read both positions from one card, and tell a story from a goal
+persona: morgan-feature-owner        # EXTENDED 2026-09-04, not a new persona — see that file's header
+job: make-in-flight-work-transferable # EXTENDED 2026-09-04, not a new job — see the story tier facet
+
+summary: >
+  Morgan opens a story card and, above the prose, reads a generated block: the story's slug and feature
+  count, the wave of the feature currently in flight, a routing line naming both the command and the
+  feature it applies to, then two tables — the feature roster with its own state glyphs, and the current
+  feature's slice roster. Nothing else is enumerated; every sibling links. Morgan names both positions
+  inside thirty seconds, and can say which grouping on screen is the story and which is the goal.
+
+steps:
+  - id: open
+    action: Morgan opens the story issue in the forge — one card, several features
+    output: The generated block, above any human prose, with its generation timestamp
+    emotion: uncertain — this is an outcome I am part-way through, or one I have never seen
+    # inherited from single-issue-per-feature/open; the only change is what the card holds
+
+  - id: read-story-position
+    action: >
+      Read the `Story:` line and the FEATURE ROSTER — one row per member feature, in declared position
+      order, each with a two-line description of what that feature delivers and a state glyph from the
+      six-value fold vocabulary (`✓ done`, `▶ in progress`, `· to do`, `! blocked`, `⊘ deferred`,
+      `? unknown`). Features other than the current one are rows with links, never sections.
+    output: Where the whole outcome stands, and which feature inside it is live — the position that does not exist today
+    emotion: oriented (story) — I can see the shape of the thing, not just the piece in my hands
+
+  - id: read-feature-position
+    action: >
+      Read the current feature's SLICE ROSTER below it, with its own seven-value glyphs, exactly as the
+      feature card already renders it. Where a roadmap.json exists, the current slice's step table follows.
+    output: Where the work in hand stands — the position that already works today
+    emotion: oriented (feature) — and both readings landed inside one page
+
+  - id: read-routing
+    action: >
+      Read the `Wave:` line, which carries the CURRENT feature's wave, and the `Work this with:` line,
+      which names a command AND the feature it applies to. A story has no owning command.
+    output: What to run next, against what
+    emotion: committed — I know the move, not just the map
+
+  - id: distinguish-story-from-goal
+    action: >
+      Notice the card sits in a milestone as well. Apply the discriminator without being taught it —
+      a goal holds CARDS and has a due date; a story holds FEATURE DIRECTORIES and is inside one card.
+    output: A reader who knows which of the two to open for what they are looking for
+    emotion: trust — two groupings, and neither is ambiguous
+
+  - id: claim
+    action: Morgan takes the story — assignee set, column position acknowledged
+    output: An owned card; a competing claim is detected and surfaced, not resolved
+    emotion: committed — this is mine now, and the board says so
+    # inherited verbatim; the unit claimed is wider, the mechanics are not
+
+  # work / divert / put-down / refresh are inherited UNCHANGED from single-issue-per-feature.yaml.
+  # A5 in particular: a diversion stack belongs to a PERSON, so a story card carries exactly one — not
+  # one per feature. Stated because a backbone activity that survives a paradigm change unaltered must be
+  # named as surviving, or the next reader invents a per-feature stack to fill the gap.
+
+emotional_arc: >
+  uncertain → oriented (story) → oriented (feature) → committed → trust  # upward
+  # The two `oriented` beats are deliberately distinct and deliberately in this order. Story first,
+  # because the half that does not exist today is the one that reframes the half that does: knowing the
+  # current feature is one of four changes what "where am I" means. Reversing them reads as an appendix.
+
+shared_artifacts:
+  - name: story_membership
+    source: docs/feature/<id>/feature-delta.md header line — `Story: <slug> · position NN`
+    consumed_by: [read-story-position]
+    # ONE AUTHORITY PER FACT: each feature declares its OWN membership. No story file, no forge read-back.
+  - name: story_state (fold over features)
+    source: phil:nwave-slice-status --story-state   # NEW derivation, lands with its owner (C5)
+    consumed_by: [open, claim]                      # decides the column
+  - name: feature_state (fold over slices)
+    source: phil:nwave-slice-status --feature-state # SHIPPED; the story fold's input, not a second fold
+    consumed_by: [read-story-position]
+  - name: slice_status_table
+    source: phil:nwave-slice-status
+    consumed_by: [read-feature-position]
+  - name: wave_label
+    source: the CURRENT feature's artifacts
+    consumed_by: [read-routing, claim]
+    # single-valued; NOT monotonic on a story card — it steps backwards when the next feature begins
+  - name: roster_order
+    source: the declared `position NN` per feature; slice-number order within a feature
+    consumed_by: [read-story-position, read-feature-position]
+  # DELIBERATELY NOT an artifact: any per-feature diversion stack (one per person, not per feature); any
+  # slice roster for a feature that is not current; any step table for a slice that is not current.
+
+error_paths:
+  - step: read-story-position
+    failure: The story has four features of six slices each, and enumerating them all is 24 rows
+    recovery: >
+      ONE EXPANDED PATH (C8). Render the feature roster plus the CURRENT feature's slices and nothing
+      else; siblings are rows with links, and each link carries a clause saying what it holds. The
+      hundreds-of-cards argument is now in its third costume and inverts identically each time
+
+  - step: read-story-position
+    failure: Morgan wants the slices of a feature that is not the current one
+    recovery: >
+      Open its brief from the roster's link. ACCEPTED COST of C8: the story card charges a click the
+      single-feature card did not. Accepted because the alternative is the wall, and recorded here so it
+      is not rediscovered as a defect. The cost is bounded by the link carrying a clause saying what it
+      holds — a bare URL would make the click a guess
+
+  - step: read-story-position
+    failure: A reader sees slices indented under features in one table and calls it compact
+    recovery: >
+      Refuse it. An indented tree renders the same N x M rows with better typography, and degrades badly
+      in both forges' web UIs — which is the surface the whole requirement is about. "Demoted a level"
+      means moved to a second table, never nested in the first
+
+  - step: read-story-position
+    failure: The fold returns a value the glyph table does not cover
+    recovery: >
+      Fail rather than degrade. Two glyph vocabularies now render in one block — six feature states, seven
+      slice statuses — and a value with no glyph gets published as `·`, which is
+      unknown-published-as-not-started at feature scale
+
+  - step: read-story-position
+    failure: No feature declares this story slug — the roster is empty
+    recovery: >
+      `unknown`, with NO count, and the card's column is left untouched. Every universal in the fold is
+      vacuously true over an empty roster, so an unguarded fold answers `done`, `done` maps to Done, and
+      auto-close turns the rendering into a CLOSED card holding N features. Inherited in shape from the
+      feature fold's 2026-08-31 guard and re-pinned rather than assumed
+
+  - step: read-routing
+    failure: The features sit in three waves and one label must serve them
+    recovery: >
+      The label carries the CURRENT feature's wave, single-valued, swapped never added. Multi-valuing it
+      resurrects the measured failure of four accumulated wave labels and an unreadable record while
+      every command reported success
+
+  - step: read-routing
+    failure: The wave label steps BACKWARDS when the next feature begins
+    recovery: >
+      That is correct output. Say so in the block. An unexplained backwards step reads as an error and
+      invites someone to "correct" it forwards, which is how accumulation comes back
+
+  - step: read-routing
+    failure: The current feature's wave has no row in the routing table
+    recovery: >
+      Emit no line AND state that the table does not cover it — the shipped rule, exercised at the new
+      tier. Observed in this repo, whose post-DISCUSS build path authors prose with plugin-dev
+
+  - step: read-story-position
+    failure: Two features are in flight at once
+    recovery: >
+      Render both `▶` and mark the second `⚠ also in flight`. This is a DEFECT, not a shape: issue-board's
+      split clause says two halves belong in different cards when two people work them at once. Grooming
+      reports it; the block does not hide it and does not resolve it
+
+  - step: distinguish-story-from-goal
+    failure: A reader cannot tell which grouping is which, or grooming offers a milestone for a story
+    recovery: >
+      A goal holds CARDS; a story holds FEATURE DIRECTORIES. Milestones do not nest and a story is not a
+      milestone. Where several open cards are features of one story the container offered is a story
+      card — the same supersession the decomposed-feature class already makes, one level up
+
+  - step: open
+    failure: Grooming reports a malformed multi-feature card as clean
+    recovery: >
+      Extend the oracle, never loosen it (C10). Demonstrability correctly passes a story card; the gap is
+      closed by a check that fires on concurrency, not by weakening the one that passes. Loosening is the
+      keep-a-backlog-trustworthy anxiety (F) arriving from the new tier

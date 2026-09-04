@@ -475,6 +475,27 @@ jobs:
     # citing ADR-013 on world-readability. REVERSED AND SCOPED, not deleted: inside the generated
     # markers it is intended; typed scratch outside them is still a defect.
     # See docs/feature/single-issue-per-feature/slices/slice-05-grooming-and-ranking-adapt.md.
+    #
+    # Story tier facet (DISCUSS, feature story-spans-features, 2026-09-04, issue #36).
+    # SECOND paradigm facet on this job, and the job is again unchanged — Robin still wants a board that
+    # says what it means. What changes is that the oracle now passes a shape it cannot see:
+    #   functional (story tier): a card may hold several FEATURES. It is large, holds several
+    #     demonstrable things, and passes the demonstrability rule — correctly. The defect a story card
+    #     can actually carry is CONCURRENCY, not size: two features in flight at once means two people
+    #     are working it, which issue-board's split clause says is two cards. New signal, new oracle.
+    #   functional (story tier, container): "ungrouped effort" proposes a MILESTONE, which is a goal.
+    #     Where the cards are features of one story the right container is a story CARD. Same
+    #     supersession the decomposed-feature class already makes, one level up.
+    #   push (story tier): the shape is malformed everywhere and flagged nowhere — rank-issues stops on
+    #     it, the generator cannot render it, and this scan reports it clean. A shape one tool refuses
+    #     and another certifies is worse than one both refuse; the certification is the record people read.
+    #   anxiety (story tier): (G) The oversized rule gets "fixed" toward size to make the story card
+    #     visible. That is anxiety (F) above, arriving from the new tier, and it reintroduces the
+    #     consolidate/split oscillation one level up — a declined split of a story into features returns
+    #     every run and only has to be accepted once. THE force this facet is built against.
+    # The rule's text is EXTENDED, never edited: demonstrability stands, and the gap it leaves is closed
+    # by a check that fires rather than by weakening the one that passes.
+    # See docs/feature/story-spans-features/slices/slice-05-grooming-and-ranking-recognise-the-story.md.
 
   - id: make-in-flight-work-transferable
     # Registered by DISCUSS wave, feature: single-issue-per-feature (2026-08-14)
@@ -525,7 +546,37 @@ jobs:
       carry-work-across-session-boundaries (medium: solo case solved, cross-person half at zero).
     status: validated
     personas: [morgan-feature-owner]
-    features: [single-issue-per-feature]
+    features: [single-issue-per-feature, story-spans-features]
+    #
+    # STORY TIER FACET (DISCUSS, feature story-spans-features, 2026-09-04, issue #36).
+    # EXTENDED, NOT REPLACED — and the choice is the point. The owner of a story is the SAME developer who
+    # builds its features, not a planning role above them, so the job story below is unchanged and only the
+    # UNIT it ranges over moves: "one issue per feature" generalises to ONE ISSUE PER UNIT OF OWNERSHIP.
+    # A second job statement over a validated job is the duplicate-authority defect this repo has recorded
+    # once already, and it is the same defect the feature itself is built against, one register up.
+    #   functional (story tier): the unit is the STORY where a feature declares membership
+    #     (`Story: <slug> · position NN` in its own feature-delta.md), the feature otherwise. The block
+    #     carries TWO positions rather than one — where the developer is inside the current feature, and
+    #     where that feature sits inside the whole story — as two stacked rosters and no more.
+    #   push (story tier): a story-sized outcome is often better executed as several small features, and
+    #     the 1:1 mapping forbids expressing that at all. Measured on issue #36: a multi-feature card is
+    #     malformed everywhere and flagged nowhere — rank-issues STOPS on it, the block generator cannot
+    #     render it, and groom-issues reports it CLEAN, correctly, because it is demonstrable.
+    #   anxiety (story tier): (F) The 22-phase unreadability argument multiplies rather than repeating —
+    #     N features x M slices is the hundreds-of-cards problem in its third costume. Answered by C8.
+    #     (G) Two groupings on one card. A story and a goal both group several features, and two
+    #     conventions for one grouping is the defect this board keeps hitting. Answered by C9.
+    #     (H) A shape that passes a shipped oracle vacuously. Loosening the oracle to see it is the
+    #     keep-a-backlog-trustworthy anxiety (F) arriving from the other side. Answered by C10.
+    #   Anxiety (D) of the original list — "one card per feature stops showing what is MOVING" — is the
+    #     force this facet acts on; issue #36 cites it as the recorded evidence that the need predates
+    #     the decision that declined it.
+    # WHY THE 2026-08-14 RULING IS NOT CONTRADICTED: epics were declined for PORTABILITY (Premium,
+    # group-scoped, and the design must work on GitLab Free), not for absence of need. That constraint is
+    # still live and still binds — it rules out epics and rules in the generated, delimited, timestamped
+    # description block that already ships and renders as a table in both forges' web UIs. Asked per
+    # nwave-issue-board's own rule ("before reversing a decision, ask what else could have justified it").
+    #
     # The premise correction this job rests on (DISCUSS, 2026-08-14). nwave-issue-board makes the SLICE
     # the card, justified as "nWave is worked one feature at a time" — but that is a property of a
     # DEVELOPER, not of a repo. With several developers each owning a feature, every conclusion drawn
@@ -545,6 +596,16 @@ jobs:
     #   C5 Derivation stays with its owner (phil:nwave-slice-status).
     #   C6 Absent state renders as `unknown`, never as a benign default.
     #   C7 No per-push forge writes; refresh at boundaries only.
+    # Added by the story tier (DISCUSS, 2026-09-04). C1-C7 all still bind, unchanged.
+    #   C8 ONE EXPANDED PATH. The block enumerates exactly one feature's slices and one slice's steps;
+    #      every sibling is a row with a link. The bound does not multiply with the roster. This is C4
+    #      restated as the purpose it always served rather than as the table count it took at one tier —
+    #      at the feature tier C8 produces C4's two tables verbatim, which is the test that it is faithful.
+    #   C9 TWO GROUPING TIERS, ONE DISCRIMINATOR, stated where a reader meets it. A goal holds CARDS; a
+    #      story holds FEATURE DIRECTORIES. Positionally: a list of issues is a goal, the inside of one
+    #      issue is a story. The milestone slot stays spent on the goal, and milestones do not nest.
+    #   C10 A shipped oracle is EXTENDED at the new scale, never loosened. Where a new shape passes an
+    #      existing check vacuously, add a check that fires — do not weaken the one that correctly passes.
 
   - id: know-a-boards-hazards-before-contact
     # Registered by DISCUSS wave, feature: board-setup-block (2026-08-14, issue #32)
