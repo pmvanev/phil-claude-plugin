@@ -2,7 +2,12 @@
   "fixture_id": "GROOM-SELFTEST-03",
   "situation": "Every issue on the board states a purpose, says how it will be judged done, links absolutely, and carries one value per single-valued label family, which the project's CLAUDE.md declares.",
   "forge": "github",
-  "scan": {"issues_returned": 12, "calls_made": 1, "truncated": false},
+  "scan": {
+    "issues_returned": 12,
+    "calls_made": 2,
+    "truncated": false,
+    "calls_note": "one `gh issue list`, plus the parent/subIssues GraphQL read added 2026-09-04 (issue #30). Was 1 before that grant; a GitHub scan making one call now is one that skipped the parent-edge check."
+  },
   "defects": [],
   "cross_issue_candidates": [],
   "expected_decision": "REPORT-CLEAN",

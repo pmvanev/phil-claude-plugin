@@ -1,0 +1,33 @@
+{
+  "fixture_id": "GROOM-SELFTEST-45",
+  "phase": "SCAN",
+  "situation": "Five open cards on an nWave board where one issue is one feature. #71-#74 are real sub-issues of open parent #70 'Payload projection', and each is one slice of it. The parent edge is the ONLY tie: no title carries `slice NN`, no body names a docs/feature/ directory, and the five share no milestone. Before the grant decision of issue #30 the scan could not read a parent edge, so this board reported CLEAN.",
+  "forge": "github",
+  "command": "/phil:groom-issues",
+  "issues": [
+    70,
+    71,
+    72,
+    73,
+    74
+  ],
+  "evidence": [
+    "real parent/child edge: #71, #72, #73, #74 are sub-issues of #70"
+  ],
+  "absent_evidence": [
+    "no `slice NN` in any title",
+    "no body names a docs/feature/ directory",
+    "no shared milestone"
+  ],
+  "reads": "gh api graphql -- parent/subIssues on the board's open cards",
+  "expected_decision": [
+    "REPORT-DEFECT",
+    "SURFACE-CANDIDATE"
+  ],
+  "expected_guard": "the parent edge is READ, not inferred and not reported unevaluated; the set is surfaced with the edge quoted; no consolidation is applied and /phil:groom-set is named with a count; the granted `gh api graphql` is used for the read only",
+  "scan": {
+    "issues_returned": 5,
+    "calls_made": 2,
+    "truncated": false
+  }
+}

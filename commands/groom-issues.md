@@ -1,16 +1,37 @@
 ---
 description: "Read a whole issue board and report what is wrong with it — bodies that state no purpose or no way to tell when they are done, links that will 404, accumulated labels, plus the defects that live between issues: duplicates, oversized cards, work overcome by events, effort with no container, features decomposed into slice cards under retired rules, and a story spread across several feature cards. Reports only; changes nothing."
 argument-hint: "[<owner/repo> or <group/project>]"
-mutates: false
-allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(glab issue list:*), AskUserQuestion, Skill
+mutates: true
+allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(gh api graphql:*), Bash(glab issue list:*), AskUserQuestion, Skill
 ---
 
 Load the `groom-issues` skill at `${CLAUDE_PLUGIN_ROOT}/skills/groom-issues/SKILL.md` and run the
 scan it describes.
 
-This command is **read-only**, and enforced rather than declared. It has no `Write` or `Edit`, and
-its `Bash` is scoped to `gh issue list` and `glab issue list` — not `gh api`, which would permit
-`--method POST` and hand back the mutation the scoping exists to remove.
+This command **reports and never writes**. It declares `mutates: true` while writing nothing, and the
+declaration is honest rather than defensive: `Bash(gh api graphql:*)` accepts a mutation document, so the
+grant *permits* a write that this command must never make. `mutates: false` beside that grant would be a
+false claim about the tool list, which is the one thing that declaration is for.
+
+**The guarantee is now half enforced and half promised, and which half is which matters.** No `Write`
+and no `Edit`, so no file can be touched — mechanical, checkable, unchanged. The forge half is prose: this
+paragraph, and the never-do list in the skill. **Send only `query` documents through `gh api graphql`,
+never `mutation`.**
+
+**Why the grant exists.** The decomposed-feature check ranks a real parent/child edge as its strongest
+evidence — sufficient on its own to offer an irreversible consolidation. `parent` and `subIssues` are
+GraphQL-only; `gh issue list --json` exposes neither and no flag adds one. Without this call the check
+reported **clean** on every board whose slice cards were properly parented, which is exactly the
+population it was written for. That was issue #30.
+
+**Two alternatives were rejected, and neither was overlooked.** A read-only helper script cannot restore
+the enforcement: no grant names one script, only its interpreter, and an interpreter cannot honestly join
+`READ_ONLY_VERBS` in `scripts/check-readonly-commands.py`, whose header says an entry there promises the
+verb has no writing mode. Leaving the edge unread was the honest status quo and left the check inert
+where it matters. The precedent for the trade taken instead is `commands/resume.md`, which has declared
+`mutates: true` while writing nothing since 2026-08-17.
+
+Read the edges in **one** call for the whole board, not one per issue.
 
 End the report by naming the command that acts on each column, with its count:
 

@@ -16,6 +16,6 @@
   "expected_decision": [
     "REPORT-UNEVALUATED"
   ],
-  "expected_guard": "the rollup is named as a check this command cannot make, with the reason; it is not read, not corrected, and not reported as a body defect",
-  "grant_note": "subIssuesSummary is GraphQL-only and commands/groom-issues.md grants no `gh api`. The measurement below was taken by hand, out of band."
+  "expected_guard": "the rollup is NOT read -- the grant covers the parent edge only -- and the check is unevaluated regardless, because the counter cannot separate a won't-build close from a shipped one; the figure is presented as hand-measured context, not as this run's finding",
+  "grant_note": "subIssuesSummary is GraphQL-only. Since 2026-09-04 commands/groom-issues.md holds Bash(gh api graphql:*), so the value is now REACHABLE -- and is still not read, because the skill authorises that grant for the parent edge alone and its never-do list forbids using it for a check with no rule behind it. The figures below stay hand-measured, out of band. Issue #30's grant made the READ possible; it did NOT make the CHECK possible, and reaching for it anyway would buy nothing."
 }

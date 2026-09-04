@@ -18,8 +18,10 @@ steps:
     emotion: wary — the board has been accumulating and nobody knows how bad it is
   - id: scan
     action: >
-      One call per forge fetches every issue with its body, labels and milestone. The defect table is
-      derived fresh against the house-default standard; no marker is read, because none exists.
+      One call per forge fetches every issue with its body, labels and milestone. On GitHub a second
+      whole-board call reads the parent/child edges, which the issue list cannot return and which the
+      decomposed-feature check ranks as its strongest evidence. The defect table is derived fresh
+      against the house-default standard; no marker is read, because none exists.
     output: >
       "51 clean, 3 with body defects, 2 duplicate candidates, 1 oversized, 1 decomposed feature (4 cards)"
       — plus the evidence behind each finding
@@ -132,6 +134,23 @@ error_paths:
   - step: fix-mechanical
     failure: The issue changed between the scan and the write
     recovery: Re-read before writing, and report the change rather than overwriting it silently
+  - step: scan
+    # Added 2026-09-04 (issue #30). The grant trade is recorded in commands/groom-issues.md.
+    failure: >
+      The board is on GitLab, where there is no stable issue-to-issue parent edge to read, so the
+      decomposed-feature check loses its strongest evidence tier
+    recovery: >
+      Report the tier unevaluated with the reason, and evaluate tiers 2 and 3 normally. Do not report the
+      class clean — silence from a check that could not run is the defect this whole journey is built
+      against. On GitHub the edge IS read, so emitting the same caveat there is a false caveat and erodes
+      the ones that are true
+  - step: scan
+    failure: >
+      A parent card's completion counter can now be read, and reads 100%
+    recovery: >
+      Report the number as read and the check as unevaluated anyway. The counter counts CLOSED children,
+      not built ones, and no forge field separates a won't-build close from a shipped one. Reading the
+      value was a grant problem and is solved; answering the question is an oracle problem and is not
   - step: decide-set-level
     failure: A set of cards looks like a decomposed feature, but only their titles tie them together
     recovery: >

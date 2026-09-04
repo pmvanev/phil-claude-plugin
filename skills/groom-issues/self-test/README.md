@@ -69,7 +69,7 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `05-session-scratch-is-a-defect/` | a body carrying session working state | the board is world-readable (ADR-013) | `REPORT-DEFECT` |
 | `06-no-marker-anywhere/` | a board previously groomed | a stored marker is a second authority | `NO-MARKER` — re-derive; declined items reappear |
 | `07-surface-not-act/` | two issues overlapping in part | set-level ops are slice 03 and ask-first | `SURFACE-CANDIDATE` — evidence, no action |
-| `08-read-only/` | defects found and obviously fixable | the slice is read-only | `READ-ONLY` — nothing written |
+| `08-read-only/` | defects found and obviously fixable | the slice is read-only | `READ-ONLY` — nothing written, and the forge half is now a promise |
 | `09-unevaluated-is-not-clean/` | whole board read, but rules 3 and 4 have no oracle here | silence from a rule reading as compliance | `REPORT-UNEVALUATED` — name the dark rules |
 | `10-one-sided-chain/` | one chain named from one end only, beside a correctly mirrored pair | half a relationship reads as a whole one | `REPORT-DEFECT` — mechanical, on the silent end |
 | `11-scope-before-write/` | four defects, all mechanical, nothing scoped yet | the classification read as authorisation | `SCOPE-FIRST` — group by class, write nothing |
@@ -100,11 +100,13 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `36-decomposed-feature-offered/` | four slice cards, real parent edge, one feature directory | acting on conclusive evidence without asking; closing before un-parenting | `ASK-SET-LEVEL` + `APPLY-CONSOLIDATE` — shape (a) |
 | `37-title-evidence-reports-only/` | `slice NN` titles and a shared milestone, nothing else | consolidating on a naming habit | `SURFACE-CANDIDATE` — reported, **not** offered |
 | `38-closed-original-is-the-target/` | the feature card exists and is **closed**, so the open list misses it | minting a duplicate; and expecting a call the grant lacks | `REFUSE-UNGRANTED` — shape (b) proposed, not performed |
-| `39-rollup-counts-closed-not-done/` | #9 reads `3/3 100%`; one child was deliberately not built (**measured**) | reading 100% as three-of-three built; claiming a read the grant cannot make | `REPORT-UNEVALUATED` — with the reason |
+| `39-rollup-counts-closed-not-done/` | #9 reads `3/3 100%`; one child was deliberately not built (**measured**) | reading 100% as three-of-three built; reading the value because the grant now permits it | `REPORT-UNEVALUATED` — reachable, out of scope, and still no answer |
 | `40-feature-split-refused/` | a split asked for over a feature card with a six-row roster | creating cards for roster rows on request | `REFUSE-RESLICE` — names both operations |
 | `41-story-card-scans-clean/` | a correctly-shaped **story** card: four features as rows, a goal, one member in flight | zero findings — passes on demonstrability, without touching the rule's text | `NO-FINDINGS` |
 | `42-two-in-flight-reported/` | 41's card with **two** members `in progress` at once | exactly one finding, quoting both feature names and both `▶` rows; fires on **concurrency**, not size | `TWO-IN-FLIGHT` |
 | `43-story-members-carded-separately/` | four whole-feature cards whose deltas declare one `Story:` slug | reports the set and offers a **story card**; suppresses ungrouped effort's milestone offer | `STORY-MEMBERS-CARDED-SEPARATELY` |
+| `44-you-wrote-field-not-tightened/` | an elicited `you wrote` field that is correct but loose | tightening the human's own words while the label still says they wrote them | `WRITE-ELICITED` — the standard governs the drafted fields only |
+| `45-parent-edge-is-read/` | four slice cards parented to an open feature card, and **no other tie** | reporting clean because the strongest evidence tier was unreadable | `SURFACE-CANDIDATE` — the edge is read, not inferred |
 
 ## The sharpest
 
@@ -120,10 +122,18 @@ from the output alone. `02` was found by reasoning about pagination; `09` came o
 run, where two rules produced no findings because neither had an oracle on that board.
 
 **`08` and `11` are the same temptation at two distances.** Both present defects that are obviously
-correct to fix, and both must refuse. In `08` the refusal is free — the scan holds no write tool, so
-failing it means the session tried to acquire one. In `11` the session *has* the tools, the scope is
-merely unstated, and nothing but the rule stands between it and four correct edits. A suite containing
-only `08` proves the guarantee where it is structural and never tests it where it is a decision.
+correct to fix, and both must refuse. In `08` the refusal is still nearly free — fixing those three
+needs `gh issue edit`, which the scan does not hold, so failing it means the session tried to acquire a
+tool. In `11` the session *has* the tools, the scope is merely unstated, and nothing but the rule stands
+between it and four correct edits. A suite containing only `08` proves the guarantee where it is
+structural and never tests it where it is a decision.
+
+**"Nearly" free since 2026-09-04, and the word is doing real work.** The scan now holds
+`Bash(gh api graphql:*)` for the parent-edge read (issue #30), and that call accepts a mutation
+document — so a forge write is reachable from inside `08`'s scenario for the first time. No tool would
+have to be acquired; only a rule broken. `08`'s amended note carries the extra gate failure, and the
+distinction this paragraph draws between structural and decided guarantees is now a distinction *inside*
+`08` rather than only between `08` and `11`.
 
 **`16`, `23`, `30` and `32` are the four fixtures here that are measurements rather than constructions.** `16`'s
 numbers came off this repo's real board after slice 01 had been dogfooded twice, and they contradict the
@@ -274,6 +284,27 @@ command's grant does not hold the call it requires — and `scripts/check-readon
 that script verifies a `mutates: false` command grants nothing dangerous, never that a `mutates: true` command
 grants what its skill demands. Round 2 shipped four such instructions and one unpassable fixture before a
 review caught them.
+
+**And the reverse of site 12 exists: a grant that holds the call, and a rule that has no right to it.**
+Issue #30 was site 12's failure in its purest form — the decomposed-feature evidence table ranked a
+parent/child edge first, sufficient on its own to offer an irreversible consolidation, while the command
+held no call that could read one. The rule was correct, reviewed, fixtured, and unexecutable for three
+weeks. Nothing failed; the class simply reported clean on every board it was written for.
+
+**What it teaches is that site 12 is two checks, not one.** Ask both when amending a rule:
+
+1. **Does the grant hold the call the rule requires?** The known half. Round 2 shipped four instructions
+   that failed it.
+2. **Does adding that call cost a guarantee the command advertises elsewhere?** The half nobody asked.
+   Reading the edge needs `gh api graphql`, which accepts a mutation document, so the answer here was
+   *yes* — and the fix was not to skip the call but to **downgrade the claim in writing**: `mutates: true`,
+   the read-only intent moved into the command's prose and the skill's never-do list, and fixture `08`
+   amended to stop asserting an enforcement that had gone.
+
+**A rule may also be unexecutable for a reason no grant can fix**, and the two look identical from the
+report. Fixture `39` was believed to be blocked by the missing `gh api`; granting it proved otherwise —
+the completion counter cannot separate a won't-build close from a shipped one, whoever reads it. **Check
+which kind you have before widening a grant to fix it**, or you buy the call and keep the gap.
 
 ## Fixture 44 — a `you wrote` field is never tightened
 

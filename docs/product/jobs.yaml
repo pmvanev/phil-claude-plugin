@@ -523,6 +523,31 @@ jobs:
     # separates this instance from it.
     # See docs/feature/board-prose-standard/feature-delta.md [D2], [D6], [D7].
 
+    #
+    # ORACLE FACET (2026-09-04, issue #30). No DISCUSS wave — the card carried the decision.
+    # The functional dimension's class list is UNCHANGED: `a feature decomposed into slice cards under
+    # retired rules` is already there and still names the right class. What changes is whether the check
+    # behind it can run.
+    #   push (oracle): the class ranks a real parent/child edge as evidence sufficient on its own to
+    #     offer an irreversible consolidation, and the scan could not read one — `parent` and `subIssues`
+    #     are GraphQL-only and the grant held `gh issue list` alone. So on every board whose slice cards
+    #     were properly parented, the check reported CLEAN. Shipped in 0.51.0, inert until 0.86.0.
+    #   anxiety (oracle): (I) A check that cannot see its own strongest signal reports the same sentence
+    #     as a check that looked and found nothing. This is anxiety (C) — an oracle that is really
+    #     taste — arriving from the opposite side: not an oracle too soft to trust, an oracle absent
+    #     behind a report that reads as authoritative.
+    # THE TRADE, recorded because it cost a guarantee: reading the edge needs `gh api graphql`, which
+    # accepts a mutation document, so `/phil:groom-issues` moved from `mutates: false` to `mutates: true`.
+    # The FILE half of read-only stays mechanical (no Write, no Edit); the FORGE half is now a promise in
+    # the command's prose and the skill's never-do list. A read-only helper script was rejected: no grant
+    # names one script, only its interpreter, and an interpreter cannot honestly join READ_ONLY_VERBS.
+    # Precedent: commands/resume.md, `mutates: true` while writing nothing, since 2026-08-17 (issue #24).
+    # NOT WIDENED: /phil:groom-set holds no such grant. Its writes are irreversible, so the identical
+    # grant beside them is a materially larger promise. REFUSE-UNGRANTED still covers its rollup read.
+    # LIMIT: on GitLab there is no stable issue parent to read, so tier 1 is reported unevaluated there.
+    # And the grant did NOT rescue the completion-counter check — that counts closed children, not built
+    # ones, which no grant fixes. See skills/groom-issues/self-test/45-parent-edge-is-read/ and 39.
+
   - id: make-in-flight-work-transferable
     # Registered by DISCUSS wave, feature: single-issue-per-feature (2026-08-14)
     job_story: >

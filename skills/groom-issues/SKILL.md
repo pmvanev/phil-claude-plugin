@@ -1,6 +1,6 @@
 ---
 name: groom-issues
-description: Skill bundle for the phil:groom-issues, phil:groom-fix, phil:groom-set and phil:groom-ask commands — reads a whole issue board in one call per forge and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, resolves the defects between issues (merge, split, close, group, consolidate a feature decomposed under retired rules or a story spread across feature cards) by asking before each one, and fills in a card that says too little from the user's answers and its own suggestions, labelling where every field's words came from. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
+description: Skill bundle for the phil:groom-issues, phil:groom-fix, phil:groom-set and phil:groom-ask commands — reads a whole issue board in one list call per forge — plus one GraphQL call on GitHub for the parent/child edges that call cannot return — and reports what is wrong with it against a stated standard, applies the mechanical fixes inside a scope the user picks, resolves the defects between issues (merge, split, close, group, consolidate a feature decomposed under retired rules or a story spread across feature cards) by asking before each one, and fills in a card that says too little from the user's answers and its own suggestions, labelling where every field's words came from. Derives the defect table fresh every run and stores no grooming marker, so a declined candidate returns.
 ---
 
 # Groom issues — say what is wrong with a board
@@ -9,7 +9,19 @@ A board accumulates cards that someone filed half-finished. Reading them one at 
 sloppy ones and misses the expensive ones, because the costly defects live *between* issues.
 
 **Four commands, and the splits between them are the guarantee.** `/phil:groom-issues` reads and
-reports — it holds no write tool at all, so read-only is enforced rather than declared.
+reports — it holds no `Write` and no `Edit`, so it cannot touch a file, and its forge calls **must** be
+reads, which since 2026-09-04 is a promise rather than a scoping.
+
+**Half of that is enforced and half is now a promise, which is a downgrade and is recorded as one.**
+Until 2026-09-04 the whole guarantee was mechanical: no write tool of any kind, and a `Bash` scoped to
+`gh issue list` and `glab issue list`. Reading a **parent/child edge** needs `gh api graphql`, which
+accepts a mutation document, so granting it removed the forge half of the enforcement. The trade was made
+deliberately for issue #30, because the alternative was a decomposed-feature check that reports clean on
+every board it was written for — see *Cross-issue candidates*. `Write` and `Edit` are still absent, so
+the file half stays mechanical; the forge half now lives in this skill's never-do list and the command's
+prose, and nothing but those forbids a mutation. A helper script was rejected rather than overlooked: no
+grant names one script, only its interpreter, and an interpreter cannot honestly join the read-only verb
+list in `scripts/check-readonly-commands.py`.
 `/phil:groom-fix` applies the mechanical column inside a scope the user picks, and can change no card's
 existence. `/phil:groom-set` resolves the defects between issues — merge, split, close, group, consolidate — and asks
 before every one. `/phil:groom-ask` fills in a card that says too little, asking, suggesting, and
@@ -17,7 +29,12 @@ writing what the user sanctions. Do not improvise any of them.
 
 The splits are not tidiness. A single command carrying the report in context is the design where a write
 gets computed against remembered text instead of read text, and where read-only holds only as long as
-nobody adds a tool. Separating them makes the re-read structural and the guarantee mechanical.
+nobody adds a tool. Separating them makes the re-read structural, and it keeps `Write` and `Edit` out of
+the scan's reach whatever happens to its forge calls.
+
+**That last clause used to read "and the guarantee mechanical", and the grant change makes the shorter
+sentence false.** It is narrowed rather than deleted: the separation still buys the re-read and still
+buys the file half. What it no longer buys is a scan that could not write to the forge if it tried.
 
 They also separate blast radii. `/phil:groom-fix` edits bodies and labels; every change it makes is one
 edit to undo. `/phil:groom-set` changes **which cards exist** — a merge closes one, a split creates
@@ -157,9 +174,47 @@ gh issue list -R <owner/repo> --state open --json number,title,body,labels,miles
 glab issue list -R <group/project> --output json --per-page 100
 ```
 
-On `glab` the JSON flag is `-O`/`--output`, **not `-F`** — the mechanism and its silent failure are
-`phil:issue-board`'s, under *`glab`'s JSON flag is `-O`, and `-F` fails silently*. Both commands return
+On `glab issue list` the JSON flag is `-O`/`--output`, **not `-F`** — the mechanism and its silent
+failure are `phil:issue-board`'s, under *`glab`'s JSON flag differs per subcommand — check before you
+type it*. **Scoped to this subcommand deliberately**: that section retired the blanket rule this line
+used to cite, and the claim survives only for `glab issue list`, which is the only one the scan uses. Both commands return
 bodies populated, so there is no N+1 and no reason to fetch issues individually.
+
+**Then one more call on GitHub, for the parent/child edges the first call cannot return.** `gh issue
+list --json` exposes no `parent` and no `subIssues`, and no flag adds one; both are GraphQL-only. Without
+this the decomposed-feature class loses the signal its own evidence table ranks first, and reports clean
+on exactly the boards it exists for:
+
+```sh
+gh api graphql -f query='query($o:String!,$r:String!){ repository(owner:$o,name:$r){
+  issues(first:100,states:OPEN){ nodes { number
+    parent { number }
+    subIssues(first:50){ nodes { number } } } } } }' -f o=<owner> -f r=<repo>
+```
+
+**One call, paginated if the board needs it — not one per issue.** The whole-board read is the design;
+an N+1 here would reintroduce the cost the single list call exists to avoid.
+
+**The query is duplicated from `phil:issue-board` (*Writing a sub-issue edge is a flag; READING one is
+GraphQL*) on purpose, and that skill owns it.** This file's own rule is that every forge mechanic lives
+there and none is guessed here — so a second copy needs a reason. It is this: the scan must be runnable
+from this file alone, and a reader who has to load the reference skill to learn the shape of a call the
+scan makes on every GitHub board is one indirection away from skipping it. **If the two ever disagree,
+`phil:issue-board` wins.**
+
+**This call is a read and must stay one.** `gh api graphql` accepts a mutation document, so nothing in
+the grant stops a write — only the never-do list below does. Never send a document whose operation is
+`mutation`, and never reach for this call to *do* something the scan reported.
+
+**On GitLab tier 1 stays unreadable, and that is not the grant being stingy.** GitLab has no stable
+issue-to-issue parent edge to read: epics are Premium, and the work-item hierarchy that would carry one
+is an *Experiment* — both per `phil:issue-board`, under *A parent's "N of M done" counts different things
+on each forge*. So `glab api` was **not** granted, because widening the promise buys an oracle that does
+not exist. On GitLab the parent-edge check has no oracle and is **reported unevaluated**, per *Reporting*.
+
+Stated rather than left to be discovered: a class that works on one forge and goes silently dark on the
+other is this skill's own recurring defect, and the whole point of issue #30 was that the dark half
+reported clean.
 
 **Never read or write a grooming marker.** No `groomed` label, no timestamp block, no state file. The
 defect table is re-derived on every run. A stored marker becomes a second authority the moment
@@ -207,8 +262,8 @@ in the same body get opposite treatment and the column stops meaning "one right 
 
 Second, the check itself. "Unambiguous" also means the target exists and is pushed, which
 `phil:issue-board` establishes with
-`git ls-tree origin/<default-branch> -- <path>` — outside a `Bash` scoped to `gh issue list` /
-`glab issue list`, and deliberately so. A bare file path in a body is therefore a **candidate**, not a
+`git ls-tree origin/<default-branch> -- <path>` — outside the scan's grant, which holds no `git` verb,
+and deliberately so. A bare file path in a body is therefore a **candidate**, not a
 finding: report it as unverified and say what would settle it. Promoting it anyway produces the failure
 `phil:issue-board` warns about from the other direction — a link that renders, passes a read-back, and
 404s for everyone else.
@@ -409,6 +464,17 @@ reports each with its evidence and stops; resolving them is `/phil:groom-set`, a
   | Bodies naming the same `docs/feature/<id>/`, **confirmed present in the repo** | **Offer**, once confirmed. |
   | `slice NN` in the titles | **Report, never offer.** A naming convention is a habit, not a fact. |
   | A shared milestone | **Nothing at all.** A milestone is a goal and holds unrelated work by design. |
+
+  **Tier 1 is readable on GitHub, and was not until 2026-09-04.** The edge is GraphQL-only; the scan now
+  makes that read, per *Scan once, derive fresh*. **This was the whole of issue #30**: the table has ranked
+  the edge first since 0.51.0 while the command could not see one, so every board whose slice cards were
+  properly parented — the boards this class was written for — came back clean. A ranking whose top row is
+  unreadable does not degrade to the rows below it; it inverts the class, firing only on the weak evidence
+  and never on the strong.
+
+  **On GitLab tier 1 remains unreadable, and is reported unevaluated rather than skipped.** There is no
+  stable issue-to-issue parent edge there to read. Tiers 2 and 3 still evaluate normally, so the class is
+  weakened on GitLab, not dark — say which it was.
 
   **Tier 2 needs the repository, not the body's word for it.** *Overcome by events* already refuses to treat
   board prose as evidence about the world — the claim "is settled in the repository or not at all" — and a body
@@ -632,8 +698,16 @@ indistinguishable from one closed as shipped: observed on this repo's board, a p
 where one child had been deliberately **not** built and closed anyway. So consolidation does not merely
 inflate a number — it produces an inflation nobody can read as one. **Say what the rollup will show before
 the user answers**, and hand over the read rather than claiming to have made it, because `subIssuesSummary`
-is GraphQL-only and no `gh api` is granted here. The mechanism and the measurement are
+is GraphQL-only and `/phil:groom-set` grants no `gh api`. The mechanism and the measurement are
 `phil:issue-board`'s, under *A parent's "N of M done" counts different things on each forge*.
+
+**Do not read the family as one grant — the scan is the exception.**
+`/phil:groom-issues` gained `Bash(gh api graphql:*)` on 2026-09-04 for the parent-edge read; this command
+did not, and `REFUSE-UNGRANTED` still names a rollup read among the calls it hands over. Widening it here
+was not decided and is not implied. The asymmetry is the point: the scan only reports, so a promise not to
+mutate costs it nothing it was ever going to do, while this command exists to make irreversible writes —
+the identical grant sitting beside `gh issue close` is a materially larger promise than it is beside a
+report.
 
 ### A declined candidate leaves no trace
 
@@ -655,6 +729,14 @@ ungrouped pair (the board's only two typesetting cards, with no milestone naming
 duplicates, no oversized cards, no work overcome by events, and no decomposed features — every slice card on
 it was already closed, which is why that class was found by reasoning about consumers' boards rather than by
 reading this one.
+
+**Read the last of those as a tiers-2-and-3 result, because that is all it was.** A second run on
+2026-08-14 against 0.53.0 reported the decomposed-feature class *evaluated with no candidates*, and the
+strongest tier had no oracle behind it — the parent edge was unreadable, and on this board there happened
+to be none to miss. On a board whose slice cards **are** parented, the identical sentence would have been
+emitted and would have meant nothing. That is issue #30, and it is the sharpest available illustration of
+this section's own lesson: a population measured through a partial oracle describes the oracle, not the
+population.
 
 Read that result carefully, because the obvious reading is wrong. The run's output was not *nothing* —
 it was two questions, one of which named a seam the board did not previously hold: both cards leave the
@@ -687,16 +769,22 @@ unreachable, or the limit truncated the list, say the read was partial and repor
 found. "52 clean" over a partial scan is the single most misleading thing this skill can emit,
 because it is a claim about issues nobody looked at.
 
-**A rule that could not be evaluated is not a rule that passed.** Two checks go dark routinely: rule 4
-wherever a **project-local** family is undeclared, and the cross-reference row wherever a target cannot be
-confirmed pushed. Both then produce no findings, and no findings reads as compliance. Name them, with
+**A rule that could not be evaluated is not a rule that passed.** Three checks go dark routinely: rule 4
+wherever a **project-local** family is undeclared, the cross-reference row wherever a target cannot be
+confirmed pushed, and **the decomposed-feature parent edge on every GitLab board**, which has no stable
+edge to read. All three then produce no findings, and no findings reads as compliance. Name them, with
 the reason:
 
 ```
 rules 1, 2, 3, 5 evaluated · rule 4 partly unevaluated (`wave: *` checked — normative;
   `documentation`/`enhancement` undeclared in CLAUDE.md)
 · 6 unlinked paths unverified (target check needs git, out of scope here)
+· decomposed feature: tiers 2 and 3 checked; parent edge unread (GitLab has no stable
+  issue parent to read — on GitHub this tier is read)
 ```
+
+The last line is owed **only on GitLab**, and only where the class had a candidate to settle. On GitHub
+the edge is read, so saying it was not is a false caveat — which erodes the caveats that are true.
 
 This is the partial-read failure one rule narrower, and it hides better — the issue count is honest,
 so nothing in the summary looks incomplete. A reader who is told the board is clean will not ask which
@@ -843,6 +931,27 @@ and any of these **alongside** it: `REPORT-UNEVALUATED` (a rule had a candidate 
 `SURFACE-CANDIDATE` (a cross-issue candidate reported, not acted on) · `NOT-A-DEFECT` (something that
 looks like a finding and is not) · `NO-MARKER` · `READ-ONLY`.
 
+**A board carrying a surfaced candidate is not clean, so the terminal is `REPORT-DEFECT`.**
+`SURFACE-CANDIDATE` is additive and never stands alone, and the pairing was undefined until fixture `45`
+made the gap visible: a board with no body defects and four properly parented slice cards satisfies
+`REPORT-CLEAN` by the letter and misreports itself. The defects that live *between* issues are defects —
+the whole premise of the whole-board scan — and the summary line has always counted them beside the
+per-issue findings. **`REPORT-CLEAN` is unavailable on any run that surfaced a candidate.**
+
+Fixture `07` carries the same shape and predates the rule; it is correct under it, and was passing on
+convention rather than on anything written down.
+
+**`READ-ONLY` is now a claim about what the run did, not only about what it could do.** Before the
+`gh api graphql` grant it was nearly tautological — the command held no tool capable of a write, so the
+outcome restated the frontmatter. It no longer does: the grant permits a mutation document and only the
+never-do list forbids one, so reporting `READ-ONLY` asserts that every forge call this run made was a
+read. Keep reporting it, and mean the stronger thing.
+
+**No new outcome was added for the parent-edge read, deliberately.** A read that succeeds produces
+`SURFACE-CANDIDATE` like any other evidence, and a read that cannot be made — every GitLab board —
+produces `REPORT-UNEVALUATED`, which is what that outcome is for. Minting a third would split one class
+across two vocabularies and buy nothing.
+
 `/phil:groom-fix` (the apply) reports `SCOPE-FIRST` before any write, then exactly one of:
 
 `APPLY-MECHANICAL` · `STALE-REREAD` · `REFUSE-GENERATED`
@@ -930,8 +1039,15 @@ All four commands:
 
 `/phil:groom-issues` (the scan) additionally:
 
-- **Write anything.** No issue edits, no labels, no comments, no milestones. It holds no write tool, so
-  a session that finds itself needing one here has misread the command.
+- **Write anything.** No issue edits, no labels, no comments, no milestones. It holds no `Write` and no
+  `Edit`, so a session that finds itself needing one of those here has misread the command.
+- **Send a `mutation` document through `gh api graphql`.** This is the one prohibition here that no tool
+  boundary backs. The grant exists to read a parent edge and permits a mutation as a side effect; the
+  scan may issue `query` documents only. **Refuse rather than improvise** — a resolution that needs a
+  forge write is `/phil:groom-set`'s, and handing it over is the whole design.
+- **Use the graphql grant to work around a missing read.** It was widened for the parent edge, not into
+  a general forge API. Anything else it could reach is a check nobody has reasoned about, arriving
+  without a rule, an evidence tier, or a fixture.
 
 `/phil:groom-fix` (the apply) additionally:
 

@@ -2,8 +2,18 @@
   "fixture_id": "GROOM-SELFTEST-09",
   "situation": "Every issue on the board was read in one call, and no rule that ran found anything. Two issues carry both `documentation` and `enhancement`, and the project's CLAUDE.md declares no single-valued label family. Six bodies name a specific repository file in a code span rather than a link — not directories, globs or ambiguous basenames, so the discriminator is satisfied and only pushed-ness is open.",
   "forge": "github",
-  "scan": {"issues_returned": 11, "calls_made": 1, "truncated": false},
-  "rules_evaluated": [1, 2, 3, 5],
+  "scan": {
+    "issues_returned": 11,
+    "calls_made": 2,
+    "truncated": false,
+    "calls_note": "one `gh issue list`, plus the parent/subIssues GraphQL read added 2026-09-04 (issue #30). Was 1 before that grant; a GitHub scan making one call now is one that skipped the parent-edge check."
+  },
+  "rules_evaluated": [
+    1,
+    2,
+    3,
+    5
+  ],
   "went_dark": {
     "rule 4": "no label family declared in CLAUDE.md; `documentation` + `enhancement` is a defect or two orthogonal facts, and nothing on the forge says which",
     "cross-reference row": "6 unlinked paths; confirming a target is pushed needs `git ls-tree`, outside `Bash(gh issue list)`"

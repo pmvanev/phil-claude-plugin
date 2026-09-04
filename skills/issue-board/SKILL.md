@@ -1,6 +1,6 @@
 ---
 name: issue-board
-description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — moving a card between board columns, reordering a column or prioritizing a backlog so the top card is what to work on next, ordering sub-issues under a parent, setting a status label or a Projects v2 Status field, reading a parent issue's completed-children count or progress bar, deciding whether a piece of work is one issue or several, hyperlinking or cross-linking references in an issue body to a file, an ADR, or another issue, marking an issue blocked by another and recording why, weighing whether to sync a local task file with a board, reading a forge's GraphQL schema to confirm a mutation's signature, or connecting to a self-hosted GitLab instance. Covers the semantics `--help` does not, where a wrong guess reports success.
+description: Use when driving a GitLab or GitHub issue tracker or board from the command line with `glab` or `gh` — moving a card between board columns, reordering a column or prioritizing a backlog so the top card is what to work on next, ordering sub-issues under a parent, reading which issues are sub-issues of which, setting a status label or a Projects v2 Status field, reading a parent issue's completed-children count or progress bar, deciding whether a piece of work is one issue or several, hyperlinking or cross-linking references in an issue body to a file, an ADR, or another issue, marking an issue blocked by another and recording why, weighing whether to sync a local task file with a board, reading a forge's GraphQL schema to confirm a mutation's signature, or connecting to a self-hosted GitLab instance. Covers the semantics `--help` does not, where a wrong guess reports success.
 ---
 
 # Driving GitLab and GitHub Issue Boards
@@ -367,6 +367,33 @@ real links, never as the mechanism you rely on.
   both ends — `blockedBy` and `blocking` are both fields on `Issue` in GraphQL — so the reverse side
   needs no second write.
 
+### Writing a sub-issue edge is a flag; READING one is GraphQL
+
+The asymmetry costs an hour if you assume the flags imply a field. **`gh issue list --json` and
+`gh issue view --json` expose no `parent` and no `subIssues`, and no flag adds them** — `--json` rejects
+both names outright. The edge is readable only through GraphQL:
+
+```sh
+gh api graphql -f query='query($o:String!,$r:String!){ repository(owner:$o,name:$r){
+  issues(first:100,states:OPEN){ nodes { number
+    parent { number }
+    subIssues(first:50){ nodes { number } } } } } }' -f o=<owner> -f r=<repo>
+```
+
+**One whole-board call, not one per issue.** The nesting returns every edge in a single response, so a
+tool that walks issues individually to find parents has bought an N+1 for nothing.
+
+**Reading it costs a guarantee, and that is worth knowing before you design around it.** `gh api graphql`
+accepts a mutation document, so a command that can read an edge can also write one; no scoping separates
+them. A tool whose value is that it *cannot* write therefore cannot read this edge and keep that claim
+mechanical — it either goes without the strongest structural signal the forge offers, or downgrades the
+claim to a promise in prose. `phil:groom-issues` took the second option on 2026-09-04, deliberately and
+in writing; the reasoning is recorded there rather than restated here.
+
+**GitLab has no stable equivalent to read.** Epics are Premium and the work-item hierarchy that would
+carry an issue-to-issue parent is an *Experiment* — see the next section. A cross-forge tool keyed on
+parent edges is a GitHub-only check, and should say so rather than reporting the GitLab half clean.
+
 ## A parent's "N of M done" counts different things on each forge
 
 Both forges render a completion count on a parent issue, and the two are backed by unrelated
@@ -680,7 +707,11 @@ cannot be discovered:
 ## Self-test
 
 `skills/issue-board/self-test/` — **created 2026-09-04**; this was the only board-family skill without a
-suite while five siblings carried 30, 43, 18, 13 and 10 fixtures.
+suite while every sibling carried one. **The counts that stood here were wrong and are not
+replaced.** They read `30, 43, 18, 13 and 10`; measured 2026-09-04 the suites hold 30, 45, 27, 13
+and 10, and `18` matched no state `session-handoff`'s suite has ever been in. A hand-maintained
+tally in shipped prose goes stale on the next fixture and cannot be checked by anything here — which
+is this board's recorded defect, committed inside a sentence about test coverage.
 
 Fixture 01 pins the chain clause: both ends written, under the fixed heading, in the description, before
 work starts on the blocker, with the clause carrying what the edge cannot. It supplies **no candidate

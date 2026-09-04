@@ -2,10 +2,23 @@
   "fixture_id": "GROOM-SELFTEST-01",
   "situation": "A GitHub board of 7 open issues. Five are well-formed. One has no statement of purpose; one carries a relative file link that would 404.",
   "forge": "github",
-  "scan": {"issues_returned": 7, "calls_made": 1, "truncated": false},
+  "scan": {
+    "issues_returned": 7,
+    "calls_made": 2,
+    "truncated": false,
+    "calls_note": "one `gh issue list`, plus the parent/subIssues GraphQL read added 2026-09-04 (issue #30). Was 1 before that grant; a GitHub scan making one call now is one that skipped the parent-edge check."
+  },
   "defects": [
-    {"issue": 31, "kind": "no-purpose", "evidence": "body is the single line 'fix the thing'"},
-    {"issue": 34, "kind": "relative-link", "evidence": "[the ADR](docs/adr/016.md) — GitHub emits relative paths verbatim"}
+    {
+      "issue": 31,
+      "kind": "no-purpose",
+      "evidence": "body is the single line 'fix the thing'"
+    },
+    {
+      "issue": 34,
+      "kind": "relative-link",
+      "evidence": "[the ADR](docs/adr/016.md) — GitHub emits relative paths verbatim"
+    }
   ],
   "expected_decision": "REPORT-DEFECT",
   "expected_guard": "each finding names the rule it violates and quotes the evidence; the run writes nothing"

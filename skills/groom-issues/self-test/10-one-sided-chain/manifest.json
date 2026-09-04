@@ -2,10 +2,20 @@
   "fixture_id": "GROOM-SELFTEST-10",
   "situation": "Issue 41 carries a `## Chain` line reading `Relates to #55 — if every mechanical defect needs a question, this slice collapses into that one`. Issue 55 is open and has no `## Chain` section at all. A second pair, 41 and 39, is correctly mirrored on both ends.",
   "forge": "github",
-  "scan": {"issues_returned": 9, "calls_made": 1, "truncated": false},
+  "scan": {
+    "issues_returned": 9,
+    "calls_made": 2,
+    "truncated": false,
+    "calls_note": "one `gh issue list`, plus the parent/subIssues GraphQL read added 2026-09-04 (issue #30). Was 1 before that grant; a GitHub scan making one call now is one that skipped the parent-edge check."
+  },
   "chains": {
-    "41": ["Relates to #55 — if every mechanical defect needs a question, this slice collapses into that one", "Blocked by #39 — the boundary had to be measured by a real run first"],
-    "39": ["Blocks #41 — the boundary had to be measured by a real run first"],
+    "41": [
+      "Relates to #55 — if every mechanical defect needs a question, this slice collapses into that one",
+      "Blocked by #39 — the boundary had to be measured by a real run first"
+    ],
+    "39": [
+      "Blocks #41 — the boundary had to be measured by a real run first"
+    ],
     "55": []
   },
   "expected_decision": "REPORT-DEFECT",

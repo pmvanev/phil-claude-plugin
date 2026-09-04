@@ -42,6 +42,21 @@ archaeology.
 **Quote the evidence, never characterise it** — the same rule the other four classes carry. "These look
 like slices of one feature" is the finding restating its own conclusion.
 
+**Amended 2026-09-04 (issue #30) — signal 1 was unreadable when this table shipped, and AC1 was
+therefore unsatisfiable.** `parent` and `subIssues` are GraphQL-only; `gh issue list --json` returns
+neither and no flag adds one, and `commands/groom-issues.md` granted `gh issue list` alone. So the row
+ranked **Sufficient** named the one signal the scan could not see, and on every board whose slice cards
+were properly parented the class reported clean. The table was right; the command could not execute it.
+
+Resolved by granting `Bash(gh api graphql:*)` to the scan, at the cost of its enforced read-only
+guarantee — `mutates: true`, the forge half of the promise moved into prose. The reasoning is in
+`commands/groom-issues.md` and `skills/groom-issues/self-test/45-parent-edge-is-read/`.
+
+**Signal 1 is GitHub-only, and this table never said so.** GitLab has no stable issue-to-issue parent
+edge — epics are Premium and the work-item hierarchy is an *Experiment*. There the class runs on signals
+2 and 3 and reports signal 1 unevaluated. The row's `— sub-issues on GitHub` was a description of the
+mechanism and got read as a description of the scope.
+
 ## The archaeology problem, and why consolidation has three shapes
 
 A previous split *"closed the original as superseded, or kept it as the container the new cards hang
