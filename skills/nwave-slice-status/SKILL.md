@@ -242,8 +242,10 @@ they can see it.
 A **story** is several nWave features worked as one piece by one owner, carried on one card. Emit a
 story-level state only when asked — by `--story-state <slug>`, or by a question that plainly asks for
 one (*"what state is this story in"*). `phil:nwave-issue-board` renders this value; it must never
-compute it. **That renderer does not exist yet** — the story tier lands in this feature's slice 03, and
-until then the publisher's mapping is defined over feature states only.
+compute it. The story tier landed in `phil:nwave-issue-board` on 2026-09-04, so that renderer now
+exists and consumes this value; before then the publisher's mapping was defined over feature states
+only. *(This paragraph said the renderer did not exist yet. Shipping it falsified that — the fold-back
+that a route-1 finding lands in **both** skills, not only the one being edited.)*
 
 **Build the roster from the features' own declarations.** Scan `docs/feature/*/feature-delta.md` for
 `Story: <slug> · position NN` — **anchored at column 0, in the file's header region, at most one per

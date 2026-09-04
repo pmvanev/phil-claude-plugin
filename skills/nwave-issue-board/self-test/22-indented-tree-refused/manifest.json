@@ -1,0 +1,13 @@
+{
+  "fixture": "22-indented-tree-refused",
+  "situation": "Fixture 20's four-feature story, rendered as ONE table with each feature's slices indented beneath it as sub-rows. This is the tempting reading of question 1's phrase `features, with slices demoted a level`, and it satisfies a naive reading of the bound: there is only one table.",
+  "artifacts": {
+    "same_as": "20-story-block-four-features"
+  },
+  "candidate_rendering": "| 01 aws-bedrock-setup | ✓ done |\n| ↳ 01-01 … | ✓ |\n| ↳ 01-02 … | ✓ |\n| 02 chat-in-web-ui | ▶ in progress |\n| ↳ 02-01 … | ✓ |\n… 24 slice sub-rows in total",
+  "forge_state": {
+    "host": "github"
+  },
+  "expected_outcome": "INDENTED-TREE-REFUSED",
+  "expected_guard": "the bound counts ENUMERATED SLICES, not tables; one table containing 24 slice rows breaches it exactly as four tables would"
+}
