@@ -26,3 +26,31 @@ mental_model:
 vocabulary:
   - session boundary, handoff, snapshot, bootstrap, resume point, compaction, staleness,
     reconstruct vs record, entry-point routing, one system of record, claimed card, baton
+
+# Finished-work facet — added by DISCUSS wave, feature: wave-summary (2026-09-08, issue #39).
+# Kai at the same moment as always — picking work back up — but against work whose thinking is FINISHED
+# rather than in flight. The shipped session-handoff feature solved "the reasoning was never written
+# down". This facet is the inverted failure: it WAS written down, at a 5,539-word median keyed on handles
+# that resolve nowhere, and a record nobody opens is not meaningfully different from one nobody wrote.
+# morgan-feature-owner was considered and rejected — Morgan inherits work in flight; these artifacts are
+# done. A new persona was rejected on the precedent that one is earned when the POSITION is orthogonal to
+# every domain, as ari-interrupted-decider's is; here the position is Kai's exactly.
+finished_work_facet:
+  goals:
+    - Know what a finished stage decided without reading the argument that produced it
+    - Learn what a slice actually landed, not only what its brief said it would
+    - Be told plainly when a stage recorded nothing, rather than handed a confident summary of it
+    - Read a decision, never a handle pointing at one
+  frustrations:
+    - The record exists, is complete, and costs an afternoon — so it goes unopened and I act from memory
+    - Its load-bearing sentences are keyed on identifiers I have to resolve before the sentence means anything
+    - Some of those identifiers point at a record this repo does not contain at all
+    - A brief tells me what was intended; nothing tells me what shipped, short of reading the commits
+  mental_model:
+    - A record nobody opens is not meaningfully different from one nobody wrote
+    - Stating a decision is worth more than naming it, and costs about the same
+    - What a slice landed and what it promised are different facts, and the gap is the interesting one
+    - A short summary that is confidently wrong costs more than the long read it replaced
+  vocabulary:
+    - the stage summary, what it landed versus what it intended, plain English, no handles,
+      word ceiling, state the decision not its number, recorded nothing

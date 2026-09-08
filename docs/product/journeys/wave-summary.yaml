@@ -1,0 +1,98 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: wave-summary (2026-09-08, issue #39)
+#
+# The FINISHED-work read. journeys/session-handoff.yaml and live-work-stack.yaml cover carrying work
+# that is in flight; journeys/board-snapshot.yaml covers the board's outside view; nwave-slice-status
+# answers where a slice stands. None reads a completed artifact to learn what it DECIDED — every one of
+# them is about position, and this is about content.
+
+id: wave-summary
+name: Learn what finished work decided, without reading it
+persona: kai-session-relay          # EXTENDED 2026-09-08 — see that file's finished_work_facet
+job: learn-what-a-finished-stage-decided
+
+summary: >
+  Kai returns to a feature whose thinking is done and, instead of opening a 5,539-word artifact, runs one
+  command and reads two hundred words: what the stage decided, in plain English, with no handles to
+  resolve. Where the question is a finished slice rather than a finished stage, the same command folds
+  the brief together with what actually shipped, and names the gap between them. Neither read derives a
+  status, and neither writes anything.
+
+# The opening beat is `deterred`, deliberately not `uncertain`. Kai does not doubt the record exists —
+# it is right there, complete and well organised. It goes unopened because opening it costs an afternoon.
+# The failure mode this feature acts on is A COMPLETE RECORD THAT GOES UNREAD, which is the same shape as
+# the board that is fine and goes unread, one layer in.
+arc: deterred -> oriented -> decided
+
+steps:
+  - id: invoke
+    action: Kai runs `/phil:nwave-wave-summary` against a feature whose thinking is finished.
+    output: One artifact read, named in the output
+    emotion: deterred — I know what is in there and I know what it costs to find out
+    shared_artifacts:
+      - name: the feature delta
+        source: docs/feature/<id>/feature-delta.md
+        note: >
+          Read, never written and never shortened in place. A summary is not a licence to edit its source.
+
+  - id: read-the-decisions
+    action: >
+      Read two hundred words or fewer naming what the stage decided and what it rules out, in plain
+      English, with no file path, bracketed identifier, bare handle or card number.
+    output: The stage summary, at or under the ceiling
+    emotion: oriented — I know what was settled and I did not spend the afternoon
+    shared_artifacts:
+      - name: the word ceiling and the vocabulary list
+        source: scripts/plain_language.py
+        note: >
+          One module, four consumers. The counter is imported rather than re-derived — the fourth copy
+          is exactly what the extraction exists to prevent.
+
+  - id: ask-about-a-slice
+    action: Kai adds `--slice`, asking what a finished slice landed rather than what a stage decided.
+    output: The brief folded with the commits and files that shipped
+    emotion: oriented — the same question at a smaller scale
+
+  - id: read-what-landed
+    action: >
+      Read what shipped, what the brief promised and did not, and what the slice learned — with any
+      disagreement between intent and outcome named rather than smoothed.
+    output: The slice summary, at or under the ceiling
+    emotion: decided — I know whether this ground can be built on
+
+error_paths:
+  - trigger: The stage recorded nothing — the artifact is absent or empty
+    response: >
+      Say so. Do not summarise. A confident two hundred words about an absent artifact is the failure
+      this feature would otherwise introduce, and it is indistinguishable afterwards from a real summary.
+    emotion: oriented — I know there is nothing there, which is itself an answer
+
+  - trigger: The fold finds nothing the brief does not already say
+    response: >
+      Say that, rather than restating the brief shorter. This is the card's own doubt about the slice
+      half, kept as behaviour instead of argued away — and if it happens on every slice, the half should
+      be dropped rather than shipped.
+    emotion: oriented
+
+  - trigger: Which commits belong to the slice cannot be established
+    response: >
+      Say so and report only the brief. This repo's commit subjects name the slice by convention, not by
+      guarantee, and attributing the wrong commits would make the landed view confidently wrong.
+    emotion: alert
+
+  - trigger: The summary would exceed the ceiling
+    response: >
+      Cut the argument, never the decisions. A decision named without its reasoning is still useful; a
+      reasoning without its decision is not. Say what was left out.
+    emotion: oriented
+
+  - trigger: The reader asks where the work stands
+    response: >
+      Answer nowhere. `phil:nwave-slice-status` owns every derivation over these files, and a second one
+      drifts against it. Name it and stop.
+    emotion: oriented
+
+# Accepted costs, recorded so they are not rediscovered as defects:
+#   - A bounded summary can be confidently wrong. Compression is judgement, and no fixture catches a
+#     summary that is short, fluent and a misreading of the source.
+#   - Forty-fold compression means most of the argument is discarded by design. The command names the
+#     artifact it read so the discarded part is one command away, never reconstructed from the summary.

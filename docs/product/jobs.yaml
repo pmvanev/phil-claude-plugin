@@ -881,3 +881,68 @@ jobs:
     #   C4 Descriptions are COMPOSED from the body. A title reworded is not a description.
     #   C5 Card numbers are permitted in composed text on this surface, and stay forbidden in an ask.
     #   C6 The read reports and never fixes. Drift is one line pointing at the audit.
+
+  - id: learn-what-a-finished-stage-decided
+    # Registered by DISCUSS wave, feature: wave-summary (2026-09-08, issue #39)
+    job_story: >
+      When I come back to work whose thinking is already finished and recorded, I want to know what
+      it decided in a read I can finish in one pass, so I can act on it without reconstructing an
+      argument written for the wave that produced it.
+    dimensions:
+      functional: >
+        Two bounded reads over finished artifacts: what a completed stage decided, and what a
+        completed slice actually landed as against what its brief intended. Both inside a 200-word
+        ceiling, both in plain English with no internal handles.
+      emotional: >
+        Confidence that the thinking already done is available rather than merely stored; relief from
+        the choice between an afternoon's read and acting in ignorance of it.
+      social: >
+        Decisions a teammate can inherit without an interview; being someone whose finished reasoning
+        is usable rather than archived.
+    four_forces:
+      push: >
+        Measured 2026-09-08: 15 feature deltas, 81,942 words, median 5,539, largest 9,447 — up from
+        59,544 words across 12 files four days earlier. They carry 157 `ADR-NNN` references pointing
+        at a record that does not exist in this repo at all, and 54 `DDD-N` handles that number a
+        decision inside one file. So the answer to "what did this stage settle" is a 5,539-word read
+        whose load-bearing sentences are keyed on identifiers the reader must resolve first.
+      pull: >
+        One command, two scales: what a finished stage decided, and what a finished slice landed.
+        200 words each, plain English, no handles — the same shape already enforced for an
+        interrupting question and for a board read, applied to the artifacts.
+      anxiety: >
+        (A) A short summary that is confidently wrong costs more than the long read it replaced.
+        (B) A slice summary that only restates its brief shorter is ceremony — the card's own doubt.
+        (C) A second derivation over these files drifts against the one that already exists.
+        (D) A plain-language rule that is asked for and never enforced, which is this repo's
+        recorded failure mode.
+      habit: >
+        Not opening the artifact at all and acting from memory; asking the person who wrote it;
+        or reading the whole thing and losing an afternoon.
+    opportunity_score: >
+      high importance, zero satisfaction — no mechanism exists, and the corpus grew 22,000 words in
+      the four days between the card being filed and DISCUSS running. Scored against
+      carry-work-across-session-boundaries (medium: the unrecorded half is solved) and
+      orient-on-a-board-without-reading-it (medium: the board's outside view now ships).
+    status: validated
+    personas: [kai-session-relay]
+    features: [wave-summary]
+    # NOT a facet of carry-work-across-session-boundaries. That job is about reasoning that was never
+    # captured; this one is about a capture nobody can read — the inverted failure, same person, same
+    # moment. Same-persona-new-job precedent: know-a-boards-hazards-before-contact.
+    # morgan-feature-owner was considered and rejected: Morgan's job is a teammate taking over work IN
+    # FLIGHT, and these artifacts are finished.
+    # Relationship to answer-a-tools-question-without-decoding-it and
+    # orient-on-a-board-without-reading-it: all three SHARE A CONSTRAINT — a bounded word count and
+    # plain English — and differ in what they read and in what they may print. This surface is the
+    # strictest of the three: it permits no identifier at all, because unlike a board read it has no
+    # column to put a number in.
+    # Load-bearing constraints (DISCUSS, 2026-09-08):
+    #   C1 200 words per summary, counted, not aimed at.
+    #   C2 No file path, bracketed identifier, bare handle OR card number. State the decision, never
+    #      its number.
+    #   C3 The slice summary reports what LANDED, folding the brief with the commits. Restating the
+    #      brief shorter is the version the card rightly doubted.
+    #   C4 A stage that recorded nothing is reported as recording nothing, never summarised.
+    #   C5 No status is derived. phil:nwave-slice-status owns every derivation over these files.
+    #   C6 mutates: false, and mechanically so — no forge, no network, git verbs only.
