@@ -59,8 +59,9 @@ unchanged and the outcome is different.
 | D10 | **The plain-language rule is extracted into a shared checker**, and the word ceiling is separated from the vocabulary list first | **Locked** — user, 2026-09-08. Three surfaces now want it and one already enforces it |
 | D11 | **Card numbers are permitted on this surface and stay forbidden in an ask** | **Locked**, and it is the reason D10 needs the split. A board read that cannot print `#34` is useless; an interrupting question that prints it is the measured defect |
 | D12 | **The extraction lands as a precursor commit inside a value-bearing slice, not as a slice of its own** | **Locked**. A slice carrying only infrastructure is a structural failure under this wave's own composition gate, and by slice 02 there are two live call sites to design against rather than one |
-| D13 | **`rules/writing.md` applies to this command's composed output** | **Locked, and it contradicts a sibling.** `CLAUDE.md`'s discriminator is *who composed the words, never where they sit*; `groom-issues` excludes itself because its output is terminal-only. Both cannot be the rule. Recorded below as a finding rather than resolved here |
+| D13 | **`rules/writing.md` applies to this command's composed output, from slice 01** | **Locked, and it contradicts a sibling.** `CLAUDE.md`'s discriminator is *who composed the words, never where they sit*; `groom-issues` excludes itself because its output is terminal-only. Both cannot be the rule. Recorded below as a finding rather than resolved here. **Scoped 2026-09-08 after `plugin-dev:skill-reviewer` found the shipped command reversing it:** the standard reaches the four clause types the skill composes — the empty-section sentence, the withheld count, the order-provenance clause, and the drift/uncolumned/inflation lines — and never a card title, which is quoted. It was tempting to defer the whole decision to slice 02's descriptions; that would have been true of the bulk and false of slice 01 |
 | D14 | Command name `/phil:board-snapshot` | **Locked**, weakly. `board-status` collides with the project's Status field; `board` is too vague to win the routing contest that opened this feature |
+| D15 | **A new skill, not a fold into `phil:issue-board`** | **Locked** — 2026-09-08, and the card asked DISCUSS to settle it rather than authoring. Measured: `issue-board` is **7,173 words with no `references/`**, already 1.4x the authoring maximum that issue #41 is an open card about in its sibling. Folding a second subject in worsens a defect this board has already filed. It is also the wrong home by subject — that skill covers how to MANIPULATE a forge, and this is how to COMPOSE a bounded read. The family pattern is a skill per subject with commands over it, which `groom-issues` and `session-handoff` both follow |
 
 ## Wave: DISCUSS / [REF] What the provoking session measured
 
@@ -117,8 +118,7 @@ point is a `gh` call this session has already made by hand.
 - **`/phil:board-snapshot --all`** — the per-card table. Slice 02.
 - **`/phil:board-snapshot [owner/repo]`** — the argument the sibling board commands already take.
 
-No HTTP surface, no skill entry point of its own. Whether the knowledge lands in a new skill or in
-`phil:issue-board` is an authoring call, not a DISCUSS one — the card says so and it is left open.
+No HTTP surface. The knowledge lands in a **new skill**, per [D15].
 
 ## Wave: DISCUSS / [REF] Journey
 

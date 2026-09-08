@@ -1,0 +1,28 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-02",
+  "situation": "This repo's live shape on 2026-09-08: 12 open cards, all in Todo. Nothing blocked, nothing in flight.",
+  "board": {
+    "blocked": 0,
+    "in_flight": 0,
+    "queued": 12,
+    "n_requested": 5
+  },
+  "expected_decision": [
+    "SNAPSHOT-RENDERED"
+  ],
+  "expected_report_lines": [
+    "READ-ONLY"
+  ],
+  "expected_guard": "one leading sentence names both empty sections; no heading is printed over blank space; the 5 queued cards appear in the order the forge returned, with one clause saying that is where the order came from; the empty-section sentence is composed under `rules/writing.md` \u2014 active voice, positive form, no padding",
+  "must_not": [
+    "print a `Blocked` heading with nothing under it",
+    "print an `In Progress` heading with nothing under it",
+    "omit any mention that the two sections were checked",
+    "sort, re-rank, or otherwise reorder the queued cards",
+    "report SNAPSHOT-CLIPPED \u2014 5 of 12 with 7 withheld is the requested N, not a clip",
+    "write the empty-section sentence in the passive \u2014 \"no cards are currently found to be blocked\" states the same fact and buries the subject",
+    "pad it with a hedge \u2014 \"it appears that nothing is blocked at this time\" says less in more words",
+    "state it in the negative where the positive form is available \u2014 prefer \"everything is queued\" to \"nothing has been started and nothing is stuck\""
+  ],
+  "why_this_fixture_exists": "On a healthy board this is the COMMON rendering, not an edge case. Two of three sections empty is what the maintainer sees most days, so it is the shape most worth pinning. It also pins the prose standard: this sentence is composed rather than quoted, a reader meets it on almost every run, and `CLAUDE.md` requires a citation to ship with a fixture that would fail without it. The three `must_not` clauses above are that fixture."
+}

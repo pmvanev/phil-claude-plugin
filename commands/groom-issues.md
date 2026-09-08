@@ -1,5 +1,5 @@
 ---
-description: "Read a whole issue board and report what is wrong with it — bodies that state no purpose or no way to tell when they are done, links that will 404, accumulated labels, plus the defects that live between issues: duplicates, oversized cards, work overcome by events, effort with no container, features decomposed into slice cards under retired rules, and a story spread across several feature cards. Reports only; changes nothing."
+description: "Read a whole issue board and report what is wrong with it — bodies that state no purpose or no way to tell when they are done, links that will 404, accumulated labels, plus the defects that live between issues: duplicates, oversized cards, work overcome by events, effort with no container, features decomposed into slice cards under retired rules, and a story spread across several feature cards. Reports only; changes nothing. For where the board STANDS rather than what is wrong with it — what is blocked, what is in flight, the next few queued — use phil:board-snapshot instead."
 argument-hint: "[<owner/repo> or <group/project>]"
 mutates: true
 allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(gh api graphql:*), Bash(glab issue list:*), AskUserQuestion, Skill

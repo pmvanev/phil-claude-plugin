@@ -1,0 +1,15 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-03",
+  "situation": "Two blocked cards. One carries a `## Chain` section naming what it waits on and why. The other carries no `## Chain` section at all, though its title mentions another card and a sibling card discusses it.",
+  "board": { "blocked": 2, "in_flight": 1, "queued": 6, "n_requested": 5 },
+  "expected_decision": ["SNAPSHOT-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "the first blocked card names what it waits on, quoted from its chain line; the second says plainly that its blocker is unrecorded",
+  "must_not": [
+    "infer the second card's blocker from its title",
+    "infer it from the sibling card that discusses it",
+    "omit the second card because its blocker is unknown",
+    "render the second card as blocked with no statement either way, which reads as an unread chain line"
+  ],
+  "why_this_fixture_exists": "The forge records the edge and never the reason. `Unrecorded` is a real answer; a confident sentence covering an absence is indistinguishable afterwards from a recorded one."
+}

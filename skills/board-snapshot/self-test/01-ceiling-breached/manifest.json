@@ -1,0 +1,25 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-01",
+  "situation": "A board large enough to breach the ceiling: 7 blocked cards each with a `## Chain` line, 6 in flight, and 40 queued. Blocked and in-flight cards are never dropped, so those 13 alone consume most of the budget before a single queued card is printed.",
+  "board": {
+    "blocked": 7,
+    "in_flight": 6,
+    "queued": 40,
+    "n_requested": 5
+  },
+  "expected_decision": [
+    "SNAPSHOT-CLIPPED"
+  ],
+  "expected_report_lines": [
+    "READ-ONLY"
+  ],
+  "expected_guard": "fewer than 5 queued cards are printed, the rendered output is at or under 200 words, and the count withheld is stated as a number; all 7 blocked and all 6 in-flight cards are still present",
+  "must_not": [
+    "breach 200 words",
+    "drop a blocked or an in-flight card to fit \u2014 only the queued section gives ground, even when the mandatory sections have consumed almost the whole budget",
+    "clip without stating how many queued cards were withheld, which is SNAPSHOT-RENDERED lying",
+    "report SNAPSHOT-RENDERED",
+    "silently reduce N without saying so"
+  ],
+  "why_this_fixture_exists": "The card demands a fixture on a board large enough to breach the ceiling. This repo's live board cannot breach it \u2014 12 cards, all queued \u2014 so a suite drawn only from real data would never exercise the one path the ceiling exists for. Sized so the two sections that may NOT be clipped already exceed the budget, which is the hard case: the clip has to come entirely out of the queued section or not at all."
+}

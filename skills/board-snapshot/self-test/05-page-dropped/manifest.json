@@ -1,0 +1,16 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-05",
+  "situation": "The items query returns 100 nodes and a cursor indicating more, and the follow-up page fails. The 100 nodes that did arrive contain 1 blocked, 3 in flight and 60 queued.",
+  "board": { "blocked": 1, "in_flight": 3, "queued": 60, "n_requested": 5, "pages_missing": true },
+  "expected_decision": ["SNAPSHOT-PARTIAL"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "the output says the read was partial and reports only what was found; no count is presented as a total",
+  "must_not": [
+    "report SNAPSHOT-RENDERED",
+    "report SNAPSHOT-CLIPPED — a clipped render over a partial read is partial",
+    "state a total for any section",
+    "say the board is clear of blocked cards, or of drift, on the strength of an incomplete read",
+    "silently render the first 100 as though they were the board"
+  ],
+  "why_this_fixture_exists": "A bounded read looks complete by construction. Nothing in a 200-word output tells a reader that forty cards were never fetched, which makes the completeness claim more dangerous here than on a full scan."
+}

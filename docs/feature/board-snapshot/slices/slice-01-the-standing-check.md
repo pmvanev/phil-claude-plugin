@@ -32,6 +32,10 @@ and the claim has never been exercised because nobody has ever run it.
 - **[D7]** — the drift line: an open card in Done, or a closed one outside it, in one line, only when it
   fires, counting against the budget, pointing at the audit.
 - **[D8]** — slice-card inflation reported in one line, never consolidated, never refused.
+- **`UNCOLUMNED`, added to this slice's scope after the brief was written.** A card on the project with no
+  Status belongs to none of the three sections, so it vanishes from a read whose whole purpose is saying
+  what is there. It comes free from the same call as the drift line and costs one line. Recorded here
+  rather than discovered later — an addition nobody wrote down is indistinguishable from scope creep.
 - **[D9]** — `mutates: true`, read-only intent in prose, `scripts/check-readonly-commands.py` passing.
 - **A fixture pinning KPI-1 on a synthetic board large enough to breach the ceiling** — at least one
   blocked, one in flight, five queued. The card demands this and it is the only test that tests anything.

@@ -1,0 +1,15 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-06",
+  "situation": "An nWave repo whose board still carries slice cards under retired rules: 4 open cards are slices of one feature, properly parented to it. Every count in the snapshot is inflated by 3.",
+  "board": { "blocked": 0, "in_flight": 1, "queued": 11, "n_requested": 5, "slice_cards": 4 },
+  "expected_decision": ["SNAPSHOT-RENDERED"],
+  "expected_report_lines": ["INFLATION", "READ-ONLY"],
+  "expected_guard": "one line reports that the counts are inflated by slice cards and names `/phil:groom-set` as what resolves it; the snapshot still renders in full",
+  "must_not": [
+    "consolidate anything",
+    "refuse to render, which withholds the read exactly when the board most needs one",
+    "collapse the slice cards into their parent in the displayed counts, which would silently invent a board the forge does not have",
+    "propose a split or a merge — this command asks nothing"
+  ],
+  "why_this_fixture_exists": "Consolidating is irreversible and belongs to a command that asks first. Refusing is the other tempting answer and is worse. Reporting and rendering anyway is the only outcome that leaves the reader both informed and served."
+}
