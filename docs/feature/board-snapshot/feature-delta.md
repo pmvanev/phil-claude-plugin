@@ -423,3 +423,85 @@ nothing checks them stated beside it.
 No slice of this feature has been run as a command. The plugin cache is at 0.86.0 and the three slices
 shipped at 0.87.0, 0.88.0 and 0.89.0. Every claim here is about composed prose, fixtures and two forge
 calls proven by hand — not about a `/phil:board-snapshot` invocation, which has never happened.
+
+## Outcome — review round, 2026-09-08
+
+Both reviewers `CLAUDE.md` requires ran over slices 02 and 03 after they were authored. Recorded here
+rather than left in `git log`, because a finding that lives only in a commit message is one nobody reads
+again.
+
+### The specification had a hole, and a fixture was asserting it
+
+**The ceiling and the never-drop rule were both absolutes and they collide.** On a board where the
+blocked and in-flight sections alone exceed 200 words, zero queued cards still breaches, and the skill had
+no tiebreak — no defined answer at the one point where the answer matters.
+
+**Fixture `01` was asserting the unsatisfiable corner.** Its `situation` said the mandatory sections
+consumed *most* of the budget while its stated purpose said they *exceeded* it, and its guard demanded
+both a 200-word output and every mandatory card present. **No run could have passed it.** The driver could
+not catch this: its sizing check proved only that the *requested* render breached.
+
+Resolved: the ceiling yields and the run says so, because dropping a blocked card is the worse failure and
+a silent overrun is worse than either. The ordinary clip and the collision are now fixtures `01` and `13`,
+and the driver checks each is sized for its own case — one that its mandatory sections fit, one that they
+cannot.
+
+### `--all` promised a completeness it could not deliver
+
+A `projectV2` items query returns only issues somebody `item-add`ed, and `CLAUDE.md` records that this
+board is **not linked to its repository**. So a mode whose stated purpose is saying what is there was
+omitting open issues in silence — the failure its own *Partial reads* rule forbids, reached structurally
+rather than through a dropped page, and worse than a dropped page because nothing in the output looks
+incomplete. One `gh issue list` reconciles it; the count is the `OFF-BOARD` line, with fixture `14`.
+
+### A rationale slice 03 had already refuted was live in four places
+
+Slice 03 measured that no hand-composed description used `#N`. That killed the reason first given both for
+permitting card numbers and for the slice 02 extraction — and the refuted sentence survived verbatim in
+`scripts/plain_language.py` twice, in the driver, and in this document. `CLAUDE.md`'s own words: *a check
+whose stated rationale is false is this board's recurring defect wearing a different hat.*
+
+The surviving reasons are better. The permission stands because forbidding `#34` renames it to `card 34`
+rather than removing it. The extraction stands because the two lists diverge in **both** directions — the
+board list drops the card-number class and adds a bare-handle class the hook omits on purpose, which is
+the direction the measurement never touched.
+
+### The handle pattern was blind to this repo's own spelling
+
+It required two or more letters before the digits, so bare `D11` — the only form written here — matched
+nothing, while fixture `12`'s counterexample used `DDD-7`, a shape nobody writes. **The guard's own
+evidence tested the case least likely to occur.** Widened, with the false-positive class asserted in tests
+and a warning that a runtime consumer must not reuse the pattern unexamined.
+
+### Three fixture directories were untracked while three tests hard-coded their paths
+
+`git commit -am` would have recorded a suite that fails on a fresh checkout, and the `>= 12` count
+assertion would not have caught it — only the three by-name lookups fail. Found by the validator, which
+reproduced it. Verified by extracting the staged tree alone and running it there.
+
+### What the reviewers confirmed rather than found
+
+The counterexample-versus-candidate distinction is machine-checked, including that each counterexample
+fails for the reason claimed. `test_the_laundered_number_escapes_the_pattern_which_is_why_it_needs_a_rule`
+asserts a **gap** rather than a capability. The hook rewiring resolves correctly from a relocated install,
+and `scripts/` ships whole-tree. Naming the cache-version gap unprompted is what the dogfood rule asks for.
+
+## KPI results — 2026-09-08
+
+| # | Target | Result |
+|---|---|---|
+| KPI-1 | Standing check ≤ 200 words on a breaching board | **Not measured.** Pinned by fixtures `01` and `13`; no output has been rendered |
+| KPI-2 | Longest description ≤ 100 words | **53 words**, over twelve hand-composed descriptions — **not** over command output |
+| KPI-3 | Internal handles in the per-card output | **0 of 12**, against 10 of 12 source bodies carrying one. The check has never fired |
+| KPI-4 | Call sites of the shared word counter | **3** — the hook, this feature's driver, the module's own tests. Met |
+| KPI-5 | Decision-request hook behaviour after extraction | **Byte-unchanged**: 127 passed, 1 skipped before and after. Met |
+| KPI-6 | Asked *what summarises my board*, this command is chosen | **Not measured.** Needs a run against a session that does not already know the answer |
+
+**Two of six are met, two are measured against hand-composed input rather than the command, and two are
+unmeasurable without a run.** Stated this way because a table of ticks over a feature that has never
+executed would be the compliance-by-silence this repo keeps recording.
+
+**KPI-3 is the interesting result and it is a negative one.** It fired zero times, which the slice brief
+named in advance as the condition disproving its own premise. The check is kept and demoted in the skill's
+own text to a build-time regression guard on a failure nobody has observed. What would change the verdict:
+one composed description, in any session, carrying a handle.
