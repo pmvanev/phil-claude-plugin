@@ -379,7 +379,7 @@ AC2 — A dependency uncovered during ranking is written as a real forge link, a
 | KPI-1a | Time to comprehension — position | ≤ **30 s** to name wave and current slice | **MET 2026-08-14** — owner's timed read of card #26, under 30 s. Recorded in slice 01's brief |
 | KPI-1b | Time to comprehension — reasoning | ≤ **30 s** to name the above **plus why work stopped** | **MET 2026-08-14** — owner's timed read of #26 after the first live `/phil:handoff` projection; all four facts named, under 30 s |
 | KPI-2 | Cards per feature | Exactly **1** (from 1 + N) | **MET 2026-08-14** — #26 is the only card; `subIssuesSummary` reads `{0, 0}` |
-| KPI-3 | Projection staleness | Block timestamp within **one boundary** of the last artifact change | **FAILED 2026-08-14** — #26's block read `00:00Z` while five slices had landed; see below |
+| KPI-3 | Projection staleness | ~~Block timestamp within **one boundary** of the last artifact change~~ | **FAILED 2026-08-14**, then **RETIRED 2026-09-08 as unmeetable by discipline** — see below |
 | KPI-4 | Grooming false positives | **0** correct cards flagged oversized or session-state-bearing | **MET 2026-08-14** — a full scan at 0.53.0 reported #26 clean: no oversized finding on the board's longest card, no session-state finding on its projection |
 | KPI-5 | Questions asked on inherit | **0** clarifying questions before resuming | Counted the first time a teammate inherits a card; n=1, honestly labelled |
 
@@ -409,7 +409,33 @@ reported the card **clean**, correctly, because no rule evaluates a block's age.
 
 **Accepted rather than fixed here**, and recorded as a failure rather than rounded off. *Refresh at
 boundaries* is a discipline, and KPI-3 asks a discipline to hold without a mechanism, which is what failed.
-The mechanism is a separate capability and is carded.
+
+### Retired 2026-09-08 — unmeetable by discipline
+
+**The target is withdrawn rather than left standing as an open commitment.** A measure nobody can meet,
+sitting in a table beside met ones, reads as work still owed; withdrawing it says what is actually true.
+
+**Why not a mechanism.** The card that carried this — issue #31 — offered four options and asked for a
+decision rather than a default. Taken 2026-09-08: **the honest answer is the one the skill now states, not
+a check.** The block's timestamp lives on the card, so comparing it to the artifacts needs a forge call,
+and both of this repo's `SessionStart` hooks are deliberately local and offline. A check would put a
+network round-trip, an auth dependency and a new failure mode into every session start, to catch something
+that fires rarely.
+
+**What replaced it.** `phil:nwave-issue-board`'s *Refresh at boundaries* now states in as many words that
+nothing compares the timestamp to the artifacts, that refreshing is a discipline, and that the timestamp is
+the reader's warning rather than the system's — with the 2026-08-14 measurement beside it. **That converts
+an unmet target into a documented property**, which is the outcome issue #31 explicitly allows.
+
+**What would reopen it.** An offline design was identified and not taken: record the projection time
+locally when `/phil:handoff` writes it, and compare against `git log` on the feature directory. It costs an
+approximation — the local record disagrees with the card whenever anyone refreshes it elsewhere — and that
+trade deserves its own DISCUSS rather than being bolted on here.
+
+**No fixture ships with this.** The claim is that no mechanism exists, which is not a behaviour a fixture
+can pin; and `nwave-issue-board`'s suite has no driver, so one would be unenforced anyway — issue #42's
+territory. Stated because a citation without a fixture is normally this repo's recorded defect, and the
+exception needs a reason rather than a silence.
 
 ## Wave: DISCUSS / [REF] Definition of Ready
 

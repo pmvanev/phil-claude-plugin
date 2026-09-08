@@ -701,6 +701,21 @@ answers "where are we" locally and writes nothing.
 Timestamp the generated block. A projection that states when it was made is honestly stale; one that
 does not is indistinguishable from current.
 
+**And that is all the reader gets, because nothing compares the timestamp to the artifacts.** Refreshing
+on the boundaries above is a **discipline**, held by whoever remembers. No hook, no check and no scan
+evaluates a block's age — including `phil:groom-issues`, whose body standard covers purpose,
+done-condition, links, labels and chains, and correctly reports a five-slice-stale card as clean.
+
+**Measured 2026-08-14, and the reason this paragraph exists:** card #26 carried a block showing a retired
+slice as current and omitting one that had shipped. Five slices had landed since it was generated. The
+owner read the card and asked whether the feature had not just been completed — **the card misinformed
+its own author for most of a day**, while every tool that looked at it reported success.
+
+**So the timestamp is the reader's warning, not the system's.** Read it before trusting anything below it,
+and treat a block older than the last thing you did on the feature as unread. Stated rather than left
+implied: a projection whose staleness is legible and unnoticed is worse than one nobody trusts, because
+this one arrives as a clean, timestamped table.
+
 ---
 
 ## Self-test (regression gate)
