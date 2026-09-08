@@ -1,0 +1,20 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-09",
+  "mode": "all",
+  "situation": "A card whose title is long, internal and unreadable standing alone, and whose 2,000-word body opens with three sentences of context before it states what the card wants.",
+  "board": { "open_cards": 1 },
+  "expected_decision": ["SNAPSHOT-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "the description is composed from the body and says what the card is for and what would change if it were done; the title is reproduced verbatim in its own column and never edited",
+  "must_not": [
+    "reword the title and call it a description",
+    "lift the body's opening sentence, which is context rather than purpose",
+    "exceed 100 words in the description",
+    "edit or tidy the title, which is the filer's own words"
+  ],
+  "counterexamples": {
+    "over_the_bound": "This card is about the fact that the skill file in question has grown considerably over time and is now very substantially larger than the size that the authoring guidance for skills in this project recommends as a target for a skill body, and it also lacks the supporting directory that the same guidance recommends using to hold material that does not need to be loaded every time, which means that a reader who triggers the skill pays the full cost of the whole file on every single occasion regardless of whether the parts they need are the parts they receive, and separately the file has recently begun to cite a standard about writing concisely which makes its own length read as though the citation were not meant seriously by whoever added it, and that reading is a fair one to take.",
+    "reworded_title": "The nwave-issue-board skill is 8,744 words and has no references directory."
+  },
+  "why_this_fixture_exists": "Compression is this mode's deliverable. A row that rewords its title has done none of it, and the failure is invisible in a table that looks correctly shaped."
+}

@@ -5,7 +5,9 @@ description: >-
   "summarise my board", "what's on the board", "where does the board stand", "what's blocked",
   "what's in flight", "what should I pick up next on the board" — on a GitHub Projects v2 board.
   Produces a bounded standing check inside a 200-word ceiling: what is blocked and what each waits
-  on, what is in flight, and the next few in the board's own order. Consumes board position, never computes it.
+  on, what is in flight, and the next few in the board's own order. Also renders every open card as
+  a number, a title and a composed description of 100 words or fewer, for re-orienting after time
+  away. Consumes board position, never computes it.
   Reports drift and never fixes it. For what is WRONG with the cards, use phil:groom-issues
   instead; for the order itself, phil:rank-issues; for the inside of one card,
   phil:nwave-slice-status.
@@ -116,6 +118,47 @@ Blocked and in-flight cards are never dropped to fit. Only the queued section gi
 The reader needs to know the section was *checked*, and on a healthy board this is the common rendering
 rather than an edge case.
 
+## The orientation read — `--all`
+
+The standing check answers *where does it stand*. After time away, or before ranking, the question is
+*what is on this board at all* — and the answer cannot be 200 words, because the honest form of it is one
+row per card.
+
+**One row per open card: the number, the title, and a description of 100 words or fewer.**
+
+**The bound is per row and there is no total.** Nothing is dropped to fit. A read whose purpose is saying
+what is there may not omit a card, so the two modes bound themselves differently on purpose — the
+standing check clips its queued section, and this one never clips at all.
+
+**`SNAPSHOT-CLIPPED` is unreachable here.** Reaching it means something was dropped, which is a defect
+rather than a mode.
+
+**Every open card appears, including cards in no column.** A card with no Status has no place in the
+three sections and it does have a place here — a row, marked as uncolumned. This mode is where such a
+card stops being invisible.
+
+**Rows follow board order**, the same authoritative order the standing check consumes.
+
+### The description is composed, never copied
+
+**The title is not a description.** Titles on a real board are long, internal and unreadable as a list —
+`nwave-issue-board is 8,744 words with no references/` tells a reader nothing without the body behind it.
+A row that rewords its own title has done no work.
+
+**Compose from the body.** The first sentence of a body is not a description either; it is the opening of
+an argument, and cards routinely open with context before saying what they want.
+
+**Say what the card is for and what would change if it were done.** Where the body leaves a real question
+open, say so — an open question is often the most useful thing in a hundred words.
+
+**`${CLAUDE_PLUGIN_ROOT}/rules/writing.md` governs every description**, as it governs the composed
+clauses above. Read it as *compose well, never compose short*: 100 words is the ceiling, not the target,
+and a card needing seventy gets seventy.
+
+**Where a card body is empty or says nothing, say that.** A confident hundred words about a card that
+states nothing is the worst output this mode can produce, because it is indistinguishable from a summary
+of a card that said something.
+
 ## What is reported and never fixed
 
 Three things are free to detect from the call already made. Each is **one line, printed only when it
@@ -154,6 +197,8 @@ These are reported **alongside** the terminal outcome, each only when it fires: 
 
 - **`SNAPSHOT-CLIPPED`** — the ceiling would have been breached, so fewer queued cards were printed. It
   must state how many were withheld. Clipping without the count is `SNAPSHOT-RENDERED` lying.
+- **`SNAPSHOT-CLIPPED` is available in the standing check only.** The orientation read drops nothing,
+  so a clipped `--all` is a defect wearing an outcome name.
 - **`SNAPSHOT-PARTIAL`** — the board was not fully read. It supersedes the other two: a clipped render
   over a partial read is partial.
 - **`READ-ONLY`** asserts that every forge call this run made was a read. The `gh api graphql` grant
@@ -192,6 +237,9 @@ refuses, and quoting is what keeps this surface out of it.
 - **Fix, consolidate, or refuse to render** on account of anything it reports.
 - **Infer a blocker.** No `## Chain` line means the blocker is unrecorded, and saying so is the answer.
 - **Print an empty heading.**
+- **Drop a card from `--all` for any reason**, including length. The bound is per row.
+- **Reword a title into a description**, or lift the body's first sentence and call it one.
+- **Write a confident description of a card that says nothing.** Say the card says nothing.
 - **Probe for the board constants.** Project id, project number and Status field are read from the target
   repo's `CLAUDE.md`, which `phil:board-setup` owns and writes. Re-deriving them here creates a second
   authority over a fact the repo already records — and this skill is triggerable with no command in play,

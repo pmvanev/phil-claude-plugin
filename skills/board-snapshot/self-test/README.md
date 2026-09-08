@@ -26,8 +26,24 @@ future driver author meets the choice rather than inferring it.
 | `05-page-dropped` | `SNAPSHOT-PARTIAL` | — | Partial supersedes clipped; no completeness claim |
 | `06-slice-cards-inflate` | `SNAPSHOT-RENDERED` | `INFLATION` | Report, never consolidate, never refuse |
 | `07-card-with-no-status` | `SNAPSHOT-RENDERED` | `UNCOLUMNED` | A card in no section must still be named |
+| `08-all-drops-nothing` | `SNAPSHOT-RENDERED` | `UNCOLUMNED` | The per-row bound; no total ceiling in `--all` |
+| `09-title-is-not-a-description` | `SNAPSHOT-RENDERED` | — | Composed, never reworded from the title |
+| `10-all-cannot-clip` | `SNAPSHOT-RENDERED` | — | 200 cards; length is not a reason to drop |
+| `11-empty-card-body` | `SNAPSHOT-RENDERED` | — | A card that says nothing is reported, never invented |
 
 `READ-ONLY` is expected on every fixture, because it is a claim about every run.
+
+**Every fixture declares its `mode`** — `standing` or `all` — because the two modes bound themselves
+differently and the driver holds them to different rules. The standing check clips its queued section;
+the orientation read drops nothing, so `SNAPSHOT-CLIPPED` there is a defect rather than a mode.
+
+**Fixture 09 carries counterexamples, and they are forbidden outputs rather than candidate prose.**
+`CLAUDE.md` records that a board fixture may not supply candidates — text a run could select instead of
+composing, which is passed by publishing the shorter string. A counterexample is the inverse: prose the
+run must not produce, paired with the `must_not` clause that forbids it. The driver enforces the
+distinction, and it also checks each counterexample genuinely violates what it claims to — the
+over-length one really exceeds 100 words, and the reworded-title one deliberately does **not**, so it can
+only fail on rewording.
 
 **Fixture 01 asserts a word count, and that does not contradict the board-prose rule.** `CLAUDE.md`
 records that `tests/test_issue_board_fixtures.py` forbids a fixture from asserting a word count — a rule

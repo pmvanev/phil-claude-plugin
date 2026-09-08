@@ -1,14 +1,26 @@
 {
   "fixture_id": "BSNAP-SELFTEST-07",
+  "mode": "standing",
   "situation": "One card was added to the project and never given a Status. It appears in the items query with a null Status field, so it belongs to none of the three sections.",
-  "board": { "blocked": 0, "in_flight": 1, "queued": 7, "n_requested": 5, "uncolumned": 1 },
-  "expected_decision": ["SNAPSHOT-RENDERED"],
-  "expected_report_lines": ["UNCOLUMNED", "READ-ONLY"],
+  "board": {
+    "blocked": 0,
+    "in_flight": 1,
+    "queued": 7,
+    "n_requested": 5,
+    "uncolumned": 1
+  },
+  "expected_decision": [
+    "SNAPSHOT-RENDERED"
+  ],
+  "expected_report_lines": [
+    "UNCOLUMNED",
+    "READ-ONLY"
+  ],
   "expected_guard": "one line names the uncolumned card; it is not placed in any of the three sections",
   "must_not": [
     "guess a column for it",
     "fold it into the queued section, which invents a board position it does not have",
-    "omit it — a card that appears in no section and no line has silently vanished",
+    "omit it \u2014 a card that appears in no section and no line has silently vanished",
     "set its Status"
   ],
   "why_this_fixture_exists": "A card with no Status is invisible in a kanban grouped by Status, and therefore invisible in the three sections too. Naming it is the only thing between the reader and a card that disappeared."

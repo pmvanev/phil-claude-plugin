@@ -1,5 +1,6 @@
 {
   "fixture_id": "BSNAP-SELFTEST-02",
+  "mode": "standing",
   "situation": "This repo's live shape on 2026-09-08: 12 open cards, all in Todo. Nothing blocked, nothing in flight.",
   "board": {
     "blocked": 0,

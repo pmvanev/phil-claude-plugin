@@ -1,5 +1,6 @@
 {
   "fixture_id": "BSNAP-SELFTEST-01",
+  "mode": "standing",
   "situation": "A board large enough to breach the ceiling: 7 blocked cards each with a `## Chain` line, 6 in flight, and 40 queued. Blocked and in-flight cards are never dropped, so those 13 alone consume most of the budget before a single queued card is printed.",
   "board": {
     "blocked": 7,

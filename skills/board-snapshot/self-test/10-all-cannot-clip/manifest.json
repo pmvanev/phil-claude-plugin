@@ -1,0 +1,17 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-10",
+  "mode": "all",
+  "situation": "`--all` against 200 open cards. The rendered table is very long by any measure.",
+  "board": { "open_cards": 200 },
+  "expected_decision": ["SNAPSHOT-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "all 200 rows render; length alone triggers no clip, no truncation and no offer to shorten",
+  "must_not": [
+    "clip, truncate, paginate or summarise the table because it is long",
+    "report SNAPSHOT-CLIPPED",
+    "substitute a count for the rows — \"and 150 more\" is the dropped card wearing a number",
+    "silently reduce the descriptions below what the cards need in order to shorten the whole",
+    "offer to render fewer, which invites the drop the mode refuses"
+  ],
+  "why_this_fixture_exists": "Length is the obvious reason to start dropping, and it is not a reason. This fixture is the pressure test for the rule that the bound is per row: 200 cards is where a total ceiling would feel most justified and would be most wrong."
+}

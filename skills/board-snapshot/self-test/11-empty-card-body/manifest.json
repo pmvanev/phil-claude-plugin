@@ -1,0 +1,17 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-11",
+  "mode": "all",
+  "situation": "Two cards among ten have title-only bodies. A third has a body that is entirely a generated status block and states no purpose of its own.",
+  "board": { "open_cards": 10, "empty_bodies": 2, "generated_only_body": 1 },
+  "expected_decision": ["SNAPSHOT-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "all three cards appear as rows; each says plainly that the card states no purpose, rather than carrying a description inferred from its title",
+  "must_not": [
+    "infer a purpose from a title",
+    "infer one from a sibling card, a label, or a milestone",
+    "summarise the generated status block as though it were the card's purpose — it is published from artifacts and says nothing about why the work is wanted",
+    "omit the three cards because they have nothing to summarise",
+    "leave the description cell blank, which reads as a rendering failure rather than as a finding"
+  ],
+  "why_this_fixture_exists": "A confident hundred words about a card that says nothing is this mode's worst output, because it is indistinguishable from a summary of a card that said something. The three cards are also a real finding — `/phil:groom-issues` reports exactly this against the body standard."
+}

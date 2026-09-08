@@ -287,3 +287,84 @@ has one.
 ### Upstream changes
 None. No DISCOVER or DIVERGE wave ran for this feature, and no prior wave asserted anything this
 contradicts.
+
+---
+
+## Outcome — slice 01, 2026-09-08
+
+`SNAPSHOT-RENDERED` is specified and unexercised. **The command has never run.** The plugin cache is at
+0.86.0 and the dogfood moment the brief demands has not been taken — stated because `CLAUDE.md` requires
+a dogfood claim to name its version, and the honest claim here is that there is none.
+
+### The hypothesis is unanswered, not confirmed
+
+Slice 01 exists to find out whether an almost-empty standing check reads as useless or as reassuring.
+Answering that needs a run. What the slice did establish is cheaper and still worth having: **both forge
+mechanics work.** The variables-form items query returns Status and board order in one call, and the
+`## Chain` extraction returns issue #4's dependency clause and returns nothing for issue #42 — which is
+the `unrecorded` path, confirmed against real cards rather than a fixture.
+
+### Two defects the suite could not have caught, and one it did
+
+**The skill would not have loaded.** Its `description:` carried a colon-space inside an unquoted YAML
+scalar, so the frontmatter did not parse. `pytest` and all three repo checks were green over it, because
+nothing here parsed frontmatter. The failure is partial and silent in the worst possible way for this
+skill: the command still loads and still reads the file, and only the routing this feature exists to win
+never fires. Found by `plugin-dev:plugin-validator`, which is a reviewer rather than a build step —
+`tests/test_frontmatter_parses.py` is the mechanism, per route 2.
+
+**The command reversed [D13] in silence**, claiming to apply no prose standard while composing four kinds
+of clause. Found by `plugin-dev:skill-reviewer`. [D13] is now scoped to name those four, the command
+carries the retraction, and fixture `02` pins the empty-section sentence with three failing variants —
+because a citation without a fixture is the mention this repo has been bitten by twice.
+
+**The driver caught a mis-sized fixture on its first run.** Fixture `01` claimed to test a ceiling breach
+with 3 blocked and 4 in flight, which cannot exceed 200 words. It could never have provoked the clip it
+tests. Both its manifest and its `expected.md` record the wrong first sizing.
+
+### The query was wrong for half the world
+
+`user(login:)` errors against an organization-owned board. The skill claimed portability while handling
+one of two cases, which is the *unstated third case* failure — worse than the GitLab exclusion it sits
+beside, because that one is declared. Now branches on owner type.
+
+### Scope added beyond the brief
+
+`UNCOLUMNED`. A card with no Status belongs to none of the three sections and would vanish from a read
+whose purpose is saying what is there. Free from the same call, one line, and now declared in the brief
+rather than left to be discovered.
+
+## Outcome — slice 02, 2026-09-08
+
+### The precursor answered its own hypothesis, and the answer was yes
+
+[D10] risked being decoration: separating the word ceiling from the vocabulary list might have left a
+counter so thin the extraction cost more than a copy. It did not, and the reason is `permit`. The hook
+forbids `#N` for a measured reason and the board read must print it — so the surfaces share the ceiling
+and genuinely diverge on vocabulary, which is exactly the split [D11] predicted and the only thing that
+makes one module serve both.
+
+**Behaviour is unchanged and measured, not asserted:** the hook's suite drives it as a subprocess and
+reported 127 passed, 1 skipped before and after. KPI-5 met. KPI-4 met at **three** call sites — the hook,
+this feature's driver, and the module's own tests.
+
+**One test exists because the hook cannot reach it.** The hook permits nothing, so no existing test
+touches `permit`, and new behaviour with no consumer under test is how an abstraction ships broken.
+
+### The per-mode bound is the decision, and the fixtures pressure it
+
+`--all` drops nothing and has no total ceiling. Fixture `10` puts 200 cards through it, which is where a
+total ceiling feels most justified and would do the most damage. `SNAPSHOT-CLIPPED` is now unreachable in
+that mode and the driver enforces it.
+
+### Counterexamples, and why they are not the thing CLAUDE.md forbids
+
+Fixture `09` supplies two descriptions that must never be produced. `CLAUDE.md` forbids a board fixture
+from supplying **candidate** prose — text a run could select instead of composing, which is passed by
+publishing the shorter string. A counterexample is the inverse, and the distinction is checkable, so the
+driver checks it: prose in a fixture must be paired with a `must_not`, and no fixture may carry
+`candidates` or `suggestions` at all.
+
+The driver also checks each counterexample does what it claims. The over-length one genuinely exceeds 100
+words. The reworded-title one deliberately **does not** — if it also breached the bound, a length check
+would appear to cover a failure that has nothing to do with length.

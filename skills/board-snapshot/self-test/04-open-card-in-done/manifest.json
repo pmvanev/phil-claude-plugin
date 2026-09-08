@@ -1,9 +1,22 @@
 {
   "fixture_id": "BSNAP-SELFTEST-04",
-  "situation": "One open issue sits in the Done column — the recorded aftermath of `gh issue reopen`, which restores the issue and not the Status field. A second card is closed while sitting in Todo.",
-  "board": { "blocked": 0, "in_flight": 2, "queued": 8, "n_requested": 5, "open_in_done": 1, "closed_outside_done": 1 },
-  "expected_decision": ["SNAPSHOT-RENDERED"],
-  "expected_report_lines": ["DRIFT", "READ-ONLY"],
+  "mode": "standing",
+  "situation": "One open issue sits in the Done column \u2014 the recorded aftermath of `gh issue reopen`, which restores the issue and not the Status field. A second card is closed while sitting in Todo.",
+  "board": {
+    "blocked": 0,
+    "in_flight": 2,
+    "queued": 8,
+    "n_requested": 5,
+    "open_in_done": 1,
+    "closed_outside_done": 1
+  },
+  "expected_decision": [
+    "SNAPSHOT-RENDERED"
+  ],
+  "expected_report_lines": [
+    "DRIFT",
+    "READ-ONLY"
+  ],
   "expected_guard": "one drift line names both halves and hands them to `/phil:groom-issues`; the line counts against the 200-word ceiling",
   "must_not": [
     "set any Status field",

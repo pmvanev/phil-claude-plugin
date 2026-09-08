@@ -1,0 +1,17 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-08",
+  "mode": "all",
+  "situation": "`--all` against a board of 40 open cards, one of which sits in no column. Rendering every row at the 100-word bound would total far more than the standing check's ceiling.",
+  "board": { "open_cards": 40, "uncolumned": 1 },
+  "expected_decision": ["SNAPSHOT-RENDERED"],
+  "expected_report_lines": ["UNCOLUMNED", "READ-ONLY"],
+  "expected_guard": "all 40 cards appear as rows, in board order; no description exceeds 100 words; there is no total ceiling; the uncolumned card is a row marked as such rather than an omission",
+  "must_not": [
+    "drop a card to fit any budget — the bound is per row and there is no total",
+    "report SNAPSHOT-CLIPPED, which in this mode means something was dropped",
+    "apply the standing check's 200-word total to this mode",
+    "omit the uncolumned card, which belongs to no section and does belong in this table",
+    "reorder the rows"
+  ],
+  "why_this_fixture_exists": "The two modes bound themselves differently and the difference is the whole reason both exist. A total ceiling here would silently drop cards from a read whose entire purpose is saying what is there."
+}

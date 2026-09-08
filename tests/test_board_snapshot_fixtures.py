@@ -19,6 +19,7 @@ with a fixture on a board large enough to breach it. Different subject, opposite
 nobody reconciles them by deleting the wrong one.
 """
 
+import importlib.util
 import json
 from pathlib import Path
 
@@ -32,6 +33,13 @@ TERMINAL = {"SNAPSHOT-RENDERED", "SNAPSHOT-CLIPPED", "SNAPSHOT-PARTIAL"}
 REPORT_LINES = {"DRIFT", "UNCOLUMNED", "INFLATION", "READ-ONLY"}
 
 CEILING = 200
+PER_ROW_BOUND = 100
+MODES = {"standing", "all"}
+
+_pl_spec = importlib.util.spec_from_file_location(
+    "plain_language", Path(__file__).resolve().parent.parent / "scripts" / "plain_language.py")
+plain_language = importlib.util.module_from_spec(_pl_spec)
+_pl_spec.loader.exec_module(plain_language)
 
 
 def test_fixtures_exist():
@@ -111,3 +119,62 @@ def test_the_clipping_fixture_is_the_only_one_expecting_a_clip():
     clipping = [json.loads(m.read_text())["fixture_id"] for m in FIXTURES
                 if json.loads(m.read_text())["expected_decision"] == ["SNAPSHOT-CLIPPED"]]
     assert clipping == ["BSNAP-SELFTEST-01"], f"unexpected clipping fixtures: {clipping}"
+
+
+# --- slice 02: the two modes bound themselves differently, so the fixtures are held to different rules ---
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_every_fixture_declares_its_mode(manifest):
+    """Without this the rules below cannot be applied, and a fixture would fall through both."""
+    d = json.loads(manifest.read_text())
+    assert d.get("mode") in MODES, f"{d['fixture_id']} declares mode {d.get('mode')!r}"
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_the_orientation_read_can_never_clip(manifest):
+    """`--all` drops nothing, so SNAPSHOT-CLIPPED there is a defect wearing an outcome name."""
+    d = json.loads(manifest.read_text())
+    if d["mode"] != "all":
+        return
+    assert d["expected_decision"] != ["SNAPSHOT-CLIPPED"], \
+        f"{d['fixture_id']} expects a clip in a mode that drops nothing"
+
+
+def test_both_modes_have_fixtures():
+    modes = {json.loads(m.read_text())["mode"] for m in FIXTURES}
+    assert modes == MODES, f"a mode with no fixture is untested: {MODES - modes}"
+
+
+def test_the_over_length_counterexample_really_is_over_length():
+    """Fixture 09 supplies a description that must be rejected for length. A counterexample that would
+    in fact pass tests nothing, and its green run is the false negative issue #42 is about — the same
+    check `test_the_ceiling_fixture_actually_breaches_the_ceiling` makes one mode over.
+
+    Counted with `scripts/plain_language.py`, which is the point of the extraction: the fixture and the
+    decision-request hook now measure length with the same function rather than two copies of it."""
+    m = SKILL_DIR / "self-test" / "09-title-is-not-a-description" / "manifest.json"
+    text = json.loads(m.read_text())["counterexamples"]["over_the_bound"]
+    over = plain_language.over_ceiling(text, ceiling=PER_ROW_BOUND)
+    assert over, f"the counterexample is {plain_language.words(text)} words, within the {PER_ROW_BOUND} bound"
+
+
+def test_the_reworded_title_counterexample_is_short_enough_to_be_tempting():
+    """The rewording failure is not caught by length — that is exactly why it needs its own rule. A
+    counterexample that also breached the bound would let a length check appear to cover it."""
+    m = SKILL_DIR / "self-test" / "09-title-is-not-a-description" / "manifest.json"
+    text = json.loads(m.read_text())["counterexamples"]["reworded_title"]
+    assert plain_language.over_ceiling(text, ceiling=PER_ROW_BOUND) is None, \
+        "this counterexample must fail on rewording alone, not on length"
+
+
+def test_counterexamples_are_forbidden_outputs_and_never_candidate_prose():
+    """`CLAUDE.md` records that a board fixture may not supply candidate prose — text the run could
+    select instead of composing. A counterexample is the opposite: prose the run must NOT produce. The
+    distinction is checkable, so it is checked. Every fixture carrying counterexamples must also carry
+    a `must_not` clause, which is what makes them forbidden rather than offered."""
+    for m in FIXTURES:
+        d = json.loads(m.read_text())
+        if "counterexamples" in d:
+            assert d.get("must_not"), f"{d['fixture_id']} supplies prose and forbids nothing"
+        assert "candidates" not in d and "suggestions" not in d, \
+            f"{d['fixture_id']} supplies candidate prose, which turns composition into selection"
