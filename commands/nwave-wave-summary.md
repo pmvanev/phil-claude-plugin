@@ -1,31 +1,48 @@
 ---
-description: "Say what a finished stage of work decided, in 200 words or fewer of plain English — the decisions and what they rule out, with no file paths, handles, decision numbers or card numbers. Reads one feature artifact and prints; writes nothing and derives no status. For where the work stands use /phil:nwave-slice-status; for what you were doing, /phil:resume."
-argument-hint: "[<feature>]"
+description: "Say what a finished stage of work decided, or with --slice what a finished slice actually landed as against what its brief promised — in 200 words or fewer of plain English — the decisions and what they rule out, with no file paths, handles, decision numbers or card numbers. Reads one feature artifact and prints; writes nothing and derives no status. For where the work stands use /phil:nwave-slice-status; for what you were doing, /phil:resume."
+argument-hint: "[<feature>] [--slice [NN]]"
 mutates: false
-allowed-tools: Read, Glob, Grep, Bash(git log:*)
+allowed-tools: Read, Glob, Grep, Bash(git log:*), Bash(git show:*)
 ---
 
 Load the `nwave-wave-summary` skill at
 `${CLAUDE_PLUGIN_ROOT}/skills/nwave-wave-summary/SKILL.md` and render the summary it describes.
+
+`--slice [NN]` reconciles a slice brief against the commits that shipped, naming what landed that the
+brief did not describe and what the brief promised that did not land. Attribution is by the brief's own
+history and by the commit-subject convention — **which fails on precursor commits**, so the count of
+unattributable commits is reported rather than absorbed.
+
+`git show` joins the grant for that reconciliation. `git diff` was granted too and then removed: the
+reconciliation uses `git show --stat`, and an unused verb has no place in the one command whose
+distinguishing claim is a narrow grant.
 
 With no argument, resolve the most recently touched feature and **say that is what was resolved** — no
 artifact records completion, so the default is not the most recently *completed* stage and must not be
 described as one.
 
 **This command's read-only grant is checked rather than merely declared.** No `Write`, no `Edit`, and a
-`Bash` holding one verb, `git log`, which is on `scripts/check-readonly-commands.py`'s allowlist.
+`Bash` holding two verbs, `git log` and `git show`, both on `scripts/check-readonly-commands.py`'s
+allowlist.
 `board-snapshot` and `resume` both declare `mutates: true` while writing nothing, because a forge grant
 accepts a mutation document; this one touches no forge, so the narrower declaration is available.
 
 **It is not the first command to manage that, and an earlier draft of this paragraph said it was.**
-`nwave-slice-status` has declared `mutates: false` with the identical `Bash(git log:*)` verb since before
-this feature existed, and `ai-eos` and `spirit-walk` do the same plugin-wide. Corrected 2026-09-08: the
+`nwave-slice-status` and `spirit-walk` have declared `mutates: false` with the identical `Bash(git log:*)`
+verb since before this feature existed, and `ai-eos` does the same with `Bash(git diff:*)`. Corrected 2026-09-08: the
 distinction is against `board-snapshot` and `resume` specifically, not against the plugin.
 
-**And "checked" is one level short of "proven".** `CLAUDE.md` states that an allowlist entry is a promise
-that a verb has no writing mode — `git log -p --ext-diff` runs a diff driver the target repo configures,
-so even this verb reaches arbitrary code in principle. The claim worth making is that the grant is
-verified against an allowlist, which is still more than the rest of this family has.
+**And "checked" is one level short of "proven", by more than was first recorded.** `CLAUDE.md` states an
+allowlist entry is a promise that a verb has no writing mode. `git log -p --ext-diff` runs a diff driver
+the target repo configures, which is conditional. **Unconditional, and found 2026-09-08: `git log` and
+`git show` both accept `--output=<file>`, which writes — clobbering an arbitrary absolute path outside the
+repo.** Verified on git 2.53.0.
+
+So `mutates: false` here asserts more than the grant delivers, and the same is true of the three other
+commands on that allowlist. The honest claim is that the grant is **verified against an allowlist whose
+entries are human promises**, and that one of those promises is now known to be wrong. Recorded in
+`scripts/check-readonly-commands.py` and in `CLAUDE.md`; a prefix-match grant cannot exclude a flag, so
+stating it is the available remedy.
 
 **What that costs, stated rather than discovered.** No interpreter is granted, so nothing counts the
 rendered output at run time. The 200-word ceiling is enforced by fixtures at build time and by the

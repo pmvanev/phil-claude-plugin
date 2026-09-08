@@ -1,0 +1,15 @@
+{
+  "fixture_id": "WSUM-SELFTEST-12",
+  "mode": "slice",
+  "situation": "The longest slice brief in the repo, 3,670 words, reconciled against its commits. Eighteen-fold compression before the commits are folded in at all.",
+  "brief_words": 3670,
+  "expected_decision": ["SUMMARY-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "the output is at or under 200 words despite an input of 3,670 plus its commits",
+  "must_not": [
+    "exceed 200 words",
+    "cut what landed in order to fit the brief's own content — the landed view is the deliverable and the brief is the input",
+    "summarise the brief and stop, which is what happens when the input dominates the budget"
+  ],
+  "why_this_fixture_exists": "The card demands a fixture on input large enough to strain the ceiling, and the stage mode has one. The slice mode had none — a scale gap the driver could not see, because no slice fixture recorded a word count. This is that rule applied at the second scale, and the brief is the real longest in the repo rather than a convenient one."
+}

@@ -1,8 +1,13 @@
 {
   "fixture_id": "WSUM-SELFTEST-05",
+  "mode": "stage",
   "situation": "No argument is given, and two feature directories were last touched by the same commit, so the newest-commit signal cannot separate them.",
-  "expected_decision": ["TARGET-AMBIGUOUS"],
-  "expected_report_lines": ["READ-ONLY"],
+  "expected_decision": [
+    "TARGET-AMBIGUOUS"
+  ],
+  "expected_report_lines": [
+    "READ-ONLY"
+  ],
   "expected_guard": "both candidates are named, the reason they tie is stated, and nothing is summarised",
   "must_not": [
     "pick one",

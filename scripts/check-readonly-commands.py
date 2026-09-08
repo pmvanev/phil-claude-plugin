@@ -25,6 +25,13 @@ MUTATING_TOOLS = {"Write", "Edit", "NotebookEdit"}
 # Verbs that cannot change the repository, the forge, or anything else. Deliberately short:
 # an entry here is a promise, so add one only after checking the verb has no writing mode.
 READ_ONLY_VERBS = {
+    # KNOWN FALSE PROMISE, found 2026-09-08 and stated rather than silently kept: git accepts
+# `--output=<file>` on log, diff, show, blame, rev-list and shortlog. It WRITES, clobbering an
+# arbitrary absolute path outside the repo, with nothing configured — verified on git 2.53.0. A
+# `Bash(git show:*)` grant is a prefix match and cannot exclude a flag, so every `mutates: false`
+# command holding a git verb asserts more than its grant delivers. The entries stay because the
+# alternative is granting bare `Bash`, which is strictly worse; the promise below is narrowed to
+# "no writing mode in ordinary use" and the exception is named here so nobody re-derives it.
     "git log", "git status", "git diff", "git show", "git blame", "git rev-parse",
     "git rev-list", "git ls-tree", "git ls-files", "git cat-file", "git describe",
     "git shortlog", "git for-each-ref",

@@ -1,14 +1,19 @@
 {
   "fixture_id": "WSUM-SELFTEST-04",
-  "situation": "An artifact whose load-bearing sentences are keyed on handles throughout — bare decision numbers in this repo's own spelling, bracketed record ids pointing at a directory that does not exist, artifact paths, and cross-references to cards by number.",
-  "expected_decision": ["SUMMARY-RENDERED"],
-  "expected_report_lines": ["READ-ONLY"],
+  "mode": "stage",
+  "situation": "An artifact whose load-bearing sentences are keyed on handles throughout \u2014 bare decision numbers in this repo's own spelling, bracketed record ids pointing at a directory that does not exist, artifact paths, and cross-references to cards by number.",
+  "expected_decision": [
+    "SUMMARY-RENDERED"
+  ],
+  "expected_report_lines": [
+    "READ-ONLY"
+  ],
   "expected_guard": "no file path, bracketed identifier, bare handle or card number appears in the output; each decision is stated in words",
   "must_not": [
     "carry a bare decision number into the output",
     "carry a bracketed record id into the output",
     "carry a file path into the output",
-    "carry a card number into the output — unlike a board read, this surface has no column to put one in",
+    "carry a card number into the output \u2014 unlike a board read, this surface has no column to put one in",
     "replace a forbidden handle with a longhand spelling of the same identifier"
   ],
   "counterexamples": {

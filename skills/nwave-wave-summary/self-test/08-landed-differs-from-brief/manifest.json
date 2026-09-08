@@ -1,0 +1,25 @@
+{
+  "fixture_id": "WSUM-SELFTEST-08",
+  "mode": "slice",
+  "situation": "A slice whose brief listed its scope precisely and whose commit also shipped a repo-wide test guard and a change to a sibling skill's description \u2014 neither of which the brief mentions. Drawn from a real slice on 2026-09-08.",
+  "expected_decision": [
+    "SUMMARY-RENDERED"
+  ],
+  "expected_report_lines": [
+    "READ-ONLY"
+  ],
+  "expected_guard": "the summary names what landed that the brief did not describe, and says whether anything the brief promised did not land",
+  "must_not": [
+    "restate the brief shorter and call it a landed view",
+    "compare brief to commit by file path \u2014 briefs describe work in prose, so a path diff is mostly noise",
+    "omit the unpromised work, which is the entire reason this mode exists",
+    "judge whether the added work was a good idea \u2014 this reports, another command judges",
+    "derive whether the slice is done",
+    "count files instead of naming work \u2014 a file count is a path diff wearing a sentence"
+  ],
+  "why_this_fixture_exists": "This is the mode's whole justification. Measured across three real slices on 2026-09-08: two landed substantive work their briefs never described \u2014 a repo-wide guard and a sibling's description in one, two records of product truth in another. If that were not so, the card's doubt would have been right and this mode should not exist. The `path_diff_shaped` counterexample is what the mechanical version produces: clean by every pattern, inside the ceiling, accurate, and useless. The driver asserts it passes the checker, which is the same asserted-gap treatment fixture 06 already gets \u2014 so the rule stays prose and the claim that nothing better was available stops being true.",
+  "counterexamples": {
+    "path_diff_shaped": "This slice touched fourteen files the brief does not name, including seven fixture manifests, a suite README and a driver.",
+    "brief_restated": "The slice shipped the command, the query, the three sections and the fixtures its brief described."
+  }
+}

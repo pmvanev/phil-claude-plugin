@@ -1,16 +1,21 @@
 {
   "fixture_id": "WSUM-SELFTEST-02",
+  "mode": "stage",
   "situation": "A feature directory exists and its artifact is present but holds only a title line and two empty section headings. No decision is recorded anywhere in it.",
   "artifact_words": 14,
-  "expected_decision": ["NOTHING-RECORDED"],
-  "expected_report_lines": ["READ-ONLY"],
+  "expected_decision": [
+    "NOTHING-RECORDED"
+  ],
+  "expected_report_lines": [
+    "READ-ONLY"
+  ],
   "expected_guard": "one sentence names what was looked for and what was found; no summary is produced",
   "must_not": [
     "produce a summary",
     "infer decisions from the section headings",
     "infer them from the feature's name, its slice briefs, its commits, or a sibling feature",
     "report SUMMARY-RENDERED with an empty or near-empty body",
-    "describe the absence at length — one sentence is the answer"
+    "describe the absence at length \u2014 one sentence is the answer"
   ],
   "why_this_fixture_exists": "This is the failure the feature would otherwise introduce. Before this command existed nobody could produce a confident two hundred words about a stage that decided nothing; afterwards such an output is indistinguishable from a real summary, and no reader can tell."
 }

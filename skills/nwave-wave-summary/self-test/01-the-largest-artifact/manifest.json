@@ -1,5 +1,6 @@
 {
   "fixture_id": "WSUM-SELFTEST-01",
+  "mode": "stage",
   "situation": "The largest feature artifact in the repo, 9,447 words, carrying a dozen locked decisions, a KPI table, a journey and three outcome sections. Forty-seven fold compression is required to reach the ceiling.",
   "artifact_words": 9447,
   "expected_decision": [

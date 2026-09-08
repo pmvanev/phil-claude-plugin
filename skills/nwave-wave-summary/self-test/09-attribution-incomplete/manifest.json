@@ -1,0 +1,16 @@
+{
+  "fixture_id": "WSUM-SELFTEST-09",
+  "mode": "slice",
+  "situation": "A slice shipped in two commits: one whose subject names the slice, and a precursor whose subject names the extracted component instead. The naming convention finds only the second half of the work.",
+  "expected_decision": ["SUMMARY-RENDERED"],
+  "expected_report_lines": ["ATTRIBUTION-INCOMPLETE", "READ-ONLY"],
+  "expected_guard": "the summary covers what could be attributed, and one line says how many commits in the range could not be tied to the slice",
+  "must_not": [
+    "assign the unattributed commit to the slice on a guess",
+    "assign it on file-path overlap, which would sweep in unrelated work touching the same files",
+    "omit the count, which is the only signal that the landed view is partial",
+    "report SUMMARY-RENDERED alone, which claims a complete reconciliation",
+    "refuse to summarise — a partial landed view with its gap named is worth more than none"
+  ],
+  "why_this_fixture_exists": "Measured over this repo's last nine commits on 2026-09-08: four name no slice, and one of those four is a precursor belonging to a slice whose sibling commit does name it. So the convention fails on precursor commits specifically — the work a slice does BEFORE its headline change, which is exactly the work a brief is least likely to have described."
+}

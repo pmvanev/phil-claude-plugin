@@ -1,5 +1,6 @@
 {
   "fixture_id": "WSUM-SELFTEST-06",
+  "mode": "stage",
   "situation": "A summary draft that contains no forbidden identifier and still fails, because it refers to decisions by position rather than stating them.",
   "expected_decision": [
     "SUMMARY-RENDERED"

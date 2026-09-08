@@ -257,6 +257,22 @@ the right reason. The word ceiling is therefore prose at run time *and* at build
 deliberate: granting an interpreter would make the count mechanical and the read-only grant promissory,
 on the one command whose distinction is the narrow grant.
 
+### [D7] is narrowed, and named here rather than left in an outcome paragraph
+
+[D7] locks `mutates: false` *"and mechanically so"*, calling it the first in the family whose guarantee is
+*"enforced rather than promised"*. **Both halves are refuted.** `nwave-slice-status` and `spirit-walk`
+already declared it with the same verb, and `ai-eos` with another. And *enforced* overstates it: git
+accepts `--output=<file>` on `log`, `diff` and `show`, which **writes**, clobbering an arbitrary absolute
+path outside the repo with nothing configured — verified on git 2.53.0.
+
+**So the declaration asserts more than the grant delivers, for this command and three others.** The
+surviving claim is that the grant is *verified against an allowlist whose entries are human promises*, and
+that one of those promises is now known to be false. Recorded in `scripts/check-readonly-commands.py` and
+in `CLAUDE.md`, because a prefix-match grant cannot exclude a flag and stating it is the available remedy.
+
+Named as a decision change because slice 01 named [D4] and [D6] that way and handled [D7] under "inflated
+claims" instead — a locked decision contradicted without being named is the defect this document cites.
+
 ### Three claims were inflated and are corrected
 
 **"The first command in this family that is mechanically unable to mutate" was false on both halves.**
@@ -310,3 +326,76 @@ wrong outcome, which outcome-coverage cannot see.
 **Two met, four not, and none of the four can be met without running the command.** Stated this way
 because a table of ticks over a feature that has never executed is the compliance-by-silence this repo
 keeps recording.
+
+
+## Outcome — slice 02, 2026-09-08
+
+### Two fixtures the brief promised did not ship, and review found it rather than the suite
+
+Slice 02's IN scope named three fixtures: the longest brief in the repo, **a brief whose slice never
+shipped**, and one where brief and commits agree. Only the third landed with the slice.
+
+**A mode built to name what a brief promised and did not deliver, shipping with an undelivered promise
+in its own brief.** The omission is the finding, not the drop. Both are now added — fixtures 12 and 13 —
+and 13's `expected.md` records that its own subject demonstrated itself.
+
+Nothing could have caught it: no test compares a slice brief's IN scope against what the slice shipped,
+which is precisely the comparison this mode exists to perform and which the skill argues cannot be
+mechanised.
+
+### KPI-4's precondition was measured before the mode was built, and it held
+
+The card doubted this half entirely. DISCUSS refuted its stated reason — briefs are not ~400 words — but
+that left the conclusion possibly right for a different reason: if what a slice lands always matches what
+its brief promised, the fold adds nothing.
+
+**Measured across three real slices by reading, 2026-09-08: two landed substantive work their briefs
+never described.** `board-snapshot` slice 01 shipped a repo-wide frontmatter guard and a change to a
+sibling skill's description, neither in its brief. `board-prose-standard` slice 01 touched two records of
+product truth, likewise absent. The third matched its brief. **So the mode earns its place**, and the
+number is 2 of 3 rather than 3 of 3, which is the honest result.
+
+### The measurement corrected its own method, which is the sharper finding
+
+The first probe was mechanical: compare files touched against files the brief names. It reported **48
+differences across three slices, of which roughly five were real.**
+
+**Briefs describe work in prose.** *"Two fixtures in the existing suite"* names no paths and plainly
+anticipates them, so every fixture file counted as unpromised. A path diff does not measure what this
+mode measures.
+
+That is now a rule rather than a footnote: **compare meaning, never paths**, and it is prose in the skill
+with a `must_not` in fixture 08, because a mechanical version of this check is **worse than none** — it
+would generate 48 findings a reader has to discard by hand, and teach them to discard the five real ones
+along with them. The driver asserts only that the trap is stated, which is all that is available.
+
+### Attribution fails on precisely the commits that matter
+
+Measured over this repo's last nine commits: **four name no slice**, and one of those four is a
+**precursor** — the extraction that slice 02 of `board-snapshot` landed before its headline change. So
+the convention drops the work a slice does *first*, which is exactly the work a brief is least likely to
+have described.
+
+`ATTRIBUTION-INCOMPLETE` reports the count. The alternative — attributing by file overlap — would sweep
+in any unrelated work touching the same files, which on a repo this size is most of it.
+
+### KPI results, both slices
+
+| # | Target | Result |
+|---|---|---|
+| KPI-1 | Stage summary ≤ 200 words on the largest artifact | **Not measured** — never rendered |
+| KPI-2 | Internal identifiers in the output | **Not measured** — the list is applied to fixture strings, not output |
+| KPI-3 | Compression ≥ 40× | **Not measured** — 47× by specification |
+| KPI-4 | Slice summaries saying something the brief does not | **Not measured; its PRECONDITION was.** The stated method reads the brief against the *summary*, and no summary has been rendered. What was read is the brief against the *commits* — establishing that divergence exists in the corpus (2 of 3 sampled) rather than that the mode surfaces it |
+| KPI-5 | `mutates: false` holds | **Met** — still passing with `git show` and `git diff` added |
+| KPI-6 | Consumers of the shared plain-language module | **Met — 4** |
+
+**Two met, four not.** KPI-5 and KPI-6 are the two that never needed a run. KPI-4 does need one, by its
+own stated method — an earlier version of this table called it Met and called the three met ones "the
+three that did not need it", which was false about KPI-4 specifically.
+
+**And the precondition evidence is weaker than it reads.** n=3, drawn non-randomly from 57 briefs, all
+from one fortnight of one author's work, judged by reading, by the party that wanted the mode to ship,
+against a pass bar of 1 of 3 — so only 0 of 3 would have failed it. It establishes that the corpus
+contains divergence. It does not establish that this mode finds it, and AC S2.5 stays untested by
+construction until the command runs.

@@ -110,7 +110,7 @@ alongside the citation.** Its vocabulary check found **nothing** across twelve h
 while ten of the twelve source bodies carried a forbidden class — so the skill states in its own text that
 the check is a build-time regression guard on a failure not yet observed, and names what would change the
 verdict. That is the honest form of a citation whose mechanism has never fired, and it is the form the
-other six should be held to when anyone next measures them.
+others should be held to when anyone next measures them.
 
 **Which of these fixtures anything actually runs, stated rather than implied.**
 `tests/test_issue_board_fixtures.py` guards two rules — **no fixture may supply candidate prose**, and
@@ -184,6 +184,15 @@ Measured 2026-08-13 across nine fold-backs: six took route 1, three route 2, one
 `scripts/check-readonly-commands.py`, which fails the build on a `mutates: false` command that
 grants `Write`/`Edit`, bare `Bash`, or a `Bash(...)` verb outside its read-only allowlist — and on
 any command carrying no declaration at all.
+
+**One entry on the read-only verb allowlist is a promise that is false, and it is named rather than
+quietly kept.** Git accepts `--output=<file>` on `log`, `diff`, `show`, `blame`, `rev-list` and
+`shortlog`. It writes, clobbering an arbitrary absolute path outside the repo, with nothing configured —
+verified on git 2.53.0 on 2026-09-08. A `Bash(git show:*)` grant is a prefix match and cannot exclude a
+flag, so **all four `mutates: false` commands holding a git verb assert more than their grant delivers.**
+The entries stay, because the alternative is granting bare `Bash`; what changed is that the promise now
+reads *no writing mode in ordinary use* and the exception is written down in the script itself. Found by
+`plugin-dev:plugin-validator` while checking a widened grant, not by the check that exists to catch it.
 
 **It is a claim about the grant, not about intent.** That is the half a script can verify.
 `mutates: false` asserts the tool list makes mutation impossible; `mutates: true` asserts only that

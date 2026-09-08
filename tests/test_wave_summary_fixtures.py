@@ -24,7 +24,8 @@ SKILL_DIR = ROOT / "skills" / "nwave-wave-summary"
 FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
 TERMINAL = {"SUMMARY-RENDERED", "NOTHING-RECORDED", "TARGET-NOT-FOUND", "TARGET-AMBIGUOUS"}
-REPORT_LINES = {"ARGUMENT-DROPPED", "READ-ONLY"}
+REPORT_LINES = {"ARGUMENT-DROPPED", "ATTRIBUTION-INCOMPLETE", "READ-ONLY"}
+MODES = {"stage", "slice"}
 CEILING = 200
 
 _spec = importlib.util.spec_from_file_location("plain_language", ROOT / "scripts" / "plain_language.py")
@@ -38,7 +39,7 @@ def _m(name):
 
 
 def test_fixtures_exist():
-    assert len(FIXTURES) >= 7, f"expected the seven slice-01 fixtures, found {len(FIXTURES)}"
+    assert len(FIXTURES) >= 14, f"expected the fourteen fixtures of slices 01-02, found {len(FIXTURES)}"
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
@@ -170,3 +171,83 @@ def test_fixture_06_does_not_hand_the_run_its_own_answer():
         assert word not in stated, (
             f"the permitted example answers this fixture's own counterexamples ({word!r}); "
             f"choose a decision the counterexamples do not cover")
+
+
+
+# --- slice 02: the two modes answer different questions and are held to different rules ---
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_every_fixture_declares_its_mode(manifest):
+    d = json.loads(manifest.read_text())
+    assert d.get("mode") in MODES, f"{d['fixture_id']} declares mode {d.get('mode')!r}"
+
+
+def test_both_modes_have_fixtures():
+    modes = {json.loads(m.read_text())["mode"] for m in FIXTURES}
+    assert modes == MODES, f"a mode with no fixture is untested: {MODES - modes}"
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_attribution_incomplete_is_a_slice_mode_line_only(manifest):
+    """The stage summary reads one file and attributes nothing, so the line is meaningless there."""
+    d = json.loads(manifest.read_text())
+    if "ATTRIBUTION-INCOMPLETE" in d.get("expected_report_lines", []):
+        assert d["mode"] == "slice", f"{d['fixture_id']} reports an attribution gap in stage mode"
+
+
+def test_the_path_diff_output_the_rule_forbids_passes_every_mechanical_check():
+    """The reconciliation compares MEANING, and no check can verify that. But the GAP can be asserted,
+    the way fixture 06 asserts its own — and an earlier version of this test claimed a substring
+    presence check was "all that is available", which fixture 06 in the same suite refutes.
+
+    Both counterexamples are the failures this mode exists to avoid: a file count dressed as a sentence,
+    and the brief restated shorter. Each is clean by every pattern, inside the ceiling, and accurate.
+    If either ever fails the checker, a pattern nobody reasoned about has appeared."""
+    d = _m("08-landed-differs-from-brief")
+    for key, text in d["counterexamples"].items():
+        assert plain_language.identifiers_in(text, forbid=FORBIDDEN) == [], \
+            f"{key} is caught by a pattern; this fixture is about what patterns cannot see"
+        assert plain_language.over_ceiling(text, CEILING) is None, \
+            f"{key} must fail on being the wrong KIND of summary, never on length"
+    assert any("file path" in c for c in d["must_not"])
+    assert any("count files" in c for c in d["must_not"])
+
+
+def test_the_empty_result_is_a_finding_and_may_not_be_suppressed():
+    """The card doubted this whole mode on the grounds that a brief says everything already. That will
+    be true of individual slices, and each time it is, saying so keeps the running evidence visible."""
+    d = _m("11-nothing-the-brief-does-not-say")
+    assert any("suppress" in c for c in d["must_not"])
+    assert any("restate the brief shorter" in c for c in d["must_not"])
+
+
+def test_the_longest_brief_fixture_tracks_the_real_longest():
+    """The stage mode had a largest-artifact fixture from its first commit; the slice mode shipped
+    without one, and no slice fixture recorded a word count, so nothing could see the scale gap."""
+    biggest = max(len(p.read_text().split())
+                  for p in (ROOT / "docs" / "feature").glob("*/slices/*.md"))
+    claimed = _m("12-the-longest-brief")["brief_words"]
+    assert claimed >= biggest * 0.9, (
+        f"RE-MEASURE THE FIXTURE: it claims {claimed} words and the longest real brief is now "
+        f"{biggest}. Not a defect in the skill — the corpus grew. Update `brief_words`.")
+
+
+def test_the_slice_mode_covers_more_than_one_outcome():
+    """`test_every_outcome_has_a_fixture` quantifies over outcomes and was satisfied entirely by
+    stage-mode fixtures, while the slice mode had one covered outcome of four.
+
+    That is the second coverage test in this feature to pass over a real gap — the first quantified
+    over outcomes while a class of INPUT landed on the wrong one. Same shape: a test quantifying over
+    one dimension cannot see a gap in another."""
+    slice_outcomes = {json.loads(m.read_text())["expected_decision"][0] for m in FIXTURES
+                      if json.loads(m.read_text())["mode"] == "slice"}
+    assert len(slice_outcomes) >= 2, f"slice mode covers only {slice_outcomes}"
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_the_expected_file_names_the_same_outcomes_as_the_manifest(manifest):
+    """Both files are hand-maintained and both carry the outcome header, so they can drift silently."""
+    d = json.loads(manifest.read_text())
+    expected = (manifest.parent / "expected.md").read_text()
+    for name in d["expected_decision"] + d.get("expected_report_lines", []):
+        assert name in expected, f"{d['fixture_id']}: expected.md never mentions {name}"

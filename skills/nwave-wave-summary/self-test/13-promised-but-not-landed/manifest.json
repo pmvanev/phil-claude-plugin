@@ -1,0 +1,16 @@
+{
+  "fixture_id": "WSUM-SELFTEST-13",
+  "mode": "slice",
+  "situation": "A brief whose IN scope names five items and whose commits deliver three. Two were promised and never shipped, and nothing outside the brief records that.",
+  "expected_decision": ["SUMMARY-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "the two undelivered items are named individually; the summary does not describe the slice as having shipped its brief",
+  "must_not": [
+    "report only what landed, which reads as completeness",
+    "describe the slice as delivering its brief when two items did not ship",
+    "aggregate the gap into a count — 'two items outstanding' names nothing a reader can act on",
+    "judge whether dropping them was right; that is another command's",
+    "infer from the absence that the items were descoped, which is a claim no artifact supports"
+  ],
+  "why_this_fixture_exists": "This is the mode's headline value and it was in the slice brief's IN scope and did not ship — the omission was found by review rather than by the suite. A mode built to name what a brief promised and did not deliver, whose own brief promised this fixture and did not deliver it, is the defect demonstrating itself."
+}

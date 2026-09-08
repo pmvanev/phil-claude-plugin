@@ -1,0 +1,15 @@
+{
+  "fixture_id": "WSUM-SELFTEST-11",
+  "mode": "slice",
+  "situation": "A slice whose brief was unusually complete and whose commits add nothing it did not anticipate — the case the card predicted would be true of every slice.",
+  "expected_decision": ["SUMMARY-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "the output says plainly that the fold found nothing the brief does not already say, and points at the brief",
+  "must_not": [
+    "restate the brief shorter to produce output",
+    "present the restatement as a landed view",
+    "treat the empty result as a failure of the run — it is a finding about the slice",
+    "suppress it, which would hide the evidence that this mode may not be worth its cost"
+  ],
+  "why_this_fixture_exists": "The card doubted this whole mode on the grounds that a brief already says everything. That doubt was refuted at the repo level — two of three sampled slices landed unpromised work — but it will be TRUE of individual slices, and each time it is, the honest output is to say so. Suppressing it would hide the running evidence about whether this mode earns its place."
+}

@@ -1,0 +1,15 @@
+{
+  "fixture_id": "WSUM-SELFTEST-14",
+  "mode": "slice",
+  "situation": "A slice number is given and the feature has no brief with that number — the feature has three slices and the number given is five.",
+  "expected_decision": ["TARGET-NOT-FOUND"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "the output says no such slice exists for that feature and names the slices that do; nothing is summarised",
+  "must_not": [
+    "report NOTHING-RECORDED, which is a claim about the work rather than about the request",
+    "fall back to the most recently touched brief, which answers a question nobody asked",
+    "summarise the nearest slice number",
+    "report TARGET-AMBIGUOUS, which means too many candidates and not none"
+  ],
+  "why_this_fixture_exists": "Every fixture the slice mode first shipped with expected SUMMARY-RENDERED, so the outcome-coverage test was satisfied entirely by stage-mode fixtures while the slice mode had one covered outcome out of four. Coverage over outcomes cannot see coverage over modes, which is the second time in this feature that a coverage test has been green over a real gap."
+}

@@ -1,0 +1,15 @@
+{
+  "fixture_id": "WSUM-SELFTEST-10",
+  "mode": "slice",
+  "situation": "A small slice that shipped exactly what its brief described: nothing added, nothing dropped, no surprises in the commits.",
+  "expected_decision": ["SUMMARY-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "the summary says brief and outcome agree, and is short",
+  "must_not": [
+    "pad to two hundred words to prove the command did work",
+    "manufacture a discrepancy",
+    "elevate a version bump or a formatting change into a finding",
+    "omit the agreement, which is itself the answer to what landed"
+  ],
+  "why_this_fixture_exists": "The ceiling is a ceiling, not a target. A command that fills two hundred words whatever it finds teaches its reader that the length carries no information, and the next real discrepancy reads like more of the same."
+}

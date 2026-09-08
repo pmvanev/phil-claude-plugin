@@ -1,13 +1,14 @@
 ---
 name: nwave-wave-summary
 description: >-
-  Use when asked what a finished stage of work decided, rather than where the work stands or what
-  you were doing — "what did DISCUSS decide", "what did that wave settle", "catch me up on this
-  feature", "what was decided here", "summarise the design decisions" — in a repo holding
-  `docs/feature/`. Reads one finished feature artifact and states its decisions in 200 words or
-  fewer of plain English, with no file paths, handles, card numbers or decision numbers: the
-  decision itself, never the label pointing at it. Reads and prints; writes nothing and derives no
-  status. For where a slice stands, use phil:nwave-slice-status; for what you personally were doing,
+  Use when asked what finished work decided, rather than where it stands or what you were doing —
+  "what did DISCUSS decide", "what did that stage settle", "catch me up on what this feature
+  decided", "what did that slice actually land", "what did that slice ship as against its brief",
+  "summarise the decisions" — in a repo holding `docs/feature/`. Two modes: a finished stage's
+  decisions, and with --slice a finished slice's brief reconciled against what shipped. 200 words
+  each, plain English, with no file paths, handles, card numbers or decision numbers — the decision
+  itself, never the label pointing at it. Reads and prints; writes nothing and derives no status.
+  For where a slice STANDS use phil:nwave-slice-status; for what you personally were doing,
   phil:resume; for what is on the board, phil:board-snapshot.
 ---
 
@@ -57,7 +58,7 @@ named feature does not, that is a different answer — see *Decision outcomes*.
 ## The summary
 
 **200 words or fewer, counted over the whole rendered output** — the summary, the provenance line, the
-outcome names and any `ARGUMENT-DROPPED` clause. Everything printed counts; a line outside the budget is
+outcome names, and any `ARGUMENT-DROPPED` or `ATTRIBUTION-INCOMPLETE` clause. Everything printed counts; a line outside the budget is
 the budget leaking.
 
 **Nothing counts it at run time**, and that is a deliberate trade rather than an oversight — see
@@ -89,6 +90,11 @@ prints `#34` because the number has a column of its own; forbidding it there wou
 *card 34*. **A summary has no column.** Every identifier in it sits mid-sentence, where it is precisely
 the lookup this command exists to spare the reader.
 
+**A slice's own number is the one exemption, and nothing else gained one.** A slice summary must say
+which slice it read, exactly as the stage summary names its feature — an identifier naming *what this
+output is about* is not the lookup the rule exists to remove. Commit shas stay forbidden: a sha points
+into history and is never the subject of a sentence.
+
 So *"per the fourth locked decision"* is not the fix, and neither is *"as recorded in the delta"*. The fix
 is to **say the thing**: *"the board's order is consumed and never recomputed, because a second producer
 would make neither answer trustworthy."*
@@ -112,6 +118,64 @@ A confident 200 words about a stage that decided nothing is the worst output thi
 because it is indistinguishable afterwards from a real summary — and it is the failure this feature would
 otherwise introduce, having never existed before.
 
+## The slice mode — `--slice`
+
+The stage summary reads one artifact. **The slice summary reads a brief and reconciles it against what
+shipped**, because a brief states what a slice *intended* and the useful question is what it *landed*.
+
+**200 words per slice**, same vocabulary rule.
+
+**With a number, read that slice. With none, read the most recently touched brief** — resolved as the
+stage mode resolves a feature, and named in the output for the same reason. **Never summarise every slice
+at once:** a per-slice bound leaves the whole output unbounded, on a command whose one promise is a
+bounded read. Where briefs tie, that is `TARGET-AMBIGUOUS`; where a number names no brief,
+`TARGET-NOT-FOUND`.
+
+### Attributing commits to a slice
+
+```sh
+git log --oneline -- docs/feature/<id>/slices/<brief>          # the brief's own history
+git log --oneline --grep "slice NN"                            # the naming convention
+git show --stat <sha>                                          # what each commit touched
+```
+
+**The naming convention is a habit, not a guarantee, and it fails on the case that matters most.**
+Measured 2026-09-08 over this repo's last nine commits: **four name no slice at all**, and one of those
+four is a *precursor commit* belonging to a slice whose sibling commit does name it. So attribution by
+subject silently drops exactly the work a slice did before its headline change.
+
+**The range is defined, because the count means nothing without it.** It runs from the commit that
+created the slice's brief to the commit that last touched the feature's directory — `git log --reverse --
+<brief>` for the first, `git log -1 -- docs/feature/<id>/` for the last. Commits outside it are not this
+slice's and are not counted; commits inside it naming no slice are the gap.
+
+**Report what could not be attributed.** Where commits in that range cannot be tied to the slice, say how
+many and stop guessing — a landed view built on a partial commit set is confidently wrong about the one
+thing it exists to establish. Report `ATTRIBUTION-INCOMPLETE` alongside.
+
+### What the fold must produce
+
+**Name what landed that the brief did not describe**, and **what the brief promised that did not land**.
+Those two are the whole value; everything else the brief already said.
+
+**Compare meaning, never paths — and never count files.** A file count is a path diff wearing a sentence.
+
+**Compare meaning, never paths.** A brief describes work in prose — *"two fixtures in the existing
+suite"* — so a file the brief never names is usually a file the brief plainly anticipated. Measured
+2026-09-08 against three real slices: a naive path comparison produced 48 differences of which roughly
+five were real. **A mechanical version of this check is worse than none**, and that is why the vocabulary
+is fixtured here while this is not. The ceiling is fixtured in neither mode — see *Half enforced, half
+promised*.
+
+**Where brief and outcome agree, say they agree, briefly.** Do not pad to prove effort.
+
+**Where the fold finds nothing the brief does not already say, say that.** The card that asked for this
+doubted the whole mode on those grounds. Producing a shorter brief instead of a landed view is exactly
+the failure it feared, and reporting the absence is how that stays visible.
+
+**Never judge what landed.** This reports; `phil:adversarial-review` judges. And never derive whether the
+slice is done — `phil:nwave-slice-status` owns that.
+
 ## Decision outcomes
 
 Report exactly one terminal outcome, every run:
@@ -123,8 +187,9 @@ already guarantees — no `Write`, no `Edit`, and a `Bash` scoped to read-only g
 restates the frontmatter rather than making a promise. Kept for consistency, and its weaker meaning is
 stated rather than left to be assumed.
 
-`ARGUMENT-DROPPED` is reported **alongside** `SUMMARY-RENDERED` whenever reasoning was cut to fit, and
-names what went.
+These are reported **alongside** `SUMMARY-RENDERED`: `ARGUMENT-DROPPED` whenever reasoning was cut to
+fit, naming what went; and `ATTRIBUTION-INCOMPLETE` in `--slice` mode whenever commits in the range could
+not be tied to the slice, naming how many.
 
 - **`TARGET-NOT-FOUND`** — a name was given and no such feature exists. **Never report `NOTHING-RECORDED`
   for this.** That outcome is a claim about the work — *this stage decided nothing* — and deriving it from
@@ -138,11 +203,15 @@ names what went.
 
 ## What this skill must never do
 
-- **Write anything.** No `Write`, no `Edit`, and a `Bash` holding one read-only git verb. **The grant is
+- **Write anything.** No `Write`, no `Edit`, and a `Bash` holding two read-only git verbs. **The grant is
   checked rather than merely declared** — `scripts/check-readonly-commands.py` verifies every verb against
   its allowlist. That is one level short of mechanical, and `CLAUDE.md` says why: an allowlist entry is a
   promise that a verb has no writing mode. `git log -p --ext-diff` runs a diff driver the target repo
-  configures, so even this verb reaches arbitrary code in principle. Checked, not proven.
+  configures — conditional on their config. **Worse, and unconditional: `git log` and `git show` both
+  accept `--output=<file>`, which writes, and clobbers an arbitrary absolute path outside the repo.**
+  Verified on git 2.53.0, 2026-09-08. So the declaration asserts more than the grant delivers — here and
+  for the three other commands on that allowlist. Checked, not proven, and the gap is named rather than
+  implied.
 - **Derive a status.** Not done, not in progress, not a percentage. That belongs to
   `phil:nwave-slice-status`.
 - **Summarise a stage that recorded nothing.**
@@ -155,6 +224,18 @@ names what went.
 - **Edit or shorten the artifact it read.** A summary is not a licence to rewrite its source.
 - **Claim the default is the most recently *completed* stage.** It is the most recently touched, and the
   output says so.
+
+## The standard for everything here
+
+**This surface quotes nothing.** Every other board-family surface mixes composed text with a filer's own
+words, and the discriminator does real work separating them. Here there is no quoted half, so
+`${CLAUDE_PLUGIN_ROOT}/rules/writing.md` governs the entire output.
+
+Read it as **compose well, never compose short** — the ceiling already bounds length, and the standard
+bears on active voice, positive form, concrete language and the emphatic word last, in a read whose whole
+value is being finishable in one pass. *State the decision, never its number* is that standard's
+*definite, specific, concrete language* applied where no pattern reaches; fixture 06 is what would fail
+without it.
 
 ## Acceptance
 

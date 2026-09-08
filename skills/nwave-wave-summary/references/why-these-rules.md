@@ -70,7 +70,7 @@ which makes a wrong pick visible immediately rather than inferred from a summary
 `gh api graphql` grant accepts a mutation document and the honest declaration is about the grant rather
 than the intent.
 
-**This command touches no forge.** It grants one verb, `git log`, which is on
+**This command touches no forge.** It grants two verbs, `git log` and `git show`, both on
 `scripts/check-readonly-commands.py`'s allowlist, so `mutates: false` is *checked* rather than merely
 declared.
 
@@ -82,11 +82,21 @@ repo keeps recording — a rationale that reads well and is false.
 true statement is narrower: it is the first in the **board and session** family, whose other members carry
 forge grants.
 
-**And "checked" is not "mechanical".** `CLAUDE.md` states that an allowlist entry is a promise that a verb
-has no writing mode. `git log -p --ext-diff` runs a diff driver the target repo configures, and
-`--textconv` runs a configured filter — arbitrary code reachable from a grant whose prefix is `git log`.
-The guarantee is a verified grant over a human-maintained allowlist, which is worth having and is not
-proof.
+**And "checked" is not "mechanical" — by more than the first version of this paragraph admitted.**
+`CLAUDE.md` states an allowlist entry is a promise that a verb has no writing mode. Two escapes exist and
+they are not equally serious.
+
+**Conditional:** `git log -p --ext-diff` runs a diff driver the target repo configures, and `--textconv`
+runs a configured filter — arbitrary code, but only where someone configured it.
+
+**Unconditional, and the one that actually refutes the declaration:** `git log --output=<file>` and
+`git show --output=<file>` **write**, clobbering an arbitrary absolute path outside the repo, with nothing
+configured. Verified on git 2.53.0, 2026-09-08.
+
+So `mutates: false` asserts the tool list makes mutation impossible, and for these verbs it does not —
+here and for the three other commands on that allowlist. It is a **verified grant over a human-maintained
+allowlist, one of whose promises is now known to be false.** Worth having, not proof, and the difference
+is now written down where the earlier draft volunteered only the weaker objection.
 
 **It costs one thing, and the trade was taken deliberately.** No interpreter is granted, so nothing counts
 the rendered output's words at run time. The ceiling is enforced by fixtures at build time and by this

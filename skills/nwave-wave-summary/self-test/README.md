@@ -19,8 +19,26 @@ use. Named here because this repo runs two competing schemes and one skill uses 
 | `04-handles-everywhere` | `SUMMARY-RENDERED` | — | No identifier of any kind, and no longhand escape |
 | `05-tied-targets` | `TARGET-AMBIGUOUS` | — | Never pick; every tie-break is a proxy for a judgement nobody made |
 | `06-named-not-stated` | `SUMMARY-RENDERED` | — | **The gap:** clean by every pattern and still useless |
+| `07-named-target-missing` | `TARGET-NOT-FOUND` | — | A typo must not become a claim about the work |
+| `08-landed-differs-from-brief` | `SUMMARY-RENDERED` | — | The slice mode's whole justification |
+| `09-attribution-incomplete` | `SUMMARY-RENDERED` | `ATTRIBUTION-INCOMPLETE` | Precursor commits are counted, never guessed |
+| `10-brief-and-outcome-agree` | `SUMMARY-RENDERED` | — | The ceiling is a ceiling, not a target |
+| `11-nothing-the-brief-does-not-say` | `SUMMARY-RENDERED` | — | The empty result is a finding, not a failure |
+| `12-the-longest-brief` | `SUMMARY-RENDERED` | — | 18× compression before the commits are folded in |
+| `13-promised-but-not-landed` | `SUMMARY-RENDERED` | — | The mode's headline value, named individually |
+| `14-slice-number-not-found` | `TARGET-NOT-FOUND` | — | Slice mode reaches more than one outcome |
 
-`READ-ONLY` is expected on every fixture.
+`READ-ONLY` is expected on every fixture. **Every fixture declares its `mode`** — `stage` or `slice` —
+because the two answer different questions and the driver holds them to different rules — an attribution
+gap belongs to slice mode alone, and slice mode must reach more than one outcome.
+
+**One rule here is prose because no check could do it better.** The slice mode reconciles a brief against
+what shipped, and that comparison is about **meaning**: a brief says *"two fixtures in the existing
+suite"* and names no paths. Measured 2026-09-08 across three real slices, a naive path diff produced
+**48 differences of which roughly five were real** — so a mechanical version of this check is worse than
+none. It lives in fixture 08's `must_not` — **and in two counterexamples the driver asserts genuinely pass the
+checker**, which is the same asserted-gap treatment fixture 06 gets. An earlier version of this paragraph
+said a stated rule was all that was available; fixture 06, in this suite, already showed otherwise.
 
 **Fixture 06 is the important one and it asserts a gap.** `The fourth locked decision` contains no path,
 no bracket, no handle and no card number — it satisfies every mechanical rule in

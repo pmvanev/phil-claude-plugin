@@ -1,8 +1,13 @@
 {
   "fixture_id": "WSUM-SELFTEST-07",
-  "situation": "A feature name is given and no such directory exists — a plausible typo one character from a real feature.",
-  "expected_decision": ["TARGET-NOT-FOUND"],
-  "expected_report_lines": ["READ-ONLY"],
+  "mode": "stage",
+  "situation": "A feature name is given and no such directory exists \u2014 a plausible typo one character from a real feature.",
+  "expected_decision": [
+    "TARGET-NOT-FOUND"
+  ],
+  "expected_report_lines": [
+    "READ-ONLY"
+  ],
   "expected_guard": "the output says the named feature was not found and where it was looked for; nothing is summarised and no near-match is substituted",
   "must_not": [
     "report NOTHING-RECORDED, which is a claim about the WORK and would be derived from a typo",
@@ -11,5 +16,5 @@
     "fall back to the most recently touched feature, which would answer a question nobody asked",
     "summarise anything"
   ],
-  "why_this_fixture_exists": "Before this outcome existed, a mistyped name landed on NOTHING-RECORDED — the command reporting that a stage decided nothing, on the evidence of a spelling mistake. That is fixture 02's own stated failure arriving through the front door, and no test could see it because the outcome coverage check quantifies over outcomes rather than over inputs."
+  "why_this_fixture_exists": "Before this outcome existed, a mistyped name landed on NOTHING-RECORDED \u2014 the command reporting that a stage decided nothing, on the evidence of a spelling mistake. That is fixture 02's own stated failure arriving through the front door, and no test could see it because the outcome coverage check quantifies over outcomes rather than over inputs."
 }
