@@ -72,20 +72,21 @@ calls again — the standard's own remedy ordering, applied by the thing that ha
 
 import json
 import os
-import re
 import sys
 
-QUESTION_CEILING = 200
+# The two halves of the rule live in `scripts/plain_language.py`, so a surface that needs the ceiling
+# without this vocabulary can take one and not the other — `phil:board-snapshot` must print `#N`, which
+# is exactly what the list below forbids. Nothing about this hook's behaviour changed in the move; the
+# list is byte-identical and `tests/test_decision_request_hook.py` drives this file as a subprocess.
+#
+# An import failure is left to raise. A hook that quietly stopped enforcing would report compliance by
+# staying silent, which is the defect this repo keeps recording; a visible hook error is the better
+# failure, and a missing file in an install is a packaging bug that should be loud.
+sys.path.insert(0, os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "scripts"))
+from plain_language import DEFAULT_CEILING, identifiers_in, words  # noqa: E402
 
-# Only the classes that are jargon in ANY project. See the header: this repo's own identifiers are
-# deliberately absent, because denying on them would refuse a stranger's question for a local reason.
-PORTABLE = [
-    ("an issue or ticket number", re.compile(r"#\d+")),
-    ("a file path", re.compile(
-        r"(?<!//)(?<!\.)\b[\w.-]+/[\w./-]*\.\w{1,5}\b|\b\w[\w.-]*\.(?:md|py|ya?ml|json|ts|tsx|js|go|rs)\b")),
-    ("a bracketed identifier", re.compile(r"\[[A-Z]+-?\d+\]")),
-]
-URL = re.compile(r"https?://\S+")
+QUESTION_CEILING = DEFAULT_CEILING
 
 # The opt-in marker for the wording half. See *Why only the length half is unconditional*.
 STRICT = "decision-request: strict"
@@ -101,10 +102,6 @@ def strict_here(cwd):
     except Exception:
         pass
     return False
-
-
-def _words(text):
-    return len(str(text or "").split())
 
 
 def counted(question):
@@ -126,7 +123,7 @@ def breaches(tool_input, strict):
         header = question.get("header") or question.get("question", "")[:30]
         text = counted(question)
 
-        count = _words(text)
+        count = words(text)
         if count > QUESTION_CEILING:
             out.append(
                 f'"{header}" is {count} words counting its option labels and descriptions; the limit '
@@ -136,9 +133,8 @@ def breaches(tool_input, strict):
 
         if not strict:
             continue
-        # A URL is a link the reader can open, not an identifier from a system they may not share.
-        scannable = URL.sub(" ", text)
-        found = sorted({name for name, pattern in PORTABLE if pattern.search(scannable)})
+        # URL handling and the forbidden classes both live in the shared module now.
+        found = identifiers_in(text)
         if found:
             out.append(
                 f'"{header}" contains {", ".join(found)} in the question or its options. The reader may '
