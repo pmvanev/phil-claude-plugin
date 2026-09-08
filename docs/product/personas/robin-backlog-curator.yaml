@@ -73,3 +73,32 @@ prose_facet:
   vocabulary:
     - composed vs derived, structural vs prose, judging vs generating, house standard,
       mention-versus-mechanism, provenance label, two-sided KPI
+
+# Orientation facet — added by DISCUSS wave, feature: board-snapshot (2026-09-08, issue #34).
+# Robin outside the board rather than inside it, acting on the second half of a goal that has sat in
+# this file since 2026-08-12: "trust the board without reading all of them again." Grooming delivered
+# the trust and left the reading cost untouched — every other facet here reads a card, and this one
+# refuses to. A new "returning reader" persona was considered and rejected on the prose facet's
+# precedent: Robin reads output that IS this job's product, rather than an ask that interrupts.
+# Contrast ari-interrupted-decider, a new persona because its position is orthogonal to every domain;
+# here the role is identical and only the question moved — from "does this card mean what it says" to
+# "where does the whole board stand".
+orientation_facet:
+  goals:
+    - Know where the board stands before deciding anything, in one pass and without opening a card
+    - Re-orient after time away without reading forty bodies to find the four that matter
+    - Get told what is blocked and by what, rather than only that something is blocked
+    - Be shown drift the moment it is free to detect, and be handed it rather than have it fixed
+  frustrations:
+    - Every command that touches the board answers a different question, and all of them at length
+    - The one that sounds closest reports what is WRONG, and the question was what is HERE
+    - Card titles are unreadable as a list; the bodies behind them run to thousands of words
+    - Asking a session to hand-write the summary works, which is the evidence the missing thing is small
+  mental_model:
+    - A bounded read that drops a card to fit is worse than no read at all
+    - The forge already knows the order; anything that recomputes it is inventing a second answer
+    - Telling me a section is empty is information; showing me an empty heading is furniture
+    - A short read that is confidently wrong costs more than the long read it replaced
+  vocabulary:
+    - standing check, orientation read, board order, word ceiling, per-row bound, drift line,
+      composed versus copied, permitted identifier, the outside view

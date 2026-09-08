@@ -1,0 +1,118 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: board-snapshot (2026-09-08, issue #34)
+#
+# The OUTSIDE view. journeys/groom-issues.yaml covers whether the cards are well formed;
+# journeys/single-issue-per-feature.yaml and story-spans-features.yaml cover the inside of one card;
+# journeys/board-prose-standard.yaml covers whether composed sentences read. None has a step at which
+# the WHOLE board is read at once, which is the finding — every existing journey opens a card.
+
+id: board-snapshot
+name: See where the board stands without reading it
+persona: robin-backlog-curator      # EXTENDED 2026-09-08, not a new persona — see that file's orientation_facet
+job: orient-on-a-board-without-reading-it
+
+summary: >
+  Robin comes back to a board and runs one command. Three sections arrive inside two hundred words:
+  what is blocked and what each waits on, what is in flight, and the next five in the board's own
+  order. Nothing is opened. Where the answer needs to be wider — after time away, or before ranking —
+  the same command prints every open card as a number, a title and a description short enough to scan.
+  Neither read fixes anything it finds.
+
+# The opening beat is `avoidant`, deliberately not `uncertain`. Robin does not arrive doubting the
+# board; Robin arrives having stopped asking it, because every existing answer costs a full read. The
+# failure mode this feature acts on is A BOARD THAT IS FINE AND GOES UNREAD, and an arc opening on
+# doubt would describe the grooming journey instead.
+arc: avoidant -> oriented -> decided
+
+steps:
+  - id: invoke
+    action: Robin runs `/phil:board-snapshot`, with no argument and no flag.
+    output: One forge call against the project's items
+    emotion: avoidant — I expect to be handed the board rather than told about it
+    shared_artifacts:
+      - name: board order
+        source: the forge, from the project-items query
+        note: >
+          Authoritative and consumed. Nothing here recomputes it — `phil:rank-issues` is the one
+          surface that produces an order, and a second producer would make neither answer trustworthy.
+
+  - id: read-the-standing-check
+    action: >
+      Read three sections — blocked, in flight, queued — inside a total ceiling of two hundred words,
+      with each blocked card naming what it waits on or saying that the blocker is unrecorded.
+    output: The standing check, at or under the ceiling
+    emotion: oriented — I know where it stands and I have opened nothing
+
+  - id: meet-an-empty-section
+    action: >
+      On a board with nothing blocked and nothing in flight — this repo's own state on 2026-09-08 —
+      read one leading sentence naming both as empty, rather than two empty headings.
+    output: One sentence; no furniture
+    emotion: oriented — the sections were checked, and I can see that they were
+
+  - id: meet-the-drift-line
+    action: >
+      Where an open card sits in the done column, or a closed one outside it, read one line saying so
+      and naming the command that resolves it.
+    output: One line, only when it fires, counting against the ceiling
+    emotion: alert — something is wrong and I have not been handed a fix I did not ask for
+
+  - id: widen-the-read
+    action: >
+      Where the standing check is not enough — after time away, or before ranking — Robin runs
+      `/phil:board-snapshot --all`.
+    output: Every open card, one row each
+    emotion: oriented — the same command, a wider question
+
+  - id: read-composed-descriptions
+    action: >
+      Read a number, a title and a description of a hundred words or fewer, composed from the body and
+      carrying no internal handles. Card numbers are present, because this surface needs them.
+    output: One scannable row per open card, nothing dropped to fit
+    emotion: decided — I know which of these is mine to open
+    shared_artifacts:
+      - name: composed description
+        source: the command, from the card body
+        note: >
+          Composed and never copied. The title is the human's words and passes through verbatim; the
+          description is this surface's own, which is what puts it under the house writing standard.
+
+error_paths:
+  - trigger: The ceiling would be breached by the queued section
+    response: >
+      Print fewer queued cards and state how many were withheld. Never breach, and never truncate
+      silently — an honest short count is the only outcome that leaves the reader able to ask for more.
+    emotion: oriented — I know the read was clipped, and by how much
+
+  - trigger: The board is entirely empty in every section
+    response: >
+      Say so in one sentence. Do not manufacture content to justify the run — the same discipline the
+      grooming audit already carries about a clean board.
+    emotion: oriented
+
+  - trigger: The read is partial — pagination failed, or the forge was unreachable
+    response: >
+      Say the read was partial and report only what was found. Inherited verbatim from the grooming
+      journey, and it binds harder here, because a bounded read looks complete by construction.
+    emotion: alert
+
+  - trigger: A card sits in no column
+    response: Name it as uncolumned. Never omit it, and never guess a column for it.
+    emotion: alert
+
+  - trigger: The board still carries slice cards, inflating every count
+    response: >
+      Report the inflation in one line and hand it over. Consolidating is irreversible and belongs to
+      `/phil:groom-set`; refusing to render would withhold the read exactly when the board is worst.
+    emotion: alert — I have been told, and nothing has been done to me
+
+  - trigger: A description would carry an internal handle
+    response: >
+      The check fires and the description is recomposed. Card numbers are permitted here and forbidden
+      in an interrupting ask — the two surfaces share a word ceiling and not a vocabulary.
+    emotion: oriented
+
+# Accepted costs, recorded so they are not rediscovered as defects:
+#   - A bounded read can be confidently wrong. Compression is judgement, and no fixture catches a
+#     description that is short, well-formed and a misreading of the body.
+#   - On a healthy board the standing check is nearly empty, so its value is reassurance rather than
+#     information. Slice 01 exists to find out whether that reads as useless.

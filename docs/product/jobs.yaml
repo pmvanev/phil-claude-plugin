@@ -817,3 +817,67 @@ jobs:
     #      so a conforming ask that is buried still fails.
     #   C6 The mechanism is named, and where it cannot be enforced that is STATED rather than implied.
     #      A convention with no enforcement is what already failed here.
+
+  - id: orient-on-a-board-without-reading-it
+    # Registered by DISCUSS wave, feature: board-snapshot (2026-09-08, issue #34)
+    job_story: >
+      When I come back to a board I own and need to know where it stands before deciding anything,
+      I want a read short enough to finish in one pass and plain enough to act on, so I can pick up
+      work without either reading forty cards or guessing.
+    dimensions:
+      functional: >
+        Two bounded reads over one board: a standing check naming what is blocked, what is in flight
+        and the next few queued inside a total word ceiling; and a per-card table giving every open
+        card a number, a title and a composed description bounded per row. Board order is consumed,
+        never computed.
+      emotional: >
+        Confidence that opening a card is a decision rather than a gamble; relief from the standing
+        tax of a full read before any small choice.
+      social: >
+        A board a teammate can be pointed at and understand in one screen; being someone whose
+        backlog answers a question rather than demanding a session.
+    four_forces:
+      push: >
+        Every command that touches this board answers a different question and answers it at length.
+        Measured 2026-09-08: asked what summarises the board, a session correctly chose the grooming
+        audit and was interrupted mid-scan, because the audit reports what is WRONG and the question
+        was what is HERE. Nothing in either description separates the two. The table actually wanted
+        was then hand-composed from two raw forge calls, from bodies running 400 to 6,500 words.
+      pull: >
+        One command with two modes — a 200-word standing check by default, a per-card table on
+        request — both composed rather than copied, both bounded by a checker already shipped for
+        the adjacent surface.
+      anxiety: >
+        (A) A ceiling that drops cards to fit, which is the one failure a board read may not have —
+        answered by bounding the table per row and never in total. (B) A bounded read that is
+        confidently wrong because it summarised a body it did not understand. (C) A plain-language
+        rule that is asked for and never enforced, which is this repo's recorded failure mode.
+        (D) A second grooming standard arriving by the back door — answered by reporting drift in one
+        line and handing it to the audit.
+      habit: >
+        Reading the whole board when something feels wrong; asking a session to hand-write the
+        summary; or acting on the top card without looking at the rest.
+    opportunity_score: >
+      high importance, zero satisfaction — no mechanism exists, and the absence was demonstrated
+      rather than argued on 2026-09-08. Scored against keep-a-backlog-trustworthy (medium: the audit
+      ships) and make-in-flight-work-transferable (medium: the inside of a card is solved, the
+      outside view is not).
+    status: validated
+    personas: [robin-backlog-curator]
+    features: [board-snapshot]
+    # NOT a facet of keep-a-backlog-trustworthy. That job is about the board MEANING what it says; a
+    # perfectly groomed board still costs twenty minutes to read. Same persona, different outcome —
+    # the precedent is know-a-boards-hazards-before-contact, registered against Robin for that reason.
+    # Relationship to answer-a-tools-question-without-decoding-it: they SHARE A CONSTRAINT and not a
+    # position. Both want a bounded word count and plain English. Ari is interrupted and holding a
+    # question; Robin is arriving and holding none. The shared half is extracted as a checker (D10);
+    # the divergent half is the vocabulary, because a board read must print card numbers and an ask
+    # must not (D11).
+    # Load-bearing constraints (DISCUSS, 2026-09-08):
+    #   C1 The ceiling is per-mode. Total for the standing check, per-row for the table, never total
+    #      for the table — dropping a card to fit is the failure this job cannot absorb.
+    #   C2 Board order is authoritative and arrives from the forge. It is consumed, never computed.
+    #   C3 Empty sections are named in one leading sentence, never printed as empty headings.
+    #   C4 Descriptions are COMPOSED from the body. A title reworded is not a description.
+    #   C5 Card numbers are permitted in composed text on this surface, and stay forbidden in an ask.
+    #   C6 The read reports and never fixes. Drift is one line pointing at the audit.
