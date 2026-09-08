@@ -1,0 +1,24 @@
+{
+  "fixture_id": "WSUM-SELFTEST-06",
+  "situation": "A summary draft that contains no forbidden identifier and still fails, because it refers to decisions by position rather than stating them.",
+  "expected_decision": [
+    "SUMMARY-RENDERED"
+  ],
+  "expected_report_lines": [
+    "READ-ONLY"
+  ],
+  "expected_guard": "each decision is stated in words a reader can act on without opening the artifact",
+  "must_not": [
+    "refer to a decision by its position \u2014 the fourth decision, the sixth locked decision, the first constraint",
+    "refer to it by location \u2014 as recorded in the artifact, per the decisions table, see the delta",
+    "produce a summary that is accurate, within the ceiling, free of identifiers, and still requires opening the source"
+  ],
+  "counterexamples": {
+    "by_position": "The fourth locked decision settles the word ceiling, and the sixth settles how the target resolves.",
+    "by_location": "The decisions table records how the ceiling and the target resolution were settled."
+  },
+  "permitted_examples": {
+    "stated": "A stage that recorded nothing is reported as recording nothing, because a confident summary of an empty artifact cannot be told apart from a real one."
+  },
+  "why_this_fixture_exists": "This is the gap the pattern check cannot see. `The fourth locked decision` contains no path, no bracket, no handle and no card number \u2014 it passes every mechanical rule and defeats the entire purpose. The vocabulary check is necessary and is not sufficient, and only a fixture can say so. The permitted example deliberately covers a DIFFERENT decision from the counterexamples: on the one fixture about whether a run states rather than names, a permitted example answering the same two decisions would hand the run its answer, and the driver's candidate-prose guard is keyed on key names and cannot see that."
+}

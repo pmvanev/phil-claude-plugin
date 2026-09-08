@@ -1,0 +1,14 @@
+{
+  "fixture_id": "WSUM-SELFTEST-03",
+  "situation": "No argument is given. Three features have been touched in the last week; the newest commit touching a feature directory belongs to one whose only recorded stage finished an hour ago, while a larger feature finished last week.",
+  "expected_decision": ["SUMMARY-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "the most recently touched feature is resolved; the output names it and its date, and says the default is most recently touched rather than most recently completed",
+  "must_not": [
+    "claim the resolved target is the most recently COMPLETED stage — nothing records completion",
+    "infer completion from the artifact's contents, which is a status derivation and belongs to another skill",
+    "resolve from the current branch, the open editor, or the most recently mentioned feature in conversation",
+    "omit the date, which is what lets a reader see a wrong pick immediately"
+  ],
+  "why_this_fixture_exists": "The card asks for the PRIOR stage, and no artifact records completion. The honest signal is the newest commit touching a directory, which is a different thing — and the difference is invisible unless the output states it."
+}

@@ -1,0 +1,28 @@
+{
+  "fixture_id": "WSUM-SELFTEST-01",
+  "situation": "The largest feature artifact in the repo, 9,447 words, carrying a dozen locked decisions, a KPI table, a journey and three outcome sections. Forty-seven fold compression is required to reach the ceiling.",
+  "artifact_words": 9447,
+  "expected_decision": [
+    "SUMMARY-RENDERED"
+  ],
+  "expected_report_lines": [
+    "ARGUMENT-DROPPED",
+    "READ-ONLY"
+  ],
+  "expected_guard": "the output is at or under 200 words, states what was decided and what it rules out, names the artifact read with its date, and says what reasoning was cut",
+  "must_not": [
+    "exceed 200 words",
+    "cut a decision to fit \u2014 the argument goes first, and what went is named",
+    "drop ARGUMENT-DROPPED, which is the only signal that the reader is holding a partial account",
+    "summarise what the stage was ABOUT rather than what it DECIDED",
+    "omit the feature's name and the artifact's date, which is what makes a wrong target visible",
+    "name the artifact by PATH \u2014 a path is a forbidden identifier like any other, and this line is not exempt from the vocabulary rule"
+  ],
+  "why_this_fixture_exists": "Forty-seven fold is the real ask. The failure mode is not length \u2014 it is a summary that is short, fluent and useless, saying what the stage concerned rather than what it settled. A fixture drawn from a small artifact would never expose it. It also pins the provenance line, which is mandatory on every run and was the one line an earlier draft required in a form its own vocabulary rule forbids.",
+  "permitted_examples": {
+    "provenance": "Read from the board-snapshot feature record, last changed 2026-09-08."
+  },
+  "counterexamples": {
+    "provenance_by_path": "Read from docs/feature/board-snapshot/feature-delta.md, last changed 2026-09-08."
+  }
+}

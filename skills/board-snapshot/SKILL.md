@@ -36,6 +36,7 @@ produced this skill is in `references/why-these-rules.md`.
 | What order should these be in? | `phil:rank-issues` |
 | What is happening inside one card? | `phil:nwave-slice-status` |
 | What was *I* doing? | `phil:resume` |
+| What did the finished thinking decide? | `phil:nwave-wave-summary` |
 
 ## The read — shared by both modes
 

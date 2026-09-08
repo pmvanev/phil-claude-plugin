@@ -1,0 +1,14 @@
+{
+  "fixture_id": "WSUM-SELFTEST-05",
+  "situation": "No argument is given, and two feature directories were last touched by the same commit, so the newest-commit signal cannot separate them.",
+  "expected_decision": ["TARGET-AMBIGUOUS"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "both candidates are named, the reason they tie is stated, and nothing is summarised",
+  "must_not": [
+    "pick one",
+    "pick the alphabetically first, the larger, or the one with more recent activity elsewhere",
+    "summarise both",
+    "fall back to the current branch or to conversation context"
+  ],
+  "why_this_fixture_exists": "A silently picked target produces a summary that is internally perfect and about the wrong feature. Every available tie-break here is a proxy for a judgement nobody made."
+}

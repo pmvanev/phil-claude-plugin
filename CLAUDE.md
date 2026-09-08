@@ -84,16 +84,23 @@ reads as a complete one.
 
 ## A board surface that names a prose standard ships a fixture with it
 
-Seven surfaces in the board family **compose** prose that lands where the whole team reads it — the fields
+Eight surfaces in the board family **compose** prose that lands where the whole team reads it — the fields
 `groom-ask` writes, the two-line roster descriptions and summarising clauses in the generated block, the
 projected why/next/stack, the clause after the dash on a `## Chain` line, the ranking basis, the
-`assumed`-line rationales, and `board-snapshot`'s per-card descriptions and report lines. Each names
-`rules/writing.md` — the first six as of 2026-09-04, the seventh on 2026-09-08. **Naming it is the mechanism,
+`assumed`-line rationales, `board-snapshot`'s per-card descriptions and report lines, and every word `nwave-wave-summary`
+composes. Each names `rules/writing.md` — the first six as of 2026-09-04, the last two on 2026-09-08.
+
+**The eighth is the limiting case: it quotes nothing at all.** Every other surface mixes composed text
+with a filer's own words, and the discriminator does real work separating them. A summary has no quoted
+half, so the standard governs the entire output — and its fixture pins that a decision must be *stated*
+rather than named, which is *definite, specific, concrete language* applied exactly where a pattern check
+cannot reach. **Naming it is the mechanism,
 and naming alone is this board's recorded defect** — `scripts/check-rule-reachability.py` verifies a rule
 is *mentioned*, never that anything *applies* it, and says so in as many words.
 
 **So a citation ships with a fixture that would fail without it** — `nwave-issue-board` 30 and 31,
-`issue-board` 01, `groom-issues` 44, `session-handoff` 27, and `board-snapshot` 02 and 12. **Two citations
+`issue-board` 01, `groom-issues` 44, `session-handoff` 27, `board-snapshot` 02 and 12, and
+`nwave-wave-summary` 06. **Two citations
 do not yet have one:** `groom-set`'s comments on an irreversible operation and `phil:rank-issues`' recorded
 basis. Stated because an unstated gap in a rule about unenforced mentions is that rule failing in its own
 terms.

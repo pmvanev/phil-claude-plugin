@@ -228,3 +228,85 @@ than re-deriving it.
 
 ### Upstream changes
 None. No DISCOVER or DIVERGE wave ran, and no prior wave asserted anything this contradicts.
+
+
+---
+
+## Outcome — slice 01, 2026-09-08
+
+Authored and reviewed; **never run.** The plugin cache is six versions behind the tree, so every claim
+here is about composed prose, seven fixtures with a driver, and two mechanical checks — not about an
+invocation.
+
+### Two locked decisions were reversed during the build
+
+**[D6] is reversed.** It locked *"'Prior' defaults to the most recently completed"*. The shipped skill
+refuses that: **no artifact records completion**, so the closest honest signal is the newest commit
+touching a feature directory, which is a different thing — a feature whose stage landed an hour ago sorts
+above one finished last week. Inferring completion from contents would be a status derivation, and [D8]
+gives every one of those to `phil:nwave-slice-status`.
+
+So the default is *most recently touched*, the output says so, and it names the feature and the artifact's
+date. **Recorded here rather than left in the skill**, because a locked decision contradicted in silence
+is this repo's named defect and it took a reviewer to notice it in the last feature too.
+
+**[D4] is narrowed.** It locked the ceiling as *"enforced by fixtures through `scripts/plain_language.py`"*.
+The forbidden list is enforced that way; **the counter is not**. No fixture in the suite can fail because
+something was too long — the counter appears only to prove a counterexample is short enough to fail for
+the right reason. The word ceiling is therefore prose at run time *and* at build time. The trade is
+deliberate: granting an interpreter would make the count mechanical and the read-only grant promissory,
+on the one command whose distinction is the narrow grant.
+
+### Three claims were inflated and are corrected
+
+**"The first command in this family that is mechanically unable to mutate" was false on both halves.**
+`nwave-slice-status` has declared `mutates: false` with the identical `Bash(git log:*)` grant since before
+this feature existed, and `ai-eos` and `spirit-walk` do the same. And *mechanical* overstates it:
+`CLAUDE.md` says an allowlist entry is a promise that a verb has no writing mode, and `git log -p
+--ext-diff` runs a diff driver the target repo configures. The surviving claim is that the grant is
+**checked** against an allowlist, and that this is the first in the **board and session** family to manage
+it — narrower, and true.
+
+**"The fixtures apply both" was false for the counter**, as above.
+
+**"In a summary there is nothing to launder into" was refuted by this skill's own fixture**, which
+supplies *"the eleventh locked decision"* and asserts it passes the checker. The surviving argument is
+better: laundering is possible here and is *worthless* — the longhand form is still a lookup — whereas on
+a board read the laundered form serves the reader exactly as well, which is why one list permits the class
+and the other does not.
+
+### The mandatory line broke the mandatory rule
+
+**Every run must name what it read, and every run must contain no identifier.** `feature-delta.md` matches
+the file-path pattern, so the provenance line as first specified was a forbidden-class hit by the skill's
+own checker — the two rules collided unconditionally and the fixtures encoded both halves without
+resolving either.
+
+Resolved by naming the **feature** and the artifact's **date**, never the path. There is no exemption: a
+reader who knows the feature can find its record, and one who cannot is not helped by a path. Fixture 01
+now pins both forms.
+
+### A whole class of input landed on an outcome that misreports it
+
+A mistyped feature name resolved to `NOTHING-RECORDED` — the command reporting that a stage decided
+nothing, on the evidence of a spelling mistake, which is fixture 02's own stated failure arriving through
+the front door. `TARGET-NOT-FOUND` now exists, with fixture 07.
+
+**No test could have caught it**, and the reason generalises: `test_every_outcome_has_a_fixture`
+quantifies over *outcomes*, and every outcome had one. The gap was a class of **input** landing on the
+wrong outcome, which outcome-coverage cannot see.
+
+### KPI results
+
+| # | Target | Result |
+|---|---|---|
+| KPI-1 | Stage summary ≤ 200 words on the largest artifact | **Not measured.** Pinned in prose and by fixture 01's guard; nothing has been rendered |
+| KPI-2 | Internal identifiers in the output | **Not measured.** The list is applied to fixture strings, not to output |
+| KPI-3 | Compression ≥ 40× | **Not measured** — 9,447 → ≤200 is 47× by specification |
+| KPI-4 | Slice summaries saying something the brief does not | **Slice 02** |
+| KPI-5 | `mutates: false` holds | **Met** — `check-readonly-commands.py` exits 0, 4 commands verified |
+| KPI-6 | Consumers of the shared plain-language module | **Met — 4** |
+
+**Two met, four not, and none of the four can be met without running the command.** Stated this way
+because a table of ticks over a feature that has never executed is the compliance-by-silence this repo
+keeps recording.

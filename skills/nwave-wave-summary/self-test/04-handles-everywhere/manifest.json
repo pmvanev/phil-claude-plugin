@@ -1,0 +1,22 @@
+{
+  "fixture_id": "WSUM-SELFTEST-04",
+  "situation": "An artifact whose load-bearing sentences are keyed on handles throughout — bare decision numbers in this repo's own spelling, bracketed record ids pointing at a directory that does not exist, artifact paths, and cross-references to cards by number.",
+  "expected_decision": ["SUMMARY-RENDERED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "no file path, bracketed identifier, bare handle or card number appears in the output; each decision is stated in words",
+  "must_not": [
+    "carry a bare decision number into the output",
+    "carry a bracketed record id into the output",
+    "carry a file path into the output",
+    "carry a card number into the output — unlike a board read, this surface has no column to put one in",
+    "replace a forbidden handle with a longhand spelling of the same identifier"
+  ],
+  "counterexamples": {
+    "keyed_on_handles": "Implements D11 and the constraint from [ADR-013], updating rules/writing.md so the standard reaches every composing surface, and unblocks #38.",
+    "laundered": "Implements the eleventh locked decision and the constraint from the thirteenth architecture record."
+  },
+  "permitted_examples": {
+    "stated": "The board's order comes from the forge and is never recomputed, because a second producer would make neither answer trustworthy."
+  },
+  "why_this_fixture_exists": "Across this repo's artifacts 157 references point at a record that does not exist here at all. A handle carried into a summary is the exact lookup the summary exists to remove, and the most common one resolves nowhere."
+}

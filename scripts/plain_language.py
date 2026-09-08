@@ -118,3 +118,12 @@ def identifiers_in(text, forbid=PORTABLE_IDENTIFIERS, permit=()) -> list[str]:
         name for name, pattern in forbid
         if name not in permitted and pattern.search(scannable)
     })
+
+
+# What a SUMMARY of a finished artifact may not contain — the strictest list here, and the reason is
+# positional. A board read prints `#34` because the number has a column of its own and forbidding it
+# would only launder it into `card 34`. A summary has no column: every identifier in it sits mid-sentence,
+# where it is precisely the lookup the summary exists to spare the reader.
+#
+# So this list is everything: the portable classes, card numbers included, plus bare handles.
+SUMMARY_FORBIDDEN = PORTABLE_IDENTIFIERS + [BARE_HANDLE]

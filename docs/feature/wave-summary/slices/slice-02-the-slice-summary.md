@@ -76,6 +76,14 @@ that misses what they record is a finding.
 - **Identical to another slice but for scale?** No. Slice 01 reads one file; this one reconciles a file
   against history, which is a different question with a different failure mode.
 
+## A routing collision this slice inherits
+
+`phil:nwave-slice-status`'s trigger list already claims **"what was the point of slice 02"** — a
+*what did the thinking intend* question, which is this mode's subject and not that skill's. Leaving it
+there is correct while only the stage summary ships. **When `--slice` lands, that phrase has to move or
+be disambiguated in both descriptions**, or the two skills compete for the same sentence and the reader
+gets whichever is matched first.
+
 ## Pre-slice SPIKE
 
 None, but note the one uncertainty: **establishing which commits belong to a slice.** This repo's commit
