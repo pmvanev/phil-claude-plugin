@@ -560,7 +560,16 @@ def test_the_manifest_still_describes_the_files(manifest):
         assert a["framing_pairs"] == len(_bodies(before, "decision"))
 
 
-@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+EMISSION_FIXTURES = [m for m in FIXTURES if json.loads(m.read_text()).get("emission_file")]
+
+
+def test_some_fixture_records_an_emission():
+    """The filter below replaced a skip. A predicate matching nothing would make the test vacuous and
+    silent, where the skip at least printed a line — so the subset is asserted non-empty."""
+    assert EMISSION_FIXTURES, "no fixture records an emission; the filter is broken, not the corpus"
+
+
+@pytest.mark.parametrize("manifest", EMISSION_FIXTURES, ids=lambda p: p.parent.name)
 def test_the_tagged_regions_reproduce_the_counted_framing(manifest):
     """The invariant that stops the two halves of a fixture drifting apart.
 
@@ -569,8 +578,6 @@ def test_the_tagged_regions_reproduce_the_counted_framing(manifest):
     fixture 04's whole value is the claim that its wording passes and only its placement fails.
     """
     d = json.loads(manifest.read_text())
-    if not d.get("emission_file"):
-        pytest.skip("no emission recorded; the manifest declares placement not asserted")
     assert framing_matches_ask(manifest.parent), (
         f"{d['fixture_id']}: ask.md is not the concatenation of its tagged framing regions"
     )

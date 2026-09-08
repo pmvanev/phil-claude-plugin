@@ -12,6 +12,7 @@ Covers:
   - skills/refactor-tests/self-test/   (this plugin's refactor-tests safety loop, fixtures 01-05)
   - refactor/self-test/                (the pre-existing refactor-loop gate, fixtures 01-02)
 """
+import json
 import shutil
 import subprocess
 import sys
@@ -163,9 +164,22 @@ def test_rl02_bad_diff_broadens_public_api_while_suite_stays_green():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
-@pytest.mark.skip(
-    reason="03-no-span-praise is a critic-verdict fixture with no runnable code path; "
-           "it is driven by the refactor-loop verdict router, not by pytest."
-)
-def test_rl03_critic_verdict_fixture():
-    ...
+def test_rl03_fixture_still_poses_the_question_the_anti_flattery_clause_must_answer():
+    """`03-no-span-praise` is judged by the refactor-loop verdict router, not by pytest — the router
+    must coerce it to `CANNOT_ASSESS` and never `accept`.
+
+    **This replaced an empty function carrying an unconditional skip.** That stub had no body, so no
+    change to anything could ever have made it fail; it reported a permanently-disabled test where
+    there was no test. What is checkable here is not the coercion but the *input*: that the fixture
+    still presents flattery with no span, so it is still the thing the clause has to reject.
+
+    A fixture can rot into passing its own question — someone adds a span while tidying, and the
+    router then coerces nothing, correctly, on an input that no longer poses the problem. The same
+    shape as `test_the_ceiling_fixture_actually_breaches_the_ceiling` in the board suite."""
+    v = json.loads((RL / "03-no-span-praise" / "verdict.json").read_text())
+    assert v["verdict"] == "accept", "the fixture must ARRIVE as an accept for coercion to be tested"
+    criteria = v["per_criterion"]
+    assert criteria, "a verdict with no criteria tests nothing"
+    assert all(c.get("span") is None for c in criteria), \
+        "every criterion must lack a span; a span makes this an assessable verdict and not flattery"
+    assert (RL / "03-no-span-praise" / "expected.md").exists()

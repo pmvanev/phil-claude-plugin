@@ -24,6 +24,24 @@ import pytest
 SKILL_DIR = Path(__file__).resolve().parent.parent / "skills" / "session-handoff"
 FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
+
+def _subset(predicate, label):
+    """Fixtures matching `predicate`, for a test that applies to some of them.
+
+    **These tests used to parametrize over every fixture and `pytest.skip` the ones they did not
+    apply to** — 74 skips from three tests, all of them noise. Filtering at collection instead reports
+    what actually ran.
+
+    The trade is that a filter matching nothing passes silently, where a skip at least printed a line.
+    `test_every_subset_is_non_empty` closes that: an empty subset is a filter bug, and the one thing
+    worse than a noisy skip is a green test over nothing."""
+    matched = [m for m in FIXTURES if predicate(m)]
+    SUBSETS[label] = matched
+    return matched
+
+
+SUBSETS: dict[str, list[Path]] = {}
+
 # Per SKILL.md's `## Decision outcomes`. A capture run reports one of CAPTURE / NO-OP; a read-back
 # reports one freshness verdict, one owner outcome, and — on the two paths with a recorded next
 # action — one board outcome.
@@ -96,7 +114,10 @@ def test_a_read_back_reports_at_most_one_of_each_triple(manifest):
         assert len(overlap) <= 1, f"{manifest.parent.name} expects {overlap} from the {name} triple"
 
 
-@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+BOARD_FIXTURES = _subset(lambda m: bool(set(_outcomes(m)) & BOARD), "board-checking")
+
+
+@pytest.mark.parametrize("manifest", BOARD_FIXTURES, ids=lambda p: p.parent.name)
 def test_a_board_outcome_requires_a_board_to_have_been_read(manifest):
     """A fixture expecting a BOARD-* outcome must supply the board state the check read, or it
     asserts a conclusion drawn from nothing.
@@ -105,25 +126,27 @@ def test_a_board_outcome_requires_a_board_to_have_been_read(manifest):
     label to route from, a claimed card — and predate the board triple by four days. Requiring the
     converse would fail four working fixtures to satisfy a symmetry nothing needs."""
     d = json.loads(manifest.read_text())
-    if not set(_outcomes(manifest)) & BOARD:
-        pytest.skip("not a board-checking fixture")
     assert "board_state" in d, \
         f"{manifest.parent.name} expects a BOARD-* outcome but supplies no board_state to read"
 
 
-@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def _marks_board_unreadable(m):
+    board = json.loads(m.read_text()).get("board_state")
+    return isinstance(board, dict) and board.get("readable") is False
+
+
+UNREADABLE_FIXTURES = _subset(_marks_board_unreadable, "unreadable-board")
+
+
+@pytest.mark.parametrize("manifest", UNREADABLE_FIXTURES, ids=lambda p: p.parent.name)
 def test_an_unreadable_board_never_expects_agreement(manifest):
     """`BOARD-UNREADABLE` is a claim about the record; `BOARD-AGREES` is a claim about the work.
     Fixture 15 exists because defaulting one to the other is the silent failure."""
-    d = json.loads(manifest.read_text())
-    board = d.get("board_state")
-    if not isinstance(board, dict) or board.get("readable") is not False:
-        pytest.skip("fixture supplies a readable board, or none")
     assert "BOARD-UNREADABLE" in _outcomes(manifest), \
         f"{manifest.parent.name} marks the board unreadable but does not expect BOARD-UNREADABLE"
 
 
-@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+@pytest.mark.parametrize("manifest", BOARD_FIXTURES, ids=lambda p: p.parent.name)
 def test_a_freshness_verdict_needs_both_dirty_flags(manifest):
     """SKILL.md fires RESUME-STALE when the dirty flag differs **in either direction**, so a fixture
     stating only the read-back value leaves a load-bearing input implicit. Caught by
@@ -134,8 +157,6 @@ def test_a_freshness_verdict_needs_both_dirty_flags(manifest):
     other slices' behaviour, from a card that owns none of it. Left as a known gap rather than a silent
     one; widening this scope is the fix if it ever bites."""
     d = json.loads(manifest.read_text())
-    if not set(_outcomes(manifest)) & BOARD:
-        pytest.skip("predates the both-flags convention; see the docstring")
     assert "working_tree_dirty" in d and "working_tree_dirty_at_capture" in d, (
         f"{manifest.parent.name} compares fingerprints but does not state both dirty flags"
     )
@@ -212,3 +233,40 @@ def test_crossed_zero_means_pushed_since_the_last_capture(manifest: Path):
                     f"{label}: frame opened {m.group(1)} reads `crossed 0` under `captured: {captured}` "
                     f"— it was in the file at that capture, so it cannot be 0"
                 )
+
+
+@pytest.mark.parametrize("label", sorted(SUBSETS))
+def test_every_subset_is_non_empty(label):
+    """The hazard introduced by replacing skips with filters: a predicate that matches nothing makes
+    every test over it pass without running. A skip at least printed a line; a filter is silent.
+
+    So an empty subset fails here. This is the only assertion in the file that exists to protect the
+    other assertions rather than the fixtures."""
+    assert SUBSETS[label], f"the {label!r} subset matched no fixture — the filter is broken, not the corpus"
+
+
+# The one fixture that states a dirty flag while sitting outside the both-flags rule. Named because
+# converting a skip into a filter hid an exemption that used to print a line every run.
+EXEMPT_FROM_BOTH_FLAGS = {"04-stale-refuses-to-resume"}
+
+
+def test_the_fixtures_outside_the_both_flags_rule_are_a_known_set():
+    """`test_a_freshness_verdict_needs_both_dirty_flags` applies to board fixtures only, and the
+    exemption used to be visible as a skip line. Filtering hid it, so it is asserted instead.
+
+    **Measured rather than inherited.** The old skip's docstring said fixtures 01, 04 and 11 predate
+    the convention. In fact only `04-stale-refuses-to-resume` states a dirty flag at all outside the
+    board fixtures, and it states one of the two; 01 and 11 state none, so they are not exempt from
+    this rule — they never reach it. The first version of this assertion carried the docstring's three
+    guessed names and failed on the real one, which is the check doing its job on its own author.
+
+    Retrofitting 04 would edit inputs pinning another slice's behaviour, so it stays a known gap. If a
+    NEW fixture starts comparing fingerprints outside the rule, this fails and someone decides."""
+    exempt = {m.parent.name for m in FIXTURES} - {m.parent.name for m in BOARD_FIXTURES}
+    carries_a_flag = {
+        name for name in exempt
+        if "working_tree_dirty" in (SKILL_DIR / "self-test" / name / "manifest.json").read_text()
+    }
+    assert carries_a_flag == EXEMPT_FROM_BOTH_FLAGS, (
+        f"the set of fixtures comparing fingerprints outside the both-flags rule changed: "
+        f"expected {sorted(EXEMPT_FROM_BOTH_FLAGS)}, found {sorted(carries_a_flag)}")
