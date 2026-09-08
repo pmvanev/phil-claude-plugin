@@ -22,5 +22,5 @@
     "report SNAPSHOT-RENDERED",
     "silently reduce N without saying so"
   ],
-  "why_this_fixture_exists": "The card demands a fixture on a board large enough to breach the ceiling. This repo's live board cannot breach it \u2014 12 cards, all queued \u2014 so a suite drawn only from real data would never exercise the one path the ceiling exists for. Sized so the two sections that may NOT be clipped already exceed the budget, which is the hard case: the clip has to come entirely out of the queued section or not at all."
+  "why_this_fixture_exists": "The card demands a fixture on a board large enough to breach the ceiling. This repo's live board cannot breach it \u2014 12 cards, all queued \u2014 so a suite drawn only from real data would never exercise the one path the ceiling exists for. Sized so the mandatory sections consume most of the budget but stay inside it, which is the ordinary clip: the queued section gives ground and the ceiling holds. The case where the mandatory sections alone exceed the ceiling is fixture 13, because the two have opposite answers and one fixture asserting both is unsatisfiable."
 }

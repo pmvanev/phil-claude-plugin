@@ -17,6 +17,12 @@ That is the honest half, and the pattern is `tests/test_board_setup_fixtures.py`
 competing schemes and that one skill uses both. This suite picks one deliberately and names it here, so a
 future driver author meets the choice rather than inferring it.
 
+**Two fixtures are sized to breach the ceiling and they have opposite answers.** `01` is the ordinary
+clip — the mandatory sections fit and the queued section gives ground. `13` is the collision — the
+mandatory sections alone exceed the ceiling, so the queued section empties *and* the ceiling yields,
+because dropping a blocked card is the worse failure. The driver checks each is sized for its own case,
+which is what fixture 01's prose got wrong before it was corrected.
+
 | Fixture | Terminal | Alongside | Pins |
 |---|---|---|---|
 | `01-ceiling-breached` | `SNAPSHOT-CLIPPED` | — | The ceiling, on a board large enough to breach it |
@@ -30,6 +36,9 @@ future driver author meets the choice rather than inferring it.
 | `09-title-is-not-a-description` | `SNAPSHOT-RENDERED` | — | Composed, never reworded from the title |
 | `10-all-cannot-clip` | `SNAPSHOT-RENDERED` | — | 200 cards; length is not a reason to drop |
 | `11-empty-card-body` | `SNAPSHOT-RENDERED` | — | A card that says nothing is reported, never invented |
+| `12-handles-in-a-description` | `SNAPSHOT-RENDERED` | — | Handles stripped; card numbers kept, and never laundered |
+| `13-mandatory-sections-exceed-the-ceiling` | `SNAPSHOT-CLIPPED` | — | The tiebreak: the ceiling yields, never a blocked card |
+| `14-open-issue-off-the-board` | `SNAPSHOT-RENDERED` | `OFF-BOARD` | Issues never added to the project are named, never rendered |
 
 `READ-ONLY` is expected on every fixture, because it is a claim about every run.
 

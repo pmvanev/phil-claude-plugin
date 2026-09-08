@@ -1,0 +1,17 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-14",
+  "mode": "standing",
+  "situation": "The project holds 9 items. The repository has 13 open issues: 4 were never `gh project item-add`ed, so the project-items query cannot see them at all.",
+  "board": { "project_items": 9, "open_issues": 13, "off_board": 4, "n_requested": 5 },
+  "expected_decision": ["SNAPSHOT-RENDERED"],
+  "expected_report_lines": ["OFF-BOARD", "READ-ONLY"],
+  "expected_guard": "the three sections render from the 9 cards on the project; one line reports that 4 open issues are not on the board and names `phil:issue-board` as what adds them",
+  "must_not": [
+    "render the 4 off-board issues as cards, which would report a board position they do not have",
+    "omit them silently, which is a completeness claim over issues the query never returned",
+    "add them to the project",
+    "describe the board as clear or complete while they are outstanding",
+    "count them in any section total"
+  ],
+  "why_this_fixture_exists": "A `projectV2` items query returns only what was added to the project, and this very repo's board is not linked to its repository — a card reaches it only by an explicit add. Without the reconciliation call, a read whose stated purpose is saying what is there omits four open issues in silence, which is the completeness failure the skill's own `Partial reads` rule forbids, arriving structurally rather than through a dropped page."
+}

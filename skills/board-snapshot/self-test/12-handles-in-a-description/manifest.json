@@ -1,0 +1,30 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-12",
+  "mode": "all",
+  "situation": "A card whose body leans on internal handles throughout \u2014 a bare decision number in this repo's own `D11` spelling, a bracketed record id, and two artifact paths \u2014 and which cross-references a sibling card by number.",
+  "board": {
+    "open_cards": 1
+  },
+  "expected_decision": [
+    "SNAPSHOT-RENDERED"
+  ],
+  "expected_report_lines": [
+    "READ-ONLY"
+  ],
+  "expected_guard": "the description states the decisions rather than their numbers, names no path and no bracketed id, and keeps the card number in whichever form reads best",
+  "must_not": [
+    "carry a bare handle such as a decision number or record id into the description",
+    "carry a file path into the description",
+    "carry a bracketed identifier into the description",
+    "spell a card number in longhand to dodge the rule \u2014 the number is permitted, and laundering it into `card 34` is the thing the permission exists to prevent",
+    "strip a handle from the card's TITLE, which is quoted verbatim because it is the filer's words"
+  ],
+  "counterexamples": {
+    "leans_on_handles": "Implements D11 and the constraint recorded in [ADR-013], updating rules/writing.md and skills/issue-board/SKILL.md so the standard is cited at every composing surface.",
+    "laundered_number": "Blocked until card 38 settles which workflow drives feature work here."
+  },
+  "permitted_examples": {
+    "card_number_kept": "Blocked until #38 settles which workflow drives feature work here."
+  },
+  "why_this_fixture_exists": "Measured 2026-09-08: ten of this repo's twelve card bodies carry a forbidden class and none of the twelve composed descriptions did. The check has never caught a real failure, so this fixture is the whole of its evidence \u2014 it exists to keep a property that currently holds, and the skill says plainly that is all it is. The counterexample uses the bare `D11` form deliberately: the first pattern required two or more letters and missed it, so the guard was blind to the one spelling this repo writes."
+}

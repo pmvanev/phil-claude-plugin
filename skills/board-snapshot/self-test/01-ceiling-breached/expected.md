@@ -23,8 +23,8 @@ successful one is the failure this fixture is for.
 This is the only path the ceiling actually governs, and it is unreachable from the live board. A suite
 built only from real data would report green while never having tested the feature's central constraint.
 
-It is sized so the two sections that may **not** be clipped already exceed the budget, which forces the
-harder question: the clip comes entirely out of the queued section, or the run reports honestly that it
-cannot fit. **The first sizing of this fixture was wrong** — 3 blocked and 4 in flight could not breach
+It is sized so the mandatory sections consume most of the budget and stay inside it — the ordinary clip,
+where the queued section gives ground and the ceiling holds. Fixture 13 carries the case where they do
+not fit, which has the opposite answer. **The first sizing of this fixture was wrong** — 3 blocked and 4 in flight could not breach
 200 words at all, so the fixture claimed to test a clip it could never provoke. `tests/` caught it before
 the suite was trusted, which is the reason that check exists.

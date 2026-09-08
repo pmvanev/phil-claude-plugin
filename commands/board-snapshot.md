@@ -1,8 +1,8 @@
 ---
-description: "Say where the issue board stands right now, in 200 words or fewer: what is blocked and what each waits on, what is in flight, and the next few in the board's own order. Reports drift and never fixes it; consumes the board's order and never computes one. For what is WRONG with the cards use /phil:groom-issues instead."
+description: "Say where the issue board stands right now: what is blocked and what each waits on, what is in flight, and the next few in the board's own order, in 200 words or fewer. With --all, every open card instead, as a number, a title and a plain-English description of 100 words or fewer — no total ceiling, nothing dropped. Reports drift and never fixes it. For what is WRONG with the cards use /phil:groom-issues instead."
 argument-hint: "[<owner/repo>] [--all] [--next N]"
 mutates: true
-allowed-tools: Read, Glob, Grep, Bash(gh api graphql:*), Bash(gh issue view:*)
+allowed-tools: Read, Glob, Grep, Bash(gh api graphql:*), Bash(gh issue view:*), Bash(gh issue list:*)
 ---
 
 Load the `board-snapshot` skill at `${CLAUDE_PLUGIN_ROOT}/skills/board-snapshot/SKILL.md` and render the
@@ -34,10 +34,10 @@ GraphQL-only. `gh project item-list` is refused for the same reason `CLAUDE.md` 
 served a stale title on 2026-08-12 and can under-report, and under-reporting inside a bounded read is
 invisible by construction.
 
-**Send the query with GraphQL variables.** Interpolating a `fieldValueByName(name: "Status")` selection
-into a single-quoted `-f query='…'` fails to parse; `-F query=@file` would work and is unavailable,
-because writing a temp file is outside this grant and `CLAUDE.md` forbids a path inside a `Bash(...)`
-grant. Measured 2026-09-08.
+`Bash(gh issue list:*)` is the reconciliation call. A project-items query returns only issues somebody
+added to the project, so without it an open issue nobody added is omitted in silence — a completeness
+claim the skill forbids, reached structurally rather than through a dropped page.
+
 
 Report the outcome by name, per the skill's `## Decision outcomes`. End by naming the command that acts
 on anything reported, with its count — for example *"1 card in Done while open; `/phil:groom-issues`
@@ -45,10 +45,9 @@ reports it against the board standard"*. Name it; do not run it, and do not offe
 
 **`rules/writing.md` governs everything this command composes** — in the standing check, the sentence
 naming empty sections, the withheld count, the clause saying where the order came from, and the drift,
-uncolumned and inflation lines; in `--all`, every description. The skill states the boundary and carries the citation. Card titles are quoted
+uncolumned and inflation lines; in `--all`, every description — which also may not carry a file path, a bracketed identifier or a bare
+handle. Card numbers are permitted, and spelling one out in longhand to dodge that is the failure the
+permission exists to prevent. The skill states the boundary and carries the citation. Card titles are quoted
 verbatim, because they are the filer's words and judging them would be the taste-policing this family
 refuses.
 
-*An earlier draft of this paragraph said the command applied no prose standard, on the grounds that
-composed descriptions arrive in a later slice. That was false about this slice and it silently reversed a
-locked decision. Corrected 2026-09-08.*

@@ -99,3 +99,34 @@ def test_the_hook_permits_nothing(pl):
     sig = inspect.signature(pl.identifiers_in)
     assert sig.parameters["permit"].default == ()
     assert sig.parameters["forbid"].default is pl.PORTABLE_IDENTIFIERS
+
+
+# --- the board list: the second surface's divergence ---
+
+def test_the_board_list_drops_card_numbers_and_adds_a_handle_class(pl):
+    """The divergence runs in both directions, and that is what the extraction actually rests on. The
+    original reason — that a board read must print `#N` — was measured and refuted."""
+    board = [n for n, _ in pl.BOARD_DESCRIPTION_FORBIDDEN]
+    hook = [n for n, _ in pl.PORTABLE_IDENTIFIERS]
+    assert "an issue or ticket number" in hook and "an issue or ticket number" not in board
+    assert "a bare decision handle" in board and "a bare decision handle" not in hook
+
+
+@pytest.mark.parametrize("text", ["as D11 settled it", "per ADR-013", "see DDD-7", "Mandate-12 applies"])
+def test_bare_handles_are_caught_in_every_spelling_the_repo_uses(pl, text):
+    """The first pattern required two or more letters and missed bare `D11` — the only spelling this
+    repo actually writes, so the guard was blind to its own house style."""
+    assert pl.identifiers_in(text, forbid=pl.BOARD_DESCRIPTION_FORBIDDEN) == ["a bare decision handle"]
+
+
+@pytest.mark.parametrize("text", ["Python-3 support", "the COVID-19 dataset", "see Section-4"])
+def test_the_known_false_positives_are_recorded_rather_than_discovered(pl, text):
+    """The class is named *decision handle* and the pattern says *letters then digits*, which are not
+    the same thing. Asserted so the gap is a documented cost rather than a surprise: tolerable because
+    this check is build-time only, where a false positive costs a rephrase and never a denial."""
+    assert pl.identifiers_in(text, forbid=pl.BOARD_DESCRIPTION_FORBIDDEN) == ["a bare decision handle"]
+
+
+def test_a_card_number_survives_the_board_list(pl):
+    assert pl.identifiers_in("blocked until #38 settles it",
+                             forbid=pl.BOARD_DESCRIPTION_FORBIDDEN) == []

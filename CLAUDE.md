@@ -84,25 +84,40 @@ reads as a complete one.
 
 ## A board surface that names a prose standard ships a fixture with it
 
-Six surfaces in the board family **compose** prose that lands where the whole team reads it — the fields
+Seven surfaces in the board family **compose** prose that lands where the whole team reads it — the fields
 `groom-ask` writes, the two-line roster descriptions and summarising clauses in the generated block, the
 projected why/next/stack, the clause after the dash on a `## Chain` line, the ranking basis, the
-`assumed`-line rationales. As of 2026-09-04 each names `rules/writing.md`. **Naming it is the mechanism,
+`assumed`-line rationales, and `board-snapshot`'s per-card descriptions and report lines. Each names
+`rules/writing.md` — the first six as of 2026-09-04, the seventh on 2026-09-08. **Naming it is the mechanism,
 and naming alone is this board's recorded defect** — `scripts/check-rule-reachability.py` verifies a rule
 is *mentioned*, never that anything *applies* it, and says so in as many words.
 
 **So a citation ships with a fixture that would fail without it** — `nwave-issue-board` 30 and 31,
-`issue-board` 01, `groom-issues` 44, `session-handoff` 27. **Two citations do not yet have one:**
-`groom-set`'s comments on an irreversible operation and `phil:rank-issues`' recorded basis. Stated
-because an unstated gap in a rule about unenforced mentions is that rule failing in its own terms.
+`issue-board` 01, `groom-issues` 44, `session-handoff` 27, and `board-snapshot` 02 and 12. **Two citations
+do not yet have one:** `groom-set`'s comments on an irreversible operation and `phil:rank-issues`' recorded
+basis. Stated because an unstated gap in a rule about unenforced mentions is that rule failing in its own
+terms.
 
-**Only fixture 01 is enforced, and the gap is stated rather than implied.**
+**`board-snapshot` is the seventh surface, added 2026-09-08, and it is the first to ship the measurement
+alongside the citation.** Its vocabulary check found **nothing** across twelve hand-composed descriptions
+while ten of the twelve source bodies carried a forbidden class — so the skill states in its own text that
+the check is a build-time regression guard on a failure not yet observed, and names what would change the
+verdict. That is the honest form of a citation whose mechanism has never fired, and it is the form the
+other six should be held to when anyone next measures them.
+
+**Which of these fixtures anything actually runs, stated rather than implied.**
 `tests/test_issue_board_fixtures.py` guards two rules — **no fixture may supply candidate prose**, and
-**no fixture may assert a word count** — but it globs `skills/issue-board/self-test/` alone. Fixtures 30
-and 31 satisfy both rules *on inspection* and are checked by nothing, because `nwave-issue-board`'s suite
-has no driver and its manifests use the other of the repo's two schemes, so the guard would fail on shape
-before reaching either rule. That is issue #42's territory, and saying "two of those checks are enforced"
-would be this very section's defect committed inside it.
+**no fixture may assert a word count** — but it globs `skills/issue-board/self-test/` alone, so it reaches
+fixture 01 and nothing else. Fixtures 30 and 31 satisfy both rules *on inspection* and are checked by
+nothing, because `nwave-issue-board`'s suite has no driver and its manifests use the other of the repo's
+two schemes, so the guard would fail on shape before reaching either rule. That is issue #42's territory.
+
+`board-snapshot` 02 and 12 **are** driven, by `tests/test_board_snapshot_fixtures.py`, which shipped with
+the suite for exactly that reason. It enforces the candidate-prose rule in a sharper form — prose in a
+fixture must be paired with a `must_not`, and `candidates` or `suggestions` keys are refused outright —
+and it deliberately **breaks the word-count rule**, because that rule protects the prose standard from
+becoming a brevity test while this skill's ceilings are a specified feature. Different subject, opposite
+conclusion, recorded in the driver's docstring so nobody reconciles them by deleting the wrong one.
 
 Both rules exist because slice 01 broke them and had to be told: candidate prose turns a composition test
 into a selection test, which is passed by "publish the shorter string" — the word ceiling the standard

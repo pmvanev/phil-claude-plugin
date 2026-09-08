@@ -104,3 +104,76 @@ and a word count would turn a composition test into a brevity test.
 or under 200 words and for a fixture that pins it on a board large enough to breach it. Asserting the
 count here is the requirement; asserting it over a composed description would be the defect. Stated
 because the two look identical from a distance, and the next reader will meet the CLAUDE.md rule first.
+
+
+## The vocabulary rule fired zero times, and that is recorded rather than buried
+
+Measured 2026-09-08, against the twelve descriptions a session composed by hand before any check existed
+— the only real sample this feature has:
+
+| | |
+|---|---|
+| Source bodies carrying a forbidden class | **10 of 12** |
+| Composed descriptions carrying one | **0 of 12** |
+| Longest description | 53 words, against a 100 bound |
+
+**The hazard upstream is real and the compression removed it every time.** Ten opportunities, ten
+strips, no leaks.
+
+What that does *not* establish is that the check is needed — but the obvious hedge is wrong, and worth
+correcting. **The composer did not know the vocabulary rule: it did not exist yet.** What they knew was
+that the descriptions had to be short and readable. So the zero is *stronger* evidence than it first
+looks — compression alone strips handles — which argues for demoting the check further rather than for
+hedging the number. What remains genuinely unestablished is generality: n is twelve, in one session,
+by one composer. So the honest status is a regression guard on a failure nobody has observed — which the
+skill says in as many words, because a check presented as a mechanism while having never fired is the
+defect `CLAUDE.md` records twice and the one this slice's own hypothesis named.
+
+**The same measurement inverted the card-number decision's reasoning.** [D11] justified permitting `#N`
+on the grounds that a board read must print card numbers. The sample says otherwise: not one description
+used `#N`, because the number has its own column — and the two cross-references were written in longhand,
+as *card 20* and *card 4*.
+
+That is the real argument, and it is stronger than the original. **Forbidding `#34` does not remove the
+identifier; it renames it to `card 34`,** which no pattern catches and which means exactly the same
+thing. The permission stands, on evidence, for a reason nobody had written down.
+
+
+## The handle pattern was blind to this repo's own spelling
+
+The first `BARE_HANDLE` required two or more letters before the digits — `ADR-013`, `DDD-7`, `Mandate-12`.
+**This repo writes its decision handles as bare `D11`,** which matched neither that pattern nor the
+bracketed one, so a description reading *"as D11 settled"* passed every rule and every check. Fixture 12's
+counterexample used `DDD-7`, a shape nobody here writes, so the guard's own evidence tested the case least
+likely to occur.
+
+Widened to letters-then-digits with the hyphen optional. That admits false positives — `Python-3`,
+`COVID-19`, `Section-4` — and they are asserted in `tests/test_plain_language.py` rather than left to be
+found. The class is named *decision handle* and the pattern says *letters then digits*; those are not the
+same thing, and the gap is tolerable only because this check is build-time, where a false positive costs a
+rephrase and never a denial. **A runtime consumer must not reuse this pattern unexamined.**
+
+## The project holds only what was added to it
+
+A `projectV2` items query returns cards. An issue reaches the board only through an explicit
+`gh project item-add`, and `CLAUDE.md` records that this very board is **not linked to its repository** —
+so an issue nobody added is invisible to the query.
+
+Without a reconciliation call, a read whose stated purpose is saying what is there omits those issues in
+silence. That is the completeness failure the *Partial reads* rule already forbids, arriving structurally
+rather than through a dropped page — and it is worse than a dropped page, because nothing in the output
+looks incomplete. One extra `gh issue list` turns a silent omission into a reported line.
+
+## The ceiling and the never-drop rule collide, and the ceiling yields
+
+Both were written as absolutes. On a badly stuck board the blocked and in-flight sections alone exceed 200
+words, and then zero queued cards still breaches — so there is no satisfying both, and a skill stating two
+absolutes with no tiebreak has no answer at the one point where the answer matters.
+
+**The ceiling yields and the run says so.** Dropping a blocked card is the worse failure, because the
+blocked section is the one a reader trusts most; a silent overrun is worse than either.
+
+Fixture 01 asserted the unsatisfiable corner before this was settled: its `situation` said the mandatory
+sections consumed *most* of the budget while its stated purpose said they *exceeded* it, and its guard
+demanded both a 200-word output and every mandatory card. No run could have passed it. The two cases are
+now fixtures 01 and 13, and the driver checks each is sized for its own.

@@ -22,6 +22,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 SKILLS = sorted(ROOT.glob("skills/*/SKILL.md"))
 COMMANDS = sorted(ROOT.glob("commands/*.md"))
+AGENTS = sorted(ROOT.glob("agents/*.md"))
 
 
 def _frontmatter(path: Path):
@@ -36,6 +37,7 @@ def test_the_corpus_is_not_empty():
     """A glob that silently matched nothing would make every test below vacuously true."""
     assert len(SKILLS) >= 20, f"expected the repo's skills, found {len(SKILLS)}"
     assert len(COMMANDS) >= 20, f"expected the repo's commands, found {len(COMMANDS)}"
+    assert len(AGENTS) >= 5, f"expected the repo's agents, found {len(AGENTS)}"
 
 
 @pytest.mark.parametrize("path", SKILLS, ids=lambda p: p.parent.name)
@@ -65,3 +67,19 @@ def test_the_check_fails_on_the_input_that_motivated_it():
     broken = "---\nname: x\ndescription: A bounded check: what is blocked\n---\n"
     with pytest.raises(yaml.YAMLError):
         yaml.safe_load(broken.split("---", 2)[1])
+
+
+@pytest.mark.parametrize("path", AGENTS, ids=lambda p: p.stem)
+def test_agent_frontmatter_parses(path):
+    """Agents carry the same frontmatter and the same parse hazard. Omitted from the first version of
+    this guard, which is the gap-in-a-gap-check shape — added once it was pointed out rather than
+    waiting for an agent to break the way a skill already did."""
+    fm = _frontmatter(path)
+    assert isinstance(fm, dict), f"{path} frontmatter is not a mapping"
+    assert fm.get("name"), f"{path} declares no name"
+    assert fm.get("description"), f"{path} declares no description"
+
+
+@pytest.mark.parametrize("path", AGENTS, ids=lambda p: p.stem)
+def test_agent_name_matches_its_filename(path):
+    assert _frontmatter(path)["name"] == path.stem

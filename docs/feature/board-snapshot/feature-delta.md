@@ -339,10 +339,13 @@ rather than left to be discovered.
 ### The precursor answered its own hypothesis, and the answer was yes
 
 [D10] risked being decoration: separating the word ceiling from the vocabulary list might have left a
-counter so thin the extraction cost more than a copy. It did not, and the reason is `permit`. The hook
-forbids `#N` for a measured reason and the board read must print it — so the surfaces share the ceiling
-and genuinely diverge on vocabulary, which is exactly the split [D11] predicted and the only thing that
-makes one module serve both.
+counter so thin the extraction cost more than a copy. It did not — the lists genuinely diverge, **in both
+directions**. The board list drops the card-number class and adds a bare-handle class the hook omits on
+purpose.
+
+*Slice 03 refuted the reason first recorded here — "the board read must print it". No hand-composed
+description used `#N`. The divergence above is what the split actually rests on, and it is the direction
+the measurement never touched.*
 
 **Behaviour is unchanged and measured, not asserted:** the hook's suite drives it as a subprocess and
 reported 127 passed, 1 skipped before and after. KPI-5 met. KPI-4 met at **three** call sites — the hook,
@@ -368,3 +371,55 @@ driver checks it: prose in a fixture must be paired with a `must_not`, and no fi
 The driver also checks each counterexample does what it claims. The over-length one genuinely exceeds 100
 words. The reworded-title one deliberately **does not** — if it also breached the bound, a length check
 would appear to cover a failure that has nothing to do with length.
+
+## Outcome — slice 03, 2026-09-08
+
+### KPI-3 is zero, and zero is the finding
+
+| | |
+|---|---|
+| Source bodies carrying a forbidden class | **10 of 12** |
+| Composed descriptions carrying one | **0 of 12** |
+| Longest description | 53 words, against a 100 bound |
+
+Measured against the twelve descriptions composed by hand earlier the same day — the only real sample
+this feature has, and one written before any check existed.
+
+**The hypothesis fired.** The brief said: *if the check fires zero times on real input, it is a mention
+rather than a mechanism.* It fires zero times. The hazard upstream is real — ten of twelve bodies carry
+one — and the compression removed it every time, so the check has never caught anything.
+
+**Kept, and demoted rather than dressed up.** The skill now states in as many words that this is a
+regression guard on a failure nobody has observed, not a fix for one. Presenting it as a mechanism would
+be the defect `CLAUDE.md` records twice, committed inside the slice whose own hypothesis named it. Dropping
+it would discard a property that currently holds and that nothing else would notice losing.
+
+**What would change the verdict:** one composed description, in any session, carrying a handle. Until
+then the number stays in the skill.
+
+### The measurement inverted [D11]'s reasoning and strengthened the decision
+
+[D11] permitted card numbers because *a board read must print them*. **The sample says it need not** —
+not one description used `#N`, because the number has its own column, and both cross-references were
+written longhand as *card 20* and *card 4*.
+
+The real argument is better. **Forbidding `#34` does not remove the identifier; it renames it to
+`card 34`,** which no pattern catches and which means the same thing. A rule that changes the spelling and
+not the content is theatre. `tests/` now asserts that gap directly — the laundered form is checked to
+escape *both* identifier lists, so the escape is recorded rather than assumed, and the prose `must_not` is
+the only thing covering it.
+
+The decision stands, on a reason nobody had written down and the original had wrong.
+
+### What is deliberately not enforced
+
+Wave labels, slice ids and other project-local vocabulary. Jargon here, ordinary domain words elsewhere,
+and machine-forbidding them would refuse a stranger's board for a local reason — the failure the
+decision-request hook's header already documents. Named in the skill as prose guidance, with the fact that
+nothing checks them stated beside it.
+
+### Still not exercised
+
+No slice of this feature has been run as a command. The plugin cache is at 0.86.0 and the three slices
+shipped at 0.87.0, 0.88.0 and 0.89.0. Every claim here is about composed prose, fixtures and two forge
+calls proven by hand — not about a `/phil:board-snapshot` invocation, which has never happened.

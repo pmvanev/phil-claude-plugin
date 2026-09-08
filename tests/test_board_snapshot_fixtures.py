@@ -30,7 +30,7 @@ FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
 # Per SKILL.md's `## Decision outcomes`.
 TERMINAL = {"SNAPSHOT-RENDERED", "SNAPSHOT-CLIPPED", "SNAPSHOT-PARTIAL"}
-REPORT_LINES = {"DRIFT", "UNCOLUMNED", "INFLATION", "READ-ONLY"}
+REPORT_LINES = {"DRIFT", "UNCOLUMNED", "OFF-BOARD", "INFLATION", "READ-ONLY"}
 
 CEILING = 200
 PER_ROW_BOUND = 100
@@ -43,7 +43,7 @@ _pl_spec.loader.exec_module(plain_language)
 
 
 def test_fixtures_exist():
-    assert len(FIXTURES) >= 7, f"expected the seven slice-01 fixtures, found {len(FIXTURES)}"
+    assert len(FIXTURES) >= 12, f"expected the twelve fixtures of slices 01-03, found {len(FIXTURES)}"
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
@@ -89,7 +89,7 @@ def test_every_fixture_forbids_something(manifest):
 
 
 def test_every_live_outcome_has_a_fixture():
-    """No disclosed gaps at slice 01. Any uncovered outcome here is an oversight, not a known limit."""
+    """No disclosed gaps. Any uncovered outcome is an oversight, not a known limit."""
     covered = {json.loads(m.read_text())["expected_decision"][0] for m in FIXTURES}
     assert TERMINAL - covered == set(), f"uncovered terminal outcomes: {TERMINAL - covered}"
 
@@ -113,12 +113,42 @@ def test_the_ceiling_fixture_actually_breaches_the_ceiling():
     )
 
 
-def test_the_clipping_fixture_is_the_only_one_expecting_a_clip():
-    """Clipping is the ceiling firing. A second fixture expecting it would mean the ceiling is being
-    hit by boards that were never built to breach it, which is a sizing bug in the fixtures."""
-    clipping = [json.loads(m.read_text())["fixture_id"] for m in FIXTURES
-                if json.loads(m.read_text())["expected_decision"] == ["SNAPSHOT-CLIPPED"]]
-    assert clipping == ["BSNAP-SELFTEST-01"], f"unexpected clipping fixtures: {clipping}"
+def test_exactly_the_two_boards_built_to_breach_the_ceiling_expect_a_clip():
+    """Clipping is the ceiling firing, and exactly two fixtures are sized to make it fire.
+
+    `01` is the ordinary clip: the mandatory sections fit, the queued section gives ground, the ceiling
+    holds. `13` is the collision: the mandatory sections alone exceed the ceiling, so the queued section
+    empties AND the ceiling yields. The two have opposite answers, which is why one fixture cannot
+    carry both — fixture 01's prose claimed to and was unsatisfiable until it was corrected.
+
+    A third would mean the ceiling is being hit by a board never built to breach it: a sizing bug."""
+    clipping = sorted(json.loads(m.read_text())["fixture_id"] for m in FIXTURES
+                      if json.loads(m.read_text())["expected_decision"] == ["SNAPSHOT-CLIPPED"])
+    assert clipping == ["BSNAP-SELFTEST-01", "BSNAP-SELFTEST-13"], \
+        f"unexpected clipping fixtures: {clipping}"
+
+
+def test_the_collision_fixture_really_cannot_fit_its_mandatory_sections():
+    """Fixture 13 only tests the tiebreak if its blocked and in-flight cards genuinely cannot fit. Sized
+    too small it becomes a second copy of fixture 01, passing while testing nothing — the same trap
+    `test_the_ceiling_fixture_actually_breaches_the_ceiling` was written for one case over."""
+    b = json.loads((SKILL_DIR / "self-test" / "13-mandatory-sections-exceed-the-ceiling"
+                    / "manifest.json").read_text())["board"]
+    mandatory = b["blocked"] + b["in_flight"]
+    assert mandatory * 12 > CEILING, (
+        f"{mandatory} mandatory cards at a conservative 12 words each is {mandatory * 12}, "
+        f"which fits inside {CEILING} — this fixture cannot force the collision")
+
+
+def test_the_ordinary_clip_fixture_can_still_fit_its_mandatory_sections():
+    """The inverse, and the assertion fixture 01's prose used to get wrong. If its mandatory sections
+    also overflowed, it would be fixture 13 and the ordinary clip would have no coverage at all."""
+    b = json.loads((SKILL_DIR / "self-test" / "01-ceiling-breached"
+                    / "manifest.json").read_text())["board"]
+    mandatory = b["blocked"] + b["in_flight"]
+    assert mandatory * 12 <= CEILING, (
+        f"{mandatory} mandatory cards do not fit in {CEILING} words — fixture 01 is asserting the "
+        f"collision case, which is fixture 13's, and its guard is then unsatisfiable")
 
 
 # --- slice 02: the two modes bound themselves differently, so the fixtures are held to different rules ---
@@ -178,3 +208,55 @@ def test_counterexamples_are_forbidden_outputs_and_never_candidate_prose():
             assert d.get("must_not"), f"{d['fixture_id']} supplies prose and forbids nothing"
         assert "candidates" not in d and "suggestions" not in d, \
             f"{d['fixture_id']} supplies candidate prose, which turns composition into selection"
+
+
+# --- slice 03: the vocabulary half ---
+
+BOARD_FORBIDDEN = plain_language.BOARD_DESCRIPTION_FORBIDDEN
+
+
+def test_the_board_list_permits_card_numbers_and_forbids_the_rest():
+    """The divergence the extraction exists for, in both directions: this list drops the card-number
+    class and adds `a bare decision handle`, which the hook omits on purpose. The older reason — that a
+    board read must print `#N` — was measured and refuted; see references/why-these-rules.md."""
+    names = [n for n, _ in BOARD_FORBIDDEN]
+    assert "an issue or ticket number" not in names
+    assert set(names) == {"a file path", "a bracketed identifier", "a bare decision handle"}
+
+
+def test_the_handle_counterexample_carries_every_forbidden_class():
+    """A counterexample missing a class would let that class ship unguarded behind a green run."""
+    m = SKILL_DIR / "self-test" / "12-handles-in-a-description" / "manifest.json"
+    text = json.loads(m.read_text())["counterexamples"]["leans_on_handles"]
+    found = plain_language.identifiers_in(text, forbid=BOARD_FORBIDDEN)
+    assert found == ["a bare decision handle", "a bracketed identifier", "a file path"]
+
+
+def test_the_permitted_example_really_passes():
+    """`#38` must survive. If the board list rejected it the surface could not do its job."""
+    m = SKILL_DIR / "self-test" / "12-handles-in-a-description" / "manifest.json"
+    text = json.loads(m.read_text())["permitted_examples"]["card_number_kept"]
+    assert plain_language.identifiers_in(text, forbid=BOARD_FORBIDDEN) == []
+
+
+def test_the_laundered_number_escapes_the_pattern_which_is_why_it_needs_a_rule():
+    """`card 38` means exactly what `#38` means and matches nothing. This test asserts the GAP: the
+    laundering failure is unreachable by pattern, so it is prose in the skill and a `must_not` here.
+
+    It also records why permitting card numbers is right. Forbidding `#38` would not remove the
+    identifier — it would rename it to something no check can see."""
+    m = SKILL_DIR / "self-test" / "12-handles-in-a-description" / "manifest.json"
+    d = json.loads(m.read_text())
+    laundered = d["counterexamples"]["laundered_number"]
+    assert plain_language.identifiers_in(laundered, forbid=BOARD_FORBIDDEN) == []
+    assert plain_language.identifiers_in(laundered) == [], "not caught by the strict list either"
+    assert any("longhand" in c for c in d["must_not"]), "the gap must be forbidden in prose"
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_permitted_examples_are_paired_with_counterexamples(manifest):
+    """A fixture showing what IS allowed, with nothing forbidden beside it, is candidate prose by
+    another name — the run can copy it. Paired with its failing twin, it is a contrast."""
+    d = json.loads(manifest.read_text())
+    if "permitted_examples" in d:
+        assert d.get("counterexamples"), f"{d['fixture_id']} shows a pass with no matching failure"

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-13",
+  "mode": "standing",
+  "situation": "A badly stuck board: 14 blocked cards, each with a `## Chain` line naming what it waits on, and 5 in flight. Those 19 mandatory cards exceed 200 words on their own, before a single queued card is considered.",
+  "board": { "blocked": 14, "in_flight": 5, "queued": 12, "n_requested": 5 },
+  "expected_decision": ["SNAPSHOT-CLIPPED"],
+  "expected_report_lines": ["READ-ONLY"],
+  "expected_guard": "every blocked and in-flight card is printed; the queued section is empty and states that all 12 were withheld; the run states that the mandatory sections alone exceeded the ceiling, so the output breaches it",
+  "must_not": [
+    "drop a blocked card to get under the ceiling — the blocked section is the one a reader trusts most",
+    "drop an in-flight card for the same reason",
+    "breach the ceiling in silence, which is worse than either the breach or the drop",
+    "report SNAPSHOT-RENDERED, which would claim the queued section was simply short",
+    "summarise the blocked cards into a count to fit — a count is the dropped card wearing a number"
+  ],
+  "why_this_fixture_exists": "The ceiling and the never-drop rule are both absolutes and they collide here. A skill stating two absolutes with no tiebreak has no answer at the one point where the answer matters, and fixture 01 cannot cover it — the ordinary clip and the unsatisfiable clip have opposite outcomes, so a single fixture asserting both would be unpassable."
+}

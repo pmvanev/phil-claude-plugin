@@ -82,9 +82,14 @@ import sys
 # An import failure is left to raise. A hook that quietly stopped enforcing would report compliance by
 # staying silent, which is the defect this repo keeps recording; a visible hook error is the better
 # failure, and a missing file in an install is a packaging bug that should be loud.
-sys.path.insert(0, os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "scripts"))
+PLUGIN_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(PLUGIN_ROOT, "scripts"))
 from plain_language import DEFAULT_CEILING, identifiers_in, words  # noqa: E402
+
+# Claude Code interpolates `${CLAUDE_PLUGIN_ROOT}` in a hook's COMMAND, never in its stdout. A denial
+# reason printing the literal variable hands the reader a path they cannot open, at the one moment they
+# are being told to go and read it.
+STANDARD = os.path.join(PLUGIN_ROOT, "skills", "shared", "decision-request.md")
 
 QUESTION_CEILING = DEFAULT_CEILING
 
@@ -168,8 +173,7 @@ def main():
             "hookEventName": "PreToolUse",
             "permissionDecision": "deny",
             "permissionDecisionReason": (
-                "This decision request breaches the standard at "
-                "${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md:\n"
+                f"This decision request breaches the standard at {STANDARD}:\n"
                 + "\n".join(f"  - {b}" for b in found)
                 + "\n\nRewrite the request and ask again. Context, evidence and identifiers belong "
                   "above the question, separated by a marker line, where they are not counted."

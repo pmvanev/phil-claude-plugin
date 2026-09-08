@@ -4,10 +4,19 @@
 and no identifiers from a system the reader may not share. `hooks/decision-request/check-ask.py` enforces
 both on every `AskUserQuestion` call.
 
-**Three surfaces now want that rule and they do not want the same half.** An interrupting ask must not
-print `#34` — measured, and the reason the vocabulary check exists. A board read *must* print `#34`,
-because the number is how a reader finds the card. Welding the ceiling to one fixed vocabulary list made
-the rule unusable by the second surface without copying it, and a fourth copy was the alternative.
+**Three surfaces now want that rule and they do not want the same list.** Welding the ceiling to one
+fixed vocabulary made it unusable by the second surface without copying it, and a fourth copy was the
+alternative.
+
+**The lists diverge in both directions, which is the part that survived measurement.** The board list
+*drops* the card-number class and *adds* `BARE_HANDLE`, which the hook omits deliberately — denying a
+stranger's question over their own vocabulary would refuse real work for a local reason, while a composed
+summary leaning on a handle has passed the reader a lookup instead of an answer.
+
+*An earlier version of this header argued the split was needed because "a board read must print `#34`".
+Measured 2026-09-08 and refuted: no hand-composed description used `#N` at all, because the number has
+its own column. The permission survives for a better reason — forbidding `#34` renames it to `card 34`
+rather than removing it — and the split survives on the divergence above, not on that claim.*
 
 So the two halves are independent here:
 
@@ -43,6 +52,42 @@ PORTABLE_IDENTIFIERS = [
 
 # A URL is a link the reader can open, not an identifier from a system they may not share.
 URL = re.compile(r"https?://\S+")
+
+# A handle of the shape LETTERS then DIGITS, hyphen optional — `ADR-013`, `DDD-7`, `Mandate-12`, and
+# bare `D11`, which is how this repo actually writes its decision numbers. Opaque in any project: it
+# names a record the reader has to resolve before the sentence containing it means anything.
+#
+# **The first draft required two or more letters and missed `D11` entirely** — the one spelling the repo
+# uses, so the guard was blind to its own house style while its fixture tested shapes nobody writes.
+#
+# Known false positives, recorded rather than discovered: `Python-3`, `COVID-19`, `Section-4`, `K8`. The
+# class name says *decision handle* and the pattern says *letters then digits*, which are not the same
+# thing. Tolerated because this check is build-time only and a false positive costs a rephrase, never a
+# denial. A runtime consumer would need a narrower pattern, and should not reuse this one unexamined.
+BARE_HANDLE = ("a bare decision handle", re.compile(r"\b[A-Z][A-Za-z]*-?\d+\b"))
+
+# What a COMPOSED board description may not contain. Built from the portable classes rather than
+# beside them, so the two lists cannot drift apart.
+#
+# Two differences from the hook's list, and both are the point of taking `forbid` as an argument:
+#
+#   - **A card number is permitted**, by being absent here — because forbidding it would only launder
+#     it. A composer told not to write `#34` writes `card 34`, which no pattern catches and which means
+#     the same thing. An interrupting question is different: there the reader was doing something else a
+#     second ago, and the number is noise rather than a column heading.
+#   - **A bare handle is added.** The hook omits it deliberately — denying a stranger's question over
+#     their own vocabulary would refuse real work for a local reason. A composed *summary* is different:
+#     the text is this tool's, not the filer's, and a summary that leans on a handle has passed the
+#     reader a lookup instead of an answer.
+#
+# What is NOT here, recorded so the absence is not read as an oversight: wave labels, slice ids and
+# other project-local vocabulary. They are jargon in this repo and are ordinary domain words elsewhere,
+# so machine-forbidding them would repeat the failure the hook's header already documents. The skill
+# names them as prose guidance instead, and says they are unenforced.
+BOARD_DESCRIPTION_FORBIDDEN = [
+    (name, pattern) for name, pattern in PORTABLE_IDENTIFIERS
+    if name != "an issue or ticket number"
+] + [BARE_HANDLE]
 
 
 def words(text) -> int:
