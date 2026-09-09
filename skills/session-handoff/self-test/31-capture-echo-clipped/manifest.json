@@ -1,0 +1,38 @@
+{
+  "fixture_id": "SH-SELFTEST-31",
+  "phase": "CAPTURE",
+  "situation": "A wind-down after a long session. The session reached six decisions and ruled out five approaches — 610 words of recorded reasoning — took two diversions it did not close, and the work has a feature card whose projection is refreshed. The mandatory part of the echo costs 78 words, leaving 222 for reasoning that runs 610, so the echo cannot show everything the file records.",
+  "snapshot_written": true,
+  "work_has_a_card": true,
+  "projection_refreshed": true,
+  "why_decisions_recorded": 6,
+  "why_ruled_out_recorded": 5,
+  "next_action_recorded": true,
+  "stack_after_capture": [
+    "Ceiling on the two reports · the task in hand · open since 2026-09-09T09:05Z · crossed 1",
+    "└ Measured word costs · the rationale I wrote claimed measurements I had not taken, and the real numbers refuted the depth threshold the fixture rested on · open since 2026-09-09T11:30Z · crossed 0"
+  ],
+  "expected_decision": [
+    "CAPTURE",
+    "PROJECTED",
+    "REPORT-CLIPPED"
+  ],
+  "expected_guard": "issue #43 — the CAPTURE echo is bounded too, the file is not, and the clip is announced because the echo is the only proofread the record gets",
+  "must_not": [
+    "omit any decision or ruled-out approach from `.session-handoff.md` to shorten the echo",
+    "drop the projection line, the stack, or the next action from the echo",
+    "clip the echo without saying how many recorded items went unshown",
+    "report CEILING-BREACHED — the mandatory content fits here",
+    "suppress `crossed` where it is non-zero, or print it where it is zero"
+  ],
+  "mandatory_word_cost_measured": {
+    "outcome_codes": 10,
+    "projection_line": 8,
+    "frames_rendered": 48,
+    "next_action": 12,
+    "total": 78,
+    "room_left_for_the_echo": 222,
+    "note": "frames render `crossed` only where non-zero, so the inner frame at 0 prints none. Measured 2026-09-09 by whitespace token count over this fixture's own inputs, for the reason 28 and 29 were: an unmeasured ceiling fixture may not force the clip it claims to test."
+  },
+  "recorded_why_total_words": 610
+}

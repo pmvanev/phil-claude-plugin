@@ -13,7 +13,7 @@ outcome**:
 `CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `PROJECTED` · `PROJECTION-UNREFRESHED` · `RESUME-CURRENT` ·
 `RESUME-STALE` · `RECONSTRUCT` · `ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER` · `BOARD-AGREES` ·
 `BOARD-DIVERGES` · `BOARD-UNREADABLE` · `REPORT-CLAIM-CONFLICT` · `PUSHED` · `POPPED` · `SHOWN` ·
-`STACK-EMPTY` · `STACK-UNKNOWN` · `WRITE-REFUSED`
+`STACK-EMPTY` · `STACK-UNKNOWN` · `WRITE-REFUSED` · `REPORT-CLIPPED` · `CEILING-BREACHED`
 
 This suite is the acceptance + regression gate for `skills/session-handoff/SKILL.md`. Format and intent mirror `skills/edd/self-test/`, `skills/work/self-test/`, and
 `skills/refactor-tests/self-test/` — this plugin's established way to test a skill.
@@ -116,6 +116,8 @@ reaches against `expected.md`.
 | `13`–`15` | the board divergence check, #24 — **must pass** |
 | `16`–`20` | the live stack, #29 slice 01 — **must pass** |
 | `21`–`26` | pop and staleness, #29 slice 02 — **must pass** |
+| `27` | the prose standard stops at the stack, #40 — **must pass** |
+| `28`–`31` | the 300-word report ceiling, #43 — **must pass** |
 
 A failure in `09`–`10` is genuine RED (the behaviour is unimplemented and will stay so), not BROKEN
 (the harness is faulty) — the fixtures are prose inputs with no imports to resolve. Do not "fix" them
@@ -126,8 +128,11 @@ so a read-back over them reports `BOARD-UNREADABLE`. That is a pass, not a failu
 the spine should do — a fixture that says nothing about a board is a situation with no board in it.
 Recorded here because the alternative failure modes are both silent: a driver that scores the extra
 outcome as a mismatch retires six working fixtures, and one that ignores the triple on any fixture not
-expecting it stops testing the triple at all. `05` and `12` are `RECONSTRUCT`, which reports no triple
-by design. **`16`–`23` and `25`–`26` are stack-path fixtures and report no capture or read-back outcome at all** —
+expecting it stops testing the triple at all. `05`, `12` and `30` are `RECONSTRUCT`, which reports no
+triple by design — `30` joined them on 2026-09-09 and is named here because this note's own failure mode
+applies to it: a driver expecting a board triple scores it a mismatch. `31` is a CAPTURE fixture and
+reports `CAPTURE` + `PROJECTED` + `REPORT-CLIPPED`, so it reports no freshness verdict and no triple
+either. **`16`–`23` and `25`–`26` are stack-path fixtures and report no capture or read-back outcome at all** —
 no freshness verdict, no board triple. A driver expecting one of those on every fixture scores all nine
 as failures. `24` is a WIND-DOWN fixture and reports `CAPTURE` normally.
 
@@ -152,3 +157,59 @@ it nowhere fails the second.
 Its pair is `skills/groom-issues/self-test/44-you-wrote-field-not-tightened/`, which is the same rule at
 an elicited field — the discriminator is per field, not per surface.
 
+
+## Fixtures 28–31 — the report ceiling, and the standard's reach
+
+Added 2026-09-09 (issue #43). The two report paths gained a **300-word ceiling** and the prose standard
+was extended from the snapshot's payload to the sentences the paths **print**. Three fixtures, and the
+first two resolve opposite ways on purpose.
+
+`28-ceiling-clips-the-why` — the tree matches, the board agrees, the stack is three deep, and the
+recorded why does not fit. **Only the why gives ground**: every frame, the verdict, the board line, the
+next action and the owner route are printed in full, and `REPORT-CLIPPED` carries a count taken against
+the whole recorded population rather than against what was shown. It also pins the asymmetry that makes
+the bound safe at all — **the snapshot is never edited to shorten the report**.
+
+`29-mandatory-content-breaches` — a stale, quantified verdict under a diverging board with a four-deep
+stack whose frame reasons are the human's own words, a paragraph each. Measured at **352 words of
+mandatory content**, 255 of it frames: they are reproduced byte-for-byte and never tightened, so they are
+the one piece of mandatory content that is both unbounded and unshortenable by this skill. **Depth is not
+the mechanism** — eleven terse frames would be needed to breach, and this fixture's first draft pinned
+depth on estimated word costs that measurement refuted. Withholding every decision buys nothing:
+**print all of it, breach, and say the ceiling gave way** (`CEILING-BREACHED`). A run reporting
+`REPORT-CLIPPED` here has clipped for appearance while breaching anyway, and one reporting nothing has
+hidden the breach entirely. The pair is the whole rule: the why yields until there is no ground left,
+and then the bound yields rather than the record. A mechanism that passes 28 by dropping frames, or 29
+by withholding a decision, fails both.
+
+`30-report-prose-composed` — a `RECONSTRUCT` read-back, sitting far inside 300 words so the ceiling does
+nothing and the standard still applies in full. The composed half is the *reconstructed, not recorded*
+label, the sentence saying the why is unavailable, and the `ASK-OWNER` sentence; the quoted half is a
+card title read from the board, passed through verbatim. **No candidate prose is supplied** — composing
+is the act under test, and offering two wordings would test selection, which is passed by picking the
+shorter string.
+
+**Its pair is `27-stack-frame-not-tightened`, one layer in.** 27 draws the composed/quoted line inside
+the snapshot; 30 draws it inside the report. Same discriminator — *who composed the words, never where
+they sit* — applied at two surfaces, and terminal-only output exempts neither.
+
+`31-capture-echo-clipped` — the ceiling on the **capture** path, added after review pointed out that
+28, 29 and 30 were all read-backs, so the bound was pinned on one of the two paths it governs.
+`CAPTURE` + `PROJECTED` + `REPORT-CLIPPED`. **It carries the asymmetry the other three cannot**: on
+read-back the withheld words are one file read away and the reader is often not their author, while on
+capture the author is present and the echo is the only proofread the record ever gets. Clipping there
+costs a check that read-back clipping does not, the echo is bounded anyway, and `REPORT-CLIPPED`'s count
+is the whole mitigation. Its severest gate failure is a capture that records *less* than the session
+reached in order to shorten its own echo — the file is uncounted, and no later read-back could detect it.
+
+**Fixture 30's quoted half was repointed during the same review.** It first quoted a card title, which
+`RECONSTRUCT` never prints — the board triple is the only place one appears, and that path reports no
+board outcome. So its central gate was unreachable and the fixture would have passed by emitting nothing
+to judge. It now quotes a commit subject `git log` returns, which the path genuinely reads. **A fixture
+whose quoted material the path never emits tests nothing**, and it reads exactly like one that works.
+
+`tests/test_session_handoff_fixtures.py` drives the structural half: the two ceiling outcomes are
+mutually exclusive, a stack fixture may expect neither (the stack path carries no ceiling, decided
+2026-09-09), a ceiling fixture must state its `must_not`, and both branches must exist so the ceiling
+cannot pass by always resolving the same way. **Whether a run reached the right decision is still
+model-driven**, as everywhere else in this suite.

@@ -1,5 +1,5 @@
 ---
-description: "Put this session down: record what a fresh session cannot derive — the decisions reached, the approaches ruled out, the work stack you were diverted through, and the intended next action — stamped with a tree fingerprint so the next session can tell whether it is still current. Refreshes the feature card's projection so a teammate can read it too. Writes nothing if the session advanced nothing."
+description: "Put this session down: record what a fresh session cannot derive — the decisions reached, the approaches ruled out, the work stack you were diverted through, and the intended next action — stamped with a tree fingerprint so the next session can tell whether it is still current. Refreshes the feature card's projection so a teammate can read it too. Reports back in about 300 words of plain English, saying so when it withheld any, while the snapshot itself is written whole and never clipped. Writes nothing if the session advanced nothing."
 argument-hint: "[\"<what you were doing>\"]"
 mutates: true
 allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion, Skill
@@ -13,3 +13,9 @@ from the card.** A forge failure leaves the snapshot standing and is reported as
 `PROJECTION-UNREFRESHED`; it is not a failed capture. Where the work has a card and neither `PROJECTED`
 nor `PROJECTION-UNREFRESHED` is reported, the run skipped the card silently — the snapshot is written
 either way, so nothing else would show it.
+
+**The report is bounded at 300 words; the snapshot is not.** The echo of what was recorded gives ground
+first — clipped, it reports `REPORT-CLIPPED` and states how many decisions were withheld against the
+whole recorded population. Nothing is ever left out of `.session-handoff.md` to shorten this output. The
+ceiling, what may never give ground, and why `/phil:stack` is exempt are the skill's, under *The report
+has a ceiling; the record never does*.

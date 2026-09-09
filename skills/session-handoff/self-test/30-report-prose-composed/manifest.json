@@ -1,0 +1,31 @@
+{
+  "fixture_id": "SH-SELFTEST-30",
+  "phase": "BOOTSTRAP",
+  "situation": "A read-back with no snapshot at all, so the position is reconstructed from the artifacts and git. The reconstruction must be labelled as reconstructed rather than recorded, must say the why is unavailable because nothing derives it, and must name an owner it cannot determine. Every sentence in that output is composed by this session; the card title it quotes from the board is not.",
+  "snapshot_exists": false,
+  "reconstructed_from": [
+    "docs/feature/ artifacts, via phil:nwave-slice-status",
+    "git branch and recent commits"
+  ],
+  "wave_label_present": false,
+  "expected_decision": [
+    "RECONSTRUCT",
+    "ASK-OWNER"
+  ],
+  "expected_guard": "issue #43 — the prose standard reaches the sentences the report composes, and stops at the ones it quotes",
+  "candidate_prose_supplied": false,
+  "must_not": [
+    "tighten, reword or summarise the quoted commit subject",
+    "present the reconstruction as a recorded briefing, or omit that the why is unavailable",
+    "begin the work, or invoke the owning command",
+    "report a board outcome — there is no recorded next action to compare",
+    "treat terminal-only output as exempt from the standard",
+    "print a card title — nothing on this path reads one"
+  ],
+  "quoted_material_available_on_this_path": {
+    "recent_commit_subject_verbatim": "wave-summary: slice 02 ships the slice mode, and a git verb on the read-only allowlist writes; 0.92.0 -> 0.93.0",
+    "branch": "main",
+    "wave_from_artifacts": "DELIVER",
+    "note": "RECONSTRUCT derives position from phil:nwave-slice-status and git. No card title is printed on this path -- the board triple is the only place one appears, and RECONSTRUCT reports no board outcome."
+  }
+}

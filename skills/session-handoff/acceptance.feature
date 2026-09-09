@@ -19,7 +19,8 @@
 #   CAPTURE · NO-OP · REFUSE-DERIVABLE · PROJECTED · PROJECTION-UNREFRESHED · RESUME-CURRENT ·
 #   RESUME-STALE · RECONSTRUCT · ROUTE · ROUTE-LIVE-WINS · ASK-OWNER ·
 #   BOARD-AGREES · BOARD-DIVERGES · BOARD-UNREADABLE · REPORT-CLAIM-CONFLICT ·
-#   PUSHED · POPPED · SHOWN · STACK-EMPTY · STACK-UNKNOWN · WRITE-REFUSED
+#   PUSHED · POPPED · SHOWN · STACK-EMPTY · STACK-UNKNOWN · WRITE-REFUSED ·
+#   REPORT-CLIPPED · CEILING-BREACHED
 #
 # REPORT-CLAIM-CONFLICT belongs to slice 03, tested and deliberately not built; it is kept here because
 # its scenario is kept. Every other outcome above is live.
@@ -233,3 +234,46 @@ Feature: Carry work across the session boundary without a re-briefing
     Then it refuses and records nothing, exactly as opening one would
     But given the diversion being closed had outlived two wind-downs
     Then closing it says so, because otherwise the drift leaves with it
+
+  @issue-43 @happy @fixture(28-ceiling-clips-the-why) @contract-shape:pure-function
+  Scenario: A briefing too long to read withholds the reasoning and never the warnings
+    Given a resume point recording far more reasoning than a short briefing can carry
+    And a session that was diverted three times
+    When the work is picked back up
+    Then the freshness verdict, the agreement about what is in flight, every diversion,
+      the intended next action and the owning command are all present
+    And only the recorded reasoning is held back
+    And the briefing says how much it held back, out of how much was recorded
+    And it says where the rest is kept
+    And nothing is removed from the record itself to shorten the briefing
+
+  @issue-43 @error @fixture(29-mandatory-content-breaches) @contract-shape:pure-function
+  Scenario: When the warnings alone are too long, the briefing runs long and says so
+    Given a resume point that is out of date against the work
+    And two records of what is in flight that disagree
+    And four diversions whose reasons are the person's own words, at length
+    When the work is picked back up
+    Then the briefing runs past its usual length rather than dropping any of them
+    And it says plainly that it did
+    And no diversion is shortened to make room, because those words are not its to edit
+    And it never claims to have held something back, since holding back would have saved nothing
+
+  @issue-43 @happy @fixture(30-report-prose-composed) @contract-shape:pure-function
+  Scenario: The house standard governs what the briefing writes and not what it quotes
+    Given no resume point exists, so the position must be worked out from the artifacts
+    When the briefing is presented
+    Then it says plainly that it was worked out rather than recorded
+    And it says the reasoning is unavailable because nothing can derive it
+    And it says the owning command is unknown, and asks
+    And every sentence it composed itself reads clearly on the first pass
+    And anything it quoted from elsewhere is passed through untouched
+
+  @issue-43 @happy @fixture(31-capture-echo-clipped) @contract-shape:pure-function
+  Scenario: Putting a session down records everything and reads back only what fits
+    Given a long session reaching six decisions, ruling out five approaches
+      and leaving two diversions open
+    When it is put down
+    Then the record holds every one of them
+    And what is read back holds as many as a short summary can carry
+    And it says how many it did not show, out of how many were recorded
+    And nothing is left out of the record so that the summary would fit

@@ -13,6 +13,25 @@ firing", and nothing was asserting the fixtures themselves.
 The sibling `tests/test_board_setup_fixtures.py` is the template, and it earned its keep by catching
 outcome drift when a later slice retired an outcome three fixtures still referenced. Same risk here:
 `SKILL.md`'s outcome vocabulary has grown three times.
+
+**On fixtures that assert word counts — a sanctioned exception, recorded so it does not read as a leak.**
+`CLAUDE.md` documents two opposite rulings on this. `tests/test_issue_board_fixtures.py` forbids a
+fixture asserting a word count, because that suite's subject is *composition* and a word ceiling in a
+fixture would pin one of `rules/writing.md`'s eleven principles of composition and license the other ten to fail.
+`tests/test_board_snapshot_fixtures.py` deliberately breaks that rule and says why in its own docstring:
+that skill's ceilings are a **specified feature**, so counting is the subject rather than a proxy for it.
+
+Since 2026-09-09 (issue #43) this suite is in board-snapshot's position, not issue-board's. Fixtures 28,
+29 and 31 carry measured word costs because a 300-word ceiling is a specified feature of `/phil:handoff`
+and `/phil:resume`, and a ceiling fixture whose arithmetic does not force the clip is not testing the
+ceiling — both 28 and 29 shipped estimates that measurement refuted, on the same day, which is why the
+numbers are now inputs in the manifests rather than adjectives in the prose.
+
+**Fixture 30 is deliberately on the other side of that line** and asserts no count: its subject is
+whether the standard reaches the report's composed sentences, and it sits far inside the ceiling
+precisely so length cannot be mistaken for the thing under test. `candidate_prose_supplied: false`
+is explicit there for the same reason — supplying two wordings would test selection, which is passed
+by picking the shorter string.
 """
 
 import json
@@ -61,7 +80,12 @@ UNBUILT = {"REPORT-CLAIM-CONFLICT"}
 # is why this is its own set rather than an addition to CAPTURE_TERMINAL.
 STACK = {"PUSHED", "POPPED", "SHOWN", "STACK-EMPTY", "STACK-UNKNOWN", "WRITE-REFUSED"}
 
-LIVE = CAPTURE_TERMINAL | FRESHNESS | OWNER | BOARD | ADDITIONAL | STACK
+# The 300-word report ceiling (issue #43, 2026-09-09). Additional outcomes on the two report paths, and
+# **mutually exclusive** — see `test_a_run_never_both_clips_and_breaches`. A stack run reports neither,
+# because `/phil:stack` deliberately carries no ceiling.
+REPORT_SHAPE = {"REPORT-CLIPPED", "CEILING-BREACHED"}
+
+LIVE = CAPTURE_TERMINAL | FRESHNESS | OWNER | BOARD | ADDITIONAL | STACK | REPORT_SHAPE
 KNOWN = LIVE | UNBUILT
 
 
@@ -233,6 +257,123 @@ def test_crossed_zero_means_pushed_since_the_last_capture(manifest: Path):
                     f"{label}: frame opened {m.group(1)} reads `crossed 0` under `captured: {captured}` "
                     f"— it was in the file at that capture, so it cannot be 0"
                 )
+
+
+# ---------------------------------------------------------------------------
+# The report ceiling (issue #43, 2026-09-09)
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_run_never_both_clips_and_breaches(manifest):
+    """`REPORT-CLIPPED` and `CEILING-BREACHED` are mutually exclusive, per SKILL.md.
+
+    Where the mandatory content alone exceeds 300 words, withholding a decision saves nothing and the
+    ceiling gives way — so a run reporting both has clipped for appearance while breaching anyway. The
+    pair is the one place a fixture could assert compliance and a breach at the same time and look
+    reasonable doing it."""
+    outcomes = set(_outcomes(manifest)) & REPORT_SHAPE
+    assert len(outcomes) <= 1, (
+        f"{manifest.parent.name} expects {sorted(outcomes)} — clipping and breaching cannot both hold"
+    )
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_stack_run_reports_no_ceiling_outcome(manifest):
+    """`/phil:stack` has no ceiling, decided 2026-09-09 and recorded in SKILL.md. A stack fixture
+    expecting one asserts a regime the skill refuses to have — which is exactly how somebody would
+    "fix" the family's two prose regimes without noticing the decision."""
+    outcomes = set(_outcomes(manifest))
+    if outcomes & STACK:
+        assert not (outcomes & REPORT_SHAPE), (
+            f"{manifest.parent.name} is a stack fixture expecting {sorted(outcomes & REPORT_SHAPE)}; "
+            f"the stack path carries no ceiling"
+        )
+
+
+CEILING_FIXTURES = _subset(lambda m: bool(set(_outcomes(m)) & REPORT_SHAPE), "report-ceiling")
+
+
+@pytest.mark.parametrize("manifest", CEILING_FIXTURES, ids=lambda p: p.parent.name)
+def test_a_ceiling_fixture_states_what_may_not_be_dropped(manifest):
+    """The ceiling's whole risk is that a report drops a safety property to fit. A fixture pinning the
+    ceiling without a `must_not` pins the bound and not the refusals, and the bound alone is satisfied
+    by printing less of anything."""
+    d = json.loads(manifest.read_text())
+    assert d.get("must_not"), f"{manifest.parent.name} pins the ceiling but states no must_not"
+
+
+CEILING = 300  # SKILL.md, "The report has a ceiling; the record never does"
+
+
+def _why_total(d):
+    """The recorded why's length, under either key the corpus uses."""
+    for k in ("snapshot_why_total_words", "recorded_why_total_words"):
+        if k in d:
+            return d[k]
+    return None
+
+
+@pytest.mark.parametrize("manifest", CEILING_FIXTURES, ids=lambda p: p.parent.name)
+def test_a_ceiling_fixture_measures_its_own_budget(manifest):
+    """A ceiling fixture must carry measured word costs whose parts sum to their stated total.
+
+    **Added because the defect shipped three times in one day.** Fixtures 28, 29 and 31 each first
+    asserted a budget from estimated word costs, and measurement refuted all three — 29's six-deep
+    stack was said to breach at ~280 when the real figure was 217, and 28's "room for about two
+    decisions" would in fact have fitted all eleven recorded items. An adjective in the prose cannot be
+    checked; a number in the manifest can."""
+    d = json.loads(manifest.read_text())
+    m = d.get("mandatory_word_cost_measured")
+    assert m, f"{manifest.parent.name} pins the ceiling but measures no word cost"
+    parts = {k: v for k, v in m.items() if isinstance(v, int) and k not in ("total", "room_left_for_the_echo", "room_left_for_the_why")}
+    assert sum(parts.values()) == m["total"], (
+        f"{manifest.parent.name}: measured parts {parts} sum to {sum(parts.values())}, "
+        f"not the stated total {m['total']}"
+    )
+    for room_key in ("room_left_for_the_echo", "room_left_for_the_why"):
+        if room_key in m:
+            assert m[room_key] == CEILING - m["total"], (
+                f"{manifest.parent.name}: {room_key} is {m[room_key]}, "
+                f"but {CEILING} - {m['total']} is {CEILING - m['total']}"
+            )
+
+
+@pytest.mark.parametrize("manifest", CEILING_FIXTURES, ids=lambda p: p.parent.name)
+def test_a_ceiling_fixture_arithmetic_forces_its_own_outcome(manifest):
+    """The situation must actually produce the outcome the fixture expects.
+
+    A `REPORT-CLIPPED` fixture whose why fits in the remaining budget clips nothing, and a
+    `CEILING-BREACHED` fixture whose mandatory content fits under the bound breaches nothing. Either
+    way the fixture passes by doing the opposite of what it tests, and reads exactly like one that
+    works — the unreachable-state defect the register records about fixture 26."""
+    d = json.loads(manifest.read_text())
+    outcomes = set(_outcomes(manifest))
+    total = d["mandatory_word_cost_measured"]["total"]
+
+    if "CEILING-BREACHED" in outcomes:
+        assert total > CEILING, (
+            f"{manifest.parent.name} expects CEILING-BREACHED but its mandatory content is {total} "
+            f"words, which fits under {CEILING} — nothing would breach"
+        )
+    if "REPORT-CLIPPED" in outcomes:
+        assert total <= CEILING, (
+            f"{manifest.parent.name} expects REPORT-CLIPPED but its mandatory content alone is "
+            f"{total} words — that is a breach, not a clip"
+        )
+        why = _why_total(d)
+        assert why is not None, f"{manifest.parent.name} expects a clip but states no recorded why length"
+        assert why > CEILING - total, (
+            f"{manifest.parent.name} expects REPORT-CLIPPED but its {why}-word why fits in the "
+            f"{CEILING - total} words left — nothing would be withheld"
+        )
+
+
+def test_both_ceiling_branches_have_a_fixture():
+    """Issue #43's done-when, asserted the way #24's was: the clip case and the breach case both exist,
+    so the ceiling cannot pass by always resolving the same way."""
+    expected = {o for m in FIXTURES for o in _outcomes(m)}
+    assert "REPORT-CLIPPED" in expected, "no fixture covers the clipped report"
+    assert "CEILING-BREACHED" in expected, "no fixture covers the mandatory content breaching"
 
 
 @pytest.mark.parametrize("label", sorted(SUBSETS))

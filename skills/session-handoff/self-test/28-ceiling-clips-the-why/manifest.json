@@ -1,0 +1,52 @@
+{
+  "fixture_id": "SH-SELFTEST-28",
+  "phase": "BOOTSTRAP",
+  "situation": "A read-back over a snapshot whose why runs long: seven decisions and four ruled-out approaches, each stating what was decided and what it rules out, 520 words between them. The tree matches the fingerprint, the board agrees about what is in flight, and the stack is three deep with its innermost frame pushed after the last capture. The mandatory content costs 105 words, so the why cannot be printed whole and the ceiling must decide what to withhold.",
+  "snapshot_exists": true,
+  "snapshot_header": {
+    "captured": "2026-09-09T14:20Z",
+    "commit": "9c41ab7",
+    "dirty": "no",
+    "owner": "/nw-execute"
+  },
+  "head_commit": "9c41ab7",
+  "working_tree_dirty": false,
+  "working_tree_dirty_at_capture": false,
+  "snapshot_why_decisions": 7,
+  "snapshot_why_ruled_out": 4,
+  "snapshot_next_action": "recorded",
+  "snapshot_stack": [
+    "Slice 02 step table · the task in hand · open since 2026-09-07T09:15Z · crossed 2",
+    "└ Roster glyph collision · the step table could not render until the two vocabularies were separated · open since 2026-09-08T11:40Z · crossed 1",
+    "  └ Fixture driver · the collision needed a gate before the fix could be trusted · open since 2026-09-09T15:05Z · crossed 0"
+  ],
+  "board_state": {
+    "readable": true,
+    "in_progress": "#43",
+    "recorded_next_action_names": "#43"
+  },
+  "expected_decision": [
+    "RESUME-CURRENT",
+    "BOARD-AGREES",
+    "ROUTE",
+    "REPORT-CLIPPED"
+  ],
+  "expected_guard": "issue #43 — the ceiling clips the why and nothing else, states the withheld count against the whole recorded population, and leaves the snapshot untouched",
+  "must_not": [
+    "withhold a stack frame, the verdict, the board line, the next action or the owner route to fit",
+    "clip without a count, or count the withheld against what was printed",
+    "rewrite or shorten `.session-handoff.md`",
+    "report CEILING-BREACHED alongside REPORT-CLIPPED"
+  ],
+  "snapshot_why_total_words": 520,
+  "mandatory_word_cost_measured": {
+    "verdict_current": 10,
+    "board_agrees": 15,
+    "frames_rendered": 59,
+    "next_action": 12,
+    "owner_route": 9,
+    "total": 105,
+    "room_left_for_the_why": 195,
+    "note": "frames render `crossed` only where non-zero, so the innermost frame at 0 prints none. Measured 2026-09-09 by whitespace token count over this fixture's own inputs -- the estimate this fixture first carried (`room for about two decisions`) was refuted the same way fixture 29's was: at the worked example's 16-word average all eleven items would have fitted."
+  }
+}

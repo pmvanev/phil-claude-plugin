@@ -142,3 +142,89 @@ The header rule says `push` and `pop` reproduce the header byte-for-byte. The on
 that *creates* the snapshot: there is no prior header to reproduce, so `commit:` and `dirty:` are stamped
 from the tree and `captured:` is written `never`. Without the exception the never-do list reads as
 forbidding the behaviour fixture 20 pins.
+
+## Why the ceiling binds the report and not the record
+
+`phil:board-snapshot` set the precedent — 200 words over the whole rendered output, fewer rows when the
+bound would break, a stated withheld count, and a breach announced rather than a card dropped in
+silence. This skill copies that shape and gets one thing that skill cannot have: **the withheld words
+are still on disk.**
+
+A snapshot clipped to fit a report is unrecoverable, and it is unrecoverable in the exact dimension the
+snapshot exists for. Everything else a reader wants — wave, slice, branch, file position — is derivable,
+which is why the never-do list refuses to record any of it. The decisions and the approaches ruled out
+are the residue that nothing derives. So the file is written whole and uncounted, and the report is a
+view over it. **That asymmetry is the whole licence for a word bound here**; without it a ceiling would
+be trading the payload for brevity, which is the exchange the standard's concision principle is most
+often misread as endorsing.
+
+It also decides which half gives ground. The verdict, the board outcome and the stack frames are each a
+line or two and each is a safety property — a stale snapshot followed confidently, a divergence nobody
+noticed, a diversion nobody remembers. The why is the only elastic section, and it is the one whose full
+text is a single file read away.
+
+## Why the collision case breaches instead of trimming
+
+**Measured 2026-09-09 against this skill's own worked examples**, counting whitespace-separated tokens:
+the quantified `STALE` verdict runs 22 words, the `BOARD-DIVERGES` block naming both sides 47, the
+recorded next action 12, a `ROUTE-LIVE-WINS` route 16, and a terse stack frame with its age, `crossed`
+and stale mark about 20. The fixed part of a worst-case read-back therefore costs about 97 words, and
+each terse frame adds twenty.
+
+**Depth alone is a poor route to a breach**: six frames reach 217, and eleven are needed to pass 300.
+This paragraph first carried the estimates 30, 60, 25 and 40, which put a six-deep stack over the bound
+on its own — measuring refuted that. Corrected rather than quietly kept, because a rationale nobody
+checks is this board's recurring defect, and an arithmetic one is checkable in a minute.
+
+**The real route is a frame's own words.** A frame's `what` and `why` are the human's arguments to
+`push`, reproduced byte-for-byte and never tightened — so among all the mandatory content they are the
+one part whose length is unbounded *and* unshortenable by this skill even in principle. Four frames
+carrying a paragraph of somebody's reasoning each will pass 300 words where four terse ones cost eighty.
+That is the shape fixture 29 supplies, and it is why the collision rule is written as a rule rather than
+as a depth threshold.
+
+At the point of breach, withholding every decision saves nothing, and the only remaining way under the
+bound is to drop a frame or a named side of a divergence — destroying a safety property to satisfy a
+display bound, and in the frame's case destroying the human's own words to save room. Hence: print all
+of it, say the ceiling gave way, and never report `REPORT-CLIPPED` alongside `CEILING-BREACHED`. A run
+claiming both has clipped for appearance while breaching anyway.
+
+## Why `/phil:stack` carries no ceiling
+
+Decided 2026-09-09, when the bound was put on the two report paths. A deep stack is the whole reason
+somebody runs `show`, and a limit there would drop frames from the one view built to display them all —
+the same failure as dropping a frame from a read-back, arrived at by policy instead of by accident.
+
+**The accepted cost, stated rather than discovered:** the same frames render under a bound inside a
+read-back and unbounded on their own, so the family carries two prose regimes on purpose. That
+inconsistency is visible and cheap; the alternative silently loses diversions. Recorded here because an
+unexplained gap in a regime invites someone to close it as tidiness, and this one is a decision.
+
+## Why the bound is 300 where the precedent is 200, and why a breach is not a decoration
+
+Both questions have one answer, and it is the difference between the two reports.
+
+`phil:board-snapshot` bounds an output **every section of which it may withhold**: when 200 words will
+not do, it prints fewer queued cards. Its mandatory sections can breach on a badly stuck board, which is
+why it has a collision rule at all, but the normal case always has give. This skill's report does not.
+The verdict, the board outcome, the frames, the next action and the owner route are all mandatory, and
+**a frame's length is the human's, not this skill's** — reproduced byte-for-byte and never tightened. So
+the floor here is set by somebody else's prose, and no amount of discipline moves it.
+
+At 200 the floor would clear the bound routinely: the measured fixed cost is 97 words before a single
+frame, and three terse frames reach 157. A bound that breaches on the ordinary case is exactly the
+failure *Why the stale threshold is two* names — **a mark that fires on the normal case is a decoration,
+and a decoration is what people stop reading.** 300 is chosen so the ordinary read-back fits with room
+for the why: four terse frames under a diverging board cost 177, leaving 123 words of decisions, and a
+three-deep stack over an agreeing board costs 125.
+
+**So the breach is rare by construction, and the arithmetic says which cases produce it.** Eleven terse
+frames, or a handful carrying a paragraph of the human's reasoning each — fixture 29's shape, measured
+at 352. Both are genuinely exceptional, and both are cases where the alternative is discarding a safety
+property or editing somebody's words. `CEILING-BREACHED` fires there and nowhere else, which is what
+keeps it an alarm.
+
+**What would refute this:** `CEILING-BREACHED` appearing on ordinary read-backs in practice. That would
+mean real stacks carry far wordier frames than the measurement assumed, and the answer would be to raise
+the bound rather than to start withholding frames — the floor is not negotiable, so the ceiling is the
+only part that can move. Recorded so the next person does not reach for the frames instead.

@@ -1,0 +1,54 @@
+{
+  "fixture_id": "SH-SELFTEST-29",
+  "phase": "BOOTSTRAP",
+  "situation": "A read-back where the mandatory content alone cannot fit. The recorded commit is six behind HEAD and the tree is dirty where it was clean, so the verdict must be quantified; the board names different work in flight, so both sides must be named; and the four-deep stack carries frames whose reasons are the human's own words, a paragraph each, reproduced byte-for-byte and not this skill's to tighten. Withholding every recorded decision still leaves the output past 300 words.",
+  "snapshot_exists": true,
+  "snapshot_header": {
+    "captured": "2026-09-08T22:10Z",
+    "commit": "4a91c02",
+    "dirty": "no",
+    "owner": "/nw-distill"
+  },
+  "head_commit": "e17bd55",
+  "commits_ahead": 6,
+  "working_tree_dirty": true,
+  "working_tree_dirty_at_capture": false,
+  "snapshot_why_decisions": 3,
+  "snapshot_next_action": "recorded",
+  "snapshot_stack": [
+    "Wave summary slice 02 · I want the slice mode to land before the stage mode ships, because the stage mode reads well over a finished wave and says almost nothing over one still in flight, which is the case I actually care about, and shipping them the other way round would let the weaker half set the shape of the output · open since 2026-09-02T08:30Z · crossed 3",
+    "└ Read-only allowlist · a git verb I had assumed was read-only accepts --output and will clobber an arbitrary absolute path outside the repo with nothing configured, so every mutates: false command holding a git verb asserts more than its grant delivers, and I have to choose between keeping the entries with the promise reworded and granting bare Bash instead · open since 2026-09-03T13:05Z · crossed 2",
+    "  └ Grant interpolation · I could not judge the allowlist entry without knowing what the grant expands to at load time, and the answer refuted the reason the rule was written rather than the rule itself, so the rule stays, its stated rationale had to be replaced, and the refuted sentences are now asserted absent so nobody re-derives them from the code · open since 2026-09-05T10:20Z · crossed 2",
+    "    └ Fixture register · the interpolation finding needed a gate that fails on it before I would trust a green run, and the register had to be contiguous before the driver would reach a new fixture at all, so the register came first · open since 2026-09-09T07:40Z · crossed 0"
+  ],
+  "board_state": {
+    "readable": true,
+    "in_progress": "#41",
+    "recorded_next_action_names": "#38",
+    "wave_label": "wave: deliver",
+    "parent_issue": 38
+  },
+  "expected_decision": [
+    "RESUME-STALE",
+    "BOARD-DIVERGES",
+    "ROUTE-LIVE-WINS",
+    "CEILING-BREACHED"
+  ],
+  "expected_guard": "issue #43 — where the mandatory content alone exceeds 300 words the ceiling yields out loud, and nothing is dropped to satisfy it",
+  "must_not": [
+    "drop a stack frame, a named side of the divergence, or the quantified distance to get under 300 words",
+    "breach in silence",
+    "report REPORT-CLIPPED, which would claim withholding bought something",
+    "resolve the divergence, or soften the stale verdict"
+  ],
+  "mandatory_word_cost_measured": {
+    "stale_verdict": 22,
+    "board_diverges": 47,
+    "next_action": 12,
+    "owner_live_wins": 16,
+    "frames_verbatim": 255,
+    "total": 352,
+    "note": "frames are the human's words, reproduced byte-for-byte; this skill may not tighten them to fit, which is what makes the mandatory content unbounded"
+  },
+  "note_on_route": "The recorded owner is /nw-distill and the live wave label implies /nw-execute -- a read-back resumes a step, never launches a wave -- so the route outcome is ROUTE-LIVE-WINS. Without the label there is nothing for the recorded owner to disagree with and a correct run reports ROUTE, which is the unreachable-state defect fixture 26 records."
+}

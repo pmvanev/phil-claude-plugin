@@ -1,11 +1,13 @@
 ---
 name: session-handoff
-description: Skill bundle for the phil:handoff, phil:resume and phil:stack commands — carries work across the session boundary and tracks where attention is inside one. Use when asked "where was I", "what was I doing before this", to push or record a diversion as it happens, to show the work stack mid-session, or to put a session down and pick it up. Records only what a fresh session cannot derive (the reasoning, the next action, the diversion stack), stamps a tree fingerprint, and projects a write-only copy onto the feature's card. On read-back it states a current/stale verdict, reports whether the board agrees about what is in flight — naming a divergence and never resolving it — then names the owning command without running it. Refuses to record derivable state, and never reads its own projection back.
+description: Skill bundle for the phil:handoff, phil:resume and phil:stack commands — carries work across the session boundary and tracks where attention is inside one. Use when asked "where was I", "what was I doing before this", to push or record a diversion as it happens, to show the work stack mid-session, or to put a session down and pick it up. Records only what a fresh session cannot derive (the reasoning, the next action, the diversion stack), stamps a tree fingerprint, and projects a write-only copy onto the feature's card. On read-back it states a current/stale verdict, reports whether the board agrees about what is in flight — naming a divergence and never resolving it — then names the owning command without running it. Both reports are held to about 300 words; the stack view is not. Refuses to record derivable state, and never reads its own projection back.
 ---
 
 # Session handoff — capture and resume
 
-Two commands over one spine. `/phil:handoff` puts a session down; `/phil:resume` picks the work up.
+Three commands over one spine. `/phil:handoff` puts a session down; `/phil:resume` picks the work
+up; `/phil:stack` tracks where attention sits inside one session. The first two report under a
+300-word ceiling and the third deliberately does not — see *The report has a ceiling*.
 
 The value is narrow and specific: **record only what a fresh session cannot work out for itself.**
 Everything else is derived at read-back from whatever already owns it. A snapshot that also records
@@ -155,6 +157,18 @@ the widest audience. Facts first, active voice, the emphatic word last. **Concis
 standard's eleven principles of composition and never a licence to drop a decision or a ruled-out
 approach**, because what a fresh session cannot derive is the whole reason the snapshot exists.
 
+**The standard reaches the REPORT, not only the snapshot.** The paragraph above governs what goes
+*into* the file. These are the sentences the paths **print**: the verdict and its distance, the wording
+of the three board outcomes and of a divergence's two named sides, the withheld-count clause, the clause
+labelling a briefing reconstructed rather than recorded, the `NO-OP` sentence saying nothing was
+recorded and why, and the refusal naming the frame it did not write.
+
+**Out, and passed through verbatim:** a frame's `what` and `why`, an `owner:` token, a commit hash, a
+timestamp, a card title read from the board, and every outcome code. **The discriminator is the one
+`${CLAUDE_PLUGIN_ROOT}/rules/writing.md` is applied by throughout this plugin — who composed the words,
+never where they sit.** Terminal-only output exempts nothing; an enumeration lags as the report grows,
+and the discriminator does not.
+
 **The STACK is excluded, and it is the sharpest case in the family.** A frame's `what` and `why` are the
 human's own arguments to `push`, and *the reason for a diversion exists only in the human's head at that
 moment* — so existing frames are reproduced **byte-for-byte** and a new frame records what the human
@@ -178,6 +192,53 @@ own root.
 
 Why regeneration is safe, why the guard is content rather than identity, and where `core.autocrlf` lands:
 `references/why-these-rules.md`.
+
+## The report has a ceiling; the record never does
+
+**300 words, counted over the whole rendered output of `/phil:handoff` and `/phil:resume`, including
+every report line and every outcome code.**
+
+**The ceiling binds the report and never the snapshot.** `.session-handoff.md` is written whole and
+uncounted. A run that trims the file to fit its own output has inverted this skill: clipping a report
+withholds a sentence a reader can fetch, and clipping the record destroys the one thing a fresh session
+cannot derive.
+
+**These never give ground, on either path:** the freshness verdict with its distance, the board outcome
+and both named sides of a divergence, every stack frame with its age, its `crossed` where non-zero and
+its `⚠ stale` mark, the next action, the owner route, and the projection line. Each is either a safety
+property or a single line, and a report that drops one has spent the ceiling on the wrong half.
+
+**Mandatory means the frame, not a fuller rendering of it.** `crossed` stays suppressed at zero exactly
+as *show* step 2 and step 5b specify — the ceiling never overrides a render rule, and reading it as a
+licence to print more would make the bound its own cause.
+
+**The why gives ground first, and CAPTURE's echo gives ground with it.** Print fewer decisions and
+ruled-out approaches, state how many were withheld, and name the file holding them all. **Count the
+withheld against the whole recorded population**, not against what was printed: a reader shown two
+decisions needs to know whether seven wait in the file or none do.
+
+**When the two rules collide, the ceiling yields and the run says so.** Print all the mandatory content,
+breach, and state that the mandatory content exceeded the ceiling. **Dropping a stack frame is the worse
+failure**, because a frame withheld to save words is a diversion nobody will remember — the loss this
+skill exists to prevent.
+
+**The two paths are not equally safe to clip, and the difference is stated rather than discovered.** On
+read-back the withheld words are one file read away and the reader is often not their author. On CAPTURE
+the author is present and the echo is the only proofread the record ever gets — step 10 exists so *a
+mistake is visible immediately* — so a clipped echo weakens the one check that catches a
+mis-recorded decision while the person who could fix it is still here. The echo is bounded anyway,
+because an unbounded one reintroduces the wall of text the ceiling exists to prevent; the mitigation is
+that `REPORT-CLIPPED` names the count, which tells the author there is something unread. **Accepted
+cost, not a solved problem.** Pinned by `self-test/31-capture-echo-clipped/`.
+
+**Never breach in silence and never clip in silence.**
+
+**`/phil:stack` has no ceiling, deliberately** — stated here so nobody supplies the missing regime as a
+tidiness fix. A read-back's own frames are mandatory content above, so the bound never reaches them
+either; only the why gives ground.
+
+Why the asymmetry makes a ceiling safe here, the arithmetic behind the collision case, and the accepted
+cost of two prose regimes: `references/why-these-rules.md`.
 
 ## CAPTURE — `/phil:handoff`
 
@@ -212,7 +273,9 @@ Why regeneration is safe, why the guard is content rather than identity, and whe
    action and the stack with their capture timestamp; it owns the block. **Never read the card back.** A
    forge failure is an un-refreshed projection, not a failed capture.
 10. **Report** `CAPTURE`, and echo what was recorded so a mistake is visible immediately. Say whether the
-   projection was refreshed, and where it was not.
+   projection was refreshed, and where it was not. **The echo obeys the 300-word ceiling and the file
+   does not** — where the echo is clipped, report `REPORT-CLIPPED` with the withheld count and say the
+   snapshot holds everything. A capture is never weakened to shorten its own echo.
 
 **Where no snapshot was ever projected, the card's stack section must render `unknown` — never empty.**
 An empty stack asserts *no diversions*, which is a claim; `unknown` asserts *nobody wrote it down*.
@@ -423,6 +486,13 @@ RESUME-CURRENT — tree matches the snapshot's fingerprint (7e63578, dirty).
 Show the recorded content clearly marked as historical. Do **not** present the recorded next action as
 the thing to do now; offer it as what was intended at the time, for the reader to judge.
 
+**This step is where the ceiling bites, and it is the only step that gives ground.** Everything above it
+is mandatory. Print the next action always; print as many decisions and ruled-out approaches as the
+remaining budget holds, then report `REPORT-CLIPPED` with the count withheld against the whole recorded
+population and name the snapshot as their home. A reader who needs the discarded alternatives can open
+the file; a reader who never learns they exist will re-propose them, which is the defect the why exists
+to prevent.
+
 ### 7. Naming the owner
 
 After the verdict and the content, name the command that owns the work — on every read-back path,
@@ -483,7 +553,7 @@ Report the outcome by name, every run — one per phase:
 `CAPTURE` · `NO-OP` · `REFUSE-DERIVABLE` · `PROJECTED` · `PROJECTION-UNREFRESHED` · `RESUME-CURRENT` ·
 `RESUME-STALE` · `RECONSTRUCT` · `ROUTE` · `ROUTE-LIVE-WINS` · `ASK-OWNER` · `BOARD-AGREES` ·
 `BOARD-DIVERGES` · `BOARD-UNREADABLE` · `PUSHED` · `POPPED` · `SHOWN` · `STACK-EMPTY` ·
-`STACK-UNKNOWN` · `WRITE-REFUSED`
+`STACK-UNKNOWN` · `WRITE-REFUSED` · `REPORT-CLIPPED` · `CEILING-BREACHED`
 
 A capture run reports exactly one of `CAPTURE` or `NO-OP`. `REFUSE-DERIVABLE` is **additional**:
 report it alongside `CAPTURE` whenever derivable state was offered and left out, naming what was left
@@ -507,6 +577,20 @@ be untouched while the work has moved on. Report both, and let them disagree.
 **A stack run reports exactly one** of `PUSHED`, `POPPED`, `SHOWN`, `STACK-EMPTY`, `STACK-UNKNOWN` or
 `WRITE-REFUSED`, and none of the capture or read-back outcomes — the three paths do not interleave.
 `WRITE-REFUSED` is terminal: nothing written, nothing retried.
+
+**`REPORT-CLIPPED` and `CEILING-BREACHED` are additional, mutually exclusive, and belong to the two
+report paths only.** Report one alongside the path's own outcomes whenever the 300-word ceiling bore on
+the output:
+
+- **`REPORT-CLIPPED`** — the ceiling withheld decisions or echoed content. **It must state how many were
+  withheld against the whole recorded population**; clipping without the count is the terminal outcome
+  overstating what it carried.
+- **`CEILING-BREACHED`** — the mandatory content alone exceeded 300 words, so nothing was withheld and
+  the ceiling gave way. It names which sections were mandatory.
+
+**Never both.** Where the mandatory content alone breaches, withholding a decision saves nothing and
+clipping did no work, so a run claiming both has clipped for appearance while breaching anyway. A stack
+run reports neither: it has no ceiling.
 
 ## What this skill must never do
 
@@ -555,6 +639,17 @@ rule below stands without reading either.
 - **Write to the board during read-back.** The projection at CAPTURE step 9 is the only sanctioned board
   write in this skill.
 - **Report `BOARD-AGREES` for a board that could not be read**, or report nothing at all.
+
+**The ceiling**
+
+- **Breach it in silence, or clip in silence.** Both make the terminal outcome overstate the report.
+- **Clip the snapshot to fit the report.** The file is uncounted; the ceiling is a display bound.
+- **Drop a verdict, a board outcome, a named side of a divergence, a stack frame, the next action, the
+  owner route or the projection line to stay under it.** The why gives ground; these do not. Dropping
+  the projection line reproduces the silent card-skip that `PROJECTED` / `PROJECTION-UNREFRESHED` exist
+  to make visible.
+- **Report `REPORT-CLIPPED` without the withheld count**, or report it together with `CEILING-BREACHED`.
+- **Apply a ceiling to `/phil:stack`.** Its absence is a decision, recorded above.
 
 **Read-back**
 
