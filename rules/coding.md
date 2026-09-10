@@ -73,6 +73,7 @@ This is **empirical design**—structural decisions based on evidence, not specu
 - Provide context: what operation failed and why
 - Don't return null—return empty collections or throw
 - Don't pass null—forbid it
+- A lookup that can miss returns a collection, not a nullable single value. Absence is then the empty case every caller already handles, not a branch each caller must remember
 
 #### 8. Resource Management (RAII / SBRM)
 Use **RAII** (Resource Acquisition Is Initialization) or equivalently **SBRM** (Scope-Bound Resource Management) to tie resource lifetimes to object lifetimes. Resources are acquired in constructors and released in destructors—or in Python, using context managers.
@@ -136,6 +137,10 @@ Separate testable logic from hard-to-test infrastructure. Push complexity into o
 When a class is hard to test, extract the logic into a testable collaborator.
 
 **The DAO Pattern** is a humble object for data access. The DAO handles SQL, connections, and transactions—mechanics that resist testing. Business logic calls an abstract interface; tests substitute a fake. Keep DAOs thin: fetch, store, delete. If a DAO contains conditionals or calculations, extract that logic into a testable service.
+
+**Fetch in batches.** A gateway's read takes a collection of keys and returns a collection of rows—one call for N keys, never N calls for N keys. The same holds for a remote API: one request for N ids. Fetching inside a loop is the defect this prevents, and it multiplies round trips by the size of the input, so the cost appears only under production data.
+
+Prefer the plural signature even where one row is the expected answer: it returns the empty collection rather than null (§7), and a caller that later needs two keys changes nothing. **This is the one place the standard prefers the general form to the observed one.** Empirical design says solve for what is there, and the exception holds only because the two costs are unequal—widening a singular read later rewrites every call site, while writing the plural read today costs a collection literal.
 
 #### 16. CUPID Properties
 Joyful code exhibits these qualities:
