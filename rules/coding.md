@@ -87,7 +87,7 @@ Use **RAII** (Resource Acquisition Is Initialization) or equivalently **SBRM** (
 | **Self-validating** | Pass or fail, no manual inspection |
 | **Timely** | Written before or with the code |
 
-The Testing Pyramid: many unit tests, fewer integration tests, fewest end-to-end tests.
+Which tier a behaviour belongs in, and what the whole suite may cost, are owned by `test-architecture.md`.
 
 #### 10. Simple Design
 Kent Beck's four rules, in priority order:

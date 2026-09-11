@@ -48,17 +48,13 @@ Model software around the business domain. Use ubiquitous language—the same te
 
 ### Test Types
 
-| Type | Scope | Speed | Purpose |
-|------|-------|-------|---------|
-| **Unit tests** | Single function or class | Milliseconds | Verify isolated logic |
-| **Integration tests** | Multiple components together | Seconds | Verify collaboration |
-| **Acceptance tests** | Entire system from user perspective | Seconds to minutes | Verify requirements |
+Three tiers, named here and allocated elsewhere:
 
-#### The Testing Pyramid
-Many unit tests at the base; fewer integration tests in the middle; fewest acceptance tests at the top. Invert the pyramid and your build slows to a crawl.
+- **Unit tests** — isolated logic, in milliseconds
+- **Integration tests** — component collaboration, in seconds
+- **Acceptance tests** — the whole system from the user's perspective, in seconds to minutes
 
-#### The Testing Trophy (Alternative Model)
-Prioritize sociable unit tests (~80%) over solitary unit tests. Sociable tests use real dependencies where possible; solitary tests mock everything. Testing behavior with real collaborators catches integration issues earlier.
+**Which tier a given behaviour belongs in is decided by `test-architecture.md`**, which owns the allocation rule, the boundary test, the settlement of the pyramid against the trophy, and the speed budget a whole suite must meet. Go there before choosing a tier or diagnosing a slow suite. The rest of this file assumes the tier is already chosen.
 
 ---
 

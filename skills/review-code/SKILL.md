@@ -16,6 +16,13 @@ above rather than restate them — BSSN owns the four-word breakdown and the eco
 the empirical spine and the two measures. Read them when a finding needs that vocabulary, not on every
 run.
 
+**Where a finding is about discipline rather than about code**, also read
+`${CLAUDE_PLUGIN_ROOT}/rules/clean-craftsmanship.md`. It owns Martin's standards and ethics, not his
+disciplines — the techniques stay in the four rules above. Reach for it when the defect is a knowingly
+shipped bug, a module frozen because changing it frightens the team, a subsystem only one person can
+work on, or a suite that reports coverage while supporting no change. **Its oath is a charter, not a
+review criterion**; cite the standards against a diff and leave the promises alone.
+
 **Language idioms.** For each file, also load the matching language rules file and check against it: `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `${CLAUDE_PLUGIN_ROOT}/rules/python.md` (`.py`), `${CLAUDE_PLUGIN_ROOT}/rules/typescript.md` (`.ts/.tsx`), `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (`.tsx/.jsx`). A `.tsx` file is checked against both TypeScript and React rules. These files use path-scoped frontmatter, so only load the ones whose paths match the file under review.
 
 ## Parse the Argument
@@ -92,6 +99,21 @@ For each file, check against the coding guide. Look for these categories of viol
 - Tests coupled to implementation rather than behavior
 - Flaky test patterns (non-determinism, shared state)
 - Excessive mocking
+
+**Tier allocation.** Where the change under review adds or moves a test, check it against
+`${CLAUDE_PLUGIN_ROOT}/rules/test-architecture.md` and name the boundary it crosses. Three findings
+come straight off that rule and none of them is visible from the bullets above:
+
+- **A test doubling a collaborator inside its own boundary** — be sociable inside a boundary. Flag
+  the double, not the test.
+- **A test crossing a boundary the behaviour did not need** — a database, a clock, or the network in
+  a test of a calculation. The fix is re-allocation, not optimization.
+- **A third-party dependency with no boundary test** — nothing in the suite exercises the library
+  itself, so an upgrade that changes its behaviour breaks production rather than a test.
+
+**Do not flag a ratio.** That rule states no percentages on purpose; a distribution is a diagnosis,
+never a score. Suite runtime is out of scope here too — this command reads a diff, and a budget is a
+claim about a whole suite.
 
 ### Priority 7 — Language Idioms
 Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1.

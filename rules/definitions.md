@@ -69,8 +69,9 @@ Terms and acronyms used in the development guides.
 | **Acceptance Test** | Tests system from user perspective. Verifies requirements. |
 | **Sociable Unit Test** | Unit test that uses real collaborators where possible. Tests behavior with real dependencies. |
 | **Solitary Unit Test** | Unit test that mocks all dependencies. Tests in complete isolation. |
-| **Testing Pyramid** | Many unit tests, fewer integration tests, fewest acceptance tests. |
-| **Testing Trophy** | Alternative model prioritizing sociable unit tests (~80%) over solitary tests. |
+| **Testing Pyramid** | A claim about cost: tests crossing more boundaries cost more, so fewer are affordable. Settled against the Trophy in `test-architecture.md`. |
+| **Testing Trophy** | A claim about coupling: tests that double their own collaborators verify structure, not behavior. Settled against the Pyramid in `test-architecture.md`. |
+| **Boundary Test** | A test exercising a third-party dependency directly, to learn how it really behaves and to catch a change on upgrade. Also called a learning test. |
 | **Flaky Test** | Non-deterministic test that sometimes passes, sometimes fails. Destroys pipeline trust. |
 
 ---
