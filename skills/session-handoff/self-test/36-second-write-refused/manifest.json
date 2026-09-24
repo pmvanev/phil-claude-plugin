@@ -1,0 +1,22 @@
+{
+  "fixture_id": "SH-SELFTEST-36",
+  "phase": "CAPTURE",
+  "situation": "A capture writes its snapshot at step 9 with the why, the next action and the two exchanges before the handoff. The work has no card. Before step 12's second write, another session rewrites the file, so its hash no longer matches the one step 9 wrote.",
+  "session_advanced_work": true,
+  "work_has_a_card": false,
+  "exchanges_written_at_step_9": 2,
+  "hash_after_step_9": "a1b2c3d",
+  "hash_before_step_12": "9f8e7d6",
+  "expected_decision": [
+    "CAPTURE",
+    "WRITE-REFUSED"
+  ],
+  "expected_guard": "a refused second write is reported beside CAPTURE, says what step 9 wrote and that the file changed beneath it, and never claims to know what the file now holds",
+  "must_not": [
+    "retry the second write",
+    "merge the handoff's exchange into the other session's file",
+    "claim the step-9 payload still stands on disk — the file is another writer's now",
+    "report what the file now holds as though this session knew",
+    "print the counting line as though the handoff's exchange were recorded"
+  ]
+}

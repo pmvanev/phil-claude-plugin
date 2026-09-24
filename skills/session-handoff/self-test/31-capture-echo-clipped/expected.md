@@ -8,7 +8,7 @@ the ceiling was pinned on only one of the two paths it governs.
 ## The asymmetry this fixture exists to hold
 
 On read-back the withheld words are one file read away and the reader is often not their author. **On
-capture the author is present, and the echo is the only proofread the record ever gets** — step 10 says
+capture the author is present, and the echo is the only proofread the record ever gets** — step 11 says
 it exists so *a mistake is visible immediately*. Clipping it therefore costs something read-back
 clipping does not: a mis-recorded decision can slip past while the one person who could correct it is
 still in the chair.
@@ -29,10 +29,10 @@ recorded as one.
   three decisions and five ruled-out approaches withheld* — and naming `.session-handoff.md` as their
   home. The exact split is not pinned; the basis of the count is.
 
-**The budget, measured rather than assumed.** The mandatory part of the echo costs 78 words — the
+**The budget, measured rather than assumed.** The mandatory part of the echo costs 84 words — the
 outcome codes (10), the projection line (8), the two rendered frames
-(48) and the next action (12) — leaving 222 for reasoning that runs
-610. Measured for the reason fixtures 28 and 29 were: both first shipped estimated costs that
+(48), the next action (12) and the line counting the recorded exchanges (6) — leaving 216 for reasoning
+that runs 610. Re-measured 2026-09-24, when the exchanges line joined the mandatory content. Measured for the reason fixtures 28 and 29 were: both first shipped estimated costs that
 measurement refuted, and **a ceiling fixture whose arithmetic does not force the clip is not testing the
 ceiling.**
 

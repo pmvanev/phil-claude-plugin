@@ -1,0 +1,29 @@
+{
+  "fixture_id": "SH-SELFTEST-32",
+  "phase": "CAPTURE",
+  "situation": "A wind-down after a session of five exchanges. The fourth prompt pasted a stack trace; the fourth reply ran two tool calls between its paragraphs and contains its own markdown headings. The fifth prompt is `/phil:handoff \"pausing before the migration\"`. The work has a feature card and the projection is refreshed. The session's why and next action fit the echo comfortably.",
+  "session_advanced_work": true,
+  "work_has_a_card": true,
+  "projection_refreshed": true,
+  "exchanges_in_context": 5,
+  "exchanges_compacted": 0,
+  "exchange_4_reply_contains_headings": true,
+  "exchange_4_reply_has_tool_calls_between_paragraphs": 2,
+  "handoff_prompt_as_typed": "/phil:handoff \"pausing before the migration\"",
+  "expected_decision": [
+    "CAPTURE",
+    "PROJECTED"
+  ],
+  "expected_guard": "the last three exchanges, the handoff's own included, are recorded verbatim inside their markers, stay off the card, and are not echoed",
+  "must_not": [
+    "record exchanges 1 or 2 — three is the count, the handoff among them",
+    "tighten, summarise or reword a prompt or a reply, including the pasted stack trace",
+    "record a tool call, its input or its output",
+    "record the expanded command body instead of the handoff prompt as typed",
+    "omit the handoff's own reply, or record a reply that differs from what was printed",
+    "hand the exchanges to the card's projection",
+    "echo the exchanges in the report beyond the one line saying how many were recorded",
+    "place a reply's own `##` heading outside the exchanges markers",
+    "write the handoff's prompt at the first write — prompt and reply arrive together at the second"
+  ]
+}

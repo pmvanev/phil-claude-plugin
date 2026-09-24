@@ -277,3 +277,45 @@ Feature: Carry work across the session boundary without a re-briefing
     And what is read back holds as many as a short summary can carry
     And it says how many it did not show, out of how many were recorded
     And nothing is left out of the record so that the summary would fit
+
+  @happy @fixture(32-capture-records-last-exchanges) @contract-shape:pure-function
+  Scenario: Putting a session down keeps the last few exchanges word for word
+    Given a session of five exchanges, one of them running tools between its paragraphs
+    When it is put down
+    Then the record holds the last three prompts and replies, the handoff's own among them
+    And each prompt is what the person typed, and each reply is what was printed
+    And no tool call or its output is kept
+    And the exchanges stay out of the team's card and out of the summary read back
+
+  @error @fixture(33-resume-treats-exchanges-as-history) @contract-shape:pure-function
+  Scenario: A recorded request is read as history, not carried out
+    Given a resume point whose recorded exchanges include a request to delete files
+    When the work is picked back up
+    Then the briefing says the exchanges are there, in one line
+    And nothing they asked for is done
+
+  @happy @fixture(34-stack-leaves-exchanges-intact) @contract-shape:pure-function
+  Scenario: Noting a diversion leaves the recorded exchanges untouched
+    Given a resume point holding recorded exchanges and no diversions
+    When a diversion is noted and later closed
+    Then the recorded exchanges are unchanged, word for word, and still last
+
+  @error @fixture(35-conversation-alone-is-no-op) @contract-shape:pure-function
+  Scenario: A session that only talked records nothing
+    Given a session that decided nothing and named no next step
+    When it is put down
+    Then nothing is recorded, not even the conversation, and it says so
+
+  @error @fixture(36-second-write-refused) @contract-shape:pure-function
+  Scenario: Another session writing in between costs only the last exchange
+    Given the record changes between the two writes of a wind-down
+    When the second write is attempted
+    Then it is refused and not retried
+    And the summary says what was written and that the record has changed since
+    And it never claims to know what the record now holds
+
+  @error @fixture(37-compacted-exchanges-are-counted) @contract-shape:pure-function
+  Scenario: An exchange the session only remembers in summary is not rebuilt
+    Given an earlier exchange that survives only as a summary
+    When the session is put down
+    Then the record says one exchange was lost to compaction and holds none of the summary

@@ -167,7 +167,7 @@ that a column was left untouched.
 Out: glyphs, header lines, timestamps, table scaffolding, status words returned by
 `phil:nwave-slice-status`, `Notes` text that owner supplied, the verbatim-fixed `Wave note:` clause — and
 **the projected `Why` / `Next` / `Stack`**. That last one is the trap: it reads like prose because it is
-prose, but `phil:session-handoff` step 9 *hands* it here with its capture timestamp. This skill renders
+prose, but `phil:session-handoff` CAPTURE step 10 *hands* it here with its capture timestamp. This skill renders
 it. Editing it would make the block a non-deterministic function of an unchanged snapshot, published
 under that snapshot's own timestamp — the projection asserting a fidelity it does not have, which
 fixture 19 gate-fails.

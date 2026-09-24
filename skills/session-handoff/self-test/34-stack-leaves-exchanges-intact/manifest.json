@@ -1,0 +1,44 @@
+{
+  "fixture_id": "SH-SELFTEST-34",
+  "phase": "STACK",
+  "situation": "A capture wrote a snapshot with a why, a next action, no stack, and three recorded exchanges last in the file; the third reply carries its own `## Findings` heading. Run A pushes the first diversion onto it. Run B pops that frame again.",
+  "run_a": {
+    "verb": "push",
+    "snapshot_present": true,
+    "snapshot_header": {
+      "captured": "2026-09-24T16:10Z",
+      "commit": "5c1e0aa",
+      "dirty": "no"
+    },
+    "snapshot_stack": [],
+    "exchanges_recorded": 3,
+    "push_args": [
+      "The flaky driver",
+      "fixture 32 cannot be driven until it stops timing out"
+    ]
+  },
+  "run_b": {
+    "verb": "pop",
+    "snapshot_present": true,
+    "snapshot_header": {
+      "captured": "2026-09-24T16:10Z",
+      "commit": "5c1e0aa",
+      "dirty": "no"
+    },
+    "snapshot_stack": [
+      "1. The flaky driver · fixture 32 cannot be driven until it stops timing out · open since 2026-09-24T16:20Z · crossed 0"
+    ],
+    "exchanges_recorded": 3
+  },
+  "expected_decision": [
+    "PUSHED",
+    "POPPED"
+  ],
+  "expected_guard": "push and pop regenerate the whole file yet leave the exchanges region byte-identical, and a created `## Stack` goes before the opening marker",
+  "must_not": [
+    "append `## Stack` after the closing exchanges marker",
+    "alter, reorder or drop any byte between the exchanges markers",
+    "read the reply's `## Findings` heading as a section of the snapshot",
+    "re-stamp the header"
+  ]
+}

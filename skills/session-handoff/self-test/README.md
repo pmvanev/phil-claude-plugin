@@ -54,6 +54,12 @@ them.
 | `24-capture-carries-the-stack-forward/` | a wind-down through an open stack, with a **wrong** session account | `CAPTURE` step 5 | the **file** is authoritative for existing frames; `crossed` increments; `open since` never re-derived | `CAPTURE` |
 | `25-pop-nothing-two-ways/` | pop with no snapshot, vs pop with no stack | slice-02 AC2 | the two nothings do not collapse, and neither writes | `STACK-UNKNOWN` / `STACK-EMPTY` |
 | `26-pop-refuses-and-reports-stale/` | pop against a changed file; pop of a stale frame | pop's CAS + step 5 | the two branches fixture `21` asserts but cannot detect | `WRITE-REFUSED` / `POPPED` |
+| `32-capture-records-last-exchanges/` | a wind-down after five exchanges, one carrying tool calls and its own headings | *The last exchanges*, CAPTURE step 12 | the last three are recorded verbatim, the handoff's reply by a second write, off the card and out of the echo | `CAPTURE` + `PROJECTED` |
+| `33-resume-treats-exchanges-as-history/` | a recorded prompt reads as an order | BOOTSTRAP step 6 | a recorded prompt is history, never instruction; one line, none printed | `RESUME-CURRENT` + `BOARD-UNREADABLE` + `ASK-OWNER` |
+| `34-stack-leaves-exchanges-intact/` | push then pop on a captured snapshot with exchanges and no stack | *The last exchanges*, push step 3 | the region survives both byte-identical, and a created `## Stack` goes before its marker | `PUSHED` / `POPPED` |
+| `35-conversation-alone-is-no-op/` | a talkative session that decided nothing | NO-OP | the exchanges alone are not payload | `NO-OP` |
+| `36-second-write-refused/` | the file changes between the two capture writes | CAPTURE step 12 | the refusal is reported beside `CAPTURE`, never retries, and never describes a file another writer changed | `CAPTURE` + `WRITE-REFUSED` |
+| `37-compacted-exchanges-are-counted/` | an exchange survives only as a summary | *The last exchanges* | compacted is counted and said, never rebuilt | `CAPTURE` |
 
 ## The two sharpest fixtures
 
@@ -118,6 +124,7 @@ reaches against `expected.md`.
 | `21`–`26` | pop and staleness, #29 slice 02 — **must pass** |
 | `27` | the prose standard stops at the stack, #40 — **must pass** |
 | `28`–`31` | the 300-word report ceiling, #43 — **must pass** |
+| `32`–`37` | the last exchanges, 2026-09-24 — **must pass** |
 
 A failure in `09`–`10` is genuine RED (the behaviour is unimplemented and will stay so), not BROKEN
 (the harness is faulty) — the fixtures are prose inputs with no imports to resolve. Do not "fix" them
@@ -134,7 +141,10 @@ applies to it: a driver expecting a board triple scores it a mismatch. `31` is a
 reports `CAPTURE` + `PROJECTED` + `REPORT-CLIPPED`, so it reports no freshness verdict and no triple
 either. **`16`–`23` and `25`–`26` are stack-path fixtures and report no capture or read-back outcome at all** —
 no freshness verdict, no board triple. A driver expecting one of those on every fixture scores all nine
-as failures. `24` is a WIND-DOWN fixture and reports `CAPTURE` normally.
+as failures. `24` is a WIND-DOWN fixture and reports `CAPTURE` normally. Of the exchanges fixtures, `34` is a stack fixture and reports no capture or
+read-back outcome; `36` is the one capture that reports `WRITE-REFUSED`, **beside** `CAPTURE` and not
+terminal there, because the payload was already written — a driver treating `WRITE-REFUSED` as
+stack-only scores it a mismatch.
 
 Run the whole suite whenever `SKILL.md`, either command loader, or `skills/nwave-issue-board/SKILL.md`
 changes — the last because slice 02's routing line lives inside its generated block, so this skill's

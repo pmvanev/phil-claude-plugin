@@ -1,0 +1,16 @@
+{
+  "fixture_id": "SH-SELFTEST-35",
+  "phase": "WIND-DOWN",
+  "situation": "A session of four exchanges explained how the board is read. Nothing was decided, nothing was ruled out, and no next action was named. The conversation was substantial and would make three rich exchanges to record.",
+  "session_advanced_work": false,
+  "decisions_made": [],
+  "next_action": null,
+  "exchanges_in_context": 4,
+  "expected_decision": "NO-OP",
+  "expected_guard": "the exchanges alone are not payload — a session with no why and no next action records nothing, however much was said",
+  "must_not": [
+    "write a snapshot holding only the exchanges",
+    "write a placeholder why or next action so the exchanges have somewhere to go",
+    "stay silent about recording nothing"
+  ]
+}

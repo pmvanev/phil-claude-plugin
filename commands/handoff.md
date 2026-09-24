@@ -1,5 +1,5 @@
 ---
-description: "Put this session down: record what a fresh session cannot derive — the decisions reached, the approaches ruled out, the work stack you were diverted through, and the intended next action — stamped with a tree fingerprint so the next session can tell whether it is still current. Refreshes the feature card's projection so a teammate can read it too. Reports back in about 300 words of plain English, saying so when it withheld any, while the snapshot itself is written whole and never clipped. Writes nothing if the session advanced nothing."
+description: "Put this session down: record what a fresh session cannot derive — the decisions reached, the approaches ruled out, the work stack you were diverted through, and the intended next action, plus the session's last three prompts and replies word for word — stamped with a tree fingerprint so the next session can tell whether it is still current. Refreshes the feature card's projection so a teammate can read it too. Reports back in about 300 words of plain English, saying so when it withheld any, while the snapshot itself is written whole and never clipped. Writes nothing if the session advanced nothing."
 argument-hint: "[\"<what you were doing>\"]"
 mutates: true
 allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion, Skill
@@ -19,3 +19,8 @@ first — clipped, it reports `REPORT-CLIPPED` and states how many decisions wer
 whole recorded population. Nothing is ever left out of `.session-handoff.md` to shorten this output. The
 ceiling, what may never give ground, and why `/phil:stack` is exempt are the skill's, under *The report
 has a ceiling; the record never does*.
+
+**The last three exchanges go in the snapshot word for word — this handoff's prompt and report the last
+of them — and nowhere else.** Not onto the card, and not into the report beyond one line counting them.
+The report is recorded by a second write after it is composed and before it is printed, so what the file
+holds is what was printed. The skill owns the rules, under *The last exchanges*.
