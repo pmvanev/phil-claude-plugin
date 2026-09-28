@@ -284,6 +284,7 @@ Feature: Carry work across the session boundary without a re-briefing
     When it is put down
     Then the record holds the last three prompts and replies, the handoff's own among them
     And each prompt is what the person typed, and each reply is what was printed
+    And they are copied from the session's own record once the summary is printed, never retyped
     And no tool call or its output is kept
     And the exchanges stay out of the team's card and out of the summary read back
 
@@ -299,6 +300,7 @@ Feature: Carry work across the session boundary without a re-briefing
     Given a resume point holding recorded exchanges and no diversions
     When a diversion is noted and later closed
     Then the recorded exchanges are unchanged, word for word, and still last
+    And they are kept by the script, never read and written back by the session
 
   @error @fixture(35-conversation-alone-is-no-op) @contract-shape:pure-function
   Scenario: A session that only talked records nothing
@@ -307,15 +309,24 @@ Feature: Carry work across the session boundary without a re-briefing
     Then nothing is recorded, not even the conversation, and it says so
 
   @error @fixture(36-second-write-refused) @contract-shape:pure-function
-  Scenario: Another session writing in between costs only the last exchange
-    Given the record changes between the two writes of a wind-down
-    When the second write is attempted
-    Then it is refused and not retried
-    And the summary says what was written and that the record has changed since
-    And it never claims to know what the record now holds
+  Scenario: Another session writing in between is reported, never merged
+    Given the record changes after the wind-down's first write
+    When the exchanges are copied in
+    Then the copy is refused and not retried
+    And one more line says no exchanges were recorded and that the record has changed since
+    And it never claims to know what the record now holds, nor types the exchanges in instead
 
-  @error @fixture(37-compacted-exchanges-are-counted) @contract-shape:pure-function
-  Scenario: An exchange the session only remembers in summary is not rebuilt
-    Given an earlier exchange that survives only as a summary
+  @happy @fixture(37-compacted-exchanges-are-recorded) @contract-shape:pure-function
+  Scenario: An exchange the session only remembers in summary is still recorded as said
+    Given an earlier exchange this session holds only as a summary
     When the session is put down
-    Then the record says one exchange was lost to compaction and holds none of the summary
+    Then the record holds that exchange word for word, copied from the session's own record
+    And none of the summary
+
+  @error @fixture(38-exchanges-are-never-typed) @contract-shape:pure-function
+  Scenario: The session never retypes what was said
+    Given a long session and an earlier resume point that holds its own exchanges
+    When the session is put down
+    Then no prompt or reply passes through anything the session writes, runs or prints
+    And the earlier resume point's exchanges are never read at wind-down
+    And where the session's own record cannot be found, it says so and records none

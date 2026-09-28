@@ -1,0 +1,17 @@
+{
+  "fixture_id": "SH-SELFTEST-37",
+  "phase": "CAPTURE",
+  "situation": "A long session whose context was compacted: of the two exchanges before the handoff, the earlier sits before the compaction boundary — this session holds it only as a summary, while the transcript still holds every word — and the later is intact. The session reached one decision and named a next action. The work has no card.",
+  "session_advanced_work": true,
+  "work_has_a_card": false,
+  "exchanges_intact_before_handoff": 1,
+  "exchanges_compacted_before_handoff": 1,
+  "expected_decision": "CAPTURE",
+  "expected_guard": "a compacted exchange is copied word for word from the transcript like any other, and the summary is never recorded",
+  "must_not": [
+    "record the summary as though it were the exchange",
+    "reconstruct a prompt or reply from the summary",
+    "count the compacted exchange apart, or leave it out, because this session no longer holds its words — the transcript does",
+    "reach past the last three for an exchange this session remembers better"
+  ]
+}

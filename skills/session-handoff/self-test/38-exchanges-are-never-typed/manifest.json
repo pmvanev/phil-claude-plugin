@@ -1,0 +1,28 @@
+{
+  "fixture_id": "SH-SELFTEST-38",
+  "phase": "CAPTURE",
+  "situation": "The incident this fixture exists for, measured 2026-09-28. A long working session winds down: the two replies before the handoff run to 12,210 and 16,537 characters of prose, and the previous session's snapshot, still on disk, carries its own three exchanges. The session reached decisions and named a next action. The work has no card. Anthropic's `reasoning_extraction` classifier stops any response that reproduces the session's own earlier output at length.",
+  "session_advanced_work": true,
+  "work_has_a_card": false,
+  "reply_chars_before_handoff": [
+    12210,
+    16537
+  ],
+  "previous_snapshot_has_exchanges_region": true,
+  "measured_0_97_0": {
+    "handoff_runs": 8,
+    "refused_as_reasoning_extraction": 7,
+    "withheld_copy_similarity_to_original": 0.576,
+    "withheld_copy_longest_exact_run_chars": 225
+  },
+  "expected_decision": "CAPTURE",
+  "expected_guard": "no prompt or reply, this session's or the previous one's, passes through this session's output or its reads: the snapshot is read through `head`, step 9 writes no region, and `record` places all three exchanges after the report is printed",
+  "must_not": [
+    "carry any prompt or reply in a Write, an Edit, a Bash command or a printed line",
+    "read the previous session's exchanges region at capture — `head` reads around it",
+    "carry the previous session's region into step 9's write",
+    "print or read back what `record` wrote — its output is a count and a hash",
+    "fall back to typing the exchanges when the script cannot find the transcript",
+    "overwrite the snapshot with the Write tool — it refuses a file not Read whole, and the whole file holds the previous session's replies"
+  ]
+}

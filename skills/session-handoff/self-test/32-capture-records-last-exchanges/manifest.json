@@ -14,7 +14,7 @@
     "CAPTURE",
     "PROJECTED"
   ],
-  "expected_guard": "the last three exchanges, the handoff's own included, are recorded verbatim inside their markers, stay off the card, and are not echoed",
+  "expected_guard": "the script copies the last three exchanges from the transcript, the handoff's own included, after the report is printed; they stay inside their markers, off the card and out of the echo",
   "must_not": [
     "record exchanges 1 or 2 — three is the count, the handoff among them",
     "tighten, summarise or reword a prompt or a reply, including the pasted stack trace",
@@ -24,6 +24,7 @@
     "hand the exchanges to the card's projection",
     "echo the exchanges in the report beyond the one line saying how many were recorded",
     "place a reply's own `##` heading outside the exchanges markers",
-    "write the handoff's prompt at the first write — prompt and reply arrive together at the second"
+    "type any prompt or reply into a Write, an Edit, a command or a printed line — the script copies them",
+    "write an exchanges region at step 9, or run `record` before the report is printed"
   ]
 }

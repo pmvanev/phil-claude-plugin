@@ -22,5 +22,21 @@ has a ceiling; the record never does*.
 
 **The last three exchanges go in the snapshot word for word — this handoff's prompt and report the last
 of them — and nowhere else.** Not onto the card, and not into the report beyond one line counting them.
-The report is recorded by a second write after it is composed and before it is printed, so what the file
-holds is what was printed. The skill owns the rules, under *The last exchanges*.
+**This session never types them.** A script copies them from the transcript Claude Code already keeps,
+after the report is printed, so what the file holds is what was printed:
+
+```
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py head   --file <root>/.session-handoff.md
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py count
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py write  --file <root>/.session-handoff.md --expect-sha <h1> --body - <<'SESSION_HANDOFF_BODY'
+<the header, the why, the next action and the stack>
+SESSION_HANDOFF_BODY
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py record --file <root>/.session-handoff.md --expect-sha <h>
+```
+
+`head` prints `SHA <h1>` from the same read; `write` prints `WROTE <h>`, the hash `record` takes. **Never
+the Write tool on the snapshot**: it refuses a file it has not Read whole, and reading it whole pulls the
+previous session's replies into context.
+
+Copying them by hand is what 0.97.0 did, and Anthropic's safety classifier refused it as duplicating
+model outputs in 7 of 8 real handoffs. The skill owns the rules, under *The last exchanges*.

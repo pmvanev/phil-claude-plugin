@@ -34,11 +34,12 @@
     "PUSHED",
     "POPPED"
   ],
-  "expected_guard": "push and pop regenerate the whole file yet leave the exchanges region byte-identical, and a created `## Stack` goes before the opening marker",
+  "expected_guard": "push and pop read the snapshot through `head`, regenerate the body alone and write it back through `carry`, so the exchanges region stays byte-identical and last, and a created `## Stack` ends the body",
   "must_not": [
     "append `## Stack` after the closing exchanges marker",
     "alter, reorder or drop any byte between the exchanges markers",
     "read the reply's `## Findings` heading as a section of the snapshot",
-    "re-stamp the header"
+    "re-stamp the header",
+    "read the region to regenerate it, or type any of it into the body — `carry` keeps it"
   ]
 }

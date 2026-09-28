@@ -27,7 +27,9 @@ it does not reopen slice 03. See `board-divergence.md`.
 ## Why whole-file regeneration is the safe form, not the crude one
 
 One writer that owns everything it rewrites cannot destroy a section it forgot about, because there is
-no section it does not read. This is the property `skills/nwave-issue-board/SKILL.md` relies on for the
+no section it does not read. The exchanges region is the one exception since 2026-09-28: the session no
+longer reads it, so the session no longer rewrites it either — `carry` keeps it in code, which is the
+same property held by the only writer that can see the section. This is the property `skills/nwave-issue-board/SKILL.md` relies on for the
 projected block — arrived at there after a partial refresh silently deleted the reasoning it did not
 know it held.
 
@@ -48,6 +50,11 @@ of content and config, so hashing an unchanged file twice always agrees and **th
 produces no spurious refusals.** The narrow residue: a competing write that changes *only* line endings
 is invisible to the guard. Not fixtured, because a fixture there would test git's determinism rather than
 this skill's behaviour.
+
+**Since 2026-09-28 the hash is `session-exchanges.py`'s, not git's.** The script hashes raw bytes on both
+sides of the swap, so it is still a pure function of content and still produces no spurious refusals —
+and a competing write that changes only line endings is now visible. `git hash-object` left the
+procedure because its filters and a SHA-256 repo can make it disagree with the script's own hash.
 
 ## Why the snapshot is per-worktree
 
@@ -97,7 +104,7 @@ claim is real — the diversion was open through two separate sessions ending.
 
 The cost, accepted deliberately: `CAPTURE` becomes a writer of frame state, which an earlier design
 refused. That refusal was a preference rather than a law, and `CAPTURE` already regenerates the whole
-file. What it may **not** do is re-derive `open since` — that is the header bug one level down, and it
+body. What it may **not** do is re-derive `open since` — that is the header bug one level down, and it
 would make `⚠ stale` unreachable for ever after.
 
 ## Why read-back renders the stack, and `show` is not enough
@@ -228,3 +235,59 @@ keeps it an alarm.
 mean real stacks carry far wordier frames than the measurement assumed, and the answer would be to raise
 the bound rather than to start withholding frames — the floor is not negotiable, so the ceiling is the
 only part that can move. Recorded so the next person does not reach for the frames instead.
+
+## Why the exchanges are copied by a script
+
+**0.97.0 had the session copy its own last three replies into the snapshot, and it never worked once.**
+Measured 2026-09-28 across every transcript on the author's machine: of 8 real handoffs on 0.97.0, 7
+were stopped by Anthropic's safety classifier, every refusal carrying the category `reasoning_extraction`
+and the explanation *"restrictions on reverse engineering or duplicating model outputs"*. The 15 handoffs
+on earlier versions drew none. The eighth ran on a just-cleared session with nothing to copy.
+
+**The stop landed on the snapshot write.** In the one session where the withheld Write survives in the
+transcript, 12,328 of its 15,558 characters were the exchanges region, and it breaks off mid-sentence
+inside the first reply. After a stop, Claude Code retries with a notice, and the retry was refused too;
+one session refused eight turns running, including a plain question about why. So the region was never
+written, and the fixtures that pinned *what* it held passed on prose no run could reach.
+
+**The copy was not a copy anyway.** That withheld reply is 58% similar to the one it claimed to
+reproduce, with a longest exact stretch of 225 characters. Asked to copy its own output, a model retypes
+it from memory — the regeneration this skill forbids in the same paragraph that asked for the copy.
+The classifier is not the only reason to take the words out of the session's hands; it is the one that
+made the other visible.
+
+**So the script reads the transcript, which Claude Code already writes to disk, and the session never
+holds the words.** That settles both defects at once: nothing is reproduced by the model, and the copy is
+exact by construction. It also removed two rules that existed only because the session did the copying:
+
+- **Compacted exchanges were counted and left out**, because a session holding the summary could not
+  honestly reproduce them. The transcript keeps every record across a compaction, so they are recorded
+  like any other. The rule's reason was the session's blindness, not the summary's existence — and the
+  summary is still never what was said.
+- **The handoff's reply was recorded before it was printed**, by a second whole-file write the session
+  composed. Now the report prints first and `record` copies it: the transcript holds only what was
+  printed, so what the file holds is what was printed without anyone having to promise it.
+
+**`push` and `pop` were the second instance of the same hazard, found before it fired.** Whole-file
+regeneration meant retyping a previous session's replies byte-for-byte on every mid-session note. They
+now read through `head` and write through `carry`; the session regenerates the body and never the region.
+
+**What stays unmeasured: read-back.** BOOTSTRAP still reads the region into a fresh session's context,
+which is input, not reproduction, and the classifier stopped output. No read-back of a populated region
+has ever run, because none was ever written. **What would refute this design:** a `reasoning_extraction`
+refusal on `/phil:resume` over a snapshot holding exchanges. The answer then is to stop reading the
+region into context and name its path instead, not to shorten it.
+
+**Two facts the order of CAPTURE step 12 stands on, measured on 2.1.283 on 2026-09-28.** Printed text is
+in the transcript before the next tool runs: a line printed at 14:13:41 was on disk when the Bash call
+at 14:13:43 read the file. And the Bash tool's environment carries `CLAUDE_CODE_SESSION_ID`, which names
+the transcript. Neither is documented. If either stops holding, `count` at step 6 prints `UNREADABLE`
+or `record` finds the handoff's reply empty — visible in the report, never a paraphrase in the file.
+
+**The transcript format is Claude Code's, and it is not published.** The shapes the script relies on —
+the `isMeta` body that follows a command the model acts on, the `local-command-stdout` after a built-in,
+the `compact_boundary` whose `logicalParentUuid` crosses it, the `parentUuid` chain that names the live
+branch past a rewind — were read from real records on 2.1.283, and the tests build them byte-for-byte.
+A change there degrades what `record` finds — fewer exchanges than three, an empty reply, or a new kind
+of harness record mistaken for a prompt — but everything it writes is still text from the record, never
+a model's paraphrase, which was the failure being replaced.

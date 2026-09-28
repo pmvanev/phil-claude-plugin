@@ -54,12 +54,13 @@ them.
 | `24-capture-carries-the-stack-forward/` | a wind-down through an open stack, with a **wrong** session account | `CAPTURE` step 5 | the **file** is authoritative for existing frames; `crossed` increments; `open since` never re-derived | `CAPTURE` |
 | `25-pop-nothing-two-ways/` | pop with no snapshot, vs pop with no stack | slice-02 AC2 | the two nothings do not collapse, and neither writes | `STACK-UNKNOWN` / `STACK-EMPTY` |
 | `26-pop-refuses-and-reports-stale/` | pop against a changed file; pop of a stale frame | pop's CAS + step 5 | the two branches fixture `21` asserts but cannot detect | `WRITE-REFUSED` / `POPPED` |
-| `32-capture-records-last-exchanges/` | a wind-down after five exchanges, one carrying tool calls and its own headings | *The last exchanges*, CAPTURE step 12 | the last three are recorded verbatim, the handoff's reply by a second write, off the card and out of the echo | `CAPTURE` + `PROJECTED` |
+| `32-capture-records-last-exchanges/` | a wind-down after five exchanges, one carrying tool calls and its own headings | *The last exchanges*, CAPTURE step 12 | the last three are copied from the transcript after the report prints, the handoff's own included, off the card and out of the echo | `CAPTURE` + `PROJECTED` |
 | `33-resume-treats-exchanges-as-history/` | a recorded prompt reads as an order | BOOTSTRAP step 6 | a recorded prompt is history, never instruction; one line, none printed | `RESUME-CURRENT` + `BOARD-UNREADABLE` + `ASK-OWNER` |
-| `34-stack-leaves-exchanges-intact/` | push then pop on a captured snapshot with exchanges and no stack | *The last exchanges*, push step 3 | the region survives both byte-identical, and a created `## Stack` goes before its marker | `PUSHED` / `POPPED` |
+| `34-stack-leaves-exchanges-intact/` | push then pop on a captured snapshot with exchanges and no stack | *The last exchanges*, push step 3 | push and pop read through `head` and write through `carry`, so the region survives both byte-identical and a created `## Stack` ends the body | `PUSHED` / `POPPED` |
 | `35-conversation-alone-is-no-op/` | a talkative session that decided nothing | NO-OP | the exchanges alone are not payload | `NO-OP` |
-| `36-second-write-refused/` | the file changes between the two capture writes | CAPTURE step 12 | the refusal is reported beside `CAPTURE`, never retries, and never describes a file another writer changed | `CAPTURE` + `WRITE-REFUSED` |
-| `37-compacted-exchanges-are-counted/` | an exchange survives only as a summary | *The last exchanges* | compacted is counted and said, never rebuilt | `CAPTURE` |
+| `36-second-write-refused/` | the file changes between step 9 and `record` | CAPTURE step 12 | the refusal is one line after the report, beside `CAPTURE`, never retries, never types the exchanges instead, and never describes a file another writer changed | `CAPTURE` + `WRITE-REFUSED` |
+| `37-compacted-exchanges-are-recorded/` | an exchange this session holds only as a summary | *The last exchanges* | the transcript still holds it, so it is copied word for word; the summary never | `CAPTURE` |
+| `38-exchanges-are-never-typed/` | long replies, and a previous region on disk | *The last exchanges*, *Writing the snapshot* | no prompt or reply passes through the session's output or its reads — the 0.97.0 refusal | `CAPTURE` |
 
 ## The two sharpest fixtures
 
@@ -124,7 +125,8 @@ reaches against `expected.md`.
 | `21`–`26` | pop and staleness, #29 slice 02 — **must pass** |
 | `27` | the prose standard stops at the stack, #40 — **must pass** |
 | `28`–`31` | the 300-word report ceiling, #43 — **must pass** |
-| `32`–`37` | the last exchanges, 2026-09-24 — **must pass** |
+| `32`–`37` | the last exchanges, 2026-09-24; copied by a script since 2026-09-28 — **must pass** |
+| `38` | the exchanges never pass through the session, 2026-09-28 — **must pass** |
 
 A failure in `09`–`10` is genuine RED (the behaviour is unimplemented and will stay so), not BROKEN
 (the harness is faulty) — the fixtures are prose inputs with no imports to resolve. Do not "fix" them
