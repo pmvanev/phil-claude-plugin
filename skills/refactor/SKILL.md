@@ -5,7 +5,7 @@ description: Skill bundle for phil:refactor command — iterative refactoring fr
 
 # Refactor
 
-You are performing systematic refactoring against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md`. You work through a prioritized backlog, one item at a time, verifying with tests at every step.
+You are performing systematic refactoring against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md`. You work through a prioritized backlog, one item at a time, verifying with tests at every step. A Priority 6 item takes its route from the Smell Catalogue in `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md`, and no row routes here, so this loop skips every one (below).
 
 **This is structure-only work. Preserve behavior absolutely.**
 
@@ -49,6 +49,12 @@ If no test runner is found by either method, warn the user: "No test runner dete
 Read `.refactoring-backlog.md`. If it doesn't exist and no inline argument was given, tell the user to run `/phil:review-code` first.
 
 Parse all items with `Status: pending` into a working list, already sorted by priority.
+
+**Work only the items routed to this command.** An item whose **Route** names another command —
+`/phil:refactor-tests`, `/phil:redesign-tests` — or `report only` is not this loop's to apply. Mark it
+`skipped (routed to {route})` and name it in the final report with the command that owns it. A backlog
+written before routes existed carries no Route field; treat its Priority 6 items the same way, because
+changing what a test asserts is behaviour change and this loop preserves behaviour.
 
 Create a task list from the pending backlog items using TaskCreate for progress tracking.
 
@@ -146,7 +152,7 @@ Continue to the next `pending` item. Repeat the full cycle.
 Stop the loop when:
 
 1. **All items are `done` or `resolved`** — Report: "Backlog complete. All refactoring items addressed."
-2. **All remaining items are `blocked`** — Report the blocked items and why.
+2. **All remaining items are `blocked` or `skipped (routed to …)`** — Report them, why, and for each routed item the command that owns it.
 3. **User interrupts** — Save progress to the backlog file so it can be resumed.
 
 ---
@@ -164,7 +170,8 @@ When the backlog is complete, report:
 1. Items completed (with brief description of each refactoring applied)
 2. Items pruned (incidentally resolved)
 3. Items blocked (with reasons)
-4. Summary of structural improvements
+4. Items skipped as routed elsewhere, each with its route — the command to run, or `report only` for a human to apply. Those commands re-detect with their own rules and never read this backlog, so an item may not reappear there
+5. Summary of structural improvements
 
 Suggest: "Run `/phil:review-code` again to verify standards compliance, or review the changes with `git diff`."
 

@@ -72,6 +72,8 @@ Test doubles replace real dependencies during testing. Each type serves a differ
 
 **Overuse of mocks signals design problems.** If you need many mocks, your code has too many dependencies.
 
+**Which double to choose, and when a mock is the right test, is decided by `test-patterns.md`.** It takes the classical side: real collaborators inside a boundary, a fake for a port you own, and a mock only where the message sent is itself the behaviour.
+
 ---
 
 ### F.I.R.S.T. Principles
@@ -119,6 +121,8 @@ Name tests to describe the behavior they verify:
 - Test edge cases: nulls, empty collections, boundaries
 - Test error paths, not just happy paths
 - QA should find nothing; your tests should find everything first
+
+**How to build the fixture, verify the result and choose the cases is owned by `test-patterns.md`**, along with the smell catalogue a review names its findings from.
 
 ---
 

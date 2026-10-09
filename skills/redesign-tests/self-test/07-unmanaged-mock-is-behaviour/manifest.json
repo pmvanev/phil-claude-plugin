@@ -1,0 +1,12 @@
+{
+  "node_id": "RD-SELFTEST-07",
+  "mode": "review",
+  "target": ".",
+  "smell_family": "implementation-coupling",
+  "named_move": "n/a — review mode applies nothing",
+  "target_span": "test_orders_boundaries.py (whole file)",
+  "rationale": "two tests assert on a mock interaction; only the one at an owned collaborator is a smell",
+  "coverage_equivalence_claim": "n/a — review mode proposes no rewrite",
+  "human_decision": "n/a — review mode does not reach a gate",
+  "expected_guard": "rules/test-patterns.md stance: a mock at an unmanaged dependency verifies behaviour and is not flagged"
+}

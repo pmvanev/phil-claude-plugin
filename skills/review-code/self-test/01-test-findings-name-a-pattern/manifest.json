@@ -1,0 +1,7 @@
+{
+  "node_id": "RC-SELFTEST-01",
+  "mode": "review",
+  "target": ".",
+  "pins": "a Priority 6 finding names a smell, a fix and a route from rules/test-patterns.md's Smell Catalogue; a mock at an unmanaged dependency is not flagged",
+  "expected_guard": "catalogue-named test findings; unmanaged-dependency mock kept"
+}

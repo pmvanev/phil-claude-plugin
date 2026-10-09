@@ -46,7 +46,7 @@ Run `git diff HEAD~1 --name-only` to get changed files. Filter to code files onl
 
 ### File Path
 
-Read the entire file.
+Read the entire file. If it is production code, find its tests by the project's naming convention and read them too — Priority 6 cannot judge tests it never read, and a public behaviour with no test is itself a finding.
 
 ### Directory Path
 
@@ -95,21 +95,40 @@ For each file, check against the coding guide. Look for these categories of viol
 - Dead code / unreachable branches
 
 ### Priority 6 — Test Quality
-- Missing tests for public functions
-- Tests coupled to implementation rather than behavior
-- Flaky test patterns (non-determinism, shared state)
-- Excessive mocking
+
+Read `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md` before judging any test. **In a test file, a finding
+Priorities 2–5 would catch is a Priority 6 finding**, whatever its shape: a long test is an Obscure Test,
+not a Long Function, and its literals are expected values, not magic numbers.
+Priorities 2–5 apply to production code only; Priorities 1 and 7 apply to test files as usual.
+**Name each finding by a smell from the Smell Catalogue, and take the fix and the route from the same
+row.** The refactoring
+catalogue holds no test refactorings, so a test finding never names one from it. The smells most
+reviews meet:
+
+- **Missing Test** — a public behaviour no test exercises
+- **Overspecified Software**, **Sensitive Equality**, **Private Access** — coupled to implementation
+  rather than behaviour
+- **Mock Inside a Boundary** — excessive mocking
+- **Erratic Test** — non-determinism, shared state
+- **Mystery Guest**, **Obscure Test**, **Conditional Test Logic**, **Assertion Roulette** — a test a
+  reader cannot follow
+
+**Do not flag a mock at an unmanaged dependency as Overspecified Software or Mock Inside a Boundary** —
+an email gateway, a bus another team reads, a third-party API. The message sent is the behaviour, and
+asserting it is the right test. Judge by what the double stands in for, not who owns its type: your own
+port wrapping the gateway counts. A double of the third-party type itself is still **Mocked Foreign
+Type**, and a wall-clock value in the asserted message is still an **Erratic Test**.
 
 **Tier allocation.** Where the change under review adds or moves a test, check it against
-`${CLAUDE_PLUGIN_ROOT}/rules/test-architecture.md` and name the boundary it crosses. Three findings
-come straight off that rule and none of them is visible from the bullets above:
+`${CLAUDE_PLUGIN_ROOT}/rules/test-architecture.md` and name the boundary it crosses. Three catalogue
+rows come straight off that rule:
 
-- **A test doubling a collaborator inside its own boundary** — be sociable inside a boundary. Flag
-  the double, not the test.
-- **A test crossing a boundary the behaviour did not need** — a database, a clock, or the network in
-  a test of a calculation. The fix is re-allocation, not optimization.
-- **A third-party dependency with no boundary test** — nothing in the suite exercises the library
-  itself, so an upgrade that changes its behaviour breaks production rather than a test.
+- **Mock Inside a Boundary** — a test doubling a collaborator inside its own boundary. Be sociable
+  inside a boundary. Flag the double, not the test.
+- **Wrong Tier** — a test crossing a boundary the behaviour did not need: a database, a clock, or the
+  network in a test of a calculation. The fix is re-allocation, not optimization.
+- **Missing Boundary Test** — nothing in the suite exercises a third-party library itself, so an
+  upgrade that changes its behaviour breaks production rather than a test.
 
 **Do not flag a ratio.** That rule states no percentages on purpose; a distribution is a diagnosis,
 never a score. Suite runtime is out of scope here too — this command reads a diff, and a budget is a
@@ -118,7 +137,7 @@ claim about a whole suite.
 ### Priority 7 — Language Idioms
 Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1.
 
-For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file) that addresses it.
+For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file, or for Priority 6 the fix from `test-patterns.md`'s Smell Catalogue) that addresses it.
 
 ---
 
@@ -149,9 +168,10 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 
 - **File**: `{file-path}`
 - **Lines**: {start}-{end}
-- **Priority**: {1-6}
+- **Priority**: {1-7}
 - **Smell**: {smell name from catalog}
 - **Refactoring**: {named refactoring from catalog}
+- **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route}
 - **Rationale**: {why this matters — which coding standard is violated}
 - **Status**: pending
 ```
@@ -160,7 +180,10 @@ Rules for the backlog:
 - IDs are sequential: `R001`, `R002`, etc.
 - Sort by priority (1 first), then by file path within priority
 - Each item is a **single, atomic refactoring** — not a bundle
-- The refactoring name must match a named refactoring from the catalog
+- The refactoring name must match a named refactoring from the catalog — for Priority 6, the smell and
+  the fix come from `test-patterns.md`'s Smell Catalogue instead, and the route is that row's
+- `report only` is a valid route: no command applies the fix, and the item says so rather than
+  pretending one does
 - Rationale must cite the specific principle or rule violated
 
 ---
@@ -172,7 +195,11 @@ After writing the backlog, report to the user:
 1. Total findings by priority
 2. Top 5 highest-priority items with brief descriptions
 3. The path to the backlog file
-4. Suggest: "Run `/phil:refactor` to work through this backlog."
+4. Suggest the command for each route the backlog holds: "Run `/phil:refactor` to work through
+   this backlog", plus `/phil:refactor-tests --review` or `/phil:redesign-tests --review` over the test
+   files when any item routes there. Name the `report only` items as the ones a human applies.
+   **A route is a pointer, not a handoff:** those two commands re-detect with their own rules and never
+   read this backlog, so say that an item may not reappear in theirs.
 
 ---
 
@@ -184,3 +211,13 @@ After writing the backlog, report to the user:
 - Hypothetical improvements for code you don't fully understand — when uncertain, skip
 
 **Be precise, not exhaustive.** A backlog with 10 well-identified items beats one with 50 vague ones.
+
+---
+
+## Self-test
+
+`skills/review-code/self-test/` holds fixtures that pin what a review must and must not flag. Whenever
+this skill changes, run `/phil:review-code` over each fixture directory and compare the backlog
+against its `expected-backlog.md` on the criteria in its `expected.md`. `tests/test_test_patterns_wiring.py`
+checks that each fixture is well-formed and green and that its expected findings name real catalogue
+rows; whether a review *produces* them is model judgement, and a human drives that comparison.

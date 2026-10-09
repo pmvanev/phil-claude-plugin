@@ -16,7 +16,7 @@ paths:
 
 Guidelines extracted from Robert C. Martin's *Clean Code*, *Clean Craftsmanship* and *Clean Architecture*, Jez Humble and David Farley's *Continuous Delivery*, and Dave Farley's *Modern Software Engineering*.
 
-This rule owns two questions the other testing rules name and never answer: **which tier a given behaviour belongs in**, and **what a whole suite may cost before it is too slow to run**. It is the single owner of the pyramid, the trophy, and their settlement. The techniques stay where they are: the three laws, doubles, F.I.R.S.T. and determinism in `testing.md`; test-code quality in `coding.md`; architectural boundaries and the dependency rule in `architecture.md`; pipeline stages and release mechanics in `continuous-delivery.md`. Complement those — do not restate them.
+This rule owns two questions the other testing rules name and never answer: **which tier a given behaviour belongs in**, and **what a whole suite may cost before it is too slow to run**. It is the single owner of the pyramid, the trophy, and their settlement. The techniques stay where they are: the three laws, doubles, F.I.R.S.T. and determinism in `testing.md`; fixtures, verification styles and the test-smell catalogue in `test-patterns.md`; test-code quality in `coding.md`; architectural boundaries and the dependency rule in `architecture.md`; pipeline stages and release mechanics in `continuous-delivery.md`. Complement those — do not restate them.
 
 ---
 

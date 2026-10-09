@@ -27,11 +27,24 @@ per-diff human approval.
 
 Only these three families. If a smell is not one of these, do **not** report or rewrite it.
 
+Each family groups rows of the Smell Catalogue in `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md` —
+the rows whose route is `/phil:redesign-tests`. Read that rule before detecting: it names the smells,
+and its stance section decides which mocks are smells at all.
+
 | Smell family | Signal | Named move(s) | What the rewrite does |
 |--------------|--------|---------------|------------------------|
-| **Implementation-coupling** | asserts on a mock interaction (`mock.x.assert_called`), a private member (`obj._field`), or an internal call — not on an observable outcome | **Assert on observable outcome** | replace the how-assertion with one on the public result / persisted state / returned value |
-| **Excessive-mocking** | mocks a collaborator that could be real (or a fake exists) and asserts only on the mock | **Replace mock with real collaborator**, **Replace mock with fake** | drive the real collaborator/fake; assert on the resulting state |
-| **Flakiness / determinism** | depends on `datetime.now()`, unseeded RNG, UUIDs, wall-clock, ordering, or hidden shared state | **Inject clock / static timestamp**, **Seed RNG**, **Isolate shared state** | make the test deterministic while preserving what it checks |
+| **Implementation-coupling** (Overspecified Software, Sensitive Equality, Private Access) | asserts on a mock interaction with an in-process collaborator (`mock.x.assert_called`), a private member (`obj._field`), an internal call, or a `str()`/`repr()`/serialized form — not on an observable outcome | **Assert on observable outcome** | replace the how-assertion with one on the public result / persisted state / returned value |
+| **Excessive-mocking** (Mock Inside a Boundary) | mocks a collaborator that could be real (or a fake exists) and asserts only on the mock | **Replace mock with real collaborator**, **Replace mock with fake** | drive the real collaborator/fake; assert on the resulting state |
+| **Flakiness / determinism** (Erratic Test) | depends on `datetime.now()`, unseeded RNG, UUIDs, wall-clock, ordering, or hidden shared state | **Inject clock / static timestamp**, **Seed RNG**, **Isolate shared state** | make the test deterministic while preserving what it checks |
+
+**A mock at an unmanaged dependency is not implementation-coupling and not excessive-mocking.** An
+email gateway, a bus another team reads, a third-party API: the message the code sends it is observable
+behaviour, so asserting that message *is* the observable outcome. Rewriting it to assert on state would
+discard the one thing the test exists to check. **Judge by what the mock stands in for, not who owns its
+type** — your own `EmailSender` port wrapping a gateway is the gateway. A mock of an owned collaborator
+that stands for nothing outside the process stays in scope, and so does the flakiness family: a gateway
+mock asserting a wall-clock value is still an Erratic Test.
+(Fixture `07-unmanaged-mock-is-behaviour`.)
 
 **Never in scope:** structure-only cleanup (that is `refactor-tests`); deleting dead/duplicate
 tests; splitting or merging test files; changing non-test (SUT) code; concurrency-race fixes that
@@ -40,8 +53,8 @@ false positives erode trust (detection-precision KPI: ≤20% rejected on first r
 
 ## Detection (reuse `review-code` Priority 6)
 
-Detect against `review-code`'s **Priority 6 — Test Quality** taxonomy (tests coupled to
-implementation, excessive mocking, flaky patterns) — do not fork a divergent list. Detect only test
+Detect against the catalogue rows routed here — a subset of the rows `review-code`'s **Priority 6 —
+Test Quality** names — and do not fork a divergent list. Detect only test
 files matching the globs in `rules/testing.md` frontmatter (the same set `testing.md` scopes itself
 to). Non-test files (the SUT) are never scanned or rewritten. v1 acts on **Python + TypeScript/React
 only**; files matched by other globs are recognized as tests but skipped with a one-line note.
@@ -106,7 +119,7 @@ propose or apply anything.** (Fixture `01-baseline-red-stop`.)
    - **File**: `{file-path}`
    - **Lines**: {start}-{end}
    - **Priority**: {1-3}
-   - **Smell**: {smell family} (review-code P6)
+   - **Smell**: {smell family} — {catalogue smell from test-patterns.md}
    - **Rewrite intent**: {what the test should verify instead — the behaviour}
    - **Status**: pending
    ```
@@ -244,6 +257,6 @@ approve/suite/revert/commit guarantees as the backlog loop.
 
 `skills/redesign-tests/self-test/` holds golden fixtures that pin these safety behaviours
 (baseline-red → STOP; post-apply-red → auto-REVERT; approve → COMMIT; reject → clean REVERT;
-`--review` → behavioural-only backlog; missing-fake → SKIP). Whenever this skill changes, drive the
+`--review` → behavioural-only backlog; missing-fake → SKIP; unmanaged-dependency mock → not flagged). Whenever this skill changes, drive the
 fixtures per `self-test/README.md` and confirm each produces its `expected.md` outcome — every edit
 here is non-monotonic, so the skill is changed and regression-tested, never changed and eyeballed.

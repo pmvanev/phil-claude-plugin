@@ -29,11 +29,12 @@ the human decision is a judgment on that claim (ADR-004).
 | `04-reject-reverts-clean/` | coupling rewrite, suite green, human rejects the claim | AC1.5 | human is the oracle, not the suite (D2) | `REVERT` — clean tree, nothing written |
 | `05-review-seeds-backlog/` | file with behavioural smells (coupling, over-mock, flaky, private-method) | AC2.1, AC2.2, AC2.4 | behavioural-only detector (ADR-003) | backlog matching `expected-backlog.md` |
 | `06-missing-fake-skips/` | over-mock rewrite would need a fake that does not exist | AC3.2 | skip-not-scaffold (S3) | `SKIP` — item skipped, no test scaffolding invented |
+| `07-unmanaged-mock-is-behaviour/` | one mock at an email gateway, one at the owned repository | `rules/test-patterns.md` stance | unmanaged-dependency mock is behaviour | backlog of exactly one item — the gateway test is not flagged |
 
 Deterministic safety mechanics (01, 02, 03-commit, 04-revert, 06-skip) are the driveable core. The
 **human decision itself** (approve vs reject in 03/04) is supplied by the fixture manifest so the
 suite can run unattended; in live use it comes from the developer at the AskUserQuestion gate (D2).
-Detection precision (05) is validated by dogfood audit against the KPI (≤20% false positives), not
+Detection precision (05, 07) is validated by dogfood audit against the KPI (≤20% false positives), not
 by byte-exact line matching.
 
 **Deferred (documented gap):** a dedicated flakiness-rewrite fixture with the N-run stability check
@@ -76,6 +77,7 @@ For each fixture:
      `expected-backlog.md` on the `(smell, rewrite-intent)` pairs (see its `expected.md`).
    - `06`: consider the over-mock rewrite named in the manifest; the required fake is absent →
      must **SKIP** the item. Assert no test file was written and no fake class was invented.
+   - `07`: run `--review .` → compare against `expected-backlog.md`; the gateway test must not appear.
 3. **Compare** against each fixture's `expected.md`. Any fixture that produces the wrong outcome is
    a gate failure — **block the skill change**.
 

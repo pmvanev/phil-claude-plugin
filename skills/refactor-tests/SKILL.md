@@ -5,8 +5,8 @@ description: Skill bundle for phil:refactor-tests command — human-approved, st
 
 # Refactor Tests
 
-You clean test code to the structure standards in `${CLAUDE_PLUGIN_ROOT}/rules/testing.md` (and the matching
-language rules) **without silently weakening what the tests verify**. You work through a
+You clean test code to the structure standards in `${CLAUDE_PLUGIN_ROOT}/rules/testing.md` and
+`${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md` (and the matching language rules) **without silently weakening what the tests verify**. You work through a
 prioritized backlog one item at a time, and **every change is applied only after the developer
 approves the diff**.
 
@@ -16,17 +16,30 @@ green suite alone cannot prove an assertion was not weakened — **the human is 
 or merge assertions, never delete a test, never fix determinism/flakiness. Those are behavior
 changes and are out of scope.
 
-## The five moves you may propose (D5)
+## The four moves you may propose (D5)
 
 Only these assertion-preserving structure moves. If a smell is not one of these, do **not**
 report or apply it.
 
 | Smell | Named move | Why it is assertion-preserving |
 |-------|-----------|--------------------------------|
-| Duplicated setup (same arrange across ≥2 tests) | **Extract Fixture/Helper** | moves setup into a shared fixture/helper; assertions unchanged |
+| Duplicated setup (same arrange across ≥2 tests) | **Extract Fixture/Helper** | moves setup into a fixture or a Creation Method; assertions unchanged |
 | Missing AAA (arrange/act/assert interleaved) | **Reorder into Arrange-Act-Assert** | reorders statements; same asserts, same values |
 | Vague test name | **Rename** | renames the test; body and asserts unchanged |
 | Long test with a repeated/extractable block | **Extract Test Helper** | extracts a block to a helper; each assert preserved verbatim |
+
+Each move is the fix in a Smell Catalogue row of `test-patterns.md` routed to `/phil:refactor-tests`:
+Test Code Duplication → Extract Fixture/Helper; Obscure Test → Extract Test Helper, which yields a
+Creation Method for a build block or a Custom Assertion for an assert block; Vague Name → Rename; Interleaved Phases → Reorder into Arrange-Act-Assert. Name the smell
+from that row in the backlog. The catalogue's other structural smells — Mystery Guest, General
+Fixture, Irrelevant Information, Assertion Roulette, Eager Test — also keep the assertion, but no move
+here fixes them yet; `review-code` reports them and a human applies the fix.
+
+**Say when a move hides a value the assertion depends on.** DAMP, not DRY: a fixture holding the
+inputs the asserted value follows from moves the cause out of the test body, and trades Test Code
+Duplication for an Obscure Test. Prefer a helper that takes those values as arguments. When the move
+still extracts them, the proposal's rationale says so in one line, and the human weighs the trade at
+the gate.
 
 **Never in scope:** tightening loose assertions, assert-splitting, determinism fixes (static
 timestamps, seeded RNG, injected clocks), deleting dead/duplicate tests, mocking changes. These
@@ -45,7 +58,7 @@ heuristics land (D6, extensible).
 
 | Smell | Python signal | TypeScript/React signal |
 |-------|---------------|-------------------------|
-| Duplicated setup | identical arrange statements (same literals/construction) repeated in ≥2 `def test_*` bodies | same arrange repeated across ≥2 `it()`/`test()` blocks; no shared `beforeEach`/helper |
+| Duplicated setup | identical arrange statements (same literals/construction) repeated in ≥2 `def test_*` bodies | same arrange repeated across ≥2 `it()`/`test()` blocks, with no helper building it |
 | Missing AAA | asserts interleaved between multiple acts; no arrange→act→assert separation | `expect(...)` calls interleaved with actions; no clear setup/act/assert grouping |
 | Vague name | name that states no behavior: `test_1`, `test_it_works`, `test_case`, `test_foo`, `test_method`, `test_func` | `it("works")`, `it("test 1")`, `test("case")`, names with no behavior clause |
 | Long test w/ extractable block | test body long (~>15 statements) or a repeated multi-line block usable as a helper | long `it()` body or a repeated build/assert block extractable to a helper |
@@ -119,7 +132,7 @@ is mid-change; the developer must get to green first. (This is fixture `01-basel
    - **File**: `{file-path}`
    - **Lines**: {start}-{end}
    - **Priority**: {1-3}
-   - **Smell**: {smell name} (D5)
+   - **Smell**: {smell name} (D5) — {catalogue smell from test-patterns.md}
    - **Move**: {named move}
    - **Rationale**: {which testing.md standard; note it is assertion-preserving}
    - **Status**: pending
