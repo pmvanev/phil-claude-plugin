@@ -16,7 +16,10 @@ you set up the review so it is honest and independent, and you present the resul
 
 The standards a review is held to are whatever applies to the target —
 `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`,
-`${CLAUDE_PLUGIN_ROOT}/rules/writing.md`, and the target's own stated intent.
+`${CLAUDE_PLUGIN_ROOT}/rules/writing.md`, and the target's own stated intent. **Where the target adds or
+changes tests, add `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md`** — a suite that is green because its
+tests assert on mocks of in-process collaborators, or compute their expected values, proves less than
+its colour, and that gap is evidence against "done".
 
 > **The through-line (ADR-010/011).** The reusable unit is the **agent**
 > (`agents/adversarial-reviewer.md`); this skill is only the standalone human driver. The agent's

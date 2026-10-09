@@ -81,6 +81,16 @@ engine-checkable. Never mark something qualitative on your own to justify runnin
 ceremony is opt-in, and over-triggering it is exactly how this tool would become the bureaucracy it
 exists to avoid.
 
+**Test two patterns against a stated reason before accepting it.** `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md`
+names two that make a hard-to-assert output checkable. A **property-based test** asserts a rule over
+generated inputs where no single example captures it. An **approval test** pins a large output: a
+human reads it once, and every later run is a diff. Neither captures a subjective judgment such as
+"helpful", but both remove "too large or too varied to assert" as a reason — an expectation either one
+can assert is engine-checkable. **An approval test's first approval is still a human read**, and the
+off-ramp opens no trail, so the read must travel with the recommendation: name it in the
+classification table and in the off-ramp's engine command, as the step that comes before any diff
+means anything.
+
 Produce a **classification table**: each expectation → `engine-checkable` (with the engine + its
 native oracle) or `qualitative` (with the concrete reason, developer-confirmed).
 
@@ -96,7 +106,9 @@ If **every** expectation is engine-checkable:
 
 1. Present the classification table (expectation → engine → native oracle).
 2. Recommend the specific engine command to run directly — `/nw-...` (or the fitting nwave wave) for
-   user-facing behavior, `/phil:work "<...>"` for invisible work — naming it explicitly.
+   user-facing behavior, `/phil:work "<...>"` for invisible work — naming it explicitly. Where an
+   expectation is checkable only through an approval test, say in the recommendation that a human
+   reads and approves its first output; nothing else records that.
 3. **Exit.** Do not commission evidence, do not dispatch an evidence producer, do not open a
    `docs/edd/<slug>/` trail. Say plainly: *"Every expectation here is provable by <engine> directly
    — run it; phil:edd would only add ceremony."*

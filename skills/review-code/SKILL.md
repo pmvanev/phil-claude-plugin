@@ -217,7 +217,8 @@ After writing the backlog, report to the user:
 ## Self-test
 
 `skills/review-code/self-test/` holds fixtures that pin what a review must and must not flag. Whenever
-this skill changes, run `/phil:review-code` over each fixture directory and compare the backlog
-against its `expected-backlog.md` on the criteria in its `expected.md`. `tests/test_test_patterns_wiring.py`
-checks that each fixture is well-formed and green and that its expected findings name real catalogue
-rows; whether a review *produces* them is model judgement, and a human drives that comparison.
+this skill changes, drive each fixture per `self-test/README.md`: run `/phil:review-code` over its
+directory and compare the backlog against its `expected-backlog.md` on the criteria in its
+`expected.md`. `tests/test_test_patterns_wiring.py` checks that every fixture is well-formed and green
+and that each expected test finding takes its smell, fix and route from one catalogue row; whether a
+review *produces* them is model judgement, and a human drives that comparison.

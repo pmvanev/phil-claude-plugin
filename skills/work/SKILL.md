@@ -191,7 +191,11 @@ or a prose skill with no self-test — is not a safety net.
 ### 2. Pin it (delegate the authoring where a skill fits)
 
 Where the pin is thin, pin **current** observable behavior before changing structure:
-- **Code:** add characterization / golden-master / contract tests that capture today's behavior.
+- **Code:** add characterization / golden-master / contract tests that capture today's behavior,
+  built as `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md` describes them — a Characterization Test asserts
+  what the code does now, not what it should; an approval test scrubs every field that varies between
+  runs, or the pin is erratic; a contract test holds a fake to the real implementation, and a
+  consumer-driven contract pins a service boundary.
 - **Prose:** capture the current self-test scenarios, or record a human-approval baseline of the
   current output, so a later diff can be judged against it.
 

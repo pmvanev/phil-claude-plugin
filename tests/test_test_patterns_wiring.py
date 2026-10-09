@@ -8,7 +8,8 @@ them against each other:
 - every route names a command that exists, or says `report only`;
 - a smell routed to `refactor-tests` never changes what a test asserts, and names one of that skill's
   moves; a smell routed to `redesign-tests` always changes it, and names one of that skill's moves;
-- the four skills name the rule, and the two new fixtures stay well-formed.
+- every skill and agent that judges or writes tests names the rule, and the fixtures stay
+  well-formed.
 
 **What this cannot check.** It verifies a skill *names* the rule, not that a run *applies* it — the gap
 `scripts/check-rule-reachability.py` states in its own header. Whether a reviewer cited the right smell
@@ -82,7 +83,7 @@ def test_a_structural_route_names_a_refactor_tests_move_and_keeps_the_assertion(
     assert routed, "nothing routes to refactor-tests — the catalogue and the skill have drifted apart"
     for row in routed:
         assert _plain(row["Changes the assertion?"]).startswith("No"), row["Smell"]
-        assert any(m in _plain(row["Fix"]) for m in REFACTOR_TESTS_MOVES), (
+        assert set(REFACTOR_TESTS_MOVES) & _fix_names(row["Fix"]), (
             f"{row['Smell']} routes to refactor-tests but names none of its moves"
         )
 
@@ -92,7 +93,7 @@ def test_a_behavioural_route_names_a_redesign_tests_move_and_changes_the_asserti
     assert routed, "nothing routes to redesign-tests — the catalogue and the skill have drifted apart"
     for row in routed:
         assert _plain(row["Changes the assertion?"]).startswith("Yes"), row["Smell"]
-        assert any(m in _plain(row["Fix"]) for m in REDESIGN_TESTS_MOVES), (
+        assert set(REDESIGN_TESTS_MOVES) & _fix_names(row["Fix"]), (
             f"{row['Smell']} routes to redesign-tests but names none of its moves"
         )
 
@@ -110,6 +111,15 @@ def test_the_moves_this_file_pins_are_the_moves_the_skills_define():
 def test_each_test_skill_names_the_rule():
     for skill in ("review-code", "redesign-tests", "refactor-tests", "refactor"):
         assert "rules/test-patterns.md" in (SKILLS / skill / "SKILL.md").read_text(), skill
+
+
+def test_each_loader_that_judges_or_writes_tests_names_the_rule():
+    """These reached the rule only through `testing.md`'s pointer, which a model may not follow."""
+    loaders = [SKILLS / s / "SKILL.md" for s in ("adversarial-review", "edd", "work")]
+    loaders += [REPO / "agents" / f"{a}.md"
+                for a in ("adversarial-reviewer", "adversarial-verifier", "refactor-critic-correctness")]
+    for path in loaders:
+        assert "rules/test-patterns.md" in path.read_text(), path.relative_to(REPO)
 
 
 def test_review_code_backlog_carries_a_route_and_all_seven_priorities():
@@ -159,26 +169,64 @@ def test_rd07_flags_the_owned_mock_and_never_the_unmanaged_one():
     assert "test_place_sends_confirmation" not in backlog
 
 
-def test_rc01_is_wellformed_and_green():
-    for name in ("manifest.json", "expected.md", "expected-backlog.md", "invoice.py",
-                 "test_invoice.py"):
-        assert (RC01 / name).exists(), name
-    json.loads((RC01 / "manifest.json").read_text())
-    assert _suite_green(RC01), "a review fixture with a red suite tests the wrong thing"
+REVIEW_CODE_FIXTURES = sorted((SKILLS / "review-code" / "self-test").glob("*/manifest.json"))
 
 
-def test_rc01_every_test_finding_names_a_catalogue_fix_and_route():
+def test_every_review_code_fixture_is_wellformed_and_green():
+    """The README promises this for each fixture, so a second one is checked the day it lands."""
+    assert REVIEW_CODE_FIXTURES
+    for manifest in REVIEW_CODE_FIXTURES:
+        fixture = manifest.parent
+        json.loads(manifest.read_text())
+        for name in ("expected.md", "expected-backlog.md"):
+            assert (fixture / name).exists(), f"{fixture.name}/{name}"
+        assert _suite_green(fixture), f"{fixture.name}: a review fixture with a red suite tests the wrong thing"
+
+
+def _fix_names(cell):
+    """The names a Fix cell offers: each alternative, and its head before `for`, `as`, `to` and the like.
+
+    So `Parameterized Test for the loop` offers `Parameterized Test`, and a bare `Assert` offers nothing.
+    """
+    names = set()
+    for seg in re.split(r",\s*(?:or\s+)?|;\s*|\s+—\s+|:\s+|\s+or\s+", _plain(cell)):
+        seg = seg.strip()
+        if seg:
+            names.add(seg)
+            names.add(re.split(r"\s+(?:for|as|that|with|to|through)\s+", seg)[0])
+    return names
+
+
+def _field(item, name, where):
+    m = re.search(rf"- \*\*{name}\*\*: (.+)", item)
+    assert m, f"{where}: an expected Priority 6 item has no {name} field"
+    return m.group(1).strip()
+
+
+def test_fix_names_reject_a_fragment():
+    assert "Parameterized Test" in _fix_names("Parameterized Test for the loop, literal expected values")
+    assert "Rename" not in _fix_names("Renamed helper")
+    assert "Assert" not in _fix_names("Assert on observable outcome: an Expected Object")
+
+
+def test_every_expected_test_finding_takes_smell_fix_and_route_from_one_row():
+    """Checked against the smell's own row, so a smell from one row cannot borrow another's route."""
+    rows = {_plain(r["Smell"]): r for r in _catalogue_rows()}
+    for manifest in REVIEW_CODE_FIXTURES:
+        backlog = (manifest.parent / "expected-backlog.md").read_text()
+        for item in re.split(r"^### \[R\d{3}\]", backlog, flags=re.M)[1:]:
+            if not re.search(r"- \*\*Priority\*\*: 6\b", item):
+                continue
+            where = manifest.parent.name
+            smell = _field(item, "Smell", where)
+            refactoring = _field(item, "Refactoring", where)
+            route = _plain(_field(item, "Route", where))
+            assert smell in rows, f"{where}: {smell} is not a catalogue smell"
+            assert refactoring in _fix_names(rows[smell]["Fix"]), f"{smell}: {refactoring} is not its row's fix"
+            assert route == _plain(rows[smell]["Route"]), f"{smell}: {route} is not its row's route"
+
+
+def test_rc01_finds_three_smells_and_leaves_the_gateway_test_alone():
     backlog = (RC01 / "expected-backlog.md").read_text()
-    items = re.split(r"^### \[R\d{3}\]", backlog, flags=re.M)[1:]
-    assert len(items) == 3
-    fixes = " ".join(_plain(r["Fix"]) for r in _catalogue_rows())
-    routes = {_plain(r["Route"]) for r in _catalogue_rows()}
-    smells = {_plain(r["Smell"]) for r in _catalogue_rows()}
-    for item in items:
-        smell = re.search(r"- \*\*Smell\*\*: (.+)", item).group(1).strip()
-        refactoring = re.search(r"- \*\*Refactoring\*\*: (.+)", item).group(1).strip()
-        route = _plain(re.search(r"- \*\*Route\*\*: (.+)", item).group(1).strip())
-        assert smell in smells, smell
-        assert refactoring in fixes, refactoring
-        assert route in routes, route
+    assert len(re.findall(r"^### \[R\d{3}\]", backlog, re.M)) == 3
     assert "send_receipt" not in backlog, "a mock at an unmanaged dependency is behaviour, not a smell"
