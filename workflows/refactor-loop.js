@@ -77,7 +77,7 @@ const VERDICT_SCHEMA = {
   additionalProperties: false,
   properties: {
     justification: { type: 'string' },
-    verdict: { type: 'string', enum: ['accept', 'revise', 'reject'] },
+    verdict: { type: 'string', enum: ['accept', 'revise', 'reject', 'CANNOT_ASSESS'] },
     confidence: { type: 'number' },
     per_criterion: {
       type: 'array',
@@ -85,7 +85,7 @@ const VERDICT_SCHEMA = {
         type: 'object',
         additionalProperties: false,
         properties: {
-          criterion: { type: 'string' }, met: { type: 'boolean' },
+          criterion: { type: 'string' }, met: { enum: [true, false, 'CANNOT_ASSESS'] },
           severity: { type: 'string', enum: ['major', 'minor', 'nit'] },
           type: { type: 'string' }, mechanism: { type: 'string' },
           span: { type: 'string' }, evidence: { type: 'string' },
@@ -159,7 +159,7 @@ Diff:
 ${p.diff}
 \`\`\`
 
-Justification FIRST, then verdict. Each criterion = (criterion, met, severity major|minor|nit, type, mechanism, span as file:line, evidence = rubric clause + offending lines). A met:false with no span is not allowed. Anti-flattery: generic praise with no span ⇒ CANNOT_ASSESS, never accept. Overall verdict (accept|revise|reject) + confidence in [0,1].`
+Justification FIRST, then verdict. Each criterion = (criterion, met, severity major|minor|nit, type, mechanism, span as file:line, evidence = rubric clause + offending lines). met is the boolean true or false, or the string "CANNOT_ASSESS" for a criterion you cannot judge from the diff alone. A met:false with no span is not allowed. Anti-flattery: generic praise with no span ⇒ CANNOT_ASSESS, never accept. Overall verdict (accept|revise|reject|CANNOT_ASSESS) + confidence in [0,1].`
 }
 
 function applyPrompt(p) {
@@ -213,6 +213,24 @@ pinned: [${PINNED.join(', ')}]
 |----|-------|------|------------|--------|------|
 ${rows}
 `
+}
+
+// GUARD (pure — no LLM, no I/O): route one critic verdict to APPLY or back to PROPOSE.
+// reject, CANNOT_ASSESS and any verdict outside accept|revise back-prompt; so does a failing major
+// item at confidence >= theta. An accept citing no file:line span is coerced to CANNOT_ASSESS
+// (rubric anti-flattery clause; refactor/self-test/03). An abstaining criterion
+// (met: "CANNOT_ASSESS") is not a failure. Wrong types fail closed: any spelling of "false" is a
+// failure, and an unreadable confidence counts as certain.
+function routeVerdict(v, theta) {
+  if (!v) return { route: 'reprompt', verdict: 'no-verdict', failures: [] }
+  const items = Array.isArray(v.per_criterion) ? v.per_criterion : []
+  const failures = items.filter(c => c.met === false || (typeof c.met === 'string' && c.met.trim().toLowerCase() === 'false'))
+  const spanned = items.some(c => typeof c.span === 'string' && /\S:\d/.test(c.span))
+  const verdict = (v.verdict === 'accept' && !spanned) ? 'CANNOT_ASSESS' : v.verdict
+  const confidence = typeof v.confidence === 'number' ? v.confidence : 1
+  const blockingMajor = failures.some(c => c.severity === 'major') && confidence >= theta
+  const reprompt = !['accept', 'revise'].includes(verdict) || blockingMajor
+  return { route: reprompt ? 'reprompt' : 'apply', verdict, failures }
 }
 
 // Deterministic test-file lockbox under the Workflow substrate (git apply via Bash
@@ -287,10 +305,12 @@ while (iter < MAX_ITER) {
 
   // --- REVIEW ---
   const v = await agent(criticPrompt(p), { schema: VERDICT_SCHEMA, label: `review#${iter}`, phase: 'Loop' })
-  const blockingMajor = !!v && Array.isArray(v.per_criterion) && v.per_criterion.some(c => c.met === false && c.severity === 'major') && (v.confidence >= THETA)
-  if (!v || v.verdict === 'reject' || blockingMajor) { // GUARD: back-prompt
-    node.status = 'invalid'; node.note = `critic ${v ? v.verdict : 'no-verdict'}`
-    lastFailure = v ? `The critic rejected node ${node.node_id}. Issues:\n` + v.per_criterion.filter(c => c.met === false).map(c => `- [${c.severity}] ${c.criterion} @ ${c.span || '?'}: ${c.mechanism || ''}`).join('\n') : 'Critic produced no valid verdict.'
+  const routed = routeVerdict(v, THETA)
+  if (routed.route === 'reprompt') { // GUARD: back-prompt
+    node.status = 'invalid'; node.note = `critic ${routed.verdict}`
+    lastFailure = !v ? 'Critic produced no valid verdict.'
+      : routed.verdict === 'CANNOT_ASSESS' ? `The critic could not assess node ${node.node_id} from a span — propose a change whose effect the diff itself shows.`
+      : `The critic rejected node ${node.node_id}. Issues:\n` + routed.failures.map(c => `- [${c.severity}] ${c.criterion} @ ${c.span || '?'}: ${c.mechanism || ''}`).join('\n')
     log(`iter ${iter}: critic blocked ${node.node_id} -> re-propose.`)
     continue
   }

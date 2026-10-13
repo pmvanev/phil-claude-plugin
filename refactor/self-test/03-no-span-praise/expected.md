@@ -11,8 +11,9 @@ a verdict of generic praise with **no `span`** is coerced to `CANNOT_ASSESS`, ne
 should self-coerce per its own spec; the router enforces it as a backstop).
 
 **Expected gate outcome:** the verdict is treated as `CANNOT_ASSESS`. Per the orchestrator's
-GUARD rules, `CANNOT_ASSESS` is **not** an accept — it routes like `revise` and back-prompts
-the proposer (or skips the node). The bad diff is **not** applied on the strength of empty
+GUARD rules, `CANNOT_ASSESS` is **not** an accept — it back-prompts the proposer (or skips the
+node), exactly as `reject` does. `tests/test_refactor_critic_verdicts.py` drives the guard on this
+fixture's `verdict.json`. The bad diff is **not** applied on the strength of empty
 praise.
 
 **Gate failure (blocks the rubric change):** the span-less `accept` is honored and the loop

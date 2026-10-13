@@ -21,9 +21,9 @@ and you never let a subagent declare the loop done.
 This is structure-only work. Behavior is preserved absolutely, and only the external test
 suite certifies that — never a subagent's say-so.
 
-The standards are `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, and the
-named refactorings in `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md`. The frozen rubric the critic
-applies is `refactor/rubric.md`.
+The standards are `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
+and the named refactorings in `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md`. The frozen rubric the
+critic applies is `${CLAUDE_PLUGIN_ROOT}/refactor/rubric.md`.
 
 ## Relationship to /phil:refactor
 
@@ -92,8 +92,8 @@ INIT ─►PROPOSE ─►REVIEW ─►[GUARD]─►APPLY ─►TEST ──green�
 
 1. Invoke `refactor-critic-correctness` via the Task/Agent tool. Pass `{ diff, original_code,
    stated_intent (one line, NOT the proposer's trace), rubric_slice (Slice 1 of
-   `refactor/rubric.md`), pinned_constraints }`. Do **not** pass the proposer's reasoning —
-   the critic must judge independently.
+   `${CLAUDE_PLUGIN_ROOT}/refactor/rubric.md`), pinned_constraints }`. Do **not** pass the proposer's
+   reasoning — the critic must judge independently.
 2. **Guard G6 (schema):** malformed verdict → re-ask once, then skip as above.
 3. Proceed to GUARD with the verdict JSON.
 
@@ -101,11 +101,13 @@ INIT ─►PROPOSE ─►REVIEW ─►[GUARD]─►APPLY ─►TEST ──green�
 
 Route on `verdict + severity + confidence`, threshold **θ = 0.6**:
 
-- **G5:** if `verdict = reject`, OR any `per_criterion` item has `severity ≥ major` and
-  `confidence ≥ 0.6` → back-prompt the proposer (`llm_self_examine`): return to PROPOSE with
+- **G5:** if `verdict = reject`, OR any failing `per_criterion` item (`met: false`) has
+  `severity ≥ major` and `confidence ≥ 0.6` → back-prompt the proposer (`llm_self_examine`): return to PROPOSE with
   the failing `per_criterion` items as `last_failure_evidence`. Increment `iter`.
 - If `verdict ∈ {accept, revise}` with no blocking item → proceed to APPLY (T4).
-- A `CANNOT_ASSESS` verdict is **not** an accept — treat it as `revise` and back-prompt.
+- A `CANNOT_ASSESS` verdict is **not** an accept — back-prompt the proposer, as G5 does. An
+  `accept` citing no `file:line` span is coerced to `CANNOT_ASSESS` first (rubric anti-flattery clause).
+  A criterion whose `met` is `CANNOT_ASSESS` abstains and is not a failure.
 
 ### APPLY  (cage)
 
@@ -257,11 +259,11 @@ back to the in-prose checks in this skill. Wire the hooks to make the boundaries
 
 ## Self-test
 
-`refactor/self-test/` holds deliberately-bad refactorings that the loop **must** reject — a
-diff that breaks a test (must REVERT at G3), a diff that broadens the public API while
-claiming `public_api_touched: false` (must REVERT at G4), and a "perfect refactor!" verdict
-with no span (must be coerced to `CANNOT_ASSESS`). These are the regression gate for the
-frozen rubric: run them whenever `refactor/rubric.md` changes. See that directory's README.
+`refactor/self-test/` holds deliberately-bad refactorings that the loop **must** reject — a diff that
+breaks a test (must REVERT at G3), a diff that broadens the public API while claiming `public_api_touched:
+false` (must REVERT at G4), and a "perfect refactor!" verdict with no span (must be coerced to
+`CANNOT_ASSESS`). These are the regression gate for the frozen rubric: run them whenever
+`${CLAUDE_PLUGIN_ROOT}/refactor/rubric.md` changes. See that directory's README.
 
 ---
 

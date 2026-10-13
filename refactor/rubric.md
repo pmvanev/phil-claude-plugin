@@ -37,9 +37,9 @@ anchors instead of adjectives. Where a criterion can be binary, it is.
 | The refactoring is wrong in kind (changes behavior, wrong target) | `reject` |
 | The critic cannot point to a span supporting its judgment | `CANNOT_ASSESS` |
 
-The orchestrator routes on `verdict + severity + confidence` with threshold **θ = 0.6**: an
-item of `severity ≥ major` at `confidence ≥ 0.6` blocks an `accept` and back-prompts the
-proposer.
+The orchestrator routes on `verdict + severity + confidence` with threshold **θ = 0.6**: a
+failing item (`met: false`) of `severity ≥ major` at `confidence ≥ 0.6` blocks an `accept` and
+back-prompts the proposer. An abstaining item (`met: CANNOT_ASSESS`) blocks nothing.
 
 ---
 
