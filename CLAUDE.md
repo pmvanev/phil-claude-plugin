@@ -1,38 +1,17 @@
-# Global Development Standards
+# phil plugin
 
-Development and writing standards live in `${CLAUDE_PLUGIN_ROOT}/rules/`. **A skill, command or agent that
-needs one names it and reads it.** Nothing preloads them.
+This repo's product is the `phil` Claude Code plugin — skills, commands, agents, hooks and rules, mostly
+prose.
 
-This used to claim they load themselves from the files you touch. **They never have.** Measured
-2026-08-31 against the running Claude Code 2.1.252: the plugin manifest's component list is
-`commands, agents, skills, hooks, outputStyles, themes, mcpServers, lspServers, experimental` — no
-`rules` — and every call site of the rules-directory loader passes `~/.claude/rules`, the managed
-directory, or `<projectRoot>/.claude/rules`. **None passes a plugin root.** This repo has no
-`.claude/rules` either, so the mechanism has never fired here.
+## Build & test
 
-**Explicit loading is the design, not a workaround.** Auto-load would push a whole standard into
-context on the chance a file matched; naming one costs nothing until it is needed. The `paths:`
-frontmatter each rule carries is not dead — it takes effect for anyone who copies these files into
-their own `.claude/rules/`, which is the only place that key is read.
-
-**So a rule nothing names is inert**, and `scripts/check-rule-reachability.py` fails the build on one.
-Reachability is transitive: a rule named by a skill is reachable, and so is a rule that reachable rule
-cites. `definitions.md` and `llm-inference.md` are declared exceptions — a glossary and a manual
-reference, applied by nobody on purpose.
-
-**The check verifies a rule is *mentioned*, not that anything *applies* it, and that gap is real.**
-`continuous-delivery.md` hangs on a single pointer inside `modern-software-engineering.md` and passes.
-Telling "go read this" from "do not apply this here" is prose judgement; a check that faked it would
-pass because the field is populated, which is the `devon-ui-developer` defect above wearing a different
-hat. Stated rather than hidden, on the pattern of the decision-request hook's header.
-
-**`ui.md` was that gap's live instance, and is now its worked example.** All eight of its mentions were
-exclusions — `ux.md` and `ux-review` naming it to say aesthetics are reviewed elsewhere, when there was
-no elsewhere. Resolved 2026-08-31 by splitting it **on checkability rather than on subject**: the
-reduced-motion variant, effect budget and small-scale legibility moved into `ux.md`, where a reviewer
-already looks; the taste questions stayed. So a rule that reads as build-time guidance is not a defect
-to wire up — it is a rule whose reviewable part has not been separated yet. `ui.md` now says so in its
-own header, which is better than an entry in a list nobody opens.
+- Run `python3 -m pytest -q` before committing. It drives the `*/self-test/` fixtures; `pytest.ini` keeps
+  their inputs out of collection.
+- `scripts/check-invariants.py` runs every repo check at `SessionStart` and prints only failures.
+- Add a check to `scripts/check-invariants.py` when a defect is found twice. Wound: `jobs.yaml` named
+  `devon-ui-developer` for six weeks with no file behind it.
+- Before trusting a new check's green run, watch it refuse the input that motivated it. Wound: the first
+  read-only check passed because its function was written and never called.
 
 ## Key Principles (always apply)
 
@@ -44,273 +23,99 @@ own header, which is better than an entry in a list nobody opens.
 
 ## Build path for this plugin
 
-This repo's product is a plugin — skills, commands, agents, rules. Two tools own the two halves, and
-neither substitutes for the other:
+- Run `nw-discuss` before authoring a new feature, skill or command. Stop after DISCUSS: the deliverable
+  is prose, so DESIGN, DISTILL and DELIVER stay out (`todo.md` 2026-06-17; edd-loop DDD8).
+- Read `plugin-dev:skill-development`, `command-development`, `agent-development` or `plugin-structure`
+  before writing the file. Take the schema from plugin-dev, not from a sibling file — a copied shape
+  carries the sibling's defects unchecked.
+- Run `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` over the result.
+- Name in the commit message which of `nw-discuss` and `plugin-dev` ran. Wound: `groom-issues` slice 03
+  was authored 2026-08-13 without plugin-dev, and nothing recorded it.
 
-- **Understand it with `nw-discuss`.** New feature, new skill, new command: run DISCUSS before
-  authoring. It produces the persona, the JTBD, the locked decisions and the slice split that the
-  `docs/feature/<name>/` artifacts then hold. Skip it and the slice brief is invented at authoring
-  time by whoever is typing.
-- **Author, review and vet with `plugin-dev`.** Consult `plugin-dev:skill-development`,
-  `command-development`, `agent-development` or `plugin-structure` **before writing the file**, not
-  after — they own the schema, the frontmatter fields and the layout. Then run
-  `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` over the result. Neither is optional
-  because a sibling file is a convenient template: copying the shape of an existing command
-  propagates whatever that command got wrong and records nothing about whether it was checked.
+## Rules load only when named
 
-DESIGN/DISTILL/DELIVER do **not** run here — the deliverable is prose, and this repo settled twice
-that skills are authored rather than waved (`todo.md` 2026-06-17; edd-loop DDD8).
+- A skill, command or agent that needs a standard from `rules/` names it and reads it. Plugins have no
+  rules component, so nothing preloads them (measured on Claude Code 2.1.252, 2026-08-31).
+- `scripts/check-rule-reachability.py` fails the build on a rule nothing names, transitively.
+  `definitions.md` and `llm-inference.md` are declared exceptions.
+- The check proves a rule is *mentioned*, not *applied*. When every mention of a rule excludes it, split
+  its checkable part into the standard a reviewer reads — as `ui.md` gave its checkable items to `ux.md`
+  on 2026-08-31.
+- A rule's `paths:` frontmatter takes effect only for a consumer who copies the rule into their own
+  `.claude/rules/`.
 
-**Say in the commit which of the two ran.** Slice 03 of `groom-issues` was authored on 2026-08-13
-from the slice brief and its sibling commands, with `plugin-dev` never loaded — a deviation from the
-build path its own `feature-delta.md` declares, invisible afterwards because nothing records
-compliance either way.
+## Decision requests
 
-## Decision requests are refused in flight here
+`decision-request: strict` — this repo opts in. `hooks/decision-request/check-ask.py` refuses any question
+over 200 words, and here also any question or option naming an issue number, a file path or a bracketed
+identifier. Rewrite a refused ask as the refusal directs.
 
-`decision-request: strict` — this line is the opt-in, read by
-`hooks/decision-request/check-ask.py` at every `AskUserQuestion` call.
+## Board surfaces that compose prose
 
-The shipped hook enforces the 200-word per-question limit in **every** project. The plain-language
-rule — no issue numbers, file paths or bracketed identifiers inside the question or its options — is
-enforced only where a project opts in, because a filename is internal jargon here and is often the
-clearest possible way to name a decision elsewhere. Measured 2026-08-26: denying on both rules would
-have refused 59 of this repo's 73 recorded asks, and 41 of the 42 distinct matches were genuine.
-
-A denial is not a dead end — the reason names the breach and the remedy, and the ask is rewritten.
-The two clauses it cannot reach (every option naming its cost, and the ask's placement in surrounding
-output) are stated in the hook's own header, because a partial enforcer that hides what it misses
-reads as a complete one.
-
-## A board surface that names a prose standard ships a fixture with it
-
-Eight surfaces in the board family **compose** prose that lands where the whole team reads it — the fields
-`groom-ask` writes, the two-line roster descriptions and summarising clauses in the generated block, the
-projected why/next/stack, the clause after the dash on a `## Chain` line, the ranking basis, the
-`assumed`-line rationales, `board-snapshot`'s per-card descriptions and report lines, and every word `nwave-wave-summary`
-composes. Each names `rules/writing.md` — the first six as of 2026-09-04, the last two on 2026-09-08.
-
-**The eighth is the limiting case: it quotes nothing at all.** Every other surface mixes composed text
-with a filer's own words, and the discriminator does real work separating them. A summary has no quoted
-half, so the standard governs the entire output — and its fixture pins that a decision must be *stated*
-rather than named, which is *definite, specific, concrete language* applied exactly where a pattern check
-cannot reach. **Naming it is the mechanism,
-and naming alone is this board's recorded defect** — `scripts/check-rule-reachability.py` verifies a rule
-is *mentioned*, never that anything *applies* it, and says so in as many words.
-
-**So a citation ships with a fixture that would fail without it** — `nwave-issue-board` 30 and 31,
-`issue-board` 01, `groom-issues` 44, `session-handoff` 27, `board-snapshot` 02 and 12, and
-`nwave-wave-summary` 06. **Two citations
-do not yet have one:** `groom-set`'s comments on an irreversible operation and `phil:rank-issues`' recorded
-basis. Stated because an unstated gap in a rule about unenforced mentions is that rule failing in its own
-terms.
-
-**`board-snapshot` is the seventh surface, added 2026-09-08, and it is the first to ship the measurement
-alongside the citation.** Its vocabulary check found **nothing** across twelve hand-composed descriptions
-while ten of the twelve source bodies carried a forbidden class — so the skill states in its own text that
-the check is a build-time regression guard on a failure not yet observed, and names what would change the
-verdict. That is the honest form of a citation whose mechanism has never fired, and it is the form the
-others should be held to when anyone next measures them.
-
-**Which of these fixtures anything actually runs, stated rather than implied.**
-`tests/test_issue_board_fixtures.py` guards two rules — **no fixture may supply candidate prose**, and
-**no fixture may assert a word count** — but it globs `skills/issue-board/self-test/` alone, so it reaches
-fixture 01 and nothing else. Fixtures 30 and 31 satisfy both rules *on inspection* and are checked by
-nothing, because `nwave-issue-board`'s suite has no driver and its manifests use the other of the repo's
-two schemes, so the guard would fail on shape before reaching either rule. That is issue #42's territory.
-
-`board-snapshot` 02 and 12 **are** driven, by `tests/test_board_snapshot_fixtures.py`, which shipped with
-the suite for exactly that reason. It enforces the candidate-prose rule in a sharper form — prose in a
-fixture must be paired with a `must_not`, and `candidates` or `suggestions` keys are refused outright —
-and it deliberately **breaks the word-count rule**, because that rule protects the prose standard from
-becoming a brevity test while this skill's ceilings are a specified feature. Different subject, opposite
-conclusion, recorded in the driver's docstring so nobody reconciles them by deleting the wrong one.
-
-Both rules exist because slice 01 broke them and had to be told: candidate prose turns a composition test
-into a selection test, which is passed by "publish the shorter string" — the word ceiling the standard
-deliberately refuses.
-
-**The discriminator is who composed the words, never where they sit.** Judging prose a human wrote is
-taste and stays out; applying a house standard to text a surface composes itself polices nobody. **At
-`groom-ask` the discriminator is per FIELD**, keyed on the provenance label that already exists: a
-suggestion and an `I rephrased your answer` rewrite are composed, a `you wrote` field is the human's and
-is never touched. Editing one would leave the label asserting the human's words over a session's
-sentence — the provenance system reporting success with the thing it records destroyed.
-
-**Two commands correctly apply no standard and say so:** `groom-issues` reports and composes nothing;
-`groom-fix` never asks, so it may never draft, and where it completes a chain it writes the edge and
-never the clause. **A surface with no citation is otherwise indistinguishable from one that forgot**,
-which is why the absence is stated rather than left implicit.
-
-The shipped scan is untouched — five structural items, no style item. A style rule in the scan is
-*judging*, which the discriminator forbids.
-
-## Repo invariants run themselves
-
-`scripts/check-invariants.py` runs the repo's checks at `SessionStart` and reports **only
-failures** — command mutation declarations, and job → persona traceability in `docs/product/`.
-A check nobody runs reports compliance by staying quiet, which is this board's recurring defect;
-a runner that announces success every session trains people to stop reading it.
-
-Add a check here when a defect is found twice. `devon-ui-developer` was referenced by `jobs.yaml`
-with no file for six weeks, noticed three times and recorded as out-of-scope twice — a shallow
-check passes because the field is populated.
+- A board surface that composes prose for the team names `rules/writing.md` and ships a fixture that
+  fails without that citation. Eight surfaces do: `groom-ask`'s fields, the generated block's roster
+  descriptions and clauses, the projected why/next/stack, a `## Chain` line's clause, the ranking basis,
+  `assumed`-line rationales, `board-snapshot`'s descriptions and report lines, and `nwave-wave-summary`.
+- Apply the standard only to words the surface composed; leave a human's words untouched. At `groom-ask`,
+  decide per field by its provenance label: a suggestion or an `I rephrased your answer` rewrite is
+  composed, a `you wrote` field is the human's.
+- `groom-issues` composes nothing, and `groom-fix` writes a chain's edge but never its clause; each says
+  in its own text that it applies no standard.
+- A fixture supplies no candidate prose and asserts no word count. Wound: slice 01's candidates turned a
+  composition test into "publish the shorter string". `tests/test_issue_board_fixtures.py` enforces both,
+  for `issue-board` only. `tests/test_board_snapshot_fixtures.py` enforces word ceilings on purpose,
+  because that skill specifies them.
+- Open gaps: `groom-set`'s comments on an irreversible operation and `phil:rank-issues`' recorded basis
+  cite the standard with no fixture. `nwave-issue-board` fixtures 30 and 31 have no driver (issue 42).
+- A surface whose check has never fired says so in its own text and names what would change the verdict,
+  as `board-snapshot` does (2026-09-08).
+- Keep the shipped scan structural: five items, no style item.
 
 ## Where a finding about a standard goes
 
-Running a skill against this repo produces two kinds of finding: defects in the target, and defects
-in **the standard being applied**. The second kind has three routes, and the discriminator is what
-the finding would change.
+| The finding changes | Route |
+|---|---|
+| What a skill asserts | Fold into every `SKILL.md` that holds the standard, add the self-test fixture that would have caught it, bump the version |
+| What this repo does | Here, with the script, hook or frontmatter key that enforces it |
+| Neither, or exceeds a paragraph | A card on the board |
 
-1. **It changes what a skill asserts** → fold into that `SKILL.md`, **add the self-test fixture that
-   would have caught it**, bump the version. The fixture is what separates a fold-back from a note;
-   without it the next run re-discovers the same hole. Where the standard lives in more than one
-   skill, fold into each — rule 4's gap needed `groom-issues` *and* `issue-board`, because one
-   asserted the rule and the other owned the declaration it read.
-2. **It changes what this repo does** → here, in `CLAUDE.md`, **with the mechanism that enforces
-   it** — a script, a hook, a frontmatter key. A convention with no enforcement is exactly the thing
-   that gets noticed twice and written down neither time.
-3. **It changes neither** — the world is broken, or the work exceeds a paragraph → **a card**. Not a
-   fold-back. Without this route everything looks foldable and real work gets buried mid-`SKILL.md`.
+Keep repo conventions out of `rules/`: that directory ships to every consumer.
 
-**Not `rules/`.** That directory is the plugin's product and ships to every consumer; a convention
-about developing this repo would land in strangers' projects where it means nothing.
+## Commands declare mutation
 
-Measured 2026-08-13 across nine fold-backs: six took route 1, three route 2, one took both.
+- Every command declares `mutates: true` or `mutates: false` beside its `allowed-tools`.
+  `scripts/check-readonly-commands.py` fails the build on a missing declaration, and on a `mutates: false`
+  command granting `Write`, `Edit`, bare `Bash` or a `Bash(...)` verb outside its read-only allowlist.
+- `mutates:` describes the grant, not the intent. Carry intent in the skill's prose: `adversarial-review`
+  never edits yet declares `true`, because it runs the test suite; `resume` writes nothing yet declares
+  `true`, because `gh api graphql` can mutate (sanctioned 2026-08-17, issue 24).
+- Add a verb to the read-only allowlist only after confirming it has no writing mode. Git's
+  `--output=<file>` on `log`, `diff`, `show`, `blame`, `rev-list` and `shortlog` writes anyway; the script
+  records that exception (git 2.53.0, 2026-09-08).
+- A `Bash(...)` grant names a bare executable — no path, no variable. To scope a command to one script,
+  grant the interpreter and put the path in the invocation. The original rationale was measured false on
+  2026-08-21, so whether this check still earns its place is open; `tests/test_check_readonly_commands.py`
+  keeps the refuted reasoning out of the script.
 
-## Every command declares whether it can mutate
+## This file ships to consumers
 
-`mutates: true | false` in the frontmatter, beside the grant it constrains. Checked by
-`scripts/check-readonly-commands.py`, which fails the build on a `mutates: false` command that
-grants `Write`/`Edit`, bare `Bash`, or a `Bash(...)` verb outside its read-only allowlist — and on
-any command carrying no declaration at all.
-
-**One entry on the read-only verb allowlist is a promise that is false, and it is named rather than
-quietly kept.** Git accepts `--output=<file>` on `log`, `diff`, `show`, `blame`, `rev-list` and
-`shortlog`. It writes, clobbering an arbitrary absolute path outside the repo, with nothing configured —
-verified on git 2.53.0 on 2026-09-08. A `Bash(git show:*)` grant is a prefix match and cannot exclude a
-flag, so **all four `mutates: false` commands holding a git verb assert more than their grant delivers.**
-The entries stay, because the alternative is granting bare `Bash`; what changed is that the promise now
-reads *no writing mode in ordinary use* and the exception is written down in the script itself. Found by
-`plugin-dev:plugin-validator` while checking a widened grant, not by the check that exists to catch it.
-
-**It is a claim about the grant, not about intent.** That is the half a script can verify.
-`mutates: false` asserts the tool list makes mutation impossible; `mutates: true` asserts only that
-the grant permits it, and says nothing about whether the command means to. `adversarial-review` is
-the standing example: it reports and never edits, yet runs the project's test suite as its
-deterministic oracle, and executing project code can write. It declares `true`, and its skill
-carries the intent in prose.
-
-**Absence of `Write` never meant read-only, and presence of bare `Bash` never meant mutating.**
-Audited 2026-08-13: `ai-eos` and `adversarial-review` were byte-identical on both signals — no
-`Write`/`Edit`, bare `Bash` — while one must never write and the other must execute arbitrary code.
-Only the skill's prose separated them, and no validator reads that. Hence the declaration.
-
-Adding a verb to the allowlist is a promise that it has no writing mode. Check before adding one.
-
-**A `Bash(...)` grant may not contain a path or a variable.** To scope a command to one script, grant
-the interpreter, put the path in the invocation instruction, and carry the real intent in prose — the
-`adversarial-review` pattern above. Checked by `scripts/check-readonly-commands.py` for **every**
-command, not only `mutates: false` ones.
-
-**The rule stands; the reason it was written does not.** This paragraph used to say `allowed-tools` does
-**not** interpolate `${CLAUDE_PLUGIN_ROOT}`, so such a grant "matches nothing" and merely prompts on
-every run. **Measured 2026-08-21 against the shipped Claude Code 2.1.239: it does interpolate.**
-`a["allowed-tools"]` is passed through `hOe`, and `hOe` does
-`e.replace(/${CLAUDE_PLUGIN_ROOT}/g, () => r(t.path))`. The grant becomes an absolute path, and since a
-command's body is interpolated by the same function at the same load, an invocation written
-`${CLAUDE_PLUGIN_ROOT}/x.py` produces the very string the rule holds. **It can match.**
-
-Three reasons the rule is kept, none of them the original:
-
-1. **The grant a human reads is not the grant enforced.** After interpolation it is an absolute,
-   install- and version-specific path. A reviewer cannot tell what it permits without knowing the
-   install root — and a declaration whose boundary is unreadable defeats its own purpose.
-2. **It covers exactly one spelling.** Any other route to the same script — a relative path, a `cd`
-   first, a different interpreter path — shares no prefix and silently prompts.
-3. **De facto convention.** The 2026-08-17 survey of 211 `Bash()` grants across this repo and every
-   installed plugin found exactly one carrying a slash or a variable; the other 210 name a bare
-   executable.
-
-**Whether those three are worth an enforced check is now open**, because the fact that motivated it is
-gone. Recorded rather than quietly kept: a check whose stated rationale is false is this board's
-recurring defect wearing a different hat. `tests/test_check_readonly_commands.py` pins the distinction —
-the behaviour is asserted, and the three refuted sentences are asserted *absent*, so nobody re-derives
-the old reason from the code.
-
-**The original note is still true of the first version of the check**, and worth keeping for its own
-lesson: it silently passed because the function was written and never called. Test that a new check
-fails on the input that motivated it before trusting a green run.
-
-Written 2026-08-17, when `board-setup` shipped exactly that grant.
-
-## This file ships to every consumer, and that is accepted
-
-`CLAUDE.md` is copied verbatim into every install — confirmed in the 0.12.0, 0.19.0 and 0.36.0 cache
-snapshots — so strangers receive 19KB of instructions about developing *this* repo, which mean nothing
-in their project. So do `rgr-loop.md`, `docs/`, `tests/` and `pytest.ini`.
-
-**Claude Code warns about it on load:** *"`CLAUDE.md` at the plugin root is not loaded as project
-context. Remove it from the plugin root. To ship context with your plugin, use a skill instead."*
-
-**Decided 2026-08-21: accept it, do not exclude it.** The alternative is a packaging step, and a
-mis-listed exclude removes a file from installs *silently* — a worse failure than the current noise,
-because a missing skill is invisible while a redundant file is merely useless. The official
-`superpowers` plugin ships its dev files the same way.
-
-What this costs, stated so it is not rediscovered as a defect: the warning keeps printing, and it is
-**not** a signal about your working tree. Do not "fix" it by moving this file — `rules/` is the wrong
-home (see *Where a finding about a standard goes*), and a skill would make repo conventions loadable in
-strangers' projects, which is the same defect one layer down.
-
-The one thing that would change this decision: a consumer reporting that shipped dev files caused real
-confusion. Nothing has.
+Leave `CLAUDE.md` at the plugin root. Every install copies it, and Claude Code warns that it is not loaded
+as project context; the warning says nothing about your working tree. Decided 2026-08-21: a mis-listed
+packaging exclude would drop a file silently. Revisit if a consumer reports real confusion.
 
 ## Which copy is under test
 
-**The released copy is what a `/phil:*` command runs — never this working tree.** Claude Code loads
-the plugin from `~/.claude/plugins/cache/pmvanev-plugins/phil/<version>/`, snapshotted at install
-time. Editing a skill here changes nothing about what the command executes until the plugin updates.
-
-**That is deliberate: dogfooding tests what users actually get.** The cost is that the skew is
-otherwise silent — nothing errors, and a run against a stale snapshot is indistinguishable from one
-against your edits. On 2026-08-13 the gap reached five versions.
-
-So a `SessionStart` hook in this repo's `.claude/settings.json` reports it. It lives in the working
-tree rather than in `hooks/hooks.json` on purpose: a detector shipped inside the plugin would load
-from the cache and could not report the gap that exists before the first update.
-
-**A dogfood claim must name the version it exercised.** "I ran `/phil:groom-issues` and it reported
-X" is a claim about the loaded version, not about your edits. Either update the plugin first, or say
-which version the run was against. A run that drove the loop by hand rather than through the command
-must say that too — it exercised the prose, not the command.
-
-Do not trust `gitCommitSha` in `installed_plugins.json` to identify what is installed; on
-2026-08-13 it pointed at a 0.12.0 commit while `version` read 0.27.0. Use `version` / `installPath`.
+- `/phil:*` commands run the released copy in `~/.claude/plugins/cache/pmvanev-plugins/phil/<version>/`,
+  never this working tree. `scripts/check-plugin-skew.py` reports the gap at `SessionStart`; it lives in
+  `.claude/settings.json` because a detector shipped in the plugin would load from the stale cache.
+- A dogfood claim names the version it ran against, or says it drove the skill's prose by hand.
+- Identify the installed copy by `version` or `installPath` in `installed_plugins.json`, never by
+  `gitCommitSha`. Wound: on 2026-08-13 it named a 0.12.0 commit while `version` read 0.27.0.
 
 ## Resuming work
 
-**Starting a session to continue existing work? Run `/phil:resume` before anything else.** It reads
-the session snapshot (`.session-handoff.md`, git-ignored and machine-local) and states up front
-whether it is current or stale against the tree, then names the command that owns the work without
-running it. With no snapshot it reconstructs from the artifacts and says that is what it did.
-
-**It also checks the snapshot against the board**, reporting `BOARD-AGREES`, `BOARD-DIVERGES` or
-`BOARD-UNREADABLE` on every read-back that has a recorded next action. The tree and the board are two
-records of what is in flight and they fail in opposite directions; the freshness verdict can only see
-one of them. It names both sides of a divergence and **never resolves it** — neither source is
-authoritative, so picking one discards the other's work while reporting success.
-
-That is why `resume` declares **`mutates: true` while writing nothing**: reading Projects v2 needs
-`gh api graphql`, which can carry a mutation, and `gh project item-list` — the read-only alternative —
-can under-report, which in a divergence detector means a missed divergence. The grant is still narrow
-(no `Write`, no `Edit`, no bare `Bash`) and the read-only intent lives in the command's prose and the
-skill's never-do list. Sanctioned 2026-08-17 for issue #24; the enforced guarantee became a declared
-one, and that trade is stated rather than discovered.
-
-Put a session down with `/phil:handoff`. It records only what a fresh session cannot derive — the
-decisions, the approaches ruled out, the intended next action — and refuses to copy anything the
-artifacts already own.
+- To continue existing work, run `/phil:resume` before anything else. Put a session down with
+  `/phil:handoff`; its snapshot, `.session-handoff.md`, is git-ignored and machine-local.
 
 ## Issue board
 <!-- phil:board-setup:v1:begin -->
@@ -363,56 +168,27 @@ Nothing here was probed or inferred. `phil:groom-issues` rule 4 reads this regio
 - Label family **(unprefixed)** (`bug`, `documentation`, `enhancement`): **multi-valued by decision** *(you declared · 2026-08-17)*
 - Label family **wave** (`wave: discuss`): **single-valued** *(you declared · 2026-08-17)*
 <!-- phil:board-setup:declared:v1:end -->
-- Forge: GitHub — pass `-R pmvanev/phil-claude-plugin` on every `gh` call. Issue #12 exists in every
-  repo, so an inferred remote mutates the wrong one successfully.
-- Board: user project 3, `phil plugin`. The kanban is view 2 —
-  https://github.com/users/pmvanev/projects/3/views/2 (view 1 is the table).
-- Status is a project **field**, not a label. An issue must be `gh project item-add`ed before any
-  field can be set; editing one that was never added does nothing.
-- IDs: project `PVT_kwHOANPp-M4Bf-px` · Status field `PVTSSF_lAHOANPp-M4Bf-pxzhaNnGs` · options
-  Todo `f75ad846`, In Progress `47fc9ee4`, Done `98236657`, Blocked `39094273`.
-- **`updateProjectV2Field`'s `singleSelectOptions` is a FULL REPLACEMENT.** The per-option `id` is
-  documented as *"optional — include this to preserve the option"*, so omitting an existing id drops that
-  option **and every card's assignment to it**. Adding `Blocked` on 2026-08-14 meant passing all three
-  existing ids back; getting it wrong would have destatused 25 cards with a call that reports success.
-  Read the input shape before writing, and read the item statuses back after.
-- **The wave is a label, never a column.** Seven wave columns are noise to everyone filing non-nWave work,
-  which is most of this board. Decided 2026-08-14, reversing a reversal — and the lesson generalises:
-  *refuting a decision's recorded rationale does not refute the decision.*
-- **Auto-close on Done is ENABLED.** Setting Status=Done closes the issue; a `gh issue close -c`
-  afterwards reports "already closed" and **silently drops the comment**. Post the closing
-  comment first, then set Status. Moving Done→Todo does not reopen — use `gh issue reopen`.
-- **The mirror workflow is ENABLED too: closing an issue sets Status=Done.** So `gh issue close` is a
-  board write, and a card closed from the CLI never sits outside Done long enough for the open-in-Done
-  check below to see it. Both directions are readable — `projectV2 { workflows { name enabled } }`
-  returns `Auto-close issue` and `Item closed` as enabled — which is how this line got written on
-  2026-08-14, after six weeks in which only the forward direction was recorded. The API exposes
-  `name` and `enabled` and **not** the configured trigger statuses, so *which* status fires the
-  close is an assumption (`Done`), not a probed fact.
-- **A closing keyword in a commit message closes the card *and* sets Status=Done.** It fires on the
-  bare `#N` and the rest of the sentence is never read: `fixed #22's unlinked path` closed #22 on
-  2026-08-13, in a commit whose subject was another issue's slice. Write `issue 22` or `the #22 body`
-  whenever the commit is not the fix. Recovery is two steps, because **`gh issue reopen` restores the
-  issue and not the field** — the card is left OPEN while sitting in Done, and no view flags that
-  combination. Set Status back by hand, and check with the open-in-Done query below.
-- Verify the two can't drift: an open issue in Done, or a closed one outside it, is always a defect.
-  Compare `gh issue list --state open --json number` against the project's items and their Status —
-  the same one call that reads the board already returns both halves.
-- `gh auth` needs the `project` scope — present as of 2026-08-12; `gh auth refresh -s project` if it
-  is lost.
-- Read the board with `gh api graphql`, never `gh project item-list` — item-list served a stale
-  title for #10 on 2026-08-12 and can under-report. GraphQL returns items in board-position order,
-  and that order is authoritative: the top Todo card is what to work on next.
-- Docs root for absolute links (GitHub emits relative paths verbatim and they 404):
-  `https://github.com/pmvanev/phil-claude-plugin/blob/main/`
-- **Label families.** `bug` · `documentation` · `enhancement` are **multi-valued by decision, not by
-  neglect** — this plugin's product is prose, so `documentation` names a surface, never a kind of work
-  that could compete with `enhancement`. The two answer different questions, so a card carrying both
-  (#2, #4) is correct. This bullet is the declaration `phil:groom-issues` rule 4 reads for
-  project-local families; label descriptions may echo it and lose on disagreement.
+- The kanban is view 2 — https://github.com/users/pmvanev/projects/3/views/2 (view 1 is the table).
+- Pass every existing option id back to `updateProjectV2Field`. `singleSelectOptions` replaces the whole
+  list, and an omitted id drops that option and every card's assignment to it, in a call that reports
+  success. Read the input shape before writing and the card statuses after. Wound: adding `Blocked` on
+  2026-08-14 put 25 cards at risk.
+- Track the wave with a `wave: *` label, never a column (decided 2026-08-14). Refuting a decision's
+  recorded rationale does not refute the decision.
+- Post a closing comment before setting Status=Done. Done closes the issue, and `gh issue close -c` on a
+  closed issue drops the comment silently. Moving Done→Todo leaves the issue closed; reopen with
+  `gh issue reopen`.
+- `gh issue close` also sets Status=Done, so it is a board write.
+- In a commit that does not fix an issue, write `issue 22` or `the #22 body`. A closing keyword fires on
+  the bare `#N` whatever follows: `fixed #22's unlinked path` closed #22 on 2026-08-13. To recover, run
+  `gh issue reopen`, then set Status by hand — reopening leaves the card in Done.
+- An open issue in Done, or a closed one outside it, is a defect. The GraphQL read that loads the board
+  returns both halves; compare them.
+- `gh auth` needs the `project` scope: `gh auth refresh -s project`.
+- Read the board with `gh api graphql`, never `gh project item-list`, which served a stale title for #10
+  on 2026-08-12. GraphQL returns items in board order; the top Todo card is next.
+- `documentation` names a surface, not a kind of work, so a card may carry it with `enhancement`.
+  `wave: *` is single-valued on `phil:nwave-issue-board`'s authority; declare it here only to override.
+- Forge mechanics: `phil:issue-board`. nWave feature, slice and step mapping: `phil:nwave-issue-board`.
 
-  `wave: *` needs no entry here. It is single-valued in every nWave repo on
-  `phil:nwave-issue-board`'s authority, and rule 4 applies that by default rather than waiting for a
-  local copy — a repo that forgot the copy would go dark on the one family with a documented failure
-  mode. Only declare `wave: *` here to *override* that, which nothing should.
-- Forge mechanics: `phil:issue-board`. nWave feature/slice/step mapping: `phil:nwave-issue-board`.
+Rationale and history cut 2026-10-13: git show 0141d4b:CLAUDE.md

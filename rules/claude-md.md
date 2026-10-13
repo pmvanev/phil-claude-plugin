@@ -11,6 +11,8 @@ paths:
 
 CLAUDE.md gives Claude Code persistent, project-level instructions. It loads at every session start. Every line competes for context with actual work — make each one count.
 
+This rule owns what belongs in CLAUDE.md and how the file is laid out. `agent-instructions.md` owns how each instruction is phrased and where it lives — read both.
+
 ---
 
 ## Structure
@@ -28,7 +30,7 @@ Keep the file under 200 lines. Organize with markdown headers and bullets. Group
 | **Workflow** | Branch naming, commit conventions, PR process |
 | **Gotchas** | Non-obvious behaviors, required environment variables, platform quirks |
 
-Order sections by frequency of use. Put build and test commands first — Claude reaches for them most often.
+Open with one or two lines of project context, then build and test commands — Claude reaches for them most often. Follow with the remaining sections in the table's order.
 
 ---
 
@@ -69,7 +71,7 @@ Imports resolve relative to the file that contains them. Maximum depth: five hop
 1. **Be specific.** "Use 2-space indentation" beats "format code properly."
 2. **Be imperative.** "Run `npm test` before committing" — not "you should consider running tests."
 3. **One instruction per bullet.** Compound bullets blur priority.
-4. **Skip justification.** State the rule; omit the rationale unless the rule seems arbitrary.
+4. **Lead with the rule.** Add the incident that earned it in one line when the rule would otherwise look arbitrary; link to any longer history.
 5. **Reserve emphasis.** Mark one or two items IMPORTANT. If everything screams, nothing stands out.
 
 ---
@@ -97,6 +99,13 @@ Move instructions out of CLAUDE.md when:
 - A rule applies only to certain file types — use a path-scoped rule
 - A rule defines a multi-step workflow — create a skill in `.claude/skills/`
 - A rule must be enforced deterministically — implement it as a hook
+- A hook or script enforces a rule, and a test shows it refusing the motivating input — cut the prose to one line naming the rule and the check
+
+---
+
+## Generated Regions
+
+Some tools write their own region into CLAUDE.md between paired markers, such as `<!-- tool:begin -->` and `<!-- tool:end -->`, or under a "do not edit" banner. Leave every byte of the region unchanged. Regenerate it with the tool that owns it.
 
 ---
 
@@ -112,6 +121,8 @@ Move instructions out of CLAUDE.md when:
 | **Linter duplication** — enforcing style rules Claude cannot guarantee | Use formatters and linters via hooks; reserve CLAUDE.md for judgment calls |
 | **Uncurated /init output** — accepting auto-generated content as-is | Run `/init`, then prune aggressively |
 | **Progressive disclosure failure** — documenting everything up front | Teach Claude where to find information, not all the information |
+| **Decision diary** — dated history wrapped around each rule | Lead with the rule; keep one line of why; link the rest |
+| **Narrated enforcement** — paragraphs explaining a rule a tested script already checks | One line naming the rule and the script |
 
 ---
 
