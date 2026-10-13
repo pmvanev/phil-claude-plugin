@@ -156,7 +156,9 @@ Add no wound the file did not hold. Keep a rule that has none.
 
 ### 5. State Reflexes
 
-Rewrite each "never X" or "do not X" as the invariant that must hold. Where a prohibition must stay, name the alternative in the same sentence.
+Rewrite each "never X" or "do not X" as the invariant that must hold. Where a prohibition must stay, name the alternative the file holds in the same sentence.
+
+**Keep the scope.** The reflex forbids exactly what the prohibition forbade — no more, no less — and keeps every qualifier, such as a mode, a path, a surface or an actor. "Don't log request bodies in production" becomes "Keep request bodies out of production logs", never "Log request headers only", which mandates header logging and drops "in production". A list of allowed actors or values forbids everything it leaves out, so write one only when the file holds it. Where the file names no alternative and no positive form keeps the scope, keep the prohibition bare and name it in the report.
 
 ### 6. Name the Protocol
 
@@ -205,6 +207,7 @@ Over the profile's budget, name the least-essential content and where each part 
 - Each rule collapsed to one bullet, with the proven check that enforces it.
 - Each check found but unproven, and each check worth writing.
 - Each rule rewritten, one line each.
+- Each prohibition kept bare, and why no positive form keeps its scope.
 - History cut, with its recovery command — or history kept because it is recoverable nowhere.
 - Content to move, and where.
 - Frozen parts found and left unchanged.

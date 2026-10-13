@@ -12,10 +12,11 @@ look like a tidy file. Each fixture here pins one such failure.
 | `05-unproven-check-keeps-prose/` | Revision rule 3 | Prose kept; the check reported found and unproven |
 | `06-skill-keeps-frontmatter-and-shape/` | Profiles; Safety: frontmatter | Frontmatter unchanged; no project-memory layout imposed |
 | `07-pointer-kept-when-nothing-cut/` | Recoverability | Earlier pointer byte-for-byte unchanged |
+| `08-reflex-keeps-scope/` | Revision rule 5 | Each reflex forbids exactly what its prohibition did, qualifiers kept |
 
 ## Driving a fixture
 
-Copy the fixture directory outside this repository. For fixtures 01–03 and 05–07, `git init` the copy and commit
+Copy the fixture directory outside this repository. For fixtures 01–03 and 05–08, `git init` the copy and commit
 it, so the skill finds a root and searches the copy's own `scripts/`. Leave fixture 04's copy
 uncommitted. Rename fixture 06's `SKILL.md.input` to `SKILL.md` in the copy — it ships renamed so
 skill discovery never loads it. Run `/phil:harden-instructions <copy>/<input>` and judge the result against `expected.md`.

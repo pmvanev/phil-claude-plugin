@@ -172,3 +172,10 @@ def test_both_rules_keep_the_limits_when_collapsing():
     """The skill and the standards it cites must agree, or a run follows whichever it read last."""
     for rule in ("agent-instructions.md", "claude-md.md"):
         assert "limit" in (REPO / "rules" / rule).read_text().split("one bullet", 1)[1][:80], rule
+
+
+def test_a_reflex_keeps_the_prohibitions_scope():
+    """Four of five meaning changes in the 0.104.0 session-handoff pass were prohibitions widened into
+    mandates: "never write the board" became "read the board"."""
+    assert "**Keep the scope.**" in SKILL.read_text()
+    assert (SELF_TEST / "08-reflex-keeps-scope" / "CLAUDE.md").is_file()
