@@ -4,7 +4,8 @@ mutates: true
 allowed-tools: Read, Glob, Grep, Bash(git rev-parse:*), Bash(git status:*), Bash(git rev-list:*), Bash(git log:*), Bash(gh api graphql:*), Skill
 ---
 
-Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handoff/SKILL.md`. Follow the BOOTSTRAP path; the
+Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handoff/SKILL.md`. Follow the BOOTSTRAP path, in its
+`references/bootstrap.md`; the
 snapshot format, the deriving rules, the decision outcomes, and the invariants govern all three paths.
 
 **This command writes nothing — not to the repository, and not to the board.** It has no `Write`, no

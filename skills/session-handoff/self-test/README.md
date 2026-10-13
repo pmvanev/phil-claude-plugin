@@ -148,7 +148,7 @@ read-back outcome; `36` is the one capture that reports `WRITE-REFUSED`, **besid
 terminal there, because the payload was already written — a driver treating `WRITE-REFUSED` as
 stack-only scores it a mismatch.
 
-Run the whole suite whenever `SKILL.md`, either command loader, or `skills/nwave-issue-board/SKILL.md`
+Run the whole suite whenever `SKILL.md`, any file in `references/`, any of the three command loaders, or `skills/nwave-issue-board/SKILL.md`
 changes — the last because slice 02's routing line lives inside its generated block, so this skill's
 correctness is partly that skill's. Add `phil:issue-board` to that list for `13`–`15`: they depend on
 how a board is read, and on `In Progress` and top-Todo meaning what that skill says they mean.

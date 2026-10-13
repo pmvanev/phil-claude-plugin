@@ -1,6 +1,6 @@
 # The board divergence check — why it exists and what each branch looks like
 
-Reference for `skills/session-handoff/SKILL.md` § BOOTSTRAP step 5. The **rules** live there and are
+Reference for `skills/session-handoff/references/bootstrap.md` § step 5. The **rules** live there and are
 authoritative; this file carries the reasoning and the worked output, which change no decision at
 runtime. Read it when changing the check, not when running it.
 

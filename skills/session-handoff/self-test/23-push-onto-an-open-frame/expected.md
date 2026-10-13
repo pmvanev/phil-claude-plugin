@@ -1,7 +1,7 @@
 # Expected — 23 (going deeper, which is the case the stack is shaped for)
 
 **Pins:** issue #29's done-when, which names *"push while a frame is open"* as required coverage, and the
-frame template at `SKILL.md` § push step 3.
+frame template at `SKILL.md` § *The snapshot*.
 
 **Expected decision:** `PUSHED`, at depth 2:
 

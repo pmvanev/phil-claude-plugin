@@ -6,7 +6,7 @@ allowed-tools: Read, Bash(git rev-parse:*), Bash(git status:*), Bash(date:*), Ba
 ---
 
 Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handoff/SKILL.md`. Follow the STACK
-path. The snapshot format, the compare-and-swap rule, the decision outcomes and the invariants govern
+path, in its `references/stack.md`. The snapshot format, the compare-and-swap rule, the decision outcomes and the invariants govern
 this path exactly as they govern CAPTURE and BOOTSTRAP.
 
 No argument shows the stack. `push` takes what is being entered and why it is being entered. `pop`

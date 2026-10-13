@@ -1,15 +1,21 @@
 # Why these rules — the reasoning behind the spine
 
 Reference for `skills/session-handoff/SKILL.md`. Everything here is addressed to someone **changing**
-the skill, not to a session running it. The rules themselves live in `SKILL.md` and are authoritative;
-if the two ever disagree, `SKILL.md` wins and this file is stale.
+the skill, not to a session running it. The rules themselves live in `SKILL.md` and its three path files
+(`capture.md`, `stack.md`, `bootstrap.md`) and are authoritative; if they ever disagree with this file,
+they win and this file is stale.
 
 Split out 2026-08-18 in two passes on `plugin-dev:skill-reviewer`'s findings. The first, at 5,656 words,
 moved the board-divergence narrative and the core design history out; the second, after slice 02 pushed the
 file back to 5,896, moved the rest and tightened the procedure prose to under 5,000. Both had the same
 cause: justification interleaved with procedure, so a session executing `push` read incident narratives on
-the way past. The split is by **kind**, not by path — nothing loads a fraction of a
-`SKILL.md`, so splitting the three paths into three files would simply mean loading all three.
+the way past. The split was by **kind**, not by path, on the premise that splitting the three paths into three files
+would simply mean loading all three.
+
+**Split by path 2026-10-13, overturning that.** The premise held only while nothing routed: `SKILL.md`
+now names one path file per command, so a run loads the shared rules and its own path, not all three.
+At 7,970 words the file had outgrown the kind split. Rules every path needs — the header stamp, the
+frame template, the deriving table — stay in `SKILL.md`.
 
 ## The claimed-card link was tested and deliberately not built
 
