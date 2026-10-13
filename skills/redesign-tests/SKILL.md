@@ -5,15 +5,15 @@ description: Skill bundle for phil:redesign-tests command — human-approved, be
 
 # Redesign Tests
 
-You rewrite tests that verify **how** the code works into tests that verify **what** it does —
-turning implementation-coupled, over-mocked, and flaky tests into behaviour-focused ones. You work
-a prioritized backlog one item at a time, and **every rewrite is applied only after the developer
-approves the diff *and* its coverage-equivalence claim.**
+Rewrite tests that verify **how** the code works into tests that verify **what** it does — turning
+implementation-coupled, over-mocked and flaky tests into behaviour-focused ones. Work a prioritized
+backlog one item at a time, and **apply every rewrite only after the developer approves the diff *and*
+its coverage-equivalence claim.**
 
 **This is behaviour-CHANGING, human-gated work — the opposite pole from `phil:refactor-tests`.**
 `refactor-tests` is structure-only and can promise coverage never shrank. This skill deliberately
 changes *what a test asserts*, so it **cannot** make that promise automatically. The test is the
-oracle, and here we are changing the test — so **the human is the sole oracle** (ADR-004). A green
+oracle, and this skill changes the test — so **the human is the sole oracle**. A green
 suite is only a secondary sanity check; it can never prove a rewrite preserved coverage. That is
 why every proposal carries a **coverage-equivalence claim** and why nothing is committed without
 per-diff human approval.
@@ -21,7 +21,7 @@ per-diff human approval.
 > **Relationship to `phil:refactor-tests`.** If the smell is a structure-only one (duplicated setup,
 > missing AAA, vague name, long test), that is `refactor-tests`' job — do not handle it here. This
 > skill handles only behaviour-changing smells (below). The two use **separate** backlog files and
-> never collide (ADR-003).
+> never collide.
 
 ## The behavioural smells in scope (and their moves)
 
@@ -49,15 +49,16 @@ mock asserting a wall-clock value is still an Erratic Test.
 **Never in scope:** structure-only cleanup (that is `refactor-tests`); deleting dead/duplicate
 tests; splitting or merging test files; changing non-test (SUT) code; concurrency-race fixes that
 require production changes. When unsure whether a flag is a true behavioural smell, **skip it** —
-false positives erode trust (detection-precision KPI: ≤20% rejected on first review).
+false positives erode trust (the precision target: at most 20% rejected on first review).
 
 ## Detection (reuse `review-code` Priority 6)
 
 Detect against the catalogue rows routed here — a subset of the rows `review-code`'s **Priority 6 —
 Test Quality** names — and do not fork a divergent list. Detect only test
-files matching the globs in `rules/testing.md` frontmatter (the same set `testing.md` scopes itself
-to). Non-test files (the SUT) are never scanned or rewritten. v1 acts on **Python + TypeScript/React
-only**; files matched by other globs are recognized as tests but skipped with a one-line note.
+files matching the globs in `${CLAUDE_PLUGIN_ROOT}/rules/testing.md` frontmatter (the same set
+`testing.md` scopes itself to). Non-test files (the SUT) are never scanned or rewritten. Act on
+**Python + TypeScript/React only**; files matched by other globs are recognized as tests but skipped with
+a one-line note.
 
 ## Parse the argument
 
@@ -97,7 +98,7 @@ propose or apply anything.** (Fixture `01-baseline-red-stop`.)
    backlog item per smell instance.
 3. Write `.test-redesign-backlog.md` in the project root, in `review-code`'s backlog **format** (by
    convention — do not modify `review-code`). Keep it **separate** from `.test-refactoring-backlog.md`
-   (ADR-003) so the two tools never collide. Use this shape:
+   so the two tools never collide. Use this shape:
 
    ```markdown
    # Test Redesign Backlog
@@ -125,7 +126,7 @@ propose or apply anything.** (Fixture `01-baseline-red-stop`.)
    ```
 
    Rules: IDs sequential `RD001`, `RD002`, …; sort by priority then file; one atomic rewrite per
-   item; only behavioural smells appear (**no** structure-only D5 smells — those are `refactor-tests`);
+   item; only behavioural smells appear (**no** structure-only smells — those are `refactor-tests`);
    the SUT is never flagged.
 4. Report: total by family, top items, and the backlog path. Suggest: "Run `/phil:redesign-tests`
    to work through this backlog." **Apply nothing in review mode.**
@@ -149,7 +150,7 @@ mark the item `skipped (missing fake)`** — move on. **Never invent unreviewed 
 and never edit the SUT to add one. (Fixture `06-missing-fake-skips`.)
 
 ### 3. Verify green baseline
-Run the suite (or the relevant subset). It must be green before you touch anything. If it is red
+Run the suite (or the relevant subset). Confirm it is green before touching anything. If it is red
 now, STOP and report.
 
 ### 4. Propose (with the coverage-equivalence claim)
@@ -157,16 +158,11 @@ Surface, to the developer:
 - the **named move** (e.g. `Assert on observable outcome`),
 - the **target** (`file:lines`),
 - a **one-line rationale**, and
-- the **coverage-equivalence claim** — the load-bearing element (ADR-004):
+- the **coverage-equivalence claim** — the load-bearing element:
   > *"The old test caught {regression class} by asserting {implementation detail X}. The rewrite
   > catches {the same regression class} by asserting {observable behaviour Y}."*
 
 **Do not print the diff in chat.** Apply nothing yet.
-
-> Pre-screen seam (deferred oracle): before pausing for the human, this is where a future automated
-> coverage oracle (mutation testing / deliberate-break-and-confirm) would validate the
-> coverage-equivalence claim. It is not built yet (v1 is human-only, DISCUSS D7); the loop leaves
-> the seam here and proceeds to apply-then-review.
 
 ### 5. Apply to the working tree
 Apply the single rewrite as the smallest possible edit. One rewrite per item — never bundle.
@@ -177,13 +173,10 @@ Preserve existing style. Touch only the test file the rewrite requires; **never 
   `blocked (post-apply red)` with the failing test as evidence, and continue. **Do not bother the
   developer with a broken rewrite.** (Fixture `02-postapply-red-autorevert`.)
 - **Flakiness family only:** additionally run the suite **N times** (default 5) to confirm the flake
-  is gone. If it is not stable, treat as red → auto-revert, mark `blocked (unstable)`. (AC4.2.)
+  is gone. If it is not stable, treat as red → auto-revert, mark `blocked (unstable)`.
 - **If green (and stable) →** go to the human gate.
 
-### 7. Human gate (the sole oracle — ADR-004)
-Pause and ask the developer to **review the uncommitted diff in their IDE/editor** (against git),
-having shown them the **coverage-equivalence claim**. Then answer via **AskUserQuestion** with four
-options:
+### 7. Human gate (the sole oracle)
 
 **This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
 
@@ -192,6 +185,9 @@ options:
 - **The counted ask states what approving asserts**: that the rewrite tests the same behaviour the old
   test did. Test names, file paths and the claim's internals stay in the context.
 
+Pause and ask the developer to **review the uncommitted diff in their IDE/editor** (against git),
+having shown them the **coverage-equivalence claim**. Then take the answer via **AskUserQuestion**, with
+four options:
 
 - **approve** → the rewrite preserves the coverage the claim describes → commit it (step 8).
 - **reject** → `git checkout -- <files>` revert; mark `skipped`; continue.
@@ -246,8 +242,8 @@ approve/suite/revert/commit guarantees as the backlog loop.
 - **Skip, do not scaffold.** If a rewrite needs a fake/collaborator that does not exist, skip the
   item; never invent unreviewed test doubles and never edit the SUT.
 - **One approved rewrite, one commit.** Never bundle items or moves.
-- **Behaviour-changing, but honest.** You cannot prove coverage was preserved automatically (v1
-  accepted risk, D7) — that is exactly why the human validates the coverage-equivalence claim.
+- **Behaviour-changing, but honest.** Nothing proves automatically that coverage was preserved — an
+  accepted risk, and exactly why the human validates the coverage-equivalence claim.
 - **No chat diffs.** The developer reviews the real uncommitted diff in their editor.
 - **Never expand scope.** Touch only the test the current rewrite requires; never the SUT.
 
@@ -255,8 +251,9 @@ approve/suite/revert/commit guarantees as the backlog loop.
 
 ## Self-test (regression gate)
 
-`skills/redesign-tests/self-test/` holds golden fixtures that pin these safety behaviours
-(baseline-red → STOP; post-apply-red → auto-REVERT; approve → COMMIT; reject → clean REVERT;
-`--review` → behavioural-only backlog; missing-fake → SKIP; unmanaged-dependency mock → not flagged). Whenever this skill changes, drive the
-fixtures per `self-test/README.md` and confirm each produces its `expected.md` outcome — every edit
-here is non-monotonic, so the skill is changed and regression-tested, never changed and eyeballed.
+`skills/redesign-tests/self-test/` holds golden fixtures that pin these safety
+behaviours (baseline-red → STOP; post-apply-red → auto-REVERT; approve → COMMIT; reject → clean REVERT;
+`--review` → behavioural-only backlog; missing-fake → SKIP; unmanaged-dependency mock → not flagged).
+Whenever this skill changes, drive the fixtures per `self-test/README.md` and confirm each produces its
+`expected.md` outcome — every edit here is non-monotonic, so the skill is changed and regression-tested,
+never changed and eyeballed.
