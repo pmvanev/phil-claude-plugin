@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(python3:*), AskUserQuestion, 
 ---
 
 Load the `board-setup` skill at `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/SKILL.md` and run
-CONFIRM → PROBE → CLASSIFY → PLACE/REFRESH → DRIFT → ELICIT → OFFER → WRITE → REPORT.
+CONFIRM → PROBE → CLASSIFY → RENDER → PLACE/REFRESH → DRIFT → ELICIT → OFFER → REPORT.
 
 ## Target
 
@@ -14,13 +14,16 @@ CONFIRM → PROBE → CLASSIFY → PLACE/REFRESH → DRIFT → ELICIT → OFFER 
 derive a candidate from the remote and **confirm it before any call**. Issue `#12` exists in every repo,
 so an inferred target reads the wrong board successfully.
 
-A `--list-targets` status of `ambiguous` — two remotes, or a fork — is a **question**, never a pick.
+Confirm on every `--list-targets` status: `ok` — one candidate, confirm it anyway; `ambiguous` — more
+than one distinct repo across the remotes — is a **question** presenting the candidates, never a pick,
+and never prefers `origin`; `none` — ask for the target.
 
 ## Scripts
 
 Every value inside the markers comes out of the probe's JSON: a value typed from recall looks exactly
 like a probed one in the finished file. A relative script path would resolve against the target repo,
-where the script does not exist.
+where the script does not exist. `SCRATCH_DIR` below is the session's scratch directory, spelled as an
+absolute path; a bare intermediate name lands in the target repo.
 
 **Probe with `probe-board.py`**, invoked by these exact spellings — targets first, which makes no forge
 call, then the probe once the target is confirmed:
@@ -35,9 +38,9 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/probe-board.py --repo GROUP/PROJ --host gi
 deterministic; by hand, order and wording drift, every run diffs, and the diffs stop being read:
 
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/render-block.py --probe PROBE.json --stamp UTC_MINUTE
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/render-block.py --probe PROBE.json --stamp UTC_MINUTE \
-    --declarations ANSWERS.json --declared-only
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/render-block.py --probe SCRATCH_DIR/PROBE.json --stamp UTC_MINUTE
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/render-block.py --probe SCRATCH_DIR/PROBE.json --stamp UTC_MINUTE \
+    --declarations SCRATCH_DIR/ANSWERS.json --declared-only
 ```
 
 **Classify, place and diff with `region-place.py`.** By hand, placement and line arithmetic are where a
@@ -45,15 +48,20 @@ silent one-line error destroys prose no probe can regenerate:
 
 ```
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --classify
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --drift PROBE.json
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --place REGION.md --expect-sha SHA
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --drift SCRATCH_DIR/PROBE.json
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --place SCRATCH_DIR/REGION.md \
+    --expect-sha SHA
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --retire LINE --expect-sha SHA
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --refresh REGION.md --expect-sha SHA
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --declare DECL.md --expect-sha SHA
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --refresh SCRATCH_DIR/REGION.md \
+    --expect-sha SHA
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --declare SCRATCH_DIR/DECL.md \
+    --expect-sha SHA
 ```
 
-Pass back the `sha256` that `--classify` returned. A file that moved between read and write is refused,
-not overwritten.
+Pass each writing call the file's current `sha256`: the one `--classify` returned, or the previous
+write's `sha256_after`; after a write that returns none, such as `--retire`, run `--classify` again. A
+file that moved between read and write is refused, not overwritten. On `file-absent` the `sha256` is
+`null`, the one case where a writing call may omit `--expect-sha`.
 
 ## Reach
 
@@ -93,9 +101,10 @@ not the frontmatter, hold the command to one file.
 - Every line inside the markers carries exactly one of `probed` / `assumed`. A half-probed value is
   written as `assumed`, stating what is not knowable and why. A value the forge would not return carries
   `unread` and never enters the region.
-- The `assumed`-line rationales are composed against `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`: that
-  clause is the only part of the line anyone writes and the only part a reader weighs. `probed` lines are
-  rendered from the forge, beyond the standard's reach. See the skill's table of provenance labels.
+- No line in the probed region is composed at run time: `render-block.py` emits every line, an `assumed`
+  line's *not knowable … why* clause included, from the probe JSON and the scripts' own strings. Leave
+  rendered lines as rendered. `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` governs the rationale strings at
+  build time, in `probe-board.py`, for whoever edits them. See the skill's table of provenance labels.
 
 When the script set or its write surface changes, update **Reach** in the same commit. It went stale
 once: it listed one read-only program after a second, writing one had been added.
