@@ -192,7 +192,7 @@ ${p.diff}
 }
 
 function revertScopedPrompt(p) {
-  return `${WORKDIR} Revert ONLY the current uncommitted refactoring for /phil:refactor-loop. The prior green refactors are committed, so restore just the files this diff touched back to HEAD: identify the files in the diff below and run \`git checkout -- <those files>\` (do NOT run \`git checkout -- .\` or touch anything else). Confirm those files match HEAD. Return applied:true when restored.
+  return `${WORKDIR} Revert ONLY the current uncommitted refactoring for /phil:refactor-loop. The prior green refactors are committed, so restore just the files this diff touched back to HEAD: identify the files in the diff below, run \`git checkout -- <the files the diff modified>\` and delete the files the diff created (do NOT run \`git checkout -- .\` or touch anything else). Confirm those files match HEAD. Return applied:true when restored.
 
 Diff:
 \`\`\`diff

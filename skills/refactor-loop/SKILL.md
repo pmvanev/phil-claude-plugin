@@ -36,7 +36,8 @@ never collide. Both detect the test runner the same way — see
 
 `$ARGUMENTS` may contain `--max-iterations N` to override the default of **10**. It may also
 name a `target_scope` (a file, directory, or `--changes`). With no argument, the scope is
-the latest git changes and `max_iterations` is 10.
+the code files in `git diff HEAD~1 --name-only` and `max_iterations` is 10. Resolve the scope once,
+at INIT; it stays fixed for the run, because each green refactor moves HEAD.
 
 ---
 
@@ -54,25 +55,33 @@ INIT ─►PROPOSE ─►REVIEW ─►[GUARD]─►APPLY ─►TEST ──green�
           │                                  (invalidate deps)     │
           └──────────────── strong-left, iter<max ─────────────────┤
                                                                     │
-                              no-actionable / no ≥major ──► DONE ◄──┘
+                              no-actionable / none pending ► DONE ◄──┘
                               iter≥max ────────────────────► HALT (report, don't fake)
 ```
 
 ### INIT  (cage)
 
-1. Detect the test runner using `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`.
-2. Run the **baseline suite** as a discrete Bash call and read `$?` directly. Guard **G1**:
+1. Work with the session's working directory at the project root, where the hooks look for the
+   ledger. If an existing ledger was left `active-run: true` from an interrupted run, say so and clear
+   the flag first.
+2. Run `git status --porcelain -- . ':!.refactor-loop-ledger.md'` — the ledger is the loop's own
+   uncommitted file. If it prints anything, stop and ask the user to commit or stash
+   (`git stash push -u -- . ':!.refactor-loop-ledger.md'`) first: REVERT discards uncommitted edits in
+   the files it restores. A diff an interrupted run left applied was never gated, so suggest stashing
+   it rather than committing it.
+3. Detect the test runner using `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`.
+4. Run the **baseline suite** as a discrete Bash call and read `$?` directly. Guard **G1**:
    if the exit code is non-zero, the suite is red — go straight to **HALT**. Never refactor
    on a red suite (`${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md` §Safety). This is a `stop`.
-3. Create or load `.refactor-loop-ledger.md` in the project root (format below). Write its
+5. Create or load `.refactor-loop-ledger.md` in the project root (format below). Write its
    header: `runner`, `baseline: green @ <git-sha>`, `iter: 0 / max <N>`, and the `pinned:`
-   list. Write the active-run marker so the Stop hook (G10) knows this is a refactor-loop
-   session.
-4. Snapshot the pinned constraints into the ledger header — the durable, compaction-immune
+   list. Write the active-run marker, which arms the G2 hook for this run.
+6. Snapshot the pinned constraints into the ledger header — the durable, compaction-immune
    source (G7). Default pinned set: `preserve-public-api`, `no-test-file-writes`.
-5. If the ledger has no nodes yet, gather candidate smells for the `target_scope`. You may
+7. If the ledger has no nodes yet, gather candidate smells for the `target_scope`. You may
    run `/phil:review-code <scope>` to seed nodes, then convert its backlog into ledger nodes.
-6. Set `iter = 0`. Proceed to PROPOSE.
+8. Set `iter = 0`. Proceed to PROPOSE. Increment `iter` on every return to PROPOSE, whatever the path
+   back — G5, a G6 skip, the green or the red LEDGER — so G8 bounds them all.
 
 ### PROPOSE  (brain → cage)
 
@@ -84,7 +93,7 @@ INIT ─►PROPOSE ─►REVIEW ─►[GUARD]─►APPLY ─►TEST ──green�
    Do **not** pass prior proposer reasoning traces.
 4. If the proposer returns `"no actionable proposal"`, go to **DONE** (T2).
 5. **Guard G6 (schema):** if the manifest is not schema-valid JSON (§ proposer output),
-   re-ask once. A second malformed return → log it, mark the node skipped, return to PROPOSE.
+   re-ask once. A second malformed return → log it, mark the node `skipped`, return to PROPOSE.
 6. Otherwise proceed to REVIEW with the manifest.
 
 ### REVIEW  (brain → cage)
@@ -102,7 +111,7 @@ Route on `verdict + severity + confidence`, threshold **θ = 0.6**:
 
 - **G5:** if `verdict = reject`, OR any failing `per_criterion` item (`met: false`) has
   `severity ≥ major` and `confidence ≥ 0.6` → back-prompt the proposer (`llm_self_examine`): return to PROPOSE with
-  the failing `per_criterion` items as `last_failure_evidence`. Increment `iter`.
+  the failing `per_criterion` items as `last_failure_evidence`.
 - If `verdict ∈ {accept, revise}` with no blocking item → proceed to APPLY (T4).
 - A `CANNOT_ASSESS` verdict is **not** an accept — back-prompt the proposer, as G5 does. An
   `accept` citing no `file:line` span is coerced to `CANNOT_ASSESS` first (rubric anti-flattery clause).
@@ -110,12 +119,14 @@ Route on `verdict + severity + confidence`, threshold **θ = 0.6**:
 
 ### APPLY  (cage)
 
-1. Make a clean `git` checkpoint of the working tree (so a revert is a single
-   `git checkout`).
-2. Apply the proposer's single diff to disk.
-3. **Guard G2** is enforced by the PreToolUse hook: any Edit/Write touching a test path is
-   blocked at the tool boundary (`stop`). You do not need to re-check it, but never attempt
-   a test-file write yourself.
+1. Confirm the tree is clean — `git status --porcelain -- . ':!.refactor-loop-ledger.md'` prints
+   nothing — so HEAD is the pre-APPLY state a revert restores. If it is not, HALT and report.
+2. **Guard G2:** refuse any diff that touches a test path — under `tests/`, `test/`, `spec/` or
+   `__tests__/`, or named `test_*.py`, `*_test.*`, `*.test.*`, `*.spec.*` or `conftest.py`. Apply
+   nothing: record the reason, mark the node `reverted`, and continue at REVERT step 3. The PreToolUse hook guards `Edit` and `Write` only, so a diff
+   applied through Bash passes it; this scan is the guard, and never attempt a test-file write
+   yourself.
+3. Apply the proposer's single diff to disk.
 
 ### TEST  (cage)
 
@@ -138,7 +149,8 @@ be narrated past — branch on the actual code.
 
 ### REVERT  (cage)
 
-1. **G3a:** `git checkout -- <changed files>` to restore the pre-APPLY state.
+1. **G3a:** `git checkout -- <changed files>` for the files the diff modified, and remove any file the
+   diff created, to restore the pre-APPLY state.
 2. Record the failing evidence (test output or the mismatch) on the node.
 3. Mark the node `reverted`. **Auto-invalidate dependents:** walk the DAG transitive closure
    of the reverted node and set every node that depends on it to `invalid`. Invalidated nodes
@@ -148,7 +160,9 @@ be narrated past — branch on the actual code.
 ### LEDGER  (cage)
 
 1. Mark the current node `resolved` (green) or `reverted`/`invalid` (red path, already done
-   in REVERT).
+   in REVERT). On green, commit the changed files, naming the node and its refactoring, so a later
+   REVERT cannot reach this work. If the commit fails, HALT and report: the next red gate would
+   otherwise wipe this work.
 2. **G7:** re-assert the pinned constraints in the ledger header. Update `iter` in the
    header.
 3. Prune: scan `pending` nodes for smells the just-applied refactoring incidentally resolved;
@@ -157,9 +171,9 @@ be narrated past — branch on the actual code.
 
 ### DONE  (cage — computed predicate, never a vibe)
 
-Reach DONE when **`green ∧ ¬∃ node(severity ≥ major ∧ confidence ≥ 0.6 unresolved) ∧
-iter < max`**, or when the proposer returned `"no actionable proposal"`. The predicate is
-computable; the proposer never gets to assert it.
+Reach DONE on a green suite when the proposer returns `"no actionable proposal"` or no `pending` node
+remains, as the Workflow path does. The predicate is computable; the proposer never gets to assert
+it.
 
 If the suite was already green with no actionable proposals, report **"nothing to do"** — not
 "converged after improvements." A no-op is not a success story.
@@ -201,14 +215,17 @@ Status lifecycle:
 
 ```
 pending ─►(applied+green)─► resolved
-pending ─►(applied+red)──► reverted ──► [each n with this node in depends_on → invalid]
+pending ─►(applied+red, or touches a test path)──► reverted ──► [each n with this node in depends_on → invalid]
+pending ─►(manifest or verdict malformed twice)──► skipped
 pending ─►(smell gone)───► resolved-incidental
 ```
 
 The header (`runner`, `baseline`, `iter`, `pinned`, `active-run`) is the durable,
 compaction-immune source. Re-read it each iteration; do not trust the rolling context for the
-pinned constraints. `active-run: true` plus the ledger's existence is the sentinel that gates
-the Stop hook (G10) so it never traps unrelated sessions. Clear `active-run` at DONE/HALT.
+pinned constraints. `active-run: true` plus the ledger's existence is the sentinel that arms the G2
+hook. Clear `active-run` at DONE/HALT. An interrupt (Ctrl-C / Esc) reaches neither, so the flag stays
+set and blocks test-file edits in that directory until cleared — say so whenever a run is
+interrupted, and INIT clears it on the next run.
 
 ---
 
@@ -217,15 +234,15 @@ the Stop hook (G10) so it never traps unrelated sessions. Clear `active-run` at 
 | Guard | Fires at | Predicate | Outcome class | Where enforced |
 |---|---|---|---|---|
 | **G1** baseline-green | INIT suite finishes | suite exit ≠ 0 | `stop` → HALT | this skill (Bash `$?`) |
-| **G2** test-file-write-block | before any Edit/Write | path matches test glob | `stop` (block write) | **PreToolUse hook** |
+| **G2** test-file-write-block | before APPLY, and any Edit/Write | path matches test glob | `stop` | this skill's diff scan + **PreToolUse hook** (Edit/Write only) |
 | **G3** hard-gate-red | TEST suite finishes | exit ≠ 0 | `stop` + G3a | this skill (Bash `$?`) |
-| **G3a** auto-revert | chained from G3 | — | `invoke_action` | `git checkout` |
+| **G3a** auto-revert | chained from G3 | — | `invoke_action` | `git checkout`, and removing created files |
 | **G4** manifest-mismatch | TEST finishes | actual delta ≠ manifest, or API diff ≠ claim | `stop` + G3a | this skill |
 | **G5** verdict-route | post-REVIEW | reject ∨ (severity≥major ∧ conf≥0.6) | `llm_self_examine` | this skill (back-prompt) |
 | **G6** schema-valid | proposer/critic finishes | output not schema-valid | `llm_self_examine` | this skill (re-ask once) |
-| **G7** pinned-reinject | every LEDGER / iteration boundary | always | `invoke_action` | this skill + **UserPromptSubmit hook** |
+| **G7** pinned-reinject | every LEDGER / iteration boundary | always | `invoke_action` | this skill (hook not wired) |
 | **G8** max-iterations | every step | `iter ≥ max` | `stop` → HALT-INCOMPLETE | this skill |
-| **G10** anti-premature-exit | session Stop | DONE predicate not satisfied | `invoke_action` | **Stop hook** (re-inject) |
+| **G10** anti-premature-exit | session Stop | DONE predicate not satisfied | `invoke_action` | this skill (hook not wired) |
 
 Guards are essentially free to evaluate — gate liberally on the recurring invariants
 (red suite, test-file touched, public-API changed, max-iterations). Do not hand-author a
@@ -235,19 +252,20 @@ guard per code smell; that is the rubric's job.
 
 ---
 
-## Hooks — wiring is a human follow-up
+## Hooks — what ships, and what is prose here
 
-This loop relies on three hooks: **G2** (PreToolUse test-file write-block), **G10** (Stop
+Three hooks back this loop: **G2** (PreToolUse test-file write-block), **G10** (Stop
 anti-premature-exit, gated on the `active-run` sentinel), and **G7** (UserPromptSubmit pinned
-re-inject). The scripts live in `${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/` and the exact `hooks.json`
+re-inject). **G2 ships wired** in the plugin's own hooks. **G7 and G10 are not wired**: in this
+fallback, G7 is re-reading the ledger header every iteration, and G10 is stopping only on the DONE
+predicate or a HALT. The scripts live in `${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/` and the exact `hooks.json`
 merge snippet is in `${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/README.md`.
 
 Merge new entries into existing hook config; never overwrite it. If wiring risks clobbering existing
 config, leave it to the user: tell them to run the `update-config` skill with the snippet from the
 README rather than editing config blindly. Surface this as the one item needing human follow-up.
 
-Until the hooks are wired, the loop still runs but loses defence-in-depth: G2/G10/G7 fall
-back to the in-prose checks in this skill. Wire the hooks to make the boundaries sound.
+Until G7 and G10 are wired, their checks are the prose above; wiring them adds defence in depth.
 
 ---
 
@@ -264,8 +282,8 @@ claiming `public_api_touched: false` (must REVERT at G4), and a "perfect refacto
 ## Safety rules
 
 - Never refactor on a red suite. G1 halts at baseline; G3 reverts mid-loop.
-- One refactoring per gate pass — each breakage is attributable to one change, and revert is
-  a single `git checkout`.
+- One refactoring per gate pass — each breakage is attributable to one change, and revert restores
+  that one change.
 - The proposer never edits tests and never runs the suite; the critic never edits or runs
   anything. Behavior preservation is certified only by the external suite plus the
   manifest-vs-actual check.

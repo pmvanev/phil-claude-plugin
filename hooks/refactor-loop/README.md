@@ -13,7 +13,7 @@ Workflow's JS owns the loop, so two of the three hooks are obviated under it:
 
 | Script | Event | Guard | Workflow path | Interactive skill path |
 |---|---|---|---|---|
-| `block-test-file-write.py` | `PreToolUse` (Edit, Write) | G2 | **wire it** (defense-in-depth) | **wire it** (primary) |
+| `block-test-file-write.py` | `PreToolUse` (Edit, Write) | G2 | **ships wired** (defense-in-depth) | **ships wired** (defense-in-depth; the skill's diff scan is primary) |
 | `anti-premature-exit.py` | `Stop` | G10 | obviated (JS owns the loop) | wire it |
 | `reinject-pinned-constraints.py` | `UserPromptSubmit` | G7 | obviated (JS holds state) | wire it |
 

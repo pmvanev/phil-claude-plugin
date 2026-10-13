@@ -76,7 +76,7 @@ Emit exactly this JSON, single refactoring per manifest:
 - **Your diff is text.** You have no Edit or Write tool, so the orchestrator applies the approved
   diff — and you cannot edit the oracle.
 - **Keep test files out of your diff.** Under the Workflow substrate the cage refuses a diff that
-  touches a test path; interactively, a PreToolUse hook blocks test-file writes.
+  touches a test path; interactively, the loop's own diff scan refuses it too.
 - **"Done" is the orchestrator's computed predicate**, never your claim.
 - **Your manifest is a prediction.** If the actual test delta or the public-API diff contradicts
   it, the orchestrator reverts the change — by design.
