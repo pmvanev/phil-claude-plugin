@@ -29,9 +29,8 @@ One flat order across a whole backlog has to be re-cut every time an issue arriv
 **In an nWave repo the ranked unit is THE CARD** — a **feature** card, or a **story** card holding
 several features (`phil:nwave-issue-board`). A card holds one position; whatever sits inside it holds
 none. A feature's slices are rows in its roster, and a story's member features are rows in *its* roster.
-*(This read "the ranked unit is the FEATURE card, not a slice" until 2026-09-04. A card may now span
-several features, so "one issue is one feature there" is no longer true.)* **An order inherited from a board that carried slice cards must be re-derived, not adjusted**:
-it ranked a unit that no longer exists, and nudging it forward preserves a sequence whose subject changed.
+**An order inherited from a board that carried slice cards must be re-derived, not adjusted**: it ranked
+a unit that no longer exists, and nudging it forward preserves a sequence whose subject changed.
 
 A new issue then costs a goal assignment and one position — not a re-cut. **A milestone is a goal**
 on both forges; that mapping is settled in `phil:issue-board` and is not renegotiated here.
@@ -46,18 +45,16 @@ than an unranked one.
 List the unranked issues with their current column order, and say plainly that the order shown may
 never have been chosen. Exclude anything already ordered upstream.
 
-**Detect slice cards here.** In an nWave repo the ranked unit is **the card** — a feature card **or** a
-story card, whichever the board carries. Cards carrying `slice NN`, or sitting as sub-issues of another
-card, mean the board predates one-issue-per-feature. Say so and stop: ranking them produces an order over
-a unit that is going away, and `phil:groom-set`'s consolidation is what comes first.
+In an nWave repo the ranked unit is **the card** — a feature card **or** a story card, whichever the
+board carries.
 
 **A story card does not stop the session, and gets exactly one position.** It is a card, so it ranks like
 any other; its member features hold **no** position of their own, because they are rows inside it rather
 than cards on the board.
 
-**Check this one BEFORE the slice-card stop above.** A member feature carded beside its own story *and*
-sitting as that story's sub-issue satisfies both, and the slice-card stop would then report the wrong
-diagnosis — *the board predates one-issue-per-feature* — about a board that does not.
+**Check the next one before the slice-card stop below.** A member feature carded beside its own story
+*and* sitting as that story's sub-issue satisfies both, and the slice-card stop would then report the
+wrong diagnosis — *the board predates one-issue-per-feature* — about a board that does not.
 
 **A story card and one of its own member features both open is a different defect, and it does stop.**
 Say so and stop, naming `/phil:groom-set` — the member should be a row in the story, not a card beside it,
@@ -65,6 +62,10 @@ and ranking both puts one unit in the queue twice. **Reuse `phil:groom-issues`'s
 story, carded separately* class rather than writing a second detector here** — same evidence, read from
 the other side; two detectors over one defect drift apart. **`phil:groom-issues` is REQUIRED BACKGROUND
 for this section**, alongside `phil:issue-board`.
+
+**Then detect slice cards.** Cards carrying `slice NN`, or sitting as sub-issues of another card, mean
+the board predates one-issue-per-feature. Say so and stop: ranking them produces an order over a unit
+that is going away, and `phil:groom-set`'s consolidation is what comes first.
 
 ### 2. GOALS
 
@@ -209,11 +210,10 @@ it not-next would resolve this properly; it does not exist yet.
 
 `phil:issue-board` owns the forge mechanics; this skill owns only the session. Should a grooming
 command arrive and genuinely share the elicit-then-write discipline, extract that discipline then —
-with two consumers to shape it. Extracting now, on one, would be guessing at the shared part
-(`ADR-008`'s rule, and the same call it made).
+with two consumers to shape it. Extracting now, on one, would be guessing at the shared part.
 
 ## Acceptance
 
-`self-test/` holds the fixtures. Run them whenever this file, the command loader, or
-`phil:issue-board`'s position or milestone sections change — this skill's correctness is partly
-that skill's.
+`${CLAUDE_PLUGIN_ROOT}/skills/rank-issues/self-test/` holds the fixtures. Run them whenever this file,
+the command loader, or `phil:issue-board`'s position or milestone sections change — this skill's
+correctness is partly that skill's.
