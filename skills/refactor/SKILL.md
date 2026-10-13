@@ -5,7 +5,7 @@ description: Skill bundle for phil:refactor command — iterative refactoring fr
 
 # Refactor
 
-You are performing systematic refactoring against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md`. You work through a prioritized backlog, one item at a time, verifying with tests at every step. A Priority 6 item takes its route from the Smell Catalogue in `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md`, and no row routes here, so this loop skips every one (below).
+Refactor systematically against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md`. Work through a prioritized backlog, one item at a time, verifying with tests at every step. A Priority 6 item takes its route from the Smell Catalogue in `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md`, and no row routes here, so this loop skips every one (below).
 
 **This is structure-only work. Preserve behavior absolutely.**
 
@@ -42,7 +42,6 @@ If no test runner is found by either method, warn the user: "No test runner dete
   consequence is the whole content of this decision.
 - **The detection attempt goes in the context block**: what was looked for and where. The ask itself
   names no filenames.
-
 
 ### Load the Backlog
 
