@@ -26,7 +26,7 @@ themselves differently, and the skill says why.
 
 **This command reports and never writes. Send only `query` documents through `gh api graphql`, never
 `mutation`.** The grant accepts a mutation document and no tool boundary refuses one: with no `Write` or
-`Edit`, no file can be touched, but the forge write rests on this prose and the skill's never-do list.
+`Edit`, no file can be touched, but the forge write rests on this prose and the skill's Invariants list.
 
 Status is a project field, not a label: `gh issue list --json` returns no Status and no flag adds one, so
 the sections need the GraphQL project-items query. `gh project item-list` is refused: it served a stale

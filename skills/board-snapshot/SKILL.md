@@ -207,7 +207,7 @@ and it is not claimed as more. The numbers are in `references/why-these-rules.md
 empty sections, the withheld-count clause, the clause saying where the order came from, the drift,
 uncolumned, off-board and inflation lines, and every description in mode 2.
 
-The discriminator is `CLAUDE.md`'s: *who composed the words, never where they sit*. Terminal-only output
+The discriminator is *who composed the words, never where they sit*. Terminal-only output
 does not exempt a sentence this skill wrote. Read the standard as **compose well, never compose short** —
 the ceilings already bound length, and the standard bears on active voice, positive form and putting the
 emphatic word last.
@@ -243,7 +243,7 @@ Report exactly one terminal outcome, every run:
 `SNAPSHOT-RENDERED` · `SNAPSHOT-CLIPPED` · `SNAPSHOT-PARTIAL`
 
 **`READ-ONLY` is reported on every run** and counts against the ceiling. It asserts that every forge call
-this run made was a read — the `gh api graphql` grant accepts a mutation document and only the never-do
+this run made was a read — the `gh api graphql` grant accepts a mutation document and only the Invariants
 list forbids one, so this is a claim the run makes about itself.
 
 These are reported **alongside** the terminal outcome, each only when it fires: `DRIFT` · `UNCOLUMNED` ·
@@ -255,27 +255,28 @@ These are reported **alongside** the terminal outcome, each only when it fires: 
 - **`SNAPSHOT-PARTIAL`** — the board was not fully read. It supersedes the other two: a clipped render
   over a partial read is partial.
 
-## What this skill must never do
+## Invariants
 
-- **Write anything.** No issue edits, no labels, no comments, no Status writes. It holds no `Write` and
-  no `Edit`.
-- **Send a `mutation` document through `gh api graphql`.** No tool boundary backs this. Issue `query`
-  documents only.
-- **Compute an order.** Board position is consumed.
-- **Probe for the board constants.** They are read from `CLAUDE.md`, which `phil:board-setup` owns.
+- **Write nothing.** No issue edits, labels, comments or Status writes; the skill holds no `Write` and no
+  `Edit`.
+- **Send only `query` documents through `gh api graphql`, never `mutation`.** No tool boundary backs this.
+- **Consume board position; compute no order.**
+- **Read the board constants from `CLAUDE.md`, which `phil:board-setup` owns; never probe for them.**
   This skill is triggerable with no command in play, so the rule belongs here.
-- **Claim completeness over a partial read**, or over the project's items alone while open issues sit
-  off the board.
-- **Fix, consolidate, or refuse to render** on account of anything it reports.
-- **Infer a blocker.** No `## Chain` line means unrecorded, and saying so is the answer.
-- **Print an empty heading.**
-- **Breach the ceiling in silence**, or drop a blocked or in-flight card to avoid breaching it.
-- **Drop a card from `--all` for any reason**, including length.
-- **Reword a title into a description**, or lift the body's first sentence and call it one.
-- **Write a confident description of a card that says nothing.**
-- **Put a file path, a bracketed identifier or a bare handle in a description**, or spell a card number
-  in longhand to dodge that rule.
-- **Judge a card's prose.** Titles are quoted.
+- **Claim completeness only over a full read**, and never over the project's items alone while open
+  issues sit off the board.
+- **Render the snapshot in full whatever it reports**, and fix or consolidate none of it.
+- **Say "unrecorded" where a blocked card has no `## Chain` line; infer no blocker.**
+- **Name an empty section in one leading sentence; print no empty heading.**
+- **Breach the ceiling only out loud**, and keep every blocked and in-flight card even when that breaches
+  it.
+- **Drop no card from `--all` for any reason**, including length.
+- **Compose each description from the body** — never a reworded title, never the body's first sentence
+  lifted and called one.
+- **Say a card states nothing when it states nothing**, rather than writing a confident description of it.
+- **Keep file paths, bracketed identifiers and bare handles out of descriptions**, and spell no card
+  number in longhand to dodge that rule.
+- **Quote titles; judge no card's prose.**
 
 ## Acceptance
 
