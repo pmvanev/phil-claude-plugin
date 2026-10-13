@@ -6,7 +6,7 @@ allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(gh issue view:*), B
 ---
 
 Load the `groom-issues` skill at `${CLAUDE_PLUGIN_ROOT}/skills/groom-issues/SKILL.md` and run the
-loop in *Resolving the set-level candidates*.
+loop in *Resolving the set-level candidates*, in `references/set.md`.
 
 Re-scan first, and re-derive between candidates. Like `/phil:groom-fix` this command inherits no
 report from another session — but it carries a second obligation that command does not: **its own

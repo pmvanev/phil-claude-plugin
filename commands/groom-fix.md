@@ -6,7 +6,7 @@ allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(gh issue view:*), B
 ---
 
 Load the `groom-issues` skill at `${CLAUDE_PLUGIN_ROOT}/skills/groom-issues/SKILL.md` and run the
-apply loop in *Applying the mechanical column*.
+apply loop in *Applying the mechanical column*, in `references/fix.md`.
 
 Re-scan first. This command never inherits a report from another session — the scan is one call, and a
 fix computed against remembered text is the failure the separation exists to prevent.

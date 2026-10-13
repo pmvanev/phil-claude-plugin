@@ -259,10 +259,10 @@ When a rule changes, the edit is not done until each of these has been checked:
 | 2 | `SKILL.md` narrative intro — the four-command summary |
 | 3 | `SKILL.md` the standard, or the *does not contain* list |
 | 4 | `SKILL.md` the defect table — the classification a session reads from |
-| 5 | `SKILL.md` the operating section for the owning command |
+| 5 | `references/<command>.md` — the operating section for the owning command (`fix`, `set`, `ask`) |
 | 6 | `SKILL.md` the cross-issue candidates list, and any "the N above" count |
 | 7 | `SKILL.md` reporting — the example output |
-| 8 | `SKILL.md` the measured-population paragraph |
+| 8 | `references/fix.md` and `references/set.md` — the measured-population paragraphs |
 | 9 | `SKILL.md` decision outcomes — including whether a new stop needs a new outcome |
 | 10 | `SKILL.md` must-never-do — the all-commands list **and** the per-command list |
 | 11 | `commands/<name>.md` frontmatter `description` — it loads *before* the skill |

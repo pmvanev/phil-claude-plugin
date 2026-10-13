@@ -6,7 +6,7 @@ allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(gh issue view:*), B
 ---
 
 Load the `groom-issues` skill at `${CLAUDE_PLUGIN_ROOT}/skills/groom-issues/SKILL.md` and run the
-loop in *Eliciting the semantic content*.
+loop in *Eliciting the semantic content*, in `references/ask.md`.
 
 Re-read the issue immediately before writing. This command inherits no report from another session,
 and the body it is about to replace is prose a human wrote — the rule matters more here than
@@ -48,5 +48,5 @@ are in scope and two are not.
 Concision is one of the standard's eleven principles of composition; it never buys brevity with content,
 and it adds **no fifth provenance label** — a label for *the human wrote it and I improved it* would
 license exactly the edit this forbids. Naming the standard is the mechanism; it authorises no pass over
-a field already written. Full rule in the skill's *Eliciting the semantic content* — the discriminator it
+a field already written. Full rule in the skill's *Eliciting the semantic content*, in `references/ask.md` — the discriminator it
 extends is in *Judging prose is taste; composing it is not*.

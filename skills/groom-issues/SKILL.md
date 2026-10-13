@@ -56,6 +56,21 @@ no longer the discriminator. What survives is that the words' origin is never in
 **REQUIRED BACKGROUND: `phil:issue-board`.** Every forge mechanic — `-R` targeting, label semantics,
 absolute-URL rules, dependency links, generated blocks — lives there. Do not guess any of it here.
 
+## The four commands
+
+Each command runs from one place. **Read the command's file whole before its first step**; this file
+governs all four.
+
+| Command | Runs | Read |
+|---|---|---|
+| `/phil:groom-issues` | the scan and its report | this file, whole |
+| `/phil:groom-fix` | the mechanical column | `references/fix.md` |
+| `/phil:groom-set` | the set-level candidates | `references/set.md` |
+| `/phil:groom-ask` | the semantic column | `references/ask.md` |
+
+**Every ask in this skill follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`. Load it
+before the first `AskUserQuestion` call.**
+
 ## The standard — what a well-formed issue contains
 
 Without this, "appropriate description" is not checkable and grooming is taste. This is the house
@@ -145,7 +160,7 @@ discriminator is checkability:
 
 **So the standard for composed text is `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`**, and it reaches only
 what the commands this skill bundles compose onto a card: the fields elicitation writes (per the
-provenance clause below) and the comments `groom-set` leaves on an irreversible operation.
+provenance clause in `references/ask.md`) and the comments `groom-set` leaves on an irreversible operation.
 `groom-issues` and `groom-fix` compose nothing that reaches a card and say so in their own files;
 `phil:rank-issues` owns its own surface and its own citation. **Concision is one of the standard's
 eleven principles of composition** — active voice, positive form, concrete language, parallel structure
@@ -216,6 +231,11 @@ Stated rather than left to be discovered: a class that works on one forge and go
 other is this skill's own recurring defect, and the whole point of issue #30 was that the dark half
 reported clean.
 
+**Re-read a card immediately before writing it, on every writing command.** Fetch the issue being
+edited rather than acting on any earlier copy. If its body moved since that read, report what moved
+and when, and overwrite nothing: the forge records the session as last author, and whoever's paragraph
+vanished cannot see that a groom run did it. Each command's file says what it re-reads beyond the card.
+
 **Never read or write a grooming marker.** No `groomed` label, no timestamp block, no state file. The
 defect table is re-derived on every run. A stored marker becomes a second authority the moment
 somebody edits a groomed issue — the exact failure `phil:issue-board` forbids under *One system of
@@ -231,7 +251,8 @@ Every finding names the rule it violates and quotes the evidence. A finding with
 opinion, and this skill does not report opinions.
 
 Classify each, because the columns have different actors: `/phil:groom-fix` acts on the mechanical column,
-and `/phil:groom-ask` on the semantic one (*Eliciting the semantic content*, below). Neither crosses.
+and `/phil:groom-ask` on the semantic one (*Eliciting the semantic content*, in `references/ask.md`).
+Neither crosses.
 
 | Mechanical — one right answer | Semantic — needs a human |
 |---|---|
@@ -286,82 +307,6 @@ establish which kind it is holding first, and that question is the human's.
 **Do not report a missing `Work this with:` line as a body defect.** That line is generated into the
 delimited block by `phil:nwave-issue-board`; its absence is a publishing question, not a content one,
 and hand-writing it would be typing into a generated region.
-
-## Applying the mechanical column — `/phil:groom-fix`
-
-**Mechanical is a claim about the fix, never about the consent.** It says the content is derivable and
-invents nothing — a relative path has one correct absolute form, a one-sided chain's missing half is
-written on the other issue. It says nothing about whether the user wants their board edited now.
-Reading the classification as authorisation is the failure this whole step is shaped against.
-
-**Scope first, and write nothing before the answer.** The user picks a defect class, a subset of
-issues, or everything. The tool does not choose, and does not start with the safest fix to show
-progress. Group the offer by class, because that is the unit a class-level answer selects; a flat list
-makes the user do the grouping the report should have done.
-
-**Scale the offer to the population, and never the consent.** Over one finding, a
-class/subset/everything menu is ceremony — and a step that feels like ceremony is the step people learn
-to click through, which is how a consent gate stops working on the run where it matters. One finding
-gets one confirmation naming it. Nothing gets applied because it was trivially small.
-
-**Report the checks that ran and found nothing.** "One defect" over five silent checks reads as a thin
-scan. Naming the passes is what separates *this board is clean* from *this tool looked at one thing*.
-Do not report them as unevaluated — they had an oracle and they ran, which is a stronger statement than
-`REPORT-UNEVALUATED` and must not be blurred into it.
-
-**Every change carries the reason it needed no judgement**, per change, not per run:
-
-```
-#31 — rewrote ./docs/adr/ADR-013.md as <absolute URL>. No judgement: GitHub emits relative
-      paths verbatim so the original 404s for every reader; target confirmed on origin/main;
-      nothing invented.
-```
-
-The reason is the deliverable, because it is what makes the mechanical claim falsifiable. "Applied 2
-fixes" cannot be contradicted by a reader; the sentence above can. A slice whose premise is that some
-fixes need no consultation has to show its work, or the boundary is asserted rather than drawn.
-
-**This command settles what the scan could not, and must actually do it.** The scan reports an unlinked
-path as an unverified *candidate* because confirming the target needs `git`, which its `Bash` scoping
-withholds. `/phil:groom-fix` holds `git ls-tree`, and that grant exists for exactly this: run
-`git ls-tree origin/<default-branch> -- <path>` on every candidate in scope, and the confirmed ones
-become findings you may fix. A candidate that will not confirm **stays unfixed and stays reported**,
-with the check that failed named.
-
-Read the scan's caveat as a statement about tools, not about truth. Carried across unexamined it
-disqualifies the fix this command leads with — relative links that 404 are the first row of the
-mechanical column and the headline of the command's own description, and a session that treats every
-one of them as permanently unverifiable refuses its most common correct edit while reporting that it
-followed the rules.
-
-**The scope is a line, not a hint.** A mechanical defect outside the chosen scope stays untouched — and
-stays *mentioned*. Out of scope means untouched, not unmentioned; a defect that disappears from the
-output reads as fixed.
-
-**The column is a property of the defect, not of the card that holds it.** An issue carrying one
-mechanical and one semantic defect gets one of each treatment in the same pass. Skipping the card
-because it also has a semantic defect makes that column contagious, and on a real board the mechanical
-column would then empty itself through proximity rather than through measurement.
-
-**Re-read before every write.** The apply is a separate command, so it must fetch the issue it edits
-and cannot act on the scan's copy. If the body moved since the scan, report what moved and when, and do
-not overwrite — the defect surviving is necessary but not sufficient, because the surrounding text is
-unassessed and the scope the user agreed to was over the board as reported. The failure prevented here
-is not a lost edit but a silent one: the forge records the session as last author, and whoever's
-paragraph vanished cannot see that a groom run did it.
-
-**Refuse a generated region even when the content is right.** A fix inside `nwave:status` markers is
-destroyed on the next refresh and disagrees with its source until then. Refuse with the reason and point
-at the generator — that pointer is the only part of the refusal that leads anywhere. Do not edit just
-outside the markers to place it "nearly" right; that leaves the region wrong and hides it from the next
-reader. Mechanical governs the content, ownership governs the bytes, and both must pass.
-
-**What the population actually is.** Measured on this repo's board on 2026-08-13, after slice 01 had
-been dogfooded twice: six mechanical checks with real oracles, and **one** defect board-wide — created
-by the maintainer that same session, minutes after re-reading the rule it broke. The boundary is real
-and its fixes need no question, but this is not a bulk fixer. Its value is catching the defect its own
-author just made, and a design that assumes a full queue will build ceremony the population cannot
-justify.
 
 ## Cross-issue candidates — the scan surfaces, never acts
 
@@ -476,278 +421,13 @@ reports each with its evidence and stops; resolving them is `/phil:groom-set`, a
   stable issue-to-issue parent edge there to read. Tiers 2 and 3 still evaluate normally, so the class is
   weakened on GitLab, not dark — say which it was.
 
-  **Tier 2 needs the repository, not the body's word for it.** *Overcome by events* already refuses to treat
+  **Tier 2 needs the repository, not the body's word for it.** *Overcome by events* (`references/set.md`) already refuses to treat
   board prose as evidence about the world — the claim "is settled in the repository or not at all" — and a body
-  naming a path is board prose. Confirm the directory exists with `git ls-tree`, which this command holds.
+  naming a path is board prose. Confirm the directory exists with `git ls-tree`, which `/phil:groom-set` holds.
   Unconfirmed, tier 2 drops to report-only alongside a title.
 
   Quote the evidence rather than characterising it. *"These look like slices of one feature"* is the finding
   restating its own conclusion.
-
-## Resolving the set-level candidates — `/phil:groom-set`
-
-The operations above are the only ones here, and each asks. What follows is what the question has to
-contain to be answerable, and what the apply owes afterwards.
-
-**The ask must have the same arity as the finding.** This is the rule the whole step turns on. Two
-issues that overlap in part are not a yes-or-no about merging: they may be a merge, a split along the
-seam, a dependency edge, or two cards that happen to share a mechanism and should stay apart. Offering
-*merge? y/n* over that finding forces a wrong answer, because the true answer was never on the menu —
-and a declined merge then reads as *these are unrelated*, which is a third thing that was also never
-asked. Present the outcomes the evidence actually admits, and let *leave them alone* be one of them.
-
-**Evidence is quoted, not characterised.** "These look similar" is the finding restating its own
-conclusion. Quote the overlapping content from both bodies, then say in one line what is shared and
-what is not — the difference is the part the user is actually adjudicating, and summarising it away
-leaves them deciding on your reading instead of theirs.
-
-**One candidate at a time, re-derived, not carried.** An apply here changes the set the remaining
-candidates were computed over: a merge closes a card a later candidate names, a split assigns numbers
-no earlier read could have seen. Slice 02's *re-read before every write* holds one level up — re-read
-the board between candidates, and drop any whose subject a previous apply has already moved. Working
-down a list built at the start of the run is how a session proposes merging an issue it closed ten
-minutes ago.
-
-### Merge
-
-**Which card survives is the user's choice, not the lower number.** The lower number is older, which
-correlates with nothing — the better-written body, the one carrying the acceptance criteria, and the
-one people have already linked to are all independent of it. Ask, showing enough of both to choose.
-
-On approval, in this order: move the detail that would be lost into the survivor, close the other with
-a comment naming the survivor, then **re-point every reference to the closed issue.** That last pass is
-separate and comes last, because until the close lands there is no settled answer to point at. Search
-the board for the closed number and fix each mention — a merge that leaves five cards pointing at a
-tombstone has moved the confusion rather than removed it.
-
-**Closing sets Status on a project board** — the mechanism and its comment-dropping hazard are
-`phil:issue-board`'s, under *A status write can close the issue underneath you*. Where the project has the **closed → Done**
-workflow enabled — a different setting from the Done → close one this repo declares, and one nothing here has
-verified — the card lands in Done by itself, and this command holds no `gh project
-item-edit` to put it anywhere else. Say so when you close; a card the user expected to keep triaging
-has just left the queue.
-
-### Split
-
-**"Split" means two different operations now, and this command performs only one of them.** Splitting a
-**story** creates cards, as below. Splitting a **feature** on a board where one issue is one feature means
-re-slicing its roadmap — a change to `docs/feature/<id>/slices/`, not to which cards exist — and this
-command has no business there. Refuse it and say which operation was asked for; the roster inside the
-feature's card is where its parts live, and adding cards for them undoes the paradigm rather than
-implementing it. See `phil:nwave-issue-board`.
-
-**Numbers are assigned at creation, so the cross-references are a second pass.** Create the new cards
-first, collect the numbers the forge hands back, then write the `## Chain` lines. Writing a reference
-during creation means writing a number that does not exist yet, and the forge will render it as a link
-to whatever else claims it. *(Mechanism: `phil:issue-board`, Bulk seeding needs two passes.)*
-
-**Nothing is inherited.** Labels, milestone, and the chains that pointed at the original do not follow
-the split — they are carried deliberately or not at all, and both are decisions. State what you are
-carrying to each new card as part of the ask, not after.
-
-**Then decide the original.** A split leaves a card that no longer describes work: it is closed as
-superseded, or kept as the container the new cards hang under. That is a second question, and the split
-is not finished until it is answered — an original left open beside its own pieces is now the
-duplicate this command exists to find.
-
-**A created issue is not a board card.** `gh issue create` puts an issue in the repo and nowhere on the
-project; a card that was never `item-add`ed has no Status and is invisible in a kanban grouped by it
-(`phil:issue-board`, *GitHub does not work the same way*).
-Add each new card to the project, and report that its Status is unset — placing it in the queue is
-`phil:rank-issues`, which is a decision about order and not this command's.
-
-### Overcome by events
-
-**This is the weakest oracle of the four, and it fails in the expensive direction.** The others are
-answerable from the payload the scan already holds; this one is a claim about the world outside the
-board — that the work landed another way, or the decision behind it was reversed. Board prose is not
-evidence of that. A sibling card asserting that something shipped is exactly the stale copy of state
-the defect table already distrusts.
-
-So an OBE candidate arrives **unverified**, in the same shape as slice 01's unlinked path: report it,
-name what would settle it, and do not close on it. What settles it is the repository — the commit, the
-file, the reversing decision — reachable here through `git log` and the working tree. Confirm it or
-leave it standing. Closing a live card because another card said the work was done is the one
-irreversible mistake on this board that nobody notices for months.
-
-On approval, close with the reason **in the same call** (`gh issue close -c`), so the account of why it
-went cannot be separated from the going. The observed hazard runs the other way round — a Status write to
-Done closes the issue, and a `gh issue close -c` afterwards reports "already closed" and drops its comment —
-and it is `phil:issue-board`'s to state, under *A status write can close the issue underneath you*. Comment
-first, then close or set Status; the same-call form satisfies that ordering by construction.
-
-*(Corrected 2026-08-14: this paragraph previously asserted that a comment posted after a close is dropped
-"once the project's close workflow has run" — a claim in the close-first direction that neither
-`phil:issue-board` nor this repo's `CLAUDE.md` establishes. Both observed the Status-first case. The
-advice was right and the mechanism was invented.)*
-
-### Ungrouped effort
-
-A card belonging to a larger effort that says so nowhere. **A milestone is a goal** — #7's convention,
-owned by `phil:issue-board`. Consume it; a second grouping convention invented here would make the two
-disagree and neither authoritative.
-
-**Joining an existing container and creating a new one are different questions.** Joining is the only
-reversible operation in this whole section — one `--milestone` away from undone — so it can be offered
-over a group of cards at once, provided the evidence for each is shown beside it. Creating a container
-cannot: a goal is a commitment about what the board is for, and this command deliberately cannot make
-one. Propose it, hand over the exact call, and stop.
-
-**Before offering a goal, check whether the right container is a story.** A goal holds *cards*; a story
-holds *feature directories*. Where the cards are whole features whose deltas declare one `Story:` slug,
-the container is a **story card** and *features of one story, carded separately* supersedes this class —
-offer that one and not this. A milestone filed around those cards groups them on the board while leaving
-the thing that should be one card as several, which looks like a resolution and is not.
-
-### Consolidate features of one story
-
-Several open cards, each a whole feature, whose deltas declare the same `Story:` slug. The target shape
-is **one story card** whose feature roster holds them as rows.
-
-**Two shapes, and the report must name which it took.** Unlike a decomposed feature there is no
-open-parent shape — a story card is what is being *created*, so nothing groups the members yet:
-
-| Shape | What exists | What to do |
-|---|---|---|
-| (a) A closed story card already exists for this slug | a previous consolidation, or a card closed by mistake | **reopen it** and add the members as roster rows; never mint a second |
-| (b) No story card exists | the common case | propose creating one; hand over the exact call and stop |
-
-**Search closed issues before concluding shape (b).** A story card closed by a prior pass is invisible to
-an open-issues scan and minting a second one splits the story permanently. This is the same search the
-decomposed-feature section mandates, and the never-do list names both tiers for that reason.
-
-**Irreversible, so it is one candidate at a time and never a group offer.** Closing a feature card
-discards its own comments and history.
-
-**The decomposed-feature rollup hazard does NOT transfer, and importing it would be a warrant that
-cannot obtain.** That hazard is *un-parent before closing, or the parent renders complete while the work
-continues* — it presupposes a real parent/child edge, which is that class's defining tier-1 evidence.
-This class is defined by the **absence** of any forge grouping, so there is no edge to remove. Where a
-member does happen to sit as a sub-issue of something, remove that edge first for the shipped reason;
-otherwise the step does not apply.
-
-**Confirm the declarations are pushed before offering.** Evidence is a `Story:` line at column 0 in each
-member's `feature-delta.md` **on the default branch** — `git ls-tree`, not the working tree. A slug that
-exists only locally is invisible to every other reader, and consolidating on it produces a story card
-whose membership nobody else can verify.
-
-**Two or more members in flight at once is a reason NOT to consolidate**, and it is the one case where the
-answer runs the other way: concurrency means two people, which is what makes them separate cards under a
-goal. Report it and do not offer the merge. **Outcome: `REFUSE-CONCURRENT`** — a refusal on verified
-evidence, which is neither `DECLINE-NO-TRACE` (nobody declined) nor `REFUSE-UNVERIFIED` (the evidence is
-good). A terminal stop with no outcome of its own is unreportable.
-
-### Consolidate a decomposed feature
-
-**Establish which of three shapes it is before writing anything.** The old split either closed its original
-as superseded or kept it as the container, so the target of a consolidation may already exist, may exist
-closed, or may not exist at all:
-
-| Shape | Target | Can this command complete it? |
-|---|---|---|
-| **(a)** An open parent exists | Close the children under it | **Yes.** Lowest risk, and it still asks. |
-| **(b)** No parent, but a closed original is findable | That closed card is the feature card | **No — the reopen is not in this command's grant.** Report `REFUSE-UNGRANTED` and hand over the calls. |
-| **(c)** Neither | The feature card must be *created* | **Yes**, with the two-pass discipline for its cross-references. |
-
-**Search closed issues before concluding (c).** The scan reads `--state open`, so shape (b) is **invisible to
-it** — a second read is required, and skipping it is how (b) gets resolved as (c), minting a duplicate of a
-card that already exists while the original's history sits behind a tombstone:
-
-```sh
-gh issue list -R <owner/repo> --state closed --search "<feature id>"
-```
-
-Never guess between the three. Name which one the evidence shows, and put it in the question.
-
-**Shape (b) is proposed, never performed.** Reopening is not something this command holds, and that is
-deliberate rather than an oversight: it is the milestone case again — *propose it, hand over the exact call,
-and stop*. Two calls, because `gh issue reopen` restores the issue and **not** its Status field, so the card
-would otherwise sit OPEN inside Done, a combination no board view flags:
-
-```sh
-gh issue reopen <n> -R <owner/repo>
-# then set Status by hand — this command holds no `gh project item-edit`
-```
-
-**The roster is not this command's to write.** A feature card's roster lives inside the `nwave:status`
-markers and is generated by `phil:nwave-issue-board` from the artifacts. Do not "absorb" children into it —
-that is a write into a generated region, which this file forbids and `REFUSE-GENERATED` names. The children's
-state reaches the card at the next refresh, from the artifacts, without anything being typed here.
-
-**Remove the edge, then post the pointer comment, then close. In that order, per child.** Three rules
-compressed into one sequence, because stating them separately permits every wrong permutation:
-
-1. **Remove the parent edge** (`gh issue edit <parent> --remove-sub-issue <n>`). A closed sub-issue still
-   counts toward its parent's completion, so closing first renders the feature **100% done** while the work
-   continues.
-2. **Post the pointer comment**, naming the feature card and the slice it became. A closed card with no
-   pointer is a dead end for whoever finds it later.
-3. **Close the child**, with the reason **in the same call** — the form *Overcome by events* already uses,
-   which satisfies the ordering by construction and needs no claim about what drops a later comment. The
-   observed hazard is narrower than "a comment after a close is lost": it is a `gh issue close -c` against an
-   issue a **Status write** had already closed, which is `phil:issue-board`'s under *A status write can close
-   the issue underneath you*. Do not restate it more broadly than it was measured.
-
-**Move what would be lost before closing anything.** A slice card carries acceptance criteria, chain lines
-and prose that the roster does not. Consolidating four cards and keeping only four pointer comments loses
-every done-condition on them — the same duty *Merge* carries, and it binds harder here because there are N
-children rather than one.
-
-**The rollup counts *closed*, not *done*, and this command cannot read it.** A card closed as won't-build is
-indistinguishable from one closed as shipped: observed on this repo's board, a parent reporting `3/3 · 100%`
-where one child had been deliberately **not** built and closed anyway. So consolidation does not merely
-inflate a number — it produces an inflation nobody can read as one. **Say what the rollup will show before
-the user answers**, and hand over the read rather than claiming to have made it, because `subIssuesSummary`
-is GraphQL-only and `/phil:groom-set` grants no `gh api`. The mechanism and the measurement are
-`phil:issue-board`'s, under *A parent's "N of M done" counts different things on each forge*.
-
-**Do not read the family as one grant — the scan is the exception.**
-`/phil:groom-issues` gained `Bash(gh api graphql:*)` on 2026-09-04 for the parent-edge read; this command
-did not, and `REFUSE-UNGRANTED` still names a rollup read among the calls it hands over. Widening it here
-was not decided and is not implied. The asymmetry is the point: the scan only reports, so a promise not to
-mutate costs it nothing it was ever going to do, while this command exists to make irreversible writes —
-the identical grant sitting beside `gh issue close` is a materially larger promise than it is beside a
-report.
-
-### A declined candidate leaves no trace
-
-Nothing is written: no label, no comment, no note in a body, no file. D6 forbids a grooming marker and
-a decline record is a grooming marker wearing the word *decline* — the moment it exists, the next run
-trusts it over the board, and a candidate the user declined for a reason that has since evaporated
-never surfaces again.
-
-The visible cost is that **the same candidate is proposed again next run**, and the report must say so
-where the decline happened, not only in a footnote. Unstated, it reads as the tool having forgotten,
-which is the complaint that produces a request for the marker this rule exists to refuse. Stated, it
-reads as what it is: the board is the only record, and it is re-read every time.
-
-### What the population actually is
-
-Measured on this repo's board on 2026-08-13, thirteen open issues: **two candidates, both declined, and
-nothing written.** One partial overlap (two cards adding checks to the same priority ladder) and one
-ungrouped pair (the board's only two typesetting cards, with no milestone naming that goal). No
-duplicates, no oversized cards, no work overcome by events, and no decomposed features — every slice card on
-it was already closed, which is why that class was found by reasoning about consumers' boards rather than by
-reading this one.
-
-**Read the last of those as a tiers-2-and-3 result, because that is all it was.** A second run on
-2026-08-14 against 0.53.0 reported the decomposed-feature class *evaluated with no candidates*, and the
-strongest tier had no oracle behind it — the parent edge was unreadable, and on this board there happened
-to be none to miss. On a board whose slice cards **are** parented, the identical sentence would have been
-emitted and would have meant nothing. That is issue #30, and it is the sharpest available illustration of
-this section's own lesson: a population measured through a partial oracle describes the oracle, not the
-population.
-
-Read that result carefully, because the obvious reading is wrong. The run's output was not *nothing* —
-it was two questions, one of which named a seam the board did not previously hold: both cards leave the
-same question open about how a new check earns its tier, and neither says so. The user declined and the
-seam is now known. **On a board in reasonable shape the deliverable of this command is the question, and
-the write is the exception**, which inverts the assumption a section full of merge and split mechanics
-invites. Build the ask as the product; the applies are what happens on the minority of runs.
-
-It also settles which guard is load-bearing. *Declined leaves no trace* looked like an edge case when it
-was written and is the observed common path — so the note that a candidate will return is not a footnote
-for a rare run, it is the sentence most runs end on.
 
 ## Reporting
 
@@ -795,129 +475,6 @@ labels does not need rule 4's oracle, and reporting it unevaluated there is boil
 a caveat stops being read by the run that needs it. The note is owed when a candidate existed and the
 check could not settle it: two labels and no declared family, an unlinked path and no way to confirm
 the target. No candidate, no note.
-
-## Eliciting the semantic content — `/phil:groom-ask`
-
-The mechanical column has `/phil:groom-fix` and the set-level column has `/phil:groom-set`. **The
-semantic column had nothing**, and that is a hole rather than a boundary: a card failing rules 1 and 2
-is reported every run and resolvable by none of them, so a board of title-only cards produces an
-identical report forever. That is *this tool teaches people to stop running it* reached from the
-other side — not manufactured findings, but real findings with no exit.
-
-**The refusal was never the problem; the missing editor was.** `/phil:groom-fix` declining to draft a
-purpose is the boundary working exactly as designed, and nothing here relaxes it — that command never
-asks, so it may never draft. What this adds is somewhere for the content to come from.
-
-**Present the card before asking.** State what it is, what it already says, and which rule failed. A
-question that assumes the reader remembers the card gets a worse answer, or none — and the reader is
-often being asked about work a past self filed.
-
-**Every ask in this skill follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`. Load it
-before the first `AskUserQuestion` call.**
-
-Two things that standard cannot know, which this section owns:
-
-- **The context block is the card.** The standard makes context *optional*; here it is **mandatory** —
-  what the card is and what it already says goes above the ask, per the paragraph before this one.
-  Only this skill knows the context is a card, and only this skill can raise an optional clause to a
-  requirement. Saying the standard "requires" it would put the consumer in contradiction with the file
-  it loads.
-- **Rule numbers never reach the counted ask.** `rule 1` and `rule 2` are this skill's internal
-  numbering, and the standard forbids internal identifiers in an ask. Name the gap in plain terms —
-  *it does not say when it is done* — and put the rule number in the context block beside the quoted
-  body.
-
-**The human sanctions every claim; the session may choose the words.** That is the unit, and stating it
-precisely matters — an earlier draft said *sanctions every word*, which the rephrasing path below does not
-deliver and cannot. Suggest one or two ways to fill the gap, **marked as the session's**, let the human
-accept, edit, or replace, and write the result as a clean card in the house voice rather than a transcript.
-
-**What must never happen is a claim reaching the card unsanctioned, or a word reaching it untraceable.**
-An inferred sentence is indistinguishable from an authored one *once written*, so the remedy is not to
-forbid drafting — it is to make every field's origin legible and every rewrite inspectable:
-
-- **Each field written carries a provenance label**, from exactly this set, and the human's action decides
-  which: accepted a suggestion unchanged → `you accepted my suggestion`; changed one → `you edited my
-  suggestion`; **rejected the suggestions and supplied their own, or answered with none offered** →
-  `you wrote`; answered in their own words and the session tidied them → `I rephrased your answer`.
-  **A field written without a label is the defect**, however well the body reads. A field left alone
-  because its rule passed is not written and takes no label.
-- **Never combine labels, and never rephrase an accepted suggestion.** If a suggestion is accepted, the
-  written form **is** the suggestion, quoted — otherwise no single label is true, and both available ones
-  lie in a different direction.
-- **Show the answer beside the written form wherever the two differ**, for `I rephrased your answer` and
-  `you edited my suggestion` alike, and quote the suggestion for `you accepted my suggestion`. A rewrite
-  the reader cannot inspect is an assertion.
-- **Rephrasing is a tidying licence, not a modelling one.** Fix grammar, punctuation and register; never
-  introduce a concept the human did not use, and never narrow or widen the claim. A rewrite that changes
-  what the card asserts is composition wearing a truthful label — the one failure the provenance rule
-  cannot catch on its own.
-- **The prose standard applies PER FIELD, keyed on the label — and this is the one surface where the
-  discriminator is not per-surface.** `rules/writing.md` governs the text *this session* composes:
-  a suggestion, at the moment it is drafted, and a `I rephrased your answer` rewrite. **It must never
-  touch a `you wrote` field.** Those are the human's own words, and tightening them would leave the
-  label asserting `you wrote` over a sentence the session had edited — the provenance system reporting
-  success while the thing it exists to record is gone. `you edited my suggestion` is out for the same
-  reason past the edit: the human's change is theirs.
-
-  **The tidying licence above already IS that standard, unnamed.** *Fix grammar, punctuation and
-  register; never introduce a concept the human did not use* is `writing.md` restricted to a rewrite —
-  so naming it here adds no rule and grants no new licence. It gives the existing clause a checkable
-  referent, which is the whole of what naming a standard buys.
-- **An accept must name the suggestion or restate its text.** A bare affirmation — "ok", "sure", "yep",
-  "sounds right", "that works" — is never an accept. This holds **even when only one suggestion was
-  offered**, where a naming rule would otherwise be satisfied by accident: the reply is equally likely to
-  mean *I have read the question and will answer it*.
-- **A reply that is neither an accept, an edit, a replacement, nor a decline is unanswered.** Ask once
-  more, naming what is still needed. **After a second unanswered ask, treat it as a decline** — say so,
-  write nothing, record nothing. Two asks is the limit; a third is the nagging that teaches people to
-  stop running the tool.
-
-**A rule that passed is never rewritten.** The session may rephrase what it elicited; a purpose that
-already satisfies rule 1 is out of reach, however much tidier it could be. This is the boundary that
-stops *write a clean card* becoming *rewrite the card*.
-
-**Ask only what the scan reported missing.** Rules 1 and 2 fail independently, so derive the questions
-from the findings — one question per missing rule, and none for a rule that passed. Asking for a
-purpose a card already states is ceremony on the answered half, and worse than ceremony: it invites
-overwriting prose that passes.
-
-Measured on this repo's board 2026-08-14: **three cards fail rule 2 (#1, #2, #3) and none fail rule
-1.** Every failing card already states a purpose and lacks only a done-condition. The population is
-*partial*, not empty — so a loop that always asks both questions is wrong against every card it has
-actually been observed to meet. A two-question loop was the first draft of this section, and nothing
-in the suite failed when it asked for both, which is why fixture `30` exists.
-
-Note what the family did before this. All four commands hold `AskUserQuestion`, and the other three
-use it only for **consent** — pick a scope, pick the surviving card of a merge. None of them ever
-asks what an issue is *for*. Elicitation is a different use of the same tool, and its absence is why
-the semantic column had no exit. Here the options are the **suggestions**, and free text is the escape
-hatch that keeps *the human sanctions every word* true rather than nominal.
-
-**One card per invocation.** No batch, no apply-to-all. The content differs every time, so a
-population-scaled offer has nothing to scale over — and a bulk offer would collect one answer and
-write it as though it were several. Slice 02 measured what a scale-shaped offer does to a small
-population: it becomes ceremony, and ceremony is what teaches people to click through a gate.
-
-**A partial answer is written partially.** One field given and one withheld writes the one given, and
-says which is still missing. **Offering** the withheld half is permitted; *supplying* it because the body
-looks nearly done is not, and the difference is a visible, refusable suggestion. A card with a purpose and
-no done-condition is a smaller defect than one with neither.
-
-**Report provenance per field.** Not decoration: it is what makes an unsanctioned sentence visible.
-"Wrote the body" cannot be contradicted by a reader; a per-field label, with the answer shown beside the
-written form wherever they differ, can — the reader knows what they said, and any sentence they did not
-sanction stands out.
-
-**Re-read immediately before writing, and refuse a body that moved.** Slice 02's rule, and it binds
-harder here — the text at risk is prose a human wrote, not a link that would have 404'd. Report what
-moved and hand back **both the answers and any draft**, so a refused write does not also lose what was
-just collected.
-
-**A decline writes nothing and records nothing.** No body, no label, no comment, no note. Same D6 cost
-as a declined set-level candidate, and this is the third surface that pays it: say at the decline that
-the finding returns next run. A user who has now met the same cost three times still has not been told
-it a third time unless this surface says so.
 
 ## Decision outcomes
 
@@ -1102,5 +659,5 @@ All four commands:
 
 ## Acceptance
 
-`self-test/` holds the fixtures. Run them whenever this file, the command loader, or
+`self-test/` holds the fixtures. Run them whenever this file, its `references/`, a command loader, or
 `phil:issue-board`'s body-relevant sections change.
