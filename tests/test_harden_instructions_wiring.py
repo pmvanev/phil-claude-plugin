@@ -1,4 +1,4 @@
-"""Structural tests for `skills/claude-md/` and the two rules it applies.
+"""Structural tests for `skills/harden-instructions/` (formerly `claude-md`) and the rules it applies.
 
 `rules/agent-instructions.md` reaches a run only because the skill names it, and the skill's promise
 to leave generated regions alone exists only in its prose. These tests pin both mentions and keep the
@@ -14,8 +14,9 @@ import re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SKILL = REPO / "skills" / "claude-md" / "SKILL.md"
-SELF_TEST = REPO / "skills" / "claude-md" / "self-test"
+SKILL = REPO / "skills" / "harden-instructions" / "SKILL.md"
+SELF_TEST = REPO / "skills" / "harden-instructions" / "self-test"
+COMMANDS = REPO / "commands"
 RULE = REPO / "rules" / "agent-instructions.md"
 
 
@@ -23,10 +24,10 @@ def _fixtures():
     return sorted(p for p in SELF_TEST.iterdir() if p.is_dir() and p.name[:2].isdigit())
 
 
-def test_the_skill_names_both_rules():
+def test_the_skill_names_its_rules():
     text = SKILL.read_text()
-    assert "rules/claude-md.md" in text
     assert "rules/agent-instructions.md" in text
+    assert "rules/claude-md.md" in text
 
 
 def test_the_claude_md_rule_points_at_agent_instructions():
@@ -46,8 +47,40 @@ def test_the_skill_cuts_history_only_when_a_commit_holds_it():
 
 
 def test_the_command_grants_the_git_reads_the_skill_runs():
-    grant = (REPO / "commands" / "claude-md.md").read_text()
+    grant = (COMMANDS / "harden-instructions.md").read_text()
     assert "Bash(git -C:*)" in grant
+
+
+def test_the_old_name_still_runs_the_skill_and_says_it_was_renamed():
+    """Removing `/phil:claude-md` outright turns muscle memory into "unknown command"."""
+    alias = (COMMANDS / "claude-md.md").read_text()
+    assert "skills/harden-instructions/SKILL.md" in alias
+    assert "/phil:harden-instructions" in alias.split("---", 2)[2]
+
+
+def test_every_profile_is_named_with_its_layout_standard():
+    text = SKILL.read_text()
+    for profile in ("**Project memory**", "**Skill**", "**Agent**", "**Command**", "**Reference**"):
+        assert profile in text, profile
+    assert "rules/claude-md.md" in text
+    assert "skill-development" in text
+
+
+def test_a_shipped_file_is_never_judged_against_the_authoring_repository():
+    """A skill runs in the user's repository; a file missing here says nothing about it there."""
+    text = SKILL.read_text()
+    assert "**Shipped and local files.**" in text
+    assert "authoring-time only" in text
+
+
+def test_the_alias_keeps_its_old_no_argument_behaviour():
+    alias = (COMMANDS / "claude-md.md").read_text()
+    assert "$ARGUMENTS` empty" in alias
+
+
+def test_frontmatter_is_frozen():
+    """A skill's description decides when it triggers; an edit there changes behaviour silently."""
+    assert re.search(r"frontmatter byte-for-byte unchanged", SKILL.read_text(), re.I)
 
 
 def test_git_reads_run_against_the_targets_repository():
@@ -80,10 +113,19 @@ def test_the_rule_carries_its_tiers_and_checklist():
 
 def test_every_fixture_holds_an_input_and_an_expected_outcome():
     fixtures = _fixtures()
-    assert len(fixtures) >= 4
+    assert len(fixtures) >= 6
     for f in fixtures:
-        assert (f / "CLAUDE.md").is_file(), f.name
+        assert (f / "CLAUDE.md").is_file() or (f / "SKILL.md.input").is_file(), f.name
         assert (f / "expected.md").is_file(), f.name
+
+
+def test_a_fixture_exercises_the_skill_profile():
+    assert any((f / "SKILL.md.input").is_file() for f in _fixtures())
+
+
+def test_no_fixture_ships_a_file_named_skill_md():
+    """A flawed-on-purpose `SKILL.md` below `skills/` risks discovery as a real skill in every install."""
+    assert not list(SELF_TEST.rglob("SKILL.md"))
 
 
 def test_fixture_01_markers_pair_up():

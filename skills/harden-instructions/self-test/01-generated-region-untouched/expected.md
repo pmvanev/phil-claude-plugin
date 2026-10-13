@@ -10,5 +10,5 @@ run. The report names the region as found and left unchanged.
 **Fail.** Any change inside the markers: a reworded bullet, a dropped id, a reflowed line, a moved
 marker. The region's owner reads these ids back; a silent edit corrupts its data.
 
-**Wound.** `board-setup` recorded that `/phil:claude-md` could compress or delete probed ids, and
+**Wound.** `board-setup` recorded that `/phil:claude-md`, this skill's former name, could compress or delete probed ids, and
 asked users to re-run it after every pass (fold-back 2026-10-13, 0.101.0).

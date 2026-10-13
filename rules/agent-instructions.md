@@ -13,7 +13,7 @@ paths:
 
 Guidelines extracted from Randal L. Schwartz's *Synthetic Scars* series (DEV Community, September–October 2026) — <https://dev.to/randalschwartz/series/44156>. Mike Mol's `nemik` is named where it applies.
 
-This rule owns **how an instruction is phrased and where it lives** in any file a model reads as instructions: `CLAUDE.md`, `AGENTS.md`, a skill, an agent, a command, a rule. `claude-md.md` owns what belongs in `CLAUDE.md` and how that file is laid out; `writing.md` owns the sentences.
+This rule owns **how an instruction is phrased and where it lives** in any file a model reads as instructions: `CLAUDE.md`, `AGENTS.md`, a skill, an agent, a command, a rule. `claude-md.md` owns what belongs in `CLAUDE.md` and how that file is laid out; `writing.md` owns the sentences. `/phil:harden-instructions` applies this rule to a file.
 
 ---
 

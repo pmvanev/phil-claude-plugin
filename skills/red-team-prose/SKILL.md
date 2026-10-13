@@ -195,5 +195,5 @@ This skill owns **prose review across all three standards**. It does not own:
 
 - **A single lens** → `/phil:eos` (clarity, edits) or `/phil:ai-eos` (tells, reports only)
 - **Comment and docstring quality** → `clean-comments`
-- **CLAUDE.md structure** → `claude-md`
+- **Instruction files** — CLAUDE.md, skills, agents, commands, rules: where a rule lives and how it is phrased → `harden-instructions`
 - **Independent adversarial critique** → `adversarial-review` (a different tool with a different contract: fresh-context reviewer, separate judge, honesty label)

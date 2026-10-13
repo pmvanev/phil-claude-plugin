@@ -1,0 +1,21 @@
+---
+name: release-notes
+description: This skill should be used when the user asks to "write release notes", "draft the changelog entry" or "summarise this release". Don't use it for commit messages.
+---
+
+# Release Notes
+
+## Procedure
+
+1. Read the merged PRs since the last tag.
+2. Group them by label.
+3. Draft one line per PR.
+4. Show the draft to the user.
+5. If the user asks for changes, go back to step 3. If they add a PR, go back to step 1 but don't re-read the PRs you already have.
+6. Write the entry to `CHANGELOG.md`.
+
+## Rules
+
+- Never invent a PR number.
+- Don't include PRs labelled `internal`.
+- Try a couple of times to fetch the PR list, then ask the user.

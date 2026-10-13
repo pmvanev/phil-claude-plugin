@@ -370,9 +370,9 @@ than guessed. `phil:issue-board` owns the template and the forge mechanics;
 `phil:nwave-issue-board` owns the artifact→issue mapping. Coverage detail and the GitHub tier
 reasoning: `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/provenance-model.md`.
 
-**`/phil:claude-md` leaves this region byte-for-byte unchanged** as of 0.101.0: it treats any
+**`/phil:harden-instructions` leaves this region byte-for-byte unchanged** since 0.101.0 (then named `/phil:claude-md`): it treats any
 `<!-- …:begin -->`/`<!-- …:end -->` pair as generated, counts it toward the line budget and never cuts
-it. That is a promise in its prose, not a check — re-run this command after a `/phil:claude-md` pass on
+it. That is a promise in its prose, not a check — re-run this command after a `/phil:harden-instructions` pass on
 an older install, and on this one if the region ever looks touched.
 
 ## Decision outcomes
