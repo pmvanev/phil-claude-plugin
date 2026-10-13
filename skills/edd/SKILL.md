@@ -76,9 +76,9 @@ For each expectation, decide how it can be proven:
 **The honesty rule (bias to off-ramp).** Default every expectation to **engine-checkable**. Mark an
 expectation qualitative **only** when the developer confirms a **concrete reason** it can't be
 cheaply asserted. An expectation offered as qualitative with no concrete stated reason is treated as
-engine-checkable. Never mark something qualitative by your own judgment to justify running a gate — evidence
-ceremony is opt-in, and over-triggering it is exactly how this tool would become the bureaucracy it
-exists to avoid.
+engine-checkable. Never mark something qualitative by your own judgment to justify running a gate —
+evidence ceremony is opt-in, and over-triggering it is exactly how this tool would become the
+bureaucracy it exists to avoid.
 
 **Test two patterns against a stated reason before accepting it.** `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md`
 names two that make a hard-to-assert output checkable. A **property-based test** asserts a rule over
@@ -140,15 +140,20 @@ For each qualitative expectation, the gate **scales** — do the least that yiel
 1. **Reuse if it already exists.** If the engine already produced relevant executed evidence (a
    DELIVER demo / e2e run, a captured transcript), point the developer at *that* artifact. Commission
    nothing new. (Whether the existing evidence is actually *relevant* is the developer's call at
-   ADJUDICATE, not this skill's — if they say it isn't, treat that as a reject and commission fresh.)
-2. **Otherwise commission it — from a non-builder.** Dispatch `agents/edd-evidence-producer`
-   (Agent/Task) to actually run or render the thing and capture the raw output **verbatim** with the
+   ADJUDICATE, not this skill's — if they say it isn't, commission fresh evidence and rebuild nothing:
+   the thing itself was never judged.)
+2. **Otherwise commission it — from a non-builder.** Dispatch `phil:edd-evidence-producer` (Agent/Task)
+   with the `expectation`, `target` and any `context` its contract names, to actually run or render the
+   thing and capture the raw output **verbatim** with the
    command that reproduces it. The producer is a **different actor than whatever built the thing**
    (it has no Edit/Write tool by design) — this separation of powers is non-negotiable; it is the
    whole reason the gate exists.
 3. **Reject narration.** If what comes back (from either path) is a description, a summary, or a
    claim with no reproducible artifact, it is **narration, not evidence** — reject it and
    re-commission a real run. Narration never satisfies the gate. Never adjudicate against narration.
+   A producer that reports it *cannot produce executed evidence* — an entry point missing, a build
+   absent — has given neither: report it to the developer rather than re-commissioning, since the same
+   run fails the same way.
 
 The output of the gate, per qualitative expectation, is an **executed artifact + its reproduce
 command**, ready for the human.
@@ -172,12 +177,13 @@ The developer — never this skill, never the producer — renders the verdict: 
 - **reject** → the expectation is **not** met. **Block done.** Route that expectation back to the
   engine to change the thing, then re-commission evidence and re-adjudicate. Never move on, never
   drop a rejected expectation, and never report the run done while any qualitative expectation stands
-  rejected. Grade the final state, not the effort.
+  rejected. Grade the final state, not the effort. The developer may stop instead: record the standing
+  reject and report the run **not done**.
 
 ## DOCUMENT — living documentation (only when the gate ran)
 
 On completion with **≥1 adjudicated** qualitative expectation, write the trail under
-`docs/edd/<slug>/`:
+`docs/edd/<slug>/` — a run stopped over a standing reject writes the trail too, its verdicts included:
 
 ```
 docs/edd/<slug>/
@@ -186,8 +192,7 @@ docs/edd/<slug>/
   verdicts.md       # per-expectation verdict (accept/reject) + timestamp + evidence reference
 ```
 
-and a durable summary at `docs/evolution/<date>-<slug>.md`, reusing the plugin's evolution
-convention. Report a summary naming, per qualitative expectation, the verdict and the evidence it
+and a durable summary at `docs/evolution/<date>-<slug>.md`, creating `docs/evolution/` if absent. Report a summary naming, per qualitative expectation, the verdict and the evidence it
 rested on.
 
 An **off-ramp-only** run writes **none** of this — the trail exists if and only if the gate ran.
