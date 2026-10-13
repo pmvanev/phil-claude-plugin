@@ -121,8 +121,10 @@ shipped**, because a brief states what a slice *intended* and the useful questio
 
 **200 words per slice**, same vocabulary rule.
 
-**With a number, read that slice. With none, read the most recently touched brief** — resolved as the
-stage mode resolves a feature, and named in the output for the same reason. **Never summarise every slice
+**Resolve the feature first** — by name, or as the stage mode resolves its default — because slice
+numbers repeat across features: a slice number names a brief inside that feature. **With a number, read
+that slice. With none, read the feature's most recently touched brief**, named in the output for the same
+reason. **Never summarise every slice
 at once:** a per-slice bound leaves the whole output unbounded, on a command whose one promise is a
 bounded read. Where briefs tie, that is `TARGET-AMBIGUOUS`; where a number names no brief,
 `TARGET-NOT-FOUND`.
@@ -141,8 +143,9 @@ four is a *precursor commit* belonging to a slice whose sibling commit does name
 subject silently drops exactly the work a slice did before its headline change.
 
 **The range is defined, because the count means nothing without it.** It runs from the commit that
-created the slice's brief to the commit that last touched the feature's directory — `git log --reverse --
-<brief>` for the first, `git log -1 -- docs/feature/<id>/` for the last. Commits outside it are not this
+created the slice's brief to the commit that last touched the feature's directory — `git log --reverse
+--format=%h -- docs/feature/<id>/slices/<brief>` (its first line) for the first, `git log -1
+--format=%h -- docs/feature/<id>/` for the last. Commits outside it are not this
 slice's and are not counted; commits inside it naming no slice are the gap.
 
 **Report what could not be attributed.** Where commits in that range cannot be tied to the slice, say how
@@ -152,7 +155,8 @@ thing it exists to establish. Report `ATTRIBUTION-INCOMPLETE` alongside.
 ### What the fold must produce
 
 **Name what landed that the brief did not describe**, and **what the brief promised that did not land**.
-Those two are the whole value; everything else the brief already said.
+Those two are the whole value; everything else the brief already said. Take what landed from the commit
+messages (`--format=%B`) and from reading the files `--stat` names — never from a patch.
 
 **Compare meaning, never paths — and never count files.** A file count is a path diff wearing a sentence.
 A brief describes work in prose — *"two fixtures in the existing
@@ -208,7 +212,8 @@ not be tied to the slice, naming how many.
 - **Derive no status** — not done, not in progress, not a percentage. That belongs to
   `phil:nwave-slice-status`.
 - **Summarise no stage that recorded nothing**; say so.
-- **Put no identifier in the output** — path, handle, bracketed id or card number.
+- **Put no identifier in the output** — path, handle, bracketed id or card number — except the slice's
+  own number in `--slice` mode.
 - **State a decision; never name it instead.** *"See the sixth decision"* is the defect, not the
   citation style.
 - **Cut the argument to fit, never a decision**, and name what went.

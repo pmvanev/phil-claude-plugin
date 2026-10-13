@@ -74,3 +74,26 @@ def test_read_only_is_a_claim_about_the_run_not_the_tool_list():
         assert not re.search(r"read-only (guarantee|property) is (mechanical|an enforced guarantee)",
                              text, re.I), path
     assert "a claim about the calls this run made, not about the tool list" in _flat(SKILL)
+
+
+def test_a_slice_number_resolves_inside_one_feature():
+    """Slice numbers repeat across features — thirteen had a slice 03 on 2026-10-13."""
+    skill = _flat(SKILL)
+    assert "Resolve the feature first" in skill
+    assert "a slice number names a brief inside that feature" in skill
+
+
+def test_the_identifier_invariant_keeps_the_slice_number_exemption():
+    invariants = " ".join(SKILL.read_text().split("## Invariants", 1)[1].split("\n## ", 1)[0].split())
+    assert "except the slice's own number in `--slice` mode" in invariants
+
+
+def test_every_inline_git_call_uses_a_patch_free_form():
+    """The line-anchored check misses calls written mid-sentence."""
+    prescribed = SKILL.read_text().split("## Invariants", 1)[0]  # the Invariants name the forbidden forms
+    for call in re.findall(r"`(git (?:log|show) [^`]+)`", prescribed):
+        assert re.search(r"--stat|--oneline|--format", call), call
+
+
+def test_slice_mode_names_where_meaning_comes_from():
+    assert "commit messages (`--format=%B`)" in _flat(SKILL)
