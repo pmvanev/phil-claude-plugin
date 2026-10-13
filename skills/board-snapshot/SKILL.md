@@ -41,7 +41,8 @@ produced this skill is in `references/why-these-rules.md`.
 ## The read — shared by both modes
 
 **One call for the board.** Status is a project field, so this is a project-items query and never
-`gh issue list`, which returns no Status at all.
+`gh issue list`, which returns no Status at all, for the board read; `gh issue list` serves only the
+reconciliation below.
 
 **Branch on the owner's type first.** `user(login:)` errors with `Could not resolve to a User` against an
 organization-owned board, and `organization(login:)` errors the same way against a personal one. There is
