@@ -23,6 +23,9 @@ card could not make it.
 the most common handle in the corpus resolves nowhere at all, which is the sharpest possible case for
 stating decisions rather than naming them.
 
+**54 `DDD-N` handles number a decision inside one file** — a lookup that resolves only by opening the
+artifact the summary exists to spare the reader.
+
 ## Why this surface forbids more than any other
 
 Three surfaces now share a bounded word count and a plain-English rule, and they permit different things:

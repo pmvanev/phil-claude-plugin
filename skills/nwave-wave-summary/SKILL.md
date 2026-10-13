@@ -14,14 +14,10 @@ description: >-
 
 # Wave summary — what the thinking decided, not where the work stands
 
-A finished artifact is written for the wave that produced it. Measured 2026-09-08 across this repo: **16
-feature deltas, a median of 5,539 words and a largest of 9,447** — carrying 157 `ADR-NNN`
-references pointing at a record this repo does not contain, and 54 `DDD-N` handles numbering a decision
-inside one file.
-
-So the answer to *what did this settle* is an afternoon's read whose load-bearing sentences are keyed on
-identifiers the reader must resolve first. **A record nobody opens is not meaningfully different from one
-nobody wrote.**
+A finished artifact is written for the wave that produced it: thousands of words whose load-bearing
+sentences are keyed on identifiers the reader must resolve first (measurements in
+`references/why-these-rules.md`). **A record nobody opens is not meaningfully different from one nobody
+wrote.**
 
 ## What this answers, and what it does not
 
@@ -78,8 +74,7 @@ the summary.
 
 **Name the feature, never the path.** A path is a file-path identifier and the vocabulary rule below
 forbids one everywhere, this line included — there is no exemption, because a reader who knows the
-feature can find its record and a reader who cannot is not helped by a path either. An earlier draft
-required the artifact's name and would have made every run breach its own rule.
+feature can find its record and a reader who cannot is not helped by a path either.
 
 ### State the decision, never its number
 
@@ -160,8 +155,7 @@ thing it exists to establish. Report `ATTRIBUTION-INCOMPLETE` alongside.
 Those two are the whole value; everything else the brief already said.
 
 **Compare meaning, never paths — and never count files.** A file count is a path diff wearing a sentence.
-
-**Compare meaning, never paths.** A brief describes work in prose — *"two fixtures in the existing
+A brief describes work in prose — *"two fixtures in the existing
 suite"* — so a file the brief never names is usually a file the brief plainly anticipated. Measured
 2026-09-08 against three real slices: a naive path comparison produced 48 differences of which roughly
 five were real. **A mechanical version of this check is worse than none**, and that is why the vocabulary
@@ -185,8 +179,7 @@ Report exactly one terminal outcome, every run:
 
 **`READ-ONLY` is reported on every run.** It is a claim about the calls this run made, not about the
 tool list: the grant holds no `Write` or `Edit`, but `git log` and `git show` accept `--output=<file>`
-and can run a repo's diff filters, so the claim holds because no call did either — see *What this skill
-must never do*.
+and can run a repo's diff filters, so the claim holds because no call did either — see *Invariants*.
 
 These are reported **alongside** `SUMMARY-RENDERED`: `ARGUMENT-DROPPED` whenever reasoning was cut to
 fit, naming what went; and `ATTRIBUTION-INCOMPLETE` in `--slice` mode whenever commits in the range could
@@ -202,31 +195,27 @@ not be tied to the slice, naming how many.
   `TARGET-NOT-FOUND`** — zero candidates is not the same as too many, and one outcome covering both tells
   the reader nothing about which happened.
 
-## What this skill must never do
+## Invariants
 
-- **Write anything.** No `Write`, no `Edit`, and a `Bash` holding two read-only git verbs. **The grant is
-  checked rather than merely declared** — `scripts/check-readonly-commands.py` verifies every verb against
-  its allowlist. That is one level short of mechanical, and `CLAUDE.md` says why: an allowlist entry is a
-  promise that a verb has no writing mode. `git log -p --ext-diff` runs a diff driver the target repo
-  configures — conditional on their config. **Worse, and unconditional: `git log` and `git show` both
-  accept `--output=<file>`, which writes, and clobbers an arbitrary absolute path outside the repo.**
-  Verified on git 2.53.0, 2026-09-08. So the declaration asserts more than the grant delivers — here and
-  for the three other commands on that allowlist. Checked, not proven, and the gap is named rather than
-  implied. **Pass neither `--output` nor `--ext-diff`, and read commits only with `--stat`, `--oneline`
-  or `--format`, never as a patch:** `git show <sha>` and `git log -p` run any `textconv` filter the
-  repo configures, with no flag at all; the forms above run none (git 2.53.0, verified 2026-10-13).
-- **Derive a status.** Not done, not in progress, not a percentage. That belongs to
+- **Write nothing.** The grant holds no `Write` and no `Edit`, and a `Bash` of two git verbs that
+  `scripts/check-readonly-commands.py` checks against its allowlist — checked, not proven. `git log -p
+  --ext-diff` runs a diff driver the target repo configures, conditional on its config; worse, and
+  unconditional, `git log` and `git show` both accept `--output=<file>`, which writes an arbitrary path
+  (git 2.53.0, 2026-09-08). **Pass neither `--output`
+  nor `--ext-diff`, and read commits only with `--stat`, `--oneline` or `--format`, never as a patch:**
+  `git show <sha>` and `git log -p` run any `textconv` filter the repo configures, with no flag at all;
+  the forms above run none (git 2.53.0, verified 2026-10-13).
+- **Derive no status** — not done, not in progress, not a percentage. That belongs to
   `phil:nwave-slice-status`.
-- **Summarise a stage that recorded nothing.**
-- **Put any identifier in the output** — path, handle, bracketed id or card number.
-- **Name a decision instead of stating it.** *"See the sixth decision"* is the defect, not the citation
-  style.
-- **Cut a decision to fit.** The argument goes first, and what went is named.
-- **Pick between tied targets**, or infer a target from the current branch, the open editor, or the most
-  recently mentioned feature in conversation.
-- **Edit or shorten the artifact it read.** A summary is not a licence to rewrite its source.
-- **Claim the default is the most recently *completed* stage.** It is the most recently touched, and the
-  output says so.
+- **Summarise no stage that recorded nothing**; say so.
+- **Put no identifier in the output** — path, handle, bracketed id or card number.
+- **State a decision; never name it instead.** *"See the sixth decision"* is the defect, not the
+  citation style.
+- **Cut the argument to fit, never a decision**, and name what went.
+- **Pick no target between ties, and infer no target** from the current branch, the open editor, or the
+  most recently mentioned feature in conversation.
+- **Leave the artifact it read untouched.** A summary is not a licence to rewrite or shorten its source.
+- **Call the default the most recently *touched* stage, never the most recently *completed* one.**
 
 ## The standard for everything here
 
