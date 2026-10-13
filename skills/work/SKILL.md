@@ -5,23 +5,22 @@ description: Skill bundle for phil:work command — wave-based orchestrator for 
 
 # Work
 
-You are the **general contractor** for an invisible technical initiative — refactoring,
+Act as the **general contractor** for an invisible technical initiative — refactoring,
 re-architecting, cleanup, a migration, a dependency or performance pass — work the end user never
-sees. You give it the discipline nwave gives user-facing features: **discuss, plan, safeguard,
-execute, document** — without a user story.
+sees. Give it the discipline nwave gives user-facing features: **discuss, plan, safeguard, execute,
+document** — without a user story.
 
-You **discuss, plan, sequence, and gate**. You do **not** re-implement execution. Each unit of
-real change is delegated to a tactical skill that already carries the right safety gate. Your job
-is the connective tissue those skills lack: framing the goal, sequencing the work, and leaving a
-decision trail.
+**Discuss, plan, sequence and gate; re-implement no execution.** Delegate each unit of real change to a
+tactical skill that already carries the right safety gate. Supply what those skills lack: framing the
+goal, sequencing the work, and leaving a decision trail.
 
-The standards you work under are `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
+The standards to work under are `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
 `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`.
 
-> **The full workflow (slices 01–05).** FRAME → MAP (a wave-by-wave roadmap, each wave routed to
-> the fitting skill) → SAFETY-NET (pin the change surface) → EXECUTE (each wave delegated and
-> gated, the sequence stopping cleanly on any failure) → VERIFY (both gates: preservation floor +
-> declared goal metric) → document (working trail + durable evolution summary).
+> **The workflow.** FRAME → MAP (a wave-by-wave roadmap, each wave routed to the fitting skill) →
+> SAFETY-NET (pin the change surface) → EXECUTE (each wave delegated and gated, the sequence stopping
+> cleanly on any failure) → VERIFY (both gates: preservation floor + declared goal metric) → document
+> (working trail + durable evolution summary).
 
 ---
 
@@ -29,8 +28,8 @@ The standards you work under are `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `
 
 Every initiative is held to **two** gates:
 
-1. **Preservation floor** (always) — observable behavior is unchanged. You never certify this
-   yourself; the **delegate's own oracle** does (see *Delegation & the inherited oracle*).
+1. **Preservation floor** (always) — observable behavior is unchanged. Never certify this yourself;
+   the **delegate's own oracle** does (see *Delegation & the inherited oracle*).
 2. **Initiative goal** (declared in FRAME) — the specific point of *this* work, captured as a
    **checkable metric** and read at VERIFY.
 
@@ -55,7 +54,7 @@ Derive a kebab-case `<slug>` from the initiative for the trail path `docs/work/<
 
 Do these in order. Do not survey, delegate, or open a trail until FRAME resolves.
 
-### 1. Off-ramp trivial work first (D7)
+### 1. Off-ramp trivial work first
 
 If the initiative is small enough that a **single existing tactical skill** would handle it
 directly — a lone rename, one extraction, a comment cleanup, a single-file structural tidy —
@@ -85,28 +84,29 @@ proceed**. Either:
 Change nothing until a checkable goal or an explicit preservation-only basis is agreed. Record the
 goal metric's **current (before) reading** now, so VERIFY can measure the delta against the target.
 
-### 3. Declare the preservation contract and pick the oracle (D9 / ADR-005)
+### 3. Declare the preservation contract and pick the oracle
 
-State how behavior will be held, chosen by **artifact type** — this is the oracle you will
-inherit, not run yourself:
+State how behavior will be held, chosen by **artifact type** — the oracle to inherit, never to run
+yourself:
 
 | The wave changes… | Delegate | Preservation oracle (delegate-owned) |
 |---|---|---|
 | executable **code** | `refactor-loop` (or `refactor` / `extract-method` for a simple move) | its test-suite gate |
-| **test prose** (test files) | `refactor-tests` / `redesign-tests` | its human-approval diff review (ADR-002) |
-| **other prose** (skill / rule / agent / doc) | the **human-approval diff gate directly** (ADR-002 mechanism) — no dedicated delegate exists in v1 | human diff review |
+| **test prose** (test files) | `refactor-tests` / `redesign-tests` | its human-approval diff review |
+| **other prose** (skill / rule / agent / doc) | the **human-approval diff gate directly** — no dedicated delegate exists | human diff review |
 
-> **v1 boundary (surfaced in DELIVER — see `distill/upstream-issues.md`).** `refactor-tests` and
-> `redesign-tests` only handle *test* files. Non-test prose (skills, rules, agents, docs) has no
-> dedicated refactoring delegate yet, so its wave uses the ADR-002 human-approval diff gate
-> **directly**: apply the smallest change, pause for the developer to review the uncommitted diff
-> in their editor, commit on approve / `git checkout` on reject. This is inheriting the *oracle*
-> (the human), not re-implementing a preservation check — ADR-005 holds.
+> **Non-test prose has no delegate.** `refactor-tests` and `redesign-tests` handle *test* files only,
+> so a skill, rule, agent or doc wave uses the human-approval diff gate **directly**: apply the
+> smallest change, pause for the developer to review the uncommitted diff in their editor, commit on
+> approve, `git checkout` on reject. This inherits the *oracle* — the human — and re-implements no
+> preservation check.
 
 ### 4. Confirm with the developer
 
 Summarize goal + preservation contract + IN/OUT scope and get explicit confirmation
-(`AskUserQuestion`) before any change.
+(`AskUserQuestion`) before any change. Then record the framed decision: write
+`docs/work/<slug>/decisions.md` with the goal, the preservation contract, the chosen delegate and
+oracle, and the IN/OUT scope.
 
 **This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
 
@@ -115,9 +115,6 @@ Summarize goal + preservation contract + IN/OUT scope and get explicit confirmat
   plain terms; the artifact paths and the delegate's name stay above it.
 - **A decline here is not a deferral.** Nothing may change before this answer, so record a decline and
   stop rather than proceeding on a partial one.
- Record the framed decision — write
-`docs/work/<slug>/decisions.md` with the goal, the preservation contract, the chosen delegate and
-oracle, and the IN/OUT scope.
 
 ---
 
@@ -148,9 +145,9 @@ in the roadmap:
 | Simple code refactor from a backlog | `/phil:refactor` | suite gate |
 | A single extraction | `/phil:extract-method` | suite gate |
 | Comment / docstring cleanup | `/phil:clean-comments` | suite gate |
-| Test-prose structure cleanup | `/phil:refactor-tests` | human-approval diff (ADR-002) |
+| Test-prose structure cleanup | `/phil:refactor-tests` | human-approval diff |
 | Sanctioned test-prose behavior change | `/phil:redesign-tests` | human-approval diff |
-| Other-prose (skill / rule / agent / doc) structure | human-approval diff gate directly (ADR-002; no dedicated delegate in v1) | human diff review |
+| Other-prose (skill / rule / agent / doc) structure | human-approval diff gate directly (no dedicated delegate) | human diff review |
 | Surveying the change surface (MAP §1) | `/phil:review-code`, `/phil:spirit-walk`, hotspot | n/a (read-only) |
 
 The same FRAME→MAP→SAFETY-NET→EXECUTE→VERIFY spine carries every initiative type (refactor,
@@ -167,8 +164,8 @@ Show the developer the roadmap and let them **edit** it — reorder, drop, or sp
 any execution. A flat ordered list is enough; a dependency DAG is only warranted if waves truly
 depend on each other (start flat, escalate on evidence).
 
-> If the survey shows the initiative is actually a single wave, you are in walking-skeleton
-> territory — run the one wave directly (do not manufacture a multi-wave roadmap to look busy).
+> If the survey shows the initiative is actually a single wave, run the one wave directly; manufacture
+> no multi-wave roadmap to look busy.
 
 ---
 
@@ -217,13 +214,13 @@ unpinnable seam as if it were safe.
 
 Work the roadmap in order. For each wave, in turn:
 
-### Delegation & the inherited oracle (ADR-005 / DDD4)
+### Delegation & the inherited oracle
 
 Hand the wave's change to its delegate by invoking that skill's command
 (`/phil:refactor-loop`, `/phil:refactor`, `/phil:refactor-tests`, …). **The delegate owns the
-gate.** You do **not** run a preservation check of your own — the delegate's suite gate (code) or
-human-approval diff (prose) is the oracle. This is non-negotiable: re-implementing a weaker gate
-here would defeat the whole design.
+gate:** its suite gate (code) or human-approval diff (prose) is the oracle. Run no preservation check
+of your own. This is non-negotiable: re-implementing a weaker gate here would
+defeat the whole design.
 
 ### The sequencing gate (the only gate you own)
 
@@ -245,7 +242,8 @@ unfinished — is not a success. Grade the final state, not the effort.
 ## VERIFY & DOCUMENT
 
 1. **Preservation gate** — confirm the preservation oracle passed for every wave (the delegates
-   reported green / approved). If not, you already stopped in EXECUTE — never reach here green.
+   reported green / approved). If not, the run should already have stopped in EXECUTE — never report it
+   green here.
 2. **Goal gate** — read the goal metric now (its **after** value) and compare to the target
    recorded in FRAME. Report the reading as `before → after (target)`.
    - **Met** → the goal gate clears.
@@ -267,8 +265,8 @@ unfinished — is not a success. Grade the final state, not the effort.
 
 ## Safety rules
 
-- **You are a contractor, not an executor.** Never re-implement a delegate's preservation gate
-  (ADR-005). Delegate the change; inherit the gate.
+- **A contractor, not an executor.** Never re-implement a delegate's preservation gate. Delegate the
+  change; inherit the gate.
 - **The two-gate spine holds absolutely.** Preservation floor always; declared goal always. Miss
   either → not done.
 - **A delegate failure never leaves the tree red** and is never reported as done. Leave last-good;
@@ -289,4 +287,4 @@ walking skeleton), routes code vs prose (04, 05), stops-and-leaves-last-good on 
 (06), and reports a missed goal as not-done (07). Whenever this skill or `commands/work.md`
 changes, drive the fixtures per `self-test/README.md` and confirm each produces its `expected.md`
 decision — every edit here is non-monotonic, so the skill is changed and regression-tested, never
-changed and eyeballed. All seven fixtures now exercise delivered behavior.
+changed and eyeballed.
