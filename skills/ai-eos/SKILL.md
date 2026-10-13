@@ -53,7 +53,7 @@ Read the file with surrounding context. Review the selected block only.
 Read the entire file.
 
 ### Directory Path
-Glob recursively for `**/*.{md,txt,rst}`. Review each. For large directories (>20 files), use an Explore agent to parallelize reading.
+Glob recursively for `**/*.{md,txt,rst}`. Review each.
 
 ---
 
@@ -63,7 +63,7 @@ Two tiers. **Tells** are over-the-top enough to flag on a single occurrence. **W
 
 For every finding, name the **mechanism** (why an LLM produces it), not just the phrase. The mechanism is what makes the finding actionable and what keeps the catalog useful as models change.
 
-**Which tier a phrase belongs to follows one rule:** a bare single word lives in the whiff tier, because one correct use proves nothing; a multi-word construction lives in the tell tier, because the construction itself is the fingerprint. "Robust" is a whiff; "underscores the importance of" is a tell.
+**Which tier a phrase belongs to follows one rule:** a bare single word lives in the whiff tier, because one correct use proves nothing; a multi-word construction lives in the tell tier, because the construction itself is the fingerprint. "Robust" is a whiff; "underscores the importance of" is a tell. The rule holds except where a tell names its own single words: #5 counts its verbs as a ratio, and #8 flags its words because the register, not the word, is the fingerprint.
 
 ### Tell tier — flag on sight
 
@@ -125,12 +125,12 @@ Three coordinate items where one carries the meaning and two pad the cadence. Es
 **8. Promotional register**
 Marketing warmth in documentation that asked for none. Reads like a launch post wearing a manual's clothes.
 
-> "seamless" · "powerful" · "cutting-edge" · "groundbreaking" · "state-of-the-art" · "effortlessly" · "a rich set of" · "a diverse array of" · "boasts" · "vibrant" · "nestled"
+> "seamless" · "powerful" · "cutting-edge" · "groundbreaking" · "state-of-the-art" · "effortlessly" · "a rich set of" · "a diverse array of" · "vibrant" · "nestled"
 
 *Fix:* cut the adjective, or replace it with the measurement that justifies it.
 
 **9. Assistant residue**
-Conversational scaffolding that survived the copy-paste. Rare, and conclusive when present.
+Conversational scaffolding that survived the copy-paste. Rare, and unmistakable as a tell when present.
 
 > "Certainly!" · "I hope this helps" · "Let me know if you'd like..." · "As an AI language model" · "As of my last update" · knowledge-cutoff disclaimers · unfilled placeholders like `[insert X]` or `[Your Name]`
 
@@ -157,7 +157,7 @@ Title Case In Headings · boldface on repeated phrases or scattered across a par
 
 *Fix:* match the surrounding document's conventions. Only flag deviation from the file's own established pattern. These are *register* findings — deviation from the file's own pattern. Headings that are label-only, wrongly nested, or unnavigable are a document-fitness matter, not a tell.
 
-Clustered whiffs report as `[tells]`-tier findings with the whiff mechanism named and the cluster quoted. Unclustered whiffs are not reported and do not affect the density count.
+Clustered whiffs go in the `WHIFFS` section, with the whiff mechanism named and the cluster quoted. Unclustered whiffs are not reported. Whiffs, clustered or not, never count toward the rate or the mechanism count.
 
 ---
 
@@ -174,7 +174,7 @@ Compute the verdict before you write the findings. Count tells (not whiffs) per 
 | **a few spots** | > 0 and < 1 |
 | **clean** | 0 — whiffs alone never escalate past this |
 
-The bands are exhaustive on rate alone. Mechanism count is a **modifier**, not a requirement: ≥4 distinct mechanisms clustered in one section raises the verdict one band; a single mechanism repeating, however often, lowers it one band. When rate and mechanism count point to different rows, take the lower verdict and say which signal you discounted.
+The bands are exhaustive on rate alone. Mechanism count is a **modifier**, not a requirement: ≥4 distinct mechanisms clustered in one section raises the verdict one band; a single mechanism repeating, however often, lowers it one band. The lowering never lowers a verdict below **a few spots** while any tell is reported. When a modifier moves the verdict, say which one and why.
 
 These thresholds are heuristics, not measurements. State the counts alongside the verdict so the reader can judge your judgment. If the counts and the verdict disagree with your read of the text, trust the text and say why.
 
@@ -205,21 +205,21 @@ COPULATIVE RATIO: {n} avoidances vs {m} plain is/has   (omit if no pattern)
 Rules for the report:
 - **Rank worst-first** — highest-confidence, most-egregious tells at the top. Never file order.
 - Quote the **exact span**, not a paraphrase. A finding you can't quote isn't a finding.
-- One line per finding. No prose commentary between findings.
-- If a fix needs a fact the text doesn't contain, say so explicitly and stop. Do not supply the fact.
+- One entry per finding, in the template's shape. No prose commentary between findings.
+- If a fix needs a fact the text doesn't contain, say so in that finding's Fix line. Do not supply the fact.
 - If you find nothing, say `VERDICT: clean` and stop. Do not manufacture findings to justify the run.
 
 ---
 
 ## What NOT to Flag
 
-- **The em dash as a mark.** It is a legitimate tool and this project's house style uses it deliberately throughout. Flag em dashes only when sustained above roughly one per two sentences *and* co-occurring with other tells — and then flag the *density*, never the punctuation.
-- **A single vocabulary hit.** "Delve," "robust," or "underscore" used once, correctly, is not evidence. Only clusters count.
+- **The em dash as a mark.** It is a legitimate tool, and many house styles use it deliberately throughout. Flag em dashes only when sustained above roughly one per two sentences *and* co-occurring with other tells — and then flag the *density*, never the punctuation.
+- **A single era-vocabulary hit.** "Delve," "robust," or "underscore" used once, correctly, is not evidence. Only clusters count.
 - **Correct technical terms** that happen to appear on a list. "Robust" describing error handling, "leverage" in a financial context, "pivotal" about an actual pivot — all fine.
-- **Deliberate house style.** This project's own rules and skills use em dashes, bold lead-ins, tables, and `---` separators heavily and on purpose. Deviation from a document's established pattern is a finding; the pattern itself is not.
+- **Deliberate house style.** Many documents use em dashes, bold lead-ins, tables, and `---` separators heavily and on purpose — this plugin's own files among them. Deviation from a document's established pattern is a finding; the pattern itself is not.
 - **Rhetorical structure that earns its keep.** A real triad of three distinct things. A genuine contrast a reader would otherwise get wrong. Emphasis on something that is in fact important.
 - **Non-native-speaker patterns.** Several tells overlap with constructions taught in ESL instruction and academic English. Flag the span; never speculate about the author.
-- **Illustrative spans.** A phrase quoted as an example of a tell — in a blockquote, a table cell, or a catalog — is not an occurrence of it. Flag prose that *uses* the construction, never prose that *names* it. This matters most when reviewing this repository, where the tell catalogs would otherwise light up wholesale.
+- **Illustrative spans.** A phrase quoted as an example of a tell — in a blockquote, a table cell, or a catalog — is not an occurrence of it. Flag prose that *uses* the construction, never prose that *names* it. This matters most in a repository that holds tell catalogs — this plugin's own skills among them — where the catalogs would otherwise light up wholesale.
 - **Anything in a code block, frontmatter, URL, or generated output.**
 
 **Be precise, not exhaustive.** Eight quotable findings beat forty vague ones. The failure mode of this skill is a witch hunt — every flag you can't quote and name costs you the reader's trust in the ones you can.

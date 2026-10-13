@@ -35,7 +35,7 @@ Determine what `$ARGUMENTS` refers to:
 
 Resolve the argument once; give all three passes the same span.
 
-**Directory mode.** Emit one verdict triple and one findings list **per file**, files ordered worst verdict first, preceded by a one-line roll-up. For large directories (>20 files), use an Explore agent to parallelize reading, as `ai-eos` specifies.
+**Directory mode.** Emit one verdict triple and one findings list **per file**, files ordered worst verdict first, preceded by a one-line roll-up. For large directories (>20 files), use an Explore agent to parallelize reading.
 
 **One exception.** The fitness pass judges the document as a whole — audience, completeness, structure. A line range cannot be judged for comprehensiveness or navigability. When the argument is a line range, read the whole file for the fitness pass, scope the other two to the range, and say so in the report.
 
@@ -51,9 +51,9 @@ Resolve the argument as `ai-eos` Step 1 specifies (`--changes` → `git diff --n
 
 ## Step 2: Run the Tells Pass
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/ai-eos/SKILL.md` and apply its catalog and tiers to the text. Honor its `What NOT to Flag` section in full — especially the em-dash rule, the single-vocabulary-hit rule, and the illustrative-spans rule. Compute its density verdict.
+Load `${CLAUDE_PLUGIN_ROOT}/skills/ai-eos/SKILL.md` and apply its catalog and tiers to the text. Honor its `What NOT to Flag` section in full — especially the em-dash rule, the single-era-vocabulary-hit rule, and the illustrative-spans rule. Compute its density verdict.
 
-Clustered whiffs report as `[tells]` findings with the whiff mechanism named and the cluster quoted. Unclustered whiffs are not reported and do not affect the density count.
+Clustered whiffs report as `[tells]` findings with the whiff mechanism named and the cluster quoted, but, as `ai-eos` says, whiffs never count toward the rate or the mechanism count. Unclustered whiffs are not reported.
 
 **Overrides while composing.** A sibling skill's own report template is suppressed — its findings feed the merged report at Step 5 only, never a second report of its own. `ai-eos`'s **Never edit** holds through Steps 1–5 and is lifted at Step 6 for `[auto-applicable]` fixes only. `eos` never writes before approval.
 
@@ -181,7 +181,7 @@ Applying is opt-in every time. Do not offer to apply before the full report, and
 
 - **Never invent a fact** to replace vagueness, and **never write the missing section.** This is the single hardest rule here, and the fitness pass raises the stakes: `eos`'s habit is to rewrite, `ai-eos` findings often *look* rewritable, and a missing-prerequisites finding is a standing invitation to invent prerequisites. "Plays a crucial role in validation" cannot become "validates the request schema" unless you verified that it does. Flag the gap and stop.
 - **Never accuse the author.** Report tells in the text, not conclusions about provenance. Detection is unreliable and this skill does not attempt it — you are reporting style, not authorship.
-- **Respect every `What NOT to Flag` boundary.** `ai-eos` protects the em dash as a mark, single vocabulary hits, correct technical terms, and this project's deliberate house style. `eos` protects meaning, formatting, tone, and domain terminology. A three-pass composite is not a licence to flag more than any pass would alone — it is three lenses, not a lower bar.
+- **Respect every `What NOT to Flag` boundary.** `ai-eos` protects the em dash as a mark, single era-vocabulary hits, correct technical terms, and a document's deliberate house style. `eos` protects meaning, formatting, tone, and domain terminology. A three-pass composite is not a licence to flag more than any pass would alone — it is three lenses, not a lower bar.
 - **Fitness findings need a named measure.** "This could be clearer" is not a finding. "Comprehensiveness: a reader cannot start without the tool versions" is. No measure, no finding — this is the fitness pass's equivalent of the quote-the-span rule, and it is what stops the pass becoming vague editorializing.
 - **Judge the document it is, not the document you'd write.** A terse reference page is not failing comprehensiveness for lacking a tutorial. Fitness is measured against the document's own purpose and audience.
 - **No double-reporting.** One span, one finding. Use the overlap table.
