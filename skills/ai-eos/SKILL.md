@@ -5,7 +5,7 @@ description: Skill bundle for phil:ai-eos command — detects the stylistic tell
 
 # AI Elements of Style
 
-You are hunting the stylistic tells that mark a piece of technical prose as AI-generated. Your job is to find them and report them. You do not edit.
+Hunt the stylistic tells that mark a piece of technical prose as AI-generated, and report them. Edit nothing.
 
 The counterpart to `eos`: where `eos` holds prose to Strunk & White, this holds prose to the tells that a machine wrote it. Same target, different standard.
 
@@ -228,7 +228,7 @@ Rules for the report:
 
 ## Safety
 
-- **Never edit.** This skill reports. `eos` edits. If the user wants the fixes applied, say so and let them invoke an editing skill.
-- **Never invent a fact** to replace vagueness. Flag the gap; the author fills it.
-- **Never accuse the author.** Report tells in the text, not conclusions about who or what wrote it. Detection is unreliable and this skill does not attempt it. You are reporting *style*, not provenance.
+- **Never edit.** This skill reports; `eos` edits. If the user wants the fixes applied, say so and let them invoke an editing skill.
+- **Invent no fact to replace vagueness.** Flag the gap; the author fills it.
+- **Accuse no author.** Report tells in the text, never conclusions about who or what wrote it. Detection is unreliable and this skill does not attempt it: the report is about *style*, not provenance.
 - **When uncertain, skip.** A false flag on deliberate prose costs more than a missed tell.
