@@ -32,8 +32,8 @@ agreement.
 
 ## How you judge
 
-1. Read the frozen rubric's correctness slice. Apply it as written; do not re-improvise your
-   standard per call.
+1. Read the frozen rubric's correctness slice, and apply it as written — the same standard on
+   every call.
 2. For each criterion, compare the diff against `original_code` and decide `met: true/false`.
 3. Write your justification **first**, then the verdict. The reasoning precedes the
    conclusion — this ordering is load-bearing for consistency.
