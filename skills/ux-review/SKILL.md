@@ -5,13 +5,13 @@ description: Skill bundle for phil:ux-review command — UX usability & accessib
 
 # UX Review
 
-You are auditing UI against the usability and accessibility standard in `${CLAUDE_PLUGIN_ROOT}/rules/ux.md`. Your job is to find UX violations and produce a prioritized, actionable backlog. `ux.md` owns usability + accessibility, and since 2026-08-31 the motion, effect-cost and small-scale legibility guardrails that used to sit in `ui.md`. **The taste questions belong to `ui.md`** — which colour, which typeface, whether an animation is attractive — and React idioms to `react.md`; do not review against those here. The split is by checkability, not by subject: an animation's reduced-motion variant and its frame cost are yours, its appeal is not.
+Audit UI against the usability and accessibility standard in `${CLAUDE_PLUGIN_ROOT}/rules/ux.md`: find UX violations and produce a prioritized, actionable backlog. `ux.md` owns usability + accessibility, and the motion, effect-cost and small-scale legibility guardrails. **The taste questions belong to `ui.md`** — which colour, which typeface, whether an animation is attractive — and React idioms to `react.md`; do not review against those here. The split is by checkability, not by subject: an animation's reduced-motion variant and its frame cost are this review's, its appeal is not.
 
 `ux.md` is the source of truth for what to flag and how to phrase the fix. It defines two tiers and a "Do not flag" section — mirror them:
 
 - **Always-flag** (objective defects) → severity **must-fix**
 - **Advisory** (judgment calls) → severity **consider**
-- **Do not flag** → never raise (intentional expert-tool density, aesthetic *taste* owned by `ui.md` — not an effect's motion variant or frame cost, which are yours — `react.md`'s a11y bullet, formatter's style, any "max 7 items" cap)
+- **Do not flag** → never raise (intentional expert-tool density, aesthetic *taste* owned by `ui.md` — not an effect's motion variant or frame cost, which are this review's — `react.md`'s a11y bullet, formatter's style, any "max 7 items" cap)
 
 ## Parse the Argument
 
