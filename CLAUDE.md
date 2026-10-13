@@ -18,37 +18,32 @@ prose.
 - **Test first.** Write a failing test before production code.
 - **Separate structure from behavior.** Refactoring commits and behavior-change commits are separate.
 - **Dependencies point inward.** Business rules never import infrastructure.
-- **Make every word tell.** Active voice, no needless words, clear on first read.
+- **Make every word tell.** Write to `rules/writing.md`: active voice, no needless words, clear on first read.
 - **Empirical design over speculation.** Solve for what is really there, not imagined futures.
-
-## Build path for this plugin
-
-- Run `nw-discuss` before authoring a new feature, skill or command. Stop after DISCUSS: the deliverable
-  is prose, so DESIGN, DISTILL and DELIVER stay out (`todo.md` 2026-06-17; edd-loop DDD8).
-- Read `plugin-dev:skill-development`, `command-development`, `agent-development` or `plugin-structure`
-  before writing the file. Take the schema from plugin-dev, not from a sibling file — a copied shape
-  carries the sibling's defects unchecked.
-- Run `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` over the result.
-- Name in the commit message which of `nw-discuss` and `plugin-dev` ran. Wound: `groom-issues` slice 03
-  was authored 2026-08-13 without plugin-dev, and nothing recorded it.
 
 ## Rules load only when named
 
-- A skill, command or agent that needs a standard from `rules/` names it and reads it. Plugins have no
-  rules component, so nothing preloads them (measured on Claude Code 2.1.252, 2026-08-31).
-- `scripts/check-rule-reachability.py` fails the build on a rule nothing names, transitively.
-  `definitions.md` and `llm-inference.md` are declared exceptions.
+- A skill, command or agent that needs a standard from `rules/` names it and reads it;
+  `scripts/check-rule-reachability.py` enforces it, exempting `definitions.md` and `llm-inference.md`.
+  Plugins have no rules component, so nothing preloads them (Claude Code 2.1.252, 2026-08-31).
 - The check proves a rule is *mentioned*, not *applied*. When every mention of a rule excludes it, split
   its checkable part into the standard a reviewer reads — as `ui.md` gave its checkable items to `ux.md`
   on 2026-08-31.
 - A rule's `paths:` frontmatter takes effect only for a consumer who copies the rule into their own
   `.claude/rules/`.
 
-## Decision requests
+## Commands declare mutation
 
-`decision-request: strict` — this repo opts in. `hooks/decision-request/check-ask.py` refuses any question
-over 200 words, and here also any question or option naming an issue number, a file path or a bracketed
-identifier. Rewrite a refused ask as the refusal directs.
+- Declare `mutates: true` or `mutates: false` beside every command's `allowed-tools`;
+  `scripts/check-readonly-commands.py` enforces it.
+- Set `mutates:` by the grant, not the intent, and carry intent in the skill's prose. `adversarial-review`
+  never edits yet declares `true`, because it runs the test suite; `resume` writes nothing yet declares
+  `true`, because `gh api graphql` can mutate (sanctioned 2026-08-17, issue 24).
+- Add a verb to the read-only allowlist only after confirming it has no writing mode. Wound: git's
+  `--output=<file>` writes from `log`, `diff`, `show`, `blame`, `rev-list` and `shortlog` (git 2.53.0,
+  2026-09-08).
+- Name a bare executable in a `Bash(...)` grant — no path, no variable; to scope a command to one script,
+  grant the interpreter and put the path in the invocation. `scripts/check-readonly-commands.py` enforces it.
 
 ## Board surfaces that compose prose
 
@@ -69,7 +64,18 @@ identifier. Rewrite a refused ask as the refusal directs.
   cite the standard with no fixture. `nwave-issue-board` fixtures 30 and 31 have no driver (issue 42).
 - A surface whose check has never fired says so in its own text and names what would change the verdict,
   as `board-snapshot` does (2026-09-08).
-- Keep the shipped scan structural: five items, no style item.
+- Keep `groom-issues`' scan structural: five items, no style item.
+
+## Build path for this plugin
+
+- Run `nw-discuss` before authoring a new feature, skill or command. Stop after DISCUSS: the deliverable
+  is prose, so DESIGN, DISTILL and DELIVER stay out (edd-loop DDD8).
+- Read `plugin-dev:skill-development`, `command-development`, `agent-development` or `plugin-structure`
+  before writing the file. Take the schema from plugin-dev, not from a sibling file — a copied shape
+  carries the sibling's defects unchecked.
+- Run `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` over the result.
+- Name in the commit message which of `nw-discuss` and `plugin-dev` ran. Wound: `groom-issues` slice 03
+  was authored 2026-08-13 without plugin-dev, and nothing recorded it.
 
 ## Where a finding about a standard goes
 
@@ -81,27 +87,23 @@ identifier. Rewrite a refused ask as the refusal directs.
 
 Keep repo conventions out of `rules/`: that directory ships to every consumer.
 
-## Commands declare mutation
+## Decision requests
 
-- Every command declares `mutates: true` or `mutates: false` beside its `allowed-tools`.
-  `scripts/check-readonly-commands.py` fails the build on a missing declaration, and on a `mutates: false`
-  command granting `Write`, `Edit`, bare `Bash` or a `Bash(...)` verb outside its read-only allowlist.
-- `mutates:` describes the grant, not the intent. Carry intent in the skill's prose: `adversarial-review`
-  never edits yet declares `true`, because it runs the test suite; `resume` writes nothing yet declares
-  `true`, because `gh api graphql` can mutate (sanctioned 2026-08-17, issue 24).
-- Add a verb to the read-only allowlist only after confirming it has no writing mode. Git's
-  `--output=<file>` on `log`, `diff`, `show`, `blame`, `rev-list` and `shortlog` writes anyway; the script
-  records that exception (git 2.53.0, 2026-09-08).
-- A `Bash(...)` grant names a bare executable — no path, no variable. To scope a command to one script,
-  grant the interpreter and put the path in the invocation. The original rationale was measured false on
-  2026-08-21, so whether this check still earns its place is open; `tests/test_check_readonly_commands.py`
-  keeps the refuted reasoning out of the script.
+`decision-request: strict` — this repo opts in. `hooks/decision-request/check-ask.py` refuses any question
+over 200 words, and here also any question or option naming an issue number, a file path or a bracketed
+identifier. Rewrite a refused ask as the refusal directs.
+
+## Resuming work
+
+- To continue existing work, run `/phil:resume` before anything else. Put a session down with
+  `/phil:handoff`; its snapshot, `.session-handoff.md`, is git-ignored and machine-local.
 
 ## This file ships to consumers
 
-Leave `CLAUDE.md` at the plugin root. Every install copies it, and Claude Code warns that it is not loaded
-as project context; the warning says nothing about your working tree. Decided 2026-08-21: a mis-listed
-packaging exclude would drop a file silently. Revisit if a consumer reports real confusion.
+- Leave `CLAUDE.md` at the plugin root. Every install copies it, and Claude Code warns that it is not
+  loaded as project context; the warning says nothing about the working tree.
+- Decided 2026-08-21: a mis-listed packaging exclude would drop a file silently. Revisit if a consumer
+  reports real confusion.
 
 ## Which copy is under test
 
@@ -111,11 +113,6 @@ packaging exclude would drop a file silently. Revisit if a consumer reports real
 - A dogfood claim names the version it ran against, or says it drove the skill's prose by hand.
 - Identify the installed copy by `version` or `installPath` in `installed_plugins.json`, never by
   `gitCommitSha`. Wound: on 2026-08-13 it named a 0.12.0 commit while `version` read 0.27.0.
-
-## Resuming work
-
-- To continue existing work, run `/phil:resume` before anything else. Put a session down with
-  `/phil:handoff`; its snapshot, `.session-handoff.md`, is git-ignored and machine-local.
 
 ## Issue board
 <!-- phil:board-setup:v1:begin -->
@@ -191,4 +188,4 @@ Nothing here was probed or inferred. `phil:groom-issues` rule 4 reads this regio
   `wave: *` is single-valued on `phil:nwave-issue-board`'s authority; declare it here only to override.
 - Forge mechanics: `phil:issue-board`. nWave feature, slice and step mapping: `phil:nwave-issue-board`.
 
-Rationale and history cut 2026-10-13: git show 0141d4b:CLAUDE.md
+Rationale and history cut 2026-10-13: git show 286274c:CLAUDE.md
