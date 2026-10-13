@@ -82,11 +82,9 @@ A card move on GitHub is three steps, not one:
    has no field to set, so editing it does nothing.
 
    **Create and add in the same breath.** An issue created with `gh issue create` is *not* a project
-   item, so it has no Status and is **invisible in any kanban grouped by Status** — present in the issue
-   list, absent from the board. Nothing catches it: a board reader cannot see a card that is not on the
-   board, so a grooming scan reports the board clean while the card sits outside it. Observed
-   2026-08-14, on two cards created by hand and found only when a later ranking run counted ten issues
-   against eight board items.
+   item, so it has no Status and is **invisible in any kanban grouped by Status**, and a grooming scan
+   reports the board clean while the card sits outside it. Wound: two hand-made cards, found only when a
+   ranking run counted ten issues against eight board items (2026-08-14).
 
    Read Status back after adding rather than assuming it is empty. On a project with an
    add-to-project workflow enabled, `item-add` lands the card in the workflow's column — observed as
@@ -120,19 +118,16 @@ followed.
 
 | | Position is | Set with | Read back with |
 |---|---|---|---|
-| GitLab board | the issue's `relative_position` | `issueMoveList` (GraphQL) | `glab issue list --order relative_position --sort asc --label <column>` |
+| GitLab board | the issue's `relative_position` | `PUT …/issues/:iid/reorder` (REST), per *GitLab reorders over REST* | `glab issue list --order relative_position --sort asc --label <column>` |
 | GitHub Projects v2 | the item's position in the project | `updateProjectV2ItemPosition` (GraphQL) | `gh api graphql`, per *Verify the end state* |
 | A plain issue list, either forge | nothing | — | — |
 
 **Neither CLI exposes a way to set position, and the label swap this skill prescribes cannot set
-one either.** *(Correction, 2026-08-12: the "GraphQL-only" claim that used to close this paragraph was
-wrong for GitLab — see* A column is a queue *below and* GitLab reorders over REST *for what replaced
-it.)* A `glab
-issue update --label/--unlabel` move changes the column and leaves the card wherever the default
-drops it — so on GitLab a deliberate move is two operations, not one. `glab issue` has no reorder
-subcommand and `gh project item-edit` has no position flag (checked on `glab` 1.112.0 and `gh`
-2.97.0) — but that does **not** make position GraphQL-only. It is on GitHub; on GitLab there is a
-REST endpoint that works. GitHub's mutation:
+one either.** A `glab issue update --label/--unlabel` move changes the column and leaves the card
+wherever the default drops it, so on GitLab a deliberate move is two operations. `glab issue` has no
+reorder subcommand and `gh project item-edit` has no position flag (`glab` 1.112.0, `gh` 2.97.0).
+Position is GraphQL on GitHub; on GitLab use the REST reorder endpoint, though GraphQL `issueMoveList`
+also exists. GitHub's mutation:
 
 ```sh
 gh api graphql -f query='mutation($p:ID!,$i:ID!,$a:ID){
@@ -185,11 +180,8 @@ no-op and is not: `afterId` **omitted or null moves the item to the top**, and `
 (GitHub, `gh` 2.97.0) — it moved a card from last to first. `positionInList` is still description-only.
 
 **`afterId` set to an item id is also confirmed by a run** (GitHub, `gh` 2.97.0, 2026-08-14): it places
-the subject *immediately after* the named item, and the read-back matched the intended sequence exactly.
-Worth knowing what that buys under a two-level scheme, because it is more than it looks: **within-goal
-order is board position restricted to that goal's members**, so a single well-chosen move can correct one
-goal's internal order while leaving every other goal's untouched. Ranking ten issues across three goals
-took one mutation.
+the subject *immediately after* the named item. **Within-goal order is board position restricted to that
+goal's members** (see *A milestone is a goal*), so one well-chosen move corrects one goal's order and leaves the others untouched.
 
 **Sub-issue order is a separate order** from any column's. Repositioning it is a third mutation —
 `reprioritizeSubIssue(issueId, subIssueId, afterId | beforeId)` — and setting a card's board
@@ -232,12 +224,10 @@ and say which one is authoritative.
 
 ### A milestone is a goal, and its due date is the only order that survives
 
-**A goal is not a story, and the discriminator is what each can hold: a goal holds *cards*; a story
-holds *feature directories*.** A goal is this milestone slot — a due date, unrelated work grouped by
-design, an ordering that survives new cards arriving. A story is itself **a card** and can never hold
-another; it groups several nWave features *inside* one issue (`phil:nwave-issue-board`). Positionally:
-a list of issues is a goal, the inside of one issue is a story. Both group several features and they are
-not alternatives — milestones do not nest, and neither replaces the other.
+**A goal holds *cards*; a story holds *feature directories*.** A goal is this milestone slot — a due
+date, unrelated work grouped by design, an ordering that survives new cards arriving. A story is itself
+**a card** and never holds another; it groups several nWave features inside one issue
+(`phil:nwave-issue-board`). A goal and a story are not alternatives; neither replaces the other.
 
 **One issue carries at most one milestone.** Verified on `glab` 1.112.0 (*"Set to `""` or 0 to
 unassign"*) and `gh` 2.97.0 (`--milestone` singular, plus `--remove-milestone`). That slot is spent
@@ -254,14 +244,8 @@ That buys the one thing hand-set position cannot give: an order that **survives 
 A new issue then needs a goal (coarse, cheap) and a position inside it, instead of a re-cut of one
 flat total order across the whole backlog.
 
-**Why a goal and not a feature.** Grouping issues by feature is the obvious alternative and it is the
-wrong trade. On GitHub, native sub-issues already give a feature its roster and its rollup, so the
-slot buys nothing. On GitLab it does buy a roster — but at the price of the only durable cross-issue
-ordering the forge offers, and a stale roster is a smaller problem than an unrankable backlog.
-
-**Same meaning on both forges.** A milestone that means "goal" on one and "feature" on the other is a
-word that has to be re-explained at every boundary, in a skill already carrying two forges'
-conventions. Accept the redundancy on GitHub rather than the divergence.
+**A goal, not a feature, because** on GitHub sub-issues already give a feature its roster; on GitLab a feature milestone would buy a roster at the price of the only durable
+cross-issue ordering. One meaning on both forges beats re-explaining the word at every boundary.
 
 Three limits worth stating before anyone builds on it:
 
@@ -383,12 +367,9 @@ gh api graphql -f query='query($o:String!,$r:String!){ repository(owner:$o,name:
 **One whole-board call, not one per issue.** The nesting returns every edge in a single response, so a
 tool that walks issues individually to find parents has bought an N+1 for nothing.
 
-**Reading it costs a guarantee, and that is worth knowing before you design around it.** `gh api graphql`
-accepts a mutation document, so a command that can read an edge can also write one; no scoping separates
-them. A tool whose value is that it *cannot* write therefore cannot read this edge and keep that claim
-mechanical — it either goes without the strongest structural signal the forge offers, or downgrades the
-claim to a promise in prose. `phil:groom-issues` took the second option on 2026-09-04, deliberately and
-in writing; the reasoning is recorded there rather than restated here.
+**Reading it costs a guarantee.** `gh api graphql` accepts a mutation document, so a command that can
+read an edge can also write one. A read-only tool either goes without this edge or downgrades its
+read-only claim to a promise in prose, as `phil:groom-issues` does.
 
 **GitLab has no stable equivalent to read.** Epics are Premium and the work-item hierarchy that would
 carry an issue-to-issue parent is an *Experiment* — see the next section. A cross-forge tool keyed on
@@ -490,11 +471,10 @@ And the mirror, in #47's: `Blocks #12 — split out of it on 2026-08-10`.
 The forge records the edge; the clause after the dash records why you stopped. Six issues deep, the
 edge alone tells you what blocked but not what you were in the middle of.
 
-**The clause is composed, so compose it against `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`.** The edge is
-rendered by the forge and there is nothing to compose in a link; the clause is the only part a person
-writes, and it is the only part a reader six issues deep depends on. Facts first, active voice, no
-expletive construction, the emphatic word last. **The standard is eleven principles of composition and concision is one
-of them** — read this as *compose it well*, never as *compose it short*.
+**Compose the clause against `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`.** The forge renders the edge;
+the clause is the only part a person writes, and the only part a reader six issues deep depends on.
+Facts first, active voice, no expletive construction, the emphatic word last — *compose it well*, never
+*compose it short*.
 
 **A clause that restates the edge fails.** `Blocked by #47 — blocked by issue 47` satisfies the shape and
 carries nothing the link did not. Pinned by `self-test/01-chain-clause-composed/`.
@@ -539,8 +519,7 @@ An expired certificate is a defect to fix, not a setting to work around.
 
 ## `glab`'s JSON flag differs per subcommand — check before you type it
 
-**There is no blanket rule.** This section asserted one until 2026-08-17 (*"the JSON flag is `-O`, and
-`-F` fails silently"*), and it was right about exactly one of the three subcommands below.
+**There is no blanket rule; check each subcommand.**
 
 | Subcommand | JSON flag | What the other flag does there |
 |---|---|---|
@@ -559,19 +538,12 @@ glab api projects/<url-encoded-path>                             # correct — n
 parses the result finds no JSON and concludes the issues have no bodies, or that the list is empty.
 That is the characteristic shape of every trap in this file — a wrong guess that reports success.
 
-**Verified against `glab --help`, not from memory**, which is how the blanket rule was caught. It was
-found by `phil:board-setup`'s GitLab adapter, whose first call — `glab api … -O json` — failed
-outright, and even then only became visible after the refusal message was made informative: the code
-had been reporting `failed: ERROR`, because `glab` prints a bare `ERROR` banner before the real
-message. **A refusal whose reason is uninformative hides the defect that caused it.**
+**Verify a flag against `glab <subcommand> --help`, never from memory**: a flag verified on one
+subcommand is evidence about that subcommand only. Wound: a blanket "`-O` everywhere" rule stood here
+until 2026-08-17, right about one subcommand of three.
 
-The lesson generalises past `glab`: a flag verified on one subcommand is evidence about that
-subcommand. This entry lived in `phil:groom-issues` until 2026-08-14 — a forge mechanic in a skill
-whose charter says it owns none — and being moved here did not make it correct.
-
-Checked by `tests/test_gitlab_probe.py::test_the_json_flag_is_correct_per_subcommand_not_blanket`,
-which is the fixture this fold-back required: without it the next author re-derives the blanket rule
-from the one subcommand where it holds.
+**Read past `glab`'s first error line.** It prints a bare `ERROR` banner before the real message, so a
+caller that reports only the first line hides the defect behind an uninformative refusal.
 
 ## `glab api graphql` answers introspection with the whole schema
 
@@ -611,8 +583,8 @@ field write; on such a board it is also `gh issue close`, with no output saying 
 
 The damage is to whatever you queued next. Observed 2026-08-12: setting an item to Done, then running
 `gh issue close <n> -c "<closing note>"`, produced `! Issue #<n> is already closed` — and **the
-comment was silently discarded**. The exit path reports the state you wanted, so nothing looks wrong;
-the note simply never posted.
+comment was silently discarded**. The exit path reports the state you wanted, so nothing
+looks wrong.
 
 Two consequences worth holding:
 
@@ -706,20 +678,13 @@ cannot be discovered:
 
 ## Self-test
 
-`skills/issue-board/self-test/` — **created 2026-09-04**; this was the only board-family skill without a
-suite while every sibling carried one. **The counts that stood here were wrong and are not
-replaced.** They read `30, 43, 18, 13 and 10`; measured 2026-09-04 the suites hold 30, 45, 27, 13
-and 10, and `18` matched no state `session-handoff`'s suite has ever been in. A hand-maintained
-tally in shipped prose goes stale on the next fixture and cannot be checked by anything here — which
-is this board's recorded defect, committed inside a sentence about test coverage.
-
-Fixture 01 pins the chain clause: both ends written, under the fixed heading, in the description, before
+`skills/issue-board/self-test/` holds the suite. Fixture 01 pins the chain clause: both ends written, under the fixed heading, in the description, before
 work starts on the blocker, with the clause carrying what the edge cannot. It supplies **no candidate
 text** — composing the clause is the act under test, and a fixture offering two variants would test
 selection instead.
 
-**The outcome vocabulary grows with the suite.** One outcome, `CHAIN-COMPOSED`, because there is one
-fixture. Shipping a vocabulary ahead of its fixtures asserts coverage that does not exist.
+**Add an outcome only with the fixture that exercises it.** One fixture so far, so one outcome:
+`CHAIN-COMPOSED`.
 
 `tests/test_issue_board_fixtures.py` checks what is automatable — every fixture well-formed, every
 `expected_decision` naming exactly one defined outcome, every defined outcome carrying a fixture. It does

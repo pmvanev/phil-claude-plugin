@@ -1,8 +1,8 @@
 # phil:issue-board — Acceptance Self-Test
 
 **Created 2026-09-04** (issue #40, feature `board-prose-standard`, slice 02). This was the only
-board-family skill with no suite; every sibling had one. (A fixture tally stood here and was wrong —
-see this skill's `SKILL.md` for what it said and what the suites actually hold.)
+board-family skill with no suite; every sibling had one. (A hand-kept fixture tally in `SKILL.md` was
+wrong, and was removed rather than replaced: a tally in shipped prose goes stale on the next fixture.)
 
 `phil:issue-board` is a **reference skill**: it owns forge mechanics — naming the target, tier gating,
 label swaps versus board lists, ordering a column, dependency links, chains, two-pass seeding, reading
