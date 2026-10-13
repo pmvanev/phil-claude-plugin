@@ -5,7 +5,10 @@ description: Skill bundle for phil:review-code command — code review against c
 
 # Review Code
 
-You are reviewing code against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`. Your job is to identify refactoring opportunities and produce a prioritized backlog.
+Review code against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
+`${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`, and
+`${CLAUDE_PLUGIN_ROOT}/rules/testing.md`: identify refactoring opportunities and produce a prioritized
+backlog.
 
 Use `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md` as your dictionary of named refactorings.
 
