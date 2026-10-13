@@ -5,7 +5,7 @@ allowed-tools: Read, Glob, Grep, Bash(git rev-parse:*), Bash(git status:*), Bash
 ---
 
 Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handoff/SKILL.md`. Follow the BOOTSTRAP path; the
-snapshot format, the deriving rules, the decision outcomes, and the never-do list govern all three paths.
+snapshot format, the deriving rules, the decision outcomes, and the invariants govern all three paths.
 
 **This command writes nothing — not to the repository, and not to the board.** It has no `Write`, no
 `Edit` and no bare `Bash`. Its `git` grants are scoped to read-only subcommands, and its one remaining
@@ -14,7 +14,7 @@ so the snapshot's next action can be compared against what the board says is in 
 
 **It declares `mutates: true` because that verb can carry a mutation, not because this command does.**
 `mutates` is a claim about the grant, which is the half a script can verify; the intent lives here and
-in the skill's never-do list, which forbids moving a card, setting a Status, or posting a comment on
+in the skill's invariants, which forbids moving a card, setting a Status, or posting a comment on
 either path. This is the `adversarial-review` pattern `CLAUDE.md` documents.
 
 The honest trade, stated so nobody discovers it later: this command's read-only guarantee used to be

@@ -136,7 +136,7 @@ winning *quietly*.
 
 ## Why "the boundary is the block, not the card"
 
-The never-do list forbids reading the projection back, and until 2026-08-17 that rule read *"never the
+The invariants forbid reading the projection back, and until 2026-08-17 that rule read *"never the
 card"* — which the #24 divergence check made false the moment it shipped, while the real invariant went
 unwritten. Read-back reads the board's **Status, position and card title**: those are the board's own
 facts, not a copy of anything this skill wrote. What it must never read back is the `Why` / `Next` /
@@ -147,7 +147,7 @@ has become the two authorities the whole design exists to prevent.
 
 The header rule says `push` and `pop` reproduce the header byte-for-byte. The one exception is a `push`
 that *creates* the snapshot: there is no prior header to reproduce, so `commit:` and `dirty:` are stamped
-from the tree and `captured:` is written `never`. Without the exception the never-do list reads as
+from the tree and `captured:` is written `never`. Without the exception the invariants read as
 forbidding the behaviour fixture 20 pins.
 
 ## Why the ceiling binds the report and not the record
@@ -159,7 +159,7 @@ are still on disk.**
 
 A snapshot clipped to fit a report is unrecoverable, and it is unrecoverable in the exact dimension the
 snapshot exists for. Everything else a reader wants — wave, slice, branch, file position — is derivable,
-which is why the never-do list refuses to record any of it. The decisions and the approaches ruled out
+which is why the invariants keep all of it out of the snapshot. The decisions and the approaches ruled out
 are the residue that nothing derives. So the file is written whole and uncounted, and the report is a
 view over it. **That asymmetry is the whole licence for a word bound here**; without it a ceiling would
 be trading the payload for brevity, which is the exchange the standard's concision principle is most

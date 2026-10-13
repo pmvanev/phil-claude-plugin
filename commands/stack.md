@@ -6,7 +6,7 @@ allowed-tools: Read, Bash(git rev-parse:*), Bash(git status:*), Bash(date:*), Ba
 ---
 
 Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handoff/SKILL.md`. Follow the STACK
-path. The snapshot format, the compare-and-swap rule, the decision outcomes and the never-do list govern
+path. The snapshot format, the compare-and-swap rule, the decision outcomes and the invariants govern
 this path exactly as they govern CAPTURE and BOOTSTRAP.
 
 No argument shows the stack. `push` takes what is being entered and why it is being entered. `pop`
@@ -18,7 +18,7 @@ for the grants that are here. `Bash(git status:*)` is present because creating a
 
 **Bare `/phil:stack` writes nothing**, but the grant does not say so — `Bash(python3:*)` is present
 because `push` and `pop` write through it, and `allowed-tools` cannot be scoped per verb. The read-only
-intent of the show verb lives here and in the skill's never-do list; `mutates: true` is the honest
+intent of the show verb lives here and in the skill's invariants; `mutates: true` is the honest
 declaration for the grant as a whole.
 
 **There is no `Write` and no `git hash-object`, and both absences are deliberate.** Every read and write
@@ -47,5 +47,5 @@ SESSION_HANDOFF_BODY
 carry a path, so the interpreter is granted and the path lives in the invocation above — the
 `adversarial-review` pattern in this repo's `CLAUDE.md`, and the one `board-setup` states for its own two
 scripts. The grant permits any Python, including a file write or shell redirection; the intent is this
-one script, carried here and in the skill's never-do list. It replaces a grant of `Write`, which was no
+one script, carried here and in the skill's invariants. It replaces a grant of `Write`, which was no
 narrower: it could overwrite any file.
