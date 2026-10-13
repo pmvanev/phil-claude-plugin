@@ -5,18 +5,17 @@ description: Skill bundle for phil:refactor-loop command — gated closed-loop r
 
 # Refactor Loop
 
-> **Substrate note (ADR-008, 2026-06-18).** The production orchestrator is now the **Workflow
-> tool** (`workflows/refactor-loop.js`) — deterministic JS owns the loop/gate/stop, so G7/G10
-> hooks are obviated and only the G2 test-file lockbox remains. This prose skill is retained as
-> the **optional `--interactive` fallback** for step-by-step debugging: the same loop expressed
-> as prose the model executes. It is less deterministic than the Workflow (the loop lives in
-> prose that can drift). Prefer the Workflow path unless you are inspecting the loop by hand.
+> **Substrate note.** The production orchestrator is the **Workflow tool**
+> (`${CLAUDE_PLUGIN_ROOT}/workflows/refactor-loop.js`): deterministic JS owns the loop, the gate and the
+> stop, so the G7 and G10 hooks are unneeded there and only the G2 test-file lockbox remains. This prose
+> skill is the **optional `--interactive` fallback** for step-by-step debugging — the same loop as prose
+> the model executes, and less deterministic, because prose can drift. Prefer the Workflow path unless
+> inspecting the loop by hand.
 
-You are the **orchestrator** of a gated refactoring loop — the cage. You own control flow:
-the test gate, the routing decisions, the stop predicate. Two subagents supply judgment (the
-brain): `refactor-proposer` generates one candidate refactoring at a time, and
-`refactor-critic-correctness` judges it. You never delegate the gate decision to a subagent,
-and you never let a subagent declare the loop done.
+Act as the **orchestrator** of a gated refactoring loop — the cage — and own its control flow: the
+test gate, the routing decisions, the stop predicate. Two subagents supply judgment (the brain):
+`refactor-proposer` generates one candidate refactoring at a time, and `refactor-critic-correctness`
+judges it. Keep the gate decision from every subagent, and let no subagent declare the loop done.
 
 This is structure-only work. Behavior is preserved absolutely, and only the external test
 suite certifies that — never a subagent's say-so.
@@ -64,7 +63,7 @@ INIT ─►PROPOSE ─►REVIEW ─►[GUARD]─►APPLY ─►TEST ──green�
 1. Detect the test runner using `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`.
 2. Run the **baseline suite** as a discrete Bash call and read `$?` directly. Guard **G1**:
    if the exit code is non-zero, the suite is red — go straight to **HALT**. Never refactor
-   on a red suite (`rules/refactoring.md` §Safety). This is a `stop`.
+   on a red suite (`${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md` §Safety). This is a `stop`.
 3. Create or load `.refactor-loop-ledger.md` in the project root (format below). Write its
    header: `runner`, `baseline: green @ <git-sha>`, `iter: 0 / max <N>`, and the `pinned:`
    list. Write the active-run marker so the Stop hook (G10) knows this is a refactor-loop
@@ -129,7 +128,7 @@ be narrated past — branch on the actual code.
 4. Compute the **actual** test delta and a **public-API diff**:
    - Public-API diff is language-specific. **Python:** `__all__` + top-level `def`/`class`.
      **TypeScript:** exported declarations. For other languages, degrade to the manifest's
-     own `public_api_touched` claim (no independent API diff in v1) — note the degradation.
+     own `public_api_touched` claim (no independent API diff) — note the degradation.
 5. **Guard G3 (hard-gate-red):** any non-zero exit → REVERT (chained G3a).
 6. **Guard G4 (manifest-mismatch):** the actual test delta contradicts
    `predicted_regressions_risk`, OR the public-API diff contradicts `public_api_touched`
@@ -171,11 +170,9 @@ Reach HALT when `iter ≥ max_iterations` (**G8**) or the baseline was red (**G1
 **incomplete** state honestly — what was resolved, what remains, why it stopped. Never narrate
 a partial run as success; grade the final state, not the effort.
 
-> **v1 HALT limitation (accepted).** v1 supports interrupt-only abort (Ctrl-C / Esc) plus the
-> G8 max-iterations HALT. The sentinel-file user-abort (G9) — a top-priority abort that wins
-> over an in-progress APPLY from every state — is **deferred to v2** (Workflow-tool returned
-> status). Safety invariant #3's "always-reachable abort" is therefore only partially
-> satisfied in v1. This is a documented, accepted limitation.
+> **HALT limitation (accepted).** Abort is interrupt-only (Ctrl-C / Esc), plus the G8
+> max-iterations HALT. No sentinel-file user-abort (G9) exists — a top-priority abort that would win
+> over an in-progress APPLY from every state — so the loop has no abort that is always reachable.
 
 ---
 
@@ -234,7 +231,7 @@ Guards are essentially free to evaluate — gate liberally on the recurring inva
 (red suite, test-file touched, public-API changed, max-iterations). Do not hand-author a
 guard per code smell; that is the rubric's job.
 
-> **G9 (user-abort sentinel) is deferred to v2.** See the HALT limitation note above.
+> **G9 (user-abort sentinel) does not exist.** See the HALT limitation note above.
 
 ---
 
@@ -242,15 +239,12 @@ guard per code smell; that is the rubric's job.
 
 This loop relies on three hooks: **G2** (PreToolUse test-file write-block), **G10** (Stop
 anti-premature-exit, gated on the `active-run` sentinel), and **G7** (UserPromptSubmit pinned
-re-inject). The scripts live in `hooks/refactor-loop/` and the exact `hooks.json` merge
-snippet is in `hooks/refactor-loop/README.md`.
+re-inject). The scripts live in `${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/` and the exact `hooks.json`
+merge snippet is in `${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/README.md`.
 
-The plugin already ships a `Stop` hook in `hooks/hooks.json`. Do **not** blindly overwrite
-it. Merge the new entries (the existing Stop notification and the new gated Stop guard can
-coexist as separate entries in the `Stop` array). If wiring risks clobbering existing
-config, leave it to the user: tell them to run the `update-config` skill with the snippet
-from the README rather than editing config blindly. Surface this as the one item needing
-human follow-up.
+Merge new entries into existing hook config; never overwrite it. If wiring risks clobbering existing
+config, leave it to the user: tell them to run the `update-config` skill with the snippet from the
+README rather than editing config blindly. Surface this as the one item needing human follow-up.
 
 Until the hooks are wired, the loop still runs but loses defence-in-depth: G2/G10/G7 fall
 back to the in-prose checks in this skill. Wire the hooks to make the boundaries sound.
@@ -259,10 +253,10 @@ back to the in-prose checks in this skill. Wire the hooks to make the boundaries
 
 ## Self-test
 
-`refactor/self-test/` holds deliberately-bad refactorings that the loop **must** reject — a diff that
-breaks a test (must REVERT at G3), a diff that broadens the public API while claiming `public_api_touched:
-false` (must REVERT at G4), and a "perfect refactor!" verdict with no span (must be coerced to
-`CANNOT_ASSESS`). These are the regression gate for the frozen rubric: run them whenever
+`${CLAUDE_PLUGIN_ROOT}/refactor/self-test/` holds deliberately-bad refactorings that the loop **must**
+reject — a diff that breaks a test (must REVERT at G3), a diff that broadens the public API while
+claiming `public_api_touched: false` (must REVERT at G4), and a "perfect refactor!" verdict with no span
+(must be coerced to `CANNOT_ASSESS`). These are the regression gate for the frozen rubric: run them whenever
 `${CLAUDE_PLUGIN_ROOT}/refactor/rubric.md` changes. See that directory's README.
 
 ---
