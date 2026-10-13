@@ -44,7 +44,7 @@ If the argument contains both a file and a line range (`docs/setup.md:12-30`), s
 Review prose only. Skip code blocks, frontmatter, config, link URLs, and generated output. Review table cells only when they contain sentences.
 
 ### `--changes`
-Run `git diff --name-only HEAD` to list files with uncommitted changes, filter to prose files (`**/*.{md,txt,rst}`), then run `git diff HEAD -- {file}` per file to get the hunks. Review only the added and modified lines — but read the whole file for context, since density is a property of the passage, not the diff. The density denominator is the reviewed lines, not the file.
+Run `git diff --name-only HEAD` to list files with uncommitted changes, filter to prose files (`**/*.{md,txt,rst}`), then run `git diff HEAD -- {file}` per file to get the hunks. Review only the added and modified lines — but read the whole file for context, since density is a property of the passage, not the diff. The density denominator is the reviewed lines, not the file. Pass `git diff` neither `--output` nor `--ext-diff`: the first writes any path, the second runs a repo-configured diff driver, and this command declares `mutates: false`.
 
 ### Line Range
 Read the file with surrounding context. Review the selected block only.

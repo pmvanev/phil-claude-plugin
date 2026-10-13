@@ -9,7 +9,9 @@ Answer one question — **where does this feature stand right now?** — by read
 artifacts, rendering a table, and stopping.
 
 **Read-only.** `/nw-continue` computes similar data and then *launches the next wave*; this skill
-exists to look without starting anything. Print the resume command as text; never run it.
+exists to look without starting anything. Print the resume command as text; never run it. Pass `git log`
+neither `--output`, which writes any path, nor `-p` or `--ext-diff`, which run a repo's configured diff
+filters.
 
 Three hard rules:
 

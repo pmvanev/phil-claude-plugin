@@ -99,3 +99,18 @@ def test_the_reported_count_matches_the_grants_actually_inspected(capsys):
         for fm in [re.search(r"^---\n(.*?)\n---", p.read_text(), re.S)] if fm
     )
     assert int(m.group(1)) == actual, f"reported {m.group(1)}, actual Bash() grants {actual}"
+
+
+def test_every_read_only_command_holding_a_git_verb_forbids_output_in_its_prose():
+    """CLAUDE.md sanctions `mutates: false` over git verbs that write through `--output=<file>`
+    (decided 2026-10-13) only because the command's own prose forbids the flag; a prefix-match grant
+    cannot exclude it."""
+    root = Path(__file__).resolve().parent.parent
+    for cmd in sorted((root / "commands").glob("*.md")):
+        text = cmd.read_text()
+        front = text.split("---", 2)[1]
+        if "mutates: false" not in front or "Bash(git " not in front:
+            continue
+        skill = root / "skills" / cmd.stem / "SKILL.md"
+        prose = text + (skill.read_text() if skill.exists() else "")
+        assert "--output" in prose, f"{cmd.name} grants a git verb under mutates: false and never forbids --output"

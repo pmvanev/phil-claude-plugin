@@ -42,6 +42,10 @@ prose.
 - Add a verb to the read-only allowlist only after confirming it has no writing mode. Wound: git's
   `--output=<file>` writes from `log`, `diff`, `show`, `blame`, `rev-list` and `shortlog` (git 2.53.0,
   2026-09-08).
+- `ai-eos`, `nwave-slice-status`, `nwave-wave-summary` and `spirit-walk` keep `mutates: false` over git
+  verbs that write through `--output=<file>`, because each one's prose forbids the flag and a narrow
+  grant beats bare `Bash` (decided 2026-10-13). `tests/test_check_readonly_commands.py` enforces the
+  prose.
 - Name a bare executable in a `Bash(...)` grant — no path, no variable; to scope a command to one script,
   grant the interpreter and put the path in the invocation. `scripts/check-readonly-commands.py` enforces it.
 
