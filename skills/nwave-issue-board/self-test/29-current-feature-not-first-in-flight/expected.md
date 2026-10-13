@@ -1,7 +1,6 @@
 # Expected outcome — fixture 29 (the current feature is the owner's, not the first one moving)
 
-**Pins:** *"do not write 'the first in-flight member' here. That is a second definition of `current
-feature`, and it disagrees with the owner's."*
+**Pins:** *"Take the current feature from the owner, never as 'the first in-flight member'."*
 
 **Expected:** the label is **`wave: discuss`** — position 01's — the routing line reads
 `Work this with: /nw-discuss · feature bedrock-setup`, and the enumerated slice roster is **position

@@ -1,7 +1,7 @@
 # Expected outcome — fixture 21 (the restatement changes nothing at the feature tier)
 
-**Pins:** the identity claim in *the bound* — *"at the feature tier this produces the two tables it
-always did, unchanged."*
+**Pins:** the identity claim in *the bound* — *"A card with no story declaration renders
+byte-identically to the feature tier before stories existed."*
 
 **Expected, arm A:** byte-identical to fixture 01's block. Two tables — the slice roster, and the
 current slice's step table. **No feature roster**, no `Story:` header line, no third table.

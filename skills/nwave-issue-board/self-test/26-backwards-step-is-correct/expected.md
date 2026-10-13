@@ -1,7 +1,7 @@
 # Expected outcome — fixture 26 (the label steps backwards, and that is right)
 
-**Pins:** *"it is therefore NOT monotonic, and that is correct output rather than a bug … say so in the
-block, every time."*
+**Pins:** *"So the label steps backwards — DELIVER to DISCUSS — when one feature finishes and the next begins.
+That is correct output"*, and *"Every story block carries this clause, verbatim."*
 
 **Expected:** `wave: design` is swapped for **`wave: discuss`**, the routing line becomes
 `Work this with: /nw-discuss · feature saved-sessions`, and the block carries the clause — that a new

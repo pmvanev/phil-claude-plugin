@@ -1,7 +1,8 @@
 # Expected outcome — fixture 20 (`STORY-BLOCK-BOUNDED`: one expanded path at four features)
 
-**Pins:** *The mapping* story row, and the bound restated as purpose — *exactly one feature's slices and
-one slice's steps are enumerated; every sibling is a row with a link.*
+**Pins:** *The mapping* story row, and the bound restated as purpose — *"At most one feature's slices are
+enumerated, and — where a `roadmap.json` exists — at most one slice's steps. Every other FEATURE is a row
+with a link."*
 
 **Expected:** two tables. A **four-row feature roster**, then **`Current feature 02 chat-in-web-ui —
 slices:`** with its **six** slice rows. **Ten rows.** No third table, because position 02 has no

@@ -1,7 +1,7 @@
 # Expected outcome — fixture 23 (a state with no glyph fails; it never becomes `·`)
 
-**Pins:** *"a value with no glyph must fail, never degrade to `·`"* — the property the slice vocabulary
-already carries, now required to hold over **two** vocabularies.
+**Pins:** *"Every value the owner can return has a glyph; a value with none fails loudly."* — the property the
+slice vocabulary already carries, now required to hold over **two** vocabularies.
 
 **Expected: fail**, naming the value and the skill that returned it. Emit no row for that feature and no
 block. Do not invent a glyph, and do not publish the other three rows as though the roster were complete.

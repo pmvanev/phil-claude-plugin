@@ -1,7 +1,7 @@
 # Expected outcome — fixture 28 (two in flight: pick first, and show the other)
 
-**Pins:** *"where two members are `in progress` at once, the label takes the first in roster order and
-the roster says so."*
+**Pins:** *"Where two members are `in progress` at once, the label is still the current feature's wave — and
+this skill does not decide which that is."* Every other in-flight member carries `⚠ also in flight`.
 
 **Expected:** two `▶ in progress` rows in the feature roster. The label is **`wave: design`** — position
 02 is the current feature *because `phil:nwave-slice-status` says so*, being the first member in position

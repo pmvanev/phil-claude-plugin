@@ -1,6 +1,6 @@
 # Expected — 19 (one writer, whole block, two sources)
 
-**Pins:** *one writer owns the whole block* — added 2026-08-14 after the first live run did it the other way.
+**Pins:** *One writer regenerates the whole block from two sources* — added 2026-08-14 after the first live run did it the other way.
 
 **Expected outcome:** `WHOLE-BLOCK-REGENERATED`. The block is rewritten in full between its markers, with
 position read fresh from `phil:nwave-slice-status` and reasoning read fresh from `.session-handoff.md` —
