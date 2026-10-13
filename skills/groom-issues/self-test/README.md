@@ -264,7 +264,7 @@ When a rule changes, the edit is not done until each of these has been checked:
 | 7 | `SKILL.md` reporting — the example output |
 | 8 | `references/fix.md` and `references/set.md` — the measured-population paragraphs |
 | 9 | `SKILL.md` decision outcomes — including whether a new stop needs a new outcome |
-| 10 | `SKILL.md` must-never-do — the all-commands list **and** the per-command list |
+| 10 | `SKILL.md` invariants — the all-commands list **and** the per-command list |
 | 11 | `commands/<name>.md` frontmatter `description` — it loads *before* the skill |
 | 12 | `commands/<name>.md` body, and its `allowed-tools` if the rule requires a new call |
 | 13 | `self-test/` — a fixture per fold-back, plus this README's row and outcome vocabulary |
@@ -298,7 +298,7 @@ weeks. Nothing failed; the class simply reported clean on every board it was wri
 2. **Does adding that call cost a guarantee the command advertises elsewhere?** The half nobody asked.
    Reading the edge needs `gh api graphql`, which accepts a mutation document, so the answer here was
    *yes* — and the fix was not to skip the call but to **downgrade the claim in writing**: `mutates: true`,
-   the read-only intent moved into the command's prose and the skill's never-do list, and fixture `08`
+   the read-only intent moved into the command's prose and the skill's invariants, and fixture `08`
    amended to stop asserting an enforcement that had gone.
 
 **A rule may also be unexecutable for a reason no grant can fix**, and the two look identical from the

@@ -20,7 +20,7 @@ command — the fixer is a different one.
 This paragraph used to add *"and scopes `Bash` to forge read calls"*, which made the whole guarantee
 mechanical. It no longer is. For issue #30 the command gained `Bash(gh api graphql:*)` so the
 decomposed-feature check could read a parent edge, and `gh api graphql` accepts a mutation document.
-Nothing in the tool list now prevents a forge write; this command's prose and the skill's never-do list
+Nothing in the tool list now prevents a forge write; this command's prose and the skill's invariants
 do, and nothing else.
 
 **The expected outcome is unchanged, and that is the point.** `READ-ONLY` still means the scan wrote

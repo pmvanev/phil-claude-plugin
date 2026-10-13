@@ -58,4 +58,4 @@ claiming the whole guarantee is enforced.
 
 Precedent: `commands/resume.md` took the same trade on 2026-08-17 for issue #24 — `mutates: true` while
 writing nothing, the narrow grant kept, the read-only intent in the command's prose and the skill's
-never-do list.
+invariants.

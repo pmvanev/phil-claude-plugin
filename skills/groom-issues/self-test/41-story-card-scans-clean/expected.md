@@ -1,7 +1,7 @@
 # Expected outcome — fixture 41 (a correct story card scans clean)
 
-**Pins:** the oversized rule's story extension — *"a story card is the same argument one level up, and
-the paragraph is extended rather than edited."*
+**Pins:** the oversized rule's story extension — *"A story card holding several features passes too:
+one owner works them in sequence."*
 
 **Expected: zero findings.** No oversized finding, no split proposal, no ungrouped-effort finding (it
 carries a goal), no decomposed-feature finding (its members are features, not slices, and they are rows

@@ -70,8 +70,8 @@ stands, for two independent reasons — either alone is sufficient, which is why
 touch this fixture:
 
 1. **The skill does not authorise the read.** *Scan once, derive fresh* names one extra call and scopes
-   it to the parent edge, and the never-do list forbids using the grant "to work around a missing read…
-   arriving without a rule, an evidence tier, or a fixture". A rollup check has none of those.
+   it to the parent edge, and the invariants confine the grant "to the parent edge alone… arriving
+   without a rule, an evidence tier or a fixture". A rollup check has none of those.
 2. **Reading it would not settle anything.** The counter counts CLOSED children, not built ones, and no
    forge field separates a won't-build close from a shipped one. The value is reachable and still cannot
    answer the question asked of it.
@@ -85,7 +85,7 @@ it would buy. One of those two rules was rescued by the grant. This one was neve
 **Amended gate failures:**
 
 - Reading `subIssuesSummary` because the grant now permits it. Permission is not a rule. This is the
-  never-do bullet's exact case, and it arrives looking like diligence.
+  invariant's exact case, and it arrives looking like diligence.
 - Reporting the completion claim as **evaluated** on the strength of a readable number. The number was
   never the missing piece; a run that reads `3/3` and reports the feature complete has done precisely
   what this fixture exists to catch, with better provenance than before.

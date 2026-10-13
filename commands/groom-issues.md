@@ -15,7 +15,7 @@ false claim about the tool list, which is the one thing that declaration is for.
 
 **The guarantee is now half enforced and half promised, and which half is which matters.** No `Write`
 and no `Edit`, so no file can be touched — mechanical, checkable, unchanged. The forge half is prose: this
-paragraph, and the never-do list in the skill. **Send only `query` documents through `gh api graphql`,
+paragraph, and the invariants in the skill. **Send only `query` documents through `gh api graphql`,
 never `mutation`.**
 
 **Why the grant exists.** The decomposed-feature check ranks a real parent/child edge as its strongest

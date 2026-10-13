@@ -1,8 +1,8 @@
 # Expected outcome — fixture 43 (the container is a story card, never a milestone)
 
 **Pins:** *features of one story, carded separately*, and its supersession of *ungrouped effort* —
-*"offer only this one. Offering both invites a goal filed around work that needs a different kind of
-container."*
+*"Its resolution proposes a milestone, a goal; the right container is a story card. Where this class's
+evidence reaches offer tier, offer only this one."*
 
 **Expected:** one set-level finding naming all four cards, with the shared `Story: chat-everywhere`
 declaration quoted as evidence. Offered resolution: **consolidate into one story card** whose feature
