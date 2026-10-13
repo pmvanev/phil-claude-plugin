@@ -51,7 +51,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --classif
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --drift SCRATCH_DIR/PROBE.json
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --place SCRATCH_DIR/REGION.md \
     --expect-sha SHA
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --retire LINE --expect-sha SHA
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --retire DRIFT_LINE --expect-sha SHA
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --refresh SCRATCH_DIR/REGION.md \
     --expect-sha SHA
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py --file CLAUDE.md --declare SCRATCH_DIR/DECL.md \

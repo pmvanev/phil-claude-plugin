@@ -138,7 +138,7 @@ arithmetic and the diff: a region placed one line off still looks placed, so cod
 | `--file F --place REGION.md --expect-sha S` | inserts, re-checking `S` first | yes |
 | `--file F --refresh REGION.md --expect-sha S` | regenerates the region; **zero bytes if nothing moved** | only on a change |
 | `--file F --declare DECL.md --expect-sha S` | inserts the declared region, once | yes |
-| `--file F --retire N --expect-sha S` | deletes exactly one whole line | yes |
+| `--file F --retire N --expect-sha S` | deletes exactly one whole line, the one `--drift` reported as `N` | yes |
 
 **`render-block.py` renders both regions, and nothing else may.**
 

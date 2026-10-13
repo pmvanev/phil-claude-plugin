@@ -452,29 +452,61 @@ def refresh_region(path: Path, region: str, expect_sha: str) -> dict:
             "changes": report, "sha256_after": sha256_of(out)}
 
 
+def retire_target(text: str, lineno: int) -> tuple[int, str]:
+    """The file line `--drift` reported as `lineno`, and its text, or a refusal.
+
+    Drift counts lines over `_excise(text)`; the file counts them with both regions in place. Found
+    2026-10-13: retire used the file's own numbering, so once a region sat above the prose the number
+    a human approved named a different line — a refusal at best, a silent deletion of another
+    hand-written line at worst.
+
+    The mapping is by line, never by character offset, and `splitlines()` throughout, as drift uses.
+    The prose line is the k-th occurrence of its own text among the lines outside both regions. Any
+    layout where those lines do not reproduce the excised prose is refused rather than guessed at.
+    """
+    lines = text.splitlines(keepends=True)
+    bare = text.splitlines()
+
+    if classify(text)["state"] == "markers-malformed":
+        raise Refusal("the markers are malformed — retire nothing until the region is repaired")
+    inside = set()
+    for begin, end in ((BEGIN, END), (DECL_BEGIN, DECL_END)):
+        b_at = [i for i, l in enumerate(bare) if l == begin]
+        e_at = [i for i, l in enumerate(bare) if l == end]
+        if text.count(begin) != len(b_at) or text.count(end) != len(e_at) or len(b_at) > 1 \
+                or len(b_at) != len(e_at) or (b_at and b_at[0] > e_at[0]):
+            raise Refusal("a region's markers are duplicated, unpaired, out of order or share a line "
+                          "with prose — retire nothing until the file is repaired")
+        if b_at:
+            inside.update(range(b_at[0], e_at[0] + 1))
+
+    prose = _excise(text).splitlines()
+    if lineno < 1 or lineno > len(prose):
+        raise Refusal(f"line {lineno} is out of range (the prose has {len(prose)} lines)")
+    outside = [i for i in range(len(lines)) if i not in inside]
+    if [bare[i] for i in outside if bare[i].strip()] != [l for l in prose if l.strip()]:
+        raise Refusal("the lines outside the regions do not reproduce the prose drift read — retire "
+                      "nothing until the file is repaired")
+
+    target = prose[lineno - 1]
+    if not target.strip():
+        raise Refusal(f"line {lineno} is blank — drift reports no blank line, so this number is not "
+                      "one it offered")
+    k = sum(1 for l in prose[:lineno] if l == target)
+    matches = [i for i in outside if bare[i] == target]
+    return matches[k - 1] + 1, target
+
+
 def retire_line(text: str, lineno: int) -> str:
     """Delete exactly one whole line — the only change permitted outside the markers.
 
-    Called only on an explicit answer. Silence is not an answer, and the caller, not this function,
-    owns that distinction.
+    `lineno` is the number `--drift` reported. Called only on an explicit answer. Silence is not an
+    answer, and the caller, not this function, owns that distinction. No line inside either region
+    can be reached: `retire_target` maps only onto lines outside both.
     """
+    file_line, _ = retire_target(text, lineno)
     lines = text.splitlines(keepends=True)
-    if lineno < 1 or lineno > len(lines):
-        raise Refusal(f"line {lineno} is out of range (file has {len(lines)} lines)")
-
-    state = classify(text)
-    if state["state"] == "region-present" and \
-            state["region_begin"] <= lineno <= state["region_end"]:
-        raise Refusal("that line is inside the probed markers — the region is generated, not retired")
-    if state["declared_begin"] and state["declared_end"] and \
-            state["declared_begin"] <= lineno <= state["declared_end"]:
-        # A declaration is never regenerated, so deleting one loses it outright — the worst outcome
-        # this function can produce, and reachable before this guard existed.
-        raise Refusal("that line is inside the declared markers — a human's declaration is never "
-                      "retired by this command",
-                      fix="edit or remove the declared region by hand if the answer has changed")
-
-    return "".join(lines[:lineno - 1] + lines[lineno:])
+    return "".join(lines[:file_line - 1] + lines[file_line:])
 
 
 def _read_text(path: Path) -> str:
@@ -517,8 +549,9 @@ def main() -> int:
                     help="report confirms / contradicts / cannot-evaluate; writes nothing")
     ap.add_argument("--place", metavar="REGION_FILE", type=Path,
                     help="insert the region; requires --expect-sha")
-    ap.add_argument("--retire", metavar="LINE", type=int,
-                    help="delete one whole line, on an explicit answer; requires --expect-sha")
+    ap.add_argument("--retire", metavar="DRIFT_LINE", type=int,
+                    help="delete the one whole line --drift reported as DRIFT_LINE, on an explicit "
+                         "answer; requires --expect-sha")
     ap.add_argument("--declare", metavar="DECL_FILE", type=Path,
                     help="insert the declared region — a human's answer, never regenerated; "
                          "requires --expect-sha")
@@ -566,9 +599,11 @@ def main() -> int:
         elif args.retire is not None:
             _require_present(args.file, state, "--retire")
             _require_sha(args, text, "--retire")
+            file_line, deleted = retire_target(text, args.retire)
             args.file.write_text(retire_line(text, args.retire))
             print(json.dumps({"schema": "board-setup-retire/v1", "status": "ok",
-                              "retired_line": args.retire}, indent=2))
+                              "retired_line": args.retire, "file_line": file_line,
+                              "deleted": deleted}, indent=2))
         else:
             raise Refusal("one of --classify, --drift, --place, --declare, --refresh or "
                           "--retire is required")

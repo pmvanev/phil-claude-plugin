@@ -303,16 +303,139 @@ def test_retire_leaves_every_other_line_untouched():
     assert out == kept
 
 
-def test_retire_refuses_a_line_inside_the_markers():
-    text = rp.place(PROSE_SECTION, REGION)
-    begin_line = text.splitlines().index(BEGIN) + 1
+def test_retire_deletes_the_line_drift_reported_once_a_region_sits_above_it():
+    """Found 2026-10-13: `--drift` numbers lines with both regions excised, and `--retire` deleted by
+    the file's own numbering. The flow places the region before DRIFT, so the number the human
+    approved named a different, hand-written line — deleted without complaint."""
+    text = PROSE_SECTION.replace("PVTSSF_lAHOANPp-M4Bf-pxzhaNnGs", "PVTSSF_WRONG")
+    placed = rp.place_declaration(rp.place(text, REGION), DECL)
+    [bad] = rp.drift(placed, PROBE)["contradicts"]
+    out = rp.retire_line(placed, bad["line"])
+    assert "PVTSSF_WRONG" not in out
+    kept = [l for l in placed.splitlines() if "PVTSSF_WRONG" not in l]
+    assert out.splitlines() == kept
+
+
+def test_retire_never_silently_deletes_a_different_human_line():
+    """The worst case of the numbering mismatch: with enough prose below the region, the shifted
+    number lands on another hand-written line, and nothing refuses."""
+    filler = "".join(f"- note {i}: a human wrote this\n" for i in range(12))
+    text = PROSE_SECTION.replace("## Something else",
+                                 filler + "- Status field `PVTSSF_WRONGWRONG`\n\n## Something else")
+    placed = rp.place(text, REGION)
+    [bad] = rp.drift(placed, PROBE)["contradicts"]
+    out = rp.retire_line(placed, bad["line"])
+    assert "PVTSSF_WRONGWRONG" not in out
+    assert all(f"- note {i}:" in out for i in range(12))
+
+
+BIG_REGION = REGION.replace(END, "".join(f"- fact {i} *(probed · Q1)*\n" for i in range(20)) + END)
+NOTES = "".join(f"- note {i}: a human wrote this\n" for i in range(10))
+
+
+def _assert_retires_only(text, needle):
+    [bad] = [c for c in rp.drift(text, PROBE)["contradicts"] if needle in c["text"]]
+    out = rp.retire_line(text, bad["line"])
+    assert [l for l in text.splitlines() if l not in out.splitlines()] == [bad["text"]]
+
+
+def test_retire_maps_past_prose_that_sits_between_the_regions():
+    """Reviewer's input A: a long probed region, then prose, then the declared region. Offset
+    arithmetic mixing prose and file positions deleted `- note 6` here."""
+    text = ("## Issue board\n" + BIG_REGION + "\n- Status `PVTSSF_WRONG`\n" + NOTES + DECL
+            + "\n\n## Next\n")
+    _assert_retires_only(text, "PVTSSF_WRONG")
+
+
+def test_retire_maps_when_the_declared_region_comes_first():
+    text = "## Issue board\n\n" + DECL + "\n- Forge: `PVTSSF_WRONG`\n\n" + REGION + "\n\n## Next\n"
+    _assert_retires_only(text, "PVTSSF_WRONG")
+
+
+@pytest.mark.parametrize("sep", ["\x0c", "\x0b", "\u2028", "\x85"])
+def test_retire_counts_lines_as_drift_does_on_a_file_with_no_regions(sep):
+    """`splitlines` breaks on more than `\\n`; counting newlines alone deleted the line above."""
+    text = f"# T\n\n## Issue board\n\n- see{sep}page two\n- Status `PVTSSF_WRONG`\n- keep me\n"
+    _assert_retires_only(text, "PVTSSF_WRONG")
+
+
+def test_retire_refuses_a_file_whose_end_marker_shares_a_line_with_prose():
+    """`place()` writes this when the heading is followed directly by prose; deleting the merged
+    line would take the end marker with it."""
+    text = rp.place("## Issue board\n- Forge `PVTSSF_WRONG`\n", REGION)
+    assert END + "- Forge" in text
     with pytest.raises(rp.Refusal):
-        rp.retire_line(text, begin_line + 1)
+        rp.retire_line(text, 2)
+
+
+def test_retire_refuses_a_file_with_a_duplicate_declared_region():
+    second = DECL.replace("Label family `wave`: single-valued",
+                          "Docs root override: https://github.com/other/repo/blob/main/")
+    text = rp.place_declaration(rp.place(PROSE_SECTION, REGION), DECL)
+    text = text.replace("## Something else", second + "\n\n## Something else")
+    for n in range(1, len(text.splitlines()) + 1):
+        with pytest.raises(rp.Refusal):
+            rp.retire_line(text, n)
+
+
+def test_retire_refuses_a_blank_line_drift_never_offers():
+    text = rp.place(PROSE_SECTION, REGION)
+    blank = rp._excise(text).splitlines().index("") + 1
+    with pytest.raises(rp.Refusal):
+        rp.retire_line(text, blank)
+
+
+def test_the_cli_reports_the_text_it_deleted(tmp_path):
+    import subprocess, sys
+    f = tmp_path / "CLAUDE.md"
+    f.write_text(rp.place(PROSE_SECTION.replace("PVTSSF_lAHOANPp-M4Bf-pxzhaNnGs", "PVTSSF_WRONG"),
+                          REGION))
+    before = f.read_text().splitlines()
+    [bad] = rp.drift(f.read_text(), PROBE)["contradicts"]
+    r = subprocess.run([sys.executable, str(SCRIPT), "--file", str(f), "--retire", str(bad["line"]),
+                        "--expect-sha", rp.sha256_of(f.read_text())],
+                       capture_output=True, text=True, check=True)
+    out = json.loads(r.stdout)
+    assert out["deleted"].strip() == bad["text"]
+    assert before[out["file_line"] - 1].strip() == bad["text"]
+    assert f.read_text().splitlines() == before[:out["file_line"] - 1] + before[out["file_line"]:]
+
+
+@pytest.mark.parametrize("regions", ["probed", "declared", "both"])
+def test_every_drift_line_number_retires_its_own_text(regions):
+    text = PROSE_SECTION
+    if regions in ("probed", "both"):
+        text = rp.place(text, REGION)
+    if regions in ("declared", "both"):
+        text = rp.place_declaration(text, DECL)
+    report = rp.drift(text, PROBE)
+    for entry in report["confirms"] + report["contradicts"] + report["cannot_evaluate"]:
+        out = rp.retire_line(text, entry["line"])
+        gone = [l for l in text.splitlines() if l not in out.splitlines()]
+        assert [l.strip() for l in gone] == [entry["text"]]
+
+
+def test_retire_never_reaches_a_line_inside_either_region():
+    """Every number either names a prose line or is refused. The blank line a placed region replaced
+    still has a drift number, and it maps into the region, so it is refused."""
+    text = rp.place_declaration(rp.place(PROSE_SECTION, REGION), DECL)
+    for n in range(1, len(text.splitlines()) + 2):
+        try:
+            out = rp.retire_line(text, n)
+        except rp.Refusal:
+            continue
+        assert REGION in out and DECL in out
 
 
 def test_retire_refuses_an_out_of_range_line():
     with pytest.raises(rp.Refusal):
         rp.retire_line(PROSE_SECTION, 9999)
+
+
+def test_retire_refuses_a_number_past_the_prose_even_when_the_file_is_longer():
+    text = rp.place(PROSE_SECTION, REGION)
+    with pytest.raises(rp.Refusal):
+        rp.retire_line(text, len(PROSE_SECTION.splitlines()) + 1)
 
 
 def test_retire_refuses_line_zero_rather_than_falling_through():
@@ -577,16 +700,15 @@ def test_a_declared_line_is_never_offered_for_retirement():
             f"*(you declared · 2026-08-17)*\n\n{rp.DECL_END}")
     text = rp.place_declaration(rp.place(PROSE_SECTION, REGION), decl)
     d = rp.drift(text, PROBE)
-    offered = [c["line"] for c in d["contradicts"]]
-    declared_lines = range(rp.classify(text)["declared_begin"],
-                           rp.classify(text)["declared_end"] + 1)
-    assert not (set(offered) & set(declared_lines)), \
+    assert not [c for c in d["contradicts"] if "other/repo" in c["text"]], \
         "a declared line was offered as a contradiction and is now retire-eligible"
 
 
 def test_retire_refuses_a_line_inside_the_declared_region():
     text = rp.place_declaration(rp.place(PROSE_SECTION, REGION), DECL)
-    c = rp.classify(text)
-    for lineno in range(c["declared_begin"], c["declared_end"] + 1):
-        with pytest.raises(rp.Refusal):
-            rp.retire_line(text, lineno)
+    for lineno in range(1, len(text.splitlines()) + 1):
+        try:
+            out = rp.retire_line(text, lineno)
+        except rp.Refusal:
+            continue
+        assert DECL in out
