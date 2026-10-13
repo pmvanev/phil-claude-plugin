@@ -11,13 +11,15 @@ The **Workflow tool** is the production substrate: its script owns the gates and
 model cannot decide it is done. Red gates enter a bounded fix sub-loop before a scoped revert; each landed
 refactor is committed on its own.
 
-## Step 1 — resolve the target (parity with `/phil:refactor`)
+## Step 1 — resolve the target
 
-Parse `$ARGUMENTS` into a `scope` (and optional `focus`) the proposer will work on:
+Take `--interactive`, `--max-iterations N` and `--max-fix-attempts N` out of `$ARGUMENTS` first. With
+`--interactive`, skip to *Optional fallback*. Parse the rest into a `scope` (and optional `focus`) the
+proposer will work on:
 
 | Input | scope | focus |
 |---|---|---|
-| `--changes` | the files in `git diff HEAD~1 --name-only` (code files only) | — |
+| `--changes` | the code files in `git diff HEAD~1 --name-only`, joined with spaces | — |
 | A function name / `file::symbol` | the enclosing file | the function name |
 | A class name / `file::Class` | the enclosing file | the class name |
 | A file path | that file | — |
@@ -28,8 +30,8 @@ the whole scope.
 
 ## Step 2 — gather the required run config
 
-The workflow **requires** `repo` and `test_cmd` and halts with `HALT-CONFIG` without them; it never
-guesses its target. Determine:
+The workflow **requires** `repo`, `test_cmd` and `plugin_root` and halts with `HALT-CONFIG` without them;
+it never guesses its target. `plugin_root` is fixed in Step 3. Determine:
 
 - **repo** — the absolute path of the target repo's working directory, where git and the tests run.
   Default to the current project root when the user is refactoring the repo they are in.
@@ -37,19 +39,28 @@ guesses its target. Determine:
   oracle (e.g. `uv run pytest`, which recurses unit, integration, property and acceptance tests; `npm
   test`), and a narrow command is a weak one. Read the project's `CLAUDE.md` for a declared command first.
 
-Confirm both with the user before launching, and confirm the test-file lockbox hook (G2) is wired:
-`hooks.json` `PreToolUse` → `block-test-file-write.py`. If it is not, warn that the lockbox falls back
-to the workflow's own diff scan only.
+Confirm both with the user before launching.
+
+Run `git -C <repo> status --porcelain -- . ':!.refactor-loop-ledger.md'` — the ledger is the loop's own
+uncommitted file. If it prints anything, stop and ask the user to commit or stash (`git stash -u`)
+first: a red gate reverts with `git checkout -- <files>`, which discards uncommitted edits in those
+files, and a landed refactor commits whole files.
+
+The workflow's own diff scan refuses any proposal that touches a test file. The plugin's
+`block-test-file-write.py` hook guards `Edit` and `Write` only, and the workflow applies diffs with `git
+apply`, so the hook does not fire on this path.
 
 ## Step 3 — invoke the Workflow
 
 The Workflow tool needs opt-in and runs in the background — confirm, then invoke with
-`scriptPath: workflows/refactor-loop.js` and **`args` as a JSON object**:
+`scriptPath: ${CLAUDE_PLUGIN_ROOT}/workflows/refactor-loop.js` and **`args` as a JSON object**, numbers
+as numbers:
 
 ```
 args: {
   repo: "<abs path>",            // required
   test_cmd: "<full suite cmd>",  // required
+  plugin_root: "${CLAUDE_PLUGIN_ROOT}", // required: the workflow names the rules from it
   scope: "<path>",               // from Step 1
   focus: "<symbol>",             // optional, from Step 1
   max_iterations: <N or 10>,
@@ -58,12 +69,18 @@ args: {
 }
 ```
 
-The loop runs INIT→PROPOSE→REVIEW→GUARD→APPLY→TEST→(FIX sub-loop)→{commit | undoable+revert}→
-{DONE | HALT}, commits each landed refactor, writes a DAG ledger to `<repo>/.refactor-loop-ledger.md`,
-and returns `{ status, iterations, applied, undoable[], invalid[] }`. Relay it, and surface every
-`undoable` finding — a refactoring proven infeasible — with its reason.
+The loop runs INIT→PROPOSE→REVIEW→GUARD→APPLY→TEST→(FIX sub-loop)→{commit | undoable+revert}, commits each
+landed refactor, and writes a DAG ledger to `<repo>/.refactor-loop-ledger.md`. It ends in `DONE` (nothing
+left worth refactoring), `HALT-INCOMPLETE` (out of iterations), `HALT-CONFIG` (a required argument
+missing) or `HALT` (a red or empty baseline suite, or a failed proposer). Relay the status; on any halt,
+relay its `reason`, and on a red baseline its `baseline` output. A finished run also returns
+`{ iterations, applied, undoable[], invalid[] }`: surface every `undoable` finding with its reason — a
+refactoring judged infeasible, a diff that touched a test file or would not apply, one that stayed red or
+changed the public API unpredicted after its fix attempts, or one whose fix agent failed.
 
 ## Optional fallback (`--interactive`)
 
 For step-by-step debugging, load and follow `${CLAUDE_PLUGIN_ROOT}/skills/refactor-loop/SKILL.md`
-instead: the same loop as prose the model executes, and less deterministic.
+instead: the same loop as prose the model executes, and less deterministic. Say what differs before
+starting: with no target the skill takes the latest git changes, not `.`, and it reads no `focus` and no
+`--max-fix-attempts`.

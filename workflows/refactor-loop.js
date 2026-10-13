@@ -33,22 +33,38 @@ export const meta = {
 // ---------------------------------------------------------------------------
 
 // --- Config ---
-// args may arrive as a JSON STRING on some invocation paths (the first-run and
-// second-run misfire: args.repo was undefined -> HALT-CONFIG). Normalize to a
-// real object so the string-vs-object footgun can never default the target repo.
-let A = {}
-if (args && typeof args === 'object') A = args
-else if (typeof args === 'string' && args.trim()) { try { A = JSON.parse(args) } catch (e) { A = {} } }
-
-const MAX_ITER = A.max_iterations || 10
-const MAX_FIX = (typeof A.max_fix_attempts === 'number') ? A.max_fix_attempts : 2
-const THETA = A.theta || 0.6
-const SCOPE = A.scope || '.'
-const FOCUS = A.focus || '' // optional: narrow to a single function/class within SCOPE
-const REPO = A.repo // REQUIRED — no default (ADR-009 D)
-const TEST_CMD = A.test_cmd // REQUIRED — no default
+// Pure, so tests/test_refactor_loop_workflow.py can drive it under Node.
+function readConfig(args) {
+  // args may arrive as a JSON STRING on some invocation paths (the first-run and
+  // second-run misfire: args.repo was undefined -> HALT-CONFIG). Normalize to a
+  // real object so the string-vs-object footgun can never default the target repo.
+  let A = {}
+  if (args && typeof args === 'object') A = args
+  else if (typeof args === 'string' && args.trim()) { try { A = JSON.parse(args) } catch (e) { A = {} } }
+  // A number or a numeric string inside [min, max]; anything else takes the default rather than
+  // reaching the loop (a negative fix budget reverts a diff it never applied).
+  const num = (v, dflt, min, max, integer) => {
+    const n = typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN)
+    const ok = Number.isFinite(n) && n >= min && n <= max && (!integer || Number.isInteger(n))
+    return ok ? n : dflt
+  }
+  // Nothing substitutes ${CLAUDE_PLUGIN_ROOT} inside a workflow script, so the command passes the
+  // resolved root. Found 2026-10-13: a literal here put an unopenable path in every agent prompt.
+  const missing = ['repo', 'test_cmd', 'plugin_root'].filter(k => !A[k])
+  return {
+    MAX_ITER: num(A.max_iterations, 10, 1, Infinity, true),
+    MAX_FIX: num(A.max_fix_attempts, 2, 0, Infinity, true),
+    THETA: num(A.theta, 0.6, 0, 1, false),
+    SCOPE: A.scope || '.',
+    FOCUS: A.focus || '', // optional: narrow to a single function/class within SCOPE
+    REPO: A.repo, // REQUIRED — the loop never guesses its target
+    TEST_CMD: A.test_cmd, // REQUIRED — no default
+    RULES: `${A.plugin_root}/rules`,
+    missing,
+  }
+}
+const { MAX_ITER, MAX_FIX, THETA, SCOPE, FOCUS, REPO, TEST_CMD, RULES, missing: MISSING } = readConfig(args)
 const LEDGER_PATH = '.refactor-loop-ledger.md'
-const RULES = '${CLAUDE_PLUGIN_ROOT}/rules'
 const PINNED = ['preserve-public-api', 'no-test-file-writes']
 const WORKDIR = `Work inside the repository at \`${REPO}\` — cd into it first; all paths below are relative to it.`
 
@@ -166,7 +182,7 @@ function applyPrompt(p) {
   return `${WORKDIR} Apply a single refactoring diff to the working tree for /phil:refactor-loop. Steps:
 1. \`git apply --recount --check\` the diff; if it does not apply cleanly, return applied:false + the error. Do NOT hand-edit to force it.
 2. If the check passes, \`git apply --recount\`.
-3. Never write to test files (also blocked by a PreToolUse hook).
+3. Never write to test files.
 Return applied:true on success, else applied:false + error.
 
 Diff:
@@ -267,9 +283,9 @@ phase('Init')
 
 // Fail fast: the cage must not guess its target (ADR-009 D). Also catches the
 // "args passed as a string" footgun (then args.repo is undefined).
-if (!REPO || !TEST_CMD) {
-  log('Missing required args. Pass a real JSON OBJECT: { repo, test_cmd, scope?, max_iterations?, max_fix_attempts?, theta? }.')
-  return { status: 'HALT-CONFIG', reason: 'repo and test_cmd are required (no defaults)', applied: [] }
+if (MISSING.length) {
+  log('Missing required args. Pass a real JSON OBJECT: { repo, test_cmd, plugin_root, scope?, max_iterations?, max_fix_attempts?, theta? }.')
+  return { status: 'HALT-CONFIG', reason: `${MISSING.join(', ')} required (no defaults)`, applied: [] }
 }
 
 const baseline = await agent(gatePrompt('baseline'), { schema: GATE_SCHEMA, label: 'baseline', phase: 'Init' })
@@ -293,12 +309,14 @@ await agent(writeLedgerPrompt(ledgerMarkdown(ledger, 0, 'running', true)), { sch
 // ===========================================================================
 phase('Loop')
 let iter = 0
+let stop = null // 'converged' | 'proposer-failed' | null (ran out of iterations)
 while (iter < MAX_ITER) {
   iter++
 
   // --- PROPOSE ---
   const p = await agent(proposerPrompt(ledger, lastFailure), { schema: PROPOSAL_SCHEMA, label: `propose#${iter}`, phase: 'Loop' })
-  if (!p || p.no_actionable) { log(`No actionable proposal at iter ${iter} -> DONE.`); break }
+  if (!p) { stop = 'proposer-failed'; log(`Proposer agent failed at iter ${iter} -> HALT.`); break }
+  if (p.no_actionable) { stop = 'converged'; log(`No actionable proposal at iter ${iter} -> DONE.`); break }
 
   const node = { node_id: p.node_id || `R${String(iter).padStart(3, '0')}`, smell: p.named_refactoring, span: p.target_span, depends_on: p.depends_on || [], status: 'pending' }
   ledger.nodes.push(node)
@@ -340,7 +358,8 @@ while (iter < MAX_ITER) {
     if (attempt < MAX_FIX) {
       const evidence = lastGate ? ((lastGate.public_api_changed && !candidate.public_api_touched ? 'Public API changed but you predicted it would not.\n' : '') + tail(lastGate.stdout)) : 'unknown failure'
       const fix = await agent(fixPrompt(candidate, evidence), { schema: PROPOSAL_SCHEMA, label: `fix#${iter}.${attempt + 1}`, phase: 'Loop' })
-      if (!fix || fix.no_actionable) { infeasibleFindings = (fix && fix.findings) || 'Proposer judged the refactor infeasible during the fix sub-loop.'; break }
+      if (!fix) { infeasibleFindings = 'The fix agent failed; nobody judged this refactor infeasible.'; break }
+      if (fix.no_actionable) { infeasibleFindings = fix.findings || 'Proposer judged the refactor infeasible during the fix sub-loop.'; break }
       candidate = fix
     }
   }
@@ -365,11 +384,19 @@ while (iter < MAX_ITER) {
 // REPORT
 // ===========================================================================
 phase('Report')
-const status = iter >= MAX_ITER ? 'HALT-INCOMPLETE' : 'DONE'
+const { status, reason } = finalStatus(stop, iter, MAX_ITER)
 await agent(writeLedgerPrompt(ledgerMarkdown(ledger, iter, status, false)), { schema: APPLY_SCHEMA, label: 'persist-ledger', phase: 'Report' })
 log(`${status}: ${applied.length} landed over ${iter} iteration(s). Ledger -> ${REPO}/${LEDGER_PATH}`)
 return {
-  status, iterations: iter, applied,
+  status, ...(reason ? { reason } : {}), iterations: iter, applied,
   undoable: ledger.nodes.filter(n => n.status === 'undoable').map(n => ({ id: n.node_id, findings: n.note })),
   invalid: ledger.nodes.filter(n => n.status === 'invalid').map(n => n.node_id),
+}
+
+// A failed proposer is not convergence, and convergence on the last allowed iteration is not
+// incompleteness. Found 2026-10-13: the second reported HALT-INCOMPLETE, the first DONE.
+function finalStatus(stop, iter, maxIter) {
+  if (stop === 'converged') return { status: 'DONE', reason: null }
+  if (stop === 'proposer-failed') return { status: 'HALT', reason: 'proposer-failed' }
+  return iter >= maxIter ? { status: 'HALT-INCOMPLETE', reason: 'max-iterations' } : { status: 'DONE', reason: null }
 }

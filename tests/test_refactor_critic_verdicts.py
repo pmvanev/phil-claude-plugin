@@ -18,6 +18,8 @@ import subprocess
 import pytest
 from pathlib import Path
 
+from js_source import js_function
+
 REPO = Path(__file__).resolve().parent.parent
 WORKFLOW = REPO / "workflows" / "refactor-loop.js"
 AGENT = REPO / "agents" / "refactor-critic-correctness.md"
@@ -29,15 +31,7 @@ VERDICTS = {"accept", "revise", "reject", "CANNOT_ASSESS"}
 
 
 def _js_function(name):
-    """The source of a top-level `function name(...) { ... }` in the workflow, braces balanced."""
-    src = WORKFLOW.read_text()
-    start = src.index(f"function {name}(")
-    depth, i = 0, src.index("{", start)
-    while True:
-        depth += {"{": 1, "}": -1}.get(src[i], 0)
-        i += 1
-        if depth == 0:
-            return src[start:i]
+    return js_function(WORKFLOW, name)
 
 
 def test_every_surface_names_the_same_four_verdicts():
