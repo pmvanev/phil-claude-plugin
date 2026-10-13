@@ -15,7 +15,7 @@
 
 Feature: Rewrite tests that verify implementation into tests that verify behaviour
   As Tess, a test maintainer,
-  I want behaviour-changing test rewrites applied only after I approve each diff and its
+  I want behaviour-changing test rewrites committed only after I approve each diff and its
   coverage-equivalence claim,
   so my suite survives refactoring and catches real regressions instead of noise.
 

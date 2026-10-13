@@ -8,7 +8,7 @@ description: Skill bundle for phil:refactor-tests command — human-approved, st
 Clean test code to the structure standards in `${CLAUDE_PLUGIN_ROOT}/rules/testing.md` and
 `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md` (and the matching language rules) **without silently
 weakening what the tests verify**. Work through a prioritized backlog one item at a time; **every change
-is applied only after the developer approves the diff**.
+is committed only after the developer approves the diff**, which they review applied in their editor.
 
 **This is structure-only, assertion-preserving work.** The test *is* the safety oracle, so a
 green suite alone cannot prove an assertion was not weakened — **the human is the oracle**
@@ -92,9 +92,10 @@ check.
 
 ### 2. Confirm a clean working tree
 
-The loop applies changes to the working tree and relies on `git checkout` to revert. If there
-are uncommitted changes to the target test files, ask the developer to commit or stash first —
-otherwise a revert could discard their work. Do this **before** the baseline run so no in-flight
+The loop applies changes to the working tree and relies on `git checkout` to revert. A move can
+write beyond the target test file — `conftest.py`, a new helper module — so check that `git status
+--porcelain` shows no change outside the backlog files; otherwise ask the developer to commit or stash
+first, since a revert could discard their work. Do this **before** the baseline run so no in-flight
 work is ever at risk.
 
 ### 3. Establish a green baseline (safety rule — never refactor on red)
@@ -187,22 +188,25 @@ existing style. Do not touch anything the move does not require.
   where to look; the counted ask states what approving asserts — that intent is preserved — and what
   each other answer costs.
 - **The four outcomes are fixed** and each names its own consequence: `approve` commits, `reject` and
-  `skip` revert, `abort` ends the loop. Do not add a fifth or fold two together.
+  `skip` revert, `quit` ends the loop. Do not add a fifth or fold two together.
 
 Pause and ask the developer to **review the uncommitted diff in their IDE/editor** (against git), then
 take the answer via **AskUserQuestion**, with four options:
 
 - **approve** → the change preserves intent → commit it (step 7).
-- **reject** → `git checkout -- <files>` revert; mark the item `skipped`; continue.
+- **reject** → `git checkout -- <files>` revert, and remove any file it created; mark the item
+  `skipped`; continue.
 - **skip** → same revert as reject; mark `skipped`; continue.
 - **quit** → `git checkout -- <files>` revert; stop the loop (progress is already saved in the
   backlog).
 
-A green suite never overrides the human. Reject/skip/quit always revert cleanly and write
-nothing. (Fixtures `03-approve-commit-on-green`, `04-reject-reverts-clean`.)
+Any other answer, or none, reverts as **reject** does. A green suite never overrides the human.
+Reject/skip/quit always revert cleanly and write nothing to the test files or git. (Fixtures
+`03-approve-commit-on-green`, `04-reject-reverts-clean`.)
 
 ### 7. Commit (approve only)
-Commit the single item — stage only the files this move touched. One commit per approved item.
+Commit the single item and only the files this move touched — `git commit -m <message> -- <files>` —
+so nothing the developer had already staged rides along. One commit per approved item.
 
 ```
 Refactor tests [{id}]: {named move} — {one-line description}
@@ -228,7 +232,9 @@ Continue to the next `pending` item.
 ## Scoped mode — a single file or test-id
 
 Same loop, but detection and moves are scoped to that one target: scan only that file/test for
-four smells, then run steps 1–9 over just those items. Same approve/suite/revert/commit
+four smells, then run steps 1–9 over just those items. A scoped run first writes its items into
+`.test-refactoring-backlog.md`, continuing its ID sequence, so commits, marking and resume have a
+backlog to read. Same approve/suite/revert/commit
 guarantees as the backlog loop. Use when the developer is working on one known-bad test and does
 not want a full review.
 

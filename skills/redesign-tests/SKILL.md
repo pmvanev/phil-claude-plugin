@@ -7,8 +7,8 @@ description: Skill bundle for phil:redesign-tests command — human-approved, be
 
 Rewrite tests that verify **how** the code works into tests that verify **what** it does — turning
 implementation-coupled, over-mocked and flaky tests into behaviour-focused ones. Work a prioritized
-backlog one item at a time, and **apply every rewrite only after the developer approves the diff *and*
-its coverage-equivalence claim.**
+backlog one item at a time; **every rewrite is committed only after the developer approves the diff *and*
+its coverage-equivalence claim**, reviewing it applied in their editor.
 
 **This is behaviour-CHANGING, human-gated work — the opposite pole from `phil:refactor-tests`.**
 `refactor-tests` is structure-only and can promise coverage never shrank. This skill deliberately
@@ -81,9 +81,10 @@ use AskUserQuestion before proceeding — redesigning tests without a runnable s
 secondary sanity check.
 
 ### 2. Confirm a clean working tree
-The loop applies changes to the working tree and relies on `git checkout` to revert. If there are
-uncommitted changes to the target test files, ask the developer to commit or stash first — otherwise
-a revert could discard their work. Do this **before** the baseline run.
+The loop applies changes to the working tree and relies on `git checkout` to revert. A rewrite can
+write beyond the target test file — `conftest.py`, a new helper module — so check that `git status
+--porcelain` shows no change outside the backlog files; otherwise ask the developer to commit or stash
+first, since a revert could discard their work. Do this **before** the baseline run.
 
 ### 3. Establish a green baseline (safety rule — never redesign on red)
 Run the suite **before** proposing any rewrite. **If the baseline is red, STOP and report — do not
@@ -190,15 +191,18 @@ having shown them the **coverage-equivalence claim**. Then take the answer via *
 four options:
 
 - **approve** → the rewrite preserves the coverage the claim describes → commit it (step 8).
-- **reject** → `git checkout -- <files>` revert; mark `skipped`; continue.
+- **reject** → `git checkout -- <files>` revert, and remove any file it created; mark the item
+  `skipped`; continue.
 - **skip** → same revert as reject; mark `skipped`; continue.
 - **quit** → `git checkout -- <files>` revert; stop the loop (progress saved in the backlog).
 
-A green suite **never** overrides the human. Reject/skip/quit always revert cleanly and write
-nothing. (Fixtures `03-approve-commit-on-green`, `04-reject-reverts-clean`.)
+Any other answer, or none, reverts as **reject** does. A green suite **never** overrides the human.
+Reject/skip/quit always revert cleanly and write nothing to the test files or git. (Fixtures
+`03-approve-commit-on-green`, `04-reject-reverts-clean`.)
 
 ### 8. Commit (approve only)
-Commit the single item — stage only the test file this rewrite touched. One commit per approved item.
+Commit the single item and only the files this rewrite touched — `git commit -m <message> -- <files>`
+— so nothing the developer had already staged rides along. One commit per approved item.
 
 ```
 Redesign tests [{id}]: {named move} — {one-line description}
@@ -222,7 +226,9 @@ Continue to the next `pending` item.
 ## Scoped mode — a single file or test-id
 
 Same loop, but detection and rewrites are scoped to that one target. Same
-approve/suite/revert/commit guarantees as the backlog loop.
+approve/suite/revert/commit guarantees as the backlog loop. A scoped run first writes its items into
+`.test-redesign-backlog.md`, continuing its ID sequence, so commits, marking and resume have a backlog
+to read.
 
 ---
 

@@ -11,7 +11,7 @@
 
 Feature: Clean test code to testing.md standards without weakening what the tests verify
   As Tess, a test maintainer,
-  I want structure-only test refactorings applied only after I approve each diff,
+  I want structure-only test refactorings committed only after I approve each diff,
   so I can keep trusting my suite as a safety net.
 
   # --- S1: Review tests for structure smells -----------------------------------------------
