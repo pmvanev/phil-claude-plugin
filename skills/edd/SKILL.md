@@ -5,18 +5,18 @@ description: Skill bundle for phil:edd command — Expectation-Driven Developmen
 
 # EDD — Expectation-Driven Development front-door
 
-You are a **thin triage front-door** for expectation-driven work. A developer hands you an intent;
-your job is to name the **expectations** inside it, decide which the existing engines already prove,
-and **get out of the way** wherever they do. Only for the expectations no test can cheaply assert
-do you attach a gate — and even then you delegate the build and inherit the engine's oracle.
+Act as a **thin triage front-door** for expectation-driven work. Given a developer's intent, name the
+**expectations** inside it, decide which the existing engines already prove, and **get out of the way**
+wherever they do. Attach a gate only to the expectations no test can cheaply assert — and even then,
+delegate the build and inherit the engine's oracle.
 
-You are the **expectation-driven sibling to `phil:work`**. `phil:work` is the general contractor for
-invisible work (preserve behavior + hit a checkable goal). You are the contractor for
+This is the **expectation-driven sibling to `phil:work`**. `phil:work` is the general contractor for
+invisible work (preserve behavior + hit a checkable goal); this is the contractor for
 expectation-driven work: **frame the expectations → delegate the build to the fitting engine →
 inherit its oracle (never re-verify) → add only the one gate the engine structurally lacks (the
-qualitative-evidence gate) → leave a trail.** (ADR-005 lineage; ADR-007/008/009.)
+qualitative-evidence gate) → leave a trail.**
 
-The standards you work under are `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, and
+The standards to work under are `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, and
 `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`.
 
 > **The full flow.** CAPTURE (intent → expectations) → CLASSIFY (engine-checkable vs qualitative,
@@ -26,15 +26,14 @@ The standards you work under are `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLA
 
 ---
 
-## The two lines you never cross
+## The two lines to hold
 
 1. **Add nothing where the engine already proves it.** If every expectation is engine-checkable,
-   you recommend the engine and **exit** — no evidence commissioned, no gate, no trail. Ceremony on
+   recommend the engine and **exit** — no evidence commissioned, no gate, no trail. Ceremony on
    already-provable work is the thing developers resent; the off-ramp exists to prevent it.
-2. **Never let the builder grade its own homework.** When you do gate a qualitative expectation
-   (slice 02), the evidence must be **executed** (a real run/render captured verbatim, not a
-   description) and produced by an agent that is **not** the builder; the **human** is the final
-   adjudicator. (D2/D4/DDD4.)
+2. **Never let the builder grade its own homework.** When gating a qualitative expectation, the
+   evidence must be **executed** (a real run/render captured verbatim, not a description) and
+   produced by an agent that is **not** the builder; the **human** is the final adjudicator.
 
 ---
 
@@ -43,7 +42,7 @@ The standards you work under are `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLA
 | Pattern | Action |
 |---|---|
 | `"<intent>"` | Run CAPTURE on the intent, then the flow below. |
-| No argument | Ask for an intent. (No-arg **resume** of an in-flight loop is deferred past v1 — see feature-delta Out of scope.) |
+| No argument | Ask for an intent. No-argument **resume** of an in-flight loop does not exist. |
 
 Derive a kebab-case `<slug>` from the intent for the trail path `docs/edd/<slug>/` — but do **not**
 create it yet (the trail is written only if the gate runs; see DOCUMENT).
@@ -77,7 +76,7 @@ For each expectation, decide how it can be proven:
 **The honesty rule (bias to off-ramp).** Default every expectation to **engine-checkable**. Mark an
 expectation qualitative **only** when the developer confirms a **concrete reason** it can't be
 cheaply asserted. An expectation offered as qualitative with no concrete stated reason is treated as
-engine-checkable. Never mark something qualitative on your own to justify running a gate — evidence
+engine-checkable. Never mark something qualitative by your own judgment to justify running a gate — evidence
 ceremony is opt-in, and over-triggering it is exactly how this tool would become the bureaucracy it
 exists to avoid.
 
@@ -120,7 +119,7 @@ gate or a trail for an all-checkable intent is a defect (it is the ceremony leak
 
 When CLASSIFY leaves a **qualitative residue** (one or more developer-confirmed qualitative
 expectations), run the rest of the flow. The engine-checkable expectations are still routed to the
-engine and proven by its own oracle — you never re-verify those.
+engine and proven by its own oracle — never re-verify those.
 
 ## BUILD — delegate to one engine, inherit its oracle
 
@@ -130,8 +129,8 @@ expectations:
 - **user-facing behavior** → nwave (its acceptance-test run is the oracle);
 - **invisible / developer-facing** → `/phil:work` (its preservation floor + checkable goal is the oracle).
 
-You do **not** run a preservation or acceptance check of your own — that is the engine's job
-(ADR-005 lineage). Record which engine built, and note that its checkable expectations are proven by
+Run no preservation or acceptance check of your own — that is the engine's job. Record which engine
+built, and note that its checkable expectations are proven by
 its oracle, so the gate below only ever concerns the **qualitative residue**.
 
 ## EVIDENCE-GATE — scaled executed evidence for each qualitative expectation
@@ -141,7 +140,7 @@ For each qualitative expectation, the gate **scales** — do the least that yiel
 1. **Reuse if it already exists.** If the engine already produced relevant executed evidence (a
    DELIVER demo / e2e run, a captured transcript), point the developer at *that* artifact. Commission
    nothing new. (Whether the existing evidence is actually *relevant* is the developer's call at
-   ADJUDICATE, not yours — if they say it isn't, treat that as a reject and commission fresh.)
+   ADJUDICATE, not this skill's — if they say it isn't, treat that as a reject and commission fresh.)
 2. **Otherwise commission it — from a non-builder.** Dispatch `agents/edd-evidence-producer`
    (Agent/Task) to actually run or render the thing and capture the raw output **verbatim** with the
    command that reproduces it. The producer is a **different actor than whatever built the thing**
@@ -157,7 +156,7 @@ command**, ready for the human.
 ## ADJUDICATE — the human decides
 
 Put each qualitative expectation's executed evidence to the developer via the human-approval port
-(AskUserQuestion + optional review of the artifact in their editor — ADR-002).
+(AskUserQuestion + optional review of the artifact in their editor).
 
 **This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
 
@@ -166,8 +165,8 @@ Put each qualitative expectation's executed evidence to the developer via the hu
   read. The counted ask names the expectation in plain terms and says what accepting commits to.
 - **Two outcomes only, and neither is a default.** `accept` and `reject` are the answer set; an
   ambiguous reply is unanswered, and a second unanswered ask blocks done rather than passing it.
- The developer — never
-you, never the producer — renders the verdict: **accept** or **reject**.
+
+The developer — never this skill, never the producer — renders the verdict: **accept** or **reject**.
 
 - **accept** → the expectation is met; record the verdict.
 - **reject** → the expectation is **not** met. **Block done.** Route that expectation back to the
@@ -192,7 +191,6 @@ convention. Report a summary naming, per qualitative expectation, the verdict an
 rested on.
 
 An **off-ramp-only** run writes **none** of this — the trail exists if and only if the gate ran.
-(ADR-009 / DDD6.)
 
 ---
 
@@ -202,9 +200,9 @@ An **off-ramp-only** run writes **none** of this — the trail exists if and onl
   exit, zero trail. No exceptions.
 - **Bias to off-ramp in CLASSIFY.** Default engine-checkable; mark qualitative only with a
   developer-confirmed concrete reason.
-- **Inherit, never re-implement.** You delegate the build and inherit the engine's oracle; you never
-  re-verify an engine-checkable expectation yourself (ADR-005 lineage).
-- **(Slice 02) Executed evidence, producer ≠ builder, human adjudicates.** Narration is never
+- **Inherit, never re-implement.** Delegate the build and inherit the engine's oracle; never
+  re-verify an engine-checkable expectation yourself.
+- **Executed evidence, producer ≠ builder, human adjudicates.** Narration is never
   evidence; a rejected qualitative expectation blocks done.
 - **Trail only when the gate ran.** An off-ramp-only run writes nothing under `docs/edd/`.
 - **Report honestly.** Grade the final state, not the effort. Never claim done over an unmet
