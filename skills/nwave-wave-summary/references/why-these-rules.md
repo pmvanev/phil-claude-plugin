@@ -61,10 +61,11 @@ Two ways to handle that: infer completion from artifact contents, or say what th
 those over these files. A second derivation drifts against the first, which is a rule this skill inherits
 rather than invents.
 
-So the default is *most recently touched*, the output says so, and it names the artifact and its date —
+So the default is *most recently touched*, the output says so, and it names the feature and its
+artifact's date —
 which makes a wrong pick visible immediately rather than inferred from a summary that reads plausibly.
 
-## Why the read-only guarantee is mechanical here, and is not elsewhere
+## Why the read-only claim is checked here, and still not proven
 
 `board-snapshot` and `resume` both declare `mutates: true` while writing nothing, because a
 `gh api graphql` grant accepts a mutation document and the honest declaration is about the grant rather
@@ -99,10 +100,11 @@ allowlist, one of whose promises is now known to be false.** Worth having, not p
 is now written down where the earlier draft volunteered only the weaker objection.
 
 **It costs one thing, and the trade was taken deliberately.** No interpreter is granted, so nothing counts
-the rendered output's words at run time. The ceiling is enforced by fixtures at build time and by this
-skill's prose at run time. Granting `python3` would make the count mechanical and would make the
-read-only guarantee promissory again — trading an enforced guarantee for an enforced check, on a command
-whose whole distinction is the enforced guarantee.
+the rendered output's words at run time, and no test counts them at build time: the fixture driver checks
+only the vocabulary. The ceiling is this skill's prose and nothing else. Granting `python3` would make the
+count mechanical and widen the grant to any Python — trading a checked grant for a checked count, on a
+command whose whole distinction is the narrow grant. Corrected 2026-10-13: this paragraph said fixtures
+enforced the ceiling, and called the read-only property an enforced guarantee.
 
 ## Cut the argument, never the decisions
 
@@ -111,7 +113,8 @@ the tempting cut is the opposite one: decisions are short and quotable, argument
 under pressure tends to keep the interesting reasoning and lose the boundaries.
 
 **A decision named without its reasoning is still useful. Reasoning without its decision is not.** The
-command names the artifact it read, so the discarded part is one command away rather than reconstructed.
+command names the feature it read and its artifact's date, so the discarded part is one command away
+rather than reconstructed.
 
 ## Saying nothing is a result
 

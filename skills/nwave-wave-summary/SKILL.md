@@ -49,8 +49,9 @@ git log -1 --format=%cI -- docs/feature/<id>/
 **"Most recently completed" is not recorded anywhere, so it is not what this resolves.** No artifact
 carries a completion marker; the newest commit touching a feature directory is the closest honest
 signal, and it is not the same thing. A feature whose DISCUSS landed an hour ago sorts above one finished
-last week — which is usually right and is sometimes not. **Name the artifact and its date in the output**
-so a wrong pick is visible immediately rather than inferred from a summary that reads plausibly.
+last week — which is usually right and is sometimes not. **Name the feature and its artifact's date in
+the output** so a wrong pick is visible immediately rather than inferred from a summary that reads
+plausibly.
 
 **Where two features tie, say so and stop.** Do not pick. Where no `docs/feature/` exists at all, or a
 named feature does not, that is a different answer — see *Decision outcomes*.
@@ -182,10 +183,10 @@ Report exactly one terminal outcome, every run:
 
 `SUMMARY-RENDERED` · `NOTHING-RECORDED` · `TARGET-NOT-FOUND` · `TARGET-AMBIGUOUS`
 
-**`READ-ONLY` is reported on every run.** Unlike the rest of this family it is a claim the tool list
-already guarantees — no `Write`, no `Edit`, and a `Bash` scoped to read-only git verbs — so here it
-restates the frontmatter rather than making a promise. Kept for consistency, and its weaker meaning is
-stated rather than left to be assumed.
+**`READ-ONLY` is reported on every run.** It is a claim about the calls this run made, not about the
+tool list: the grant holds no `Write` or `Edit`, but `git log` and `git show` accept `--output=<file>`
+and can run a repo's diff filters, so the claim holds because no call did either — see *What this skill
+must never do*.
 
 These are reported **alongside** `SUMMARY-RENDERED`: `ARGUMENT-DROPPED` whenever reasoning was cut to
 fit, naming what went; and `ATTRIBUTION-INCOMPLETE` in `--slice` mode whenever commits in the range could
@@ -211,7 +212,9 @@ not be tied to the slice, naming how many.
   accept `--output=<file>`, which writes, and clobbers an arbitrary absolute path outside the repo.**
   Verified on git 2.53.0, 2026-09-08. So the declaration asserts more than the grant delivers — here and
   for the three other commands on that allowlist. Checked, not proven, and the gap is named rather than
-  implied.
+  implied. **Pass neither `--output` nor `--ext-diff`, and read commits only with `--stat`, `--oneline`
+  or `--format`, never as a patch:** `git show <sha>` and `git log -p` run any `textconv` filter the
+  repo configures, with no flag at all; the forms above run none (git 2.53.0, verified 2026-10-13).
 - **Derive a status.** Not done, not in progress, not a percentage. That belongs to
   `phil:nwave-slice-status`.
 - **Summarise a stage that recorded nothing.**

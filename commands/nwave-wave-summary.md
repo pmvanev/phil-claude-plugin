@@ -22,12 +22,17 @@ Read it as *compose well, never compose short*: the ceiling already bounds lengt
 on active voice, positive form and putting the emphatic word last, in a read whose whole value is being
 finishable in one pass.
 
-No interpreter is granted, so nothing counts the rendered output at run time: the skill's prose alone
-holds the 200-word ceiling here, and fixtures hold it at build time.
+Count the 200 words yourself, over the whole rendered output: no interpreter is granted, so nothing
+counts it at run time, and no test counts it either — the fixture driver checks only the vocabulary, on
+the fixtures' own examples.
 
 `mutates: false` asserts more than the grant delivers. `git log` and `git show` both accept
 `--output=<file>`, which writes any path, unconditionally (git 2.53.0, 2026-09-08); `git log -p
 --ext-diff` runs a diff driver the target repo configures. A prefix-match grant cannot exclude a flag.
+Pass neither `--output` nor `--ext-diff`, and read commits only as the skill spells them — `--stat`,
+`--oneline`, `--format` — never as a patch: `git show <sha>` and `git log -p` run any `textconv` filter
+the target repo configures (git 2.53.0, verified 2026-10-13).
 
-Report the outcome by name, per the skill's `## Decision outcomes`, and name the artifact read with its
-date so a wrong target is visible rather than inferred.
+Report every outcome the skill's `## Decision outcomes` requires — the terminal one, `READ-ONLY`, and
+any companion. Name the feature read and the date of its artifact, never its path, so a wrong target is
+visible rather than inferred.

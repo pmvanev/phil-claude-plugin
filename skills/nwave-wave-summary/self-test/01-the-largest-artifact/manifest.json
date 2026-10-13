@@ -10,7 +10,7 @@
     "ARGUMENT-DROPPED",
     "READ-ONLY"
   ],
-  "expected_guard": "the output is at or under 200 words, states what was decided and what it rules out, names the artifact read with its date, and says what reasoning was cut",
+  "expected_guard": "the output is at or under 200 words, states what was decided and what it rules out, names the feature read and its artifact's date, and says what reasoning was cut",
   "must_not": [
     "exceed 200 words",
     "cut a decision to fit \u2014 the argument goes first, and what went is named",

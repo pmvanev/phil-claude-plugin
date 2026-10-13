@@ -51,7 +51,8 @@ fixture may assert a word count**. The second exists to stop a prose standard be
 there, shortness is not the goal and a count would measure the wrong thing.
 
 **Here the ceiling *is* the standard.** A two-hundred-word bound is what the command promises, so
-fixture `01`'s guard asserts it deliberately. If issue #42 is ever resolved by generalising
+fixture `01`'s guard asserts it deliberately — for whoever judges a driven run; the pytest driver applies
+no counter. If issue #42 is ever resolved by generalising
 `tests/test_issue_board_fixtures.py` to glob every `skills/*/self-test/`, **that guard will match its
 word-count rule and fail** — and this paragraph is what tells whoever hits it that they have found a
 deliberate exception rather than a defect. The same divergence, for the same reason, is recorded in
