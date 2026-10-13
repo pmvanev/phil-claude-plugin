@@ -95,4 +95,5 @@ def test_the_boundary_fixture_carries_both_halves():
     assert "palette" in blob or "typeface" in blob
     expected = (SELF_TEST / "02-motion-cost-in-scope-taste-is-not" / "expected.md").read_text()
     assert "Gate failures" in expected
-    assert "consider" in expected.lower(), "raising taste as a soft finding must also be a failure"
+    assert "the palette or the typeface at any severity, including **consider**" in expected, \
+        "raising taste as a soft finding must also be a failure"

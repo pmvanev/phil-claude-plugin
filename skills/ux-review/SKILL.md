@@ -20,8 +20,8 @@ Determine what `$ARGUMENTS` refers to:
 | Pattern | Type | Example |
 |---------|------|---------|
 | `--changes` | Latest git changes | `--changes` |
+| Is a directory (test this first: `.` and `ui.kit/` are directories) | Directory path | `src/`, `src/components`, `.` |
 | Has a file extension | File path | `src/LoginForm.tsx` |
-| Ends with `/` or a directory with no extension | Directory path | `src/`, `src/components` |
 | No argument | Default to `--changes` | |
 
 ---
@@ -31,13 +31,18 @@ Determine what `$ARGUMENTS` refers to:
 Restrict to UI files — the surface `ux.md` governs: `**/*.{tsx,jsx,vue,svelte,css,scss,sass,less,html}` and anything under `components/`, `pages/`, `layouts/`, `styles/`. Skip pure logic, config, and test files.
 
 ### `--changes` (default)
-Run `git diff HEAD~1 --name-only`, filter to UI files, read each in full, and run `git diff HEAD~1 -- <file>` to see what changed.
+Run `git diff HEAD~1 --name-only`, and `git ls-files --others --exclude-standard` for new files not yet
+added. With no parent commit, use `git diff HEAD --name-only` and say so. Skip deleted files. Filter to
+UI files, read each in full, and run `git diff HEAD~1 -- <file>` to see what changed.
 
 ### File Path
 Read the entire file.
 
 ### Directory Path
-Glob recursively for UI files. Read each. For large directories (>20 files), use an Explore agent to parallelize reading.
+Glob recursively for UI files, skipping vendored and generated trees — `node_modules/`, `dist/`,
+`build/`, `.next/`, `storybook-static/`, `coverage/`. Read each. For large directories (>20 files), an
+Explore agent may locate the files, but read each one yourself: the backlog records exact lines, which
+a summary cannot give.
 
 ---
 
@@ -48,7 +53,8 @@ Read `${CLAUDE_PLUGIN_ROOT}/rules/ux.md` first so your findings and wording trac
 ### Must-fix — objective defects (always-flag tier)
 
 **Accessibility**
-- Interactive behavior on a non-semantic element (`onClick` on a `<div>`/`<span>`), no keyboard handler, or a likely focus trap → real button/link, keyboard-operable, visible focus, no trap.
+- Interactive element not keyboard-operable, with no visible focus, or a likely focus trap → every action reachable and operable by keyboard, focus always visible, logical order, no trap. (Whether it is a real `<button>` rather than a `<div>` with a handler is `react.md`'s.)
+- Animation, parallax or large scale/pan motion with no reduced-motion variant → honour the user's reduced-motion preference: drop parallax and large motion, keep an equivalent still state (WCAG 2.3.3).
 - Meaning by color alone (class names / inline styles like `status--red` with no text or icon) → pair color with text/icon/shape.
 - Text contrast < 4.5:1 (< 3:1 large) or UI/icon contrast < 3:1 where colors are visible in source → meet WCAG AA.
 - Interactive target < 24×24 CSS px with no spacing exception → ≥ 24×24px (WCAG 2.5.8).
@@ -74,7 +80,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/rules/ux.md` first so your findings and wording trac
 
 ### Consider — judgment calls (advisory tier)
 
-Raise these as guidance, not hard blocks: feedback timing (~1s / ~10s thresholds), empty-state copy that guides the next action, error prevention before messages, forgiving input formats (input only), minimal required fields, sensible defaults, reduce/segment choices + presets, progressive disclosure (≤ 2 levels), recognition over recall / chunking, platform conventions, consistent vocabulary, Gestalt grouping, scannability/headings, one clear visual hierarchy, plain action-labeled copy, progress toward goals, optimistic UI for reversible actions only, mobile & touch advisories (viewport meta, fluid / content-driven breakpoints, safe-area insets, thumb reach, hover-on-touch alternatives, correct input types / on-screen-keyboard handling, ≥ 16px form inputs).
+Raise these as guidance, not hard blocks: motion & effect budget (compositor-cheap properties; heavy blur, live `filter` and stacked shadows judged against the device), legibility at small sizes, feedback timing (~1s / ~10s thresholds), empty-state copy that guides the next action, error prevention before messages, forgiving input formats (input only), minimal required fields, sensible defaults, reduce/segment choices + presets, progressive disclosure (≤ 2 levels), recognition over recall / chunking, platform conventions, consistent vocabulary, Gestalt grouping, scannability/headings, one clear visual hierarchy, plain action-labeled copy, progress toward goals, optimistic UI for reversible actions only, mobile & touch advisories (viewport meta, fluid / content-driven breakpoints, safe-area insets, thumb reach, hover-on-touch alternatives, correct input types / on-screen-keyboard handling, ≥ 16px form inputs).
 
 For each finding, name the **specific `ux.md` principle** it violates and the **preferred form** as the fix.
 
@@ -82,7 +88,10 @@ For each finding, name the **specific `ux.md` principle** it violates and the **
 
 ## Step 3: Write the Backlog
 
-Write findings to `.ux-review-backlog.md` in the project root. Use this exact format:
+Write findings to `.ux-review-backlog.md` in the project root — the one file this review writes. Edit
+none of the reviewed files, even for an obvious fix: this command reports and does not repair. Use this
+exact format. If the backlog already exists, add the new items under a fresh `Scope:` line, continuing
+its ID sequence; never drop or renumber an existing item.
 
 ```markdown
 # UX Review Backlog
@@ -126,6 +135,7 @@ After writing the backlog, report to the user:
 2. Top 5 must-fix items with brief descriptions.
 3. The path to the backlog file.
 4. Note any items marked "verify at runtime" that need a rendered check.
+5. Say which files were reviewed and which were skipped as non-UI — skipping is not passing.
 
 ---
 
@@ -152,7 +162,8 @@ silently passed (06), non-UI files skipped without being reported clean (07), an
 fix left unapplied because this command reports and does not repair (08).
 
 Whenever this skill, `commands/ux-review.md`, `rules/ux.md` or `rules/ui.md` changes, drive the
-fixtures per `self-test/README.md` and confirm each produces its `expected.md` outcome. The last two
+fixtures per `self-test/README.md` — drive this working tree's `SKILL.md` by hand, since
+`/phil:ux-review` runs the released copy — and confirm each produces its `expected.md` outcome. The last two
 are in that list because this skill's correctness is defined by them: fixture `02` exists because the
 boundary between `ux.md` and `ui.md` moved on 2026-08-31, and the shorter summary it replaced —
 *"aesthetics are out of scope"* — is now wrong in a way no reader can detect from this file alone.
