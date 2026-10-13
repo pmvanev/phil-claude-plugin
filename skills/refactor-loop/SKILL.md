@@ -123,9 +123,9 @@ Route on `verdict + severity + confidence`, threshold **θ = 0.6**:
    nothing — so HEAD is the pre-APPLY state a revert restores. If it is not, HALT and report.
 2. **Guard G2:** refuse any diff that touches a test path — under `tests/`, `test/`, `spec/` or
    `__tests__/`, or named `test_*.py`, `*_test.*`, `*.test.*`, `*.spec.*` or `conftest.py`. Apply
-   nothing: record the reason, mark the node `reverted`, and continue at REVERT step 3. The PreToolUse hook guards `Edit` and `Write` only, so a diff
-   applied through Bash passes it; this scan is the guard, and never attempt a test-file write
-   yourself.
+   nothing: record the reason, mark the node `reverted`, and continue at REVERT step 3. The PreToolUse
+   hook guards `Edit` and `Write` only, so a diff applied through Bash passes it; this scan is the
+   guard, and never attempt a test-file write yourself.
 3. Apply the proposer's single diff to disk.
 
 ### TEST  (cage)
