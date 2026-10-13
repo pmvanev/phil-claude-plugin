@@ -87,7 +87,7 @@ git -C <root> status --porcelain --ignored -- <rel>
 git -C <root> log -1 --format=%h -- <rel>
 ```
 
-- **Empty status and a hash** → the pre-revision text sits at that commit. History may be cut. Name `git show <hash>:<rel>` in the report. For project memory only, also leave it as the file's last line, outside every frozen part — `Rationale and history cut <date>: git show <hash>:<rel>` — replacing any earlier line of that form. This pointer is the one line the skill may add. A shipped file gets no pointer: its body is prompt text, and the hash names a repository its users do not have.
+- **Empty status and a hash** → the pre-revision text sits at that commit. History may be cut — any text rules 2–4 remove that is not itself a rule: an incident beyond its one-line wound, a rationale, a mechanism, a dated decision trail. Name `git show <hash>:<rel>` in the report. For project memory only, when this run cuts history, also leave it as the file's last line, outside every frozen part — `Rationale and history cut <date>: git show <hash>:<rel>` — replacing any earlier line of that form. The version it names carries the earlier line, so each cut stays one hop from the last. A run that cuts no history leaves an existing pointer byte-for-byte unchanged. This pointer is the one line the skill may add. A shipped file gets no pointer: its body is prompt text, and the hash names a repository its users do not have.
 - **Anything else** — modified, untracked, ignored, no root, or an error → cut no history. Compress each wound to one line and keep the rest, flagged in the report as recoverable nowhere.
 
 ---
@@ -97,7 +97,7 @@ git -C <root> log -1 --format=%h -- <rel>
 Score the file against each criterion. Flag violations before editing.
 
 ### Placement — every profile
-- [ ] A rule a tested check enforces takes one line naming the check
+- [ ] A rule a tested check enforces takes one bullet: reflex, limits, check
 - [ ] A mechanically checkable rule with no check is flagged for one
 - [ ] The model learns its position from disk or forge state, never a remembered step number
 - [ ] Each non-obvious rule leads with its reflex and carries at most one line of wound
@@ -124,7 +124,7 @@ Score the file against each criterion. Flag violations before editing.
 
 ## Revision Rules
 
-Apply these in order. Rules 1 and 9 apply to project memory only; the rest apply to every profile.
+Apply these in order, to every profile unless a rule names one.
 
 ### 1. Delete What Claude Already Knows
 
@@ -140,7 +140,7 @@ In a shipped file, judge only names inside its own bundle: `${CLAUDE_PLUGIN_ROOT
 
 For each rule, search the root's `scripts/`, `hooks/`, `.claude/settings.json`, CI config and `tests/` for a check that enforces it. For an `AGENTS.md`, count only checks every agent meets — CI, tests, git hooks — never a Claude Code hook.
 
-- **A check exists and a test exercises it** — a test that runs the check on the input it must refuse. The check is proven. Collapse the rule to one line: the reflex, then the check's path. Delete the explanation of how the check works; the check's own header owns it.
+- **A check exists and a test exercises it** — a test that runs the check on the input it must refuse. The check is proven for the limits the test exercises. Collapse the rule to one bullet: the reflex, each proven limit, then the check's path. A **limit** is a condition the model's own output must meet — `200 words`, `no file path` — kept so the model gets the work right the first time instead of learning it from a refusal. Cut the **mechanism**: how the check decides, where it is wired, why it was built; the check's own header owns those. A limit no test exercises keeps its prose, reported unproven.
 - **A check exists and no test exercises it.** The check is unproven. Keep the rule's prose, and name the check and the missing test in the report.
 - **The rule is mechanically checkable and no check exists.** Keep the rule, and name the missing check in the report.
 
@@ -192,7 +192,7 @@ Tighten each sentence per `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`: active voice
 
 ### 12. Fit the Budget
 
-Project memory over 200 lines, a skill body over 2,000 words, or an agent body over 3,000 characters: name the least-essential content and where each part could move. Report the profile's flag threshold when the file crosses it. Project memory counts its generated regions toward the 200 lines; a skill or agent counts its body only, never its frontmatter. Frozen parts are never cut.
+Over the profile's budget, name the least-essential content and where each part could move; report the flag threshold when the file crosses it. Project memory counts its generated regions; a skill or agent counts its body, never its frontmatter. Frozen parts stay.
 
 ---
 
@@ -202,7 +202,7 @@ Project memory over 200 lines, a skill body over 2,000 words, or an agent body o
 - Lines and words, before and after.
 - The audit, with each failed item.
 - Each rule cut, and why: stale or inferable.
-- Each rule collapsed to one line, with the proven check that enforces it.
+- Each rule collapsed to one bullet, with the proven check that enforces it.
 - Each check found but unproven, and each check worth writing.
 - Each rule rewritten, one line each.
 - History cut, with its recovery command — or history kept because it is recoverable nowhere.
@@ -215,7 +215,7 @@ Project memory over 200 lines, a skill body over 2,000 words, or an agent body o
 
 - **Leave frontmatter byte-for-byte unchanged.** A skill's `description` decides when it triggers; a command's `allowed-tools` and `mutates` are checked by tooling. Report a frontmatter defect instead of fixing it.
 - **Leave generated regions byte-for-byte unchanged.** A region runs from a `<!-- …:begin -->` marker to its matching `<!-- …:end -->`. A "do not edit" banner with no end marker freezes everything from the banner to the next markdown heading, or to the end of the file. A `begin` without its `end`, or an `end` without its `begin`, stops the run: edit nothing in that file and report the broken marker. The region's owner regenerates it; an edit is overwritten or, worse, corrupts data its owner reads back.
-- **Keep every rule that still binds.** Delete a rule only when it is stale or inferable from code. A rule a proven check enforces collapses to one line; it stays.
+- **Keep every rule that still binds.** Delete a rule only when it is stale or inferable from code. A rule a proven check enforces collapses to one bullet; it stays.
 - **Keep team conventions.** Branch names and PR process stay, even when they look obvious.
 - **Create no files.** Name where content should go; the user decides.
 - **Invent no instructions.** Tighten, rename, reorder or delete. Add no rule, wound or parameter the file did not hold; the recovery pointer is the one exception.

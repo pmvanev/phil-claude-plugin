@@ -139,3 +139,36 @@ def test_the_readme_lists_every_fixture():
     readme = (SELF_TEST / "README.md").read_text()
     for f in _fixtures():
         assert f.name in readme, f.name
+
+
+def test_a_collapsed_rule_keeps_the_limits_the_model_writes_to():
+    """Cutting `200 words` with the mechanism leaves the model to learn the limit from a refusal.
+    Found 2026-10-13, when 0.102.0 hardened this repo's CLAUDE.md and the decision-request rule
+    sat on the boundary."""
+    assert "A **limit** is a condition the model's own output must meet" in SKILL.read_text()
+    expected = (SELF_TEST / "02-enforced-rule-collapses" / "expected.md").read_text()
+    assert "bare `Bash`" in expected.split("**Pass.**", 1)[1].split("**Fail.**", 1)[0]
+
+
+def test_a_run_that_cuts_no_history_leaves_the_pointer_alone():
+    """Re-pointing on every run moves the original one more hop away each time, for nothing."""
+    assert "cuts no history leaves an existing pointer byte-for-byte unchanged" in SKILL.read_text()
+    lines = (SELF_TEST / "07-pointer-kept-when-nothing-cut" / "CLAUDE.md").read_text().splitlines()
+    assert lines[-1].startswith("Rationale and history cut ")
+
+
+def test_history_is_defined_so_the_pointer_rule_can_fire():
+    """Undefined, a run decides a cut mechanism is not history and keeps a pointer that leads
+    nowhere near it."""
+    assert "any text rules 2–4 remove that is not itself a rule" in SKILL.read_text()
+
+
+def test_a_fixture_requires_the_pointer_when_history_is_cut():
+    expected = (SELF_TEST / "02-enforced-rule-collapses" / "expected.md").read_text()
+    assert "Rationale and history cut <date>: git show <hash>:CLAUDE.md" in expected
+
+
+def test_both_rules_keep_the_limits_when_collapsing():
+    """The skill and the standards it cites must agree, or a run follows whichever it read last."""
+    for rule in ("agent-instructions.md", "claude-md.md"):
+        assert "limit" in (REPO / "rules" / rule).read_text().split("one bullet", 1)[1][:80], rule

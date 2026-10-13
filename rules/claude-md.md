@@ -99,7 +99,7 @@ Move instructions out of CLAUDE.md when:
 - A rule applies only to certain file types — use a path-scoped rule
 - A rule defines a multi-step workflow — create a skill in `.claude/skills/`
 - A rule must be enforced deterministically — implement it as a hook
-- A hook or script enforces a rule, and a test shows it refusing the motivating input — cut the prose to one line naming the rule and the check
+- A hook or script enforces a rule, and a test shows it refusing the motivating input — cut the prose to one bullet naming the rule, the limits the model writes to, and the check
 
 ---
 
@@ -122,7 +122,7 @@ Some tools write their own region into CLAUDE.md between paired markers, such as
 | **Uncurated /init output** — accepting auto-generated content as-is | Run `/init`, then prune aggressively |
 | **Progressive disclosure failure** — documenting everything up front | Teach Claude where to find information, not all the information |
 | **Decision diary** — dated history wrapped around each rule | Lead with the rule; keep one line of why; link the rest |
-| **Narrated enforcement** — paragraphs explaining a rule a tested script already checks | One line naming the rule and the script |
+| **Narrated enforcement** — paragraphs explaining a rule a tested script already checks | One bullet: the rule, its limits, the script |
 
 ---
 

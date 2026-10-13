@@ -6,15 +6,16 @@ look like a tidy file. Each fixture here pins one such failure.
 | Fixture | Pins | Pass |
 |---|---|---|
 | `01-generated-region-untouched/` | Safety: generated regions | Bytes between the markers unchanged |
-| `02-enforced-rule-collapses/` | Revision rule 3 | One line naming `scripts/check-mutates.py` |
+| `02-enforced-rule-collapses/` | Revision rule 3 | One bullet keeping the `Write`/`Edit`/`Bash` limit and naming `scripts/check-mutates.py`; the buried rule kept; pointer added |
 | `03-prohibition-becomes-reflex/` | Revision rule 5 | Three constraints survive in positive form |
 | `04-history-kept-when-unrecoverable/` | Recoverability | History kept and flagged when no commit holds it |
 | `05-unproven-check-keeps-prose/` | Revision rule 3 | Prose kept; the check reported found and unproven |
 | `06-skill-keeps-frontmatter-and-shape/` | Profiles; Safety: frontmatter | Frontmatter unchanged; no project-memory layout imposed |
+| `07-pointer-kept-when-nothing-cut/` | Recoverability | Earlier pointer byte-for-byte unchanged |
 
 ## Driving a fixture
 
-Copy the fixture directory outside this repository. For fixtures 01–03, 05 and 06, `git init` the copy and commit
+Copy the fixture directory outside this repository. For fixtures 01–03 and 05–07, `git init` the copy and commit
 it, so the skill finds a root and searches the copy's own `scripts/`. Leave fixture 04's copy
 uncommitted. Rename fixture 06's `SKILL.md.input` to `SKILL.md` in the copy — it ships renamed so
 skill discovery never loads it. Run `/phil:harden-instructions <copy>/<input>` and judge the result against `expected.md`.

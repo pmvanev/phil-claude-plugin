@@ -37,7 +37,7 @@ Place each rule on the highest tier it can reach.
 | **State** | An affirmative sentence in the prompt | When the model reads, retrieves and obeys it |
 
 - **Enforce what a machine can check.** The model cannot argue past a guard the runtime fires. A prompt that holds 98% of the time fails twice in a hundred runs.
-- **Prove the check before cutting the prose.** Replay the input that motivated the rule and watch the check refuse it. Then cut the prose to one line naming the rule and the check. Mike Mol's `nemik` deletes a prose rule only after its hook refuses a replayed bad payload.
+- **Prove the check before cutting the prose.** Replay the input that motivated the rule and watch the check refuse it. Then cut the prose to one bullet: the rule, each limit the model's output must meet, and the check. Mike Mol's `nemik` deletes a prose rule only after its hook refuses a replayed bad payload.
 - **Derive position from the world.** The model reads the branch, the tree, the open PR and the files on disk to learn where it stands, never a remembered step number.
 
 ---
@@ -130,7 +130,7 @@ Treat these as practice, not measured law. One controlled benchmark backs **Name
 
 ### Quick Reference Checklist
 
-- [ ] Does a hook, script or test enforce this rule? Then is the prose one line naming it?
+- [ ] Does a hook, script or test enforce this rule? Then is the prose one bullet naming the rule, its limits and the check?
 - [ ] Does the model learn its position from disk or forge state?
 - [ ] Could a known formalism replace this paragraph?
 - [ ] Does each rule state what holds, not what to avoid?
