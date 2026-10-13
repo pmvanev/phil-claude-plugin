@@ -35,8 +35,8 @@ Determine what `$ARGUMENTS` refers to:
 | Pattern | Type | Example |
 |---------|------|---------|
 | `--changes` | Latest git changes | `--changes` |
+| Is a directory (test this first: `.` and `conf.d/` are directories) | Directory path | `src/`, `src/services`, `.` |
 | Has a file extension | File path | `src/order.py` |
-| Ends with `/` or has no extension and is a directory | Directory path | `src/`, `src/services` |
 | No argument | Default to `--changes` | |
 
 ---
@@ -45,7 +45,11 @@ Determine what `$ARGUMENTS` refers to:
 
 ### `--changes` (default)
 
-Run `git diff HEAD~1 --name-only` to get changed files. Filter to code files only (exclude configs, lockfiles, generated files). Read each changed file in full, plus run `git diff HEAD~1 -- <file>` to see what changed.
+Run `git diff HEAD~1 --name-only` to get changed files, and `git ls-files --others --exclude-standard`
+for new files not yet added. With no parent commit, use `git diff HEAD --name-only` and say so. Skip
+deleted files. Filter to code files only (exclude configs, lockfiles, generated files). Read each changed
+file in full, plus run `git diff HEAD~1 -- <file>` to see what changed, and find the tests of each changed
+production file as File Path mode does.
 
 ### File Path
 
@@ -53,7 +57,10 @@ Read the entire file. If it is production code, find its tests by the project's 
 
 ### Directory Path
 
-Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swift,cpp,c,h,hpp,scala,clj,ex,exs,hs,ml,fs,fsx}`). Read each file. For large directories (>20 files), use an Explore agent to parallelize reading.
+Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swift,cpp,c,h,hpp,scala,clj,ex,exs,hs,ml,fs,fsx}`),
+skipping vendored and generated trees — `node_modules/`, `.venv/`, `venv/`, `vendor/`, `dist/`, `build/`.
+Read each file. For large directories (>20 files), an Explore agent may locate the files, but read each
+one yourself: the backlog records exact lines, which a summary cannot give.
 
 ---
 
@@ -68,7 +75,7 @@ For each file, check against the coding guide. Look for these categories of viol
 - Security vulnerabilities (injection, unsanitized input)
 
 ### Priority 2 — Structural Smells (High Impact)
-- **Long Functions** — Functions longer than 20 lines
+- **Long Functions** — Functions of 20 lines or more
 - **Large Class** — A class with many fields and methods. Look for cohesion clusters: groups of fields and methods that are used together but independent of other groups. Each cluster is a candidate for Extract Class. Signs: subsets of fields appear together in method signatures, methods only touch a subset of the class's fields, comments or naming prefixes that partition the class ("// payment fields", "// shipping methods")
 - **Feature Envy** — Function uses another module's data more than its own
 - **Shotgun Surgery** — One change would touch many files
@@ -78,7 +85,7 @@ For each file, check against the coding guide. Look for these categories of viol
 
 ### Priority 3 — Naming & Readability
 - Names that don't reveal intent
-- **Long Parameter List** — Functions with more than 3 arguments. Check whether parameters could be replaced by a query the callee can make itself (Replace Parameter with Query), or whether an existing object already holds the values being passed (Preserve Whole Object)
+- **Long Parameter List** — Functions with three or more arguments without a stated reason. Check whether parameters could be replaced by a query the callee can make itself (Replace Parameter with Query), or whether an existing object already holds the values being passed (Preserve Whole Object)
 - Flag arguments (boolean parameters that fork behavior)
 - Missing explaining variables for complex expressions
 - Magic numbers without named constants
@@ -122,7 +129,8 @@ asserting it is the right test. Judge by what the double stands in for, not who 
 port wrapping the gateway counts. A double of the third-party type itself is still **Mocked Foreign
 Type**, and a wall-clock value in the asserted message is still an **Erratic Test**.
 
-**Tier allocation.** Where the change under review adds or moves a test, check it against
+**Tier allocation.** Where the change under review adds or moves a test — in File Path and Directory
+mode, every test read — check it against
 `${CLAUDE_PLUGIN_ROOT}/rules/test-architecture.md` and name the boundary it crosses. Three catalogue
 rows come straight off that rule:
 
@@ -146,7 +154,9 @@ For each finding, identify the **specific named refactoring** from the catalog (
 
 ## Step 3: Write the Backlog
 
-Write findings to `.refactoring-backlog.md` in the project root. Use this exact format:
+Write findings to `.refactoring-backlog.md` in the project root. Use this exact format. If the file
+already exists, add the new items under a fresh `Scope:` line, continuing its ID sequence; never drop or
+renumber an existing item — `/phil:refactor` resumes from that file, and earlier commits cite its IDs.
 
 ```markdown
 # Refactoring Backlog
@@ -174,7 +184,7 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 - **Priority**: {1-7}
 - **Smell**: {smell name from catalog}
 - **Refactoring**: {named refactoring from catalog}
-- **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route}
+- **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route; a Priority 7 item routes to `/phil:refactor` in production code and `report only` in a test file}
 - **Rationale**: {why this matters — which coding standard is violated}
 - **Status**: pending
 ```
@@ -184,7 +194,10 @@ Rules for the backlog:
 - Sort by priority (1 first), then by file path within priority
 - Each item is a **single, atomic refactoring** — not a bundle
 - The refactoring name must match a named refactoring from the catalog — for Priority 6, the smell and
-  the fix come from `test-patterns.md`'s Smell Catalogue instead, and the route is that row's
+  the fix come from `test-patterns.md`'s Smell Catalogue instead, and the route is that row's. For a
+  Priority 7 idiom, name the idiom from the language rules file. Where the catalogue names no
+  refactoring for it — most Priority 1 items, a dependency-direction violation — state the fix in plain
+  words and route it `report only`
 - `report only` is a valid route: no command applies the fix, and the item says so rather than
   pretending one does
 - Rationale must cite the specific principle or rule violated
@@ -220,8 +233,8 @@ After writing the backlog, report to the user:
 ## Self-test
 
 `skills/review-code/self-test/` holds fixtures that pin what a review must and must not flag. Whenever
-this skill changes, drive each fixture per `self-test/README.md`: run `/phil:review-code` over its
-directory and compare the backlog against its `expected-backlog.md` on the criteria in its
+this skill changes, drive each fixture per `self-test/README.md` — drive this working tree's `SKILL.md` by hand,
+since `/phil:review-code` runs the released copy — over its directory and compare the backlog against its `expected-backlog.md` on the criteria in its
 `expected.md`. `tests/test_test_patterns_wiring.py` checks that every fixture is well-formed and green
 and that each expected test finding takes its smell, fix and route from one catalogue row; whether a
 review *produces* them is model judgement, and a human drives that comparison.

@@ -64,8 +64,8 @@ INIT ─►PROPOSE ─►REVIEW ─►[GUARD]─►APPLY ─►TEST ──green�
 1. Work with the session's working directory at the project root, where the hooks look for the
    ledger. If an existing ledger was left `active-run: true` from an interrupted run, say so and clear
    the flag first.
-2. Run `git status --porcelain -- . ':!.refactor-loop-ledger.md'` — the ledger is the loop's own
-   uncommitted file. If it prints anything, stop and ask the user to commit or stash
+2. Run `git status --porcelain -- . ':!.refactor-loop-ledger.md' ':!.refactoring-backlog.md'` — the
+   ledger and a seeding review's backlog are the loop's own uncommitted files. If it prints anything, stop and ask the user to commit or stash
    (`git stash push -u -- . ':!.refactor-loop-ledger.md'`) first: REVERT discards uncommitted edits in
    the files it restores. A diff an interrupted run left applied was never gated, so suggest stashing
    it rather than committing it.
@@ -79,7 +79,9 @@ INIT ─►PROPOSE ─►REVIEW ─►[GUARD]─►APPLY ─►TEST ──green�
 6. Snapshot the pinned constraints into the ledger header — the durable, compaction-immune
    source (G7). Default pinned set: `preserve-public-api`, `no-test-file-writes`.
 7. If the ledger has no nodes yet, gather candidate smells for the `target_scope`. You may
-   run `/phil:review-code <scope>` to seed nodes, then convert its backlog into ledger nodes.
+   run `/phil:review-code <scope>` to seed nodes, then convert into ledger nodes only items whose
+   **Route** is `/phil:refactor` — a `report only` item changes behaviour, and a test-file item is
+   one G2 refuses.
 8. Set `iter = 0`. Proceed to PROPOSE. Increment `iter` on every return to PROPOSE, whatever the path
    back — G5, a G6 skip, the green or the red LEDGER — so G8 bounds them all.
 
@@ -119,7 +121,7 @@ Route on `verdict + severity + confidence`, threshold **θ = 0.6**:
 
 ### APPLY  (cage)
 
-1. Confirm the tree is clean — `git status --porcelain -- . ':!.refactor-loop-ledger.md'` prints
+1. Confirm the tree is clean — `git status --porcelain -- . ':!.refactor-loop-ledger.md' ':!.refactoring-backlog.md'` prints
    nothing — so HEAD is the pre-APPLY state a revert restores. If it is not, HALT and report.
 2. **Guard G2:** refuse any diff that touches a test path — under `tests/`, `test/`, `spec/` or
    `__tests__/`, or named `test_*.py`, `*_test.*`, `*.test.*`, `*.spec.*` or `conftest.py`. Apply
