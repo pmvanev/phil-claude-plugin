@@ -27,10 +27,8 @@ Every line — `probed`, `assumed` and its *not knowable … why* clause alike �
 typing a value the script returns, which *Never type a value this script could return* forbids and
 *Hand-writing a region breaks determinism* explains the cost of.
 
-**The rationale strings are still prose, and `rules/writing.md` still governs them — at build time, in
-`probe-board.py`, by whoever edits them.** That is a different author at a different moment, and the
-distinction matters: a rule that reads as build-time guidance is not a defect to wire up, it is a rule
-whose reviewable part has not been separated yet. `CLAUDE.md` records that shape under `ui.md`.
+**The rationale strings are still prose**: `rules/writing.md` governs them at build time, in
+`probe-board.py`, for whoever edits them.
 
 **`declared` is out for a second, independent reason**: a human wrote it, and judging prose a human
 wrote is taste.
@@ -78,9 +76,8 @@ generated 2026-08-17T14:44Z · do not edit inside these markers
 <!-- phil:board-setup:v1:end -->
 ```
 
-**The markers are bare and versioned; the timestamp is the first line inside.** The marker is the
-string slice 05 must match on to find the region again, so it must not be the string that changes
-every run.
+**The markers are bare and versioned; the timestamp is the first line inside**, so the string a
+refresh matches on never changes between runs.
 
 **Every bullet names the query that produced it**, with the queries listed once each at the foot —
 several constants come from one call, and repeating a GraphQL document per bullet buries the values
@@ -95,8 +92,8 @@ it exists to source. Two shapes need a rule:
 
 ## Two regions, and the second is a human's
 
-A declaration must live **outside** the probed markers, which collides with AC1's byte-identity. It is
-resolved with a **second delimited region**, not loose prose:
+A declaration lives in a **second delimited region**, outside the probed markers, so the probed region
+can be regenerated without touching a human's answer:
 
 ```
 <!-- phil:board-setup:declared:v1:begin -->
@@ -120,28 +117,19 @@ identifiers is asking the reader to hold the vocabulary the answer is supposed t
 - Bytes outside **both** regions are byte-identical, save the one newline the declared region
   contributes as its own terminator, and the sanctioned retire deletion.
 
-Loose prose would have satisfied "outside the markers" and left slice 05 no way to know what it must
-not touch. **Both regions are checked for malformation**: a dangling declared `begin` is
-`MALFORMED-MARKERS` like any other, because the command whose rule is *an extent is never guessed*
-must not write one itself.
+**Both regions are checked for malformation**: a dangling declared `begin` is `MALFORMED-MARKERS`
+like any other.
 
 ## Where the region goes, and why it looks tight
 
-**Immediately after the `## Issue board` heading, contributing no blank line of its own.** The line
-that already followed the heading terminates the `end` marker, so excising the region returns the
-file byte-for-byte. A blank line inserted for readability is a byte outside the markers that was not
-there before, so the `end` marker sits directly above the first hand-written line with no breathing
-room. That cost is accepted: readability outside the markers is not this command's to spend.
-
-Placement is **deterministic** — the position derives from the heading's line number and nothing
-else. No scan for a "good spot", no reading of the prose.
+**Immediately after the `## Issue board` heading, with no blank line of its own**, so excising the
+region returns the file byte-for-byte; `region-place.py` places it deterministically. The `end` marker
+therefore sits directly above the first hand-written line — an accepted cost.
 
 ## The reader, the placer and the drift report are a script
 
 `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/region-place.py` owns classification, placement, line
-arithmetic and the diff. Same reasoning as the probe: **AC1 is a property code can hold and prose
-can only request.** A region placed one line off still looks placed, and a reflowed bullet still
-reads as English — every failure here is silent.
+arithmetic and the diff: a region placed one line off still looks placed, so code holds it.
 
 | Call | Does | Writes? |
 |---|---|---|
@@ -159,10 +147,8 @@ reads as English — every failure here is silent.
 | `--probe P.json --stamp T` | the probed-and-assumed region |
 | `--probe P.json --stamp T --declarations A.json --declared-only` | the declared region |
 
-Hand-writing a region breaks determinism, and determinism is the whole of KPI-3: a model's ordering
-and wording drift run to run, so every refresh would write bytes and the diffs would stop being read.
-The renderer refuses a probe whose `status` is not `ok`, so a refusal cannot render as an
-empty-but-well-formed block.
+Hand-writing a region breaks determinism: a model's ordering and wording drift run to run, so every
+refresh would write bytes. The renderer refuses a probe whose `status` is not `ok`.
 
 **GitLab is `probe-board.py --repo GROUP/PROJ --host gitlab.com`.** A `--forge` contradicting the host
 is refused rather than half-served.
@@ -170,10 +156,8 @@ is refused rather than half-served.
 The `sha256` from `--classify` is passed back to every writing call, so a file that moved between
 read and write is refused rather than overwritten.
 
-**`PROBE.json` and `REGION.md` are intermediates, and they never touch the target repo.** Write both
-to the session's scratch directory and pass absolute paths. Left unqualified they default into the
-repo root, which contradicts this command's whole contract — *one local file changes* — and leaves
-untracked litter in someone else's tree. The target repo gains exactly one modified file:
+**Write `PROBE.json` and `REGION.md` to the session's scratch directory, and pass absolute paths.**
+Left unqualified they default into the repo root. The target repo gains exactly one modified file:
 `CLAUDE.md`.
 
 ## Five states, and four are written to
@@ -181,13 +165,12 @@ untracked litter in someone else's tree. The target repo gains exactly one modif
 | State | Means | Do |
 |---|---|---|
 | `file-absent` | no `CLAUDE.md` at all | **create it**, carrying the section and the region, and say that it was created |
-| `no-section` | no `## Issue board` at all | append the section — slice 01's path |
+| `no-section` | no `## Issue board` at all | append the section |
 | `section-no-markers` | hand-written prose, no region | **insert**, then report drift |
 | `region-present` | a region is already there | **`--refresh` it** — zero bytes if nothing moved |
 | `markers-malformed` | `begin` without `end`, `end` without `begin`, nested, or out of order | **refuse**, file untouched |
 
-`### Issue board` is never the section. A heading deeper than h2 belongs to something else, and
-inserting board constants under an unrelated parent is a silent misplacement.
+`### Issue board` is never the section; `region-place.py` enforces it.
 
 ## The drift report, and the bucket that keeps it honest
 
@@ -202,18 +185,14 @@ Three buckets over the prose **outside** the markers:
   result rather than a weak one: the hazards are prose recorded after contact, and no forge records
   them.
 
-Two rules the first dogfood run bought, both of which had made the report *look* better than it was:
-
-- **A probed scalar shorter than six characters is not evidence.**
-- **Fact values are walked to full depth**, so ids nested inside a fact still count.
-
-Line numbers are counted over the file with the region excised, so the report is identical before
+`region-place.py --drift` computes the buckets — a scalar under six characters is not evidence, and
+nested ids count at any depth. Line numbers are counted with the region excised, so the report is identical before
 and after placement. **The generated region agreeing with the probe is a tautology, not a
 confirmation**, and must never appear in `confirms`.
 
-The incidents behind all three rules are in
+The incidents behind these rules are in
 `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/drift-and-retire.md`. **Read it before changing
-the evidence floor, the flattening depth, or any retire-offer rule** — each number there was bought
+the evidence floor, the nesting depth, or any retire-offer rule** — each number there was bought
 by a false result on a real board.
 
 ## Eliciting what no forge records
@@ -233,7 +212,7 @@ difference is load-bearing:
 Ask per family, with the evidence beneath the question. Five rules:
 
 - **Never pre-select, default, or write on silence.** Not "likely", not a confidence, not a
-  recommended option. This is the one thing the slice exists to make impossible.
+  recommended option.
 - **A decline writes nothing at all** — not even a line saying it was declined. Report that rule 4
   stays `unevaluated` for that family. A "declined" line is still a line, and rule 4 would read a
   declaration no human made.
@@ -260,13 +239,10 @@ about it produces the silent partial block this skill calls worse than none.
 
 ## Re-running it
 
-`--refresh` regenerates the probed region and **writes zero bytes when nothing moved** (KPI-3).
+`--refresh` regenerates the probed region and **writes zero bytes when nothing moved**.
 
-**The timestamp question, decided: the stamp is not refreshed on a no-change run.** KPI-3 demands zero
-bytes and re-stamping writes bytes, so excluding the stamp from the comparison while still writing it
-would fail KPI-3 while looking correct. A run that rewrites the file to move a clock diffs every time,
-the diffs stop being read, and the block decays into issue #31's unnoticed-stale state wearing the
-look of maintenance.
+**The stamp is not refreshed on a no-change run** — re-stamping writes bytes, and a file that diffs
+every run stops being read. `region-place.py` enforces it.
 
 The change report is **line by line, never a count**: constants are not interchangeable. An option id
 that changed means `updateProjectV2Field` was run against the field; a docs root that changed means
@@ -288,14 +264,13 @@ across forges. Two things are never defaults:
   can say. Such a value carries provenance `unread` and **never enters the markers**.
 
 **The JSON flag differs per `glab` subcommand**: `glab api` takes none, `glab repo view` uses `-F`,
-`glab issue list` uses `-O`. `phil:issue-board`'s blanket rule — *"the JSON flag is `-O`; `-F` fails
-silently"* — holds for one of the three, and the correction is folded back there too.
+`glab issue list` uses `-O` (`phil:issue-board` owns the detail).
 
 **A connectivity failure is retried; an auth failure is not.** A single timeout against a self-hosted
 instance is usually the network; a 401 is not flaky, so retrying it only delays the real answer.
 
-The call table, the fold-back, and what remains unverified: `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/gitlab.md`. **Read it before changing a
-`glab` call** — one of these constants was already wrong in a shipped skill.
+The call table and what remains unverified: `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/gitlab.md`.
+**Read it before changing a `glab` call.**
 
 ## The retire offer
 
@@ -359,21 +334,24 @@ them. Why *how the board was found* is itself a constant: `${CLAUDE_PLUGIN_ROOT}
 9. **REPORT** — the outcome, the three drift counts, the three provenance totals, and what was left
    out with who owns it. A total of zero is stated as such rather than printed bare.
 
+**Three questions are permitted and no more**: confirming the forge target, the label-family question
+per family, and the retire offer on a contradicting line. Anything else asked is a defect.
+
 **Scope is the working tree's `CLAUDE.md`** — one `CLAUDE.md`, the one in the working tree, never a sibling
 checkout. Confirming the forge target is required; the file target is not negotiable.
 
 ## What the probe reaches, and what it cannot
 
 The probe reaches every field of `phil:issue-board`'s *Per-project setup* template except
-**`label-families`** and **`local-task-system`** — both slice 03's, both correctly *declared* rather
+**`label-families`** and **`local-task-system`** — both correctly *declared* rather
 than guessed. `phil:issue-board` owns the template and the forge mechanics;
 `phil:nwave-issue-board` owns the artifact→issue mapping. Coverage detail and the GitHub tier
 reasoning: `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/provenance-model.md`.
 
-**`/phil:harden-instructions` leaves this region byte-for-byte unchanged** since 0.101.0 (then named `/phil:claude-md`): it treats any
-`<!-- …:begin -->`/`<!-- …:end -->` pair as generated, counts it toward the line budget and never cuts
-it. That is a promise in its prose, not a check — re-run this command after a `/phil:harden-instructions` pass on
-an older install, and on this one if the region ever looks touched.
+**`/phil:harden-instructions` leaves this region byte-for-byte unchanged** (since 0.101.0, then named
+`/phil:claude-md`). That is a promise in its prose, not a check: re-run this command after a
+`/phil:harden-instructions` pass on an older install, and on this one if the region ever looks
+touched.
 
 ## Decision outcomes
 
@@ -382,9 +360,8 @@ Report **exactly one terminal outcome** by name, every run:
 `WROTE` · `WROTE-BESIDE-PROSE` · `REFRESHED` · `UNCHANGED` · `DECLARED` · `AMBIGUOUS-TARGET` ·
 `REFUSED` · `MALFORMED-MARKERS`
 
-`REGION-PRESENT` is **retired**: slice 05 shipped the re-run it deferred to, so a file already
-carrying a region is now `REFRESHED` or `UNCHANGED`. A run still reporting it is running an old
-skill — the same retirement `SECTION-EXISTS` went through.
+A file already carrying a region reports `REFRESHED` or `UNCHANGED`. `REGION-PRESENT` and
+`SECTION-EXISTS` are retired; a run reporting either is running an old skill.
 
 **Three report lines are not outcomes, and each accompanies a terminal one.** `DRIFT` names the three
 bucket counts on any run reaching the drift step. `UNEVALUATED` names each label family left
@@ -392,64 +369,52 @@ undeclared, so a decline is visible rather than silent. `REPORTED-NOT-WRITTEN` s
 value that is neither probed nor assumable — half-probed values are now *written*, as `assumed`. None
 can stand alone, and a run emitting one as its verdict has not reported an outcome.
 
-**`SECTION-EXISTS` is retired.** It was slice 01's boundary marker, and slice 02 is the thing it
-pointed at; a run that still reports it is running the old skill.
-
 The discriminator is **who stopped the run**, because the script has one failure state and the model
 has another. `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/outcomes.md` gives each outcome's
 meaning, what it must name, and the fixture contradiction that split the report lines out. Read it
 before adding an outcome or changing what one reports.
 
-## What this skill must never do
+## Invariants
 
-- **Type a value the script could have returned**, or fill a gap it left.
-- **Write a half-probed value as a fact.** It is written as `assumed`, stating what is not knowable
-  and why. Spelling it like a probed value is the defect; omitting it is not.
-- **Infer a label family from the labels in use.** Nothing on a forge records whether a family is
-  single- or multi-valued. The labels in use may be shown as *evidence beside a question*; they may
-  never be adopted as the answer. Inferring one makes the board's habits audit themselves and mints
-  precisely the declaration `phil:groom-issues` rule 4 exists to read.
-- **Write to the forge.** This command reads the forge and writes one local file. It creates no
-  project, no field, no option, no label. `updateProjectV2Field`'s full-replacement hazard is a
-  reason to *record* a field's shape, never to modify it.
-- **Touch anything outside both regions**, on any path including failure — with exactly two
-  sanctioned exceptions and no others: the retire offer deleting one whole line on an explicit
-  answer, and the declared region's one-time insertion carrying its own terminating newline.
-- **Guess a region's extent.** A `begin` marker with no `end` is refused, file unchanged (S2 AC4).
-- **Rewrite, reflow or reformat a hand-written line.** Reporting it is the whole job. The only
-  permitted change is deleting one whole line, on an answer.
-- **Call a line `contradicts` without a probed value to point at.** Absence of evidence is
-  `cannot evaluate`. Upgrading it makes the board's habits audit themselves.
-- **Offer to retire a `cannot evaluate` line**, or treat silence as consent.
-- **Rewrite a *declared* region.** A human's answer is never regenerated; a second `--declare`
-  refuses. The probed region, by contrast, is regenerated on every refresh — that is its contract.
-- **Leave `PROBE.json`, `REGION.md` or any other intermediate in the target repo.** They belong in
-  the session's scratch directory. One file changes, and it is `CLAUDE.md`.
-- **Place, insert or retire a line by hand.** `region-place.py` owns every write to the target,
-  including creating an absent file. The `Write`/`Edit` grant exists for the script's output path,
-  not as a fallback when a call refuses.
-- **Relay a fix the product cannot honour**, or print a null `fix`.
-- **Restate `phil:issue-board`'s template or its tier probe.** That skill owns both.
-- **Rewrite, reflow or delete anything in the declared region**, including through the retire
-  offer. It is the one thing here that cannot be regenerated if lost.
+- **Every value inside the markers came out of the script**; fill no gap it left.
+- **Write a half-probed value as `assumed`**, stating what is not knowable and why — never spelled
+  like a probed value. Omitting it is not the defect.
+- **Take a label family — its grouping and its cardinality — from a human's answer alone.** Nothing on a
+  forge records either. The labels in use may be shown as *evidence beside a question*, never adopted as
+  the answer; doing so lets the board's habits audit themselves and mints the declaration
+  `phil:groom-issues` rule 4 reads.
+- **Write nothing to the forge.** This command reads the forge and writes one local file: no project,
+  field, option or label. `updateProjectV2Field`'s full-replacement hazard is a reason to *record* a
+  field's shape, never to modify it.
+- **Leave everything outside both regions untouched**, on every path including failure, with exactly
+  two exceptions: the retire offer deleting one whole line on an explicit answer, and the declared
+  region's one-time insertion with its own terminating newline.
+- **Guess no region's extent.** A `begin` with no `end` is `MALFORMED-MARKERS`; the file is unchanged.
+- **Leave hand-written lines as written.** Report them; the only permitted change is deleting one whole
+  line, on an answer.
+- **Call a line `contradicts` only with a probed value to point at.** Absence of evidence is
+  `cannot evaluate`.
+- **Offer to retire only a `contradicts` line stating a fact the region now owns, and delete it only on
+  an explicit answer**; silence is not consent.
+- **Write the declared region once, only on an answer, and never rewrite, reflow or delete it** — not on refresh, not
+  through the retire offer. A second `--declare` refuses. It is the one thing here that cannot be
+  regenerated; the probed region, by contrast, is regenerated on every refresh.
+- **Leave no intermediate in the target repo.** `PROBE.json`, `REGION.md` and the rest belong in the
+  session's scratch directory.
+- **Let `region-place.py` make every write to the target**, including creating an absent file. The
+  `Write`/`Edit` grant exists for the script's output path, not as a fallback when a call refuses.
+- **Relay only a fix the product can honour, and print no null `fix`.**
+- **Point to `phil:issue-board`'s template and tier probe; restate neither.**
 
-## Slice boundary — what is built, and what is merely unverified
+## What is unverified
 
-**All six slices are built.** CONFIRM → PROBE → CLASSIFY → PLACE/REFRESH → DRIFT → ELICIT → OFFER →
-WRITE, on GitHub and GitLab, against a `CLAUDE.md` that is absent, sectionless, hand-written, or
-already configured.
-
-What remains open is **verification, not construction**, and it is recorded rather than implied:
+Every step of *The flow* is built, on GitHub and GitLab. What remains open is verification:
 
 | Open | Why | Recorded in |
 |---|---|---|
 | AC3's `ambiguous`-path asking (slice 01) | skipped by explicit decision; needs a session rooted in a two-remote checkout | slice 01 brief |
 | A real GitLab region diffed against a real GitHub one (slice 06 AC1–AC2) | `projects/X` reads unauthenticated but `projects/X/labels` returns 401, and on GitLab the label set *is* the board | slice 06 brief |
 | A real self-hosted connection failure (slice 06 AC5) | the retry is unit-tested; no unreachable instance was available | slice 06 brief |
-
-**Three questions are permitted and no more**: confirming the forge target, the label-family question
-per family, and the retire offer on a contradicting line. Anything else asked is a defect — the
-measurement is what comes out without it.
 
 ## Acceptance
 

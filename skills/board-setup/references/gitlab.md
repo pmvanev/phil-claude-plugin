@@ -5,8 +5,9 @@ detail and the fold-back, because one of the constants involved was wrong in thi
 
 ## The JSON flag differs per subcommand
 
-`phil:issue-board` records a blanket rule: *"glab's JSON flag is `-O`; `-F` fails silently."*
-**It holds for exactly one of the three calls this adapter makes.**
+`phil:issue-board` once recorded a blanket rule — *"glab's JSON flag is `-O`; `-F` fails silently"* —
+which held for exactly one of the three calls this adapter makes. It now carries the per-subcommand
+table below.
 
 Discovered 2026-08-17 when `glab api projects/… -O json` failed with
 `Unknown shorthand flag: 'O' in -O`, then confirmed against `glab --help`:
