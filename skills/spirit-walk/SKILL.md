@@ -113,8 +113,8 @@ Map the user's question to one of these intents and use the matching tool mix.
 - **Read** — open a file at specific lines rather than reading whole files when possible.
 - **Grep** — use `output_mode: "count"` first for "where is this used" questions to avoid dumping 200 matches.
 - **Glob** — survey structure before reading.
-- **Bash** — for git history: `git log --follow --oneline -- <file>`, `git blame -L <range> <file>`, `git log -S "<snippet>"` to find when a string appeared. Pass no `--output`, which writes any path, and no `-p` or `--ext-diff`, which run a repo's configured diff filters: this command declares `mutates: false`.
-- **WebSearch / WebFetch** — only for language features, library docs, or RFCs the user asks about. Prefer repo evidence first.
+- **Bash** — for git history: `git log --follow --oneline -- <file>`, `git blame --no-textconv -L <range> <file>`, `git log -S '<snippet>' --no-textconv` to find when a string appeared — single quotes, so the shell expands nothing in the snippet. Pass no `--output`, which writes any path, and no `-p`, `-u`, `--patch` or `--ext-diff`: they render diffs through a repo's configured filters, and `git blame` and `git log -S` run those filters too unless given `--no-textconv` (git 2.53.0, verified 2026-10-13). This command declares `mutates: false`.
+- **No web tools.** The grant holds none; for language features, library docs or RFCs, name the source for the user to read, and prefer repo evidence first.
 
 ---
 

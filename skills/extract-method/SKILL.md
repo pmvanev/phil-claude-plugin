@@ -14,11 +14,11 @@ Determine what `$ARGUMENTS` refers to:
 | Pattern | Type | Example |
 |---------|------|---------|
 | Digits separated by `-` or `:`, with an optional `lines:` prefix | Line range | `42-67`, `42:67`, `lines:42-67` |
+| Is a directory (test this first: `v1.2/` and `.github/` are directories) | Directory path | `src/`, `src/services` |
 | Has a file extension | File path | `src/order.py`, `lib/utils.ts` |
-| Ends with `/` or has no extension and is a directory | Directory path | `src/`, `src/services` |
 | Otherwise | Method/function name | `processOrder`, `handle_request` |
 
-If the argument contains both a file and a line range (e.g., `src/order.py:42-67`), split them.
+If the argument contains both a file and a line range (e.g., `src/order.py:42-67`), split them. A bare line range names no file: ask which file before editing.
 
 ---
 
@@ -59,7 +59,8 @@ If the argument contains both a file and a line range (e.g., `src/order.py:42-67
 
 ## Directory Path
 
-1. Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swift,cpp,c,h,hpp,scala,clj,ex,exs,hs,ml,fs,fsx}`).
+1. Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swift,cpp,c,h,hpp,scala,clj,ex,exs,hs,ml,fs,fsx}`), skipping vendored, generated and fixture trees — `node_modules/`, `.venv/`, `vendor/`, `dist/`,
+   `build/`, and any `self-test/` directory, whose inputs are flawed on purpose.
 2. Apply the **File Path** analysis to each file.
 3. Summarize all extractions: file, original method, extracted methods.
 
@@ -79,7 +80,11 @@ If the argument contains both a file and a line range (e.g., `src/order.py:42-67
 
 ## Safety
 
-- Run tests after every extraction if tests exist.
-- If a test fails, undo. Try a smaller step.
+- Before the first extraction, run `git status --porcelain` and stop if it prints anything — an undo
+  restores files and would discard the developer's edits — and find the test runner per
+  `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`. Run the suite once before the first
+  extraction; a red baseline stops the run.
+- Run tests after every extraction. If a test fails, undo: `git checkout -- <files>` for the files the
+  step modified, and remove any file the step created. Try a smaller step.
 - Each extraction is a separate, reversible change.
 - This is a **structure change only**. Do not fix bugs, add features, or change logic during extraction.

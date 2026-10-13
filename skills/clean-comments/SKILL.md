@@ -14,11 +14,11 @@ Determine what `$ARGUMENTS` refers to:
 | Pattern | Type | Example |
 |---------|------|---------|
 | Digits separated by `-` or `:`, with an optional `lines:` prefix | Line range | `42-67`, `42:67`, `lines:42-67` |
+| Is a directory (test this first: `v1.2/` and `.github/` are directories) | Directory path | `src/`, `src/services` |
 | Has a file extension | File path | `src/order.py`, `lib/utils.ts` |
-| Ends with `/` or has no extension and is a directory | Directory path | `src/`, `src/services` |
 | Otherwise | Method/function name | `processOrder`, `handle_request` |
 
-If the argument contains both a file and a line range (e.g., `src/order.py:42-67`), split them.
+If the argument contains both a file and a line range (e.g., `src/order.py:42-67`), split them. A bare line range names no file: ask which file before editing.
 
 ---
 
@@ -46,7 +46,8 @@ If the argument contains both a file and a line range (e.g., `src/order.py:42-67
 
 ## Directory Path
 
-1. Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swift,cpp,c,h,hpp,scala,clj,ex,exs,hs,ml,fs,fsx}`).
+1. Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swift,cpp,c,h,hpp,scala,clj,ex,exs,hs,ml,fs,fsx}`), skipping vendored, generated and fixture trees — `node_modules/`, `.venv/`, `vendor/`, `dist/`,
+   `build/`, and any `self-test/` directory, whose inputs are flawed on purpose.
 2. Apply the **File Path** analysis to each file.
 3. Summarize changes per file.
 
@@ -133,14 +134,15 @@ If the function name and signature already reveal everything, the docstring may 
 Apply writing standards to surviving comments:
 - **Active voice** — "Retries on timeout" not "This is retried when a timeout occurs"
 - **No needless words** — Cut filler: "basically", "actually", "in order to", "note that"
-- **Definite and specific** — "Caches for 5 minutes" not "Caches for a while"
+- **Definite and specific** — "Caches for 5 minutes" not "Caches for a while", when the code says five
+  minutes. Use only a fact the text or its code already holds; otherwise keep the phrase
 - **No qualifiers** — Drop "very", "really", "quite", "rather"
 
 ### 6. Flag JSX Stanza Comments
 
 `{/* Section Label */}` comments preceding a JSX block are the **Comments smell** in React form. The block lacks a name of its own.
 
-**Do not extract** — that is `/extract-method`'s job. Instead:
+**Do not extract** — that is `/phil:extract-method`'s job. Instead:
 - If the comment is the only issue, leave a note: `{/* TODO: extract to <ComponentName> */}`
 - If the commented block is trivial (single expression, positional marker), leave it alone.
 - If the comment is genuinely redundant with a nearby component name, delete it.
@@ -150,5 +152,9 @@ Apply writing standards to surviving comments:
 ## Safety
 
 - This is a **structure change only**. Do not change logic, fix bugs, or add features.
-- Deleting a comment never changes behavior. But read carefully — some comments contain `TODO`, `FIXME`, `HACK`, or `@ts-ignore` directives that serve a purpose. Preserve those unless they are clearly stale.
+- Most comments carry no behaviour, but some do; keep each of these: a doctest (`>>>`), a docstring read
+  at run time (`__doc__`, a CLI or API help text), a build directive (`//go:build`, `//go:embed`, the cgo
+  preamble), a lint or type pragma (`eslint-disable`, `# type: ignore`, `# noqa`, `@ts-ignore`,
+  `# pragma: no cover`), a bundler hint (`/* webpackChunkName */`), a shebang, and `TODO`, `FIXME` or
+  `HACK` notes unless clearly stale.
 - When uncertain whether a comment is redundant, keep it. False deletions cost more than false keeps.

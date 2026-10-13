@@ -14,11 +14,11 @@ Determine what `$ARGUMENTS` refers to:
 | Pattern | Type | Example |
 |---------|------|---------|
 | Digits separated by `-` or `:`, with an optional `lines:` prefix | Line range | `42-67`, `42:67`, `lines:42-67` |
+| Is a directory (test this first: `v1.2/` and `.github/` are directories) | Directory path | `docs/`, `src/services` |
 | Has a file extension | File path | `docs/setup.md`, `README.md` |
-| Ends with `/` or has no extension and is a directory | Directory path | `docs/`, `src/services` |
 | Otherwise | File path (assume current context) | — |
 
-If the argument contains both a file and a line range (e.g., `docs/setup.md:12-30`), split them.
+If the argument contains both a file and a line range (e.g., `docs/setup.md:12-30`), split them. A bare line range names no file: ask which file before editing.
 
 ---
 
@@ -39,7 +39,8 @@ If the argument contains both a file and a line range (e.g., `docs/setup.md:12-3
 
 ## Directory Path
 
-1. Glob recursively for prose files (`**/*.{md,txt,rst}`).
+1. Glob recursively for prose files (`**/*.{md,txt,rst}`), skipping vendored, generated and fixture trees — `node_modules/`, `.venv/`, `vendor/`, `dist/`,
+   `build/`, and any `self-test/` directory, whose inputs are flawed on purpose.
 2. Apply the **File Path** analysis to each file.
 3. Summarize changes per file.
 
@@ -71,7 +72,6 @@ State what is, not what is not. Positive statements are stronger and shorter.
 | Did not remember | Forgot |
 | Does not support | Lacks |
 | Not unlike | Like |
-| Not important | Trivial |
 
 ### 3. Omit Needless Words
 
@@ -93,7 +93,9 @@ Cut every word that carries no meaning. Vigorous writing is concise.
 
 ### 4. Definite, Specific, Concrete
 
-Replace vague language with precise language. Prefer facts to generalities.
+Replace vague language with precise language. Prefer facts to generalities. Use only a fact the text
+or its code already holds; where it holds none, keep the phrase and flag it for the author — the
+examples below assume the fact is on the page.
 
 | Before | After |
 |--------|-------|
@@ -149,7 +151,6 @@ Prefer plain words. Anglo-Saxon over Latinate.
 |--------|-------|
 | Utilize | Use |
 | Facilitate | Help |
-| Implement | Build |
 | Commence | Start |
 | Terminate | End |
 | Aggregate | Collect |

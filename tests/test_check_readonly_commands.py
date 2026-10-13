@@ -10,6 +10,7 @@ A green run from an unexercised checker is indistinguishable from a green run fr
 """
 
 import importlib.util
+import re
 from pathlib import Path
 
 import pytest
@@ -113,4 +114,5 @@ def test_every_read_only_command_holding_a_git_verb_forbids_output_in_its_prose(
             continue
         skill = root / "skills" / cmd.stem / "SKILL.md"
         prose = text + (skill.read_text() if skill.exists() else "")
-        assert "--output" in prose, f"{cmd.name} grants a git verb under mutates: false and never forbids --output"
+        assert re.search(r"[Pp]ass[^.]{0,40}\b(?:no|neither)\b[^.]{0,20}`--output`", prose), \
+            f"{cmd.name} grants a git verb under mutates: false and never forbids --output"

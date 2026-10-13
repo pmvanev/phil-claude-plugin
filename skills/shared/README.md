@@ -8,7 +8,7 @@ alike — so the guidance lives once instead of being restated, and drifting, in
 
 | File | Consumers (derived) |
 |---|---|
-| `test-runner-detection.md` | `adversarial-review`, `agents/adversarial-reviewer`, `redesign-tests`, `refactor`, `refactor-loop`, `refactor-tests` |
+| `test-runner-detection.md` | `adversarial-review`, `agents/adversarial-reviewer`, `extract-method`, `redesign-tests`, `refactor`, `refactor-loop`, `refactor-tests` |
 | `decision-request.md` | `adversarial-review`, `board-setup`, `edd`, `groom-issues`, `rank-issues`, `redesign-tests`, `refactor`, `refactor-tests`, `session-handoff`, `work` |
 
 **This table was hand-maintained and drifted twice.** On 2026-08-21 it named `work` and `edd` as
