@@ -14,27 +14,28 @@ Refactor systematically against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/co
 | Pattern | Type | Action |
 |---------|------|--------|
 | No argument | Backlog mode | Read `.refactoring-backlog.md` and work through it |
-| `--changes` | Inline mode | Run `/phil:review-code --changes` first, then refactor |
-| Has a file extension | Inline mode | Run `/phil:review-code {file}` first, then refactor |
-| Ends with `/` or directory | Inline mode | Run `/phil:review-code {dir}` first, then refactor |
+| `--changes` | Inline mode | Review with `--changes` first, then refactor |
+| Is a directory | Inline mode | Review `{dir}` first, then refactor |
+| Has a file extension | Inline mode | Review `{file}` first, then refactor |
+
+Inline mode reviews by reading and following `${CLAUDE_PLUGIN_ROOT}/skills/review-code/SKILL.md` over the
+argument — this command's grant cannot invoke `/phil:review-code` — then works only the items under the
+`Scope:` line the review just wrote.
 
 ---
 
 ## Prerequisites
 
+### Confirm a clean working tree
+
+Run `git status --porcelain -- . ':!.refactoring-backlog.md'`. If it prints anything, stop and ask the
+developer to commit or stash (`git stash -u`) first: an undo restores files from HEAD and would discard
+their edits.
+
 ### Locate the Test Runner
 
-Before starting any refactoring, determine how to run tests:
-
-1. **Check CLAUDE.md first.** Read the project's `CLAUDE.md` for a declared test command (look for headings or keys like "Test", "Testing", "Test Commands", "test runner", or shell commands like `npm test`, `pytest`, `cargo test`, `go test`). If found, use it — the user has told you the answer.
-2. If CLAUDE.md has no test command, auto-detect:
-   - Check for `package.json` scripts (`test`, `test:unit`)
-   - Check for `pytest.ini`, `setup.cfg`, `pyproject.toml`
-   - Check for `Makefile` test targets
-   - Check for `go.test`, `cargo test`, etc.
-3. Run the test command once to verify it works before starting.
-
-If no test runner is found by either method, warn the user: "No test runner detected. Refactoring without tests is risky. Continue anyway?" Use AskUserQuestion and await confirmation before proceeding.
+Follow `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`. If it finds no runner, ask
+before proceeding, and stop on any answer but a clear yes.
 
 **This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
 
@@ -47,7 +48,9 @@ If no test runner is found by either method, warn the user: "No test runner dete
 
 Read `.refactoring-backlog.md`. If it doesn't exist and no inline argument was given, tell the user to run `/phil:review-code` first.
 
-Parse all items with `Status: pending` into a working list, already sorted by priority.
+Parse the items with `Status: pending` into a working list — in inline mode, only the items under the
+`Scope:` line the review just wrote. Sort the working list by Priority: an extended backlog holds one
+sorted block per review, not one sorted list.
 
 **Work only the items routed to this command.** An item whose **Route** names another command —
 `/phil:refactor-tests`, `/phil:redesign-tests` — or `report only` is not this loop's to apply. Mark it
@@ -65,7 +68,8 @@ For each pending item in priority order:
 
 ### Phase 1: Understand
 
-1. Read the file and lines referenced in the backlog item.
+1. Read the file and lines referenced in the backlog item. Earlier commits in this run may have moved
+   code, so where those lines no longer hold it, find the smell by its content before judging it gone.
 2. Read surrounding context — callers, callees, related tests.
 3. Confirm the smell still exists (code may have changed since the review). If the smell is gone, mark the item `resolved (incidental)` and move on.
 4. Identify the specific named refactoring to apply.
@@ -93,7 +97,8 @@ Rules:
 ### Phase 4: Verify Tests Still Pass
 
 Run the test suite again. If tests fail:
-1. The refactoring broke something. **Undo the change immediately.**
+1. The refactoring broke something. **Undo the change immediately**: `git checkout -- <files>` for the
+   files the step modified, and remove any file the step created.
 2. Try a smaller step.
 3. If the smaller step also fails, mark the item `blocked (test failure)` with a note explaining what happened. Move on.
 
@@ -105,11 +110,15 @@ After the primary refactoring succeeds, re-read the changed code. Ask:
 - Does the calling code read better now, or does it need adjustment?
 - Are there naming improvements that became obvious after extraction?
 
-Apply small tidyings. Run tests after each one. Stop when the code respects the coding guide's standards for that function/area. Do not expand scope beyond the code you just changed.
+Apply small tidyings. Run tests after each one; if a tidying goes red, undo only that tidying — reverse
+its own edit, leaving the green primary refactoring — and stop tidying. Stop when the code respects the
+coding guide's standards for that function/area. Do not expand scope beyond the code you just changed,
+and leave a tidying that another pending item names to that item.
 
 ### Phase 6: Commit
 
-After the primary refactoring and inner tidyings pass tests, commit the changes. Stage only the files you modified for this backlog item.
+After the primary refactoring and inner tidyings pass tests, commit only the files modified for this
+backlog item — `git commit -m <message> -- <files>` — so nothing already staged rides along.
 
 Commit message format:
 ```
