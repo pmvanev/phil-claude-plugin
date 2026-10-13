@@ -11,49 +11,23 @@ Load the `nwave-wave-summary` skill at
 `--slice [NN]` reconciles a slice brief against the commits that shipped, naming what landed that the
 brief did not describe and what the brief promised that did not land. Attribution is by the brief's own
 history and by the commit-subject convention — **which fails on precursor commits**, so the count of
-unattributable commits is reported rather than absorbed.
-
-`git show` joins the grant for that reconciliation. `git diff` was granted too and then removed: the
-reconciliation uses `git show --stat`, and an unused verb has no place in the one command whose
-distinguishing claim is a narrow grant.
+unattributable commits is reported rather than absorbed. `git show --stat` serves that reconciliation.
 
 With no argument, resolve the most recently touched feature and **say that is what was resolved** — no
 artifact records completion, so the default is not the most recently *completed* stage and must not be
 described as one.
 
-**This command's read-only grant is checked rather than merely declared.** No `Write`, no `Edit`, and a
-`Bash` holding two verbs, `git log` and `git show`, both on `scripts/check-readonly-commands.py`'s
-allowlist.
-`board-snapshot` and `resume` both declare `mutates: true` while writing nothing, because a forge grant
-accepts a mutation document; this one touches no forge, so the narrower declaration is available.
+**Every word of the summary is composed, so `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` governs all of it.**
+Read it as *compose well, never compose short*: the ceiling already bounds length, and the standard bears
+on active voice, positive form and putting the emphatic word last, in a read whose whole value is being
+finishable in one pass.
 
-**It is not the first command to manage that, and an earlier draft of this paragraph said it was.**
-`nwave-slice-status` and `spirit-walk` have declared `mutates: false` with the identical `Bash(git log:*)`
-verb since before this feature existed, and `ai-eos` does the same with `Bash(git diff:*)`. Corrected 2026-09-08: the
-distinction is against `board-snapshot` and `resume` specifically, not against the plugin.
+No interpreter is granted, so nothing counts the rendered output at run time: the skill's prose alone
+holds the 200-word ceiling here, and fixtures hold it at build time.
 
-**And "checked" is one level short of "proven", by more than was first recorded.** `CLAUDE.md` states an
-allowlist entry is a promise that a verb has no writing mode. `git log -p --ext-diff` runs a diff driver
-the target repo configures, which is conditional. **Unconditional, and found 2026-09-08: `git log` and
-`git show` both accept `--output=<file>`, which writes — clobbering an arbitrary absolute path outside the
-repo.** Verified on git 2.53.0.
-
-So `mutates: false` here asserts more than the grant delivers, and the same is true of the three other
-commands on that allowlist. The honest claim is that the grant is **verified against an allowlist whose
-entries are human promises**, and that one of those promises is now known to be wrong. Recorded in
-`scripts/check-readonly-commands.py` and in `CLAUDE.md`; a prefix-match grant cannot exclude a flag, so
-stating it is the available remedy.
-
-**What that costs, stated rather than discovered.** No interpreter is granted, so nothing counts the
-rendered output at run time. The 200-word ceiling is enforced by fixtures at build time and by the
-skill's prose at run time. Granting `python3` would make the count mechanical and the read-only
-guarantee promissory again — trading an enforced guarantee for an enforced check, on the one command
-whose distinction is the enforced guarantee.
-
-**Every word of the summary is composed, so `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` governs all of it** —
-there is nothing quoted here to exempt. Read it as *compose well, never compose short*: the ceiling
-already bounds length, and the standard bears on active voice, positive form and putting the emphatic
-word last, in a read whose whole value is being finishable in one pass.
+`mutates: false` asserts more than the grant delivers. `git log` and `git show` both accept
+`--output=<file>`, which writes any path, unconditionally (git 2.53.0, 2026-09-08); `git log -p
+--ext-diff` runs a diff driver the target repo configures. A prefix-match grant cannot exclude a flag.
 
 Report the outcome by name, per the skill's `## Decision outcomes`, and name the artifact read with its
 date so a wrong target is visible rather than inferred.
