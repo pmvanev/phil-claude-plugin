@@ -29,10 +29,10 @@ is only the standalone human driver.
 
 ## Invariants
 
-1. **Independence (C1).** Dispatch the reviewer in **fresh context** with the target, intent and
-   standards **only**. Withhold the **builder's reasoning and self-assessment**: a reviewer that sees
-   them agrees with the builder instead of judging the work. The judge is independent of the reviewer
-   in the same way.
+1. **Independence (C1).** Dispatch the reviewer in **fresh context** with the target, intent, standards
+   and any `oracle_result` **only**. Withhold the **builder's reasoning and self-assessment**: a reviewer
+   that sees them agrees with the builder instead of judging the work. The judge is independent of the
+   reviewer in the same way.
 2. **Advisory, never self-adjudicating (C3).** The reviewer emits findings and the judge confirms or
    refutes them; neither declares the task done or not done. **The human decides.** Present; never
    rule.
@@ -78,8 +78,9 @@ Assemble three things, and only these:
 2. **Intent** — the claim-of-done: what the task was meant to achieve, stated by the host, given via
    `--intent`, or inferred from context. Show an inferred intent to the developer so they can correct
    it.
-3. **Standards** — the rules that apply to this target type: code → coding and testing; prose → eos and
-   the relevant rule; a skill or agent → the plugin's own conventions.
+3. **Standards** — the rules above that fit the target type: code → `coding.md`, `testing.md` and
+   `architecture.md`, plus `test-patterns.md` when tests change; prose → `writing.md` and any rule the
+   prose is about; a skill or agent → `writing.md` and the conventions of the plugin it belongs to.
 
 Begin the review only once the target and intent are settled.
 
@@ -92,9 +93,11 @@ result a host already captured; never re-implement it.
 
 - **Code target:** detect a test runner via `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`;
   if one exists, run the suite, and lint and types if present, and capture the result.
-- **Prose target** (skill, agent, rule, doc): run the deterministic prose checks that apply —
-  self-test fixture pass, dead-link and broken skill-ref scan, frontmatter validity, file-length limit,
-  required-citation presence. Capture each result.
+- **Prose target** (skill, agent, rule, doc): run the deterministic checks that apply — a scripted
+  self-test fixture run, a dead-link or skill-ref scan, a frontmatter, length or citation check — with
+  the repository's own scripts or a standard tool such as a YAML parser. Capture each result. A fixture
+  suite a model drives is not one, and neither is a check improvised to stand in for judgment: neither
+  earns `sound-gate`.
 - **No deterministic oracle** (a design doc's "soundness", a subjective artifact): proceed with no
   `oracle_result`.
 
@@ -140,19 +143,24 @@ The reviewer is motivated to find something, so it can over-report. Put each fin
 For **each** finding, dispatch `adversarial-verifier` — a fresh subagent per finding — with
 `{ finding, target, intent, standards, oracle_result? }`, and **withhold the reviewer's
 `justification`, `confidence` and other findings**: the judge must reach its own view from the work, or
-the two would simply agree. The judge is prompted to **refute**, and **defaults to `refuted` when it
-cannot independently confirm**.
+the two would simply agree. The judge tries to confirm charitably, then to refute, with equal effort.
+It refutes on uncertainty only as a last resort after an honest confirmation attempt, and marks that
+refute with **low `confidence`** so it is never mistaken for a confident refute of a clear misread.
 
 Then filter:
 
 - Keep the findings the judge **`confirmed`**, applying any `corrected_severity`; re-rank worst-first.
-- **Drop** the findings the judge **`refuted`**, and count them.
-- If the judge refuted every finding, report that: the reviewer raised N and the judge refuted all N.
+- Sort every `refuted` finding by the judge's `basis`. When the basis says the defect could not be
+  established either way — the uncertainty refute the judge also marks with low `confidence` — list it
+  separately as *could not be confirmed either way*, so the human can give it a second look. **Drop**
+  every other refuted finding, and count it.
+- If the judge refuted every finding and none is uncertain, report that: the reviewer raised N and the
+  judge refuted all N.
   That is not a `clean` verdict — the reviewer did see problems — but nothing survived independent
   scrutiny.
 
 Verification changes *which findings* survive, never the label. A hard finding that faithfully cites the
-oracle should pass; one the judge refutes misread the oracle.
+oracle should survive verification; one the judge confidently refutes misread the oracle.
 
 > **Cost and skip.** Verification costs one judge pass per finding. A review with no findings (`clean`,
 > `cannot-assess`) has nothing to verify — skip it. A composing host may run the reviewer alone when it
@@ -170,7 +178,10 @@ Give the developer a clear summary, and offer to open the target and the spans i
   *"Sound gate — backed by the test suite; hard findings cite the actual run."*
 - Present the **judge-confirmed** findings **worst-first**, each with its span, mechanism and evidence.
   Say how many the judge **refuted and dropped** — "the reviewer raised 5; an independent judge
-  confirmed 3 and refuted 2". The refuted count is a signal about reviewer noise.
+  confirmed 3 and refuted 2". The refuted count is a signal about reviewer noise. Present any finding that
+  *could not be confirmed either way* in its own short list, after the confirmed ones.
+- When the judge refuted all of them and none is uncertain, say so: "the reviewer raised 4; an
+  independent judge refuted all 4" — carrying the label, and never as a clean pass.
 - On `verdict: "clean"`, say so plainly with the label: "independent review found nothing — still a
   draft signal, not a verified pass" (no oracle), or "nothing found, and the suite ran green — sound
   gate" (oracle). On `verdict: "cannot-assess"`, report exactly that, never as approval.
@@ -211,7 +222,8 @@ labeled `draft-signal` (01, the walking skeleton); oracle plus failure → `soun
 finding (02); findings alone, however confident, never earn `sound-gate` (03); builder reasoning
 withheld from the dispatch (04); anti-flattery `cannot-assess` (05); advisory, never self-adjudicating
 (06); an honest clean pass with no manufactured findings (07); clean plus a green oracle → `sound-gate`
-(08); the judge refuting a false positive (09) and independently confirming a real finding (10).
+(08); the judge refuting a false positive (09) and independently confirming a real finding (10); an
+uncertain refute listed for the human rather than counted away (11).
 Fixtures 02, 03, 07 and 08 pin the label in both directions.
 
 Whenever this skill, `commands/adversarial-review.md`, `agents/adversarial-reviewer.md` or

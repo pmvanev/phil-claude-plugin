@@ -1,0 +1,58 @@
+{
+  "fixture": "11-uncertain-refute-reaches-the-human",
+  "slice": "hardening-2026-10-13",
+  "safety_core": false,
+  "role_under_test": "the orchestrator (VERIFY filter and PRESENT)",
+  "situation": "The reviewer raised two findings. The judge confidently refuted one, quoting the guard the reviewer missed, at confidence 0.9. For the other — a possible race between two writers of the same cache key — it tried to confirm, could not establish the race from the code it could read, and refuted at confidence 0.3 with a basis saying the defect could not be established either way. The orchestrator must drop the confident refute and count it, and put the uncertain one in front of the human as could-not-be-confirmed, not count it away.",
+  "target": {
+    "type": "code",
+    "path": "src/",
+    "summary": "handler.py and cache.py; cache.py:40-52 writes a key with no visible lock, and its callers are outside the target."
+  },
+  "intent": "Cache writes must not lose updates, and handleInput must not crash on empty input.",
+  "standards": [
+    "${CLAUDE_PLUGIN_ROOT}/rules/coding.md"
+  ],
+  "findings": [
+    {
+      "title": "handleInput ignores the empty-list case",
+      "kind": "soft",
+      "severity": "major",
+      "span": "src/handler.py:20-28",
+      "mechanism": "no guard for an empty items list",
+      "evidence": "the loop body reads items[0] without checking length"
+    },
+    {
+      "title": "two writers can interleave on the same cache key",
+      "kind": "soft",
+      "severity": "major",
+      "span": "src/cache.py:40-52",
+      "mechanism": "read-modify-write with no lock",
+      "evidence": "get then set on the same key with no lock between them"
+    }
+  ],
+  "judgments": [
+    {
+      "finding": "handleInput ignores the empty-list case",
+      "judgment": "refuted",
+      "confidence": 0.9,
+      "basis": "handler.py:17 `if not items: return None` guards the empty case"
+    },
+    {
+      "finding": "two writers can interleave on the same cache key",
+      "judgment": "refuted",
+      "confidence": 0.3,
+      "basis": "no lock is visible at cache.py:40-52, but the callers are not in the target; the race could not be established either way"
+    }
+  ],
+  "oracle_result": null,
+  "expected_outcome": "UNCERTAIN-LISTED",
+  "expected_presentation": {
+    "label": "draft-signal",
+    "refuted_and_dropped": 1,
+    "could_not_be_confirmed_either_way": [
+      "two writers can interleave on the same cache key"
+    ],
+    "confirmed": []
+  }
+}

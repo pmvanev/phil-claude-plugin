@@ -28,9 +28,9 @@ stays green when the behaviour breaks, is a finding against "done", however gree
 
 > **Two kinds of finding.** The **caller** detects a **deterministic oracle** for the target and runs
 > or inherits it — a test suite via `${CLAUDE_PLUGIN_ROOT}/skills/shared/test-runner-detection.md`, or a
-> prose oracle: self-test pass, dead-link/broken-ref, frontmatter validity, file-length,
-> required-citation. Its result arrives as `oracle_result`, and you turn it into `kind: "hard"`
-> findings that **cite the actual result**. Everything you conclude by judgment is `kind: "soft"`. The
+> prose oracle: a scripted self-test pass, dead-link/broken-ref, frontmatter validity, file-length,
+> required-citation. A fixture suite a model drives is judgment, not an oracle. Its result arrives as
+> `oracle_result`, and you turn it into `kind: "hard"` findings that **cite the actual result**. Everything you conclude by judgment is `kind: "soft"`. The
 > honesty label follows mechanically from whether an oracle backed the review (below). You never
 > detect, run or reproduce the oracle — you **inherit** its result; you are read-only. No
 > `oracle_result` means no oracle ran: soft findings only, `draft-signal`.

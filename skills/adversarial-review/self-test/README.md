@@ -6,7 +6,7 @@ on the builder's own reasoning (a correlated, non-independent pass), or empty pr
 finding — each looks exactly like a smooth, thorough review. These fixtures feed the reviewer known
 situations and assert each produces the correct **decision outcome**
 (`DRAFT-SIGNAL` / `SOUND-GATE` / `NEVER-SOUND-GATE` / `INDEPENDENT-DISPATCH` / `CANNOT-ASSESS` /
-`ADVISORY-ONLY` / `CLEAN-PASS` / `CONFIRMED` / `REFUTED`).
+`ADVISORY-ONLY` / `CLEAN-PASS` / `CONFIRMED` / `REFUTED` / `UNCERTAIN-LISTED`).
 
 This suite is the **acceptance + regression gate** for `skills/adversarial-review/SKILL.md`,
 `agents/adversarial-reviewer.md` (the adversary), and `agents/adversarial-verifier.md` (the judge)
@@ -37,6 +37,7 @@ oracle come from the real invocation.
 | `08-clean-sound-gate-green-oracle/` | nothing wrong, oracle ran green | C4 positive pole | verified-clean earns `sound-gate`; no under-claiming | `CLEAN-PASS` (sound-gate) |
 | `09-verifier-refutes-false-positive/` | reviewer over-reported a misread | adversary→judge separation | judge reads the span, refutes, drops it | `REFUTED` |
 | `10-verifier-confirms-real-finding/` | reviewer got one right | judge confirm pole + independence | judge independently confirms; finding survives | `CONFIRMED` |
+| `11-uncertain-refute-reaches-the-human/` | judge refuted one confidently, one on uncertainty | VERIFY filter + PRESENT | confident refute dropped and counted; uncertain one listed for a second look | `UNCERTAIN-LISTED` |
 
 `01` is the single walking-skeleton scenario (a standalone review end-to-end). The **safety core** is
 `03`, `04`, `06`, `09` — the bug classes most likely to ship silently: a soft review dressed as a
@@ -48,7 +49,8 @@ The three roles under test: the **builder** is the thing reviewed (not built her
 or a delegated AI); the **adversary** is `agents/adversarial-reviewer` (raises findings — fixtures
 01–08); the **judge** is `agents/adversarial-verifier` (confirms/refutes each finding — fixtures
 09–10). The judge never sees the adversary's reasoning, so the two cannot agree their way past a
-blind spot.
+blind spot. Fixture 11 tests the **orchestrator**: given the judge's judgments, it drops confident
+refutes and lists uncertain ones for the human.
 
 Fixtures `02`, `03`, `07`, `08` together pin the honesty label in **both** directions: oracle+failure
 → `sound-gate` (02), no oracle → never `sound-gate` (03), clean without oracle → `draft-signal` (07),
