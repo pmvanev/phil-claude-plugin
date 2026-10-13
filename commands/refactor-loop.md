@@ -7,9 +7,9 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash, Agent, Workflow, TaskCreate,
 
 # phil:refactor-loop
 
-The production substrate is the **Workflow tool** — JS owns the loop, gates, and stop decision
-(the cage); the model cannot decide it is done (ADR-008). Red gates enter a bounded fix
-sub-loop before a scoped revert; landed refactors are committed per item (ADR-009).
+The **Workflow tool** is the production substrate: its script owns the gates and the stop decision, so the
+model cannot decide it is done. Red gates enter a bounded fix sub-loop before a scoped revert; each landed
+refactor is committed on its own.
 
 ## Step 1 — resolve the target (parity with `/phil:refactor`)
 
@@ -23,30 +23,28 @@ Parse `$ARGUMENTS` into a `scope` (and optional `focus`) the proposer will work 
 | A file path | that file | — |
 | A directory (or no arg → `.`) | that directory (proposer recurses) | — |
 
-`focus` (when set) tells the proposer to narrow to that symbol within the file; otherwise it
-refactors across the whole scope.
+`focus`, when set, narrows the proposer to that symbol within the file; otherwise it refactors across
+the whole scope.
 
 ## Step 2 — gather the required run config
 
-The orchestrator **requires** `repo` and `test_cmd` and will HALT-CONFIG without them
-(ADR-009 — it must never guess its target). Determine:
+The workflow **requires** `repo` and `test_cmd` and halts with `HALT-CONFIG` without them; it never
+guesses its target. Determine:
 
-- **repo** — absolute path to the target repo working dir (where git + tests run). Default to
-  the current project root if the user is refactoring the repo they're in.
-- **test_cmd** — the **full** gate command. Prefer the whole suite, not a narrow slice — the
-  suite is the oracle (e.g. `uv run pytest`, which recurses unit/integration/property/acceptance;
-  `npm test`; etc.). Read the project CLAUDE.md for a declared command first. A narrow command
-  is a weak oracle.
+- **repo** — the absolute path of the target repo's working directory, where git and the tests run.
+  Default to the current project root when the user is refactoring the repo they are in.
+- **test_cmd** — the **full** gate command. Prefer the whole suite to a narrow slice: the suite is the
+  oracle (e.g. `uv run pytest`, which recurses unit, integration, property and acceptance tests; `npm
+  test`), and a narrow command is a weak one. Read the project's `CLAUDE.md` for a declared command first.
 
-Confirm both with the user before launching, plus that the **G2 hook is wired** (`hooks.json`
-PreToolUse → `block-test-file-write.py`); if not, warn that the test-file lockbox falls back to
-the cage's in-JS diff scan only.
+Confirm both with the user before launching, and confirm the test-file lockbox hook (G2) is wired:
+`hooks.json` `PreToolUse` → `block-test-file-write.py`. If it is not, warn that the lockbox falls back
+to the workflow's own diff scan only.
 
 ## Step 3 — invoke the Workflow
 
 The Workflow tool needs opt-in and runs in the background — confirm, then invoke with
-`scriptPath: workflows/refactor-loop.js` and **`args` as a real JSON OBJECT** (never a
-JSON-encoded string, or every field silently defaults — the first-run misfire):
+`scriptPath: workflows/refactor-loop.js` and **`args` as a JSON object**:
 
 ```
 args: {
@@ -62,10 +60,10 @@ args: {
 
 The loop runs INIT→PROPOSE→REVIEW→GUARD→APPLY→TEST→(FIX sub-loop)→{commit | undoable+revert}→
 {DONE | HALT}, commits each landed refactor, writes a DAG ledger to `<repo>/.refactor-loop-ledger.md`,
-and returns `{ status, iterations, applied, undoable[], invalid[] }`. Relay it — and surface any
-`undoable` findings (refactorings proven infeasible, with the reason).
+and returns `{ status, iterations, applied, undoable[], invalid[] }`. Relay it, and surface every
+`undoable` finding — a refactoring proven infeasible — with its reason.
 
 ## Optional fallback (`--interactive`)
 
-For step-by-step debugging, load and follow `${CLAUDE_PLUGIN_ROOT}/skills/refactor-loop/SKILL.md` instead — the same
-loop as prose the model executes (original substrate, less deterministic; see ADR-008).
+For step-by-step debugging, load and follow `${CLAUDE_PLUGIN_ROOT}/skills/refactor-loop/SKILL.md`
+instead: the same loop as prose the model executes, and less deterministic.
