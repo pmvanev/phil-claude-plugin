@@ -14,8 +14,9 @@ document** — without a user story.
 tactical skill that already carries the right safety gate. Supply what those skills lack: framing the
 goal, sequencing the work, and leaving a decision trail.
 
-The standards to work under are `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
-`${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, and `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`.
+Read the standards to work under before FRAME: `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`,
+`${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, and
+`${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`.
 
 > **The workflow.** FRAME → MAP (a wave-by-wave roadmap, each wave routed to the fitting skill) →
 > SAFETY-NET (pin the change surface) → EXECUTE (each wave delegated and gated, the sequence stopping
@@ -34,8 +35,9 @@ Every initiative is held to **two** gates:
    **checkable metric** and read at VERIFY.
 
 A run that breaks the preservation floor is **never** reported as done. A run that preserves
-behavior but misses its declared goal metric is **never** reported as done. Grade the final state,
-not the effort.
+behavior but misses its declared goal metric is **never** reported as done. On an accepted
+preservation-only basis, the preservation floor is the only gate (see FRAME §2). Grade the final
+state, not the effort.
 
 ---
 
@@ -44,7 +46,7 @@ not the effort.
 | Pattern | Mode | Action |
 |---------|------|--------|
 | `"<initiative>"` | Start | Run FRAME on a new initiative, then the loop below. |
-| No argument | Resume | Resume the in-flight initiative from its `docs/work/<slug>/progress.md`: read the roadmap and the per-wave status, and continue from the first wave not yet `done`. Do not re-run completed waves or re-frame. |
+| No argument | Resume | Resume the in-flight initiative from its `docs/work/<slug>/progress.md`: read the roadmap and the per-wave status, and continue from the first wave not yet `done`. Do not re-run completed waves or re-frame. With several in-flight initiatives under `docs/work/`, ask which; with none, say so and stop. When the run stopped on a failed wave, ask before re-running the wave that stopped it. |
 
 Derive a kebab-case `<slug>` from the initiative for the trail path `docs/work/<slug>/`.
 
@@ -109,6 +111,8 @@ Summarize goal + preservation contract + IN/OUT scope and get explicit confirmat
 oracle, and the IN/OUT scope.
 
 **This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
+Every question this skill puts to the developer follows it — the goal restatement in §2, the roadmap
+approval, an unpinnable seam, a prose wave's diff review and a resume choice included.
 
 - **The context block is the framed contract** — goal, preservation contract, IN/OUT scope, chosen
   delegate and oracle. The counted ask states what is being sanctioned and what it commits to, in
@@ -156,7 +160,9 @@ migration is handled as a re-architecture initiative routed across these delegat
 bespoke migration engine.
 
 Keep waves small and independently committable — one wave, one delegate, one commit, mirroring the
-delegates' own per-item discipline. Write the roadmap to `docs/work/<slug>/roadmap.md`.
+delegates' own per-item discipline. Write the roadmap to `docs/work/<slug>/roadmap.md`, and write
+`docs/work/<slug>/progress.md` with every wave `pending`, so a run that stops on its first wave still
+leaves a status to resume from.
 
 ### 3. Approve
 
@@ -245,7 +251,9 @@ unfinished — is not a success. Grade the final state, not the effort.
    reported green / approved). If not, the run should already have stopped in EXECUTE — never report it
    green here.
 2. **Goal gate** — read the goal metric now (its **after** value) and compare to the target
-   recorded in FRAME. Report the reading as `before → after (target)`.
+   recorded in FRAME. Report the reading as `before → after (target)`. On a preservation-only basis,
+   skip the goal gate: the preservation result alone decides done, and the report says no goal was
+   declared.
    - **Met** → the goal gate clears.
    - **Not met** → report the goal as **not achieved**, showing the reading as evidence, and do
      **not** report the initiative as done — even though behavior was preserved. Preservation
@@ -255,9 +263,8 @@ unfinished — is not a success. Grade the final state, not the effort.
    delegates used, the preservation results, the commits made) and `progress.md` (every wave's
    final status).
 4. Write the **durable evolution summary** to `docs/evolution/<date>-<slug>.md` — what changed,
-   why, the goal outcome (before → after vs target), and the preservation result — reusing the
-   plugin's existing `docs/evolution/` convention. This is the record that outlives the working
-   trail.
+   why, the goal outcome (before → after vs target), and the preservation result. Create
+   `docs/evolution/` if the repository has none. This is the record that outlives the working trail.
 5. Report a summary to the developer naming: the **goal outcome**, the **preservation result**
    (oracle green / approved), and the **commit(s)** made.
 
@@ -267,8 +274,8 @@ unfinished — is not a success. Grade the final state, not the effort.
 
 - **A contractor, not an executor.** Never re-implement a delegate's preservation gate. Delegate the
   change; inherit the gate.
-- **The two-gate spine holds absolutely.** Preservation floor always; declared goal always. Miss
-  either → not done.
+- **The two-gate spine holds absolutely.** Preservation floor always; the declared goal whenever one
+  was declared. Miss either → not done.
 - **A delegate failure never leaves the tree red** and is never reported as done. Leave last-good;
   record it; stop.
 - **Off-ramp trivial work.** If one skill would do, recommend it and exit — no ceremony.
@@ -281,10 +288,10 @@ unfinished — is not a success. Grade the final state, not the effort.
 
 ## Self-test (regression gate)
 
-`skills/work/self-test/` holds golden fixtures that pin these safety behaviors: FRAME refuses an
-uncheckable goal (01), off-ramps trivial work (02), carries one initiative end-to-end (03,
-walking skeleton), routes code vs prose (04, 05), stops-and-leaves-last-good on a delegate failure
-(06), and reports a missed goal as not-done (07). Whenever this skill or `commands/work.md`
-changes, drive the fixtures per `self-test/README.md` and confirm each produces its `expected.md`
-decision — every edit here is non-monotonic, so the skill is changed and regression-tested, never
-changed and eyeballed.
+`${CLAUDE_PLUGIN_ROOT}/skills/work/self-test/` holds golden fixtures that pin these safety
+behaviors: FRAME refuses an uncheckable goal (01), off-ramps trivial work (02), carries one initiative
+end-to-end (03, walking skeleton), routes code vs prose (04, 05), stops-and-leaves-last-good on a
+delegate failure (06), and reports a missed goal as not-done (07). Whenever this skill or
+`${CLAUDE_PLUGIN_ROOT}/commands/work.md` changes, drive the fixtures per its `README.md` and confirm
+each produces its `expected.md` decision — every edit here is non-monotonic, so the skill is changed
+and regression-tested, never changed and eyeballed.
