@@ -33,9 +33,9 @@ Determine what `$ARGUMENTS` refers to:
 | Ends with `/` or a directory with no extension | Directory path | `docs/`, `skills/` |
 | No argument | Prose in the current context | — |
 
-Resolve the argument once; give all three passes the same span.
+Resolve the argument once; give all three passes the same span. If the argument contains both a file and a line range (`docs/setup.md:12-30`), split them.
 
-**Directory mode.** Emit one verdict triple and one findings list **per file**, files ordered worst verdict first, preceded by a one-line roll-up. For large directories (>20 files), use an Explore agent to parallelize reading.
+**Directory mode.** Emit one verdict triple and one findings list **per file**, files ordered worst verdict first, preceded by a one-line roll-up. For large directories (>20 files), an Explore agent may locate the prose files, but read each file yourself before its passes: exact spans and Step 6's edits need the text, not a summary.
 
 **One exception.** The fitness pass judges the document as a whole — audience, completeness, structure. A line range cannot be judged for comprehensiveness or navigability. When the argument is a line range, read the whole file for the fitness pass, scope the other two to the range, and say so in the report.
 
@@ -61,7 +61,7 @@ Clustered whiffs report as `[tells]` findings with the whiff mechanism named and
 
 ## Step 3: Run the Clarity Pass
 
-Load `${CLAUDE_PLUGIN_ROOT}/skills/eos/SKILL.md` and apply its ten editing rules to the same text — but **diagnostically**. Identify each violation and its rewrite; do not edit the file yet. Honor `eos`'s Safety section: preserve meaning, formatting, tone, and domain terminology. Its File Path mode — which edits in place and emits its own summary — is suppressed here; both are deferred to Steps 5 and 6.
+Load `${CLAUDE_PLUGIN_ROOT}/skills/eos/SKILL.md` and apply its ten editing rules to the same text — but **diagnostically**. Identify each violation and its rewrite; do not edit the file yet. Honor `eos`'s Safety section: preserve meaning, formatting, tone, and domain terminology. A rewrite that adds a number, a name, an actor or a claim the text does not hold is `[NEEDS YOU]`, never `[auto-applicable]` — "caches for a while" cannot become "caches for 5 minutes" without the author. A span quoted as an example of bad prose is exempt from the clarity pass too, as `ai-eos` exempts it from the tells pass. Its File Path mode — which edits in place and emits its own summary — is suppressed here; both are deferred to Steps 5 and 6.
 
 ---
 
@@ -127,7 +127,7 @@ Report inline. Write no files. Lead with three verdicts, then merge the findings
 ```
 RED-TEAM: {file}
 
-TELLS:   {verdict} — {N} tells / {M} words, {K} mechanisms
+TELLS:   {verdict} — {N} tells / {M} words, {K} mechanisms{, moved by: <modifier and why>}
 CLARITY: {n} rewrites, {m} cuts across {j} of eos's 10 rules
 FITNESS: {verdict} — {which measures fail}; audience {named | never named}
 
@@ -163,14 +163,16 @@ Ranking rules:
 
 ## Step 6: Offer to Apply — Approval Gate
 
-After reporting, ask once:
+After reporting, ask once. Ask only when at least one finding is `[auto-applicable]`; otherwise the report is the deliverable, and say so:
 
 > "Apply the {X} auto-applicable fixes? The {Y} marked NEEDS YOU require a fact I don't have."
 
 Then:
 
 - **On approval** — apply only the `[auto-applicable]` fixes, using each pass's own fix form: `eos`'s rewrite discipline for clarity findings, and `ai-eos`'s stated fix for tells (cut, or the plain form it names). Report what you changed, per line.
-- **On refusal, or no answer** — change nothing. The report is the deliverable.
+- **On refusal, no answer, or anything but a clear yes** — change nothing. The report is the deliverable.
+- A formatting-tell fix is `[NEEDS YOU]`: it rewrites headings or markup, which `eos`'s Safety, honoured here, keeps.
+- With no file behind the prose, Step 6 offers the rewritten text inline instead of editing — the no-argument mode reviews prose in the conversation.
 - **Never** apply a `[NEEDS YOU]` finding. Not on approval, not on a follow-up "fix everything." Those need information the document does not contain.
 
 Applying is opt-in every time. Do not offer to apply before the full report, and do not bundle the two.

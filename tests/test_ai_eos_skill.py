@@ -66,7 +66,7 @@ def test_directory_mode_asks_only_for_tools_the_command_grants():
     granted = re.search(r"allowed-tools: (.*)", COMMAND.read_text()).group(1)
     assert "Agent" not in granted and "Task" not in granted
     assert "Explore agent" not in _flat(SKILL)
-    assert "as `ai-eos` specifies" not in _flat(RED_TEAM)
+    assert "use an Explore agent to parallelize reading" not in _flat(RED_TEAM)
 
 
 def test_house_style_is_the_reviewed_document_s_not_the_plugin_s():
