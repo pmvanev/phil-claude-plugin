@@ -23,9 +23,9 @@ Then *"any feature is `done` or `in progress`"* fires: **`in progress`**.
 story. Discovery is a scan for the slug, not a scan of `docs/feature/`.
 
 **Slice 06 is the trap this fixture carries, and it is not about the story tier at all.** It declares no
-`**Status:**` line and no `DEFERRED` marker — the two forms *Step 2* names. Its retirement lives in the
-H1 (`— SUBSUMED BY SLICE 07`) and in the commit that closed the feature. A reader matching only the two
-documented markers counts slice 06 as not-done, position 01 folds to `in progress` instead of `done`, and
+`**Status:**` line and no `DEFERRED` marker. Its retirement lives in the H1 (`— SUBSUMED BY SLICE
+07`) and in the commit that closed the feature — a heading form *Step 2* names. A reader matching only
+`**Status:**` and `DEFERRED` counts slice 06 as not-done, position 01 folds to `in progress` instead of `done`, and
 the story line becomes `0 of 2 features done`. **The story answer is still `in progress`, so the story
 fold looks correct while its input is wrong** — the count is the only thing that moves, and a count is
 what a reader trusts. Found live 2026-09-04 building the card on #36.
