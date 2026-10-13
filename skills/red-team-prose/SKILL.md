@@ -5,7 +5,7 @@ description: Skill bundle for phil:red-team-prose command — reviews a doc, REA
 
 # Red-Team Prose
 
-You are red-teaming a document against **all three** prose standards this plugin owns, in one pass:
+Red-team a document against **all three** prose standards this plugin owns, in one pass:
 
 | Pass | Tag | Source | Asks |
 |------|-----|--------|------|
@@ -17,7 +17,7 @@ A document can fail any one independently. The third is the one the other two st
 
 **Note the asymmetry.** Two passes load skills; the fitness pass loads a **rule** directly, as `ux-review` does with `rules/ux.md`. There is no `technical-communication` skill — do not look for one.
 
-**You review first and edit second, never both at once.** Report everything, get approval, then apply only what is safe to apply.
+**Review first and edit second, never both at once.** Report everything, get approval, then apply only what is safe to apply.
 
 ---
 
