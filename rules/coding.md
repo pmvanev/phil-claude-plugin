@@ -81,9 +81,8 @@ Use **RAII** (Resource Acquisition Is Initialization) or equivalently **SBRM** (
 **Pool connections, and let nested scopes own them.** Opening a database connection per call pays a handshake and an authentication on every query and, under load, exhausts the server's connection limit.
 
 - **The application owns the pool.** The composition root creates one pool at startup and closes it at shutdown, and every connection comes from it.
-- **The unit of work owns the connection.** Each unit of work borrows a connection inside a scope guard—a `with` block, a destructor, a `using`—and the guard returns it on every exit, exception included. The transaction shares that scope: it commits on a normal exit and rolls back on an exception. A connection borrowed without a guard leaks on the first exception, and the leaks drain the pool only under production load.
+- **The unit of work owns the connection.** Each unit of work borrows a connection inside a scope guard—a `with` block, a destructor, a `using`—and the guard returns it on every exit, exception included. The transaction shares that scope: it commits on a normal exit and rolls back on an exception. Keep remote calls and user waits outside the unit of work, so it holds the connection only while talking to the database. A connection borrowed without a guard leaks on the first exception, and the leaks drain the pool only under production load.
 - **Business logic owns neither.** It calls a port, and the adapter borrows from the pool. A port that takes a connection leaks infrastructure into the domain.
-- **Hold a connection only while talking to its database.** Release it before calling another service or waiting on a user; a connection held through the wait serves no one, and enough of them drain the pool.
 
 Pool HTTP connections the same way: create one long-lived client per remote service and reuse it, so its keep-alive connections are pooled.
 
