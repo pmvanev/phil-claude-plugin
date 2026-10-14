@@ -25,8 +25,8 @@ unassessed story closes a card holding **N features**, and it pins the **conjunc
 declares and a slug whose members are all unknown reach `unknown` by different rows, so a guard covering
 one is green on the other.
 
-This suite is the **acceptance + regression gate** for `skills/nwave-slice-status/SKILL.md` and
-`commands/nwave-slice-status.md`. Run it whenever either changes. Format and intent mirror
+This suite is the **acceptance + regression gate** for `skills/nwave-slice-status/SKILL.md`, its
+`references/states.md`, and `commands/nwave-slice-status.md`. Run it whenever any of them changes. Format and intent mirror
 `skills/adversarial-review/self-test/`, `skills/edd/self-test/`, and `skills/work/self-test/` — the
 plugin's established way to test a skill.
 

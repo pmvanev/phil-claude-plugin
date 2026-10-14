@@ -118,7 +118,7 @@ slice roster, not for the wave; the renderer would invent the fact the deriver w
   written for. Three rules apply unchanged at this tier: the label is still the source, no label
   still means no line, and no row still means no line **with the reason stated**.
 - **Where two members are `in progress` at once, the label is still the current feature's wave — and
-  this skill does not decide which that is.** `phil:nwave-slice-status` § *The story-level state, on request* already
+  this skill does not decide which that is.** `phil:nwave-slice-status`'s `references/states.md` § *The story-level state, on request* already
   defines it: **the first member, in `position` order, whose state is not `done`** — which is not
   necessarily the first member that is `in progress`. **Every other in-flight member's Notes cell carries
   `⚠ also in flight`.**

@@ -1,6 +1,6 @@
 # Expected outcome — fixture 18 (a collision is named, never resolved)
 
-**Pins:** *The story-level state, on request* — the roster-ordering rules, and this skill's standing
+**Pins:** *The story-level state, on request*, in `references/states.md` — the roster-ordering rules, and this skill's standing
 refusal to pick a winner when sources disagree.
 
 **Expected output** — the state still answers, and the defects ride alongside it:

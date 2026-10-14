@@ -1,6 +1,6 @@
 # Expected outcome — fixture 17 (the empty-roster guard, tested on its conjunction)
 
-**Pins:** *The story-level state, on request* — the two distinct emptinesses, and the fact that they
+**Pins:** *The story-level state, on request*, in `references/states.md` — the two distinct emptinesses, and the fact that they
 resolve differently.
 
 **Expected output — case A, no feature declares the slug:**

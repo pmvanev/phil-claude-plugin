@@ -1,6 +1,6 @@
 # Expected outcome — fixture 16 (the story fold is the feature fold, one level up)
 
-**Pins:** *The story-level state, on request* — membership discovery, the substitution table, and the
+**Pins:** *The story-level state, on request*, in `references/states.md` — membership discovery, the substitution table, and the
 `in progress` row reached over members in different states.
 
 **Expected output**, one line, with the count:

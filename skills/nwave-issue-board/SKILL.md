@@ -181,7 +181,7 @@ Board columns therefore hold the **feature-level state** from `phil:nwave-slice-
 
 **Ask `phil:nwave-slice-status` for the feature-level state, and for a story card's state with
 `--story-state`; fold neither here.** It exposes the feature state under *The feature-level state, on
-request* — `blocked` · `done` · `in progress` · `deferred` · `unknown` · `to do`, folded over **every**
+request*, in its `references/states.md` — `blocked` · `done` · `in progress` · `deferred` · `unknown` · `to do`, folded over **every**
 slice, and `unknown` for a feature with no slices. Publish what it returns; if this skill and
 `phil:nwave-slice-status` disagree, the owner wins. The six states and four columns below apply unchanged
 to a story card. Wound: a fold was written here on 2026-08-14, while the owner had none, and removed the

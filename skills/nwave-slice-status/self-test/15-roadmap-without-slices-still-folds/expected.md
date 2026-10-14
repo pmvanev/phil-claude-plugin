@@ -1,6 +1,6 @@
 # Expected outcome — fixture 15 (either source alone is a roster)
 
-**Pins:** the *conjunction* in the empty-roster row of the fold. Fixture 14 proves the guard fires when it
+**Pins:** the *conjunction* in the empty-roster row of the fold, in `references/states.md`. Fixture 14 proves the guard fires when it
 should; this one proves it does not fire when only one of its two clauses holds.
 
 **Expected state:** `done`, with the count beside it:

@@ -1,6 +1,6 @@
 # Expected outcome — fixture 14 (an empty roster folds to `unknown`, never `done`)
 
-**Pins:** *The feature-level state, on request* — the empty-roster row of the fold table, and the reason it
+**Pins:** *The feature-level state, on request*, in `references/states.md` — the empty-roster row of the fold table, and the reason it
 sits above every test quantified over slices.
 
 **Expected state:** `unknown`, with the reason beside it and **no count**, because there is nothing to
