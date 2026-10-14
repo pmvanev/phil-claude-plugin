@@ -90,6 +90,14 @@ it exists to source. Two shapes need a rule:
 
 **Everything outside the markers belongs to a human, permanently.**
 
+### The facts with no template field still get written
+
+Five facts carry no `template_field`: `default-branch`, `fork`, `project-discovery`, `board-view`,
+`other-single-select-fields`. **They are not surplus and must not be dropped.** Write them as
+bullets in the same region, after the template-shaped ones, each carrying its provenance and
+Q-number like any other. `fork` and `other-single-select-fields` appear only when the forge returned
+them. Why *how the board was found* is itself a constant: `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/provenance-model.md`.
+
 ## Two regions, and the second is a human's
 
 A declaration lives in a **second delimited region**, outside the probed markers, so the probed region
@@ -283,14 +291,6 @@ For a **contradicting** line stating a fact the region now owns, offer to remove
 - **Never offered for `cannot evaluate`.** There is no evidence the line is wrong, so there is
   nothing to retire it in favour of.
 - **Never offered for a line inside the markers.** The region is regenerated, not retired.
-
-### The facts with no template field still get written
-
-Five facts carry no `template_field`: `default-branch`, `fork`, `project-discovery`, `board-view`,
-`other-single-select-fields`. **They are not surplus and must not be dropped.** Write them as
-bullets in the same region, after the template-shaped ones, each carrying its provenance and
-Q-number like any other. `fork` and `other-single-select-fields` appear only when the forge returned
-them. Why *how the board was found* is itself a constant: `${CLAUDE_PLUGIN_ROOT}/skills/board-setup/references/provenance-model.md`.
 
 ## The flow
 
