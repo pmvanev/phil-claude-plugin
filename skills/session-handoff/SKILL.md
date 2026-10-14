@@ -147,7 +147,7 @@ what the tool will not.
 **The mark is computed at render time and never written to the file.** The snapshot stores `crossed`;
 `⚠ stale` appears only in `show` and `pop`'s report.
 
-**This rule's source is here.** `skills/nwave-issue-board/SKILL.md` restates it for the projected copy;
+**This rule's source is here.** `skills/nwave-issue-board/references/projection.md` restates it for the projected copy;
 if the two disagree, this one wins.
 
 **The header is stamped from the tree:** `captured:` is the current UTC minute (`2026-08-12T17:30Z`),
@@ -507,6 +507,6 @@ and that is a pass.** The register says which ones and why.
 The suite is **model-driven** for the decisions; `tests/test_session_handoff_fixtures.py` structurally
 guards every fixture but does not drive them. Drive each by giving this skill the situation in its
 `manifest.json` and comparing the decision reached against its `expected.md` — whenever this file, any
-of its `references/`, any of the three command loaders, `skills/nwave-issue-board/SKILL.md` or
-`skills/issue-board/SKILL.md` changes. **Every failure mode here is silent**, which is why it is regression-tested rather than
+of its `references/`, any of the three command loaders, `skills/nwave-issue-board/SKILL.md` or its `references/`, or
+`skills/issue-board/SKILL.md` or its `references/` changes. **Every failure mode here is silent**, which is why it is regression-tested rather than
 eyeballed.

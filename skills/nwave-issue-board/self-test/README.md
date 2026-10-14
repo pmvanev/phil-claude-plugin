@@ -22,7 +22,7 @@ These fixtures feed the skill known project and forge states and assert each pro
 `DERIVED-CELLS-UNTOUCHED`).
 
 This suite is the **acceptance + regression gate** for `skills/nwave-issue-board/SKILL.md`. Run it
-whenever that file changes, and whenever either skill it delegates to changes — `phil:issue-board`
+whenever that file or any file in its `references/` changes, and whenever either skill it delegates to changes — `phil:issue-board`
 or `phil:nwave-slice-status` — because this skill's correctness is defined partly by theirs. Format
 and intent mirror `skills/nwave-slice-status/self-test/`.
 
