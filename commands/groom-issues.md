@@ -5,8 +5,8 @@ mutates: true
 allowed-tools: Read, Glob, Grep, Bash(gh issue list:*), Bash(gh api graphql:*), Bash(glab issue list:*), AskUserQuestion, Skill
 ---
 
-Load the `groom-issues` skill at `${CLAUDE_PLUGIN_ROOT}/skills/groom-issues/SKILL.md` and run the
-scan it describes.
+Load the `groom-issues` skill at `${CLAUDE_PLUGIN_ROOT}/skills/groom-issues/SKILL.md` and its
+`references/scan.md`, both whole, then run the scan they describe.
 
 This command **reports and never writes**. It declares `mutates: true` while writing nothing, and the
 declaration is honest rather than defensive: `Bash(gh api graphql:*)` accepts a mutation document, so the

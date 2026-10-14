@@ -259,12 +259,12 @@ When a rule changes, the edit is not done until each of these has been checked:
 | 2 | `SKILL.md` narrative intro — the four-command summary |
 | 3 | `SKILL.md` the standard, or the *does not contain* list |
 | 4 | `SKILL.md` the defect table — the classification a session reads from |
-| 5 | `references/<command>.md` — the operating section for the owning command (`fix`, `set`, `ask`) |
+| 5 | `references/<command>.md` — the operating section for the owning command (`fix`, `set`, `ask`), and the owning command's *Outcomes this command reports* and *Invariants* (`scan`, `fix`, `set`, `ask`) |
 | 6 | `SKILL.md` the cross-issue candidates list, and any "the N above" count |
 | 7 | `SKILL.md` reporting — the example output |
 | 8 | `references/fix.md` and `references/set.md` — the measured-population paragraphs |
-| 9 | `SKILL.md` decision outcomes — including whether a new stop needs a new outcome |
-| 10 | `SKILL.md` invariants — the all-commands list **and** the per-command list |
+| 9 | `SKILL.md` decision outcomes — the table and the shared definitions; including whether a new stop needs a new outcome |
+| 10 | `SKILL.md` invariants — the all-commands list; the per-command lists are site 5 |
 | 11 | `commands/<name>.md` frontmatter `description` — it loads *before* the skill |
 | 12 | `commands/<name>.md` body, and its `allowed-tools` if the rule requires a new call |
 | 13 | `self-test/` — a fixture per fold-back, plus this README's row and outcome vocabulary |

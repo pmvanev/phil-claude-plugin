@@ -62,3 +62,26 @@ must pass.
 **This is not a bulk fixer.** On this repo's board on 2026-08-13, six mechanical checks found **one**
 defect, made by the maintainer minutes earlier. Its value is catching the defect its author just made;
 build no ceremony for a full queue.
+
+## Outcomes this command reports
+
+`SKILL.md` § *Decision outcomes* holds the table and the outcomes every command shares; these are this command's own.
+
+- **`LEAVE-SEMANTIC`** — a semantic defect was reported and left.
+
+## Invariants
+
+`SKILL.md` § *Invariants* holds the ones all four commands share; these bind this command as well.
+
+`/phil:groom-fix` (the apply) also:
+
+- Writes only after the user has picked a scope.
+- Takes consent from the user's answer alone — never from the mechanical classification, or from a
+  small population.
+- Stays inside the chosen scope, even for a mechanical fix.
+- Applies only edits computed against the issue's text as it stands after its last change.
+- Writes nothing inside a generated region, nor just outside it to approximate the fix.
+- Leaves every semantic defect untouched — no drafted acceptance criteria, rewritten purpose or decided
+  granularity. It reports them and leaves them, every time.
+- Starts every run with no scope. Nothing is stored between runs; a remembered scope is the marker this
+  skill refuses, grown back in another shape.

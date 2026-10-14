@@ -12,8 +12,8 @@ sloppy ones and misses the expensive ones, because the costly defects live *betw
 
 - `/phil:groom-issues` reads and reports. It holds no `Write` and no `Edit`, so it cannot touch a file.
   Its forge calls must be reads, and since 2026-09-04 that half is a promise, not a scoping: reading a
-  parent/child edge needs `gh api graphql`, which also accepts a mutation document. The invariants below
-  carry that promise, and nothing else does. Wound: without the grant, the decomposed-feature check
+  parent/child edge needs `gh api graphql`, which also accepts a mutation document. The scan's invariants,
+  in `references/scan.md`, carry that promise, and nothing else does. Wound: without the grant, the decomposed-feature check
   reported clean on every board it was written for.
 - `/phil:groom-fix` applies the mechanical column inside a scope the user picks, and changes no card's
   existence.
@@ -45,7 +45,7 @@ governs all four.
 
 | Command | Runs | Read |
 |---|---|---|
-| `/phil:groom-issues` | the scan and its report | this file, whole |
+| `/phil:groom-issues` | the scan and its report | `references/scan.md` |
 | `/phil:groom-fix` | the mechanical column | `references/fix.md` |
 | `/phil:groom-set` | the set-level candidates | `references/set.md` |
 | `/phil:groom-ask` | the semantic column | `references/ask.md` |
@@ -176,7 +176,7 @@ an N+1 here would reintroduce the cost the single list call exists to avoid.
 GraphQL*) so the scan runs from this file alone. If the two ever disagree, `phil:issue-board` wins.**
 
 **This call is a read and must stay one.** `gh api graphql` accepts a mutation document, so nothing in
-the grant stops a write — only the invariants below do. Send `query` documents only — never a
+the grant stops a write — only the scan's invariants, in `references/scan.md`, do. Send `query` documents only — never a
 `mutation` document — and hand anything the scan reported to the command that owns it.
 
 **On GitLab the parent edge stays unreadable, so report the check unevaluated, per *Reporting*.**
@@ -422,45 +422,21 @@ Report the outcome by name, every run. Each command draws from its own row:
 - **`NOT-A-DEFECT`** — something that looks like a finding and is not.
 - **`NO-MARKER`** — the run read and wrote no grooming marker, and re-derived everything; a candidate
   that reappears says why (fixture `06`).
-- **`REFUSE-UNVERIFIED`** — a candidate whose evidence would not confirm, such as overcome by events
-  with nothing in the repository behind it. Reported with the check that ran, and never put to a vote.
 - **`READ-ONLY`** — every forge call this run made was a read. The grant permits a mutation, so this
   is a claim about the run, not about the tool list.
-- **`LEAVE-SEMANTIC`** — a semantic defect was reported and left.
-- **`REDERIVE-BETWEEN`** — an apply invalidated a later candidate.
-- **`APPLY-CONSOLIDATE`** — names the shape it took, because each has a different blast radius: for a
-  decomposed feature, an open parent, a reopened closed original or a newly created card; for a story,
-  a reopened closed story card or a newly created one. It also states what the parent's rollup now
-  shows, since nobody reading the card can tell inflation from completion.
-- **`REFUSE-CONCURRENT`** — members in flight at once, so consolidating them is refused on verified
-  evidence. Nobody declined, and the evidence is good.
-- **`REFUSE-RESLICE`** — a split was asked for over a *feature*, which means re-slicing its roadmap, not
-  changing which cards exist. Name the operation asked for and the one that would be needed.
-- **`REFUSE-UNGRANTED`** — the resolution needs a call this command does not hold: shape (b)'s reopen, a
-  Status write, or a rollup read. **Hand over the exact calls and stop.** It refuses to act, never to
-  report. A run that silently does less than it said, or reports `APPLY-CONSOLIDATE` for a shape it could
-  only half-complete, is the failure it prevents.
 - **`DECLINE-NO-TRACE`, `STALE-REREAD` and `REFUSE-GENERATED` mean the same on every command** — a
   decline that stores nothing, a body that moved since the read, and a write whose target belongs to a
   generator. At `/phil:groom-ask`, a card can carry a generated `nwave:status` block and still state no
   purpose; where the generated region is the whole body, elicited prose has no room outside the
   markers, so refuse rather than approximate.
-- **`WRITE-ELICITED` and `WRITE-PARTIAL` need provenance on every written field** — one of `you wrote` ·
-  `you accepted my suggestion` · `you edited my suggestion` · `I rephrased your answer` — and an
-  unlabelled field fails the outcome however the body reads. Beside `I rephrased your answer` or
-  `you edited my suggestion`, show the answer next to the written form.
+
+Each writing command's own outcomes are defined in its file: `references/fix.md`, `references/ask.md`
+and `references/set.md`.
 
 **The first column is a precondition, not an alternative.** An apply that reports only its terminal
 outcome has not said whether it asked, and *did it ask* is the property the writing commands exist to
-guarantee. `REFUSE-UNVERIFIED` is the exception: an unconfirmed candidate is not put to a vote, so
+guarantee. At `/phil:groom-set`, `REFUSE-UNVERIFIED` (`references/set.md`) is the exception: an unconfirmed candidate is not put to a vote, so
 nothing was asked.
-
-**`ASK-CONTENT` collects content, not consent** — the content is the deliverable. A run reporting
-`WRITE-ELICITED` without `ASK-CONTENT` wrote a body nobody sanctioned.
-
-**`ASK-CONTENT` alone is a legal terminal, and the only one that resolves nothing.** A run that asked and
-received no answer, edit, replacement or decline reports `ASK-CONTENT` again and stops — fixtures `32`
-and `29`. Report `DECLINE-NO-TRACE` only when the user refused; a user who has not answered yet did not.
 
 ## Invariants
 
@@ -480,70 +456,8 @@ All four commands:
   block — and propose splitting no **feature card or story card** on size. A size-keyed reading
   oscillates the board.
 
-`/phil:groom-issues` (the scan) also:
-
-- **Writes nothing** — no issue edits, labels, comments or milestones. It holds no `Write` and no
-  `Edit`, so a session that finds itself needing one has misread the command.
-- **Sends only `query` documents through `gh api graphql`, never a `mutation` document.** No tool
-  boundary backs this one. Refuse rather than improvise: a resolution that needs a forge write is
-  `/phil:groom-set`'s, and handing it over is the design.
-- **Confines the graphql grant to the parent edge alone.** Anything else it could reach is a check nobody
-  has reasoned about, arriving without a rule, an evidence tier or a fixture.
-
-`/phil:groom-fix` (the apply) also:
-
-- Writes only after the user has picked a scope.
-- Takes consent from the user's answer alone — never from the mechanical classification, or from a
-  small population.
-- Stays inside the chosen scope, even for a mechanical fix.
-- Applies only edits computed against the issue's text as it stands after its last change.
-- Writes nothing inside a generated region, nor just outside it to approximate the fix.
-- Leaves every semantic defect untouched — no drafted acceptance criteria, rewritten purpose or decided
-  granularity. It reports them and leaves them, every time.
-- Starts every run with no scope. Nothing is stored between runs; a remembered scope is the marker this
-  skill refuses, grown back in another shape.
-
-`/phil:groom-ask` (the elicitation loop) also:
-
-- **Writes only words the human has sanctioned.** Drafting is permitted; silence, "ok", or any reply
-  that is neither an accept, an edit nor a replacement adopts no draft.
-- **Labels every written field with its provenance**, and shows the answer beside the written form
-  wherever it claims `I rephrased your answer` or `you edited my suggestion`.
-- Presents the card and the rule that failed before every question.
-- **Leaves a rule that passed as written.** A purpose already satisfying rule 1 is out of reach; only
-  what this run elicited may be rephrased.
-- Writes a partial answer partially. Offering the withheld half is permitted; writing it unasked is not.
-- **Asks only about rules the scan reported failing.** The questions come from the findings.
-- Works one card per run — no batch, no apply-to-all, no "the same again for the next card".
-- Refuses to overwrite a body that moved since the read, and hands back the answers and any draft.
-- **Writes elicited prose nowhere inside a generated region, nor just outside it to approximate
-  placement.**
-- Leaves mechanical defects, labels, links and which cards exist to their own commands.
-
-`/phil:groom-set` (the set-level loop) also:
-
-- Offers every outcome the evidence admits; a yes-or-no only where the evidence admits exactly two.
-- Leaves the surviving card of a merge to the user — never to the lower number or any other proxy for
-  the user's judgement.
-- Re-points every reference to an issue it closed.
-- Writes a cross-reference only to a card the forge has already numbered.
-- Settles a split's original — closed as superseded, or kept as the container — and adds each new card
-  to the project board.
-- **Removes a child's parent edge before closing it.** A closed child still counts toward the parent's
-  completion.
-- **Searches closed issues before concluding that no feature card or story card exists.** A previous
-  split may have closed the original as superseded, and minting a second one buries the first.
-- **Treats title evidence alone as report-only.** `slice NN` in a title is a habit: it licenses a
-  report, never an irreversible write. A shared milestone licenses nothing.
-- **Hands over every reopen with its Status call.** `gh issue reopen` does not restore the field, so a
-  card reopened alone sits OPEN in Done and no view flags it.
-- Splits no feature into slice cards, and no story card on size. Splitting an ordinary card creates
-  cards; splitting a feature means re-slicing its roadmap, which is not this command's to do.
-- Closes an overcome-by-events candidate only on evidence from the repository. The claim that work
-  landed another way is settled there or not at all; board prose alone settles nothing.
-- Creates no milestone; where one is the right container, it proposes it and hands over the exact
-  call. One card's container is no evidence for another's.
-- Records no decline anywhere, and puts each ask to the user afresh however many approvals preceded it.
+Each command's own invariants are in its file: the scan's in `references/scan.md`, and each writing
+command's in `references/fix.md`, `references/ask.md` and `references/set.md`.
 
 ## Acceptance
 

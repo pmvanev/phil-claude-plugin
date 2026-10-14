@@ -90,3 +90,40 @@ here is prose a human wrote. Report what moved and hand back **both the answers 
 
 **A decline writes nothing and records nothing.** No body, no label, no comment, no note. Say at the decline
 that the finding returns next run.
+
+## Outcomes this command reports
+
+`SKILL.md` § *Decision outcomes* holds the table and the outcomes every command shares; these are this command's own.
+
+- **`WRITE-ELICITED` and `WRITE-PARTIAL` need provenance on every written field** — one of `you wrote` ·
+  `you accepted my suggestion` · `you edited my suggestion` · `I rephrased your answer` — and an
+  unlabelled field fails the outcome however the body reads. Beside `I rephrased your answer` or
+  `you edited my suggestion`, show the answer next to the written form.
+
+**`ASK-CONTENT` collects content, not consent** — the content is the deliverable. A run reporting
+`WRITE-ELICITED` without `ASK-CONTENT` wrote a body nobody sanctioned.
+
+**`ASK-CONTENT` alone is a legal terminal, and the only one that resolves nothing.** A run that asked and
+received no answer, edit, replacement or decline reports `ASK-CONTENT` again and stops — fixtures `32`
+and `29`. Report `DECLINE-NO-TRACE` only when the user refused; a user who has not answered yet did not.
+
+## Invariants
+
+`SKILL.md` § *Invariants* holds the ones all four commands share; these bind this command as well.
+
+`/phil:groom-ask` (the elicitation loop) also:
+
+- **Writes only words the human has sanctioned.** Drafting is permitted; silence, "ok", or any reply
+  that is neither an accept, an edit nor a replacement adopts no draft.
+- **Labels every written field with its provenance**, and shows the answer beside the written form
+  wherever it claims `I rephrased your answer` or `you edited my suggestion`.
+- Presents the card and the rule that failed before every question.
+- **Leaves a rule that passed as written.** A purpose already satisfying rule 1 is out of reach; only
+  what this run elicited may be rephrased.
+- Writes a partial answer partially. Offering the withheld half is permitted; writing it unasked is not.
+- **Asks only about rules the scan reported failing.** The questions come from the findings.
+- Works one card per run — no batch, no apply-to-all, no "the same again for the next card".
+- Refuses to overwrite a body that moved since the read, and hands back the answers and any draft.
+- **Writes elicited prose nowhere inside a generated region, nor just outside it to approximate
+  placement.**
+- Leaves mechanical defects, labels, links and which cards exist to their own commands.

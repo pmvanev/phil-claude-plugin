@@ -109,7 +109,7 @@ open-parent shape — a story card is what is being *created*, so nothing groups
 
 **Search closed issues before concluding shape (b).** A story card closed by a prior pass is invisible to
 an open-issues scan and minting a second one splits the story permanently. This is the same search the
-decomposed-feature section mandates, and the invariants in `SKILL.md` name both tiers for that reason.
+decomposed-feature section mandates, and the invariants below name both tiers for that reason.
 
 **Irreversible, so it is one candidate at a time and never a group offer.** Closing a feature card
 discards its own comments and history.
@@ -202,3 +202,52 @@ runs to end on the note that a declined candidate will return.
 
 **A population measured through a partial oracle describes the oracle.** The same board's
 decomposed-feature result was tiers 2 and 3 only, while the parent edge was unreadable.
+
+## Outcomes this command reports
+
+`SKILL.md` § *Decision outcomes* holds the table and the outcomes every command shares; these are this command's own.
+
+- **`REFUSE-UNVERIFIED`** — a candidate whose evidence would not confirm, such as overcome by events
+  with nothing in the repository behind it. Reported with the check that ran, and never put to a vote.
+- **`REDERIVE-BETWEEN`** — an apply invalidated a later candidate.
+- **`APPLY-CONSOLIDATE`** — names the shape it took, because each has a different blast radius: for a
+  decomposed feature, an open parent, a reopened closed original or a newly created card; for a story,
+  a reopened closed story card or a newly created one. It also states what the parent's rollup now
+  shows, since nobody reading the card can tell inflation from completion.
+- **`REFUSE-CONCURRENT`** — members in flight at once, so consolidating them is refused on verified
+  evidence. Nobody declined, and the evidence is good.
+- **`REFUSE-RESLICE`** — a split was asked for over a *feature*, which means re-slicing its roadmap, not
+  changing which cards exist. Name the operation asked for and the one that would be needed.
+- **`REFUSE-UNGRANTED`** — the resolution needs a call this command does not hold: shape (b)'s reopen, a
+  Status write, or a rollup read. **Hand over the exact calls and stop.** It refuses to act, never to
+  report. A run that silently does less than it said, or reports `APPLY-CONSOLIDATE` for a shape it could
+  only half-complete, is the failure it prevents.
+
+## Invariants
+
+`SKILL.md` § *Invariants* holds the ones all four commands share; these bind this command as well.
+
+`/phil:groom-set` (the set-level loop) also:
+
+- Offers every outcome the evidence admits; a yes-or-no only where the evidence admits exactly two.
+- Leaves the surviving card of a merge to the user — never to the lower number or any other proxy for
+  the user's judgement.
+- Re-points every reference to an issue it closed.
+- Writes a cross-reference only to a card the forge has already numbered.
+- Settles a split's original — closed as superseded, or kept as the container — and adds each new card
+  to the project board.
+- **Removes a child's parent edge before closing it.** A closed child still counts toward the parent's
+  completion.
+- **Searches closed issues before concluding that no feature card or story card exists.** A previous
+  split may have closed the original as superseded, and minting a second one buries the first.
+- **Treats title evidence alone as report-only.** `slice NN` in a title is a habit: it licenses a
+  report, never an irreversible write. A shared milestone licenses nothing.
+- **Hands over every reopen with its Status call.** `gh issue reopen` does not restore the field, so a
+  card reopened alone sits OPEN in Done and no view flags it.
+- Splits no feature into slice cards, and no story card on size. Splitting an ordinary card creates
+  cards; splitting a feature means re-slicing its roadmap, which is not this command's to do.
+- Closes an overcome-by-events candidate only on evidence from the repository. The claim that work
+  landed another way is settled there or not at all; board prose alone settles nothing.
+- Creates no milestone; where one is the right container, it proposes it and hands over the exact
+  call. One card's container is no evidence for another's.
+- Records no decline anywhere, and puts each ask to the user afresh however many approvals preceded it.

@@ -26,6 +26,7 @@ REPO = Path(__file__).resolve().parent.parent
 SCAN = REPO / "commands" / "groom-issues.md"
 SET = REPO / "commands" / "groom-set.md"
 SKILL = REPO / "skills" / "groom-issues" / "SKILL.md"
+SCAN_INVARIANTS = REPO / "skills" / "groom-issues" / "references" / "scan.md"
 FIXTURES = REPO / "skills" / "groom-issues" / "self-test"
 
 
@@ -74,8 +75,9 @@ def test_the_forge_half_of_the_guarantee_is_carried_in_prose():
     """Nothing in the tool list now forbids a forge write, so the never-do list must."""
     skill = SKILL.read_text()
     assert "mutation" in skill and "gh api graphql" in skill
-    assert re.search(r"never\s+`?mutation|`mutation`\s+document", skill, re.I), (
-        "the skill must forbid a mutation document in as many words — it is the only thing that does"
+    invariants = SCAN_INVARIANTS.read_text()
+    assert re.search(r"never\s+a\s+`mutation`\s+document", invariants, re.I), (
+        "the scan's invariants must forbid a mutation document in as many words — they are the only thing that does"
     )
     assert "query" in SCAN.read_text()
 
