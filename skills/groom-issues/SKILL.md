@@ -386,6 +386,15 @@ the edge is read, so saying it was not is a false caveat — which erodes the ca
 It is the partial-read failure one rule narrower, and it hides better: the issue count is honest, so
 nothing in the summary looks incomplete.
 
+**A parent's completion count is a claim the scan reports unevaluated, never one it settles.** The
+forge's `N of M done` counts closed children, and a child closed as won't-build counts the same as one
+that shipped (`phil:issue-board`'s `references/hierarchy.md`, *A parent's "N of M done" counts different
+things on each forge*). Where the parent edge shows an open parent with at least one sub-issue and none
+of them open — every child number missing from the open list — say that its count reads complete, that
+the count cannot tell the two closes apart, and that the claim is unevaluated. Read no rollup to settle
+it: the number would settle nothing. Report no defect in the parent's body; the counter is the forge's
+and does what it documents. A figure measured outside the run is context, and the report says so.
+
 **Say a check went dark only when it had something to decide.** A board where no issue carries two
 labels does not need rule 4's oracle, and reporting it unevaluated there is boilerplate — which is how
 a caveat stops being read by the run that needs it. The note is owed when a candidate existed and the

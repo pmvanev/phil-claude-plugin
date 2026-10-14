@@ -5,6 +5,8 @@
   "forge": "github",
   "command": "/phil:groom-issues",
   "issue": 9,
+  "parent_state": "open",
+  "parent_edge": "#10, #11 and #12 are sub-issues of #9, and none of them is in the open list",
   "measured": {
     "subIssuesSummary": {
       "total": 3,
