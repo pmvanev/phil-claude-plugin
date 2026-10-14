@@ -78,6 +78,15 @@ This is **empirical design**—structural decisions based on evidence, not specu
 #### 8. Resource Management (RAII / SBRM)
 Use **RAII** (Resource Acquisition Is Initialization) or equivalently **SBRM** (Scope-Bound Resource Management) to tie resource lifetimes to object lifetimes. Resources are acquired in constructors and released in destructors—or in Python, using context managers.
 
+**Pool connections, and let nested scopes own them.** Opening a database connection per call pays a handshake and an authentication on every query and, under load, exhausts the server's connection limit.
+
+- **The application owns the pool.** The composition root creates one pool at startup and closes it at shutdown, and every connection comes from it.
+- **The unit of work owns the connection.** Each unit of work borrows a connection inside a scope guard—a `with` block, a destructor, a `using`—and the guard returns it on every exit, exception included. The transaction shares that scope: it commits on a normal exit and rolls back on an exception. A connection borrowed without a guard leaks on the first exception, and the leaks drain the pool only under production load.
+- **Business logic owns neither.** It calls a port, and the adapter borrows from the pool. A port that takes a connection leaks infrastructure into the domain.
+- **Hold a connection only while talking to its database.** Release it before calling another service or waiting on a user; a connection held through the wait serves no one, and enough of them drain the pool.
+
+Pool HTTP connections the same way: create one long-lived client per remote service and reuse it, so its keep-alive connections are pooled.
+
 #### 9. Testing Principles
 | Principle | Meaning |
 |-----------|---------|
@@ -138,9 +147,11 @@ When a class is hard to test, extract the logic into a testable collaborator.
 
 **The DAO Pattern** is a humble object for data access. The DAO handles SQL, connections, and transactions—mechanics that resist testing. Business logic calls an abstract interface; tests substitute a fake. Keep DAOs thin: fetch, store, delete. If a DAO contains conditionals or calculations, extract that logic into a testable service.
 
-**Fetch in batches.** A gateway's read takes a collection of keys and returns a collection of rows—one call for N keys, never N calls for N keys. The same holds for a remote API: one request for N ids. Fetching inside a loop is the defect this prevents, and it multiplies round trips by the size of the input, so the cost appears only under production data.
+**Batch every call that crosses the network.** A port that fronts a database or a remote service takes a collection and returns a collection, for writes as well as reads: one call fetches N keys, one call saves, updates or deletes N items—never N calls for N items. Calling inside a loop—the N+1 query problem—multiplies round trips by the size of the input, so the cost appears only under production data. The rule binds the port the business logic defines as well as the DAO beneath it: a singular port forces a singular adapter, however well the database batches. Design an HTTP endpoint the same way—its request carries a list and its response returns one.
 
-Prefer the plural signature even where one row is the expected answer: it returns the empty collection rather than null (§7), and a caller that later needs two keys changes nothing. **This is the one place the standard prefers the general form to the observed one.** Empirical design says solve for what is there, and the exception holds only because the two costs are unequal—widening a singular read later rewrites every call site, while writing the plural read today costs a collection literal.
+Return a read's result as a map from requested key to row, so a caller matches each row to its request without trusting order, and a missed key is absent. Give a batch write a stated failure mode: either one transaction commits or rolls back the whole batch, or the result reports each item's outcome, as HTTP 207 Multi-Status does. A batch that fails partway and raises one error hides which items landed.
+
+Prefer the plural signature even where one item is the expected case: a read returns the empty collection rather than null (§7), and a caller that later needs two items changes nothing. **This is the one place the standard prefers the general form to the observed one.** Empirical design says solve for what is there, and the exception holds only because the two costs are unequal—widening a singular signature later rewrites every call site, while writing the plural one today costs a collection literal.
 
 #### 16. CUPID Properties
 Joyful code exhibits these qualities:
