@@ -6,7 +6,9 @@ with a link."*
 
 **Expected:** two tables. A **four-row feature roster**, then **`Current feature 02 chat-in-web-ui —
 slices:`** with its **six** slice rows. **Ten rows.** No third table, because position 02 has no
-`roadmap.json` — and no promise that one is coming, since `/nw-roadmap` may never run.
+`roadmap.json` — and, per *Fill in two stages*, the stage-1 line saying its step table arrives with the
+roadmap. Nothing here says `/nw-roadmap` never runs, and the block's own `Order:` line calls the slice
+order provisional until it does.
 
 **The arithmetic is the assertion.** Four features × six slices is **24 rows** before a single step. The
 bound yields **10**. That ratio is why question 1 was a scale choice wearing a layout choice's clothes:
@@ -25,7 +27,8 @@ what excluded epics in the first place, and a story block that needed Premium wo
 **Gate failures:**
 
 - Rendering any sibling feature's slices. 24 rows, the defect this fixture exists to catch.
-- Rendering a third table, or promising one arrives with the roadmap. No roadmap is coming here.
+- Rendering a third table before the roadmap exists, or omitting the stage-1 line that says one arrives
+  with it. A card carrying neither reads as a feature with no steps.
 - **Folding the story state locally instead of asking `--story-state`.** This skill's recurring defect,
   committed on 2026-08-14 and reverted the same day. It renders this value; it must never compute it.
 - Bare sibling links with no clause saying what they hold.
