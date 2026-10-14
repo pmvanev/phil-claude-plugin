@@ -65,7 +65,7 @@ Confirm `--label` / `--unlabel` against `glab issue update --help` on your versi
 across major releases.
 
 A label swap moves the card between columns and says nothing about where it lands inside one. See
-*A column is a queue, so its order is a claim* for the position, which is a separate write.
+*A column is a queue, so its order is a claim*, in `references/ordering.md`, for the position, which is a separate write.
 
 ## GitHub does not work the same way
 
@@ -101,353 +101,21 @@ If a project needs a list rather than a board, plain issues plus open/closed is 
 with a repository-scoped token — which a Projects v2 board cannot, because projects are
 owner-scoped.
 
-## A column is a queue, so its order is a claim
+## Position, sub-issue order and milestones
 
-Read top to bottom, a column says what to pick up next. Neither forge decides that for you, and the
-two cases fail differently. A **plain issue list** is a reverse-chronological feed — `glab issue
-list` defaults to `created_at` descending, per `--help` on 1.112.0 — which is a record of when work
-was filed, not of when it will be done. A **board column** has a real position, and it stays unset
-until someone writes one. Unset still renders in some order, and that order is indistinguishable
-from one a person chose.
+**Before reordering a column, ranking a backlog, reading which card is next, or setting a sub-issue
+order or a milestone, read `references/ordering.md` whole.** It holds both forges' position calls, whose anchor parameters point
+in opposite directions, and why a milestone is a goal.
 
-**Where the work has a known order — a plan, a dependency chain, a release — write that order into
-the board.** Where it has none, rank it anyway, by what unblocks the most work, and record the basis
-where the column's readers already look: the description of the parent or tracking issue, under a
-fixed heading, as with `## Chain` below. A stated guess gets corrected; an unstated one gets
-followed.
+## Links and dependencies
 
-| | Position is | Set with | Read back with |
-|---|---|---|---|
-| GitLab board | the issue's `relative_position` | `PUT …/issues/:iid/reorder` (REST), per *GitLab reorders over REST* | `glab issue list --order relative_position --sort asc --label <column>` |
-| GitHub Projects v2 | the item's position in the project | `updateProjectV2ItemPosition` (GraphQL) | `gh api graphql`, per *Verify the end state* |
-| A plain issue list, either forge | nothing | — | — |
+**Before writing a link into an issue body, read `references/links.md` whole.** A relative path renders
+on both forges and 404s on GitHub.
 
-**Neither CLI exposes a way to set position, and the label swap this skill prescribes cannot set
-one either.** A `glab issue update --label/--unlabel` move changes the column and leaves the card
-wherever the default drops it, so on GitLab a deliberate move is two operations. `glab issue` has no
-reorder subcommand and `gh project item-edit` has no position flag (`glab` 1.112.0, `gh` 2.97.0).
-Position is GraphQL on GitHub; on GitLab use the REST reorder endpoint, though GraphQL `issueMoveList`
-also exists. GitHub's mutation:
-
-```sh
-gh api graphql -f query='mutation($p:ID!,$i:ID!,$a:ID){
-  updateProjectV2ItemPosition(input:{projectId:$p,itemId:$i,afterId:$a}){clientMutationId}}' \
-  -f p=<project-node-id> -f i=<item-node-id> -f a=<the item this one should land below>
-```
-
-### GitLab reorders over REST
-
-**Use this, not GraphQL.** Exercised 2026-08-12 against a self-hosted 18.x Premium instance:
-
-```sh
-glab api --method PUT "projects/<id>/issues/<iid>/reorder" -f move_after_id=<issue id>
-# or -f move_before_id=<issue id>
-```
-
-Three things the run established, each of which will otherwise cost an hour:
-
-- **`move_after_id` and `move_before_id` name the *other* issue's destination, not the subject's.**
-  `move_after_id=X` means "place X **after** the issue in the path" — so the subject moves *ahead of*
-  X. The natural reading is inverted, and the call succeeds either way.
-
-  **This is the exact opposite of GitHub's convention.** In `updateProjectV2ItemPosition`, `afterId`
-  is the item the subject lands *below*. Same word, opposite direction. Carrying a mental model
-  across forges silently reverses your ordering.
-
-  | | Parameter | Subject ends up |
-  |---|---|---|
-  | GitHub | `afterId: X` | **after** X |
-  | GitLab | `move_after_id: X` | **before** X |
-
-- **The IDs are global issue `id`s, not project `iid`s** — while the path takes the `iid`. Both
-  numbers appear on the same object and mixing them yields `404 Issue Not Found`.
-- **`relative_position` is not serialized in the REST response.** It read `null` on every issue
-  before, during, and after a successful reorder, in both the single-issue GET and the list. A
-  reorder that worked is indistinguishable from one that did nothing if you check that field — so
-  **verify by reading the ordered list back**, never by reading `relative_position`.
-
-An unset position also reads as `null`, which is the same warning as everywhere else in this
-section: the order you see is indistinguishable from one somebody chose. On the instance tested, all
-39 open issues had `null` — nothing had ever been positioned.
-
-GitLab's GraphQL `issueMoveList` carries `moveBeforeId`, `moveAfterId`, and `positionInList` alongside
-`fromListId` and `toListId`, so there a move between columns and a move within one are the same
-mutation. It has no one-liner here because it needs a `boardId` and both list IDs resolved first.
-
-Two behaviors come from the schemas' own description fields, and both are the kind that reads as a
-no-op and is not: `afterId` **omitted or null moves the item to the top**, and `positionInList` is
-0-based with `-1` meaning the end of the list. The `afterId`-omitted behavior is **confirmed by a run**
-(GitHub, `gh` 2.97.0) — it moved a card from last to first. `positionInList` is still description-only.
-
-**`afterId` set to an item id is also confirmed by a run** (GitHub, `gh` 2.97.0, 2026-08-14): it places
-the subject *immediately after* the named item. **Within-goal order is board position restricted to that
-goal's members** (see *A milestone is a goal*), so one well-chosen move corrects one goal's order and leaves the others untouched.
-
-**Sub-issue order is a separate order** from any column's. Repositioning it is a third mutation —
-`reprioritizeSubIssue(issueId, subIssueId, afterId | beforeId)` — and setting a card's board
-position leaves the parent's list untouched.
-
-**Confirmed by a run**: `--add-sub-issue 11,10,12` produced the parent list `12, 10, 11` — not call
-order, not creation order, not the column's order. Both `beforeId` and `afterId` anchoring then fixed
-it on the first attempt. Set the sub-issue order explicitly whenever it matters; nothing you have
-already done will have set it for you.
-
-All three signatures here were read from live schemas — GitHub's, and an 18.9.1-ee instance, the
-latter out of the schema dump described under *`glab api graphql` answers introspection with the whole
-schema*. Exercise status, as of 2026-08-12:
-
-| Mutation | Exercised? |
-|---|---|
-| `updateProjectV2ItemPosition`, `afterId` omitted → top | **yes** — `gh` 2.97.0 |
-| `updateProjectV2ItemPosition`, `afterId` → a specific sibling | **yes** |
-| `reprioritizeSubIssue`, `beforeId` and `afterId` | **yes**, both forms |
-| GitLab REST `PUT …/issues/:iid/reorder` | **yes** — 18.x Premium, both directions, repeatable |
-| GitLab GraphQL `issueMoveList` | **no** — still schema-only, and superseded by the REST call above |
-
-Every form above landed correctly on the first attempt. Read the introspection section before running
-a query of your own.
-
-**Write the order top-down in one pass.** Each call anchors to a neighbor, so anchoring to a card
-you have not placed yet shifts everything after it — successfully, and with no output that says so.
-That failure mode is reasoned from the mutations' shape, not observed: read the column back and
-compare it against the intended sequence, per *Verify the end state*.
-
-A GitHub view with a sort configured orders by that field, which leaves a hand-set position
-invisible on that view *(unverified — check the view's sort and the position it may be hiding before
-trusting either)*. On GitLab, `glab issue list --order` also offers field-derived orders —
-`priority`, `label_priority`, `weight`, `milestone_due`, `due_date`, among them — which keep working
-as new issues arrive, where a hand-set position does not. Which of those fields your tier populates
-is a tier question; see *Find the tier before choosing a convention*.
-
-Without a board there is no position to set. Carry the order in a checklist in one tracking issue,
-and say which one is authoritative.
-
-### A milestone is a goal, and its due date is the only order that survives
-
-**A goal holds *cards*; a story holds *feature directories*.** A goal is this milestone slot — a due
-date, unrelated work grouped by design, an ordering that survives new cards arriving. A story is itself
-**a card** and never holds another; it groups several nWave features inside one issue
-(`phil:nwave-issue-board`). A goal and a story are not alternatives; neither replaces the other.
-
-**One issue carries at most one milestone.** Verified on `glab` 1.112.0 (*"Set to `""` or 0 to
-unassign"*) and `gh` 2.97.0 (`--milestone` singular, plus `--remove-milestone`). That slot is spent
-once, so what it means is a real decision — and the decision is: **a milestone is a goal**, on both
-forges alike.
-
-That buys the one thing hand-set position cannot give: an order that **survives new issues arriving**.
-
-| Level | Ordered by | Survives new arrivals? |
-|---|---|---|
-| Between goals | milestone **due date** (`--due-date`, ISO 8601, on both CLIs) | **yes** |
-| Within a goal | hand-set position | no — needs a re-rank, but only inside one goal |
-
-A new issue then needs a goal (coarse, cheap) and a position inside it, instead of a re-cut of one
-flat total order across the whole backlog.
-
-**A goal, not a feature, because** on GitHub sub-issues already give a feature its roster; on GitLab a feature milestone would buy a roster at the price of the only durable
-cross-issue ordering. One meaning on both forges beats re-explaining the word at every boundary.
-
-Three limits worth stating before anyone builds on it:
-
-- **Milestones do not nest.** One level of goal, and no sub-goals.
-- **A milestone gives no order *within* itself.** It groups; ranking inside a goal is still position.
-- **Not Premium-gated** — verified against a self-hosted 18.x instance, which is what makes this
-  usable on Free where epics are not.
-
-## Link what the forge cannot resolve
-
-An issue is read on its own page, away from the repo and away from you. Every reference a reader
-might need to follow — a file, an ADR, a sibling issue — should be traversable by clicking. Two
-rules, and they pull in opposite directions.
-
-**Do not wrap what the forge already autolinks.** A bare `#12` becomes a live reference carrying the
-issue's title and state — on GitHub, as a hovercard on the rendered link. `[#12](https://…/issues/12)`
-renders as an ordinary link with none of that, and adds a URL to maintain. Leave these bare:
-
-| | Autolinked without markdown |
-|---|---|
-| Both | `#12`, `@user`, commit SHAs |
-| GitHub also | `owner/repo#12` |
-| GitLab also | `group/project#12`, `!34` (MR), `%2` (milestone), `~label` |
-
-A forge autolinks an issue reference **only when the issue exists**, which makes a read-back a
-free wrong-number check — verified on GitHub (`#3` renders an href, `#999` stays plain text), and
-on GitLab only in the negative direction, where a reference to a non-existent issue stayed plain.
-It works only against *rendered* output. `gh issue view --json body` returns
-the raw markdown, where `#12` is literal text whether or not it resolves, so checking there proves
-nothing either way. Render it:
-
-```sh
-gh api -X POST /markdown -f mode=gfm -f context=<owner>/<repo> \
-  -f text="$(gh issue view 12 -R <owner>/<repo> --json body -q .body)"
-# GitLab: POST /api/v4/markdown with gfm=true and project=<group/project>
-```
-
-Plain text means the number is wrong **or** you cannot read the target — a confidential issue or a
-private project renders identically. GitHub shares one number space between issues and pull
-requests, so `#12` may resolve to a PR.
-
-**Write an absolute URL for everything else.** Relative paths are the trap, because the two forges
-disagree and both render a link either way:
-
-| `[adr](docs/adr/016.md)` in an issue body | Result |
-|---|---|
-| GitLab | expands to `<host>/<project>/-/blob/<default-branch>/docs/adr/016.md` |
-| GitHub | emitted verbatim, resolved against the *issue* URL → **404** |
-
-Verified by rendering the same body through both forges' markdown APIs (`POST /markdown`). A
-leading slash does not save it: GitLab resolves `/docs/…` identically, GitHub emits it verbatim and
-it resolves to `github.com/docs/…`. Absolute URLs work on both — write those and the question never
-comes up.
-
-- **Docs and ADRs** — link at the default branch, so the reader gets current content:
-  `https://<host>/<owner>/<repo>/blob/<default-branch>/docs/adr/ADR-016.md` on GitHub,
-  `https://<host>/<project>/-/blob/<default-branch>/…` on GitLab. Note the `/-/` — GitLab needs it,
-  GitHub has no such segment.
-- **A specific line of code** — use a commit-SHA permalink, never a branch. A line anchor against a
-  moving branch drifts onto unrelated code and stays plausible while doing it. Anchor syntax
-  differs: GitHub `#L40-L52`, GitLab `#L40-52` *(GitLab form unverified — confirm by clicking a line
-  number on any file in your instance; GitLab writes the anchor into the address bar)*.
-- **Confirm the path is pushed** before linking it. A file that exists only in your working tree
-  produces a link that renders correctly, passes your read-back, and 404s for every other reader.
-  Resolve it against the branch you are linking, not your checkout:
-  `git ls-tree origin/<default-branch> -- <path>` prints nothing if the file is not there.
-
-On GitHub only, a repository can map a prefix to a URL template, so every bare `ADR-016` becomes a
-link — including ones a human types, with no markdown:
-
-```sh
-gh api --method POST repos/<owner>/<repo>/autolinks \
-  -f key_prefix='ADR-' -f url_template='https://…/docs/adr/ADR-<num>.md'
-```
-
-The same path without `--method POST` lists what is already configured. It needs admin, is
-configured per repository, and has no GitLab equivalent, so treat it as a bonus on top of writing
-real links, never as the mechanism you rely on.
-
-## Dependencies depend on the tier
-
-- **GitLab Premium and above**: real link types — `blocks`, `is_blocked_by` — enforced by GitLab
-  and rendered with backlinks on both sides. Prefer these. Created via
-  `glab api --method POST "projects/<id>/issues/<iid>/links" -f target_project_id=<id> -f target_issue_iid=<iid> -f link_type=blocks`
-  *(command form unverified — check whether your `glab` exposes a subcommand for this).*
-- **GitLab Free**: only `relates_to` is available; `blocks` and `is_blocked_by` are Premium and
-  above. Use `relates_to` and carry the direction in a `Blocked by #N` line in the description.
-- **GitHub**: native `blocked by` / `blocking` links and sub-issues, exposed as first-class flags.
-  These are recent — older guidance says GitHub has none, so check `gh --version` before believing
-  it. Verified on `gh` 2.97.0:
-
-  ```sh
-  gh issue edit 123 -R owner/repo --add-blocked-by 200 --add-blocking 300,301
-  gh issue edit 100 -R owner/repo --add-sub-issue 123,124   # or: --parent 100 on the child
-  gh issue edit 100 -R owner/repo --remove-sub-issue 123    # or: --remove-parent on the child
-  ```
-
-  **The edge can be removed as well as added** — `--remove-sub-issue` / `--remove-parent`, and GraphQL
-  `removeSubIssue`. Verified on `gh` 2.97.0, 2026-08-14. This matters because *removing* the edge is the only
-  way to stop a child counting toward its parent's completion; see the next section.
-
-  Each flag takes an issue number or a URL, so links cross repositories. It is one edge read from
-  both ends — `blockedBy` and `blocking` are both fields on `Issue` in GraphQL — so the reverse side
-  needs no second write.
-
-### Writing a sub-issue edge is a flag; READING one is GraphQL
-
-The asymmetry costs an hour if you assume the flags imply a field. **`gh issue list --json` and
-`gh issue view --json` expose no `parent` and no `subIssues`, and no flag adds them** — `--json` rejects
-both names outright. The edge is readable only through GraphQL:
-
-```sh
-gh api graphql -f query='query($o:String!,$r:String!){ repository(owner:$o,name:$r){
-  issues(first:100,states:OPEN){ nodes { number
-    parent { number }
-    subIssues(first:50){ nodes { number } } } } } }' -f o=<owner> -f r=<repo>
-```
-
-**One whole-board call, not one per issue.** The nesting returns every edge in a single response, so a
-tool that walks issues individually to find parents has bought an N+1 for nothing.
-
-**Reading it costs a guarantee.** `gh api graphql` accepts a mutation document, so a command that can
-read an edge can also write one. A read-only tool either goes without this edge or downgrades its
-read-only claim to a promise in prose, as `phil:groom-issues` does.
-
-**GitLab has no stable equivalent to read.** Epics are Premium and the work-item hierarchy that would
-carry an issue-to-issue parent is an *Experiment* — see the next section. A cross-forge tool keyed on
-parent edges is a GitHub-only check, and should say so rather than reporting the GitLab half clean.
-
-## A parent's "N of M done" counts different things on each forge
-
-Both forges render a completion count on a parent issue, and the two are backed by unrelated
-mechanisms. Reading the wrong field returns a real number that counts something else — the
-characteristic failure of this whole area, since nothing errors.
-
-**GitHub carries two independent rollups on one issue.** Sub-issues are real issues, so the children
-are also cards; the parent's bar comes from `subIssuesSummary`. A markdown task list that references
-issues is counted separately, by `trackedIssues`. The two do not fall back to each other.
-
-```sh
-gh api graphql -f query='query{ repository(owner:"<o>",name:"<r>"){ issue(number:9){
-  subIssuesSummary{ total completed percentCompleted }
-  trackedIssues(first:1){ totalCount } } } }'
-```
-
-Verified on `gh` 2.97.0, 2026-08-12: a parent with three open sub-issues and no checkboxes in its
-body returned `{total: 3, completed: 0, percentCompleted: 0}` alongside `trackedIssues.totalCount: 0`.
-
-**`completed` counts CLOSED children, and closing one is what increments it.** Measured 2026-08-14 on a live
-parent: adding an open child gave `{1, 0, 0}`, **closing that child** gave `{1, 1, 100}`, and **removing the
-edge** gave `{0, 0, 0}`. Two consequences worth having before you rely on the number:
-
-- **A child closed for any reason counts as completed.** A won't-build close and a shipped close are the same
-  value here. Observed on `pmvanev/phil-claude-plugin`: parent #9 reads `3/3 · 100%` while one of its three
-  children was deliberately **not** built and closed anyway. The counter is doing what it documents; the
-  difference survives only in prose elsewhere.
-- **To stop a child counting, remove the edge — closing it does the opposite.** Anything that consolidates
-  children into a parent must un-parent before closing, or it renders the parent complete while the work
-  continues.
-What the issue page renders when *both* counters are non-zero is unverified — check it before relying
-on either to be the one displayed.
-
-**GitLab's stable *parent-issue* rollup counts checkboxes, not issues.**
-
-| Mechanism | Field | Children are | Status |
-|---|---|---|---|
-| Checklist | `taskCompletionStatus {count, completedCount}`; REST `task_completion_status {count, completed_count}` | markdown `- [ ]` in the description | Free, stable — **verified** |
-| Child work items | `WorkItemWidgetHierarchy.rolledUpCountsByType` → `countsByState {all, opened, closed}` | real issues and tasks | **Experiment**, added 17.3 — 18.9.1-ee schema only, not run |
-| Milestone | `MilestoneStats {closedIssuesCount, totalIssuesCount}` | real issues | Free, stable |
-
-`task_completion_status` needs no widget and no tier, and appeared on every issue observed in the
-REST payload — which makes it the one to reach for:
-
-```sh
-glab api "projects/<id>/issues/<iid>" | jq .task_completion_status   # {"count":6,"completed_count":1}
-```
-
-Verified against an 18.9.1-ee instance by parsing checkboxes out of raw descriptions and comparing:
-counts matched on twelve issues, including partials (`1/6`, `2/6`) and complete (`5/5`).
-
-**`WorkItemWidgetProgress` is not this.** Despite the name it carries
-`startValue` / `currentValue` / `endValue` / `progress` for OKR key results — a manually set
-percentage, not a count of finished children. It answers, and the answer is unrelated.
-
-The asymmetry decides the design: **GitHub's parent rollup counts things that are cards; GitLab's
-stable parent rollup counts things that are not.** A GitLab parent whose children must also cross
-board columns has no project-scoped, non-experimental count of them.
-
-A milestone is the one GitLab rollup that is both stable and counts real issues, so grouping those
-children under one *would* buy the count — but **do not**. The milestone slot is singular and is
-spent on the goal (see *A milestone is a goal*), and trading the backlog's only durable ordering for
-a progress bar is a bad exchange. Accept that GitLab has no reliable feature-level count, and read
-the children's live states instead of a summed one.
-
-**Reopening restores the issue and not the field.** `gh issue reopen` puts an issue back to OPEN and leaves
-Status wherever the close left it — so a card reopened out of Done sits **OPEN inside Done**, and no board view
-groups on that combination or flags it. Setting the field back is a separate `gh project item-edit`, and a
-command that holds no such verb can only hand the call over. The asymmetry is the same one the paragraph above
-describes from the other direction: **the two facts are coupled on the way in and independent on the way out.**
-
-Check for it after any reopen — an open issue sitting in Done, or a closed one outside it, is always a defect,
-and the single board read that lists items with their Status already returns both halves.
+**Before writing or reading a blocking link or a sub-issue edge, reading a parent's completion count,
+or closing an issue that has a parent — setting Done included — read `references/hierarchy.md`
+whole.** Each forge offers different link types per tier and counts a parent's children differently,
+and a closed child counts as completed whatever the reason it closed.
 
 ## Leave a chain when you pivot
 
@@ -484,11 +152,11 @@ it governs the one you are about to write.
 
 Where the forge writes the reverse edge for you — GitHub, and GitLab Premium — it writes only the
 edge, never the reason, so the prose line goes on both issues either way. See *Dependencies depend
-on the tier* above for what each forge gives you.
+on the tier*, in `references/hierarchy.md`, for what each forge gives you.
 
 Do not hand-maintain the chain as blockers close. The linked issue is authoritative about its own
 state and is one click away, so editing #12 to say #47 closed just creates a second copy that can
-go stale. Bare references carry title and state, as above; this is the second reason to leave them
+go stale. Bare references carry title and state, as `references/links.md` shows; this is the second reason to leave them
 bare — a live reference exposes a closed issue at the link, a hand-written markdown link does not.
 
 ## Bulk seeding needs two passes
@@ -500,80 +168,12 @@ project already has issues.
 
 This matters only for one-time seeding. Day-to-day work touches one issue at a time.
 
-## Self-hosted certificates
+## `glab` and self-hosted instances
 
-Two failure modes look alike and are not:
-
-- **Unknown certificate authority** — import the CA into the OS trust store. `glab` and `gh` are Go
-  binaries and read it. This is the fix:
-  `sudo cp ca.pem /usr/local/share/ca-certificates/gitlab.crt && sudo update-ca-certificates`
-- **Expired certificate** — no CA import helps. Renew it. There is no safe workaround.
-
-Disabling verification is not a fallback an agent may choose. It exposes an `api`-scope token to
-anyone on the network path, and a private-IP instance on a shared or home network is exactly where
-that matters. If the developer decides to accept that risk, it is scoped to the single host
-(`glab config set skip_tls_verify true --host <host>` — confirm the flag against your `glab`
-version), it is temporary, and it must be stated out loud in the transcript every time it is used.
-
-An expired certificate is a defect to fix, not a setting to work around.
-
-## `glab`'s JSON flag differs per subcommand — check before you type it
-
-**There is no blanket rule; check each subcommand.**
-
-| Subcommand | JSON flag | What the other flag does there |
-|---|---|---|
-| `glab issue list` | **`-O` / `--output`** `json` | `-F` is `--output-format`, taking `details\|ids\|urls` |
-| `glab repo view` | **`-F` / `--output`** `json` | `-O` **does not exist** |
-| `glab api` | **none** — prints JSON natively | `-O` is **rejected**: `Unknown shorthand flag: 'O' in -O` |
-
-```sh
-glab issue list -R <group/project> --output json --per-page 100   # correct
-glab issue list -R <group/project> -F json                       # silently returns a table
-glab repo view <group/project> -F json                           # correct — -O is not a flag here
-glab api projects/<url-encoded-path>                             # correct — no output flag at all
-```
-
-**On `issue list`, `-F json` does not error**: it returns the human-readable table. A caller that
-parses the result finds no JSON and concludes the issues have no bodies, or that the list is empty.
-That is the characteristic shape of every trap in this file — a wrong guess that reports success.
-
-**Verify a flag against `glab <subcommand> --help`, never from memory**: a flag verified on one
-subcommand is evidence about that subcommand only. Wound: a blanket "`-O` everywhere" rule stood here
-until 2026-08-17, right about one subcommand of three.
-
-**Read past `glab`'s first error line.** It prints a bare `ERROR` banner before the real message, so a
-caller that reports only the first line hides the defect behind an uninformative refusal.
-
-## `glab api graphql` answers introspection with the whole schema
-
-This skill sends readers to live schemas to confirm mutation signatures. On `glab` 1.112.0, that
-route has a trap: **any query containing `__type` or `__schema` is discarded and answered with a full
-schema dump** — 7.4 MB against an 18.9.1-ee instance. The response is valid JSON with a `data` key,
-so it looks like a success; only `data.__type` is missing, and a naive parse raises a `KeyError`
-rather than reporting what happened.
-
-Verified on 1.112.0 — the discriminator is introspection, not syntax:
-
-| Query | Result |
-|---|---|
-| `--raw-field query='{currentUser{username}}'` | correct response |
-| `--raw-field query='query{currentUser{username}}'` | correct response |
-| `--raw-field query='{__type(name:"Issue"){name}}'` | full schema dump |
-| `--raw-field query='query{__type(name:"Issue"){name}}'` | full schema dump |
-| `--raw-field query='query Foo{__type(name:"Issue"){name}}'` | full schema dump |
-
-Ordinary queries pass through untouched, so this affects schema reading only. Two neighboring forms
-fail differently and are not workarounds: `--input <file>` with a `{"query": "..."}` body arrives as
-an empty document (`Unexpected end of document`), and `-f query=@<file>` sends the literal string
-`@<file>` rather than reading it.
-
-**Capture the dump once and query it locally** — `jq`, or a few lines of Python over
-`data.__schema.types` — rather than fighting the flag. It contains every type, so one dump answers
-every later question. Write it to a scratch path, never into the repository: it is megabytes of
-generated content that dates the moment the instance is upgraded. Going around `glab` with `curl`
-needs the instance's CA and its own token handling, and on an IP-addressed instance the certificate
-may carry no matching SAN.
+**Before asking any `glab` command for JSON, reporting a `glab` error, reading a GitLab schema, or
+connecting to a self-hosted instance — and on any certificate error from either CLI — read
+`references/gitlab-cli.md` whole.** Its JSON flag differs per subcommand, introspection returns the whole
+schema, and a certificate failure has two causes with different fixes.
 
 ## A status write can close the issue underneath you
 
@@ -597,6 +197,15 @@ Two consequences worth holding:
 The same class applies to the mirror workflow (*item closed → Status: Done*), which makes
 `gh issue close` a board write. Neither is discoverable from `--help`, and neither is visible in the
 project's field schema — check the project's workflow settings, or infer it the way this was found.
+
+**Reopening restores the issue and not the field.** `gh issue reopen` puts an issue back to OPEN and leaves
+Status wherever the close left it — so a card reopened out of Done sits **OPEN inside Done**, and no board view
+groups on that combination or flags it. Setting the field back is a separate `gh project item-edit`, and a
+command that holds no such verb can only hand the call over. The asymmetry is the same one this section
+describes from the other direction: **the two facts are coupled on the way in and independent on the way out.**
+
+Check for it after any reopen — an open issue sitting in Done, or a closed one outside it, is always a defect,
+and the single board read that lists items with their Status already returns both halves.
 
 ## Verify the end state
 
@@ -689,5 +298,5 @@ selection instead.
 `tests/test_issue_board_fixtures.py` checks what is automatable — every fixture well-formed, every
 `expected_decision` naming exactly one defined outcome, every defined outcome carrying a fixture. It does
 not judge whether a run reached the right decision, and says so. Drive the fixtures by hand per
-`self-test/README.md` whenever this file changes, and whenever `phil:nwave-issue-board` or
+`self-test/README.md` whenever this file or its `references/` change, and whenever `phil:nwave-issue-board` or
 `phil:nwave-slice-status` changes, since both build on these mechanics.

@@ -228,7 +228,7 @@ inside the current slice. Publish both.
 no sub-issue list to disagree with the column, and no second seeding pass.
 
 What remains is the order of the **feature** cards within a column, which is `phil:issue-board`'s under
-*A column is a queue, so its order is a claim*.
+*A column is a queue, so its order is a claim*, in its `references/ordering.md`.
 
 - **At the story tier the order is the declared `position`, and the line says so:**
   `Order: feature position as declared · slice order <as below>`. Where a member declares no position it

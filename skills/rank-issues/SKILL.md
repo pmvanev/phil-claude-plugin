@@ -215,5 +215,5 @@ with two consumers to shape it. Extracting now, on one, would be guessing at the
 ## Acceptance
 
 `${CLAUDE_PLUGIN_ROOT}/skills/rank-issues/self-test/` holds the fixtures. Run them whenever this file,
-the command loader, or `phil:issue-board`'s position or milestone sections change — this skill's
+the command loader, or `phil:issue-board`'s `references/ordering.md` changes — this skill's
 correctness is partly that skill's.

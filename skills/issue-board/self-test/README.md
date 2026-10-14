@@ -72,5 +72,5 @@ automatable** — these are prose fixtures over a prose skill.
 that `expected_decision` names exactly one outcome this README defines, and that every defined outcome
 has a fixture. It does not pretend to judge a run, and it says so in its own docstring.
 
-**Run it whenever `skills/issue-board/SKILL.md` changes**, and whenever `phil:nwave-issue-board` or
+**Run it whenever `skills/issue-board/SKILL.md` or any file in its `references/` changes**, and whenever `phil:nwave-issue-board` or
 `phil:nwave-slice-status` changes, since both build on this skill's mechanics.

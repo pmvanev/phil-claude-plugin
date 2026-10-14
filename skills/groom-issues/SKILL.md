@@ -154,7 +154,7 @@ glab issue list -R <group/project> --output json --per-page 100
 ```
 
 On `glab issue list` the JSON flag is `-O`/`--output`, **not `-F`** — `phil:issue-board` owns the
-mechanism, under *`glab`'s JSON flag differs per subcommand — check before you type it*. Both commands
+mechanism, in its `references/gitlab-cli.md` under *`glab`'s JSON flag differs per subcommand — check before you type it*. Both commands
 return bodies populated, so fetch no issue individually.
 
 **Then one more call on GitHub, for the parent/child edges the first call cannot return.** `gh issue
@@ -172,7 +172,7 @@ gh api graphql -f query='query($o:String!,$r:String!){ repository(owner:$o,name:
 **One call, paginated if the board needs it — not one per issue.** The whole-board read is the design;
 an N+1 here would reintroduce the cost the single list call exists to avoid.
 
-**The query is copied from `phil:issue-board` (*Writing a sub-issue edge is a flag; READING one is
+**The query is copied from `phil:issue-board`'s `references/hierarchy.md` (*Writing a sub-issue edge is a flag; READING one is
 GraphQL*) so the scan runs from this file alone. If the two ever disagree, `phil:issue-board` wins.**
 
 **This call is a read and must stay one.** `gh api graphql` accepts a mutation document, so nothing in
@@ -181,7 +181,7 @@ the grant stops a write — only the invariants below do. Send `query` documents
 
 **On GitLab the parent edge stays unreadable, so report the check unevaluated, per *Reporting*.**
 GitLab has no stable issue-to-issue parent edge: epics are Premium, and the work-item hierarchy is an
-*Experiment* (`phil:issue-board`, *A parent's "N of M done" counts different things on each forge*). So
+*Experiment* (`phil:issue-board`'s `references/hierarchy.md`, *A parent's "N of M done" counts different things on each forge*). So
 `glab api` is not granted; it would widen the promise for an oracle that does not exist.
 
 **Re-read a card immediately before writing it, on every writing command.** Fetch the issue being

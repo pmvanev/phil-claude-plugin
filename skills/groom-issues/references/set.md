@@ -178,7 +178,7 @@ cards — *Merge*'s duty, times N.
 indistinguishable from one closed as shipped; this repo's board once showed `3/3 · 100%` over a child
 deliberately not built. **Say what the rollup will show before the user answers**, and hand over the read rather than claiming to have made it, because `subIssuesSummary`
 is GraphQL-only and `/phil:groom-set` grants no `gh api`. The mechanism and the measurement are
-`phil:issue-board`'s, under *A parent's "N of M done" counts different things on each forge*.
+`phil:issue-board`'s, in its `references/hierarchy.md` under *A parent's "N of M done" counts different things on each forge*.
 
 **Only the scan holds `gh api graphql`; this command does not, by decision.** Beside `gh issue close`, a
 grant that can mutate is a far larger promise than beside a report. `REFUSE-UNGRANTED` hands over the

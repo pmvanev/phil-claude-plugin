@@ -33,7 +33,7 @@ edge; OR a line written as a comment rather than into the description; OR one en
 other on the ground that GitHub mirrors the edge; OR any construction named in assertion 5; OR a word
 ceiling introduced.
 
-**Why no candidate text is supplied.** `SKILL.md:456` ships a real, tight example — *"Blocked by #47 —
+**Why no candidate text is supplied.** `SKILL.md`, under *Leave a chain when you pivot*, ships a real, tight example — *"Blocked by #47 —
 token refresh must land first or the retry test can't be written"*. Offering it beside a padded variant
 would test **selection**, and selection is passed by "publish the shorter string", which is the word
 ceiling `board-prose-standard` [D5] refuses. The shipped example is the reference for what good looks
