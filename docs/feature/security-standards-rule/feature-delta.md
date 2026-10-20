@@ -206,8 +206,8 @@ Decision enabled: whether the hook's design must change before it ships.
 
 - **Who:** a developer running `/phil:review-code` on a change.
 - **Does what:** gets each objective security defect named by CWE id with its fix.
-- **By how much:** every seeded always-flag defect surfaced with the right CWE (at least 8 of 8
-  across US-01 and US-03); zero items on the decoys (0 of at least 5).
+- **By how much:** every seeded always-flag defect surfaced with the right CWE (10 of 10 across
+  US-01 and US-03, as delivered); zero items on the decoys (0 of 6).
 - **Measured by:** the self-test fixture, plus the dogfood run over this repo's hooks and scripts.
 - **Baseline:** no rule; the reviewer's one bullet names no id and no exemption.
 
@@ -228,3 +228,45 @@ out-of-scope listed.
 
 Order: research precursor → CWE verification (D5) → slice 01 → slice 02 → slice 03. Slice 01 carries
 the highest uncertainty — whether 30 rows stay readable and whether the decoys hold — so it goes first.
+
+## Wave: DISCUSS / [REF] Delivered and dogfooded (2026-10-20)
+
+All three slices landed together in `57f7d8b` (1.2.0); the rule was drafted whole, so the slices did
+not ship separately. Fixture 02 grew from eight seeded defects to ten when its first drive filed two
+correct items the fixture had not listed (CWE-297, CWE-250).
+
+**Fixture drive.** A fresh agent followed this working tree's `SKILL.md` over fixture 02, reading only
+the code: 8 of the 8 then-listed defects, 0 of 6 decoys, both guard-elsewhere cases sent to Advisory.
+
+**Dogfood run.** A fresh agent followed this working tree's `SKILL.md`, Priority 1 security only,
+over `hooks/` and `scripts/` — the released copy was not run. Seven items, two confirmed by executing
+the code:
+
+| Item | File | Finding |
+|---|---|---|
+| CWE-636 | `hooks/refactor-loop/block-test-file-write.py` | Guard G2 fails open: an undecodable ledger, or a non-object `tool_input`, lets a test-file write through. Confirmed by running the hook. |
+| CWE-1333 | `scripts/plain_language.py` | Path regexes backtrack quadratically; `check-ask.py` scans the whole question even after it fails the word ceiling. 1.0 s on 20,000 characters, measured. |
+| CWE-88 | `scripts/probe-board.py` | `--repo` reaches `gh repo view` positionally with no leading-dash guard; the only check is `"/" in args.repo`. |
+| CWE-943 | `scripts/probe-board.py` | GraphQL queries `%`-format owner and name into string literals; seven sites, one fix (GraphQL variables). |
+| CWE-1427 | `scripts/render-block.py` | Forge-supplied project, view, option and workflow names are written verbatim into `CLAUDE.md`, which every later session loads. |
+| CWE-1427 | `scripts/render-block.py` | Label names from the board are written verbatim into the declared region. |
+| Advisory | `hooks/refactor-loop/reinject-pinned-constraints.py` | Ledger lines re-injected as context; a cloned repo can commit a ledger. Unregistered today. |
+
+**Where the rule made the reviewer hesitate** — candidate refinements, not yet applied:
+
+1. Model output is untrusted only where the code grants more than the model's own grant; a script
+   that writes a path the model could write directly grants nothing.
+2. A sink an earlier, unrelated call happens to protect has no stated tier.
+3. CWE-636 needs a scope: a deny that is not a security control (a wording standard) is outside it.
+4. CWE-1333's threshold: whether "overlapping quantifiers" covers a class beside a literal it matches.
+5. One defect matching two ids of one row: file the most specific, not both.
+6. CWE-1427's Preferred form assumes a live session; a write into an instruction file needs its own
+   fix (render as inert data, or keep it out), and forge metadata belongs in the untrusted list.
+7. An untrusted status the code cannot show belongs with the trust-boundary Advisory, unstated today.
+8. No row for an uncanonicalised path in a guard, a guard its subject can disable, or verbatim
+   transcripts written at default permissions.
+9. Do not flag held cleanly: a SHA-1 compare-and-swap fingerprint and list-form `subprocess.run`.
+
+Each refinement changes what the rule asserts, so per `CLAUDE.md` it folds into `rules/security.md`
+with a fixture that would have caught it and a version bump. The seven findings are defects in this
+repo and belong on the board.
