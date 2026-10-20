@@ -52,6 +52,11 @@ SHAPES = {
     "docs-root": re.compile(r"https://github\.com/[^\s`)]+/blob/[^\s`)]+"),
 }
 
+# No shape matches across whitespace, so each token is scanned alone and truncated here. The docs-root
+# shape restarts at every `https://github.com/` and scans to the end of the run: one line repeating
+# that prefix took ten seconds at 304,000 characters (CWE-1333, issue 48). No id or URL is longer.
+TOKEN_CAP = 512
+
 
 class Refusal(Exception):
     """A stop with a reason. Nothing is written on any path that raises this."""
@@ -309,8 +314,9 @@ def drift(text: str, probe: dict) -> dict:
 
     for lineno, line in _section_lines(text):
         bad = None
+        words = [w[:TOKEN_CAP] for w in line.split()]
         for shape, pattern in SHAPES.items():
-            for token in pattern.findall(line):
+            for token in (t for w in words for t in pattern.findall(w)):
                 if not any(token in v or v in token for v in probed):
                     bad = {"line": lineno, "shape": shape, "found": token, "text": line.strip()}
                     break

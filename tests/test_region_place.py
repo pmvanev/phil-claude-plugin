@@ -712,3 +712,28 @@ def test_retire_refuses_a_line_inside_the_declared_region():
         except rp.Refusal:
             continue
         assert DECL in out
+
+
+# --- the drift scan is linear in its input (CWE-1333, issue 48) ----------------------------
+#
+# The docs-root shape restarts at every `https://github.com/` and scans to the end of the run, so one
+# line repeating the prefix took ten seconds at 304,000 characters.
+
+HOSTILE_LINE = "- " + "https://github.com/" * 16000 + "\n"
+
+
+def test_one_hostile_line_drifts_in_bounded_time():
+    import time
+    text = PROSE_SECTION.replace("## Something else", HOSTILE_LINE + "\n## Something else")
+    start = time.perf_counter()
+    rp.drift(text, PROBE)
+    assert time.perf_counter() - start < 1.0
+
+
+def test_a_wrong_docs_root_beside_a_hostile_token_still_contradicts():
+    text = PROSE_SECTION.replace(
+        "## Something else",
+        "- " + "https://github.com/" * 16000 + " Docs: https://github.com/other/repo/blob/main/\n\n"
+        "## Something else")
+    d = rp.drift(text, PROBE)
+    assert any(c["found"] == "https://github.com/other/repo/blob/main/" for c in d["contradicts"])
