@@ -130,3 +130,25 @@ def test_the_known_false_positives_are_recorded_rather_than_discovered(pl, text)
 def test_a_card_number_survives_the_board_list(pl):
     assert pl.identifiers_in("blocked until #38 settles it",
                              forbid=pl.BOARD_DESCRIPTION_FORBIDDEN) == []
+
+
+# --- the scan is linear in its input (CWE-1333, issue 48) ----------------------------------
+#
+# The file-path class backtracks quadratically inside one long token, and one token is one word, so a
+# 40,000-character question passes the word ceiling and reaches the scan. Before the fix this took about
+# ten seconds; a bound of one second fails it by an order of magnitude, never by machine noise.
+
+HOSTILE_TOKENS = ["a." * 20000, "a-" * 20000, "a/" * 20000]
+
+
+@pytest.mark.parametrize("text", HOSTILE_TOKENS, ids=["dots", "dashes", "slashes"])
+def test_one_long_token_scans_in_bounded_time(pl, text):
+    import time
+    start = time.perf_counter()
+    pl.identifiers_in(text, forbid=pl.SUMMARY_FORBIDDEN)
+    assert time.perf_counter() - start < 1.0
+
+
+def test_an_identifier_beside_a_hostile_token_is_still_found(pl):
+    text = "a." * 20000 + " then read skills/x/SKILL.md about #12"
+    assert pl.identifiers_in(text) == ["a file path", "an issue or ticket number"]

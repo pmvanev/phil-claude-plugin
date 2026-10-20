@@ -53,6 +53,12 @@ PORTABLE_IDENTIFIERS = [
 # A URL is a link the reader can open, not an identifier from a system they may not share.
 URL = re.compile(r"https?://\S+")
 
+# No class matches across whitespace, so each token is scanned alone and truncated here. The file-path
+# class backtracks quadratically inside one long token, and one token is one word, so a 40,000-character
+# question passed the word ceiling and stalled the hook for ten seconds (CWE-1333, issue 48). No path a
+# reader writes is longer than this.
+TOKEN_CAP = 256
+
 # A handle of the shape LETTERS then DIGITS, hyphen optional — `ADR-013`, `DDD-7`, `Mandate-12`, and
 # bare `D11`, which is how this repo actually writes its decision numbers. Opaque in any project: it
 # names a record the reader has to resolve before the sentence containing it means anything.
@@ -112,11 +118,11 @@ def identifiers_in(text, forbid=PORTABLE_IDENTIFIERS, permit=()) -> list[str]:
     the finding is reported in — `permit=["an issue or ticket number"]` for a surface whose whole job is
     printing card numbers. A permitted class is not scanned for at all; it is not a finding downgraded.
     """
-    scannable = URL.sub(" ", str(text or ""))
+    tokens = [t[:TOKEN_CAP] for t in URL.sub(" ", str(text or "")).split()]
     permitted = set(permit)
     return sorted({
         name for name, pattern in forbid
-        if name not in permitted and pattern.search(scannable)
+        if name not in permitted and any(pattern.search(t) for t in tokens)
     })
 
 

@@ -253,3 +253,19 @@ def test_a_url_is_not_a_path(tmp_path):
     linked = json.loads(json.dumps(CLEAN))
     linked["questions"][0]["options"][0]["description"] += " See https://github.com/o/r/blob/main/x.md"
     assert ask(linked, cwd=_strict_project(tmp_path)) is None
+
+
+# --------------------------------------------------------------------------- bounded time (CWE-1333)
+
+
+def test_a_one_word_question_of_forty_thousand_characters_is_decided_quickly(tmp_path):
+    """One token is one word, so this passes the ceiling and reaches the identifier scan, where the
+    file-path class backtracked quadratically: about ten seconds before the fix (issue 48). A hook
+    that stalls every ask is a denial of service on the conversation, whatever it decides."""
+    import time
+    hostile = {"questions": [{"header": "Way", "question": "a." * 20000,
+                              "options": [{"label": "Yes", "description": "Go."},
+                                          {"label": "No", "description": "Stop."}]}]}
+    start = time.perf_counter()
+    ask(hostile, cwd=_strict_project(tmp_path))
+    assert time.perf_counter() - start < 2.0
