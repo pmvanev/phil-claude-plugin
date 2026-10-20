@@ -990,3 +990,41 @@ jobs:
     # NOT a facet of catch-ux-violations-while-building-ui: different reader, different standards,
     # and a different cost of a miss. Same-persona-new-job precedent: know-a-boards-hazards-before-contact.
     # See docs/feature/security-standards-rule/feature-delta.md.
+
+  - id: delegate-mechanical-steps-without-handing-over-a-shell
+    # Registered by DISCUSS wave, feature: loop-agent-least-privilege (2026-10-20)
+    job_story: >
+      When I let an autonomous loop change my repository unattended, I want each of its mechanical
+      steps to hold only the command or file that step needs, so I can grant the loop bypass mode
+      without granting every agent in it my whole machine.
+    dimensions:
+      functional: >
+        Start each step that applies, reverts, commits, records or tests as an agent type whose tools
+        and commands are limited to that step, enforced where the agent cannot switch it off.
+      emotional: >
+        Confidence to leave a run unattended; relief from auditing every command a run might have
+        issued.
+      social: >
+        Being seen to run autonomous tooling with the least privilege the security standard asks of
+        everyone else's code.
+    four_forces:
+      push: >
+        Measured 2026-10-20: five of the refactor loop's eight agent calls start untyped, each holding
+        a full shell and any-path write. A command pattern in an agent's `tools:` line limits nothing,
+        and the plugin's own security rule recommends it.
+      pull: >
+        The read-only proposer and critic already start as typed agents that cannot write; the same
+        guarantee for the steps that must act, scoped to one command each.
+      anxiety: >
+        (A) A grant that reads narrow and limits nothing is worse than a bare one, because it is
+        trusted. (B) A boundary too tight halts a healthy run. (C) The test suite and pre-commit hooks
+        run arbitrary code whatever any grant says.
+      habit: >
+        Running the loop in bypass mode and trusting each agent's prompt to keep it to its step.
+    opportunity_score: >
+      high importance, low satisfaction — the loop's mechanical steps hold every tool the session does.
+    status: validated
+    personas: [quinn-codebase-steward]
+    features: [loop-agent-least-privilege]
+    # Not a facet of keep-test-suite-trustworthy: that job protects what the tests verify; this one
+    # bounds what the loop's agents can do at all. See docs/feature/loop-agent-least-privilege/.
