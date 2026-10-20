@@ -209,7 +209,8 @@ Use \`git add <changed files>\` then \`git commit\`. Do not stage unrelated file
 }
 
 function writeLedgerPrompt(md) {
-  return `${WORKDIR} Write the following content verbatim to \`${LEDGER_PATH}\` in the repo root (create or overwrite). Return applied:true.\n\n\`\`\`markdown\n${md}\n\`\`\``
+  // The ledger writer holds no shell, so it cannot cd into REPO; it names the ledger absolutely.
+  return `Write the following content verbatim to \`${REPO}/${LEDGER_PATH}\` (create or overwrite; if it exists, Read it first so the Write may replace it). Return applied:true.\n\n\`\`\`markdown\n${md}\n\`\`\``
 }
 
 function ledgerMarkdown(ledger, iter, status, activeRun) {
@@ -313,7 +314,7 @@ log(`Baseline green (runner: ${baseline.runner || 'detected'}, tests: ${baseline
 const ledger = { nodes: [] }
 const applied = []
 let lastFailure = null
-await agent(writeLedgerPrompt(ledgerMarkdown(ledger, 0, 'running', true)), { schema: APPLY_SCHEMA, label: 'sentinel-on', phase: 'Init' })
+await agent(writeLedgerPrompt(ledgerMarkdown(ledger, 0, 'running', true)), { agentType: 'phil:refactor-ledger-writer', schema: APPLY_SCHEMA, label: 'sentinel-on', phase: 'Init' })
 
 // ===========================================================================
 // LOOP
@@ -400,7 +401,7 @@ while (iter < MAX_ITER) {
 // ===========================================================================
 phase('Report')
 const { status, reason } = finalStatus(stop, iter, MAX_ITER)
-await agent(writeLedgerPrompt(ledgerMarkdown(ledger, iter, status, false)), { schema: APPLY_SCHEMA, label: 'persist-ledger', phase: 'Report' })
+await agent(writeLedgerPrompt(ledgerMarkdown(ledger, iter, status, false)), { agentType: 'phil:refactor-ledger-writer', schema: APPLY_SCHEMA, label: 'persist-ledger', phase: 'Report' })
 log(`${status}: ${applied.length} landed over ${iter} iteration(s). Ledger -> ${REPO}/${LEDGER_PATH}`)
 return {
   status, ...(reason ? { reason } : {}), iterations: iter, applied,

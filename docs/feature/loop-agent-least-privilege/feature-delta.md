@@ -251,3 +251,24 @@ named; out-of-scope listed.
 Order: 01 → 02 → 03 → 04 → 05. Slice 01 carries the one unverified fact — a plugin agent's
 `agent_type` — and builds the hook the rest extend, so it goes first. Slice 02 follows once a plugin
 agent has proved the corrected form. The gate runner goes last, by the human's decision (2026-10-20).
+
+## Wave: DISCUSS / [REF] Delivered and dogfooded
+
+### Slice 01 — the ledger writer (1.2.19, 2026-10-20)
+
+Driven against this working tree through `claude -p --plugin-dir`, in bypass mode; the released copy
+was not run.
+
+- **The pre-requisite is settled.** A plugin agent arrives in the hook's payload as
+  `phil:refactor-ledger-writer`. Unnarrowed workflow agents arrive as `workflow-subagent`.
+- **Live probe.** The ledger writer wrote and read the ledger at a repository root and was refused
+  `other.md` and `/etc/hostname`, each refusal naming the allow-list; it held only `Read` and `Write`.
+  A `general-purpose` agent was refused the ledger and allowed `other.md`; the ledger kept
+  `active-run: true`.
+- **Real run.** One iteration of `/phil:refactor-loop` on a seeded repository: the ledger writer wrote
+  the ledger at the start and the end, one refactoring committed, the run ended `HALT-INCOMPLETE` at its
+  iteration bound, as configured. The hook refused nothing.
+- **Review.** `plugin-dev:plugin-validator`: pass. Its warning — other subagents can still write the
+  ledger through `Bash` — was already the stated residual; the docstring now says so too. No command
+  filter stands in for it, because a glob spells the name past any filter (D10 of
+  security-standards-rule: flag the capability, never a missing filter).

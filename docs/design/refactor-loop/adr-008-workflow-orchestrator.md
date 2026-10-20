@@ -58,6 +58,12 @@ mplv2 cage.
     `phil:refactor-critic-correctness` by `agentType`; each held only Read, Grep and Glob, and
     neither could write a file or run a command. The proposer, its fix mode and the critic now start
     as those types (issue 48, CWE-250), so "never touch disk" is a grant, not an instruction.
+  - *Update 2026-10-20, later:* `tools:` picks whole tools, never commands. A probe agent granted
+    `Bash(echo:*)` wrote files through `touch`, a redirect, a chain and a substitution in bypass mode.
+    The writing roles are therefore bounded by `hooks/refactor-loop/agent-allowlist.py`, which keys on
+    the `agent_type` in each `PreToolUse` payload; a live probe showed a plugin agent arrives as
+    `phil:<name>` and the hook's deny holds in bypass mode. The ledger writer is the first such role
+    (`docs/feature/loop-agent-least-privilege/`).
 
 ## Trace
 Three-way analysis (session 2026-06-18); `harebrain/docs/mpl/mpl.md` (mplv2 ↔ Harel);

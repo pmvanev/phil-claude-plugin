@@ -1,7 +1,16 @@
 {
-  "description": "PreToolUse: refactor-loop G2 test-file write-block (no-op unless a refactor-loop run is active), and the decision-request standard's two mechanically checkable rules, enforced on every AskUserQuestion call.",
+  "description": "PreToolUse: the refactor-loop allow-list, which bounds each narrowed loop agent to its own paths and commands and is silent for every other caller; refactor-loop G2 test-file write-block (no-op unless a refactor-loop run is active); and the decision-request standard's two mechanically checkable rules, enforced on every AskUserQuestion call.",
   "hooks": {
     "PreToolUse": [
+      {
+        "matcher": "Bash|Read|Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/refactor-loop/agent-allowlist.py\""
+          }
+        ]
+      },
       {
         "matcher": "Edit|Write",
         "hooks": [

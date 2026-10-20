@@ -13,12 +13,13 @@ Workflow's JS owns the loop, so two of the three hooks are obviated under it:
 
 | Script | Event | Guard | Workflow path | Interactive skill path |
 |---|---|---|---|---|
+| `agent-allowlist.py` | `PreToolUse` (Bash, Read, Write, Edit, NotebookEdit) | allow-list | **ships wired** (the boundary for each narrowed agent) | silent (the main session carries no agent type) |
 | `block-test-file-write.py` | `PreToolUse` (Edit, Write) | G2 | **ships wired** (defense-in-depth) | **ships wired** (defense-in-depth; the skill's diff scan is primary) |
 | `anti-premature-exit.py` | `Stop` | G10 | obviated (JS owns the loop) | wire it |
 | `reinject-pinned-constraints.py` | `UserPromptSubmit` | G7 | obviated (JS holds state) | wire it |
 
-**Under the Workflow substrate, G2 is the only hook to wire — and it is defense-in-depth, not
-the primary guard.** The applier agent applies diffs via `git apply` (Bash), which bypasses the
+**Under the Workflow substrate, the allow-list and G2 are the hooks that apply, and both ship wired
+in `hooks/hooks.json`. G2 is defense-in-depth, not the primary guard.** The applier agent applies diffs via `git apply` (Bash), which bypasses the
 `Edit|Write` PreToolUse matcher; so the *primary* test-file lockbox under the Workflow is the
 **cage's in-JS diff scan** (`workflows/refactor-loop.js` refuses any proposed diff that touches a
 test path, before applying). The G2 hook still catches any stray `Edit`/`Write` to a test file.
@@ -36,10 +37,22 @@ so G7 also re-injects only header lines that match their key's grammar — `pinn
 `iter: N / max M`, `baseline: green|red @ <sha>`, `theta`, `status` — and never the free-text
 `runner:`. No free text reaches the prompt, whoever wrote the ledger.
 
-**G2's switch guards a cooperative agent, not a hostile one.** The loop writes its own ledger with an
-ordinary `Write`, so G2 cannot tell the run's legitimate `active-run: false` from an agent disarming
-it. Both diff scans refuse a proposed diff that touches the ledger, which closes the proposer's
-route; an agent that writes the ledger directly can still switch G2 off.
+**The allow-list is where a narrowed agent's grant is enforced.** An agent file's `tools:` line picks
+whole tools, never commands or paths: a probe agent granted `Bash(echo:*)` wrote files through `touch`,
+a redirect, a chain and a substitution in bypass mode (2026-10-20). Claude Code puts the calling
+subagent's `agent_type` in each `PreToolUse` payload, and a deny holds in bypass mode, so the hook
+allows each narrowed role only its own paths and commands. It matches the type's last segment, so
+`phil:refactor-ledger-writer` and a copied `refactor-ledger-writer` are both bounded. The ledger writer
+may `Read` and `Write` only `.refactor-loop-ledger.md` at a repository root, never through a symlink.
+The hook is silent for the main session and every other agent type, except for the ledger rule below.
+A session started with `--agent` carries that agent's type in its main session too, so the ledger rule
+applies to it.
+
+**G2's switch guards the loop's own agents, not every agent.** The loop writes its ledger through the
+ledger writer, the only subagent type the allow-list lets `Write` or `Edit` the ledger, and the cage
+composes every byte it writes. Both diff scans refuse a proposed diff that touches the ledger. An agent
+that still holds an unchecked shell can switch G2 off through `Bash`; that route closes as the gate
+runner, applier, reverter and committer are narrowed (issue 48).
 
 ## Why this needs human follow-up
 

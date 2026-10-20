@@ -167,6 +167,21 @@ def test_the_read_only_agent_types_grant_only_read_search_and_list(agent_type):
     assert re.search(r"^tools: Read, Grep, Glob$", text, re.M), agent_type
 
 
+# The writing roles start as types whose grant the allow-list hook bounds to their own paths and
+# commands, because `tools:` picks whole tools, never commands (CWE-250, issue 48).
+NARROWED_CALLS = {
+    "writeLedgerPrompt(": "phil:refactor-ledger-writer",
+}
+
+
+@pytest.mark.parametrize("call,agent_type", NARROWED_CALLS.items())
+def test_a_writing_role_starts_as_its_narrowed_agent_type(call, agent_type):
+    lines = [l for l in WORKFLOW.read_text().splitlines() if "await agent(" in l and call in l]
+    assert len(lines) >= 1, f"no agent call builds {call}"
+    for line in lines:
+        assert f"agentType: '{agent_type}'" in line, line
+
+
 def test_the_loop_wires_each_stop_to_its_cause():
     """The pure function is only right if the loop sets `stop` from the right branch."""
     src = WORKFLOW.read_text()
