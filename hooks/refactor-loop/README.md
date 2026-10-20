@@ -31,7 +31,10 @@ return.
 write it cannot check. G7 speaks only when git answers that the ledger is untracked: the loop never
 commits its ledger, so a tracked one, or one git cannot vouch for, came from whoever can commit to
 the repo or pack the archive, and re-injecting it would let them write every prompt's context. G7
-is therefore silent outside a git repository.
+is therefore silent outside a git repository. A tarball of a working copy carries its own `.git`,
+so G7 also re-injects only header lines that match their key's grammar — `pinned: [slug, …]`,
+`iter: N / max M`, `baseline: green|red @ <sha>`, `theta`, `status` — and never the free-text
+`runner:`. No free text reaches the prompt, whoever wrote the ledger.
 
 **G2's switch guards a cooperative agent, not a hostile one.** The loop writes its own ledger with an
 ordinary `Write`, so G2 cannot tell the run's legitimate `active-run: false` from an agent disarming
