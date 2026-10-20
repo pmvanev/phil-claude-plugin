@@ -74,10 +74,18 @@ def main():
         deny("the write names no target path, so it cannot be checked against the test globs.")
         return
 
+    # Check the spelling and the resolved target alike, case-folded: a write lands where a symlink or
+    # a relative path points, and `Tests/` is `tests/` on a case-insensitive filesystem (CWE-180).
     norm = path.replace("\\", "/")
     leaf = norm.rsplit("/", 1)[-1]
+    try:
+        resolved = os.path.realpath(os.path.join(cwd, path)).replace("\\", "/")
+    except Exception:
+        deny("the target path cannot be resolved, so it cannot be checked against the test globs.")
+        return
+    candidates = (norm, leaf, resolved, resolved.rsplit("/", 1)[-1])
 
-    if any(re.search(p, norm) or re.search(p, leaf) for p in TEST_PATTERNS):
+    if any(re.search(p, c, re.IGNORECASE) for p in TEST_PATTERNS for c in candidates):
         deny(f"writes to test files are blocked during an active run ({leaf}). "
              f"The proposer never edits the oracle.")
 

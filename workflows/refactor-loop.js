@@ -252,8 +252,12 @@ function routeVerdict(v, theta) {
 // Deterministic test-file lockbox under the Workflow substrate (git apply via Bash
 // bypasses the Edit/Write PreToolUse matcher). The G2 hook is defense-in-depth.
 function touchesTestPath(diff) {
-  const patterns = [/\/tests?\//, /\/spec\//, /\/__tests__\//, /_test\./, /\.test\./, /\.spec\./, /(^|\/)test_[^/]*\.py/, /conftest\.py/]
-  const headers = (diff.match(/^[+-]{3} .*/gm) || [])
+  const patterns = [/\/tests?\//i, /\/spec\//i, /\/__tests__\//i, /_test\./i, /\.test\./i, /\.spec\./i, /(^|\/)test_[^/]*\.py/i, /conftest\.py/i]
+  // Every line that names a path, case-folded: a pure rename or copy carries only `rename to` or
+  // `copy to`, a binary patch only `diff --git`, and `Tests/` is `tests/` on a case-insensitive
+  // filesystem (CWE-180).
+  const headers = (diff.match(/^(?:[+-]{3} |diff --git |(?:rename|copy) (?:from|to) ).*/gm) || [])
+    .map(line => line.replace(/^(?:rename|copy) (?:from|to) /, '+++ b/'))
   return headers.some(line => patterns.some(p => p.test(line)))
 }
 

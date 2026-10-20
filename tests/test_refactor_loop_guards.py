@@ -65,7 +65,7 @@ def test_an_active_run_allows_a_production_file_write(active):
     assert write(active, {"file_path": "src/app.py"}) is None
 
 
-# --------------------------------------------------------------------------- fails closed once the ledger exists
+# --------------------------------------------------------------------------- G2: fails closed
 
 
 def test_an_undecodable_ledger_denies(tmp_path):
@@ -91,6 +91,41 @@ def test_a_target_path_that_is_not_a_string_denies(active, tool_input):
 @pytest.mark.parametrize("stdin", ["not json", "[]", "null"])
 def test_a_payload_that_is_not_an_object_denies(active, stdin):
     assert run(stdin, active) == "deny"
+
+
+# --------------------------------------------------------------------------- G2: the path written
+#
+# A write lands where the resolved path points, whatever its spelling. Wound: a symlink into tests/, a
+# relative path, and a case change on a case-insensitive filesystem each passed G2 (CWE-180, issue 48).
+
+
+def test_a_symlink_into_the_tests_denies(active):
+    (active / "tests").mkdir()
+    (active / "tests" / "test_a.py").write_text("")
+    (active / "src").mkdir()
+    (active / "src" / "alias.py").symlink_to("../tests/test_a.py")
+    assert write(active, {"file_path": str(active / "src" / "alias.py")}) == "deny"
+
+
+def test_a_symlink_to_production_code_allows(active):
+    (active / "src").mkdir()
+    (active / "src" / "app.py").write_text("")
+    (active / "src" / "alias.py").symlink_to("app.py")
+    assert write(active, {"file_path": str(active / "src" / "alias.py")}) is None
+
+
+def test_a_path_that_cannot_be_resolved_denies(active):
+    assert write(active, {"file_path": "src/app\x00.py"}) == "deny"
+
+
+def test_a_relative_path_into_the_tests_denies(active):
+    assert write(active, {"file_path": "tests/helpers.py"}) == "deny"
+
+
+@pytest.mark.parametrize("name", ["Tests/helpers.py", "TESTS/x.py", "src/CONFTEST.PY", "src/a.Spec.ts",
+                                  "Test_x.py"])
+def test_a_case_change_denies(active, name):
+    assert write(active, {"file_path": str(active / name)}) == "deny"
 
 
 # --------------------------------------------------------------------------- G7: tracked ledgers

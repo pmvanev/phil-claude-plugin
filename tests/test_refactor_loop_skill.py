@@ -43,6 +43,14 @@ def test_the_loop_scans_the_diff_for_test_paths_itself():
     assert "refuse any diff that touches a test path" in body
 
 
+def test_the_diff_scan_reads_every_path_line_in_any_case():
+    """A pure rename carries only `rename to`, and `Tests/` is `tests/` on a case-insensitive
+    filesystem; the scan read only `---`/`+++`, case-sensitively (CWE-180, issue 48)."""
+    body = _flat()
+    for line in ("`diff --git`", "`rename to`", "`copy to`", "in any letter case"):
+        assert line in body, line
+
+
 def test_an_interrupted_run_s_sentinel_is_named_and_cleared_before_the_dirty_check():
     text = SKILL.read_text()
     assert text.index("left `active-run: true` from an interrupted run") < text.index("git status --porcelain")

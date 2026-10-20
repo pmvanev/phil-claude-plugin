@@ -90,6 +90,35 @@ class TestFinalStatus:
                                                                   "reason": "proposer-failed"}
 
 
+@pytest.mark.skipif(not node, reason="node is not installed")
+class TestTestPathLockbox:
+    """The primary test-file guard under the Workflow: `git apply` bypasses the G2 hook.
+
+    A diff names its paths in more lines than `---`/`+++`: a pure rename or copy carries only
+    `rename to` or `copy to`, and a binary patch only `diff --git`. Wound: those slipped past, and so
+    did `Tests/` on a case-insensitive filesystem (CWE-180, issue 48).
+    """
+
+    @pytest.mark.parametrize("diff", [
+        "--- a/tests/test_a.py\n+++ b/tests/test_a.py\n@@ -1 +1 @@\n-x\n+y\n",
+        "--- a/Tests/helpers.py\n+++ b/Tests/helpers.py\n",
+        "--- a/src/CONFTEST.PY\n+++ b/src/CONFTEST.PY\n",
+        "diff --git a/src/a.py b/tests/test_a.py\nsimilarity index 100%\n"
+        "rename from src/a.py\nrename to tests/test_a.py\n",
+        "diff --git a/src/a.py b/test_a.py\nsimilarity index 100%\n"
+        "rename from src/a.py\nrename to test_a.py\n",
+        "diff --git a/src/a.py b/spec/a_spec.rb\nsimilarity index 100%\n"
+        "copy from src/a.py\ncopy to spec/a_spec.rb\n",
+        "diff --git a/tests/data.bin b/tests/data.bin\nGIT binary patch\nliteral 3\n",
+    ], ids=["edit", "case-dir", "case-leaf", "rename", "rename-top-level", "copy", "binary"])
+    def test_a_diff_that_reaches_a_test_path_is_refused(self, diff):
+        assert _call("touchesTestPath", diff) is True
+
+    def test_a_diff_of_production_code_passes(self):
+        assert _call("touchesTestPath", "diff --git a/src/a.py b/src/a.py\n"
+                                        "--- a/src/a.py\n+++ b/src/a.py\n+contest = 1\n") is False
+
+
 def test_the_loop_wires_each_stop_to_its_cause():
     """The pure function is only right if the loop sets `stop` from the right branch."""
     src = WORKFLOW.read_text()
