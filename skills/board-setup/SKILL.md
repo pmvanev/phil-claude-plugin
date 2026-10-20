@@ -158,6 +158,12 @@ arithmetic and the diff: a region placed one line off still looks placed, so cod
 Hand-writing a region breaks determinism: a model's ordering and wording drift run to run, so every
 refresh would write bytes. The renderer refuses a probe whose `status` is not `ok`.
 
+**A forge string renders as inert data.** Anyone with board access names projects, views, options,
+workflows, labels and branches, and every later session loads `CLAUDE.md` as instructions. The renderer
+turns each character outside a fixed set into `?` and caps each value at 100 characters, so no value can
+start a line, close a code span or write marker text. A `?` in a rendered name marks a character the
+forge held and the region refused.
+
 **GitLab is `probe-board.py --repo GROUP/PROJ --host gitlab.com`.** A `--forge` contradicting the host
 is refused rather than half-served.
 

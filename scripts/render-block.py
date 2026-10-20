@@ -35,6 +35,19 @@ DECL_END = "<!-- phil:board-setup:declared:v1:end -->"
 
 STAMP_RE = re.compile(r"^generated .*$", re.M)
 
+# Forge strings — project, view, option, workflow and label names, and the ids beside them — are
+# authored by anyone with board access, and every later session loads CLAUDE.md as the developer's
+# instructions (CWE-1427, issue 48). Each renders as inert data: a character outside this set becomes
+# `?`, and the whole is capped. The set holds no newline, backtick or `<`, so no value can start a
+# line, close a code span or write marker text.
+INERT_CHARS = re.compile(r"[^\w .:/#&+'(),!?@=%-]")
+INERT_CAP = 100
+
+
+def inert(value) -> str:
+    text = INERT_CHARS.sub("?", str(value))
+    return text if len(text) <= INERT_CAP else text[:INERT_CAP - 1] + "…"
+
 LABELS = {
     "forge-and-repo": "Forge",
     "project-and-board-ids": "Board",
@@ -96,15 +109,16 @@ def _body(field: str, value) -> str:
     """
     if field == "project-and-board-ids":
         if isinstance(value, dict) and "number" in value:            # GitHub: Projects v2
-            return (f'project `{value["id"]}` · number {value["number"]} · '
-                    f'"{value["title"]}" · {value["url"]}')
+            return (f'project `{inert(value["id"])}` · number {inert(value["number"])} · '
+                    f'"{inert(value["title"])}" · {inert(value["url"])}')
         if isinstance(value, dict) and "slug" in value:              # GitLab: a project
-            return f'project `{value["id"]}` · {value["slug"]} · {value["url"]}'
+            return (f'project `{inert(value["id"])}` · {inert(value["slug"])} · '
+                    f'{inert(value["url"])}')
     if field == "column-families":
         if isinstance(value, dict) and "options" in value:            # GitHub: single-select options
-            opts = " · ".join(f'{o["name"]} `{o["id"]}`' for o in value["options"])
-            return (f'Status options ({value["option_count"]}) on field '
-                    f'`{value["field_id"]}` — {opts}')
+            opts = " · ".join(f'{inert(o["name"])} `{inert(o["id"])}`' for o in value["options"])
+            return (f'Status options ({inert(value["option_count"])}) on field '
+                    f'`{inert(value["field_id"])}` — {opts}')
         if isinstance(value, dict) and "labels" in value:             # GitLab: status:: labels
             labels = value.get("labels")
             if labels is None:
@@ -112,17 +126,24 @@ def _body(field: str, value) -> str:
                 # it beats emitting `count: None` if that filter ever moves.
                 raise Refusal("an unread label set cannot be rendered as a fact")
             return (f'{value["mechanism"]} ({value["count"]}) — '
-                    + (" · ".join(f'`{l}`' for l in labels) if labels
+                    + (" · ".join(f'`{inert(l)}`' for l in labels) if labels
                        else "none defined on this project"))
     if field == "builtin-workflows":
         if isinstance(value, dict):                                   # GitHub
-            out = "enabled — " + " · ".join(value["enabled"])
+            out = "enabled — " + " · ".join(inert(w) for w in value["enabled"])
             if value.get("disabled"):
-                out += " · disabled: " + " · ".join(value["disabled"])
+                out += " · disabled: " + " · ".join(inert(w) for w in value["disabled"])
             return out
         return str(value)                                             # GitLab: not applicable
     if field == "board-view":
-        return " · ".join(f'{v["number"]} "{v["name"]}" {v["url"]}' for v in value)
+        return " · ".join(f'{inert(v["number"])} "{inert(v["name"])}" {inert(v["url"])}'
+                          for v in value)
+    if field == "other-single-select-fields":
+        return " · ".join(inert(n) for n in value)
+    if field in ("default-branch", "docs-root"):
+        # A git refname may hold a backtick or `<`, and the docs root embeds it. A URL needs no
+        # character outside the inert set, so the whole value takes the treatment.
+        return inert(value)
     if isinstance(value, (dict, list)):
         return json.dumps(value, sort_keys=True)
     return str(value)
@@ -238,8 +259,8 @@ def render_declarations(answers: dict, evidence: dict, stamp: str) -> str | None
     for name in sorted(answers):
         value = answers[name]
         fam = fams.get(name, {})
-        members = ", ".join(f"`{m}`" for m in fam.get("members", []))
-        lines.append(f"- Label family **{name}**{f' ({members})' if members else ''}: "
+        members = ", ".join(f"`{inert(m)}`" for m in fam.get("members", []))
+        lines.append(f"- Label family **{inert(name)}**{f' ({members})' if members else ''}: "
                      f"**{value}** *(you declared · {stamp[:10]})*")
 
         multiple = fam.get("issues_with_multiple") or []
