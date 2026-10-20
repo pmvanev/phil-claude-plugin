@@ -339,3 +339,38 @@ Driven against this working tree through `claude -p --plugin-dir`, in bypass mod
   A real run on a fresh repository landed one refactoring through the committer, tree clean.
 - **Residuals.** A name git quotes (any non-ASCII one) now halts the run with `commit-failed` rather
   than committing. The instruction-file list is not complete; the hook and README say so.
+
+### Slice 05 — the gate runner (1.2.23, 2026-10-20)
+
+Driven against this working tree through `claude -p --plugin-dir`, in bypass mode.
+
+- **Where the test command comes from.** A `test_cmd:` line in the ledger's header, which the cage
+  composes and only the ledger writer can write. The cage now writes the ledger before the baseline
+  gate, disarms it on an early halt, and halts as `ledger-write-failed` if arming fails. `readConfig`
+  refuses a test command the ledger cannot carry: a line break, trailing whitespace, a backtick fence.
+- **The grant.** `Read` anywhere; `cd <repo> && <test command>`, matched as one exact string, the user's
+  own shell syntax kept; `git -C <repo> diff HEAD` and `git -C <repo> show HEAD:<path>`. The hook reads
+  `test_cmd:` and `active-run:` from the header alone, and the cage writes each table cell on one line,
+  so no refactoring name can forge either.
+- **Review.** `plugin-dev:plugin-validator` failed the slice once: an unquoted repo word carried `;` or
+  `$( )`, and `normpath` folded the trailing `/..` back to the repo, so bash ran the payload. The word
+  must now be plain path characters or one single-quoted string, already normal. It also found that a
+  throw after arming left the ledger armed: everything after arming now sits in a `catch` that disarms
+  and rethrows, and every ledger write's result is checked.
+- **Live.** The probe ran the test command and the hook refused the gate runner's `ls`; the runner
+  declined, by its own judgment, to send the `; touch` variant. A real run started every agent as a
+  narrowed or read-only type — no `workflow-subagent` call remained — and landed one refactoring.
+- **Open risk, stated in the README.** The ledger writer is a model: a prompt that misled it could write
+  a different header. Its only prompt carrying the proposer's text is the final write, after the last
+  gate, and the next run rewrites the header first. Closing it fully needs a run file no model copies.
+
+## Wave: DISCUSS / [REF] Outcome against the KPI
+
+- **Loop agents holding an unchecked shell or any-path write:** 5 of 8 agent calls at `ab5bf22`; 0 at
+  1.2.23. Every `agent()` call passes an `agentType`, and a test pins it.
+- **Live probes outside a grant:** every call the agents issued outside their grant was refused by the
+  hook — the ledger writer's other paths, the applier's `touch`, chained apply, `git status` and stray
+  write, the tampered patch, the gate runner's `ls`. The reverter, committer and gate runner declined to
+  issue some out-of-grant calls at all; for those, the hook tests drive the exact payloads.
+- **Review:** `plugin-dev:plugin-validator` found ten bypasses across slices 03–05, each now a refusal
+  test; slice 04 also closed a hole slice 03 shipped (a rename out of `tests/`).

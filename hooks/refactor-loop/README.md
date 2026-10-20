@@ -62,7 +62,14 @@ committer may `Read` and `Write` only `.refactor-loop-commit-msg`, stage exactly
 (`git -C <repo> --literal-pathspecs add -- <paths>`; a validator staged the whole tree through a file
 named `:^nothing` before the flag), and commit only with `git -C <repo> commit -F
 <repo>/.refactor-loop-commit-msg` — no `-m`, `--amend`, `--no-verify` or `push`. The repository's
-own commit hooks still run its code. **Accepted residual:** the applier holds `Write`, so in parallel
+own commit hooks still run its code. The gate runner may `Read` anywhere and run three things: `cd
+<repo> && <test command>`, matched as one exact string against the `test_cmd:` line of the ledger's
+header — the test command is the user's, so its own shell syntax is kept, not refused — and `git -C
+<repo> diff HEAD` and `git -C <repo> show HEAD:<path>` for its public-API check. The hook reads
+`test_cmd:` and `active-run:` from the ledger's header alone, because a refactoring's name reaches the
+node table, and the cage writes the ledger before the first gate. The test suite runs the repository's
+code, and no grant limits that; `git diff HEAD` also runs any diff driver the repository configures, a
+risk of the same kind. **Accepted residual:** the applier holds `Write`, so in parallel
 tool calls it could replace the patch between the hook's check and git's apply. The candidate fix is a
 hook that rewrites the command to apply a copy it checked, once a rewrite is shown not to auto-approve
 the call. The hook is silent for the main session and every other agent type,
@@ -72,9 +79,20 @@ applies to it.
 
 **G2's switch guards the loop's own agents, not every agent.** The loop writes its ledger through the
 ledger writer, the only subagent type the allow-list lets `Write` or `Edit` the ledger, and the cage
-composes every byte it writes. Both diff scans refuse a proposed diff that touches the ledger. An agent
-that still holds an unchecked shell can switch G2 off through `Bash`; that route closes when the gate
-runner is narrowed (issue 48).
+composes every byte it writes. Both diff scans refuse a proposed diff that touches the ledger. Every agent the
+workflow starts is now a narrowed or read-only type, so none holds an unchecked shell to switch G2 off
+through. What remains, as open risks:
+
+- **The ledger writer is a model.** It copies text the cage composed, and a prompt that misled it could
+  write different bytes, including the `test_cmd:` and `active-run:` lines the hook trusts. Its writes
+  happen at Init and on an early halt, with an empty node table, and at the final report, after the last
+  gate. So the only prompt that carries the proposer's text comes when no gate is left to steer, and the
+  next run's Init rewrites the header before its first gate. Closing it fully means a run file only the
+  cage composes, with no model copying it.
+- **The main session**, on the interactive path, writes the ledger itself.
+- **A throw** after the ledger is armed disarms it before the workflow fails, and a failed ledger write
+  is reported (`ledger-write-failed`, or `ledger: write-failed` in the result). A run killed outright
+  can still leave `active-run: true` behind.
 
 ## Why this needs human follow-up
 

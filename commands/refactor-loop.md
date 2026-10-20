@@ -72,8 +72,8 @@ args: {
 The loop runs INIT→PROPOSE→REVIEW→GUARD→APPLY→TEST→(FIX sub-loop)→{commit | undoable+revert}, commits each
 landed refactor, and writes a DAG ledger to `<repo>/.refactor-loop-ledger.md`. It ends in `DONE` (nothing
 left worth refactoring), `HALT-INCOMPLETE` (out of iterations), `HALT-CONFIG` (a required argument
-missing) or `HALT` (a red or empty baseline suite, a failed proposer, or a revert or commit that failed —
-the working tree then still holds that diff). Relay the status; on any halt,
+missing) or `HALT` (a red or empty baseline suite, a failed proposer, a revert or commit that failed — the
+working tree then still holds that diff — or a ledger that could not be written). Relay the status; on any halt,
 relay its `reason`, and on a red baseline its `baseline` output. A finished run also returns
 `{ iterations, applied, undoable[], invalid[] }`: surface every `undoable` finding with its reason — a
 refactoring judged infeasible, a diff that touched a test file or would not apply, one that stayed red or

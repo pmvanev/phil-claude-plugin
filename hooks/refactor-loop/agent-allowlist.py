@@ -74,13 +74,24 @@ def target_path(tool_input):
     return path
 
 
-def run_is_active(root):
-    """Only the ledger writer can write the ledger, so an active one marks the repository this run targets."""
+def ledger_header(root):
+    """The ledger above its node table. A refactoring's name reaches the table, so only the header, which
+    the cage composes, is read."""
     ledger = os.path.join(root, LEDGER)
     if os.path.islink(ledger) or not os.path.isfile(ledger):
-        return False
+        return ""
     with open(ledger, encoding="utf-8", errors="replace") as f:
-        return re.search(r"^active-run:\s*true\s*$", f.read(), re.M) is not None
+        return f.read().split("\n## Nodes", 1)[0]
+
+
+def run_is_active(root):
+    """Only the ledger writer can write the ledger, so an active one marks the repository this run targets."""
+    return re.search(r"^active-run:\s*true\s*$", ledger_header(root), re.M) is not None
+
+
+def runs_test_command(root):
+    found = re.search(r"^test_cmd: (.+)$", ledger_header(root), re.M)
+    return found.group(1) if found else None
 
 
 def is_repo_root(directory):
@@ -269,11 +280,47 @@ def committer(tool, tool_input, cwd):
     raise Refused(f"the committer may only run `{COMMIT_FORMS[0]}` and `{COMMIT_FORMS[1]}`.")
 
 
+# `cd <repo> && <test command>`: the repo as plain path characters or one single-quoted string, already
+# in normal form, and the rest as one exact string. An unquoted word once carried `;` and `$( )`, and
+# `normpath` folded the trailing `/..` back to the repo (plugin-dev:plugin-validator, 2026-10-20).
+GATE_COMMAND = re.compile(r"cd ([\w/.\-+:@%,=]+|'[^']*') && (.+)", re.S)
+
+
+def gate_runner(tool, tool_input, cwd):
+    if tool == "Read":
+        return
+    if tool != "Bash":
+        raise Refused(f"the gate runner may only read and run the test command, not use {tool}.")
+    if not isinstance(tool_input, dict) or not isinstance(tool_input.get("command"), str):
+        raise Refused("the call carries no command to check.")
+    command = tool_input["command"]
+    gate = GATE_COMMAND.fullmatch(command)
+    if gate:
+        # The user's test command keeps its own shell syntax, so it is matched whole, never word by word.
+        word = gate.group(1).strip("'")
+        root = root_named_by(word) if os.path.isabs(word) and os.path.normpath(word) == word else None
+        if root:
+            require_active_run("gate runner", root)
+            if gate.group(2) == runs_test_command(root):
+                return
+        raise Refused("the gate runner may only run `cd <repo> && <the test command the run's ledger names>`.")
+    words = command_words(tool_input)
+    root = root_named_by(words[2]) if len(words) > 3 and words[:2] == ["git", "-C"] else None
+    reads_head = words[3:] == ["diff", "HEAD"] or (
+        len(words) == 5 and words[3] == "show" and re.fullmatch(r"HEAD:[^-:][^:]*", words[4]))
+    if root and reads_head:
+        require_active_run("gate runner", root)
+        return
+    raise Refused("the gate runner may only run the test command, `git -C <repo> diff HEAD` and "
+                  "`git -C <repo> show HEAD:<path>`.")
+
+
 ROLES = {
     "refactor-ledger-writer": ledger_writer,
     "refactor-applier": applier,
     "refactor-reverter": reverse_patch,
     "refactor-committer": committer,
+    "refactor-gate-runner": gate_runner,
 }
 
 

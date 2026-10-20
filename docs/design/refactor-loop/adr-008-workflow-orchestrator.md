@@ -64,6 +64,10 @@ mplv2 cage.
     the `agent_type` in each `PreToolUse` payload; a live probe showed a plugin agent arrives as
     `phil:<name>` and the hook's deny holds in bypass mode. The ledger writer is the first such role
     (`docs/feature/loop-agent-least-privilege/`).
+  - *Update 2026-10-20, slice 05:* every `agent()` call now passes an `agentType` — the ledger writer,
+    applier, reverter, committer and gate runner join the proposer and critic — and a test pins that.
+    The ledger is written before the first gate, because its header names the test command the gate
+    runner may run.
 
 ## Trace
 Three-way analysis (session 2026-06-18); `harebrain/docs/mpl/mpl.md` (mplv2 ↔ Harel);

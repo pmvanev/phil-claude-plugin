@@ -439,6 +439,107 @@ def test_the_committer_type_holds_only_its_tools():
     assert "\ntools: Read, Write, Bash\n" in (REPO / "agents" / "refactor-committer.md").read_text()
 
 
+# --------------------------------------------------------------------------- the gate runner
+
+GATE = "phil:refactor-gate-runner"
+
+
+def with_test_command(repo, test_cmd="python3 -m pytest -q", active=True):
+    (repo / LEDGER).write_text(f"# Refactor-Loop Ledger\nstatus: running\nactive-run: {str(active).lower()}\n"
+                               f"test_cmd: {test_cmd}\n\n## Nodes\n| id |\n")
+    return repo
+
+
+def gate(repo, command):
+    return call(repo, "Bash", {"command": command}, agent_type=GATE)
+
+
+# The test command is the user's, so its own shell syntax is matched as one exact string, never refused.
+@pytest.mark.parametrize("test_cmd", ["python3 -m pytest -q", "pytest -q && ruff check .", "npm test -- --ci"])
+def test_the_gate_runner_may_run_the_runs_test_command(repo, test_cmd):
+    with_test_command(repo, test_cmd)
+    assert gate(repo, f"cd {repo} && {test_cmd}") is None
+
+
+@pytest.mark.parametrize("command", [
+    "cd {r} && python3 -m pytest",
+    "cd {r} && python3 -m pytest -q; touch x",
+    "cd {r} && python3 -m pytest -q 2>&1",
+    "cd {r}/src && python3 -m pytest -q",
+    "cd /tmp && python3 -m pytest -q",
+    "python3 -m pytest -q",
+    "cd {r}; python3 -m pytest -q",
+    "touch {r}/x",
+    "git -C {r} log",
+    "git -C {r} diff HEAD --output=x",
+    "git -C {r} diff",
+    "git -C {r} show HEAD:src/app.py > out",
+    "git -C {r} show --output=x HEAD:src/app.py",
+], ids=["other-args", "chained", "redirected", "subdir", "elsewhere", "no-cd", "semicolon", "touch", "log",
+        "diff-output", "diff-worktree", "show-redirect", "show-output"])
+def test_the_gate_runner_may_run_nothing_else(repo, command):
+    (repo / "src").mkdir(exist_ok=True)
+    with_test_command(repo)
+    assert gate(repo, command.format(r=repo)) == "deny"
+
+
+# Found by plugin-dev:plugin-validator, 2026-10-20: an unquoted repo word carried `;` or `$( )`, and
+# `normpath` folded the trailing `/..` back to the repo, so bash ran the injected command.
+@pytest.mark.parametrize("word", [
+    "{r}/x;touch${{IFS}}PWNED;/..", "{r}/$(touch${{IFS}}PWNED)/..", "{r}/`touch PWNED`/..", "{r}/src/..",
+    "{r}/", "{r}|cat",
+], ids=["semicolon", "substitution", "backtick", "dot-dot", "trailing-slash", "pipe"])
+def test_the_repo_word_carries_no_shell_syntax_and_no_dot_dot(repo, word):
+    (repo / "src").mkdir(exist_ok=True)
+    with_test_command(repo)
+    assert gate(repo, f"cd {word.format(r=repo)} && python3 -m pytest -q") == "deny"
+
+
+def test_a_single_quoted_repo_word_is_one_path(repo):
+    with_test_command(repo)
+    assert gate(repo, f"cd '{repo}' && python3 -m pytest -q") is None
+
+
+@pytest.mark.parametrize("command", ["git -C {r} diff HEAD", "git -C {r} show HEAD:src/app.py"])
+def test_the_gate_runner_may_read_head_for_its_api_check(repo, command):
+    with_test_command(repo)
+    assert gate(repo, command.format(r=repo)) is None
+
+
+def test_the_gate_runner_acts_only_where_a_run_is_active(repo):
+    with_test_command(repo, active=False)
+    assert gate(repo, f"cd {repo} && python3 -m pytest -q") == "deny"
+
+
+def test_no_test_command_in_the_ledger_allows_none(repo):
+    (repo / LEDGER).write_text("active-run: true\n")
+    assert gate(repo, f"cd {repo} && python3 -m pytest -q") == "deny"
+
+
+# A refactoring's name reaches the ledger's table; the cage strips newlines from every cell, and the hook
+# reads `test_cmd:` and `active-run:` from the header alone, so no table row can forge either.
+def test_a_test_command_in_the_table_is_not_the_runs(repo):
+    (repo / LEDGER).write_text("active-run: true\n\n## Nodes\n| x |\ntest_cmd: touch pwned\n")
+    assert gate(repo, f"cd {repo} && touch pwned") == "deny"
+
+
+def test_an_active_run_in_the_table_is_not_an_active_run(repo):
+    with_patch(repo, active=False)
+    (repo / LEDGER).write_text("active-run: false\n\n## Nodes\n| x |\nactive-run: true\n")
+    assert call(repo, "Bash", {"command": apply_cmd(repo)}, agent_type=APPLIER) == "deny"
+
+
+def test_the_gate_runner_may_read_anywhere_and_write_nowhere(repo):
+    with_test_command(repo)
+    assert call(repo, "Read", {"file_path": "/etc/hostname"}, agent_type=GATE) is None
+    for tool in ("Write", "Edit", "NotebookEdit"):
+        assert call(repo, tool, {"file_path": str(repo / "src/app.py"), "content": "x"}, agent_type=GATE) == "deny"
+
+
+def test_the_gate_runner_type_holds_only_its_tools():
+    assert "\ntools: Read, Grep, Glob, Bash\n" in (REPO / "agents" / "refactor-gate-runner.md").read_text()
+
+
 # --------------------------------------------------------------------------- everyone else
 
 

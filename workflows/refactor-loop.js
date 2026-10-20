@@ -52,6 +52,11 @@ function readConfig(args) {
   // Nothing substitutes ${CLAUDE_PLUGIN_ROOT} inside a workflow script, so the command passes the
   // resolved root. Found 2026-10-13: a literal here put an unopenable path in every agent prompt.
   const missing = ['repo', 'test_cmd', 'plugin_root'].filter(k => !A[k])
+  // The ledger's header carries the test command on one line for the allow-list hook to match.
+  // The ledger writer copies it through a code fence, and the hook matches it exactly, so a line break,
+  // trailing whitespace or a backtick fence would turn every gate into a refusal.
+  const carriable = c => !/[\r\n]|\s$|```/.test(String(c))
+  if (A.test_cmd && !carriable(A.test_cmd) && !missing.includes('test_cmd')) missing.push('test_cmd')
   return {
     MAX_ITER: num(A.max_iterations, 10, 1, Infinity, true),
     MAX_FIX: num(A.max_fix_attempts, 2, 0, Infinity, true),
@@ -139,11 +144,16 @@ const APPLY_SCHEMA = {
 }
 
 // --- Prompt builders ---
+// A repo path the shell would split is single-quoted; the allow-list hook reads it back as one word.
+function shellWord(path) {
+  return /^[\w\/.\-+:@%,=]+$/.test(path) ? path : `'${path}'`
+}
+
 function gatePrompt(kind) {
-  return `You are the gate-runner for /phil:refactor-loop. ${WORKDIR} Run the test gate and report results. Do NOT modify any files.
-1. Run exactly this test command: \`${TEST_CMD}\`. Capture its exit code and how many tests were collected/run. This suite may take several minutes — set your Bash timeout to the maximum (600000 ms) so a slow-but-passing run is never mistaken for a failure. If the command is killed by a timeout (no real exit code), report exit_code:-1 and say so verbatim in stdout; do NOT report it as a test failure.
+  return `You are the gate-runner for /phil:refactor-loop, in the repository at \`${REPO}\`. Run the test gate and report results. Do NOT modify any files.
+1. Run exactly this command, nothing added: \`cd ${shellWord(REPO)} && ${TEST_CMD}\`. Capture its exit code and how many tests were collected/run. This suite may take several minutes — set your Bash timeout to the maximum (600000 ms) so a slow-but-passing run is never mistaken for a failure. If the command is killed by a timeout (no real exit code), report exit_code:-1 and say so verbatim in stdout; do NOT report it as a test failure.
 2. ${kind === 'post-apply'
-      ? 'Also determine whether the PUBLIC API changed vs HEAD: Python compare `__all__` + top-level def/class names; TypeScript compare exported declarations. Set public_api_changed (false/omit for other languages).'
+      ? `Also determine whether the PUBLIC API changed vs HEAD: Python compare \`__all__\` + top-level def/class names; TypeScript compare exported declarations. Read HEAD only with \`git -C ${REPO} diff HEAD\` or \`git -C ${REPO} show HEAD:<path>\`. Set public_api_changed (false/omit for other languages).`
       : 'Baseline run; public_api_changed is not relevant.'}
 Return exit_code (0 = green), tests_collected, the tail of stdout (failing test names/messages verbatim), and the runner. Read the exit code yourself; never narrate past a non-zero exit.`
 }
@@ -250,9 +260,14 @@ function writeLedgerPrompt(md) {
   return `Write the following content verbatim to \`${REPO}/${LEDGER_PATH}\` (create or overwrite; if it exists, Read it first so the Write may replace it). Return applied:true.\n\n\`\`\`markdown\n${md}\n\`\`\``
 }
 
+// One line per cell: a refactoring's name reaches the table, and a newline in it would forge a header line.
+function ledgerCell(value) {
+  return String(value == null ? '' : value).replace(/[\r\n]/g, ' ')
+}
+
 function ledgerMarkdown(ledger, iter, status, activeRun) {
   const rows = ledger.nodes.map(n =>
-    `| ${n.node_id} | ${n.smell || ''} | ${n.span || ''} | ${(n.depends_on || []).join(',') || '-'} | ${n.status} | ${(n.note || '').replace(/\n/g, ' ')} |`
+    `| ${ledgerCell(n.node_id)} | ${ledgerCell(n.smell)} | ${ledgerCell(n.span)} | ${ledgerCell((n.depends_on || []).join(',') || '-')} | ${ledgerCell(n.status)} | ${ledgerCell(n.note)} |`
   ).join('\n')
   return `# Refactor-Loop Ledger
 status: ${status}
@@ -261,6 +276,7 @@ iter: ${iter} / max ${MAX_ITER}
 theta: ${THETA}
 max_fix_attempts: ${MAX_FIX}
 pinned: [${PINNED.join(', ')}]
+test_cmd: ${TEST_CMD}
 
 ## Nodes
 | id | smell | span | depends_on | status | note |
@@ -349,134 +365,152 @@ if (MISSING.length) {
   return { status: 'HALT-CONFIG', reason: `${MISSING.join(', ')} required (no defaults)`, applied: [] }
 }
 
-const baseline = await agent(gatePrompt('baseline'), { schema: GATE_SCHEMA, label: 'baseline', phase: 'Init' })
-if (!baseline || baseline.exit_code !== 0) {
-  log('Baseline suite is RED — refusing to refactor on a red suite (G1 -> HALT).')
-  return { status: 'HALT', reason: 'baseline-red', baseline: baseline ? tail(baseline.stdout) : 'gate agent failed', applied: [] }
-}
-if (typeof baseline.tests_collected === 'number' && baseline.tests_collected === 0) {
-  log('Baseline collected ZERO tests — a green from no tests is not a valid oracle (ADR-009 E -> HALT).')
-  return { status: 'HALT', reason: 'no-tests-collected', applied: [] }
-}
-log(`Baseline green (runner: ${baseline.runner || 'detected'}, tests: ${baseline.tests_collected != null ? baseline.tests_collected : '?'}). Loop: max_iter=${MAX_ITER}, max_fix=${MAX_FIX}, theta=${THETA}.`)
-
+// The ledger goes first: it arms G2, and its header names the test command the allow-list hook lets the
+// gate runner run, so no gate may run before the cage has written it.
 const ledger = { nodes: [] }
 const applied = []
 let lastFailure = null
-await agent(writeLedgerPrompt(ledgerMarkdown(ledger, 0, 'running', true)), { agentType: 'phil:refactor-ledger-writer', schema: APPLY_SCHEMA, label: 'sentinel-on', phase: 'Init' })
-
-// ===========================================================================
-// LOOP
-// ===========================================================================
-phase('Loop')
-let iter = 0
-let stop = null // 'converged' | 'proposer-failed' | 'revert-failed' | 'commit-failed' | null (ran out of iterations)
-while (iter < MAX_ITER) {
-  iter++
-
-  // --- PROPOSE ---
-  const p = await agent(proposerPrompt(ledger, lastFailure), { agentType: 'phil:refactor-proposer', schema: PROPOSAL_SCHEMA, label: `propose#${iter}`, phase: 'Loop' })
-  if (!p) { stop = 'proposer-failed'; log(`Proposer agent failed at iter ${iter} -> HALT.`); break }
-  if (p.no_actionable) { stop = 'converged'; log(`No actionable proposal at iter ${iter} -> DONE.`); break }
-
-  const node = { node_id: p.node_id || `R${String(iter).padStart(3, '0')}`, smell: p.named_refactoring, span: p.target_span, depends_on: p.depends_on || [], status: 'pending' }
-  ledger.nodes.push(node)
-
-  // --- REVIEW ---
-  const v = await agent(criticPrompt(p), { agentType: 'phil:refactor-critic-correctness', schema: VERDICT_SCHEMA, label: `review#${iter}`, phase: 'Loop' })
-  const routed = routeVerdict(v, THETA)
-  if (routed.route === 'reprompt') { // GUARD: back-prompt
-    node.status = 'invalid'; node.note = `critic ${routed.verdict}`
-    lastFailure = !v ? 'Critic produced no valid verdict.'
-      : routed.verdict === 'CANNOT_ASSESS' ? `The critic could not assess node ${node.node_id} from a span — propose a change whose effect the diff itself shows.`
-      : `The critic rejected node ${node.node_id}. Issues:\n` + routed.failures.map(c => `- [${c.severity}] ${c.criterion} @ ${c.span || '?'}: ${c.mechanism || ''}`).join('\n')
-    log(`iter ${iter}: critic blocked ${node.node_id} -> re-propose.`)
-    continue
-  }
-
-  // --- LAND: apply -> test, with a bounded FIX sub-loop (ADR-009 A) ---
-  let candidate = p
-  let landed = false
-  let lastGate = null
-  let infeasibleFindings = null
-  let revertError = null
-  for (let attempt = 0; attempt <= MAX_FIX; attempt++) {
-    // G2 cage guard: never apply a diff that touches a test path
-    if (touchesTestPath(candidate.diff || '')) {
-      infeasibleFindings = 'Proposed diff modifies a test file; the suite is the oracle. Rejected by the cage.'
-      break
-    }
-    if (touchesLedger(candidate.diff || '')) {
-      infeasibleFindings = 'Proposed diff modifies the run ledger, which arms the test-file guard. Rejected by the cage.'
-      break
-    }
-    if (touchesPatchFile(candidate.diff || '')) {
-      infeasibleFindings = 'Proposed diff modifies the patch file the revert reverses. Rejected by the cage.'
-      break
-    }
-    if (touchesCommitMessage(candidate.diff || '')) {
-      infeasibleFindings = 'Proposed diff modifies the file the commit message is read from. Rejected by the cage.'
-      break
-    }
-    const ap = await agent(applyPrompt(candidate), { agentType: 'phil:refactor-applier', schema: APPLY_SCHEMA, label: `apply#${iter}.${attempt}`, phase: 'Loop' })
-    if (!ap || !ap.applied) {
-      lastGate = { stdout: `diff did not apply: ${ap ? ap.error : 'agent failed'}` }
-    } else {
-      const g = await agent(gatePrompt('post-apply'), { schema: GATE_SCHEMA, label: `test#${iter}.${attempt}`, phase: 'Loop' })
-      lastGate = g
-      const mismatch = !!g && g.public_api_changed === true && candidate.public_api_touched !== true
-      if (g && g.exit_code === 0 && !mismatch) { landed = true; break } // green!
-      // red / mismatch: reverse this attempt before trying a fix. No fallback widens the grant (D5).
-      const rv = await agent(revertPrompt(), { agentType: 'phil:refactor-reverter', schema: APPLY_SCHEMA, label: `revert#${iter}.${attempt}`, phase: 'Loop' })
-      if (!rv || !rv.applied) { stop = 'revert-failed'; revertError = rv ? rv.error : 'the reverter failed'; break }
-    }
-    if (attempt < MAX_FIX) {
-      const evidence = lastGate ? ((lastGate.public_api_changed && !candidate.public_api_touched ? 'Public API changed but you predicted it would not.\n' : '') + tail(lastGate.stdout)) : 'unknown failure'
-      const fix = await agent(fixPrompt(candidate, evidence), { agentType: 'phil:refactor-proposer', schema: PROPOSAL_SCHEMA, label: `fix#${iter}.${attempt + 1}`, phase: 'Loop' })
-      if (!fix) { infeasibleFindings = 'The fix agent failed; nobody judged this refactor infeasible.'; break }
-      if (fix.no_actionable) { infeasibleFindings = fix.findings || 'Proposer judged the refactor infeasible during the fix sub-loop.'; break }
-      candidate = fix
-    }
-  }
-
-  if (landed) {
-    const c = await agent(commitPrompt(candidate, node.node_id), { agentType: 'phil:refactor-committer', schema: APPLY_SCHEMA, label: `commit#${iter}`, phase: 'Loop' })
-    // A refused or failed commit leaves the green change in the tree; recording it as committed would lie.
-    if (!c || !c.applied) {
-      stop = 'commit-failed'
-      node.status = 'undoable'; node.note = `green but not committed, run halted; the tree holds this diff: ${tail(c ? c.error : 'the committer failed', 400)}`
-      log(`iter ${iter}: ${node.node_id} is green but its commit failed -> HALT. The working tree still holds it.`)
-      break
-    }
-    node.status = 'resolved'; node.note = 'green, committed'
-    applied.push(node.node_id); lastFailure = null
-    log(`iter ${iter}: landed ${node.node_id} (${node.smell}) — green & committed.`)
-  } else if (stop === 'revert-failed') {
-    node.status = 'undoable'
-    node.note = `revert failed, run halted; the tree holds this diff: ${tail(revertError, 400)}`
-    log(`iter ${iter}: ${node.node_id} could not be reversed -> HALT. The working tree still holds it.`)
-    break
-  } else {
-    // Every red attempt was reversed inside the land loop, so the tree is at the last green commit.
-    node.status = 'undoable'
-    node.note = `findings: ${infeasibleFindings || `could not restabilize after ${MAX_FIX} fix attempt(s). Last: ${tail(lastGate && lastGate.stdout, 400)}`}`
-    invalidateDependents(ledger, node.node_id)
-    lastFailure = null // do not poison the next fresh proposal
-    log(`iter ${iter}: ${node.node_id} undoable -> reverted, findings recorded, dependents invalidated.`)
-  }
+const armed = await agent(writeLedgerPrompt(ledgerMarkdown(ledger, 0, 'running', true)), { agentType: 'phil:refactor-ledger-writer', schema: APPLY_SCHEMA, label: 'sentinel-on', phase: 'Init' })
+if (!armed || !armed.applied) {
+  log('The run ledger could not be written, so no gate can run (HALT).')
+  return { status: 'HALT', reason: 'ledger-write-failed', applied: [] }
 }
+// An early halt disarms the ledger again, or G2 would stay armed in a repo no run is changing.
+const disarm = status => agent(writeLedgerPrompt(ledgerMarkdown(ledger, 0, status, false)), { agentType: 'phil:refactor-ledger-writer', schema: APPLY_SCHEMA, label: 'sentinel-off', phase: 'Init' })
 
-// ===========================================================================
-// REPORT
-// ===========================================================================
-phase('Report')
-const { status, reason } = finalStatus(stop, iter, MAX_ITER)
-await agent(writeLedgerPrompt(ledgerMarkdown(ledger, iter, status, false)), { agentType: 'phil:refactor-ledger-writer', schema: APPLY_SCHEMA, label: 'persist-ledger', phase: 'Report' })
-log(`${status}: ${applied.length} landed over ${iter} iteration(s). Ledger -> ${REPO}/${LEDGER_PATH}`)
-return {
-  status, ...(reason ? { reason } : {}), iterations: iter, applied,
-  undoable: ledger.nodes.filter(n => n.status === 'undoable').map(n => ({ id: n.node_id, findings: n.note })),
-  invalid: ledger.nodes.filter(n => n.status === 'invalid').map(n => n.node_id),
+// A throw after arming would leave G2 armed in a repo no run is changing, so it disarms first.
+try {
+  const baseline = await agent(gatePrompt('baseline'), { agentType: 'phil:refactor-gate-runner', schema: GATE_SCHEMA, label: 'baseline', phase: 'Init' })
+  if (!baseline || baseline.exit_code !== 0) {
+    log('Baseline suite is RED — refusing to refactor on a red suite (G1 -> HALT).')
+    await disarm('HALT')
+    return { status: 'HALT', reason: 'baseline-red', baseline: baseline ? tail(baseline.stdout) : 'gate agent failed', applied: [] }
+  }
+  if (typeof baseline.tests_collected === 'number' && baseline.tests_collected === 0) {
+    log('Baseline collected ZERO tests — a green from no tests is not a valid oracle (ADR-009 E -> HALT).')
+    await disarm('HALT')
+    return { status: 'HALT', reason: 'no-tests-collected', applied: [] }
+  }
+  log(`Baseline green (runner: ${baseline.runner || 'detected'}, tests: ${baseline.tests_collected != null ? baseline.tests_collected : '?'}). Loop: max_iter=${MAX_ITER}, max_fix=${MAX_FIX}, theta=${THETA}.`)
+
+  // ===========================================================================
+  // LOOP
+  // ===========================================================================
+  phase('Loop')
+  let iter = 0
+  let stop = null // 'converged' | 'proposer-failed' | 'revert-failed' | 'commit-failed' | null (ran out of iterations)
+  while (iter < MAX_ITER) {
+    iter++
+
+    // --- PROPOSE ---
+    const p = await agent(proposerPrompt(ledger, lastFailure), { agentType: 'phil:refactor-proposer', schema: PROPOSAL_SCHEMA, label: `propose#${iter}`, phase: 'Loop' })
+    if (!p) { stop = 'proposer-failed'; log(`Proposer agent failed at iter ${iter} -> HALT.`); break }
+    if (p.no_actionable) { stop = 'converged'; log(`No actionable proposal at iter ${iter} -> DONE.`); break }
+
+    const node = { node_id: p.node_id || `R${String(iter).padStart(3, '0')}`, smell: p.named_refactoring, span: p.target_span, depends_on: p.depends_on || [], status: 'pending' }
+    ledger.nodes.push(node)
+
+    // --- REVIEW ---
+    const v = await agent(criticPrompt(p), { agentType: 'phil:refactor-critic-correctness', schema: VERDICT_SCHEMA, label: `review#${iter}`, phase: 'Loop' })
+    const routed = routeVerdict(v, THETA)
+    if (routed.route === 'reprompt') { // GUARD: back-prompt
+      node.status = 'invalid'; node.note = `critic ${routed.verdict}`
+      lastFailure = !v ? 'Critic produced no valid verdict.'
+        : routed.verdict === 'CANNOT_ASSESS' ? `The critic could not assess node ${node.node_id} from a span — propose a change whose effect the diff itself shows.`
+        : `The critic rejected node ${node.node_id}. Issues:\n` + routed.failures.map(c => `- [${c.severity}] ${c.criterion} @ ${c.span || '?'}: ${c.mechanism || ''}`).join('\n')
+      log(`iter ${iter}: critic blocked ${node.node_id} -> re-propose.`)
+      continue
+    }
+
+    // --- LAND: apply -> test, with a bounded FIX sub-loop (ADR-009 A) ---
+    let candidate = p
+    let landed = false
+    let lastGate = null
+    let infeasibleFindings = null
+    let revertError = null
+    for (let attempt = 0; attempt <= MAX_FIX; attempt++) {
+      // G2 cage guard: never apply a diff that touches a test path
+      if (touchesTestPath(candidate.diff || '')) {
+        infeasibleFindings = 'Proposed diff modifies a test file; the suite is the oracle. Rejected by the cage.'
+        break
+      }
+      if (touchesLedger(candidate.diff || '')) {
+        infeasibleFindings = 'Proposed diff modifies the run ledger, which arms the test-file guard. Rejected by the cage.'
+        break
+      }
+      if (touchesPatchFile(candidate.diff || '')) {
+        infeasibleFindings = 'Proposed diff modifies the patch file the revert reverses. Rejected by the cage.'
+        break
+      }
+      if (touchesCommitMessage(candidate.diff || '')) {
+        infeasibleFindings = 'Proposed diff modifies the file the commit message is read from. Rejected by the cage.'
+        break
+      }
+      const ap = await agent(applyPrompt(candidate), { agentType: 'phil:refactor-applier', schema: APPLY_SCHEMA, label: `apply#${iter}.${attempt}`, phase: 'Loop' })
+      if (!ap || !ap.applied) {
+        lastGate = { stdout: `diff did not apply: ${ap ? ap.error : 'agent failed'}` }
+      } else {
+        const g = await agent(gatePrompt('post-apply'), { agentType: 'phil:refactor-gate-runner', schema: GATE_SCHEMA, label: `test#${iter}.${attempt}`, phase: 'Loop' })
+        lastGate = g
+        const mismatch = !!g && g.public_api_changed === true && candidate.public_api_touched !== true
+        if (g && g.exit_code === 0 && !mismatch) { landed = true; break } // green!
+        // red / mismatch: reverse this attempt before trying a fix. No fallback widens the grant (D5).
+        const rv = await agent(revertPrompt(), { agentType: 'phil:refactor-reverter', schema: APPLY_SCHEMA, label: `revert#${iter}.${attempt}`, phase: 'Loop' })
+        if (!rv || !rv.applied) { stop = 'revert-failed'; revertError = rv ? rv.error : 'the reverter failed'; break }
+      }
+      if (attempt < MAX_FIX) {
+        const evidence = lastGate ? ((lastGate.public_api_changed && !candidate.public_api_touched ? 'Public API changed but you predicted it would not.\n' : '') + tail(lastGate.stdout)) : 'unknown failure'
+        const fix = await agent(fixPrompt(candidate, evidence), { agentType: 'phil:refactor-proposer', schema: PROPOSAL_SCHEMA, label: `fix#${iter}.${attempt + 1}`, phase: 'Loop' })
+        if (!fix) { infeasibleFindings = 'The fix agent failed; nobody judged this refactor infeasible.'; break }
+        if (fix.no_actionable) { infeasibleFindings = fix.findings || 'Proposer judged the refactor infeasible during the fix sub-loop.'; break }
+        candidate = fix
+      }
+    }
+
+    if (landed) {
+      const c = await agent(commitPrompt(candidate, node.node_id), { agentType: 'phil:refactor-committer', schema: APPLY_SCHEMA, label: `commit#${iter}`, phase: 'Loop' })
+      // A refused or failed commit leaves the green change in the tree; recording it as committed would lie.
+      if (!c || !c.applied) {
+        stop = 'commit-failed'
+        node.status = 'undoable'; node.note = `green but not committed, run halted; the tree holds this diff: ${tail(c ? c.error : 'the committer failed', 400)}`
+        log(`iter ${iter}: ${node.node_id} is green but its commit failed -> HALT. The working tree still holds it.`)
+        break
+      }
+      node.status = 'resolved'; node.note = 'green, committed'
+      applied.push(node.node_id); lastFailure = null
+      log(`iter ${iter}: landed ${node.node_id} (${node.smell}) — green & committed.`)
+    } else if (stop === 'revert-failed') {
+      node.status = 'undoable'
+      node.note = `revert failed, run halted; the tree holds this diff: ${tail(revertError, 400)}`
+      log(`iter ${iter}: ${node.node_id} could not be reversed -> HALT. The working tree still holds it.`)
+      break
+    } else {
+      // Every red attempt was reversed inside the land loop, so the tree is at the last green commit.
+      node.status = 'undoable'
+      node.note = `findings: ${infeasibleFindings || `could not restabilize after ${MAX_FIX} fix attempt(s). Last: ${tail(lastGate && lastGate.stdout, 400)}`}`
+      invalidateDependents(ledger, node.node_id)
+      lastFailure = null // do not poison the next fresh proposal
+      log(`iter ${iter}: ${node.node_id} undoable -> reverted, findings recorded, dependents invalidated.`)
+    }
+  }
+
+  // ===========================================================================
+  // REPORT
+  // ===========================================================================
+  phase('Report')
+  const { status, reason } = finalStatus(stop, iter, MAX_ITER)
+  const persisted = await agent(writeLedgerPrompt(ledgerMarkdown(ledger, iter, status, false)), { agentType: 'phil:refactor-ledger-writer', schema: APPLY_SCHEMA, label: 'persist-ledger', phase: 'Report' })
+  if (!persisted || !persisted.applied) log(`The final ledger could not be written; ${REPO}/${LEDGER_PATH} may still say active-run: true.`)
+  log(`${status}: ${applied.length} landed over ${iter} iteration(s). Ledger -> ${REPO}/${LEDGER_PATH}`)
+  return {
+    status, ...(reason ? { reason } : {}), iterations: iter, applied,
+    ...(persisted && persisted.applied ? {} : { ledger: 'write-failed' }),
+    undoable: ledger.nodes.filter(n => n.status === 'undoable').map(n => ({ id: n.node_id, findings: n.note })),
+    invalid: ledger.nodes.filter(n => n.status === 'invalid').map(n => n.node_id),
+  }
+} catch (e) {
+  await disarm('HALT')
+  throw e
 }
 
 // A failed proposer is not convergence, and convergence on the last allowed iteration is not

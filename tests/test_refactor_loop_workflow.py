@@ -240,6 +240,56 @@ def test_a_failed_commit_is_a_halt_with_its_reason():
     assert _call("finalStatus", "commit-failed", 2, 10) == {"status": "HALT", "reason": "commit-failed"}
 
 
+# The hook reads the run's test command from the ledger header, which only the ledger writer writes and
+# the cage composes; so the ledger is written before the first gate, and inactive again on any early halt.
+def test_the_ledger_names_the_test_command_in_its_header():
+    body = _js_function("ledgerMarkdown")
+    assert body.index("test_cmd: ${TEST_CMD}") < body.index("## Nodes")
+
+
+def test_the_ledger_is_written_before_the_baseline_gate():
+    src = WORKFLOW.read_text()
+    assert src.index("label: 'sentinel-on'") < src.index("gatePrompt('baseline')")
+
+
+def test_an_early_halt_disarms_the_ledger():
+    src = WORKFLOW.read_text()
+    init = src[src.index("gatePrompt('baseline')"):src.index("phase('Loop')")]
+    assert init.count("return {") == init.count("await disarm(")
+
+
+def test_the_gate_runs_the_test_command_from_the_repo():
+    assert "&& ${TEST_CMD}" in _js_function("gatePrompt")
+
+
+# The hook matches the ledger's `test_cmd:` line exactly, and the ledger writer copies it through a code
+# fence: a line break, trailing whitespace or a backtick fence would make every gate a refusal.
+@pytest.mark.skipif(not node, reason="node is not installed")
+@pytest.mark.parametrize("test_cmd", ["pytest\ntouch x", "pytest -q ", "pytest ```x```"],
+                         ids=["multi-line", "trailing-space", "fence"])
+def test_a_test_command_the_ledger_cannot_carry_is_refused(test_cmd):
+    assert "test_cmd" in _call("readConfig", {"repo": "/r", "test_cmd": test_cmd, "plugin_root": "/p"})["missing"]
+
+
+# Found by plugin-dev:plugin-validator, 2026-10-20: a throw after `sentinel-on` left the ledger armed, and
+# no ledger write's result was checked.
+def test_a_throw_after_arming_disarms_the_ledger():
+    src = WORKFLOW.read_text()
+    assert re.search(r"\} catch \(e\) \{\s*await disarm\('HALT'\)[^}]*throw e", src)
+
+
+def test_a_failed_arming_halts_before_any_gate():
+    src = WORKFLOW.read_text()
+    arm = src.index("label: 'sentinel-on'")
+    assert src.index("'ledger-write-failed'", arm) < src.index("gatePrompt('baseline')")
+
+
+@pytest.mark.skipif(not node, reason="node is not installed")
+@pytest.mark.parametrize("given,expected", [("a\nb", "a b"), ("x\r\ntest_cmd: y", "x  test_cmd: y"), (None, "")])
+def test_a_ledger_cell_holds_one_line(given, expected):
+    assert _call("ledgerCell", given) == expected
+
+
 # A revert reverses the one patch file the applier applied: one allowed command, where `git checkout`
 # plus `rm` would need paths the allow-list cannot bound (D5).
 def test_revert_reverses_the_patch_file_and_never_checks_out():
@@ -302,7 +352,13 @@ NARROWED_CALLS = {
     "applyPrompt(": "phil:refactor-applier",
     "revertPrompt(": "phil:refactor-reverter",
     "commitPrompt(": "phil:refactor-committer",
+    "gatePrompt(": "phil:refactor-gate-runner",
 }
+
+
+def test_every_agent_starts_as_a_narrowed_or_read_only_type():
+    calls = [l for l in WORKFLOW.read_text().splitlines() if "await agent(" in l]
+    assert calls and all("agentType: 'phil:refactor-" in l for l in calls), [l for l in calls if "agentType" not in l]
 
 
 @pytest.mark.parametrize("call,agent_type", NARROWED_CALLS.items())
