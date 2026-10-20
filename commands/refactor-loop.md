@@ -41,8 +41,8 @@ it never guesses its target. `plugin_root` is fixed in Step 3. Determine:
 
 Confirm both with the user before launching.
 
-Run `git -C <repo> status --porcelain -- . ':!.refactor-loop-ledger.md' ':!.refactor-loop-patch.diff'`
-— the ledger and the patch file are the loop's own uncommitted files. If it prints anything, stop and
+Run `git -C <repo> status --porcelain -- . ':!.refactor-loop-ledger.md' ':!.refactor-loop-patch.diff' ':!.refactor-loop-commit-msg'`
+— the ledger, the patch file and the commit message file are the loop's own uncommitted files. If it prints anything, stop and
 ask the user to commit or stash (`git stash -u`) first: a red gate reverses the diff with `git apply -R`,
 which halts the run when uncommitted edits overlap it, and a landed refactor commits whole files.
 
@@ -72,8 +72,8 @@ args: {
 The loop runs INIT→PROPOSE→REVIEW→GUARD→APPLY→TEST→(FIX sub-loop)→{commit | undoable+revert}, commits each
 landed refactor, and writes a DAG ledger to `<repo>/.refactor-loop-ledger.md`. It ends in `DONE` (nothing
 left worth refactoring), `HALT-INCOMPLETE` (out of iterations), `HALT-CONFIG` (a required argument
-missing) or `HALT` (a red or empty baseline suite, a failed proposer, or a revert that failed — the
-working tree then still holds that diff). Relay the status; on any halt,
+missing) or `HALT` (a red or empty baseline suite, a failed proposer, or a revert or commit that failed —
+the working tree then still holds that diff). Relay the status; on any halt,
 relay its `reason`, and on a red baseline its `baseline` output. A finished run also returns
 `{ iterations, applied, undoable[], invalid[] }`: surface every `undoable` finding with its reason — a
 refactoring judged infeasible, a diff that touched a test file or would not apply, one that stayed red or

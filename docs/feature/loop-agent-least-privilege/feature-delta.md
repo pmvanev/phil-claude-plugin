@@ -314,3 +314,28 @@ Driven against this working tree through `claude -p --plugin-dir`, in bypass mod
 - **Not closed here.** The workflow's own `touchesTestPath` and `touchesLedger` scans share the header
   regex's blind spots. The hook is the enforcing check on this path; the cage's scans now only save an
   agent call.
+
+### Slice 04 — the committer (1.2.22, 2026-10-20)
+
+Driven against this working tree through `claude -p --plugin-dir`, in bypass mode.
+
+- **The grant.** The committer may `Read`/`Write` only the message file, stage with
+  `git -C <repo> --literal-pathspecs add -- <paths>` where the paths are exactly the ones the patch
+  changes, and commit only with `commit -F <repo>/.refactor-loop-commit-msg`. A failed or refused commit
+  halts the run (`commit-failed`); before this slice the workflow ignored the commit's result.
+- **A hole in slice 03, closed here.** `--numstat` names only a rename's destination, so the hook
+  committed at `b555716` let a patch rename a test out of `tests/`, and git deleted it. The hook now
+  applies the patch to a scratch index made from HEAD and lists every changed path with
+  `--raw --no-renames`, modes included.
+- **Review, two rounds.** `plugin-dev:plugin-validator` failed the slice twice. First: a file named
+  `:^nothing` let `git add` stage the whole tree as pathspec magic; a symlinked `.claude` and
+  `CLAUDE.local.md` passed; `changedPaths` missed mode-only and binary changes and misread a removed
+  `-- a/x` comment. Then: a quoted non-ASCII name was missing from the cage's path list, so the hook
+  allowed staging the rest and the commit landed partial. Fixes: `--literal-pathspecs` and no `:`
+  paths; broader instruction patterns, symlinks and gitlinks refused; header-pair parsing; staging must
+  cover every changed path, so a missed name fails closed. Each is a refusal test.
+- **Live.** The probe committed only `src/app.py` while an edited `src/other.py` stayed unstaged; the
+  committer declined, by its own judgment, to issue the out-of-grant steps, which the hook tests drive.
+  A real run on a fresh repository landed one refactoring through the committer, tree clean.
+- **Residuals.** A name git quotes (any non-ASCII one) now halts the run with `commit-failed` rather
+  than committing. The instruction-file list is not complete; the hook and README say so.

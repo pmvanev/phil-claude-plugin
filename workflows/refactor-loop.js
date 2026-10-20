@@ -68,6 +68,8 @@ const { MAX_ITER, MAX_FIX, THETA, SCOPE, FOCUS, REPO, TEST_CMD, RULES, missing: 
 const LEDGER_PATH = '.refactor-loop-ledger.md'
 // The applier writes each diff here and `git apply` names it; the allow-list hook pins both.
 const PATCH_PATH = '.refactor-loop-patch.diff'
+// The committer commits from this file with `commit -F`; the allow-list hook pins it.
+const MESSAGE_PATH = '.refactor-loop-commit-msg'
 const PINNED = ['preserve-public-api', 'no-test-file-writes']
 const WORKDIR = `Work inside the repository at \`${REPO}\` — cd into it first; all paths below are relative to it.`
 
@@ -204,12 +206,43 @@ function revertPrompt() {
   return `Reverse the refactoring diff /phil:refactor-loop last applied to \`${REPO}\`. Run exactly \`git -C ${REPO} apply --recount -R --check ${REPO}/${PATCH_PATH}\`, then \`git -C ${REPO} apply --recount -R ${REPO}/${PATCH_PATH}\`. Return applied:true if both exit 0, else applied:false + the output verbatim.`
 }
 
+// The paths a diff changes, a rename as both sides, for the committer to stage. Only header lines count:
+// `diff --git` names a mode-only or binary change that has no ---/+++ lines, and a removed `-- a/x`
+// comment inside a hunk is content. The hook checks each path against what git says the patch changes,
+// and refuses an add that leaves any out, so a name this misses (git quotes a non-ASCII one) halts the
+// run with commit-failed rather than committing part of the change.
+function changedPaths(diff) {
+  const paths = []
+  const add = p => { if (p && !paths.includes(p)) paths.push(p) }
+  // A diff-style timestamp follows a name after a tab, and a CRLF patch ends each line in \r.
+  const lines = String(diff || '').split('\n').map(l => l.replace(/\r$/, '').replace(/\t.*$/, ''))
+  let inHunk = false
+  lines.forEach((line, i) => {
+    const git = line.match(/^diff --git a\/(.+) b\/(.+)$/)
+    if (git) { inHunk = false; add(git[1]); add(git[2]); return }
+    // A `--- ` line opens a file only when `+++ ` follows it; otherwise it is a removed line.
+    if (line.startsWith('--- ') && (lines[i + 1] || '').startsWith('+++ ')) {
+      inHunk = false
+      const from = line.match(/^--- a\/(.+)$/), to = lines[i + 1].match(/^\+\+\+ b\/(.+)$/)
+      add(from && from[1]); add(to && to[1]); return
+    }
+    if (line.startsWith('@@')) { inHunk = true; return }
+    const moved = !inHunk && line.match(/^(?:rename|copy) (?:from|to) (.+)$/)
+    if (moved) add(moved[1])
+  })
+  return paths
+}
+
 function commitPrompt(p, nodeId) {
-  return `${WORKDIR} Commit the refactoring that just passed the gate for /phil:refactor-loop. Stage only the files changed by this refactoring and commit them with this message:
+  // The committer holds no cd: every command names the repo with -C and the message file absolutely.
+  return `Commit the refactoring that just passed the gate in \`${REPO}\` for /phil:refactor-loop. Steps:
+1. If \`${REPO}/${MESSAGE_PATH}\` exists, Read it. Then Write this message to it, byte for byte, followed by one newline:
 
 Refactor [${nodeId}]: ${p.named_refactoring} — ${p.stated_intent}
 
-Use \`git add <changed files>\` then \`git commit\`. Do not stage unrelated files. Return applied:true on a successful commit.`
+2. Run exactly \`git -C ${REPO} --literal-pathspecs add -- ${changedPaths(p.diff).join(' ')}\`.
+3. Run exactly \`git -C ${REPO} commit -F ${REPO}/${MESSAGE_PATH}\`.
+Return applied:true on a successful commit, else applied:false + the output verbatim.`
 }
 
 function writeLedgerPrompt(md) {
@@ -272,6 +305,12 @@ function touchesPatchFile(diff) {
   return headers.some(line => /(^|[\/ ])\.refactor-loop-patch\.diff(\s|$)/i.test(line))
 }
 
+// The committer commits from the message file, so a diff that rewrites it rewrites the next commit.
+function touchesCommitMessage(diff) {
+  const headers = (diff.match(/^(?:[+-]{3} |diff --git |(?:rename|copy) (?:from|to) ).*/gm) || [])
+  return headers.some(line => /(^|[\/ ])\.refactor-loop-commit-msg(\s|$)/i.test(line))
+}
+
 // The ledger's `active-run: true` arms the G2 hook, so a diff that rewrites, renames or deletes it
 // disarms the guard (CWE-807). The cage writes the ledger itself; a proposed diff never may.
 function touchesLedger(diff) {
@@ -331,7 +370,7 @@ await agent(writeLedgerPrompt(ledgerMarkdown(ledger, 0, 'running', true)), { age
 // ===========================================================================
 phase('Loop')
 let iter = 0
-let stop = null // 'converged' | 'proposer-failed' | 'revert-failed' | null (ran out of iterations)
+let stop = null // 'converged' | 'proposer-failed' | 'revert-failed' | 'commit-failed' | null (ran out of iterations)
 while (iter < MAX_ITER) {
   iter++
 
@@ -375,6 +414,10 @@ while (iter < MAX_ITER) {
       infeasibleFindings = 'Proposed diff modifies the patch file the revert reverses. Rejected by the cage.'
       break
     }
+    if (touchesCommitMessage(candidate.diff || '')) {
+      infeasibleFindings = 'Proposed diff modifies the file the commit message is read from. Rejected by the cage.'
+      break
+    }
     const ap = await agent(applyPrompt(candidate), { agentType: 'phil:refactor-applier', schema: APPLY_SCHEMA, label: `apply#${iter}.${attempt}`, phase: 'Loop' })
     if (!ap || !ap.applied) {
       lastGate = { stdout: `diff did not apply: ${ap ? ap.error : 'agent failed'}` }
@@ -397,7 +440,14 @@ while (iter < MAX_ITER) {
   }
 
   if (landed) {
-    await agent(commitPrompt(candidate, node.node_id), { schema: APPLY_SCHEMA, label: `commit#${iter}`, phase: 'Loop' })
+    const c = await agent(commitPrompt(candidate, node.node_id), { agentType: 'phil:refactor-committer', schema: APPLY_SCHEMA, label: `commit#${iter}`, phase: 'Loop' })
+    // A refused or failed commit leaves the green change in the tree; recording it as committed would lie.
+    if (!c || !c.applied) {
+      stop = 'commit-failed'
+      node.status = 'undoable'; node.note = `green but not committed, run halted; the tree holds this diff: ${tail(c ? c.error : 'the committer failed', 400)}`
+      log(`iter ${iter}: ${node.node_id} is green but its commit failed -> HALT. The working tree still holds it.`)
+      break
+    }
     node.status = 'resolved'; node.note = 'green, committed'
     applied.push(node.node_id); lastFailure = null
     log(`iter ${iter}: landed ${node.node_id} (${node.smell}) — green & committed.`)
@@ -435,5 +485,6 @@ function finalStatus(stop, iter, maxIter) {
   if (stop === 'converged') return { status: 'DONE', reason: null }
   if (stop === 'proposer-failed') return { status: 'HALT', reason: 'proposer-failed' }
   if (stop === 'revert-failed') return { status: 'HALT', reason: 'revert-failed' }
+  if (stop === 'commit-failed') return { status: 'HALT', reason: 'commit-failed' }
   return iter >= maxIter ? { status: 'HALT-INCOMPLETE', reason: 'max-iterations' } : { status: 'DONE', reason: null }
 }

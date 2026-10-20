@@ -180,6 +180,66 @@ def test_the_applier_is_handed_the_normalised_patch():
     assert "patchText(p.diff)" in _js_function("applyPrompt")
 
 
+@pytest.mark.skipif(not node, reason="node is not installed")
+class TestCommitMessageLockbox:
+    """The committer commits from one message file, so a diff that rewrites it rewrites the next commit."""
+
+    @pytest.mark.parametrize("diff", [
+        "--- /dev/null\n+++ b/.refactor-loop-commit-msg\n",
+        "--- a/.Refactor-Loop-Commit-Msg\n+++ b/.Refactor-Loop-Commit-Msg\n",
+    ], ids=["create", "case"])
+    def test_a_diff_that_reaches_the_message_file_is_refused(self, diff):
+        assert _call("touchesCommitMessage", diff) is True
+
+    def test_a_diff_of_production_code_passes(self):
+        assert _call("touchesCommitMessage", "--- a/src/msg.py\n+++ b/src/msg.py\n") is False
+
+    def test_the_cage_refuses_a_message_file_diff_before_applying_it(self):
+        src = WORKFLOW.read_text()
+        assert src.index("touchesCommitMessage(candidate.diff") < src.index("applyPrompt(candidate)")
+
+
+# The committer stages the paths the cage names; the hook checks each against what git says the patch
+# touches, so a wrong name here costs a refused add, never a wider one.
+@pytest.mark.skipif(not node, reason="node is not installed")
+@pytest.mark.parametrize("diff,expected", [
+    ("--- a/src/a.py\n+++ b/src/a.py\n", ["src/a.py"]),
+    ("--- /dev/null\n+++ b/src/new.py\n", ["src/new.py"]),
+    ("--- a/src/gone.py\n+++ /dev/null\n", ["src/gone.py"]),
+    ("diff --git a/src/o.py b/src/n.py\nrename from src/o.py\nrename to src/n.py\n", ["src/o.py", "src/n.py"]),
+    ("--- a/src/a.py\n+++ b/src/a.py\n--- a/src/b.py\n+++ b/src/b.py\n", ["src/a.py", "src/b.py"]),
+    # Found by plugin-dev:plugin-validator, 2026-10-20: a mode-only change and a binary patch carry no
+    # ---/+++ lines, and a removed `-- a/x` comment inside a hunk reads as a header.
+    ("diff --git a/bin/run b/bin/run\nold mode 100644\nnew mode 100755\n", ["bin/run"]),
+    ("diff --git a/img.png b/img.png\nindex 1..2 100644\nGIT binary patch\nliteral 1\nIc\n", ["img.png"]),
+    ("diff --git a/q.sql b/q.sql\n--- a/q.sql\n+++ b/q.sql\n@@ -1,2 +1 @@\n--- a/x\n select 1\n", ["q.sql"]),
+    ("--- a/src/a.py\t2026-10-20 10:00:00\n+++ b/src/a.py\t2026-10-20 10:01:00\n", ["src/a.py"]),
+    ("--- a/src/a.py\r\n+++ b/src/a.py\r\n", ["src/a.py"]),
+], ids=["edit", "create", "delete", "rename", "two", "mode-only", "binary", "comment-in-hunk", "timestamp",
+        "crlf"])
+def test_the_cage_names_every_path_a_diff_changes(diff, expected):
+    assert _call("changedPaths", diff) == expected
+
+
+def test_the_commit_prompt_names_the_message_file_and_the_paths():
+    prompt = _js_function("commitPrompt")
+    assert "${REPO}/${MESSAGE_PATH}" in prompt
+    assert "changedPaths(p.diff)" in prompt
+    assert "commit -F" in prompt
+    assert "--literal-pathspecs add --" in prompt
+
+
+# A refused or failed commit leaves the green change uncommitted; recording it as committed would lie.
+def test_a_failed_commit_stops_the_run():
+    src = WORKFLOW.read_text()
+    assert re.search(r"if \(!c \|\| !c\.applied\) \{[^}]*stop = 'commit-failed'", src)
+
+
+@pytest.mark.skipif(not node, reason="node is not installed")
+def test_a_failed_commit_is_a_halt_with_its_reason():
+    assert _call("finalStatus", "commit-failed", 2, 10) == {"status": "HALT", "reason": "commit-failed"}
+
+
 # A revert reverses the one patch file the applier applied: one allowed command, where `git checkout`
 # plus `rm` would need paths the allow-list cannot bound (D5).
 def test_revert_reverses_the_patch_file_and_never_checks_out():
@@ -241,6 +301,7 @@ NARROWED_CALLS = {
     "writeLedgerPrompt(": "phil:refactor-ledger-writer",
     "applyPrompt(": "phil:refactor-applier",
     "revertPrompt(": "phil:refactor-reverter",
+    "commitPrompt(": "phil:refactor-committer",
 }
 
 
@@ -281,7 +342,8 @@ def test_the_command_names_the_workflow_from_the_plugin_root():
 
 def test_the_command_refuses_a_dirty_tree():
     body = _body()
-    assert "git -C <repo> status --porcelain -- . ':!.refactor-loop-ledger.md' ':!.refactor-loop-patch.diff'" in body
+    assert ("git -C <repo> status --porcelain -- . ':!.refactor-loop-ledger.md' ':!.refactor-loop-patch.diff'"
+            " ':!.refactor-loop-commit-msg'") in body
     assert "commit or stash (`git stash -u`)" in body
     assert "git checkout" not in body
 

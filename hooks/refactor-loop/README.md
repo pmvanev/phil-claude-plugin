@@ -49,11 +49,20 @@ The applier may `Read` and `Write` only `.refactor-loop-patch.diff` at a reposit
 alone and may run only the same command with `-R`. Shell syntax is refused before a command is split
 into words, and the words must match exactly. Both act only in a repository whose ledger says `active-run: true`:
 only the ledger writer can write that file, and a workflow agent's `cwd` is the session's, not the
-target's. Before either command runs, the hook asks `git apply --numstat -z` which paths the patch
-touches, and refuses a test path, a loop file, or a file later sessions load as instructions
-(`.claude/`, `CLAUDE.md`, `AGENTS.md`). It asks git because a header regex let through an unprefixed
-rename, `rename old`/`rename new`, and octal-quoted names, and because the cage scanned the proposer's
-diff, not the bytes the applier wrote. **Accepted residual:** the applier holds `Write`, so in parallel
+target's. Before either command runs, the hook applies the patch to a scratch index made
+from HEAD and lists every changed path, a rename as both sides. It refuses a test path, a loop file
+(the ledger, the patch file, the commit message file), a file later sessions load as instructions
+(`.claude`, `CLAUDE.md`, `CLAUDE.local.md`, `AGENTS.md`, `.mcp.json`), a symlink or submodule entry, and a
+path starting with `:`, which `git add` would read as pathspec magic. The instruction list is not
+complete — a file a `CLAUDE.md` imports, or a script a project's hook runs, also persists past the run
+— and the test suite already runs the patch's code. It asks git because a header regex let through an unprefixed
+rename, `rename old`/`rename new`, and octal-quoted names, and `--numstat` named only a rename's
+destination; and because the cage scanned the proposer's diff, not the bytes the applier wrote. The
+committer may `Read` and `Write` only `.refactor-loop-commit-msg`, stage exactly the paths that list holds, all of them
+(`git -C <repo> --literal-pathspecs add -- <paths>`; a validator staged the whole tree through a file
+named `:^nothing` before the flag), and commit only with `git -C <repo> commit -F
+<repo>/.refactor-loop-commit-msg` — no `-m`, `--amend`, `--no-verify` or `push`. The repository's
+own commit hooks still run its code. **Accepted residual:** the applier holds `Write`, so in parallel
 tool calls it could replace the patch between the hook's check and git's apply. The candidate fix is a
 hook that rewrites the command to apply a copy it checked, once a rewrite is shown not to auto-approve
 the call. The hook is silent for the main session and every other agent type,
@@ -64,8 +73,8 @@ applies to it.
 **G2's switch guards the loop's own agents, not every agent.** The loop writes its ledger through the
 ledger writer, the only subagent type the allow-list lets `Write` or `Edit` the ledger, and the cage
 composes every byte it writes. Both diff scans refuse a proposed diff that touches the ledger. An agent
-that still holds an unchecked shell can switch G2 off through `Bash`; that route closes as the gate
-runner and committer are narrowed (issue 48).
+that still holds an unchecked shell can switch G2 off through `Bash`; that route closes when the gate
+runner is narrowed (issue 48).
 
 ## Why this needs human follow-up
 

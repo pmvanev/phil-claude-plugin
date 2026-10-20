@@ -45,11 +45,24 @@ def call(cwd, tool, tool_input, agent_type=WRITER):
     return decide(payload, cwd)[0]
 
 
+# The hook applies each patch to a scratch index made from HEAD, so the fixture commits every file a
+# patch below edits, renames or deletes.
+COMMITTED = {"src/app.py": "a = 1\n", "src/util.py": "b = 1\n", "src/old.py": "x\n", "src/a.py": "a\n",
+             "tests/test_app.py": "a\n", "tests/t.py": "a\n", "Tests/test_app.py": "a\n",
+             ".claude/settings.json": "{}\n", "CLAUDE.md": "a\n"}
+
+
 @pytest.fixture
 def repo(tmp_path):
     root = tmp_path / "work"
     root.mkdir()
     subprocess.run(["git", "init", "-q", str(root)], check=True)
+    for name, text in COMMITTED.items():
+        (root / name).parent.mkdir(parents=True, exist_ok=True)
+        (root / name).write_text(text)
+    subprocess.run(["git", "-C", str(root), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(root), "-c", "user.name=t", "-c", "user.email=t@example.invalid",
+                    "commit", "-qm", "seed"], check=True)
     return root.resolve()
 
 
@@ -220,7 +233,7 @@ def test_anything_beyond_the_exact_command_is_refused(repo, suffix, agent_type):
     lambda r: "echo hi",
 ], ids=["no-dash-C", "not-the-root", "other-patch", "extra-flag", "env-prefix", "dash-c", "cat", "echo"])
 def test_every_other_command_shape_is_refused(repo, make):
-    (repo / "src").mkdir()
+    (repo / "src").mkdir(exist_ok=True)
     with_patch(repo)
     assert call(repo, "Bash", {"command": make(repo)}, agent_type=APPLIER) == "deny"
 
@@ -236,33 +249,65 @@ def test_a_missing_patch_file_is_refused(repo):
     assert call(repo, "Bash", {"command": apply_cmd(repo)}, agent_type=APPLIER) == "deny"
 
 
-# The cage scanned the proposer's diff, not the bytes the applier wrote, so the hook reads the patch
-# file itself before any apply or reversal (D6).
-@pytest.mark.parametrize("patch", [
-    "--- a/tests/test_app.py\n+++ b/tests/test_app.py\n",
-    "--- a/Tests/test_app.py\n+++ b/Tests/test_app.py\n",
-    "diff --git a/src/a.py b/tests/a.py\nsimilarity index 100%\nrename from src/a.py\nrename to tests/a.py\n",
-    "diff --git a/src/conftest.py b/src/conftest.py\nBinary files differ\n",
-    "--- a/.refactor-loop-ledger.md\n+++ b/.refactor-loop-ledger.md\n",
-    "--- a/.refactor-loop-patch.diff\n+++ b/.refactor-loop-patch.diff\n",
+# The cage scanned the proposer's diff, not the bytes the applier wrote, so the hook asks git which paths
+# the patch file changes before any apply or reversal (D6). Each case applies to HEAD, so each refusal
+# is for its path, never for a patch git could not read.
+TEST, LOOP, INSTRUCTIONS = "test path", "loop file", "instructions"
+REFUSED_PATCHES = {
+    "test-path": ("--- a/tests/test_app.py\n+++ b/tests/test_app.py\n@@ -1 +1 @@\n-a\n+b\n", TEST),
+    "case": ("--- a/Tests/test_app.py\n+++ b/Tests/test_app.py\n@@ -1 +1 @@\n-a\n+b\n", TEST),
+    "rename-into-tests": ("diff --git a/src/a.py b/tests/a.py\nsimilarity index 100%\n"
+                          "rename from src/a.py\nrename to tests/a.py\n", TEST),
+    "delete-a-test": ("--- a/tests/t.py\n+++ /dev/null\n@@ -1 +0,0 @@\n-a\n", TEST),
+    "create-conftest": ("--- /dev/null\n+++ b/src/conftest.py\n@@ -0,0 +1 @@\n+x\n", TEST),
+    "ledger": ("--- /dev/null\n+++ b/.refactor-loop-ledger.md\n@@ -0,0 +1 @@\n+active-run: x\n", LOOP),
+    "patch-file": ("--- /dev/null\n+++ b/.refactor-loop-patch.diff\n@@ -0,0 +1 @@\n+x\n", LOOP),
+    "commit-message-file": ("--- /dev/null\n+++ b/.refactor-loop-commit-msg\n@@ -0,0 +1 @@\n+m\n", LOOP),
     # Found by plugin-dev:plugin-validator, 2026-10-20: each passed a header regex, and git wrote it.
-    "diff --git a/src/a.py b/src/x.py\nsimilarity index 100%\nrename from src/a.py\nrename to tests/x.py\n",
-    "diff --git a/src/a.py b/src/a.py\nsimilarity index 100%\nrename old src/a.py\nrename new tests/t2.py\n",
-    '--- "a/te\\163ts/t.py"\n+++ "b/te\\163ts/t.py"\n@@ -1 +1 @@\n-a\n+b\n',
-    '--- /dev/null\n+++ "b/\\056refactor-loop-ledger.md"\n@@ -0,0 +1 @@\n+active-run: x\n',
-    "--- a/.claude/settings.json\n+++ b/.claude/settings.json\n@@ -1 +1 @@\n-{}\n+{}\n",
-    "--- a/CLAUDE.md\n+++ b/CLAUDE.md\n@@ -1 +1 @@\n-a\n+b\n",
-], ids=["test-path", "case", "rename-into-tests", "binary-conftest", "ledger", "patch-file",
-        "unprefixed-rename", "legacy-rename", "octal-test-path", "octal-ledger", "claude-settings",
-        "claude-md"])
+    "unprefixed-rename": ("diff --git a/src/a.py b/src/x.py\nsimilarity index 100%\n"
+                          "rename from src/a.py\nrename to tests/x.py\n", TEST),
+    "legacy-rename": ("diff --git a/src/a.py b/src/a.py\nsimilarity index 100%\n"
+                      "rename old src/a.py\nrename new tests/t2.py\n", TEST),
+    "octal-test-path": ('--- "a/te\\163ts/t.py"\n+++ "b/te\\163ts/t.py"\n@@ -1 +1 @@\n-a\n+b\n', TEST),
+    "octal-ledger": ('--- /dev/null\n+++ "b/\\056refactor-loop-ledger.md"\n@@ -0,0 +1 @@\n+active-run: x\n', LOOP),
+    # Found in slice 04, 2026-10-20: `--numstat` names only a rename's destination, so a rename out of
+    # tests/ passed the scan committed at b555716, and git deleted the test.
+    "rename-out-of-tests": ("diff --git a/tests/t.py b/src/t.py\nsimilarity index 100%\n"
+                            "rename from tests/t.py\nrename to src/t.py\n", TEST),
+    "claude-settings": ('--- a/.claude/settings.json\n+++ b/.claude/settings.json\n@@ -1 +1 @@\n-{}\n+{"x": 1}\n',
+                        INSTRUCTIONS),
+    "claude-md": ("--- a/CLAUDE.md\n+++ b/CLAUDE.md\n@@ -1 +1 @@\n-a\n+b\n", INSTRUCTIONS),
+    # Found by plugin-dev:plugin-validator, 2026-10-20: `.claude` as a symlink to a directory the patch
+    # also fills, and `CLAUDE.local.md`, both passed `(^|/)\.claude/` and `claude\.md$`.
+    "claude-local-md": ("--- /dev/null\n+++ b/CLAUDE.local.md\n@@ -0,0 +1 @@\n+a\n", INSTRUCTIONS),
+    "mcp-json": ("--- /dev/null\n+++ b/.mcp.json\n@@ -0,0 +1 @@\n+{}\n", INSTRUCTIONS),
+    "symlinked-claude-dir": ("diff --git a/.claude-link b/.claude-link\nnew file mode 120000\n--- /dev/null\n"
+                             "+++ b/.claude-link\n@@ -0,0 +1 @@\n+src/cfg\n\\ No newline at end of file\n", "symlink"),
+    "gitlink": ("diff --git a/sub b/sub\nnew file mode 160000\nindex 0000000..1111111\n--- /dev/null\n"
+                "+++ b/sub\n@@ -0,0 +1 @@\n+Subproject commit 1111111111111111111111111111111111111111\n",
+                "submodule"),
+    "bare-claude-entry": ("diff --git a/src/.claude b/src/.claude\nnew file mode 120000\n--- /dev/null\n"
+                          "+++ b/src/.claude\n@@ -0,0 +1 @@\n+cfg\n\\ No newline at end of file\n", INSTRUCTIONS),
+}
+
+
+@pytest.mark.parametrize("case", sorted(REFUSED_PATCHES))
 @pytest.mark.parametrize("agent_type", [APPLIER, REVERTER])
-def test_a_patch_reaching_a_test_or_a_loop_file_is_refused(repo, patch, agent_type):
+def test_a_patch_reaching_a_test_or_a_loop_file_is_refused(repo, case, agent_type):
+    patch, why = REFUSED_PATCHES[case]
     with_patch(repo, patch)
     flags = ("-R",) if agent_type == REVERTER else ()
     decision, reason = decide({"tool_name": "Bash", "tool_input": {"command": apply_cmd(repo, *flags)},
                                "cwd": str(repo), "agent_type": agent_type}, repo)
     assert decision == "deny"
-    assert "patch" in reason
+    assert why in reason, reason
+
+
+def test_a_patch_git_cannot_apply_to_head_is_refused(repo):
+    with_patch(repo, "--- a/src/app.py\n+++ b/src/app.py\n@@ -1 +1 @@\n-not what HEAD holds\n+b\n")
+    decision, reason = decide({"tool_name": "Bash", "tool_input": {"command": apply_cmd(repo)},
+                               "cwd": str(repo), "agent_type": APPLIER}, repo)
+    assert decision == "deny" and "HEAD" in reason, reason
 
 
 @pytest.mark.parametrize("tool", ["Write", "Read", "Edit"])
@@ -274,6 +319,124 @@ def test_the_reverter_holds_no_file_tool(repo, tool):
                                         ("refactor-reverter", "Bash")])
 def test_the_apply_types_hold_only_their_tools(name, tools):
     assert f"\ntools: {tools}\n" in (REPO / "agents" / f"{name}.md").read_text()
+
+
+# --------------------------------------------------------------------------- the committer
+
+MESSAGE = ".refactor-loop-commit-msg"
+COMMITTER = "phil:refactor-committer"
+TWO_FILE_PATCH = ("diff --git a/src/app.py b/src/app.py\n--- a/src/app.py\n+++ b/src/app.py\n"
+                  "@@ -1 +1 @@\n-a = 1\n+a = 2\n"
+                  "diff --git a/src/util.py b/src/util.py\n--- a/src/util.py\n+++ b/src/util.py\n"
+                  "@@ -1 +1 @@\n-b = 1\n+b = 2\n")
+RENAME_PATCH = "diff --git a/src/old.py b/src/new.py\nsimilarity index 100%\nrename from src/old.py\nrename to src/new.py\n"
+
+
+def commit(repo, command):
+    return call(repo, "Bash", {"command": command}, agent_type=COMMITTER)
+
+
+@pytest.mark.parametrize("tool", ["Write", "Read"])
+def test_the_committer_may_write_and_read_the_message_file(repo, tool):
+    with_patch(repo)
+    assert call(repo, tool, {"file_path": str(repo / MESSAGE), "content": "m"}, agent_type=COMMITTER) is None
+
+
+@pytest.mark.parametrize("path", [PATCH, LEDGER, "src/app.py"])
+def test_the_committer_may_write_no_other_file(repo, path):
+    with_patch(repo)
+    assert call(repo, "Write", {"file_path": str(repo / path), "content": "m"}, agent_type=COMMITTER) == "deny"
+
+
+@pytest.mark.parametrize("patch,paths", [
+    (PROD_PATCH, "src/app.py"),
+    (TWO_FILE_PATCH, "src/app.py src/util.py"),
+    (TWO_FILE_PATCH, "src/util.py src/app.py"),
+    (RENAME_PATCH, "src/old.py src/new.py"),
+], ids=["one", "two", "any-order", "rename"])
+def test_the_committer_may_stage_paths_the_patch_touches(repo, patch, paths):
+    with_patch(repo, patch)
+    assert commit(repo, f"git -C {repo} --literal-pathspecs add -- {paths}") is None
+
+
+@pytest.mark.parametrize("paths", [
+    "src/other.py", "src/app.py src/other.py", ".", "src", "tests/test_app.py", "../src/app.py",
+    f"{LEDGER}", f"{PATCH}", f"{MESSAGE}", "./src/../src/other.py",
+])
+def test_the_committer_may_not_stage_a_path_the_patch_does_not_touch(repo, paths):
+    with_patch(repo)
+    assert commit(repo, f"git -C {repo} --literal-pathspecs add -- {paths}") == "deny"
+
+
+@pytest.mark.parametrize("make", [
+    lambda r: f"git -C {r} --literal-pathspecs add src/app.py",
+    lambda r: f"git -C {r} --literal-pathspecs add -A",
+    lambda r: f"git -C {r} --literal-pathspecs add -f -- src/app.py",
+    lambda r: f"git -C {r} --literal-pathspecs add --",
+    lambda r: f"git -C {r} commit -m done",
+    lambda r: f"git -C {r} commit -F {r / 'other.txt'}",
+    lambda r: f"git -C {r} commit --no-verify -F {r / MESSAGE}",
+    lambda r: f"git -C {r} commit -a -F {r / MESSAGE}",
+    lambda r: f"git -C {r} commit --amend -F {r / MESSAGE}",
+    lambda r: f"git -C {r} push",
+    lambda r: f"git -C {r} commit -F {r / MESSAGE} && git -C {r} push",
+], ids=["no-dashdash", "all", "force", "no-paths", "inline-message", "other-file", "no-verify", "all-tracked",
+        "amend", "push", "chain"])
+def test_every_other_commit_shape_is_refused(repo, make):
+    with_patch(repo)
+    (repo / MESSAGE).write_text("m\n")
+    assert commit(repo, make(repo)) == "deny"
+
+
+# Found by plugin-dev:plugin-validator, 2026-10-20: the cage's path list missed a name git quotes, the
+# hook allowed staging the rest, and the commit landed without it while the run recorded it committed.
+# Staging must cover every path the patch changes, so a missed name fails closed.
+def test_staging_part_of_the_patch_is_refused(repo):
+    with_patch(repo, TWO_FILE_PATCH)
+    assert commit(repo, f"git -C {repo} --literal-pathspecs add -- src/util.py") == "deny"
+
+
+def test_the_committer_may_commit_from_the_message_file(repo):
+    with_patch(repo)
+    (repo / MESSAGE).write_text("Refactor [R001]: Extract Method\n")
+    assert commit(repo, f"git -C {repo} commit -F {repo / MESSAGE}") is None
+
+
+def test_a_message_file_that_is_a_symlink_is_refused(repo, tmp_path):
+    with_patch(repo)
+    (tmp_path / "msg").write_text("m\n")
+    os.symlink(tmp_path / "msg", repo / MESSAGE)
+    assert commit(repo, f"git -C {repo} commit -F {repo / MESSAGE}") == "deny"
+
+
+def test_the_committer_acts_only_where_a_run_is_active(repo):
+    with_patch(repo, active=False)
+    (repo / MESSAGE).write_text("m\n")
+    assert commit(repo, f"git -C {repo} --literal-pathspecs add -- src/app.py") == "deny"
+    assert commit(repo, f"git -C {repo} commit -F {repo / MESSAGE}") == "deny"
+
+
+def test_staging_needs_the_patch_file(repo):
+    (repo / LEDGER).write_text("active-run: true\n")
+    assert commit(repo, f"git -C {repo} --literal-pathspecs add -- src/app.py") == "deny"
+
+
+# Found by plugin-dev:plugin-validator, 2026-10-20: a patch created a file named `:^nothing`, and
+# `git add -- ':^nothing'` staged the whole tree, tests and loop files included, because git read the
+# word as pathspec magic. The stage command must turn magic off, and no path may start with `:`.
+def test_staging_without_literal_pathspecs_is_refused(repo):
+    with_patch(repo)
+    assert commit(repo, f"git -C {repo} add -- src/app.py") == "deny"
+
+
+def test_a_patch_creating_a_pathspec_magic_name_is_refused(repo):
+    with_patch(repo, "--- /dev/null\n+++ b/:^nothing\n@@ -0,0 +1 @@\n+x\n")
+    assert commit(repo, f"git -C {repo} --literal-pathspecs add -- ':^nothing'") == "deny"
+    assert call(repo, "Bash", {"command": apply_cmd(repo)}, agent_type=APPLIER) == "deny"
+
+
+def test_the_committer_type_holds_only_its_tools():
+    assert "\ntools: Read, Write, Bash\n" in (REPO / "agents" / "refactor-committer.md").read_text()
 
 
 # --------------------------------------------------------------------------- everyone else
