@@ -15,7 +15,26 @@ with hookSpecificOutput.additionalContext (UserPromptSubmit).
 import json
 import os
 import re
+import subprocess
 import sys
+
+
+def tracked(cwd):
+    """True when version control tracks the ledger, or when that cannot be ruled out.
+
+    The loop writes the ledger and never commits it, so a tracked ledger came from whoever can commit
+    to the repo, and re-injecting it would let a cloned repo author every prompt's context (CWE-1427,
+    issue 48). Outside a repository, or without git, the ledger can only be the loop's own.
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "ls-files", "--error-unmatch", "--", ".refactor-loop-ledger.md"],
+            cwd=cwd, capture_output=True, timeout=5)
+    except FileNotFoundError:
+        return False
+    except Exception:
+        return True
+    return proc.returncode == 0
 
 
 def main():
@@ -27,7 +46,7 @@ def main():
     cwd = payload.get("cwd") or os.getcwd()
     ledger = os.path.join(cwd, ".refactor-loop-ledger.md")
 
-    if not os.path.isfile(ledger):
+    if not os.path.isfile(ledger) or tracked(cwd):
         return
     try:
         ledger_text = open(ledger, encoding="utf-8").read()

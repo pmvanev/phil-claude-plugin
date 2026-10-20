@@ -27,6 +27,11 @@ Wire G10/G7 only if you run the prose `skills/refactor-loop/SKILL.md` fallback (
 where the model executes the loop and those weaknesses (premature exit, context compaction)
 return.
 
+**Two guards distrust the ledger in opposite directions.** Once the ledger exists, G2 denies any
+write it cannot check. G7 stays silent on a ledger that version control tracks: the loop never
+commits its ledger, so a tracked one came from whoever can commit to the repo, and re-injecting it
+would let a cloned repo write every prompt's context.
+
 ## Why this needs human follow-up
 
 `hooks/hooks.json` ships **no `Stop` hook** — the toast/chime notifier that used to live there was

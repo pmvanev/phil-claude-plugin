@@ -1,4 +1,6 @@
-"""Tests for `hooks/refactor-loop/block-test-file-write.py` — guard G2.
+"""Tests for the refactor-loop guards that read the run ledger: G2 and G7.
+
+G2 — `hooks/refactor-loop/block-test-file-write.py`.
 
 G2 keeps the proposer off the oracle: while a refactor-loop run is active, no Edit or Write may touch a
 test file. Outside a run it must stay silent, so it never traps unrelated editing.
@@ -89,3 +91,45 @@ def test_a_target_path_that_is_not_a_string_denies(active, tool_input):
 @pytest.mark.parametrize("stdin", ["not json", "[]", "null"])
 def test_a_payload_that_is_not_an_object_denies(active, stdin):
     assert run(stdin, active) == "deny"
+
+
+# --------------------------------------------------------------------------- G7: tracked ledgers
+#
+# `hooks/refactor-loop/reinject-pinned-constraints.py` re-states the ledger's pinned lines as context on
+# every prompt. The loop writes that ledger and never commits it, so a ledger version control tracks
+# came from whoever can commit to the repo, and a cloned repo could author every prompt's context
+# (CWE-1427, issue 48). G7 stays silent on a tracked ledger.
+
+G7 = REPO / "hooks" / "refactor-loop" / "reinject-pinned-constraints.py"
+PINNED = "active-run: true\npinned: never edit a test\n"
+
+
+def reinject(cwd):
+    proc = subprocess.run([sys.executable, str(G7)], cwd=cwd, capture_output=True, text=True,
+                          input=json.dumps({"prompt": "go", "cwd": str(cwd)}), timeout=30)
+    assert proc.returncode == 0, proc.stderr
+    if not proc.stdout.strip():
+        return None
+    return json.loads(proc.stdout)["hookSpecificOutput"]["additionalContext"]
+
+
+def git(cwd, *args):
+    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True)
+
+
+def test_g7_restates_the_pinned_lines_of_an_untracked_ledger(tmp_path):
+    git(tmp_path, "init", "-q")
+    (tmp_path / LEDGER).write_text(PINNED)
+    assert "pinned: never edit a test" in reinject(tmp_path)
+
+
+def test_g7_restates_the_pinned_lines_outside_a_repository(tmp_path):
+    (tmp_path / LEDGER).write_text(PINNED)
+    assert "pinned: never edit a test" in reinject(tmp_path)
+
+
+def test_g7_is_silent_on_a_ledger_version_control_tracks(tmp_path):
+    git(tmp_path, "init", "-q")
+    (tmp_path / LEDGER).write_text(PINNED)
+    git(tmp_path, "add", LEDGER)
+    assert reinject(tmp_path) is None
