@@ -147,6 +147,7 @@ The sinks reuse the rows above; CWE-1427 names the injection itself. OWASP LLM i
 | Violation | Preferred form | Cite |
 |---|---|---|
 | Untrusted text — tool output, file, web page, issue or PR body — inserted into a prompt whose context also holds tools or secrets | Read it in a context with no tools (Dual LLM); fix the plan before reading it (Plan-Then-Execute) | CWE-1427 · LLM01:2025 |
+| Untrusted text written into a file a model later loads as instructions — `CLAUDE.md`, `AGENTS.md`, a skill, a rule — where every later session reads it as the developer's | Render it as inert data — an allow-listed character set, a length cap, no newlines, backticks or marker text — or keep it out and record only ids | CWE-1427 · LLM01:2025 |
 | Model output passed to a shell, SQL, `eval`, HTML or a file path without the treatment untrusted input gets | Treat model output as untrusted input: the injection rows above apply | CWE-78, CWE-94, CWE-79, CWE-22 · LLM05:2025 |
 | One agent context holds private data, untrusted content and an outbound channel — network, email, a public write, a rendered image URL | Remove one leg of the trifecta, and name the design pattern that removes it: Action-Selector, Plan-Then-Execute, LLM Map-Reduce, Dual LLM, Code-Then-Execute or Context-Minimization | CWE-1427 · LLM01, LLM02, LLM06:2025 |
 | Code that starts an agent or registers a hook with tools beyond its task — bare shell, any-path write, network | The narrowest grant that does the job (`Bash(git log:*)`, not `Bash`) | CWE-250 · LLM06:2025 |

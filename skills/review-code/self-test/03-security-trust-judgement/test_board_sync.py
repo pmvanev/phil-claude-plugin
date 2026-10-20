@@ -25,3 +25,10 @@ def test_ledger_context_keeps_only_pinned_lines(tmp_path):
 
 def test_ledger_context_is_empty_without_a_ledger(tmp_path):
     assert board_sync.ledger_context(tmp_path) == []
+
+
+def test_write_label_region_replaces_only_the_region(tmp_path):
+    claude_md = tmp_path / "CLAUDE.md"
+    claude_md.write_text("intro\n<!-- labels -->\nold\n<!-- /labels -->\noutro\n")
+    board_sync.write_label_region(claude_md, ["bug"])
+    assert claude_md.read_text() == "intro\n<!-- labels -->\n- Label `bug`\n<!-- /labels -->\noutro\n"

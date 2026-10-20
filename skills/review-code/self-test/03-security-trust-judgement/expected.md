@@ -19,6 +19,9 @@ that begins with the row's Preferred form:
 2. **CWE-1427** — `describe_labels` puts label names, which anyone with label rights writes, into a
    prompt that holds a shell.
 3. **CWE-250** — the same call grants a bare shell to group labels.
+4. **CWE-1427** — `write_label_region` writes label names verbatim into `CLAUDE.md`, which every later
+   session loads as instructions. The fix is the instruction-file row's, not the live-prompt row's:
+   Dual LLM cannot help text that is already an instruction.
 
 **Hard assertions (any failure blocks the skill change):**
 

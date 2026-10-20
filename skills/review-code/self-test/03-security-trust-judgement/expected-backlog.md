@@ -34,3 +34,14 @@ Scope: .
 - **Route**: report only
 - **Rationale**: security.md — CWE-250 · LLM06:2025
 - **Status**: pending
+
+### [R004] CWE-1427 — label names written verbatim into CLAUDE.md
+
+- **File**: `board_sync.py`
+- **Lines**: 30-36
+- **Priority**: 1
+- **Smell**: CWE-1427
+- **Refactoring**: Render it as inert data — an allow-listed character set, a length cap, no newlines, backticks or marker text — or keep it out and record only ids
+- **Route**: report only
+- **Rationale**: security.md — CWE-1427 · LLM01:2025; an instruction file is a prompt every later session reads
+- **Status**: pending

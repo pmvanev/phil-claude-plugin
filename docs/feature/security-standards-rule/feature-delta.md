@@ -260,7 +260,7 @@ the code:
 3. CWE-636 needs a scope: a deny that is not a security control (a wording standard) is outside it.
 4. CWE-1333's threshold: whether "overlapping quantifiers" covers a class beside a literal it matches.
 5. One defect matching two ids of one row: file the most specific, not both.
-6. CWE-1427's Preferred form assumes a live session; a write into an instruction file needs its own
+6. *(Applied: forge metadata 1.2.1, the instruction-file row 1.2.2.)* CWE-1427's Preferred form assumes a live session; a write into an instruction file needs its own
    fix (render as inert data, or keep it out), and forge metadata belongs in the untrusted list.
 7. *(Applied, 1.2.1.)* An untrusted status the code cannot show belongs with the trust-boundary
    Advisory, unstated today.

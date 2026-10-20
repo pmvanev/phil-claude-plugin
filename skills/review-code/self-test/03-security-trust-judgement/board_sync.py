@@ -25,3 +25,12 @@ def ledger_context(cwd):
     if not ledger.exists():
         return []
     return [line for line in ledger.read_text().splitlines() if line.startswith("pinned:")]
+
+
+def write_label_region(claude_md, labels):
+    """Replace the label region of the repo's CLAUDE.md, which every later session loads."""
+    text = Path(claude_md).read_text()
+    head, _, rest = text.partition("<!-- labels -->")
+    _, _, tail = rest.partition("<!-- /labels -->")
+    region = "\n".join(f"- Label `{name}`" for name in labels)
+    Path(claude_md).write_text(f"{head}<!-- labels -->\n{region}\n<!-- /labels -->{tail}")
