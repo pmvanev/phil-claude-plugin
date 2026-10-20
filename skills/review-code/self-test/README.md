@@ -17,6 +17,7 @@ flags. Format mirrors `skills/redesign-tests/self-test/`.
 | `03-security-trust-judgement/` | helpers whose inputs are untrusted in some places and not others | `rules/security.md`'s definition of untrusted | the hook and the label prompt flagged; the granted write left alone; the ledger raised as Advisory |
 | `04-security-row-precision/` | a probe and two hooks on the edge of four rows | the rule's precision lines: accidental guards, CWE-636's scope, CWE-1333's threshold, one id per defect | four items; the wording gate unflagged; no CWE-770 beside CWE-1333 |
 | `05-security-guard-integrity/` | a write guard that works until its subject attacks it, and the transcript it keeps | the guard-integrity rows (CWE-180, CWE-807); the transcript Advisory bullet | two guard items; the transcript raised as Advisory |
+| `06-security-agent-grant/` | a subagent narrowed by `Bash(git log:*)` beside a read-only one | the CWE-250 agent row: a command pattern grants the whole shell | one CWE-250 item on the history reader; the read-only drafter left alone |
 
 ## Layout
 

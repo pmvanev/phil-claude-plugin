@@ -152,9 +152,11 @@ The sinks reuse the rows above; CWE-1427 names the injection itself. OWASP LLM i
 | Untrusted text written into a file a model later loads as instructions — `CLAUDE.md`, `AGENTS.md`, a skill, a rule — where every later session reads it as the developer's | Render it as inert data — an allow-listed character set, a length cap, no newlines, backticks or marker text — or keep it out and record only ids | CWE-1427 · LLM01:2025 |
 | Model output passed to a shell, SQL, `eval`, HTML or a file path without the treatment untrusted input gets | Treat model output as untrusted input: the injection rows above apply | CWE-78, CWE-94, CWE-79, CWE-22 · LLM05:2025 |
 | One agent context holds private data, untrusted content and an outbound channel — network, email, a public write, a rendered image URL | Remove one leg of the trifecta, and name the design pattern that removes it: Action-Selector, Plan-Then-Execute, LLM Map-Reduce, Dual LLM, Code-Then-Execute or Context-Minimization | CWE-1427 · LLM01, LLM02, LLM06:2025 |
-| Code that starts an agent or registers a hook with tools beyond its task — bare shell, any-path write, network | The narrowest grant that does the job (`Bash(git log:*)`, not `Bash`) | CWE-250 · LLM06:2025 |
+| Code that starts an agent or registers a hook with tools beyond its task — bare shell, any-path write, network — including a subagent definition that narrows a shell with a command pattern such as `Bash(git log:*)`, which grants the whole shell | Only the tools the task needs; a shell or a write bounded by a hook that allows its exact commands or paths and refuses the rest | CWE-250 · LLM06:2025 |
 | Secret or credential placed in a system prompt or agent instructions | Keep secrets in the tool's runtime, out of the model's context | CWE-798 · LLM07:2025 |
 | Agent loop with no step, token, time or cost bound | A hard bound that stops the loop and reports | CWE-770 · LLM10:2025 |
+
+**A command pattern in a subagent's `tools` picks the tool, not the command.** Measured on Claude Code 2.1.305, 2026-10-20: a subagent granted only `Bash(echo:*)` wrote files through `touch`, a redirect, `&&` and `$( )` in bypass mode, while a `PreToolUse` hook keyed on the payload's `agent_type` refused all four. A pattern in a slash command's `allowed-tools` was not measured; this row does not reach it.
 
 Checked against CWE 4.20 (2026-04-30), OWASP ASVS 5.0.0, NIST SP 800-63B-4 (2025-07-31) and the OWASP Top 10 for LLM Applications 2025, on 2026-10-20. Every CWE id above resolved in MITRE's CWE database that day.
 

@@ -272,3 +272,17 @@ was not run.
   ledger through `Bash` — was already the stated residual; the docstring now says so too. No command
   filter stands in for it, because a glob spells the name past any filter (D10 of
   security-standards-rule: flag the capability, never a missing filter).
+
+### Slice 02 — the security rule's narrow-grant row (1.2.20, 2026-10-20)
+
+- **The row.** `rules/security.md`'s CWE-250 agent row now names a command pattern in a subagent
+  definition as the violation it is, and its Preferred form is the enforced one: only the tools the
+  task needs, with any shell or write bounded by a hook. A dated note under the table states what was
+  measured on Claude Code 2.1.305, and that a slash command's `allowed-tools` was not.
+- **RED first.** Fixture 06 (`06-security-agent-grant`) expected the new form and failed
+  `test_every_expected_security_item_takes_its_id_and_fix_from_one_row` against the old row. Fixtures
+  02 and 03 copied the old form and moved with the row.
+- **Drive.** A fresh agent followed this working tree's `review-code` `SKILL.md` over fixture 06 without
+  its answer key: one CWE-250 item on the history reader, its fix the row's form plus ` — here: ` a hook
+  keyed on that agent type; no security item on the read-only drafter. It also raised one Advisory
+  question — who writes the task text — which `expected.md` lists as not a failure.

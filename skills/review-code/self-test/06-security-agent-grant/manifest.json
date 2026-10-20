@@ -1,0 +1,9 @@
+{
+  "node_id": "RC-SELFTEST-06",
+  "mode": "review",
+  "target": ".",
+  "pins": "a command pattern in a subagent definition's tools grants the whole shell, so it is CWE-250, not a narrow grant; a read-only agent is not",
+  "expected_guard": "one CWE-250 item on the history reader, whose fix is the row's enforced form; nothing on the read-only drafter",
+  "decoys": ["notes-drafter"],
+  "min_items": 1
+}

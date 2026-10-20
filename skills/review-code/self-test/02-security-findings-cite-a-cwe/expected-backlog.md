@@ -96,7 +96,7 @@ Scope: .
 - **Lines**: 81
 - **Priority**: 1
 - **Smell**: CWE-250
-- **Refactoring**: The narrowest grant that does the job (`Bash(git log:*)`, not `Bash`)
+- **Refactoring**: Only the tools the task needs; a shell or a write bounded by a hook that allows its exact commands or paths and refuses the rest
 - **Route**: report only
 - **Rationale**: security.md — CWE-250 · LLM06:2025
 - **Status**: pending
