@@ -130,6 +130,152 @@ def test_a_malformed_tool_input_from_a_narrowed_type_is_refused(repo, tool_input
     assert call(repo, "Write", tool_input) == "deny"
 
 
+# --------------------------------------------------------------------------- the applier and reverter
+
+PATCH = ".refactor-loop-patch.diff"
+APPLIER = "phil:refactor-applier"
+REVERTER = "phil:refactor-reverter"
+PROD_PATCH = "--- a/src/app.py\n+++ b/src/app.py\n@@ -1 +1 @@\n-a = 1\n+a = 2\n"
+
+
+def with_patch(repo, text=PROD_PATCH, active=True):
+    (repo / PATCH).write_text(text)
+    if active:
+        (repo / LEDGER).write_text("status: running\nactive-run: true\n")
+    return repo
+
+
+def apply_cmd(repo, *flags):
+    return " ".join(["git", "-C", str(repo), "apply", "--recount", *flags, str(repo / PATCH)])
+
+
+@pytest.mark.parametrize("tool", ["Write", "Read"])
+def test_the_applier_may_write_and_read_the_patch_file(repo, tool):
+    with_patch(repo)
+    assert call(repo, tool, {"file_path": str(repo / PATCH), "content": PROD_PATCH}, agent_type=APPLIER) is None
+
+
+# Only the ledger writer can write the ledger, so an active one marks the repository this run targets.
+# A workflow agent's `cwd` is the session's, not the target's, so it cannot pin the repository.
+@pytest.mark.parametrize("ledger", [None, "active-run: false\n"])
+def test_the_applier_and_reverter_act_only_where_a_run_is_active(repo, ledger):
+    with_patch(repo, active=False)
+    if ledger:
+        (repo / LEDGER).write_text(ledger)
+    assert call(repo, "Write", {"file_path": str(repo / PATCH), "content": "x"}, agent_type=APPLIER) == "deny"
+    assert call(repo, "Bash", {"command": apply_cmd(repo)}, agent_type=APPLIER) == "deny"
+    assert call(repo, "Bash", {"command": apply_cmd(repo, "-R")}, agent_type=REVERTER) == "deny"
+
+
+@pytest.mark.parametrize("tool,path", [("Write", "src/app.py"), ("Write", LEDGER), ("Edit", PATCH),
+                                       ("Read", "/etc/hostname")])
+def test_the_applier_is_refused_every_other_file_call(repo, tool, path):
+    assert call(repo, tool, {"file_path": path, "content": "x", "old_string": "a", "new_string": "b"},
+                agent_type=APPLIER) == "deny"
+
+
+@pytest.mark.parametrize("flags", [("--check",), ()])
+def test_the_applier_may_check_and_apply_the_patch_file(repo, flags):
+    with_patch(repo)
+    assert call(repo, "Bash", {"command": apply_cmd(repo, *flags)}, agent_type=APPLIER) is None
+
+
+def test_a_quoted_repository_path_is_one_word(repo):
+    with_patch(repo)
+    command = f"git -C '{repo}' apply --recount '{repo / PATCH}'"
+    assert call(repo, "Bash", {"command": command}, agent_type=APPLIER) is None
+
+
+@pytest.mark.parametrize("flags", [("-R",), ("-R", "--check")])
+def test_the_reverter_may_check_and_reverse_the_patch_file(repo, flags):
+    with_patch(repo)
+    assert call(repo, "Bash", {"command": apply_cmd(repo, *flags)}, agent_type=REVERTER) is None
+
+
+def test_the_applier_may_not_reverse_and_the_reverter_may_not_apply(repo):
+    with_patch(repo)
+    assert call(repo, "Bash", {"command": apply_cmd(repo, "-R")}, agent_type=APPLIER) == "deny"
+    assert call(repo, "Bash", {"command": apply_cmd(repo)}, agent_type=REVERTER) == "deny"
+
+
+@pytest.mark.parametrize("suffix", [
+    "; touch x", " && touch x", " | sh", " > out", " $(touch x)", " `touch x`", "\ntouch x", " &",
+    " --unsafe-paths", " --exclude=x", " -p0", " # note", " *",
+])
+@pytest.mark.parametrize("agent_type", [APPLIER, REVERTER])
+def test_anything_beyond_the_exact_command_is_refused(repo, suffix, agent_type):
+    with_patch(repo)
+    flags = ("-R",) if agent_type == REVERTER else ()
+    assert call(repo, "Bash", {"command": apply_cmd(repo, *flags) + suffix}, agent_type=agent_type) == "deny"
+
+
+@pytest.mark.parametrize("make", [
+    lambda r: f"git apply --recount {r / PATCH}",
+    lambda r: f"git -C {r / 'src'} apply --recount {r / PATCH}",
+    lambda r: f"git -C {r} apply --recount {r / 'other.diff'}",
+    lambda r: f"git -C {r} apply --unsafe-paths --recount {r / PATCH}",
+    lambda r: f"GIT_DIR=/x git -C {r} apply --recount {r / PATCH}",
+    lambda r: f"git -c core.x=y -C {r} apply --recount {r / PATCH}",
+    lambda r: f"cat {r / PATCH}",
+    lambda r: "echo hi",
+], ids=["no-dash-C", "not-the-root", "other-patch", "extra-flag", "env-prefix", "dash-c", "cat", "echo"])
+def test_every_other_command_shape_is_refused(repo, make):
+    (repo / "src").mkdir()
+    with_patch(repo)
+    assert call(repo, "Bash", {"command": make(repo)}, agent_type=APPLIER) == "deny"
+
+
+def test_a_patch_file_that_is_a_symlink_is_refused(repo, tmp_path):
+    (tmp_path / "elsewhere.diff").write_text(PROD_PATCH)
+    os.symlink(tmp_path / "elsewhere.diff", repo / PATCH)
+    assert call(repo, "Bash", {"command": apply_cmd(repo)}, agent_type=APPLIER) == "deny"
+    assert call(repo, "Write", {"file_path": str(repo / PATCH), "content": "x"}, agent_type=APPLIER) == "deny"
+
+
+def test_a_missing_patch_file_is_refused(repo):
+    assert call(repo, "Bash", {"command": apply_cmd(repo)}, agent_type=APPLIER) == "deny"
+
+
+# The cage scanned the proposer's diff, not the bytes the applier wrote, so the hook reads the patch
+# file itself before any apply or reversal (D6).
+@pytest.mark.parametrize("patch", [
+    "--- a/tests/test_app.py\n+++ b/tests/test_app.py\n",
+    "--- a/Tests/test_app.py\n+++ b/Tests/test_app.py\n",
+    "diff --git a/src/a.py b/tests/a.py\nsimilarity index 100%\nrename from src/a.py\nrename to tests/a.py\n",
+    "diff --git a/src/conftest.py b/src/conftest.py\nBinary files differ\n",
+    "--- a/.refactor-loop-ledger.md\n+++ b/.refactor-loop-ledger.md\n",
+    "--- a/.refactor-loop-patch.diff\n+++ b/.refactor-loop-patch.diff\n",
+    # Found by plugin-dev:plugin-validator, 2026-10-20: each passed a header regex, and git wrote it.
+    "diff --git a/src/a.py b/src/x.py\nsimilarity index 100%\nrename from src/a.py\nrename to tests/x.py\n",
+    "diff --git a/src/a.py b/src/a.py\nsimilarity index 100%\nrename old src/a.py\nrename new tests/t2.py\n",
+    '--- "a/te\\163ts/t.py"\n+++ "b/te\\163ts/t.py"\n@@ -1 +1 @@\n-a\n+b\n',
+    '--- /dev/null\n+++ "b/\\056refactor-loop-ledger.md"\n@@ -0,0 +1 @@\n+active-run: x\n',
+    "--- a/.claude/settings.json\n+++ b/.claude/settings.json\n@@ -1 +1 @@\n-{}\n+{}\n",
+    "--- a/CLAUDE.md\n+++ b/CLAUDE.md\n@@ -1 +1 @@\n-a\n+b\n",
+], ids=["test-path", "case", "rename-into-tests", "binary-conftest", "ledger", "patch-file",
+        "unprefixed-rename", "legacy-rename", "octal-test-path", "octal-ledger", "claude-settings",
+        "claude-md"])
+@pytest.mark.parametrize("agent_type", [APPLIER, REVERTER])
+def test_a_patch_reaching_a_test_or_a_loop_file_is_refused(repo, patch, agent_type):
+    with_patch(repo, patch)
+    flags = ("-R",) if agent_type == REVERTER else ()
+    decision, reason = decide({"tool_name": "Bash", "tool_input": {"command": apply_cmd(repo, *flags)},
+                               "cwd": str(repo), "agent_type": agent_type}, repo)
+    assert decision == "deny"
+    assert "patch" in reason
+
+
+@pytest.mark.parametrize("tool", ["Write", "Read", "Edit"])
+def test_the_reverter_holds_no_file_tool(repo, tool):
+    assert call(repo, tool, {"file_path": str(repo / PATCH), "content": "x"}, agent_type=REVERTER) == "deny"
+
+
+@pytest.mark.parametrize("name,tools", [("refactor-applier", "Read, Write, Bash"),
+                                        ("refactor-reverter", "Bash")])
+def test_the_apply_types_hold_only_their_tools(name, tools):
+    assert f"\ntools: {tools}\n" in (REPO / "agents" / f"{name}.md").read_text()
+
+
 # --------------------------------------------------------------------------- everyone else
 
 

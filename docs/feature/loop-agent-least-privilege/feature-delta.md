@@ -286,3 +286,31 @@ was not run.
   its answer key: one CWE-250 item on the history reader, its fix the row's form plus ` — here: ` a hook
   keyed on that agent type; no security item on the read-only drafter. It also raised one Advisory
   question — who writes the task text — which `expected.md` lists as not a failure.
+
+### Slice 03 — the applier and the reverter (1.2.21, 2026-10-20)
+
+Driven against this working tree through `claude -p --plugin-dir`, in bypass mode.
+
+- **Live probe.** The applier wrote, checked and applied a real patch, and the hook refused its `touch`,
+  a `;`-chained apply, `git status`, and a `Write` to `src/`. After it wrote a patch reaching
+  `tests/test_calc.py`, the hook refused to apply it. The reverter reversed the applied patch cleanly.
+  It declined, by its own judgment, to issue `git checkout -- .`, `rm` and a forward apply, twice, so the
+  hook never saw them live; the hook tests drive exactly those calls under the reverter's type.
+- **Review found three bypasses, now closed.** `plugin-dev:plugin-validator` got four crafted patches
+  past the first scan, a header regex: a rename into an unprefixed test path, `rename old`/`rename new`,
+  and two octal-quoted names, one of them the ledger. Each wrote its path. The hook now asks
+  `git apply --numstat -z` which paths a patch touches, and each case is a refusal test. It also pinned
+  the grant to the repository whose ledger says `active-run: true` (a workflow agent's `cwd` is the
+  session's, not the target's), and refuses `.claude/`, `CLAUDE.md` and `AGENTS.md`.
+- **Accepted residual.** The applier holds `Write`, so parallel tool calls could swap the patch between
+  the hook's check and git's apply. Candidate fix: the hook rewrites the command to apply a copy it
+  checked, once a rewrite is shown not to auto-approve the call. Recorded in the hooks README.
+- **Real runs.** The first one-iteration run failed all three applies: the proposer's diff ends in an
+  extra empty line, which git reads as context the file lacks. The full-shell applier had sometimes
+  worked past it (run 1's commit message records a retry for that reason); the narrowed applier copies
+  byte for byte. The cage now hands it a diff ending in exactly one newline (`patchText`). The rerun
+  landed one refactoring first time, green and committed, with no refusal. No gate went red, so the
+  real run did not exercise the reverter; the probe did.
+- **Not closed here.** The workflow's own `touchesTestPath` and `touchesLedger` scans share the header
+  regex's blind spots. The hook is the enforcing check on this path; the cage's scans now only save an
+  agent call.

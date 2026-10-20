@@ -76,6 +76,22 @@ about, and the run demonstrated it (it refactored the plugin with no behavior pr
 - (−) "Infeasible vs. just-needs-another-fix" is a model judgment (the proposer's) gated by a
   hard counter — the same dynamic-verdict/static-threshold split used elsewhere.
 
+## Update 2026-10-20 — revert reverses the patch file
+
+The scoped revert (`git checkout -- <files>` plus deleting created files) needed a shell that could
+name any path, which no allow-list can bound. The applier now writes each diff to
+`<repo>/.refactor-loop-patch.diff`, and the reverter runs `git apply --recount -R` on that file — one
+command, enforced by `hooks/refactor-loop/agent-allowlist.py`. `git apply` is atomic, so after a red
+gate the tree is HEAD plus exactly that patch, and `-R` deletes the files it created.
+
+- The final revert after the land loop is gone: every path out of that loop has already reversed its
+  red attempt or applied nothing, so it would reverse a patch that is not there.
+- A revert that fails halts the run (`HALT`, reason `revert-failed`) and leaves the diff in the tree;
+  nothing falls back to `git checkout`. The run now refuses an overlapping dirty tree for this reason
+  too.
+
+Decision D5 of `docs/feature/loop-agent-least-privilege/`.
+
 ## Operational note (not a code change)
 
 `args` must be passed to the Workflow tool as a real JSON object, never a JSON-encoded string,

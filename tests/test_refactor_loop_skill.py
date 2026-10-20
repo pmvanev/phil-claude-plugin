@@ -79,7 +79,9 @@ def test_every_return_to_propose_counts_once():
 
 def test_revert_removes_files_the_diff_created_here_and_in_the_workflow():
     assert "remove any file the diff created" in _flat()
-    assert "delete the files the diff created" in (REPO / "workflows" / "refactor-loop.js").read_text()
+    # The workflow reverses its patch file with `git apply -R`, which deletes the files the patch
+    # created as part of the reversal (loop-agent-least-privilege D5).
+    assert "apply --recount -R" in (REPO / "workflows" / "refactor-loop.js").read_text()
 
 
 def test_a_refused_diff_leaves_by_revert_and_skipped_is_a_status():

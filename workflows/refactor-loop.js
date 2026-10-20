@@ -26,7 +26,8 @@ export const meta = {
 //  - HALT if the baseline collects zero tests (decorative-gate prevention);
 //  - commit-on-green (durable green + audit trail + surgical revert);
 //  - red -> bounded FIX sub-loop (repair the same refactor) before REVERT;
-//  - REVERT is scoped (restore only the diff's files), never `git checkout -- .`;
+//  - REVERT is scoped: `git apply -R` of the one patch file the applier applied, never
+//    `git checkout`; a revert that fails halts the run (loop-agent-least-privilege D5);
 //  - a node that can't be made to pass is marked `undoable` with findings.
 //
 // Canonical spec: docs/design/refactor-loop/architecture.md.
@@ -65,6 +66,8 @@ function readConfig(args) {
 }
 const { MAX_ITER, MAX_FIX, THETA, SCOPE, FOCUS, REPO, TEST_CMD, RULES, missing: MISSING } = readConfig(args)
 const LEDGER_PATH = '.refactor-loop-ledger.md'
+// The applier writes each diff here and `git apply` names it; the allow-list hook pins both.
+const PATCH_PATH = '.refactor-loop-patch.diff'
 const PINNED = ['preserve-public-api', 'no-test-file-writes']
 const WORKDIR = `Work inside the repository at \`${REPO}\` — cd into it first; all paths below are relative to it.`
 
@@ -178,26 +181,27 @@ ${p.diff}
 Justification FIRST, then verdict. Each criterion = (criterion, met, severity major|minor|nit, type, mechanism, span as file:line, evidence = rubric clause + offending lines). met is the boolean true or false, or the string "CANNOT_ASSESS" for a criterion you cannot judge from the diff alone. A met:false with no span is not allowed. Anti-flattery: generic praise with no span ⇒ CANNOT_ASSESS, never accept. Overall verdict (accept|revise|reject|CANNOT_ASSESS) + confidence in [0,1].`
 }
 
+// The proposer's diff can end in extra empty lines, which git reads as context the file lacks. Only
+// empty lines go: a blank context line is a single space and stays.
+function patchText(diff) {
+  return String(diff || '').replace(/\n*$/, '') + '\n'
+}
+
 function applyPrompt(p) {
-  return `${WORKDIR} Apply a single refactoring diff to the working tree for /phil:refactor-loop. Steps:
-1. \`git apply --recount --check\` the diff; if it does not apply cleanly, return applied:false + the error. Do NOT hand-edit to force it.
-2. If the check passes, \`git apply --recount\`.
-3. Never write to test files.
+  // The applier holds no cd: every command names the repo with -C and the patch file absolutely.
+  return `Apply a single refactoring diff to the working tree at \`${REPO}\` for /phil:refactor-loop. Steps:
+1. If \`${REPO}/${PATCH_PATH}\` exists, Read it. Then Write the diff below to it, byte for byte: it ends at its last line, followed by one newline.
+2. Run exactly \`git -C ${REPO} apply --recount --check ${REPO}/${PATCH_PATH}\`. If it fails, return applied:false + its output. Do NOT hand-edit to force it.
+3. Run exactly \`git -C ${REPO} apply --recount ${REPO}/${PATCH_PATH}\`.
 Return applied:true on success, else applied:false + error.
 
 Diff:
 \`\`\`diff
-${p.diff}
-\`\`\``
+${patchText(p.diff)}\`\`\``
 }
 
-function revertScopedPrompt(p) {
-  return `${WORKDIR} Revert ONLY the current uncommitted refactoring for /phil:refactor-loop. The prior green refactors are committed, so restore just the files this diff touched back to HEAD: identify the files in the diff below, run \`git checkout -- <the files the diff modified>\` and delete the files the diff created (do NOT run \`git checkout -- .\` or touch anything else). Confirm those files match HEAD. Return applied:true when restored.
-
-Diff:
-\`\`\`diff
-${p.diff}
-\`\`\``
+function revertPrompt() {
+  return `Reverse the refactoring diff /phil:refactor-loop last applied to \`${REPO}\`. Run exactly \`git -C ${REPO} apply --recount -R --check ${REPO}/${PATCH_PATH}\`, then \`git -C ${REPO} apply --recount -R ${REPO}/${PATCH_PATH}\`. Return applied:true if both exit 0, else applied:false + the output verbatim.`
 }
 
 function commitPrompt(p, nodeId) {
@@ -262,6 +266,12 @@ function touchesTestPath(diff) {
   return headers.some(line => patterns.some(p => p.test(line)))
 }
 
+// The patch file is what `git apply -R` reverses, so a diff that rewrites it changes the next revert.
+function touchesPatchFile(diff) {
+  const headers = (diff.match(/^(?:[+-]{3} |diff --git |(?:rename|copy) (?:from|to) ).*/gm) || [])
+  return headers.some(line => /(^|[\/ ])\.refactor-loop-patch\.diff(\s|$)/i.test(line))
+}
+
 // The ledger's `active-run: true` arms the G2 hook, so a diff that rewrites, renames or deletes it
 // disarms the guard (CWE-807). The cage writes the ledger itself; a proposed diff never may.
 function touchesLedger(diff) {
@@ -321,7 +331,7 @@ await agent(writeLedgerPrompt(ledgerMarkdown(ledger, 0, 'running', true)), { age
 // ===========================================================================
 phase('Loop')
 let iter = 0
-let stop = null // 'converged' | 'proposer-failed' | null (ran out of iterations)
+let stop = null // 'converged' | 'proposer-failed' | 'revert-failed' | null (ran out of iterations)
 while (iter < MAX_ITER) {
   iter++
 
@@ -350,6 +360,7 @@ while (iter < MAX_ITER) {
   let landed = false
   let lastGate = null
   let infeasibleFindings = null
+  let revertError = null
   for (let attempt = 0; attempt <= MAX_FIX; attempt++) {
     // G2 cage guard: never apply a diff that touches a test path
     if (touchesTestPath(candidate.diff || '')) {
@@ -360,7 +371,11 @@ while (iter < MAX_ITER) {
       infeasibleFindings = 'Proposed diff modifies the run ledger, which arms the test-file guard. Rejected by the cage.'
       break
     }
-    const ap = await agent(applyPrompt(candidate), { schema: APPLY_SCHEMA, label: `apply#${iter}.${attempt}`, phase: 'Loop' })
+    if (touchesPatchFile(candidate.diff || '')) {
+      infeasibleFindings = 'Proposed diff modifies the patch file the revert reverses. Rejected by the cage.'
+      break
+    }
+    const ap = await agent(applyPrompt(candidate), { agentType: 'phil:refactor-applier', schema: APPLY_SCHEMA, label: `apply#${iter}.${attempt}`, phase: 'Loop' })
     if (!ap || !ap.applied) {
       lastGate = { stdout: `diff did not apply: ${ap ? ap.error : 'agent failed'}` }
     } else {
@@ -368,8 +383,9 @@ while (iter < MAX_ITER) {
       lastGate = g
       const mismatch = !!g && g.public_api_changed === true && candidate.public_api_touched !== true
       if (g && g.exit_code === 0 && !mismatch) { landed = true; break } // green!
-      // red / mismatch: scoped-revert this attempt before trying a fix
-      await agent(revertScopedPrompt(candidate), { schema: APPLY_SCHEMA, label: `revert#${iter}.${attempt}`, phase: 'Loop' })
+      // red / mismatch: reverse this attempt before trying a fix. No fallback widens the grant (D5).
+      const rv = await agent(revertPrompt(), { agentType: 'phil:refactor-reverter', schema: APPLY_SCHEMA, label: `revert#${iter}.${attempt}`, phase: 'Loop' })
+      if (!rv || !rv.applied) { stop = 'revert-failed'; revertError = rv ? rv.error : 'the reverter failed'; break }
     }
     if (attempt < MAX_FIX) {
       const evidence = lastGate ? ((lastGate.public_api_changed && !candidate.public_api_touched ? 'Public API changed but you predicted it would not.\n' : '') + tail(lastGate.stdout)) : 'unknown failure'
@@ -385,9 +401,13 @@ while (iter < MAX_ITER) {
     node.status = 'resolved'; node.note = 'green, committed'
     applied.push(node.node_id); lastFailure = null
     log(`iter ${iter}: landed ${node.node_id} (${node.smell}) — green & committed.`)
+  } else if (stop === 'revert-failed') {
+    node.status = 'undoable'
+    node.note = `revert failed, run halted; the tree holds this diff: ${tail(revertError, 400)}`
+    log(`iter ${iter}: ${node.node_id} could not be reversed -> HALT. The working tree still holds it.`)
+    break
   } else {
-    // ensure tree is clean, then mark undoable + findings, invalidate dependents
-    await agent(revertScopedPrompt(candidate), { schema: APPLY_SCHEMA, label: `revert-final#${iter}`, phase: 'Loop' })
+    // Every red attempt was reversed inside the land loop, so the tree is at the last green commit.
     node.status = 'undoable'
     node.note = `findings: ${infeasibleFindings || `could not restabilize after ${MAX_FIX} fix attempt(s). Last: ${tail(lastGate && lastGate.stdout, 400)}`}`
     invalidateDependents(ledger, node.node_id)
@@ -414,5 +434,6 @@ return {
 function finalStatus(stop, iter, maxIter) {
   if (stop === 'converged') return { status: 'DONE', reason: null }
   if (stop === 'proposer-failed') return { status: 'HALT', reason: 'proposer-failed' }
+  if (stop === 'revert-failed') return { status: 'HALT', reason: 'revert-failed' }
   return iter >= maxIter ? { status: 'HALT-INCOMPLETE', reason: 'max-iterations' } : { status: 'DONE', reason: null }
 }

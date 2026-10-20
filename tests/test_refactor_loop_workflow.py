@@ -142,6 +142,74 @@ class TestLedgerLockbox:
         assert src.index("touchesLedger(candidate.diff") < src.index("applyPrompt(candidate)")
 
 
+@pytest.mark.skipif(not node, reason="node is not installed")
+class TestPatchFileLockbox:
+    """The applier writes each diff to one patch file that `git apply` and `git apply -R` name, so a diff
+    that rewrites the patch file would change what the next revert reverses."""
+
+    @pytest.mark.parametrize("diff", [
+        "--- a/.refactor-loop-patch.diff\n+++ b/.refactor-loop-patch.diff\n",
+        "diff --git a/x b/.refactor-loop-patch.diff\nrename from x\nrename to .refactor-loop-patch.diff\n",
+        "--- a/.Refactor-Loop-Patch.DIFF\n+++ b/.Refactor-Loop-Patch.DIFF\n",
+    ], ids=["edit", "rename", "case"])
+    def test_a_diff_that_reaches_the_patch_file_is_refused(self, diff):
+        assert _call("touchesPatchFile", diff) is True
+
+    def test_a_diff_of_production_code_passes(self):
+        assert _call("touchesPatchFile", "--- a/src/patch.diff\n+++ b/src/patch.diff\n") is False
+
+    def test_the_cage_refuses_a_patch_file_diff_before_applying_it(self):
+        src = WORKFLOW.read_text()
+        assert src.index("touchesPatchFile(candidate.diff") < src.index("applyPrompt(candidate)")
+
+
+# The proposer's diff arrives with an extra empty line at its end, which git reads as a context line the
+# file lacks: every apply in the 2026-10-20 slice-03 run failed on it. The narrowed applier copies the
+# diff byte for byte, so the cage hands it a diff that ends in exactly one newline.
+@pytest.mark.skipif(not node, reason="node is not installed")
+@pytest.mark.parametrize("given,expected", [
+    ("--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b\n\n", "--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b\n"),
+    ("--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b", "--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b\n"),
+    ("@@ -1,2 +1,2 @@\n-a\n+b\n \n\n\n", "@@ -1,2 +1,2 @@\n-a\n+b\n \n"),
+], ids=["extra-empty-line", "no-final-newline", "blank-context-line-kept"])
+def test_the_patch_text_ends_in_exactly_one_newline(given, expected):
+    assert _call("patchText", given) == expected
+
+
+def test_the_applier_is_handed_the_normalised_patch():
+    assert "patchText(p.diff)" in _js_function("applyPrompt")
+
+
+# A revert reverses the one patch file the applier applied: one allowed command, where `git checkout`
+# plus `rm` would need paths the allow-list cannot bound (D5).
+def test_revert_reverses_the_patch_file_and_never_checks_out():
+    prompt = _js_function("revertPrompt")
+    assert "apply --recount -R" in prompt
+    assert "checkout" not in prompt
+
+
+def test_apply_writes_the_diff_to_the_patch_file_and_applies_it_there():
+    prompt = _js_function("applyPrompt")
+    assert "${REPO}/${PATCH_PATH}" in prompt
+    assert "apply --recount --check" in prompt
+
+
+# Every path out of the land loop has already reverted its red attempt or applied nothing, so a final
+# revert would reverse a patch that is not there.
+def test_no_revert_runs_after_the_land_loop():
+    assert "revert-final" not in WORKFLOW.read_text()
+
+
+def test_a_failed_revert_stops_the_run():
+    src = WORKFLOW.read_text()
+    assert re.search(r"if \(!rv \|\| !rv\.applied\) \{[^}]*stop = 'revert-failed'", src)
+
+
+@pytest.mark.skipif(not node, reason="node is not installed")
+def test_a_failed_revert_is_a_halt_with_its_reason():
+    assert _call("finalStatus", "revert-failed", 2, 10) == {"status": "HALT", "reason": "revert-failed"}
+
+
 # The read-only roles start as agent types whose grant is Read, Grep and Glob, so "never touch disk"
 # is a limit on the tools rather than a line in the prompt (CWE-250, issue 48). A two-agent workflow
 # run on 2026-10-20 confirmed that `agentType` enforces the agent file's `tools:` inside a workflow:
@@ -171,6 +239,8 @@ def test_the_read_only_agent_types_grant_only_read_search_and_list(agent_type):
 # commands, because `tools:` picks whole tools, never commands (CWE-250, issue 48).
 NARROWED_CALLS = {
     "writeLedgerPrompt(": "phil:refactor-ledger-writer",
+    "applyPrompt(": "phil:refactor-applier",
+    "revertPrompt(": "phil:refactor-reverter",
 }
 
 
@@ -211,8 +281,9 @@ def test_the_command_names_the_workflow_from_the_plugin_root():
 
 def test_the_command_refuses_a_dirty_tree():
     body = _body()
-    assert "git -C <repo> status --porcelain -- . ':!.refactor-loop-ledger.md'" in body
+    assert "git -C <repo> status --porcelain -- . ':!.refactor-loop-ledger.md' ':!.refactor-loop-patch.diff'" in body
     assert "commit or stash (`git stash -u`)" in body
+    assert "git checkout" not in body
 
 
 def test_the_command_no_longer_asks_for_a_hook_that_never_fires():
