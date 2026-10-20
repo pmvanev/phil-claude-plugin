@@ -83,11 +83,22 @@ For each file, check against the coding guide. Look for these categories of viol
 
 #### Security
 
-Apply `security.md`'s Always-flag tables. **Name each finding by the CWE id of its row, and copy the row's Preferred form verbatim
-as its fix**, then add this code's concrete instance after it. A paraphrase cannot be traced back to its row. Where a row cites several ids, name the one whose definition
-matches the line, and file one item per defect: when one defect matches two of a row's ids, file the most specific. A context that turns off both certificate and hostname checks is two defects; a row with no CWE id names its NIST section
-instead. Leave every case on the rule's Do-not-flag list alone. Its Principles half is design and
-yields no finding on its own.
+Apply `security.md`'s Always-flag tables:
+
+- **Name each finding by the CWE id of its row.** Where a defect fits two rows, take the row whose
+  Violation names its source — the model-output row, not the shell row, for a model reply run in a
+  shell. A row with no CWE id names its NIST section.
+- **Copy the row's Preferred form verbatim as its fix, then write ` — here: ` and the one change this
+  code needs**: the alternative that applies, or, where the form defers to another row, that row's
+  fix. The verbatim prefix traces the item to its row; the instance keeps it a single, atomic change.
+- **File one item per missing protection, not per matching id.** Two protections are missing when
+  the code could restore either without the other: a context that turns off certificate and hostname
+  checks lacks two (CWE-295, CWE-297), and so does a prompt that holds untrusted text and a grant
+  broader than its task (CWE-1427, CWE-250). One protection that matches two ids files the most
+  specific: the child where one id is the other's parent (CWE-89 over CWE-943 for SQL), else the id
+  the Cite column tags to the clause that matches.
+- Leave every case on the rule's Do-not-flag list alone. The Principles half is design and yields no
+  finding on its own.
 
 **An Advisory bullet is a question for the author, not a defect.** File it with `Priority: 1`,
 `Smell: Advisory`, `Refactoring: none — the author decides`, `Route: report only`, and a Rationale
@@ -169,7 +180,7 @@ claim about a whole suite.
 ### Priority 7 — Language Idioms
 Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1. An idiom that is also a security sink — `dangerouslySetInnerHTML` fed untrusted data — is a Priority 1 security item under its CWE id, filed once, never also at Priority 7.
 
-For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file, or for Priority 6 the fix from `test-patterns.md`'s Smell Catalogue) that addresses it.
+For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file, or for Priority 6 the fix from `test-patterns.md`'s Smell Catalogue, or for a security item the fix the **Security** subsection above defines) that addresses it.
 
 ---
 
@@ -205,7 +216,7 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 - **Lines**: {start}-{end}
 - **Priority**: {1-7}
 - **Smell**: {smell name from catalog; for a security item, its CWE id, e.g. `CWE-78`; `Advisory` for a question}
-- **Refactoring**: {named refactoring from catalog; for a security item, the row's Preferred form verbatim, then this code's instance}
+- **Refactoring**: {named refactoring from catalog; for a security item, the row's Preferred form verbatim, then ` — here: ` and this code's one change}
 - **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route; a Priority 7 item routes to `/phil:refactor` in production code and `report only` in a test file}
 - **Rationale**: {why this matters — which coding standard is violated; for a security item, `security.md` and the row's Cite column}
 - **Status**: pending
@@ -218,9 +229,9 @@ Rules for the backlog:
 - The refactoring name must match a named refactoring from the catalog — for Priority 6, the smell and
   the fix come from `test-patterns.md`'s Smell Catalogue instead, and the route is that row's. For a
   Priority 7 idiom, name the idiom from the language rules file. Where the catalogue names no
-  refactoring for it — most Priority 1 items, a dependency-direction violation — state the fix in plain
+  refactoring for it — most non-security Priority 1 items, a dependency-direction violation — state the fix in plain
   words and route it `report only`. For a security item, the smell is the CWE id and the fix is the
-  row's Preferred form
+  one the **Security** subsection defines
 - `report only` is a valid route: no command applies the fix, and the item says so rather than
   pretending one does
 - Rationale must cite the specific principle or rule violated

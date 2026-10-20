@@ -25,6 +25,7 @@ SECURITY_FIXTURES = sorted((REPO / "skills" / "review-code" / "self-test").glob(
 # Resolved through MITRE's CWE API (content version 4.20, 2026-04-30) on 2026-10-20. An id joins this
 # set only after the same lookup; that is decision D5 of docs/feature/security-standards-rule/.
 VERIFIED_CWE = {
+    90,  # resolved 2026-10-20, for LDAP in the query row
     22, 77, 78, 79, 88, 89, 94, 95, 208, 209, 250, 256, 295, 297, 306, 307, 321, 323, 327, 328, 329,
     330, 338, 347, 352, 384, 427, 494, 502, 532, 601, 611, 614, 636, 639, 732, 770, 798, 829, 862,
     916, 918, 943, 1004, 1104, 1333, 1336, 1357, 1395, 1427,
@@ -49,6 +50,11 @@ def _always_flag_rows():
         violation, preferred, cite = _cells(line)
         rows.append({"Violation": violation, "Preferred form": preferred, "Cite": cite})
     return rows
+
+
+def _takes_the_form(fix, form):
+    """The row's form verbatim, alone or followed by ` — here: ` and this code's change."""
+    return fix == form or fix.startswith(form + " — here: ")
 
 
 def _items(backlog):
@@ -111,7 +117,12 @@ def _check_items_against_rows(manifest, rows):
         fix = _plain(_field(item, "Refactoring"))
         owning = [r for r in rows if re.search(rf"\b{re.escape(smell)}\b", r["Cite"])]
         assert owning, f"{smell} heads no always-flag row"
-        assert any(fix == _plain(r["Preferred form"]) for r in owning), f"{smell}: {fix!r} is not its row's fix"
+        assert any(_takes_the_form(fix, _plain(r["Preferred form"])) for r in owning), (
+            f"{smell}: {fix!r} is not its row's fix"
+        )
+        deferring = [r for r in owning if "rows above apply" in r["Preferred form"]]
+        if deferring and fix == _plain(deferring[0]["Preferred form"]):
+            raise AssertionError(f"{smell}: a form that defers to other rows needs ' — here: ' and their fix")
         assert _plain(_field(item, "Route")) == "report only", smell
 
 
@@ -124,7 +135,7 @@ def test_no_fixture_expects_an_item_on_a_decoy():
 
 def test_review_code_files_one_defect_once_under_its_most_specific_id():
     body = " ".join(SKILL.read_text().split())
-    assert "file the most specific" in body
+    assert "files the most specific" in body
 
 
 def test_the_rule_says_an_accidental_protection_is_no_guard():
@@ -135,7 +146,7 @@ def test_the_rule_says_an_accidental_protection_is_no_guard():
 def test_review_code_copies_the_preferred_form_verbatim():
     """A paraphrased fix cannot be traced to its row; the first fixture drives paraphrased three of ten."""
     body = " ".join(SKILL.read_text().split())
-    assert "copy the row's Preferred form verbatim" in body
+    assert "Copy the row's Preferred form verbatim" in body
 
 
 def test_decoy_assertions_are_scoped_to_security_items():
@@ -143,3 +154,11 @@ def test_decoy_assertions_are_scoped_to_security_items():
     for manifest in SECURITY_FIXTURES:
         text = (manifest.parent / "expected.md").read_text()
         assert "**No item names" not in text, manifest.parent.name
+
+
+def test_review_code_counts_missing_protections_and_marks_the_instance():
+    """'Most specific' alone could not reproduce both fixture verdicts: TLS is two items, the regex one."""
+    body = " ".join(SKILL.read_text().split())
+    assert "File one item per missing protection, not per matching id" in body
+    assert "write ` — here: `" in body
+    assert "take the row whose Violation names its source" in body

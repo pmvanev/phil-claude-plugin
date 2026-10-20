@@ -11,8 +11,8 @@ writer the code cannot show is a question, not a defect. The first dogfood run h
 **How to drive it:** drive this working tree's `skills/review-code/SKILL.md` by hand over this
 directory (`/phil:review-code` runs the released copy).
 
-**Expected:** the Priority 1 items in `expected-backlog.md`, matched on the Smell and on a Refactoring
-that begins with the row's Preferred form:
+**Expected:** the Priority 1 items in `expected-backlog.md`, matched on the Smell and on a Refactoring that is
+the row's Preferred form verbatim, alone or followed by ` — here: ` and this code's one change:
 
 1. **CWE-78** — `apply_fix` runs a model reply in a shell from a hook, which acts with the user's
    privileges whatever the session grants.

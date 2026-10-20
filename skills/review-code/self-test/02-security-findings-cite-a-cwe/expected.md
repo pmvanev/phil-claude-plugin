@@ -12,8 +12,8 @@ unsanitized input)" — that named no id, no fix and no exemption.
 directory (`/phil:review-code` runs the released copy).
 
 **Expected:** a `.refactoring-backlog.md` holding the ten Priority 1 items in `expected-backlog.md`,
-matched on the Smell and on a Refactoring that begins with the row's Preferred form (a concrete
-instance may follow it):
+matched on the Smell and on a Refactoring that is
+the row's Preferred form verbatim, alone or followed by ` — here: ` and this code's one change:
 
 1. **CWE-798** — `DB_PASSWORD`, a production password assigned in source.
 2. **CWE-89** — `cards_for` formats the caller's `owner` into SQL.
@@ -37,6 +37,8 @@ instance may follow it):
   - `password123` in `test_ingest.py` — a test credential.
 - **No item demands a prompt-injection filter or guardrail** for `triage`. The rule flags the
   capability, never a missing filter.
+- **CWE-1427 and CWE-250 on `triage` are two items.** Narrowing the grant leaves the injection, and
+  isolating the text leaves a bare shell; either can be restored without the other.
 - Every security item carries `Route: report only` and names its CWE id in the Smell field.
 - Advisory items are counted under Advisory, never under Priority 1.
 

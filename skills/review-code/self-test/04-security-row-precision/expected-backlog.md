@@ -30,7 +30,7 @@ Scope: .
 - **Lines**: 6, 19
 - **Priority**: 1
 - **Smell**: CWE-1333
-- **Refactoring**: Limits at the boundary; a pattern without nested quantifiers, or a linear-time engine
+- **Refactoring**: Limits at the boundary; a pattern without nested quantifiers, or a linear-time engine — here: cap the question's length before the scan
 - **Route**: report only
 - **Rationale**: security.md — CWE-1333 · v5.0.0 V2; one defect, the more specific id
 - **Status**: pending

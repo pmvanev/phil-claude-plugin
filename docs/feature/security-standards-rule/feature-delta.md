@@ -278,3 +278,11 @@ over fixtures 02 to 05, reading only each fixture's code. At 1.2.4, fixtures 04 
 refuses and a reader cannot trace to its row. At 1.2.5 the skill requires the form verbatim, and a
 mechanical grade (id, verbatim prefix, lines ±2, decoys) passed both: 10 of 10 and 4 of 4, no
 security item on a decoy, no extra security item.
+
+**Skill review of the 1.2.3 and 1.2.5 changes (2026-10-20).** `plugin-dev:skill-reviewer` had reviewed
+`review-code` only at 1.2.0. Run over the later two changes, it rated them "needs improvement": "most
+specific" settled only parent-child pairs, the fixtures' own verdicts disagreed under any single test,
+the instance the skill required appeared in no expected item and was forbidden by the test, and
+deferring or menu-shaped forms copied verbatim named no one fix. 1.2.6 answers each. Re-driven:
+fixture 04 passed, and fixture 02 passed after one more sharpening — the first 1.2.6 drive folded
+CWE-250 into CWE-1427, which the independent-restoration test now separates.

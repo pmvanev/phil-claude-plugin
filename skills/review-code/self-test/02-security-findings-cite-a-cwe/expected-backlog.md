@@ -52,7 +52,7 @@ Scope: .
 - **Lines**: 66-69
 - **Priority**: 1
 - **Smell**: CWE-295
-- **Refactoring**: Verify; for a private CA, trust that CA explicitly
+- **Refactoring**: Verify; for a private CA, trust that CA explicitly — here: drop the unverified context, which turns certificate checking off
 - **Route**: report only
 - **Rationale**: security.md — CWE-295, CWE-297 · v5.0.0 V12
 - **Status**: pending
@@ -63,7 +63,7 @@ Scope: .
 - **Lines**: 66-69
 - **Priority**: 1
 - **Smell**: CWE-297
-- **Refactoring**: Verify; for a private CA, trust that CA explicitly
+- **Refactoring**: Verify; for a private CA, trust that CA explicitly — here: drop the unverified context, which also turns hostname checking off
 - **Route**: report only
 - **Rationale**: security.md — CWE-295, CWE-297 · v5.0.0 V12; one item per id that fires
 - **Status**: pending
@@ -107,7 +107,7 @@ Scope: .
 - **Lines**: 82
 - **Priority**: 1
 - **Smell**: CWE-78
-- **Refactoring**: Treat model output as untrusted input: the injection rows above apply
+- **Refactoring**: Treat model output as untrusted input: the injection rows above apply — here: argument list, no shell, chosen from a fixed set of label commands
 - **Route**: report only
 - **Rationale**: security.md — CWE-78, CWE-94, CWE-79, CWE-22 · LLM05:2025
 - **Status**: pending

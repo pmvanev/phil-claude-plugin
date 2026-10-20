@@ -8,7 +8,7 @@ Scope: .
 - **Lines**: 11-13
 - **Priority**: 1
 - **Smell**: CWE-78
-- **Refactoring**: Treat model output as untrusted input: the injection rows above apply
+- **Refactoring**: Treat model output as untrusted input: the injection rows above apply — here: argument list, no shell, chosen from fixes the hook already knows
 - **Route**: report only
 - **Rationale**: security.md — CWE-78, CWE-94, CWE-79, CWE-22 · LLM05:2025; a hook grants more than the model's own grant
 - **Status**: pending

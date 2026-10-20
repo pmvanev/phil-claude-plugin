@@ -84,7 +84,7 @@ Name each finding by its CWE id and take the fix from the row. ASVS citations ar
 
 | Violation | Preferred form | Cite |
 |---|---|---|
-| SQL, NoSQL or LDAP query built by concatenating or formatting untrusted data | Parameterized query or the driver's builder | CWE-89, CWE-943 · v5.0.0 V1 |
+| SQL, NoSQL or LDAP query built by concatenating or formatting untrusted data | Parameterized query or the driver's builder | CWE-89 (SQL), CWE-90 (LDAP), CWE-943 (other query languages) · v5.0.0 V1 |
 | Shell command string built from untrusted data | Argument list, no shell (`subprocess.run([...])`, `execFile`) | CWE-78, CWE-77 · v5.0.0-1.2.5 |
 | Untrusted value placed in an argument list where it can be read as an option | End options with `--`, or reject a leading `-` | CWE-88 · v5.0.0 V1 |
 | `eval`, `exec`, dynamic import or template compilation on untrusted data | A parser for the data's format; a fixed dispatch table | CWE-94, CWE-95, CWE-1336 · v5.0.0 V1 |
@@ -94,7 +94,7 @@ Name each finding by its CWE id and take the fix from the row. ASVS citations ar
 | XML from untrusted input parsed with external entities or DTDs enabled | Disable DTDs and external entities; a hardened parser | CWE-611 · v5.0.0 V1 |
 | Server fetches a caller-supplied URL with no destination allow-list | Allow-list hosts and schemes; block private and link-local ranges | CWE-918 · v5.0.0 V1 |
 | Redirect to a caller-supplied URL with no allow-list | Redirect to a known path or an id mapped to one | CWE-601 · v5.0.0 V3 |
-| Unbounded work from untrusted input — no size, count, depth or time limit; a pattern with nested or overlapping quantifiers (`(a+)+`, `(a\|a)*`), or a quantified class beside a literal the class also matches (`[\w.]*\.`), run on untrusted text of unbounded length | Limits at the boundary; a pattern without nested quantifiers, or a linear-time engine | CWE-770, CWE-1333 · v5.0.0 V2 |
+| Unbounded work from untrusted input — no size, count, depth or time limit; a pattern with nested or overlapping quantifiers (`(a+)+`, `(a\|a)*`), or a quantified class beside a literal the class also matches (`[\w.]*\.`), run on untrusted text of unbounded length | Limits at the boundary; a pattern without nested quantifiers, or a linear-time engine | CWE-770 (no limit), CWE-1333 (the pattern) · v5.0.0 V2 |
 
 ### Access control
 
@@ -137,7 +137,7 @@ Name each finding by its CWE id and take the fix from the row. ASVS citations ar
 
 | Violation | Preferred form | Cite |
 |---|---|---|
-| Code run with no integrity check — `curl … \| sh`, a script fetched at build time, a third-party CI action or base image pinned by a mutable tag | Pin by digest or commit SHA; verify a checksum or signature before running | CWE-494, CWE-829 · v5.0.0 V15 |
+| Code run with no integrity check — `curl … \| sh`, a script fetched at build time, a third-party CI action or base image pinned by a mutable tag | Pin by digest or commit SHA; verify a checksum or signature before running | CWE-494 (fetched code), CWE-829 (a CI action or image) · v5.0.0 V15 |
 | CI workflow that checks out untrusted code under a privileged trigger (`pull_request_target` running the PR's head) | Run untrusted code without secrets or write tokens | CWE-829 · v5.0.0 V15 |
 | Package resolution that lets a public registry answer for an internal package's name — `--extra-index-url` beside a private index, an unscoped internal npm name | One index per name: a scoped name (`@org/…`) bound to the private registry, or a single proxy index that serves internal names first | CWE-427 · v5.0.0 V15 |
 | An application's build that installs without its lockfile — `npm install` where `npm ci` would enforce it, a lockfile deleted or git-ignored | Commit the lockfile and install from it | CWE-1357 · v5.0.0 V15 |
