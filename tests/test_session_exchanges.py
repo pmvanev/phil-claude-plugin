@@ -579,8 +579,9 @@ def test_carry_refuses_a_body_that_holds_a_region_of_its_own(tmp_path):
     assert snap.read_text() == BODY
 
 
-def test_a_rewritten_snapshot_keeps_its_permissions(tmp_path):
-    """`mkstemp` creates 0600, and `os.replace` would carry that onto the snapshot."""
+def test_a_rewritten_snapshot_is_owner_only(tmp_path):
+    """The snapshot copies prompts and replies word for word, so every write leaves it 0600, and an
+    existing 0644 copy is tightened (CWE-312, issue 48)."""
     snap = tmp_path / ".session-handoff.md"
     snap.write_text(BODY)
     snap.chmod(0o644)
@@ -588,4 +589,17 @@ def test_a_rewritten_snapshot_keeps_its_permissions(tmp_path):
     run("record", "--file", str(snap), "--expect-sha", git_hash(snap),
         "--transcript", str(five_exchanges().write(tmp_path / "t.jsonl")))
 
-    assert snap.stat().st_mode & 0o777 == 0o644
+    assert snap.stat().st_mode & 0o777 == 0o600
+
+
+def test_a_new_snapshot_is_owner_only_whatever_the_umask(tmp_path):
+    import os
+    snap = tmp_path / ".session-handoff.md"
+    old = os.umask(0o022)
+    try:
+        subprocess.run(["python3", str(SCRIPT), "write", "--file", str(snap), "--body", "-",
+                        "--expect-sha", "absent"], input=BODY, capture_output=True, text=True, check=True)
+    finally:
+        os.umask(old)
+
+    assert snap.stat().st_mode & 0o777 == 0o600

@@ -235,22 +235,17 @@ def current_sha(path: Path) -> str:
     return git_blob_hash(path.read_bytes()) if path.exists() else ABSENT
 
 
-def _mode(path: Path) -> int:
-    if path.exists():
-        return path.stat().st_mode & 0o777
-    umask = os.umask(0)
-    os.umask(umask)
-    return 0o666 & ~umask
-
-
 def swap(path: Path, expect: str, data: bytes) -> str | None:
-    """Write `data` if the file still hashes to `expect`; return the new hash, or None if refused."""
-    mode = _mode(path)
+    """Write `data` if the file still hashes to `expect`; return the new hash, or None if refused.
+
+    The snapshot copies prompts and replies word for word, so every write leaves it owner-only, and an
+    existing wider copy is tightened (CWE-312, issue 48).
+    """
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".session-handoff.", suffix=".tmp")
     try:
         with os.fdopen(fd, "wb") as f:
             f.write(data)
-        os.chmod(tmp, mode)
+        os.chmod(tmp, 0o600)
         if current_sha(path) != expect:
             return None
         os.replace(tmp, path)

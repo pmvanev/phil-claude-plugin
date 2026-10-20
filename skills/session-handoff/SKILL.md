@@ -229,6 +229,9 @@ write   write | carry | record  --expect-sha <h1>   → re-checked, then an atom
         the file moved → `REFUSED <h1> <h2>`, nothing written: report both hashes as WRITE-REFUSED
 ```
 
+Every write leaves the snapshot owner-only (`0600`), because it holds the session's prompts and replies
+word for word.
+
 ```
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py head   --file <root>/.session-handoff.md
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py count
