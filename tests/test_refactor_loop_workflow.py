@@ -119,6 +119,29 @@ class TestTestPathLockbox:
                                         "--- a/src/a.py\n+++ b/src/a.py\n+contest = 1\n") is False
 
 
+@pytest.mark.skipif(not node, reason="node is not installed")
+class TestLedgerLockbox:
+    """The ledger's `active-run: true` arms the G2 hook, so a diff that rewrites, renames or deletes
+    the ledger disarms it (CWE-807, issue 48). The cage writes the ledger itself; a diff never may."""
+
+    @pytest.mark.parametrize("diff", [
+        "--- a/.refactor-loop-ledger.md\n+++ b/.refactor-loop-ledger.md\n-active-run: true\n",
+        "--- a/.refactor-loop-ledger.md\n+++ /dev/null\n",
+        "diff --git a/.refactor-loop-ledger.md b/old.md\nsimilarity index 100%\n"
+        "rename from .refactor-loop-ledger.md\nrename to old.md\n",
+        "--- a/.Refactor-Loop-Ledger.MD\n+++ b/.Refactor-Loop-Ledger.MD\n",
+    ], ids=["edit", "delete", "rename", "case"])
+    def test_a_diff_that_reaches_the_ledger_is_refused(self, diff):
+        assert _call("touchesLedger", diff) is True
+
+    def test_a_diff_of_production_code_passes(self):
+        assert _call("touchesLedger", "--- a/src/ledger.md\n+++ b/src/ledger.md\n") is False
+
+    def test_the_cage_refuses_a_ledger_diff_before_applying_it(self):
+        src = WORKFLOW.read_text()
+        assert src.index("touchesLedger(candidate.diff") < src.index("applyPrompt(candidate)")
+
+
 def test_the_loop_wires_each_stop_to_its_cause():
     """The pure function is only right if the loop sets `stop` from the right branch."""
     src = WORKFLOW.read_text()

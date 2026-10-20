@@ -261,6 +261,13 @@ function touchesTestPath(diff) {
   return headers.some(line => patterns.some(p => p.test(line)))
 }
 
+// The ledger's `active-run: true` arms the G2 hook, so a diff that rewrites, renames or deletes it
+// disarms the guard (CWE-807). The cage writes the ledger itself; a proposed diff never may.
+function touchesLedger(diff) {
+  const headers = (diff.match(/^(?:[+-]{3} |diff --git |(?:rename|copy) (?:from|to) ).*/gm) || [])
+  return headers.some(line => /(^|[\/ ])\.refactor-loop-ledger\.md(\s|$)/i.test(line))
+}
+
 function invalidateDependents(ledger, revertedId) {
   let changed = true
   while (changed) {
@@ -346,6 +353,10 @@ while (iter < MAX_ITER) {
     // G2 cage guard: never apply a diff that touches a test path
     if (touchesTestPath(candidate.diff || '')) {
       infeasibleFindings = 'Proposed diff modifies a test file; the suite is the oracle. Rejected by the cage.'
+      break
+    }
+    if (touchesLedger(candidate.diff || '')) {
+      infeasibleFindings = 'Proposed diff modifies the run ledger, which arms the test-file guard. Rejected by the cage.'
       break
     }
     const ap = await agent(applyPrompt(candidate), { schema: APPLY_SCHEMA, label: `apply#${iter}.${attempt}`, phase: 'Loop' })

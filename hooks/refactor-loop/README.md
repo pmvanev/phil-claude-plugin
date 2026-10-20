@@ -33,6 +33,11 @@ commits its ledger, so a tracked one, or one git cannot vouch for, came from who
 the repo or pack the archive, and re-injecting it would let them write every prompt's context. G7
 is therefore silent outside a git repository.
 
+**G2's switch guards a cooperative agent, not a hostile one.** The loop writes its own ledger with an
+ordinary `Write`, so G2 cannot tell the run's legitimate `active-run: false` from an agent disarming
+it. Both diff scans refuse a proposed diff that touches the ledger, which closes the proposer's
+route; an agent that writes the ledger directly can still switch G2 off.
+
 ## Why this needs human follow-up
 
 `hooks/hooks.json` ships **no `Stop` hook** — the toast/chime notifier that used to live there was

@@ -126,7 +126,9 @@ Route on `verdict + severity + confidence`, threshold **θ = 0.6**:
 2. **Guard G2:** refuse any diff that touches a test path — under `tests/`, `test/`, `spec/` or
    `__tests__/`, or named `test_*.py`, `*_test.*`, `*.test.*`, `*.spec.*` or `conftest.py`, in any
    letter case. Read every line that names a path: the `---` and `+++` headers, `diff --git`, and
-   `rename to` or `copy to`, which a pure rename or copy carries instead of headers. Apply
+   `rename to` or `copy to`, which a pure rename or copy carries instead of headers. Likewise
+   refuse any diff that touches the ledger: its `active-run: true` arms the hook, so a diff that
+   rewrites it disarms the guard. Apply
    nothing: record the reason, mark the node `reverted`, and continue at REVERT step 3. The PreToolUse
    hook guards `Edit` and `Write` only, so a diff applied through Bash passes it; this scan is the
    guard, and never attempt a test-file write yourself.

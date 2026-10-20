@@ -51,6 +51,11 @@ def test_the_diff_scan_reads_every_path_line_in_any_case():
         assert line in body, line
 
 
+def test_the_diff_scan_refuses_a_diff_that_reaches_the_ledger():
+    """The ledger arms G2, so a diff that rewrites it disarms the guard (CWE-807, issue 48)."""
+    assert "refuse any diff that touches the ledger" in _flat()
+
+
 def test_an_interrupted_run_s_sentinel_is_named_and_cleared_before_the_dirty_check():
     text = SKILL.read_text()
     assert text.index("left `active-run: true` from an interrupted run") < text.index("git status --porcelain")
