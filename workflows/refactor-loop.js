@@ -325,7 +325,7 @@ while (iter < MAX_ITER) {
   iter++
 
   // --- PROPOSE ---
-  const p = await agent(proposerPrompt(ledger, lastFailure), { schema: PROPOSAL_SCHEMA, label: `propose#${iter}`, phase: 'Loop' })
+  const p = await agent(proposerPrompt(ledger, lastFailure), { agentType: 'phil:refactor-proposer', schema: PROPOSAL_SCHEMA, label: `propose#${iter}`, phase: 'Loop' })
   if (!p) { stop = 'proposer-failed'; log(`Proposer agent failed at iter ${iter} -> HALT.`); break }
   if (p.no_actionable) { stop = 'converged'; log(`No actionable proposal at iter ${iter} -> DONE.`); break }
 
@@ -333,7 +333,7 @@ while (iter < MAX_ITER) {
   ledger.nodes.push(node)
 
   // --- REVIEW ---
-  const v = await agent(criticPrompt(p), { schema: VERDICT_SCHEMA, label: `review#${iter}`, phase: 'Loop' })
+  const v = await agent(criticPrompt(p), { agentType: 'phil:refactor-critic-correctness', schema: VERDICT_SCHEMA, label: `review#${iter}`, phase: 'Loop' })
   const routed = routeVerdict(v, THETA)
   if (routed.route === 'reprompt') { // GUARD: back-prompt
     node.status = 'invalid'; node.note = `critic ${routed.verdict}`
@@ -372,7 +372,7 @@ while (iter < MAX_ITER) {
     }
     if (attempt < MAX_FIX) {
       const evidence = lastGate ? ((lastGate.public_api_changed && !candidate.public_api_touched ? 'Public API changed but you predicted it would not.\n' : '') + tail(lastGate.stdout)) : 'unknown failure'
-      const fix = await agent(fixPrompt(candidate, evidence), { schema: PROPOSAL_SCHEMA, label: `fix#${iter}.${attempt + 1}`, phase: 'Loop' })
+      const fix = await agent(fixPrompt(candidate, evidence), { agentType: 'phil:refactor-proposer', schema: PROPOSAL_SCHEMA, label: `fix#${iter}.${attempt + 1}`, phase: 'Loop' })
       if (!fix) { infeasibleFindings = 'The fix agent failed; nobody judged this refactor infeasible.'; break }
       if (fix.no_actionable) { infeasibleFindings = fix.findings || 'Proposer judged the refactor infeasible during the fix sub-loop.'; break }
       candidate = fix

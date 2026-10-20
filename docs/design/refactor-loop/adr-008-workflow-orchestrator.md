@@ -54,6 +54,10 @@ mplv2 cage.
 - (−) Tool-scoping for plugin-defined agent types under `agent({agentType})` is unverified;
   v1 mitigates by having the proposer *return a diff as text* (never touch disk) and relying on
   the G2 hook, which fires on any agent's write regardless of substrate.
+  - *Update 2026-10-20:* verified. A two-agent workflow started `phil:refactor-proposer` and
+    `phil:refactor-critic-correctness` by `agentType`; each held only Read, Grep and Glob, and
+    neither could write a file or run a command. The proposer, its fix mode and the critic now start
+    as those types (issue 48, CWE-250), so "never touch disk" is a grant, not an instruction.
 
 ## Trace
 Three-way analysis (session 2026-06-18); `harebrain/docs/mpl/mpl.md` (mplv2 ↔ Harel);

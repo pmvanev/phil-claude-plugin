@@ -142,6 +142,31 @@ class TestLedgerLockbox:
         assert src.index("touchesLedger(candidate.diff") < src.index("applyPrompt(candidate)")
 
 
+# The read-only roles start as agent types whose grant is Read, Grep and Glob, so "never touch disk"
+# is a limit on the tools rather than a line in the prompt (CWE-250, issue 48). A two-agent workflow
+# run on 2026-10-20 confirmed that `agentType` enforces the agent file's `tools:` inside a workflow:
+# both types listed only Read, Grep and Glob, and neither could write or run a command.
+READ_ONLY_CALLS = {
+    "proposerPrompt(": "phil:refactor-proposer",
+    "fixPrompt(": "phil:refactor-proposer",
+    "criticPrompt(": "phil:refactor-critic-correctness",
+}
+
+
+@pytest.mark.parametrize("call,agent_type", READ_ONLY_CALLS.items())
+def test_a_read_only_role_starts_as_its_read_only_agent_type(call, agent_type):
+    lines = [l for l in WORKFLOW.read_text().splitlines() if "await agent(" in l and call in l]
+    assert lines, f"no agent call builds {call}"
+    for line in lines:
+        assert f"agentType: '{agent_type}'" in line, line
+
+
+@pytest.mark.parametrize("agent_type", sorted(set(READ_ONLY_CALLS.values())))
+def test_the_read_only_agent_types_grant_only_read_search_and_list(agent_type):
+    text = (REPO / "agents" / f"{agent_type.split(':', 1)[1]}.md").read_text()
+    assert re.search(r"^tools: Read, Grep, Glob$", text, re.M), agent_type
+
+
 def test_the_loop_wires_each_stop_to_its_cause():
     """The pure function is only right if the loop sets `stop` from the right branch."""
     src = WORKFLOW.read_text()
