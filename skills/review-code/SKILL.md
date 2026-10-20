@@ -83,8 +83,8 @@ For each file, check against the coding guide. Look for these categories of viol
 
 #### Security
 
-Apply `security.md`'s Always-flag tables. **Name each finding by the CWE id of its row, and take the
-fix from the same row's Preferred form.** Where a row cites several ids, name the one whose definition
+Apply `security.md`'s Always-flag tables. **Name each finding by the CWE id of its row, and copy the row's Preferred form verbatim
+as its fix**, then add this code's concrete instance after it. A paraphrase cannot be traced back to its row. Where a row cites several ids, name the one whose definition
 matches the line, and file one item per defect: when one defect matches two of a row's ids, file the most specific. A context that turns off both certificate and hostname checks is two defects; a row with no CWE id names its NIST section
 instead. Leave every case on the rule's Do-not-flag list alone. Its Principles half is design and
 yields no finding on its own.
@@ -205,7 +205,7 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 - **Lines**: {start}-{end}
 - **Priority**: {1-7}
 - **Smell**: {smell name from catalog; for a security item, its CWE id, e.g. `CWE-78`; `Advisory` for a question}
-- **Refactoring**: {named refactoring from catalog; for a security item, the row's Preferred form}
+- **Refactoring**: {named refactoring from catalog; for a security item, the row's Preferred form verbatim, then this code's instance}
 - **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route; a Priority 7 item routes to `/phil:refactor` in production code and `report only` in a test file}
 - **Rationale**: {why this matters — which coding standard is violated; for a security item, `security.md` and the row's Cite column}
 - **Status**: pending

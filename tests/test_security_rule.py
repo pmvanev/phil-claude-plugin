@@ -130,3 +130,16 @@ def test_review_code_files_one_defect_once_under_its_most_specific_id():
 def test_the_rule_says_an_accidental_protection_is_no_guard():
     body = " ".join(RULE.read_text().split())
     assert "An earlier call that happens to fail on hostile input is not one" in body
+
+
+def test_review_code_copies_the_preferred_form_verbatim():
+    """A paraphrased fix cannot be traced to its row; the first fixture drives paraphrased three of ten."""
+    body = " ".join(SKILL.read_text().split())
+    assert "copy the row's Preferred form verbatim" in body
+
+
+def test_decoy_assertions_are_scoped_to_security_items():
+    """'No item names X' also catches a type-hint item that lists X; the pin is about security items."""
+    for manifest in SECURITY_FIXTURES:
+        text = (manifest.parent / "expected.md").read_text()
+        assert "**No item names" not in text, manifest.parent.name

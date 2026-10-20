@@ -38,7 +38,7 @@ Scope: .
 ### [R004] CWE-1427 — label names written verbatim into CLAUDE.md
 
 - **File**: `board_sync.py`
-- **Lines**: 30-36
+- **Lines**: 35-36
 - **Priority**: 1
 - **Smell**: CWE-1427
 - **Refactoring**: Render it as inert data — an allow-listed character set, a length cap, no newlines, backticks or marker text — or keep it out and record only ids

@@ -271,3 +271,10 @@ the code:
 Each refinement changes what the rule asserts, so per `CLAUDE.md` it folds into `rules/security.md`
 with a fixture that would have caught it and a version bump. The seven findings are defects in this
 repo and belong on the board.
+
+**Fixture drives after the refinements (2026-10-20).** Fresh agents drove the working tree's `SKILL.md`
+over fixtures 02 to 05, reading only each fixture's code. At 1.2.4, fixtures 04 and 05 passed. Fixtures
+02 and 03 made every judgement right but paraphrased three Preferred forms each, which a strict match
+refuses and a reader cannot trace to its row. At 1.2.5 the skill requires the form verbatim, and a
+mechanical grade (id, verbatim prefix, lines ±2, decoys) passed both: 10 of 10 and 4 of 4, no
+security item on a decoy, no extra security item.

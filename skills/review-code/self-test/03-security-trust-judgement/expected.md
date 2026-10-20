@@ -25,7 +25,7 @@ that begins with the row's Preferred form:
 
 **Hard assertions (any failure blocks the skill change):**
 
-- **No item names `save_note`.** The path is the model's, but the command that runs it already grants
+- **No security item names `save_note`.** The path is the model's, but the command that runs it already grants
   `Write` on any path, so the script grants nothing the model lacks. A CWE-22 item here is a gate failure.
 - **`ledger_context` yields an Advisory question, never a CWE-1427 item.** The code cannot show who
   writes the ledger; a cloned repository could.

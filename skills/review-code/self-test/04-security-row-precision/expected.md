@@ -25,7 +25,7 @@ that begins with the row's Preferred form:
 
 **Hard assertions (any failure blocks the skill change):**
 
-- **No item names `wording_gate`.** It fails open too, but it enforces a word count, not a security
+- **No security item names `wording_gate`.** It fails open too, but it enforces a word count, not a security
   property, and says so.
 - **No CWE-770 item beside the CWE-1333 one.** The missing length limit and the backtracking pattern
   are one defect; the more specific id names it.

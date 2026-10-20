@@ -28,7 +28,7 @@ instance may follow it):
 
 **Hard assertions (any failure blocks the skill change):**
 
-- **No item names a look-alike:**
+- **No security item names a look-alike:**
   - `cards_sorted` formats SQL from a closed set — the injection rows need untrusted data.
   - `cache_key` uses MD5 as a cache key — a non-security purpose.
   - `display_order` shuffles with `random` — non-security work.
