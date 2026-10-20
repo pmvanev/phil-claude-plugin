@@ -254,15 +254,16 @@ the code:
 
 **Where the rule made the reviewer hesitate** — candidate refinements, not yet applied:
 
-1. Model output is untrusted only where the code grants more than the model's own grant; a script
-   that writes a path the model could write directly grants nothing.
+1. *(Applied, 1.2.1.)* Model output is untrusted only where the code grants more than the model's own
+   grant; a script that writes a path the model could write directly grants nothing.
 2. A sink an earlier, unrelated call happens to protect has no stated tier.
 3. CWE-636 needs a scope: a deny that is not a security control (a wording standard) is outside it.
 4. CWE-1333's threshold: whether "overlapping quantifiers" covers a class beside a literal it matches.
 5. One defect matching two ids of one row: file the most specific, not both.
 6. CWE-1427's Preferred form assumes a live session; a write into an instruction file needs its own
    fix (render as inert data, or keep it out), and forge metadata belongs in the untrusted list.
-7. An untrusted status the code cannot show belongs with the trust-boundary Advisory, unstated today.
+7. *(Applied, 1.2.1.)* An untrusted status the code cannot show belongs with the trust-boundary
+   Advisory, unstated today.
 8. No row for an uncanonicalised path in a guard, a guard its subject can disable, or verbatim
    transcripts written at default permissions.
 9. Do not flag held cleanly: a SHA-1 compare-and-swap fingerprint and list-form `subprocess.run`.

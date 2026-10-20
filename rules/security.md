@@ -17,7 +17,9 @@ This rule owns **what a reviewer flags as a security defect, what it must not fl
 
 **The two halves divide on checkability, not on subject.** The reviewer half — Always-flag, Advisory, Do not flag — names defects a diff shows, each by its CWE id. The Principles half is design: almost none of it shows on a line, and a review that files a principle as a defect lends it unearned authority. Both are here, labelled, so neither borrows the other's.
 
-**"Untrusted" means data that crossed a trust boundary to reach this code**: request input; files, environment and arguments another principal controls; tool and model output; issue, PR and commit text. A value the code chooses from a closed set is trusted.
+**"Untrusted" means data that crossed a trust boundary to reach this code**: request input; files, environment and arguments another principal controls; tool and model output; issue, PR and commit text; and the forge metadata other principals write — label, project, view, option, workflow and branch names. A value the code chooses from a closed set is trusted.
+
+**Model output is untrusted where code acts on it with more than the model's own grant** — a hook, a CI job, a script that runs outside the session's permissions. A script that writes a path the model could already write grants nothing new, and no row fires on it.
 
 ---
 
@@ -76,7 +78,7 @@ Greshake et al. showed that **any text an LLM reads can issue instructions** —
 
 Name each finding by its CWE id and take the fix from the row. ASVS citations are chapter-level and carry the version, because ASVS warns its item ids "may change between versions". OWASP Top 10 categories group findings; a category name is never a finding.
 
-**A row fires only on what the review read.** Where the guard a row asks for can live outside the code read — middleware, a decorator, the router, a gateway, the framework's config — and that place went unread, raise the row as an Advisory question instead.
+**A row fires only on what the review read.** Where the guard a row asks for can live outside the code read — middleware, a decorator, the router, a gateway, the framework's config — and that place went unread, raise the row as an Advisory question instead. The same holds where the code cannot show who writes a source — a file in the working tree that a cloned repository can carry: raise the trust-boundary question rather than an injection row.
 
 ### Injection and untrusted input
 

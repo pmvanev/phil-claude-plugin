@@ -14,6 +14,7 @@ flags. Format mirrors `skills/redesign-tests/self-test/`.
 |---|---|---|---|
 | `01-test-findings-name-a-pattern/` | three test smells and one correct gateway-mock test | `rules/test-patterns.md` Smell Catalogue; the unmanaged-dependency exemption | three Priority 6 items, each with the catalogue's smell, fix and route; the gateway test not flagged |
 | `02-security-findings-cite-a-cwe/` | ten security defects beside six safe look-alikes | `rules/security.md` Always-flag rows; its Do-not-flag list | ten Priority 1 items, each with its row's CWE id and Preferred form; no look-alike flagged |
+| `03-security-trust-judgement/` | helpers whose inputs are untrusted in some places and not others | `rules/security.md`'s definition of untrusted | the hook and the label prompt flagged; the granted write left alone; the ledger raised as Advisory |
 
 ## Layout
 

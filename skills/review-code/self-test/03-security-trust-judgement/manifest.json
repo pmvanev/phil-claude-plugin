@@ -1,0 +1,9 @@
+{
+  "node_id": "RC-SELFTEST-03",
+  "mode": "review",
+  "target": ".",
+  "pins": "who counts as untrusted: model output only where code grants more than the model's own grant, forge metadata always, a source the code cannot attribute as an Advisory question",
+  "expected_guard": "the hook and the label prompt flagged; the granted write left alone; the ledger raised as a question",
+  "decoys": ["save_note"],
+  "min_items": 3
+}

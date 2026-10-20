@@ -7,17 +7,20 @@ was resolved in MITRE's CWE database, and the fixture's expected items to their 
 
 **What this cannot check.** It verifies a fixture *expects* the right item, not that a review
 *produces* it — whether a reviewer flagged the seeded defect and left the decoy alone is model
-judgement, which `self-test/02-security-findings-cite-a-cwe/expected.md` carries and a human drives.
+judgement, which each security fixture's `expected.md` carries and a human drives.
 
 Written 2026-10-20, when the rule landed.
 """
+import json
 import re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 RULE = REPO / "rules" / "security.md"
 SKILL = REPO / "skills" / "review-code" / "SKILL.md"
-RC02 = REPO / "skills" / "review-code" / "self-test" / "02-security-findings-cite-a-cwe"
+# Every review-code fixture that pins security items. Each manifest lists its decoys and how many
+# security items its expected backlog must hold.
+SECURITY_FIXTURES = sorted((REPO / "skills" / "review-code" / "self-test").glob("*-security-*/manifest.json"))
 
 # Resolved through MITRE's CWE API (content version 4.20, 2026-04-30) on 2026-10-20. An id joins this
 # set only after the same lookup; that is decision D5 of docs/feature/security-standards-rule/.
@@ -26,11 +29,6 @@ VERIFIED_CWE = {
     330, 338, 347, 352, 384, 427, 494, 502, 532, 601, 611, 614, 636, 639, 732, 770, 798, 829, 862,
     916, 918, 943, 1004, 1104, 1333, 1336, 1357, 1395, 1427,
 }
-
-# Functions in fixture 02 that look like a defect and are not one. A backlog naming any of them has
-# flagged a Do-not-flag case.
-DECOYS = ("cache_key", "display_order", "cards_sorted", "hash_password", "login", "password123")
-
 
 def _plain(cell):
     return re.sub(r"[*`]", "", cell).strip()
@@ -90,11 +88,23 @@ def test_review_code_reads_the_rule_on_every_run_and_names_findings_by_cwe():
     assert "Count it under Advisory, never under Priority 1" in body
 
 
-def test_rc02_expects_every_security_item_to_take_its_id_and_fix_from_one_row():
+def test_the_security_fixtures_are_found():
+    """A glob that matches nothing passes both fixture tests below silently."""
+    assert len(SECURITY_FIXTURES) >= 2
+
+
+def test_every_expected_security_item_takes_its_id_and_fix_from_one_row():
     """Checked against the id's own row, so an item cannot borrow another row's fix."""
     rows = _always_flag_rows()
-    items = [i for i in _items((RC02 / "expected-backlog.md").read_text()) if "**Smell**: CWE-" in i]
-    assert len(items) >= 10, "fixture 02 seeds ten defects"
+    for manifest in SECURITY_FIXTURES:
+        _check_items_against_rows(manifest, rows)
+
+
+def _check_items_against_rows(manifest, rows):
+    want = json.loads(manifest.read_text())["min_items"]
+    backlog = (manifest.parent / "expected-backlog.md").read_text()
+    items = [i for i in _items(backlog) if "**Smell**: CWE-" in i]
+    assert len(items) >= want, f"{manifest.parent.name} seeds {want} defects"
     for item in items:
         smell = _plain(_field(item, "Smell"))
         fix = _plain(_field(item, "Refactoring"))
@@ -104,7 +114,8 @@ def test_rc02_expects_every_security_item_to_take_its_id_and_fix_from_one_row():
         assert _plain(_field(item, "Route")) == "report only", smell
 
 
-def test_rc02_expects_no_item_on_a_decoy():
-    backlog = (RC02 / "expected-backlog.md").read_text()
-    for decoy in DECOYS:
-        assert decoy not in backlog, f"{decoy} is a Do-not-flag case"
+def test_no_fixture_expects_an_item_on_a_decoy():
+    for manifest in SECURITY_FIXTURES:
+        backlog = (manifest.parent / "expected-backlog.md").read_text()
+        for decoy in json.loads(manifest.read_text())["decoys"]:
+            assert decoy not in backlog, f"{manifest.parent.name}: {decoy} is a Do-not-flag case"
