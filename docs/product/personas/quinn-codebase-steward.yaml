@@ -18,3 +18,13 @@ mental_model:
 vocabulary:
   - refactoring, re-architecture, migration, tech debt, characterization test, golden master,
     contract test, behavior preservation, seam, coupling, cohesion, wave, preservation floor
+
+# Security facet (DISCUSS, feature security-standards-rule, 2026-10-20):
+# Quinn already runs /phil:review-code for the health of the codebase; security defects are health
+# defects the reviewer could not yet name. Job: catch-security-defects-in-review.
+#   goal: a review that names each objective security defect by CWE id and its fix, and stays quiet
+#     on the false alarms scanners raise
+#   frustration: one Priority 1 bullet ("injection, unsanitized input") with no id, no fix and no
+#     exemption, so findings are impressions
+#   vocabulary: CWE, ASVS, trust boundary, least privilege, fail-safe default, injection, secret,
+#     supply chain, prompt injection, lethal trifecta

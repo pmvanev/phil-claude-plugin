@@ -946,3 +946,47 @@ jobs:
     #   C4 A stage that recorded nothing is reported as recording nothing, never summarised.
     #   C5 No status is derived. phil:nwave-slice-status owns every derivation over these files.
     #   C6 mutates: false, and mechanically so — no forge, no network, git verbs only.
+
+  - id: catch-security-defects-in-review
+    # Registered by DISCUSS wave, feature: security-standards-rule (2026-10-20)
+    job_story: >
+      When I review a change, I want the objective security defects in it flagged by the weakness
+      they are and the fix that closes them — and the false alarms left alone — so I can stop
+      shipping vulnerabilities without carrying CWE, ASVS and NIST in my head or drowning in
+      scanner noise.
+    dimensions:
+      functional: >
+        Name each objective security defect in a diff by its CWE id, cite the standard chapter, and
+        name the preferred form; raise design-level concerns (a new trust boundary, a new
+        dependency) as questions rather than defects.
+      emotional: >
+        Confidence that injection, leaked secrets and broken access control will not pass review
+        unnamed; relief from both failure modes — silence, and a wall of false alarms.
+      social: >
+        Code teammates can trust with their data; being seen as someone whose reviews catch the
+        defect an attacker would find first.
+    four_forces:
+      push: >
+        Measured 2026-10-20: no rule in `rules/` owns security; `review-code` carries one bullet
+        ("Security vulnerabilities (injection, unsanitized input)") with no id, no fix and no
+        exemption. Supply chain, secrets, authorization, cryptography and prompt injection are
+        mentioned nowhere. This repo's own hooks shell out and read model-composed text.
+      pull: >
+        The same "flag the violation, name the preferred form" help `ux.md` gives for WCAG — keyed
+        by CWE, with a Do not flag list that keeps a review quiet where scanners are loud.
+      anxiety: >
+        (A) A security tier that false-flags — MD5 cache keys, test passwords, public health
+        checks — trains the reader to skip Priority 1. (B) Versioned standards (Top 10, ASVS) date,
+        and a stale id is a citation nobody can check. (C) A rule that demands a prompt-injection
+        filter teaches a defence the evidence says does not work.
+      habit: >
+        Reviewing from memory; trusting a scanner's output wholesale or ignoring it wholesale;
+        treating security as a later, separate audit.
+    opportunity_score: >
+      high importance, near-zero satisfaction — the reviewer's only guidance is one bullet.
+    status: validated
+    personas: [quinn-codebase-steward]
+    features: [security-standards-rule]
+    # NOT a facet of catch-ux-violations-while-building-ui: different reader, different standards,
+    # and a different cost of a miss. Same-persona-new-job precedent: know-a-boards-hazards-before-contact.
+    # See docs/feature/security-standards-rule/feature-delta.md.
