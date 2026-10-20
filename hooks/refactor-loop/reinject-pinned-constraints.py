@@ -20,21 +20,20 @@ import sys
 
 
 def tracked(cwd):
-    """True when version control tracks the ledger, or when that cannot be ruled out.
+    """True unless git answers that the ledger is untracked.
 
     The loop writes the ledger and never commits it, so a tracked ledger came from whoever can commit
     to the repo, and re-injecting it would let a cloned repo author every prompt's context (CWE-1427,
-    issue 48). Outside a repository, or without git, the ledger can only be the loop's own.
+    issue 48). Only exit 1 is that answer. Exit 128 covers a directory unpacked from an archive, with
+    no `.git`, and a repository git refuses as dubiously owned; either ledger may be anyone's.
     """
     try:
         proc = subprocess.run(
             ["git", "ls-files", "--error-unmatch", "--", ".refactor-loop-ledger.md"],
             cwd=cwd, capture_output=True, timeout=5)
-    except FileNotFoundError:
-        return False
     except Exception:
         return True
-    return proc.returncode == 0
+    return proc.returncode != 1
 
 
 def main():

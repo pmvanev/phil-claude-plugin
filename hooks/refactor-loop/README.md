@@ -28,9 +28,10 @@ where the model executes the loop and those weaknesses (premature exit, context 
 return.
 
 **Two guards distrust the ledger in opposite directions.** Once the ledger exists, G2 denies any
-write it cannot check. G7 stays silent on a ledger that version control tracks: the loop never
-commits its ledger, so a tracked one came from whoever can commit to the repo, and re-injecting it
-would let a cloned repo write every prompt's context.
+write it cannot check. G7 speaks only when git answers that the ledger is untracked: the loop never
+commits its ledger, so a tracked one, or one git cannot vouch for, came from whoever can commit to
+the repo or pack the archive, and re-injecting it would let them write every prompt's context. G7
+is therefore silent outside a git repository.
 
 ## Why this needs human follow-up
 

@@ -98,15 +98,17 @@ def test_a_payload_that_is_not_an_object_denies(active, stdin):
 # `hooks/refactor-loop/reinject-pinned-constraints.py` re-states the ledger's pinned lines as context on
 # every prompt. The loop writes that ledger and never commits it, so a ledger version control tracks
 # came from whoever can commit to the repo, and a cloned repo could author every prompt's context
-# (CWE-1427, issue 48). G7 stays silent on a tracked ledger.
+# (CWE-1427, issue 48). G7 speaks only on git's definite "not tracked" answer. Wound: the first fix
+# read every git failure as untracked, so a ledger unpacked from an archive, with no `.git`, or in a
+# repository git refused as dubiously owned, still reached every prompt.
 
 G7 = REPO / "hooks" / "refactor-loop" / "reinject-pinned-constraints.py"
 PINNED = "active-run: true\npinned: never edit a test\n"
 
 
-def reinject(cwd):
+def reinject(cwd, env=None):
     proc = subprocess.run([sys.executable, str(G7)], cwd=cwd, capture_output=True, text=True,
-                          input=json.dumps({"prompt": "go", "cwd": str(cwd)}), timeout=30)
+                          input=json.dumps({"prompt": "go", "cwd": str(cwd)}), timeout=30, env=env)
     assert proc.returncode == 0, proc.stderr
     if not proc.stdout.strip():
         return None
@@ -123,9 +125,24 @@ def test_g7_restates_the_pinned_lines_of_an_untracked_ledger(tmp_path):
     assert "pinned: never edit a test" in reinject(tmp_path)
 
 
-def test_g7_restates_the_pinned_lines_outside_a_repository(tmp_path):
+def test_g7_is_silent_outside_a_repository(tmp_path):
+    """An archive unpacks with no `.git`, so a ledger here may be anyone's."""
     (tmp_path / LEDGER).write_text(PINNED)
-    assert "pinned: never edit a test" in reinject(tmp_path)
+    assert reinject(tmp_path) is None
+
+
+def test_g7_is_silent_when_git_refuses_the_repository(tmp_path):
+    import os
+    git(tmp_path, "init", "-q")
+    (tmp_path / LEDGER).write_text(PINNED)
+    env = {**os.environ, "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1",
+           "GIT_TEST_ASSUME_DIFFERENT_OWNER": "1"}
+    assert reinject(tmp_path, env) is None
+
+
+def test_g7_is_silent_without_git(tmp_path):
+    (tmp_path / LEDGER).write_text(PINNED)
+    assert reinject(tmp_path, {"PATH": str(tmp_path)}) is None
 
 
 def test_g7_is_silent_on_a_ledger_version_control_tracks(tmp_path):
