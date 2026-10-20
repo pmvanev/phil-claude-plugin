@@ -1,6 +1,6 @@
 ---
 name: review-code
-description: Skill bundle for phil:review-code command — code review against coding standards with prioritized refactoring backlog
+description: Skill bundle for phil:review-code command — code review against coding standards, and security defects by CWE, with prioritized refactoring backlog
 ---
 
 # Review Code
@@ -8,7 +8,8 @@ description: Skill bundle for phil:review-code command — code review against c
 Review code against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
 `${CLAUDE_PLUGIN_ROOT}/rules/refactoring.md`, `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`, and
 `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`: identify refactoring opportunities and produce a prioritized
-backlog.
+backlog. Read `${CLAUDE_PLUGIN_ROOT}/rules/security.md` on every run, before Priority 1: a security
+defect is invisible until the rule names it, so the read cannot wait for one to appear.
 
 Use `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md` as your dictionary of named refactorings.
 
@@ -47,7 +48,10 @@ Determine what `$ARGUMENTS` refers to:
 
 Run `git diff HEAD~1 --name-only` to get changed files, and `git ls-files --others --exclude-standard`
 for new files not yet added. With no parent commit, use `git diff HEAD --name-only` and say so. Skip
-deleted files. Filter to code files only (exclude configs, lockfiles, generated files). Read each changed
+deleted files. Filter to code files only (exclude configs, lockfiles, generated files), but keep shell
+scripts, CI workflows (`.github/workflows/**`, `.gitlab-ci*`), `Dockerfile*` and package-manager config
+(`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`) — check those against
+`security.md` alone. Read each changed
 file in full, plus run `git diff HEAD~1 -- <file>` to see what changed, and find the tests of each changed
 production file as File Path mode does.
 
@@ -59,6 +63,9 @@ Read the entire file. If it is production code, find its tests by the project's 
 
 Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swift,cpp,c,h,hpp,scala,clj,ex,exs,hs,ml,fs,fsx}`),
 skipping vendored and generated trees — `node_modules/`, `.venv/`, `venv/`, `vendor/`, `dist/`, `build/`.
+Also gather `**/*.{sh,bash}`, `.github/workflows/**`, `.gitlab-ci*`, `Dockerfile*` and package-manager
+config (`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and check those
+against `security.md` alone.
 Read each file. For large directories (>20 files), an Explore agent may locate the files, but read each
 one yourself: the backlog records exact lines, which a summary cannot give.
 
@@ -72,7 +79,21 @@ For each file, check against the coding guide. Look for these categories of viol
 - Missing error handling at system boundaries
 - Null/undefined hazards
 - Resource leaks (missing cleanup, unclosed connections)
-- Security vulnerabilities (injection, unsanitized input)
+- Security defects — see **Security** below
+
+#### Security
+
+Apply `security.md`'s Always-flag tables. **Name each finding by the CWE id of its row, and take the
+fix from the same row's Preferred form.** Where a row cites several ids, name the one whose definition
+matches the line, and file one item per id that fires; a row with no CWE id names its NIST section
+instead. Leave every case on the rule's Do-not-flag list alone. Its Principles half is design and
+yields no finding on its own.
+
+**An Advisory bullet is a question for the author, not a defect.** File it with `Priority: 1`,
+`Smell: Advisory`, `Refactoring: none — the author decides`, `Route: report only`, and a Rationale
+naming the bullet. Count it under Advisory, never under Priority 1, and leave it out of Step 4's top
+five. It is exempt from "single, atomic refactoring" and from "when uncertain, skip" — uncertainty is
+what makes it Advisory.
 
 ### Priority 2 — Structural Smells (High Impact)
 - **Long Functions** — Functions of 20 lines or more
@@ -146,7 +167,7 @@ never a score. Suite runtime is out of scope here too — this command reads a d
 claim about a whole suite.
 
 ### Priority 7 — Language Idioms
-Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1.
+Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1. An idiom that is also a security sink — `dangerouslySetInnerHTML` fed untrusted data — is a Priority 1 security item under its CWE id, filed once, never also at Priority 7.
 
 For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file, or for Priority 6 the fix from `test-patterns.md`'s Smell Catalogue) that addresses it.
 
@@ -167,7 +188,8 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 ## Summary
 
 - **Total items**: {count}
-- **Priority 1 (Correctness)**: {count}
+- **Priority 1 (Correctness)**: {count, Advisory items excluded}
+- **Advisory (questions for the author)**: {count}
 - **Priority 2 (Structure)**: {count}
 - **Priority 3 (Naming)**: {count}
 - **Priority 4 (Duplication)**: {count}
@@ -182,10 +204,10 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 - **File**: `{file-path}`
 - **Lines**: {start}-{end}
 - **Priority**: {1-7}
-- **Smell**: {smell name from catalog}
-- **Refactoring**: {named refactoring from catalog}
+- **Smell**: {smell name from catalog; for a security item, its CWE id, e.g. `CWE-78`; `Advisory` for a question}
+- **Refactoring**: {named refactoring from catalog; for a security item, the row's Preferred form}
 - **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route; a Priority 7 item routes to `/phil:refactor` in production code and `report only` in a test file}
-- **Rationale**: {why this matters — which coding standard is violated}
+- **Rationale**: {why this matters — which coding standard is violated; for a security item, `security.md` and the row's Cite column}
 - **Status**: pending
 ```
 
@@ -197,7 +219,8 @@ Rules for the backlog:
   the fix come from `test-patterns.md`'s Smell Catalogue instead, and the route is that row's. For a
   Priority 7 idiom, name the idiom from the language rules file. Where the catalogue names no
   refactoring for it — most Priority 1 items, a dependency-direction violation — state the fix in plain
-  words and route it `report only`
+  words and route it `report only`. For a security item, the smell is the CWE id and the fix is the
+  row's Preferred form
 - `report only` is a valid route: no command applies the fix, and the item says so rather than
   pretending one does
 - Rationale must cite the specific principle or rule violated
@@ -213,7 +236,8 @@ After writing the backlog, report to the user:
 3. The path to the backlog file
 4. Suggest the command for each route the backlog holds: "Run `/phil:refactor` to work through
    this backlog", plus `/phil:refactor-tests --review` or `/phil:redesign-tests --review` over the test
-   files when any item routes there. Name the `report only` items as the ones a human applies.
+   files when any item routes there. Name the `report only` items as the ones a human applies, and
+   the Advisory items as questions the author answers.
    **A route is a pointer, not a handoff:** those two commands re-detect with their own rules and never
    read this backlog, so say that an item may not reappear in theirs.
 

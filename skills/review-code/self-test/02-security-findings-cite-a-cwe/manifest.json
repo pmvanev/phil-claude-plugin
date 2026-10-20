@@ -1,0 +1,7 @@
+{
+  "node_id": "RC-SELFTEST-02",
+  "mode": "review",
+  "target": ".",
+  "pins": "a security finding is named by the CWE id of its rules/security.md row and takes that row's Preferred form as its fix; a Do-not-flag case is not flagged",
+  "expected_guard": "ten CWE-named Priority 1 items; six safe look-alikes unflagged"
+}
