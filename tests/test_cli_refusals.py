@@ -146,3 +146,16 @@ def test_a_forge_host_mismatch_is_refused_as_the_help_text_promises():
                                 "--host", "gitlab.com", "--forge", "github"))
     assert_json_refusal(run_cli(PROBE_BOARD, "--repo", "a/b",
                                 "--host", "github.com", "--forge", "gitlab"))
+
+
+# --- probe-board.py: --repo is validated before any forge call (CWE-88, issue 48) ----------
+
+@pytest.mark.parametrize("repo", ["--web/x", "o/-r", "o/r/extra", 'o"/r', "o/r --web"])
+def test_a_repo_that_is_not_owner_slash_repo_is_refused_before_any_forge_call(repo, tmp_path):
+    """PATH holds no `gh`, so a refusal naming OWNER/REPO can only come from the validation. The
+    `=` form is how a dash-led value reaches the script: argparse rejects `--repo --web/x` itself."""
+    p = subprocess.run([sys.executable, str(PROBE_BOARD), f"--repo={repo}"],
+                       capture_output=True, text=True, timeout=60, env={"PATH": str(tmp_path)})
+    payload = assert_json_refusal(p)
+    assert "OWNER/REPO" in payload["refusal"]["reason"], payload
+    assert p.returncode == 2

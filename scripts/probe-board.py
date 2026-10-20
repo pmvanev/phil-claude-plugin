@@ -80,14 +80,31 @@ def run(argv: list[str]) -> str:
     return proc.stdout
 
 
-def graphql(query: str) -> dict:
+def graphql_flags(variables: dict) -> list[str]:
+    """`-f` for a string, `-F` for an integer. `-F` reads a value starting `@` as a file path, so a
+    string never takes it."""
+    flags: list[str] = []
+    for name, value in variables.items():
+        flags += ["-F" if isinstance(value, int) else "-f", f"{name}={value}"]
+    return flags
+
+
+def recorded(query: str, **variables) -> str:
+    """The query as the region records it: its text, then the `gh` flags that bind its variables."""
+    return " ".join([query, *graphql_flags(variables)])
+
+
+def graphql(query: str, **variables) -> dict:
     """Run a GraphQL read and return `data`.
+
+    Every value reaches the forge as a variable, never as query text: a `"` in an owner or repo
+    name formatted into a string literal rewrites the query (CWE-943, issue 48).
 
     A transient 503 from the projects API was observed on 2026-08-17 and succeeded on retry,
     so this refuses rather than retries: a probe that quietly retries can mask a forge that is
     genuinely unwell, and the caller is a human who can run the command again.
     """
-    out = run(["gh", "api", "graphql", "-f", f"query={query}"])
+    out = run(["gh", "api", "graphql", "-f", f"query={query}", *graphql_flags(variables)])
     try:
         payload = json.loads(out)
     except json.JSONDecodeError:
@@ -468,6 +485,13 @@ def require_project_scope() -> None:
         )
 
 
+def owner_scope(owner: str) -> str:
+    """`user` or `organization`: the GraphQL field that holds this owner's projects."""
+    kind = graphql("query($owner:String!){ repositoryOwner(login:$owner){ __typename } }",
+                   owner=owner)["repositoryOwner"]["__typename"]
+    return "user" if kind == "User" else "organization"
+
+
 def pick_project(host: str, owner: str, repo: str, facts: list[dict]) -> dict:
     """Resolve the board, preferring the repo link and falling back to the owner's projects.
 
@@ -478,14 +502,15 @@ def pick_project(host: str, owner: str, repo: str, facts: list[dict]) -> dict:
     ever reaches the board.
     """
     linked_q = (
-        '{ repository(owner:"%s", name:"%s"){ projectsV2(first:20){ nodes '
-        "{ id number title url closed } } } }" % (owner, repo)
+        "query($owner:String!, $name:String!){ repository(owner:$owner, name:$name){ "
+        "projectsV2(first:20){ nodes { id number title url closed } } } }"
     )
-    linked = graphql(linked_q)["repository"]["projectsV2"]["nodes"]
+    linked = graphql(linked_q, owner=owner, name=repo)["repository"]["projectsV2"]["nodes"]
+    linked_r = recorded(linked_q, owner=owner, name=repo)
     open_linked = [p for p in linked if not p["closed"]]
     if len(open_linked) == 1:
         facts.append(
-            fact("project-discovery", "linked to the repository", linked_q,
+            fact("project-discovery", "linked to the repository", linked_r,
                  "the repository's own project link resolved to exactly one open project")
         )
         return open_linked[0]
@@ -499,14 +524,13 @@ def pick_project(host: str, owner: str, repo: str, facts: list[dict]) -> dict:
             fix=None,
         )
 
-    type_q = '{ repositoryOwner(login:"%s"){ __typename } }' % owner
-    kind = graphql(type_q)["repositoryOwner"]["__typename"]
-    scope = "user" if kind == "User" else "organization"
+    scope = owner_scope(owner)
+    # `scope` is one of two literals, never a forge value, so it alone is formatted into the text.
     owner_q = (
-        '{ %s(login:"%s"){ projectsV2(first:50){ totalCount nodes '
-        "{ id number title url closed } } } }" % (scope, owner)
+        "query($owner:String!){ %s(login:$owner){ projectsV2(first:50){ totalCount nodes "
+        "{ id number title url closed } } } }" % scope
     )
-    all_owned = graphql(owner_q)[scope]["projectsV2"]["nodes"]
+    all_owned = graphql(owner_q, owner=owner)[scope]["projectsV2"]["nodes"]
     open_owned = [p for p in all_owned if not p["closed"]]
     if not open_owned:
         raise Refusal(
@@ -524,7 +548,7 @@ def pick_project(host: str, owner: str, repo: str, facts: list[dict]) -> dict:
     facts.append(
         fact("project-discovery",
              f"NOT linked to the repository; found via the {scope}'s projects",
-             f"{linked_q}  # returned [] — then: {owner_q}",
+             f"{linked_r}  # returned [] — then: {recorded(owner_q, owner=owner)}",
              f"`repository.projectsV2` was empty, so the board was resolved from the {scope}'s "
              f"one open project; a card reaches this board only via an explicit "
              f"`gh project item-add`")
@@ -605,14 +629,16 @@ def probe(host: str, slug: str) -> dict:
     ))
 
     # --- status field and options --------------------------------------------------------
-    owner_kind = graphql('{ repositoryOwner(login:"%s"){ __typename } }' % owner)
-    scope = "user" if owner_kind["repositoryOwner"]["__typename"] == "User" else "organization"
+    scope = owner_scope(owner)
+    board = {"owner": owner, "number": number}
     fields_q = (
-        '{ %s(login:"%s"){ projectV2(number:%d){ fields(first:50){ nodes { __typename '
+        "query($owner:String!, $number:Int!){ %s(login:$owner){ projectV2(number:$number){ "
+        "fields(first:50){ nodes { __typename "
         "... on ProjectV2SingleSelectField { id name options { id name } } "
-        "... on ProjectV2Field { id name dataType } } } } } }" % (scope, owner, number)
+        "... on ProjectV2Field { id name dataType } } } } } }" % scope
     )
-    nodes = graphql(fields_q)[scope]["projectV2"]["fields"]["nodes"]
+    nodes = graphql(fields_q, **board)[scope]["projectV2"]["fields"]["nodes"]
+    fields_q = recorded(fields_q, **board)
     single_selects = [n for n in nodes if n.get("__typename") == "ProjectV2SingleSelectField"]
     status = next((n for n in single_selects if n["name"] == "Status"), None)
     if status is None:
@@ -647,9 +673,11 @@ def probe(host: str, slug: str) -> dict:
                           "makes every card sort against all of them"))
 
     # --- views ---------------------------------------------------------------------------
-    views_q = ('{ %s(login:"%s"){ projectV2(number:%d){ views(first:20){ nodes '
-               "{ number name layout } } } } }" % (scope, owner, number))
-    views = graphql(views_q)[scope]["projectV2"]["views"]["nodes"]
+    views_q = ("query($owner:String!, $number:Int!){ %s(login:$owner){ "
+               "projectV2(number:$number){ views(first:20){ nodes "
+               "{ number name layout } } } } }" % scope)
+    views = graphql(views_q, **board)[scope]["projectV2"]["views"]["nodes"]
+    views_q = recorded(views_q, **board)
     boards = [v for v in views if v["layout"] == "BOARD_LAYOUT"]
     facts.append(fact(
         "board-view",
@@ -661,9 +689,11 @@ def probe(host: str, slug: str) -> dict:
     ))
 
     # --- built-in workflows --------------------------------------------------------------
-    wf_q = ('{ %s(login:"%s"){ projectV2(number:%d){ workflows(first:50){ nodes '
-            "{ name enabled } } } } }" % (scope, owner, number))
-    workflows = graphql(wf_q)[scope]["projectV2"]["workflows"]["nodes"]
+    wf_q = ("query($owner:String!, $number:Int!){ %s(login:$owner){ "
+            "projectV2(number:$number){ workflows(first:50){ nodes "
+            "{ name enabled } } } } }" % scope)
+    workflows = graphql(wf_q, **board)[scope]["projectV2"]["workflows"]["nodes"]
+    wf_q = recorded(wf_q, **board)
     enabled = [w["name"] for w in workflows if w["enabled"]]
     facts.append(fact(
         "builtin-workflows",
@@ -733,9 +763,11 @@ def probe(host: str, slug: str) -> dict:
     # --- slice 03: evidence for the questions no forge answers ---------------------------
     # Fetched here rather than in a second script because it is the same board, read once. It is
     # deliberately NOT a fact: facts go inside the markers, and this goes beneath a question.
-    labels_q = (f"gh issue list -R {slug} --state all --limit 200 --json number,labels")
+    labels_argv = ["gh", "issue", "list", "-R", slug, "--state", "all", "--limit", "200",
+                   "--json", "number,labels"]
+    labels_q = " ".join(labels_argv)
     try:
-        raw = json.loads(run(labels_q.split()))
+        raw = json.loads(run(labels_argv))
         issues = [{"number": i["number"], "labels": [l["name"] for l in i.get("labels", [])]}
                   for i in raw]
         evidence = derive_label_evidence(issues)
@@ -769,6 +801,26 @@ def probe(host: str, slug: str) -> dict:
             "uncovered": sorted(set(TEMPLATE_FIELDS) - covered),
         },
     }
+
+
+# A path segment: no leading dash, so `gh` never reads it as a flag; no whitespace or quote, so it
+# never splits or escapes; and never `.` or `..`.
+SEGMENT = re.compile(r"(?!\.{1,2}\Z)[A-Za-z0-9_.][A-Za-z0-9_.-]*\Z")
+
+
+def repo_refusal(slug: str, forge: str) -> str | None:
+    """Why `--repo` is not a forge target, or None. GitLab allows nested groups; GitHub does not.
+
+    `--repo` reaches `gh` and `glab` positionally, so a value starting `-` would be read as a flag
+    (CWE-88, issue 48).
+    """
+    parts = slug.split("/")
+    count_ok = len(parts) >= 2 if forge == "gitlab" else len(parts) == 2
+    if count_ok and all(SEGMENT.match(p) for p in parts):
+        return None
+    shape = "OWNER/REPO, or GROUP/…/PROJECT on GitLab" if forge == "gitlab" else "OWNER/REPO"
+    return (f"--repo must be {shape}: segments of letters, digits, `.`, `_` and `-`, none starting "
+            f"with `-`")
 
 
 def main() -> int:
@@ -811,12 +863,12 @@ def main() -> int:
                           "refusal": {"reason": "--repo is required unless --list-targets is given",
                                       "fix": None}}, indent=2))
         return 2
-    if "/" not in args.repo:
-        print(json.dumps({"status": "refused", "schema": "board-setup-probe/v1",
-                          "refusal": {"reason": "--repo must be OWNER/REPO", "fix": None}},
-                         indent=2))
-        return 2
     inferred = "gitlab" if "gitlab" in args.host else "github"
+    reason = repo_refusal(args.repo, args.forge or inferred)
+    if reason:
+        print(json.dumps({"status": "refused", "schema": "board-setup-probe/v1",
+                          "refusal": {"reason": reason, "fix": None}}, indent=2))
+        return 2
     if args.forge and args.forge != inferred:
         # Promised by --forge's help text and never implemented: the mismatch probed the wrong forge
         # and reported `status: ok`. A wrong forge reads a wrong board successfully, which is the

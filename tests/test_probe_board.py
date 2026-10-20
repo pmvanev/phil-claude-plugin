@@ -90,7 +90,7 @@ def project(number, title, closed=False):
 
 def fake_graphql(monkeypatch, linked, owned=None, kind="User"):
     """Route the three queries pick_project can issue by their distinguishing substring."""
-    def _g(query):
+    def _g(query, **_):
         if "repositoryOwner" in query:
             return {"repositoryOwner": {"__typename": kind}}
         if "repository(owner" in query:
@@ -210,3 +210,104 @@ def test_kpi1_denominator_is_the_ten_template_fields():
     assert len(pb.TEMPLATE_FIELDS) == 10
     assert "label-families" in pb.TEMPLATE_FIELDS
     assert "local-task-system" in pb.TEMPLATE_FIELDS
+
+
+# --- forge values reach `gh` as data, never as syntax (CWE-943, CWE-88; issue 48) ----------
+
+def fake_forge(monkeypatch, name_with_owner="o/r"):
+    """Answer every call `probe` makes, and record each argv exactly as `gh` would receive it."""
+    calls = []
+
+    def flags(argv):
+        pairs = {}
+        for i, a in enumerate(argv):
+            if a in ("-f", "-F") and i + 1 < len(argv):
+                key, _, value = argv[i + 1].partition("=")
+                pairs[key] = (a, value)
+        return pairs
+
+    def _run(argv):
+        calls.append(argv)
+        if argv[:3] == ["gh", "auth", "status"]:
+            return "  - Token scopes: 'project', 'repo'\n"
+        if argv[:3] == ["gh", "repo", "view"]:
+            return json.dumps({"nameWithOwner": name_with_owner, "isFork": False,
+                               "defaultBranchRef": {"name": "main"}})
+        if argv[:3] == ["gh", "api", "graphql"]:
+            q = flags(argv)["query"][1]
+            if "repositoryOwner" in q:
+                data = {"repositoryOwner": {"__typename": "User"}}
+            elif "repository(" in q:
+                data = {"repository": {"projectsV2": {"nodes": []}}}
+            elif "projectsV2(" in q:
+                data = {"user": {"projectsV2": {"totalCount": 1, "nodes": [project(3, "b")]}}}
+            elif "fields(" in q:
+                data = {"user": {"projectV2": {"fields": {"nodes": [
+                    {"__typename": "ProjectV2SingleSelectField", "id": "F", "name": "Status",
+                     "options": [{"id": "a", "name": "Todo"}]}]}}}}
+            elif "views(" in q:
+                data = {"user": {"projectV2": {"views": {"nodes": []}}}}
+            else:
+                data = {"user": {"projectV2": {"workflows": {"nodes": []}}}}
+            return json.dumps({"data": data})
+        if argv[:2] == ["git", "ls-tree"]:
+            return ""
+        if argv[:3] == ["gh", "issue", "list"]:
+            return "[]"
+        raise AssertionError(f"unexpected call: {argv}")
+
+    monkeypatch.setattr(pb.shutil, "which", lambda _: "/usr/bin/gh")
+    monkeypatch.setattr(pb, "run", _run)
+    return calls, flags
+
+
+def test_owner_and_repo_travel_as_graphql_variables_not_query_text(monkeypatch):
+    """A `"` in either value would otherwise close the string literal and rewrite the query.
+    Defence in depth: `main()` refuses such a `--repo`, and this calls `probe` directly."""
+    owner, repo = 'ow"ner', 're"po'
+    calls, flags = fake_forge(monkeypatch)
+    pb.probe("github.com", f"{owner}/{repo}")
+    queries = [flags(c) for c in calls if c[:3] == ["gh", "api", "graphql"]]
+    assert len(queries) == 7
+    for f in queries:
+        assert owner not in f["query"][1] and repo not in f["query"][1], f["query"][1]
+        assert f["owner"] == ("-f", owner), "a string variable must use -f: -F reads @file values"
+    assert sum("name" in f for f in queries) == 1
+    assert next(f for f in queries if "name" in f)["name"] == ("-f", repo)
+
+
+def test_a_recorded_query_names_the_variables_that_reproduce_it(monkeypatch):
+    fake_forge(monkeypatch)
+    facts = {f["field"]: f for f in pb.probe("github.com", "o/r")["facts"]}
+    assert facts["status-mechanism"]["query"].endswith("-f owner=o -F number=3")
+    assert "-f owner=o -f name=r" in facts["project-discovery"]["query"]
+
+
+def test_the_label_read_passes_the_slug_as_one_argument(monkeypatch):
+    calls, _ = fake_forge(monkeypatch)
+    pb.probe("github.com", "o/r --web")
+    issue_list = next(c for c in calls if c[:3] == ["gh", "issue", "list"])
+    assert issue_list[issue_list.index("-R") + 1] == "o/r --web"
+    assert "--web" not in issue_list
+
+
+# --- --repo is OWNER/REPO before any forge call (CWE-88) ---------------------------------
+
+@pytest.mark.parametrize("slug,forge", [
+    ("pmvanev/phil-claude-plugin", "github"),
+    ("o/.github", "github"),
+    ("a_b/c.d", "github"),
+    ("group/sub/proj", "gitlab"),
+])
+def test_a_well_formed_repo_is_accepted(slug, forge):
+    assert pb.repo_refusal(slug, forge) is None
+
+
+@pytest.mark.parametrize("slug,forge", [
+    ("--web/x", "github"), ("-R/x", "github"), ("o/-r", "github"), ("o/r/extra", "github"),
+    ("o/", "github"), ("/r", "github"), ('o"/r', "github"), ("o/r --web", "github"),
+    ("o/..", "github"), ("./r", "github"), ("o /r", "github"), ("o/r\n", "github"),
+    ("group/-sub/proj", "gitlab"), ("solo", "gitlab"),
+])
+def test_a_malformed_repo_is_refused(slug, forge):
+    assert "OWNER/REPO" in pb.repo_refusal(slug, forge)
