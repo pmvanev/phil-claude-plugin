@@ -1,0 +1,9 @@
+{
+  "node_id": "RC-SELFTEST-05",
+  "mode": "review",
+  "target": ".",
+  "pins": "a guard's own integrity: it checks a path before canonicalising it (CWE-180), or reads its switch from a file the guarded agent can write (CWE-807); a verbatim transcript is an Advisory question (CWE-312)",
+  "expected_guard": "two guard items; the transcript raised as Advisory, never as a defect",
+  "decoys": ["keep_transcript"],
+  "min_items": 2
+}

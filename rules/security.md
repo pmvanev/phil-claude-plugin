@@ -104,6 +104,8 @@ Name each finding by its CWE id and take the fix from the row. ASVS citations ar
 | Object loaded by a caller-supplied id with no ownership or tenant check | Scope the lookup to the caller (`WHERE owner_id = :caller`) | CWE-639 · v5.0.0 V8 |
 | Critical function reachable without authentication | Authenticate before the function, not inside some of its branches | CWE-306 · v5.0.0 V6 |
 | Error, timeout or exception path in a security control — an access check, an authentication step, a guard that keeps an agent from its own oracle — that grants access, skips the check or returns "allow" | Fail closed: an unexpected path denies | CWE-636 · v5.0.0 V16 |
+| A guard that checks a path before resolving it — a substring or prefix match that `../`, a symlink or a case change slips past | Resolve the path first — `os.path.realpath`, `Path.resolve()` — then check it | CWE-180 · v5.0.0 V5 |
+| A guard that reads its own switch from a source the guarded party can write — a file in the agent's working tree, an environment variable the agent sets | Keep the switch where the guarded party cannot write it | CWE-807 · v5.0.0 V8 |
 | Privilege broader than the task — world-writable files, running as root, wildcard scopes, a CI token with `write-all` | The narrowest grant that works, stated where it is granted | CWE-732, CWE-250 · v5.0.0 V13 |
 
 ### Secrets, authentication and sessions
@@ -172,6 +174,7 @@ A reviewer raises these; the author decides. Each needs context the diff lacks.
 - **Detail in a user-facing error** beyond what the user can act on.
 - **A shell invoked on a constant string** where an argument list would do — safe today, one edit from CWE-78.
 - **Secrets in environment variables** where a secrets manager is available. Twelve-Factor's test — could you publish this code now without leaking a credential? — governs separation from code; it does not make the environment a vault.
+- **A verbatim transcript written to disk** — prompts, replies or tool output kept for a later session. It holds whatever was pasted in, which no code can know: write it `0600`, outside the repository, or redacted (CWE-312).
 - **Security code too intricate to review** — economy of mechanism.
 - **Version ranges against exact pins.** A library declares ranges and lets the application's lockfile pin; an application pins exactly. Always-flag covers mutable CI and image tags.
 - **A missing security header** — `Content-Security-Policy`, `frame-ancestors` — on a new HTML surface.

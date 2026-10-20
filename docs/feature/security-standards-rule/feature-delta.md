@@ -264,7 +264,7 @@ the code:
    fix (render as inert data, or keep it out), and forge metadata belongs in the untrusted list.
 7. *(Applied, 1.2.1.)* An untrusted status the code cannot show belongs with the trust-boundary
    Advisory, unstated today.
-8. No row for an uncanonicalised path in a guard, a guard its subject can disable, or verbatim
+8. *(Applied, 1.2.4: CWE-180, CWE-807, and an Advisory bullet for CWE-312.)* No row for an uncanonicalised path in a guard, a guard its subject can disable, or verbatim
    transcripts written at default permissions.
 9. Do not flag held cleanly: a SHA-1 compare-and-swap fingerprint and list-form `subprocess.run`.
 
