@@ -78,7 +78,7 @@ Greshake et al. showed that **any text an LLM reads can issue instructions** —
 
 Name each finding by its CWE id and take the fix from the row. ASVS citations are chapter-level and carry the version, because ASVS warns its item ids "may change between versions". OWASP Top 10 categories group findings; a category name is never a finding.
 
-**A row fires only on what the review read.** Where the guard a row asks for can live outside the code read — middleware, a decorator, the router, a gateway, the framework's config — and that place went unread, raise the row as an Advisory question instead. The same holds where the code cannot show who writes a source — a file in the working tree that a cloned repository can carry: raise the trust-boundary question rather than an injection row.
+**A row fires only on what the review read.** Where the guard a row asks for can live outside the code read — middleware, a decorator, the router, a gateway, the framework's config — and that place went unread, raise the row as an Advisory question instead. The same holds where the code cannot show who writes a source — a file in the working tree that a cloned repository can carry: raise the trust-boundary question rather than an injection row. **A guard is code that exists to refuse the input.** An earlier call that happens to fail on hostile input is not one, so the row still fires on the sink after it.
 
 ### Injection and untrusted input
 
@@ -94,7 +94,7 @@ Name each finding by its CWE id and take the fix from the row. ASVS citations ar
 | XML from untrusted input parsed with external entities or DTDs enabled | Disable DTDs and external entities; a hardened parser | CWE-611 · v5.0.0 V1 |
 | Server fetches a caller-supplied URL with no destination allow-list | Allow-list hosts and schemes; block private and link-local ranges | CWE-918 · v5.0.0 V1 |
 | Redirect to a caller-supplied URL with no allow-list | Redirect to a known path or an id mapped to one | CWE-601 · v5.0.0 V3 |
-| Unbounded work from untrusted input — no size, count, depth or time limit; a pattern with nested or overlapping quantifiers (`(a+)+`, `(a\|a)*`) run on untrusted text | Limits at the boundary; a pattern without nested quantifiers, or a linear-time engine | CWE-770, CWE-1333 · v5.0.0 V2 |
+| Unbounded work from untrusted input — no size, count, depth or time limit; a pattern with nested or overlapping quantifiers (`(a+)+`, `(a\|a)*`), or a quantified class beside a literal the class also matches (`[\w.]*\.`), run on untrusted text of unbounded length | Limits at the boundary; a pattern without nested quantifiers, or a linear-time engine | CWE-770, CWE-1333 · v5.0.0 V2 |
 
 ### Access control
 
@@ -103,7 +103,7 @@ Name each finding by its CWE id and take the fix from the row. ASVS citations ar
 | Handler or endpoint that changes or reveals data, with no authorization check in the handler, its decorators or the router that mounts it | Check authorization in every handler, deny by default | CWE-862 · v5.0.0 V8 |
 | Object loaded by a caller-supplied id with no ownership or tenant check | Scope the lookup to the caller (`WHERE owner_id = :caller`) | CWE-639 · v5.0.0 V8 |
 | Critical function reachable without authentication | Authenticate before the function, not inside some of its branches | CWE-306 · v5.0.0 V6 |
-| Error, timeout or exception path that grants access, skips a check or returns "allow" | Fail closed: an unexpected path denies | CWE-636 · v5.0.0 V16 |
+| Error, timeout or exception path in a security control — an access check, an authentication step, a guard that keeps an agent from its own oracle — that grants access, skips the check or returns "allow" | Fail closed: an unexpected path denies | CWE-636 · v5.0.0 V16 |
 | Privilege broader than the task — world-writable files, running as root, wildcard scopes, a CI token with `write-all` | The narrowest grant that works, stated where it is granted | CWE-732, CWE-250 · v5.0.0 V13 |
 
 ### Secrets, authentication and sessions
@@ -191,6 +191,7 @@ A reviewer raises these; the author decides. Each needs context the diff lacks.
 - **The absence of a prompt-injection detector or guardrail.** Flag the trifecta or the grant instead; the evidence says filters fail.
 - **An OWASP Top 10 category as a finding.** "This is A05" names no defect; name the CWE and the line.
 - **TLS verification turned off in a test against a local or loopback server.**
+- **A gate that enforces a standard rather than a security property, and fails open by stated design** — a word-count or lint hook. CWE-636 is about security controls.
 - **`dangerouslySetInnerHTML` on content that never crossed a trust boundary** — `react.md`'s idiom. When untrusted data reaches it, file CWE-79 once, citing `react.md`.
 
 ---

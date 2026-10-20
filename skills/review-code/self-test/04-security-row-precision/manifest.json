@@ -1,0 +1,9 @@
+{
+  "node_id": "RC-SELFTEST-04",
+  "mode": "review",
+  "target": ".",
+  "pins": "row precision: an accidental protection is no guard; CWE-636 covers security controls only; CWE-1333 covers a quantified class beside a literal it matches; one defect matching two ids of a row is filed once, under the more specific id",
+  "expected_guard": "four items; the wording gate unflagged; no CWE-770 beside the CWE-1333 item",
+  "decoys": ["wording_gate", "CWE-770"],
+  "min_items": 4
+}

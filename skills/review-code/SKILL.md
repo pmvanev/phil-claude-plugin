@@ -85,7 +85,7 @@ For each file, check against the coding guide. Look for these categories of viol
 
 Apply `security.md`'s Always-flag tables. **Name each finding by the CWE id of its row, and take the
 fix from the same row's Preferred form.** Where a row cites several ids, name the one whose definition
-matches the line, and file one item per id that fires; a row with no CWE id names its NIST section
+matches the line, and file one item per defect: when one defect matches two of a row's ids, file the most specific. A context that turns off both certificate and hostname checks is two defects; a row with no CWE id names its NIST section
 instead. Leave every case on the rule's Do-not-flag list alone. Its Principles half is design and
 yields no finding on its own.
 

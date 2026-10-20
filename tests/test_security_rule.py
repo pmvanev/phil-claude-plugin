@@ -119,3 +119,13 @@ def test_no_fixture_expects_an_item_on_a_decoy():
         backlog = (manifest.parent / "expected-backlog.md").read_text()
         for decoy in json.loads(manifest.read_text())["decoys"]:
             assert decoy not in backlog, f"{manifest.parent.name}: {decoy} is a Do-not-flag case"
+
+
+def test_review_code_files_one_defect_once_under_its_most_specific_id():
+    body = " ".join(SKILL.read_text().split())
+    assert "file the most specific" in body
+
+
+def test_the_rule_says_an_accidental_protection_is_no_guard():
+    body = " ".join(RULE.read_text().split())
+    assert "An earlier call that happens to fail on hostile input is not one" in body
