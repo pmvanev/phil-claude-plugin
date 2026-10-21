@@ -302,3 +302,40 @@ def test_a_shard_that_finds_no_source_file_fails_in_ci(repo):
     _git(repo, "rm", "-q", "src/a.ts")
     _git(repo, "commit", "-qm", "empty")
     assert _shard(repo, 1, 1, CI="true", CI_PIPELINE_SOURCE="schedule").returncode != 0
+
+
+# Lessons from the dogfood on this repository (2026-10-21).
+
+def test_docs_only_paths_come_from_what_the_suite_reads():
+    """`docs/product/` looked like documentation; `check-product-ssot.py` reads it."""
+    assert "a path the suite or a check reads is never docs" in _skill()
+
+
+def test_a_check_is_called_so_its_failure_fails_the_job():
+    """This repo's invariant hook reports failures and exits 0, by design for SessionStart."""
+    assert "a wrapper that reports and exits 0 gates nothing" in _skill()
+
+
+def test_a_project_with_no_lockfile_for_its_ci_tools_gets_one():
+    skill = _skill()
+    assert "a hash-pinned lockfile for the tools CI installs" in skill
+    assert "--require-hashes" in skill
+
+
+def test_the_skill_names_where_an_action_sha_is_read():
+    assert "gh api repos/<owner>/<action>/git/ref/tags/<tag>" in _skill()
+    assert "shellcheck" in _skill()
+
+
+def test_a_checkout_git_cannot_read_fails_every_task(repo):
+    """PR 51's first run: in the gitleaks container git refused the checkout as dubious ownership, and
+    gitleaks scanned 0 commits and exited 0. The script must stop before any task reads nothing."""
+    clean = {k: v for k, v in os.environ.items() if not k.startswith(("CI", "GITHUB_"))}
+    for task in ("scope", "secret-scan", "test"):
+        out = subprocess.run(["sh", "scripts/ci/run.sh", task], cwd=repo, capture_output=True, text=True,
+                             env={**clean, "CI": "true", "GIT_DIR": str(repo / "no-such-git-dir")})
+        assert out.returncode != 0 and "git cannot read this checkout" in out.stderr, task
+
+
+def test_a_container_job_lets_git_read_the_checkout():
+    assert "GIT_CONFIG_KEY_0: safe.directory" in SKILL.read_text()

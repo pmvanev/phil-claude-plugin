@@ -13,7 +13,8 @@ build** table, the privilege row and the credential-literal row: a built pipelin
 installs from the lockfile, grants the narrowest token and holds no credential.
 
 **This skill writes repository files and reads the forge.** It writes the CI files, `scripts/ci/run.sh`,
-the project's instruction file and `.gitignore` entries for what the jobs leave behind, and nothing else.
+the project's instruction file, a hash-pinned lockfile for the tools CI installs where the project has
+none, and `.gitignore` entries for what the jobs leave behind, and nothing else.
 **Write no forge setting without an answer** — the merge gate, branch protection, auto-cancel, a pipeline
 schedule. `glab api` and `gh api` can write as well as read: send a `POST`, `PUT` or `PATCH` only after a
 yes, and never one that starts a pipeline. **Never push**, and never start a pipeline: a lint's dry run
@@ -39,13 +40,19 @@ Read before proposing anything; the project may already have decided.
   schedules, deploys, releases and runners. A recorded decision outranks the default block.
 - **What each job would run.** The project's own commands: the test runner, linter, type checker, build,
   mutation tool and deploy, from its task runner (`package.json` scripts, a `Makefile`, a `justfile`, a
-  repository CLI) and its manifests. Name what is missing; never invent a command. A project with no
+  repository CLI) and its manifests. Name what is missing; never invent a command. Call each check so its
+  failure fails the job: a wrapper that reports and exits 0 gates nothing, however useful it is
+  elsewhere. Where the tools CI installs have no lockfile, write one with hashes — `uv pip compile
+  --generate-hashes`, `npm install --package-lock-only` — and install from it, `pip` with
+  `--require-hashes`. A project with no
   secret scanner gets gitleaks, in its own job and image: the policy's secret scan needs one.
 - **Change classes.** The areas a change can touch — packages, apps, services — and the selector's own
   inputs: the lockfile and manifest, the CI configuration, `scripts/ci/`, shared test files, the build,
   lint and mutation configuration.
-- **Documentation paths.** Where the docs live. In a repository whose product is prose — skills, rules,
-  specifications in markdown — ask which markdown is product before calling any of it docs.
+- **Documentation paths.** Where the docs live — and a path the suite or a check reads is never docs,
+  whatever its folder is called: grep the tests and check scripts for each candidate path. In a
+  repository whose product is prose — skills, rules, specifications in markdown — ask which markdown is
+  product before calling any of it docs.
 
 ## Step 2: Declare the Policy
 
@@ -102,8 +109,10 @@ The decision, which `./scripts/ci/run.sh scope` prints as `docs-only`, `scoped` 
   the run that would skip every task and report green.
 - **Full when a selector input changed**, or on the default branch; scoped otherwise.
 
-The secret scan never consults the decision. The job's image must hold `git`, and the checkout must
-reach the base: GitLab `GIT_DEPTH: "0"`, GitHub `fetch-depth: 0`.
+The secret scan never consults the decision. **The script stops when git cannot read the checkout**: a
+scanner that cannot read the history scans nothing and can still exit 0, as gitleaks does. The job's
+image must hold `git`, and the checkout must reach the base: GitLab `GIT_DEPTH: "0"`, GitHub
+`fetch-depth: 0`.
 
 ## Step 5: Write the Pipeline
 
@@ -147,10 +156,13 @@ put `interruptible: true` only on MR-pipeline jobs. Each line below answers the 
 | An image built in the pipeline | copy the manifest and lockfile, install, then copy the source | the same | PIPE-14 |
 | Portable paths | `$CI_PROJECT_DIR`, or a path relative to the checkout | `$GITHUB_WORKSPACE` | PIPE-16 |
 | A merge queue | — | `merge_group` in the required workflow's triggers | PIPE-5 |
+| A job in a container whose user does not own the checkout | — | job `env:` `GIT_CONFIG_COUNT: 1`, `GIT_CONFIG_KEY_0: safe.directory`, `GIT_CONFIG_VALUE_0: "*"`; `actions/checkout` trusts the directory only for its own commands | — |
 | Pinned, narrow and secret-free | images by digest; tools from their own image, never fetched by `curl`; installs from the lockfile; credentials from CI variables | actions by commit SHA; `permissions: contents: read` at the top; secrets from `secrets.*` | CWE-829, CWE-494, CWE-1357, CWE-250, CWE-798 |
 
-Give each job a `timeout`. Keep production deploys and rollbacks manual. Where the environment cannot
-read an image digest or an action's commit, write the tag and list each one under "To pin". Editing an
+Give each job a `timeout`. Keep production deploys and rollbacks manual. Read an action's commit with
+`gh api repos/<owner>/<action>/git/ref/tags/<tag>`, and write the tag beside it as a comment. Where the
+environment cannot read an image digest or an action's commit, write the tag and list each one under
+"To pin". Editing an
 existing pipeline, change the least that brings it to the policy, and name in the report the row each
 change answers.
 
@@ -164,7 +176,8 @@ change answers.
    pin this run cannot read, which goes under "To pin". Write no `.ci-review.md`.
 3. **Lint it.** GitLab: `glab ci lint --dry-run --ref <default branch> --include-jobs`, then compare the
    jobs it lists with the matrix's main push column. GitHub: `actionlint`. Check the entry-point script
-   with `sh -n`. Where a tool is missing or the forge refuses access, say so; never push instead.
+   with `sh -n` and, where it is installed, `shellcheck -s sh`. The tasks themselves are the user's to run:
+   the report gives each one's local command, to run once before the first push. Where a tool is missing or the forge refuses access, say so; never push instead.
 
 ## Step 7: Read the Forge's Settings, and Ask Before Changing One
 
