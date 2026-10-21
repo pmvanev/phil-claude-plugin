@@ -19,6 +19,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 RULE = REPO / "rules" / "ci-pipelines.md"
 SECURITY = REPO / "rules" / "security.md"
+RUNNERS = REPO / "rules" / "ci-runners.md"
 SKILL = REPO / "skills" / "review-ci" / "SKILL.md"
 COMMAND = REPO / "commands" / "review-ci.md"
 FIXTURES = sorted((REPO / "skills" / "review-ci" / "self-test").glob("*/manifest.json"))
@@ -53,6 +54,12 @@ def _pipe_rows():
     for id_, violation, preferred, cite in _table_rows(RULE.read_text(), "## Always-flag", "\n## ", "| Id"):
         rows.append({"Id": _plain(id_), "Violation": violation, "Preferred form": preferred, "Cite": cite})
     return rows
+
+
+def _runner_rows():
+    section = RUNNERS.read_text().split("## Always-flag", 1)[1].split("\n## ", 1)[0]
+    return {_plain(c[0]): {"Preferred form": c[2]} for c in
+            (_cells(l) for l in section.splitlines() if l.startswith("| RUN-"))}
 
 
 def _security_rows():
@@ -150,6 +157,10 @@ def test_every_expected_item_takes_its_id_and_fix_from_one_row():
             if row_id.startswith("PIPE-"):
                 assert row_id in pipe, f"{row_id} heads no always-flag row"
                 forms = [_plain(pipe[row_id]["Preferred form"])]
+            elif row_id.startswith("RUN-"):
+                runner = _runner_rows()
+                assert row_id in runner, f"{row_id} heads no ci-runners.md row"
+                forms = [_plain(runner[row_id]["Preferred form"])]
             else:
                 owning = [r for r in security if re.search(rf"\b{re.escape(row_id)}\b", r["Cite"])]
                 assert owning, f"{row_id} heads no security.md row"

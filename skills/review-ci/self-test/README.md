@@ -3,8 +3,8 @@
 `review-ci` writes a backlog, and its failures are silent: a finding filed under the wrong row, a
 documented idiom flagged, or a supply-chain defect filed as a pipeline item all look like an ordinary
 backlog. These fixtures hand the reviewer a known pipeline and state what its backlog must and must not
-contain. Run them whenever `skills/review-ci/SKILL.md`, `commands/review-ci.md` or
-`rules/ci-pipelines.md` changes.
+contain. Run them whenever `skills/review-ci/SKILL.md`, `commands/review-ci.md`, `rules/ci-pipelines.md`
+or `rules/ci-runners.md` changes.
 
 ## What the fixtures pin
 
@@ -12,6 +12,7 @@ contain. Run them whenever `skills/review-ci/SKILL.md`, `commands/review-ci.md` 
 |---|---|---|---|
 | `01-pipeline-findings-cite-a-row/` | twelve pipeline defects and one mutable image tag beside six look-alikes, on both forges, including defects one edit fixes across several jobs | `rules/ci-pipelines.md` Always-flag and Do not flag; `security.md`'s CWE-829 row | thirteen must-fix items, each with its row's id and Preferred form, each shared defect filed once; no look-alike filed |
 | `02-trigger-matrix/` | a declared CI policy, and four defects only a job-by-source reading shows — a schedule that deploys, a rule on an empty variable, a `needs:` on a path-skipped job, a check skipped by any doc path — plus one policy departure, each beside a correct guard | the declared policy, the trigger matrix, PIPE-17 to PIPE-24 | five must-fix items and a matrix marking each one's cells; no look-alike filed |
+| `03-runner-config/` | a GitLab runner fleet's configuration and Terraform beside a retired platform's, seeding a socket on reused machines, a no-op `scale_factor`, a role-holding pool open to unprotected refs and a bare `retry` | `rules/ci-runners.md` and PIPE-10 | four must-fix items by RUN and PIPE id; the retired fleet and the safe look-alikes unflagged |
 
 ## Layout
 
@@ -25,14 +26,16 @@ scripts its jobs call — plus:
 ## How to drive it
 
 1. Copy the fixture's project files to a scratch directory — everything except `manifest.json`,
-   `expected.md` and `expected-backlog.md`, which a review of `.` would otherwise read.
+   `expected.md` and `expected-backlog.md`, which a review of `.` would otherwise read — and make the
+   copy a git repository with one commit, since the review records the commit it read.
 2. In that copy, follow this working tree's `skills/review-ci/SKILL.md` with `.` as the argument.
 3. Compare the written `.ci-review.md` with `expected-backlog.md` on the criteria in `expected.md`. Any
    hard assertion that fails blocks the change.
 
 ## What runs automatically, and what does not
 
-`tests/test_ci_pipelines_rule.py` checks that every expected item takes its id and fix from one row,
+`tests/test_ci_pipelines_rule.py` and `tests/test_ci_runners_rule.py` check that every expected item
+takes its id and fix from one row,
 that every Zampetti id the rule cites was checked against the paper, and that each look-alike is in the
 fixture and absent from its expected backlog. **Whether a review produces those items is model
 judgement.** Step 2 needs an agent or a person, and step 3 needs a judge. A green repo suite says the

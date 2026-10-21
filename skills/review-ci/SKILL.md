@@ -1,6 +1,6 @@
 ---
 name: review-ci
-description: This skill should be used when the user asks to "review the CI pipeline", "check our .gitlab-ci.yml", "audit the GitHub Actions workflows", "is our pipeline gating correctly", "which jobs run on a schedule", "why wasn't my MR pipeline created", "check the pipeline against our CI policy", or runs /phil:review-ci. It applies rules/ci-pipelines.md and the pipeline rows of rules/security.md, builds a jobs-by-source trigger matrix against the project's declared CI policy, and writes a findings backlog without editing the pipeline.
+description: This skill should be used when the user asks to "review the CI pipeline", "check our .gitlab-ci.yml", "audit the GitHub Actions workflows", "is our pipeline gating correctly", "which jobs run on a schedule", "why wasn't my MR pipeline created", "check the pipeline against our CI policy", "review our GitLab runner config", "is our runner fleet isolated", or runs /phil:review-ci. It applies rules/ci-pipelines.md, rules/ci-runners.md for runner configuration, and the pipeline rows of rules/security.md, builds a jobs-by-source trigger matrix against the project's declared CI policy, and writes a findings backlog without editing what it reviews.
 ---
 
 # Review CI
@@ -11,9 +11,10 @@ rows of `${CLAUDE_PLUGIN_ROOT}/rules/security.md`, then write a findings backlog
 defect, and a review from memory files impressions.
 
 `ci-pipelines.md` owns when a pipeline runs, what it runs, how it fails and whether it rebuilds.
-`security.md` owns what a pipeline trusts. From it, apply three things to every gathered file: the
+`${CLAUDE_PLUGIN_ROOT}/rules/ci-runners.md` owns how the machines that run the jobs are configured; apply
+it whenever the target holds runner configuration. `security.md` owns what a pipeline trusts. From it, apply three things to every gathered file: the
 **Supply chain and build** table, the privilege row (CWE-250, CWE-732) and the credential-literal row
-(CWE-798). Review against no other rule here. `/phil:review-code` reviews the code the pipeline runs,
+(CWE-798). Review against no rule beyond these three. `/phil:review-code` reviews the code the pipeline runs,
 and it also applies `security.md` to pipeline files, so the two backlogs can share a CWE item.
 
 ## Parse the Argument
@@ -31,7 +32,8 @@ misses the defects between files.
 ## Step 1: Read the Rules, Then Gather the Pipeline
 
 Read `${CLAUDE_PLUGIN_ROOT}/rules/ci-pipelines.md` whole, and the three parts of
-`${CLAUDE_PLUGIN_ROOT}/rules/security.md` named above.
+`${CLAUDE_PLUGIN_ROOT}/rules/security.md` named above; with runner configuration in the target,
+`${CLAUDE_PLUGIN_ROOT}/rules/ci-runners.md` whole as well.
 
 Read the project's declared policy: the `## CI policy` block, in the shape `ci-pipelines.md` gives under
 "The declared policy", from the `CLAUDE.md` or `AGENTS.md` nearest the target. Read the project's
@@ -46,22 +48,32 @@ Then collect, from the target:
 - **GitHub:** `.github/workflows/*.{yml,yaml}`, and every local reusable workflow or action a workflow
   names by `uses: ./…`.
 - **Images:** every `Dockerfile*` a job builds.
+- **Runner configuration**, when the target holds any: any file with a `[[runners]]` table — GitLab
+  Runner's `config.toml` and its templates — and the infrastructure code that provisions the runners' machines — launch templates,
+  instance profiles, IAM trust policies, cloud-init, a GitHub runner scale set's values. Read
+  `ci-runners.md` whole before judging it. Decide **which platform is live** from the README and the
+  recorded decisions: a directory a file calls retired, and that nothing live applies, is history,
+  named on the backlog's History line and not reviewed. Where something live still applies it, review it. Record the commit the review read with `git rev-parse HEAD`, and list the live system — the
+  runner manager, the cloud account — under Not read (RUN-T1).
 - **Project files a row turns on:** the lockfile and the manifest a cache key or an install names, and
   any script a job calls whose behaviour decides a row — whether a deploy script rebuilds, whether a
   test script swallows its exit code, whether a script skips the work for a docs-only change.
 
 With `--changes`, run `git diff HEAD --name-only`, `git diff HEAD~1 --name-only` and
 `git ls-files --others --exclude-standard`. With no parent commit, skip the second and say so. Keep the
-CI files and Dockerfiles, and gather the whole pipeline each belongs to.
+CI files, Dockerfiles and runner configuration, and gather the whole pipeline or fleet each belongs to.
 
 **List each source the review cannot read:** a remote, template, project or component `include:`; a
 reusable workflow in another repository; a forge setting, such as branch protection, required checks,
-the merge queue, auto-cancel, pipeline schedules or the runner configuration; a file a job calls that
+the merge queue, auto-cancel, pipeline schedules or runner settings the target does not hold; a file a job calls that
 the target does not hold; a script read only in part, with the part read; and any other forge's
 pipeline file (`azure-pipelines*`, `.circleci/**`, `Jenkinsfile`), which the rule's rows do not cover. A
 row's guard or premise can live in any of them.
 
 ## Step 2: Build the Trigger Matrix
+
+Where the target holds runner configuration and no pipeline file, write no matrix, and say so in its
+place.
 
 Write one row per job and one column per pipeline source, in this order: **MR**, **docs-only MR**,
 **main push**, **docs-only main**, **schedule**, **tag**, **web or API**.
@@ -73,7 +85,8 @@ Write one row per job and one column per pipeline source, in this order: **MR**,
   `repository_dispatch`. Name each row `workflow.yml: job`.
 - **MR** is a change with a path outside the docs allow-list; **docs-only** is a change whose every path
   matches the declared Docs-only paths. With none declared, write `n/a` in both docs-only columns.
-- **Web or API** reads a pipeline started on the default branch; note where another ref differs.
+- **Web or API** reads a pipeline started on the default branch, and so does **schedule**, whose
+  existence is a forge setting; note where another ref differs.
 - **A child pipeline** gets a matrix of its own; its trigger job's cells say whether it exists.
 
 **The first row, `(pipeline)`, says whether the forge creates the pipeline** for each source: `created`,
@@ -105,10 +118,14 @@ a variable's value from its `variables:` default, and note any other value that 
 
 Check every gathered file against each Always-flag row of `ci-pipelines.md`, against the `security.md`
 rows named above, against the trigger matrix and the declared policy for PIPE-24, against the Advisory
-list, and against `ci-pipelines.md`'s Do not flag list.
+list, and against `ci-pipelines.md`'s Do not flag list. Check gathered runner configuration against
+`ci-runners.md`'s Always-flag rows, its Advisory list and its Do not flag list. A runner setting is
+`ci-runners.md`'s: `privileged = true` in a runner's config is RUN-2, not `security.md`'s privilege row,
+which keeps a pipeline file's privileges; a credential literal in a committed file is CWE-798 wherever it
+sits, and a long-lived key held as a variable or on the host is RUN-6.
 
-- **Name each finding by its row's id** — `PIPE-n` for a `ci-pipelines.md` row, the CWE id for a
-  `security.md` row. Where a `security.md` row cites two ids, take the id its Cite cell tags to the
+- **Name each finding by its row's id** — `PIPE-n` for a `ci-pipelines.md` row, `RUN-n` for a
+  `ci-runners.md` row, the CWE id for a `security.md` row. Where a `security.md` row cites two ids, take the id its Cite cell tags to the
   clause that matches; where the cell tags neither, take the id whose CWE definition fits. A Zampetti
   id is a citation, never the finding.
 - **Copy the row's Preferred form verbatim**, as it renders: a `\|` in the table is `|`. Then, where the
@@ -148,7 +165,9 @@ what a job does — a rebuild, a cache, a CWE — mark no cell.
 
 Generated: {date}
 Scope: {argument}
-Standard: rules/ci-pipelines.md; rules/security.md (Supply chain and build, the privilege row, the credential-literal row)
+Standard: rules/ci-pipelines.md; rules/ci-runners.md, where runner configuration was read; rules/security.md (Supply chain and build, the privilege row, the credential-literal row)
+Read at: {the commit `git rev-parse HEAD` printed, with "and uncommitted changes" where `git diff HEAD` shows any, and the branch where it is not the default branch, since the live fleet most likely runs the default branch's code; "not a git repository" where it fails}
+History: {each retired platform's configuration, named and not reviewed, or "none"}
 Policy: {each declared field as `Field: value`, or "none declared"}
 Not read: {each unread include, workflow, setting, missing or part-read file, or other forge's file, or "nothing"}
 
@@ -175,7 +194,7 @@ Not read: {each unread include, workflow, setting, missing or part-read file, or
 - **File**: `{file-path}`
 - **Lines**: {start}-{end}, one line number, or each site of a value repeated in the file
 - **Severity**: must-fix | question | advisory
-- **Row**: {PIPE-n, CWE-n or Advisory}
+- **Row**: {PIPE-n, RUN-n, CWE-n or Advisory}
 - **Preferred form**: {the row's form, verbatim, optionally followed by " — here: " and this change}
 - **Cite**: {rule file} — {row id} · {the row's Cite cell}
 - **Status**: pending
@@ -196,7 +215,7 @@ Not read: {each unread include, workflow, setting, missing or part-read file, or
 
 ## What Not to Flag
 
-- Anything on `ci-pipelines.md`'s Do not flag list.
+- Anything on `ci-pipelines.md`'s or `ci-runners.md`'s Do not flag list.
 - A supply-chain, privilege or credential defect as a `PIPE-n` item. File it under its CWE id.
 - Speed as a must-fix item. A pipeline without parallel jobs or caches is not defective; raise a speed
   bullet from the Advisory list only with job durations in hand.
@@ -211,10 +230,13 @@ Not read: {each unread include, workflow, setting, missing or part-read file, or
 clears, defects one edit fixes across several jobs, and one supply-chain defect filed by CWE id.
 `02-trigger-matrix/` declares a policy and seeds a schedule that deploys, a rule on an empty variable,
 a `needs:` on a path-skipped job, a check skipped by any doc path and a departure from the policy, each
-beside a correct guard; its expected backlog holds the matrix.
-`tests/test_ci_pipelines_rule.py` checks that every item a fixture expects takes its id and fix from one
-row, and that no look-alike is expected.
+beside a correct guard; its expected backlog holds the matrix. `03-runner-config/` holds a GitLab
+runner fleet's configuration and its infrastructure code, seeding a socket on reused machines, a no-op
+`scale_factor`, a deploy pool open to unprotected refs and a bare `retry`, beside a retired platform's
+configuration and safe look-alikes.
+`tests/test_ci_pipelines_rule.py` and `tests/test_ci_runners_rule.py` check that every item a fixture
+expects takes its id and fix from one row, and that no look-alike is expected.
 
-Whenever this skill, `commands/review-ci.md` or `rules/ci-pipelines.md` changes, drive each fixture
+Whenever this skill, `commands/review-ci.md`, `rules/ci-pipelines.md` or `rules/ci-runners.md` changes, drive each fixture
 per `self-test/README.md`. Drive this working tree's `SKILL.md` by hand, since `/phil:review-ci` runs
 the released copy. A green repo suite says the fixtures are well-formed, not that a review passes them.

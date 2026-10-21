@@ -528,3 +528,71 @@ assertion.
 
 **Not verified:** `/phil:build-ci` itself (installed copy 1.2.23); a `--speed` run over a GitHub
 workflow with `needs:`, where `created_at` as a job's ready time is unconfirmed.
+
+## Wave: DISCUSS / [REF] Slice 05 delivered and dogfooded (2026-10-21)
+
+**What landed.** `rules/ci-runners.md`, shaped like `ci-pipelines.md`:
+- *Principles:* one trust class per machine; a fresh container is not a fresh machine; credentials
+  follow the job; warm capacity is setup time; a setting means what the code does; answer from what is
+  live.
+- *Always-flag:* RUN-1 to RUN-10 and RUN-12, with the fleet-answer rows RUN-T1 and RUN-T2.
+- *Advisory and Do not flag lists.*
+- *Unused ids:* RUN-11 stays unused, since a bare `retry` is PIPE-10's; so does RUN-13, since the
+  Docker Machine executor is deprecated, not broken, and moved to Advisory.
+
+`review-ci` now gathers any file with a `[[runners]]` table and the code that provisions the runners'
+machines, and decides which platform is live. A retired one goes on a History line. It records the
+commit and branch it read, and lists the live system as unread. It applies `ci-runners.md`'s three lists
+and says which rule owns a privilege or credential defect found in runner config.
+
+**V2 and V3, closed.**
+- *V2:* each CWE was read on cwe.mitre.org (4.20) for its mapping usage. The research's CWE-668 and
+  CWE-269 are DISCOURAGED and were replaced by CWE-653, Improper Isolation or Compartmentalization, and
+  CWE-266, Incorrect Privilege Assignment, both ALLOWED.
+- *V3:* taskscaler's `internal/capacity/capacity.go` at `1f87885729aa`, the revision GitLab Runner 19.5.0
+  pins, is byte-identical to `main`.
+
+**Fixture 03 (runner configuration), two blind drives.**
+- *Drive 1* filed exactly the four expected items: PIPE-10, RUN-1, RUN-12 and RUN-4. It named
+  `legacy-azure/` as retired and left the deploy pool's one-job socket alone.
+- *The reviews:* `plugin-dev:plugin-validator` (fail) and `plugin-dev:skill-reviewer` ("needs
+  improvement") found these, all fixed:
+  - Step 3 never applied the runner rule's own lists.
+  - RUN-12's second clause turned on load at run time, and its formula dropped the code's `limit > 0`
+    guard, which would have flagged a working `scale_factor = 2`.
+  - RUN-2 contradicted the socket's Do-not-flag entry.
+  - RUN-T1 and RUN-T2 read as config defects, and RUN-T1 would fire on any README.
+  - "Retired" failed open.
+  - RUN-13 fired on a supported executor.
+  - A privilege or credential defect could be filed twice, once under each rule.
+  - The fixture never linked the deploy runner to its launch template.
+- *Drive 2*, after the fixes, filed exactly the four expected items and met every hard assertion: the
+  History line, the deploy pool's socket raised only as Advisory, every look-alike left alone. Its one
+  ambiguity, a question or Not read for an unread templated value, now follows `ci-pipelines.md`'s
+  guard-or-premise rule.
+
+**Dogfood: runbooks' `runners/` at `8637cf0` (branch `feature/runner-image`), with the working tree's skill,
+read-only.**
+- *Which platform is live:* AWS, from `CLAUDE.md` and the READMEs. The Azure tree was named as history.
+- *The `scale_factor` finding appeared:* RUN-12, at `config.auto.tfvars`. Its comments and the AWS
+  README promise "one ready per busy instance, at least 2 and at most 8", which the arithmetic never
+  produces. That is the claim that opened this feature.
+- *Also filed:*
+  - two READMEs still describing the Azure backend as current (RUN-T2);
+  - `script.deb.sh` piped into `bash` at boot, and the fleeting plugin installed unpinned (CWE-494);
+  - the default job image by tag (CWE-829);
+  - the deploy pool's role able to assume every project's deploy role (CWE-250), which `deploying.md`
+    records as accepted for now.
+- *The learning hypothesis held, with one caveat.* Reuse and the socket were judged from the code
+  alone: `max_use_count = 1` is in the config. Only the autoscaler's running build needs the live
+  system, since `gitlab-runner` is installed unpinned. The arithmetic holds at the pinned revision.
+- *What it taught the rule, each pinned:*
+  - RUN-5 fired on pools whose jobs are meant to use the role; it now fires where they are not.
+  - A recorded decision that accepts a risk makes a question.
+  - RUN-T1 covers a document that misstates what a setting does.
+  - The backlog names the branch read where it is not the default branch.
+- *Seen, no row covers:* `aws-apply-stack.sh`'s "no jobs running" check sees only the projects its user
+  belongs to, so an apply can kill another project's job on the shared pool.
+
+**Not verified:** `/phil:review-ci` itself (installed copy 1.2.23); a run against the live fleet; the
+runbooks dogfood after the four lessons were folded in.
