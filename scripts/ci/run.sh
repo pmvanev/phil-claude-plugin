@@ -11,6 +11,10 @@ IFS='
 
 cd "$(dirname "$0")/../.."
 
+# A checkout git cannot read — another user's files with no safe.directory, as in a container job —
+# makes every diff and scan read nothing, and a scan that reads nothing reports green. Stop first.
+git rev-parse --verify -q HEAD >/dev/null || { echo "run.sh: git cannot read this checkout" >&2; exit 1; }
+
 ZERO=0000000000000000000000000000000000000000
 DEFAULT_BRANCH=${CI_DEFAULT_BRANCH:-main}
 
