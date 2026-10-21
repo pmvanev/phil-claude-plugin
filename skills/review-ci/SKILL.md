@@ -145,14 +145,14 @@ sits, and a long-lived key held as a variable or on the host is RUN-6.
   the field, file a question naming both instead of a PIPE-24 item.
 - **An Advisory bullet is a question for the author, not a defect.** File it with Severity `advisory`,
   Row `Advisory`, Preferred form `none — the author decides`, and a Cite naming the bullet's bold lead.
-  Raise one only where the file shows its subject; an Advisory bullet never stands in for a row.
+  Raise one only where the file shows its subject, and file a defect a row names under that row, not as Advisory.
 - **Honour Do not flag**, in full.
 
 ## Step 4: Write the Backlog
 
 Write `.ci-review.md` in the project root — the one file this review writes. **Edit none of the reviewed
 files**, even for a one-token fix: this command reports and does not repair. If the backlog exists, add
-the new items under a fresh `Scope:` line, continuing its id sequence; never drop or renumber an item.
+the new items under a fresh `Scope:` line, continuing its id sequence and keeping every earlier item under its id.
 
 Once the items are numbered, mark the matrix. For an item about when a job runs — a Triggering, Every
 change, skip-gate or policy row — put `✗` and the item's id on each cell where the defect shows, in the
@@ -219,7 +219,7 @@ Not read: {each unread include, workflow, setting, missing or part-read file, or
 - A supply-chain, privilege or credential defect as a `PIPE-n` item. File it under its CWE id.
 - Speed as a must-fix item. A pipeline without parallel jobs or caches is not defective; raise a speed
   bullet from the Advisory list only with job durations in hand.
-- A hypothetical defect in an unread source. Raise the question; do not guess the answer.
+- A hypothetical defect in an unread source: raise the question and leave the answer to the author.
 
 **Be precise, not exhaustive.** Eight traceable items beat forty vague ones.
 

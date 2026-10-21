@@ -21,7 +21,7 @@ This rule owns **how the machines that run jobs are configured — isolation, cr
 
 > **"An ephemeral build environment MUST be provisioned for each build."** — SLSA v1.0, Build L3
 
-A runner's isolation is decided by the machine, not the container. Give each job a machine that no earlier job touched, or run on one machine only jobs that could safely share it.
+The machine, not the container, decides a runner's isolation. Give each job a machine that no earlier job touched, or run on one machine only jobs that could safely share it.
 
 ### One trust class per machine
 
@@ -107,8 +107,7 @@ A reviewer raises these; the author decides. Each needs a measurement, an intent
 - **Reuse on a pool where RUN-1 and RUN-2 do not fire** (`max_use_count` above 1): does every job on the pool come from one trust class, and does any job there produce an artifact others consume?
 - **Unbounded reuse** — `max_use_count` very large on a reused pool, or unset, where its default is unconfirmed. Drift and tampering live as long as the machine.
 - **A warm floor sized without data** — an `idle_count` with no measured queue wait or boot time behind it — or an always-on machine whose monthly cost nobody named.
-- **The socket on one-job machines**, where RUN-1 does not fire: a daemonless builder takes host root
-  away from every job, and the machine stays the only boundary until then.
+- **The socket on one-job machines**, where RUN-1 does not fire: a daemonless builder takes host root away from every job; until then, the machine is the only boundary.
 - **`capacity_per_instance` above 1** without the socket: concurrent jobs still share a kernel, a disk and a network.
 - **A private CA trusted machine-wide on reused machines that give jobs host root**: any job can add a root to the store, and every later job trusts it.
 - **Metadata a hop limit does not guard.** A hop limit of 1 stops a container on a bridge network; it does not stop a job with the socket, privileged mode or the shell or instance executor, which reach the host's network. On such a pool the instance role is every job's. Where `http_tokens` or the hop limit is unset, the AMI's and the account's defaults decide: ask what they are.
@@ -137,7 +136,7 @@ A reviewer raises these; the author decides. Each needs a measurement, an intent
 
 SLSA v1.0 supplies the isolation boundary each Isolation row rests on, and OWASP CICD-SEC-5 the test for when a machine may be shared, with NIST SP 800-190 and 800-204D behind both. Docker's engine-security page and the CIS socket control show why the socket is host root, and GitLab's runner and Docker-build documentation give each row's GitLab form. GitHub's hardening guidance corroborates them independently. The vendors' OIDC and AWS metadata documentation supply the credential rows. Gandhi, Harchol-Balter and Adan, Little, and AWS's warm-pool guidance frame warm capacity as setup time. The taskscaler source settles what `scale_factor` does where the documentation is ambiguous. The drift documentation and Fowler's "PhoenixServer" ground the fleet-answer rows.
 
-**What is this rule's own:** the `RUN-n` ids and the wording of every row; the split into Principles, Always-flag, Advisory and Do not flag, which follows `ci-pipelines.md`; the reading that reuse is acceptable within one trust class and not across one, which reconciles SLSA L3's ephemeral demand with OWASP's permission to share; the CWE chosen for each row, by MITRE's mapping usage, where the research's two candidates, CWE-668 and CWE-269, are discouraged; and RUN-T2, which extends the drift literature from IaC drift to answering from a retired platform's documents. The rule draws on the research document; the research lists what it could not open under Knowledge Gaps, among them the CIS Benchmark's primary text and whether one job can re-tag another's base image through a shared daemon.
+**This rule's own:** the `RUN-n` ids and the wording of every row; the split into Principles, Always-flag, Advisory and Do not flag, which follows `ci-pipelines.md`; the reading that reuse is acceptable within one trust class and not across one, which reconciles SLSA L3's ephemeral demand with OWASP's permission to share; the CWE chosen for each row, by MITRE's mapping usage, where the research's two candidates, CWE-668 and CWE-269, are discouraged; and RUN-T2, which extends the drift literature from IaC drift to answering from a retired platform's documents. The rule draws on the research document; the research lists what it could not open under Knowledge Gaps, among them the CIS Benchmark's primary text and whether one job can re-tag another's base image through a shared daemon.
 
 ---
 
