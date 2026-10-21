@@ -422,5 +422,36 @@ not re-driven.
 default policy is silent on it; the drive's design kept it, and it is how a main pipeline is re-run.
 
 **Not verified:** `/phil:build-ci` itself (installed copy 1.2.23); a lint against a real forge, since the
-fixture's remote does not exist; any pipeline run. **US-03's last criterion is open:** a dogfood on one
-real repo, run with the user, its matrix recorded.
+fixture's remote does not exist; any pipeline run.
+
+**Dogfood: this repository at `c2f8e9d`, with the user (2026-10-21).** The working tree's skill, driven by
+hand in a scratch clone. GitHub, no CI, `main` unprotected, no rulesets.
+- *Policy, by the user's answers:* MR-only; docs-only is the research notes, feature write-ups, evolution
+  and work notes, the root readme and the licence; the full suite and the repo checks on every pull
+  request; no mutation and no schedule.
+- *Files:* `.github/workflows/ci.yml` (three jobs: `secret-scan` in the gitleaks image, `checks`,
+  `test`), `scripts/ci/run.sh` from the reference with its decision unchanged, a hash-pinned
+  `requirements-ci.txt` compiled by `uv`, and the policy and workflow lines in `CLAUDE.md`. Each action
+  is pinned to the commit `gh api` read for its tag, and the image to the digest the registry served.
+- *Matrix:*
+
+  | Job | MR | docs-only MR | main push | docs-only main | schedule | tag | web or API |
+  |---|---|---|---|---|---|---|---|
+  | (pipeline) | created | created | created | created | — | — | — |
+  | secret-scan | runs | runs | runs | runs | — | — | — |
+  | checks | runs | exits early | runs | exits early | — | — | — |
+  | test | runs | exits early | runs | exits early | — | — | — |
+
+- *Verified locally:* each task through the script (the checks, the suite's 1847 tests); the pinned
+  gitleaks image over all 305 commits, no leak; `actionlint` 1.7.12 and `shellcheck -s sh`, clean; and
+  the docs-only decision on real commits under simulated GitHub events. A research note and the readme
+  are docs-only; product notes, a rule, and a rule renamed into the work notes are not.
+- *What it taught the skill, each pinned in `tests/test_build_ci.py`:*
+  - A path the suite or a check reads is never docs. `docs/product/` looks like docs, and
+    `check-product-ssot.py` reads it.
+  - A wrapper that reports and exits 0 gates nothing. This repo's invariant hook does exactly that, by
+    design, so CI calls each check itself.
+  - A project with no lockfile for its CI tools gets a hash-pinned one.
+  - An action's commit is read with `gh api …/git/ref/tags/<tag>`.
+  - Lint the script with `shellcheck` too.
+- *Not verified:* a run on GitHub's runners. The merge gate is unchanged, pending the user's answer.

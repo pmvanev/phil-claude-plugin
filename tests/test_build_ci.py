@@ -302,3 +302,26 @@ def test_a_shard_that_finds_no_source_file_fails_in_ci(repo):
     _git(repo, "rm", "-q", "src/a.ts")
     _git(repo, "commit", "-qm", "empty")
     assert _shard(repo, 1, 1, CI="true", CI_PIPELINE_SOURCE="schedule").returncode != 0
+
+
+# Lessons from the dogfood on this repository (2026-10-21).
+
+def test_docs_only_paths_come_from_what_the_suite_reads():
+    """`docs/product/` looked like documentation; `check-product-ssot.py` reads it."""
+    assert "a path the suite or a check reads is never docs" in _skill()
+
+
+def test_a_check_is_called_so_its_failure_fails_the_job():
+    """This repo's invariant hook reports failures and exits 0, by design for SessionStart."""
+    assert "a wrapper that reports and exits 0 gates nothing" in _skill()
+
+
+def test_a_project_with_no_lockfile_for_its_ci_tools_gets_one():
+    skill = _skill()
+    assert "a hash-pinned lockfile for the tools CI installs" in skill
+    assert "--require-hashes" in skill
+
+
+def test_the_skill_names_where_an_action_sha_is_read():
+    assert "gh api repos/<owner>/<action>/git/ref/tags/<tag>" in _skill()
+    assert "shellcheck" in _skill()
