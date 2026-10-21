@@ -59,6 +59,8 @@ Every change flows through the same automated path from commit to production.
 - Every commit is a release candidate
 - Stop the line on failure—all feature work halts until the build is green
 
+`ci-pipelines.md` names the defects in a pipeline file that break these principles, such as a deploy job that rebuilds or build output passed through the cache, each by its `PIPE-n` id.
+
 #### Deterministic Pipeline
 
 - Same inputs produce same outputs—repeatable, authoritative, trustworthy
@@ -84,7 +86,7 @@ Every change flows through the same automated path from commit to production.
 - Fix broken builds immediately—target < 1 hour
 - Keep the build under ten minutes
 
-**Trunk-based development enables continuous integration.** Long-lived branches delay integration and hide problems.
+**Trunk-based development enables continuous integration.** Long-lived branches delay integration and hide problems. A branch merged through an MR still counts as trunk-based while it lives about two days, review wait included (trunkbaseddevelopment.com); past that, it is a long-lived branch.
 
 #### Evolutionary Coding Practices
 

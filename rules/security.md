@@ -135,6 +135,8 @@ Name each finding by its CWE id and take the fix from the row. ASVS citations ar
 
 ### Supply chain and build
 
+A pipeline defect that is not a security defect — duplicate pipelines, a tolerated test failure, a deploy that rebuilds — is `ci-pipelines.md`'s, by `PIPE-n` id.
+
 | Violation | Preferred form | Cite |
 |---|---|---|
 | Code run with no integrity check — `curl … \| sh`, a script fetched at build time, a third-party CI action or base image pinned by a mutable tag | Pin by digest or commit SHA; verify a checksum or signature before running | CWE-494 (fetched code), CWE-829 (a CI action or image) · v5.0.0 V15 |

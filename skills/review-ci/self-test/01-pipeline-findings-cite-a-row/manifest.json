@@ -1,0 +1,16 @@
+{
+  "node_id": "RCI-SELFTEST-01",
+  "mode": "review",
+  "target": ".",
+  "pins": "a pipeline finding is named by its rules/ci-pipelines.md row id and takes that row's Preferred form as its fix; a supply-chain defect is filed by its security.md CWE id; a Do-not-flag case is not flagged",
+  "expected_guard": "thirteen must-fix items, twelve PIPE-n and one CWE-829; six look-alikes unflagged",
+  "decoys": [
+    "release-prod",
+    "mutation-full",
+    "mr-smoke",
+    "coverage-trend",
+    "key: npm-",
+    "group: secret-scan-"
+  ],
+  "min_items": 13
+}

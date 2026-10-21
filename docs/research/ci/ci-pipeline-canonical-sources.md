@@ -970,7 +970,7 @@ D1–D5; Culture C1–C6 (10+7+29+8+14+5+6 = 79). The ids relevant to this rule:
 | BP25 | Time-out is not properly configured | 52% / 36% (25) | **Relevant** |
 | BP26 | Unneeded tasks are scheduled in the build process | 44% / 28% (25) | — |
 | BP27 | Build time for the "commit stage" overcomes the 10-minutes rule | 52% / 22% (23) | **Relevant** |
-| BP28 | Unnecessary re-build steps are performed | 40% / 28% (25) | — |
+| BP28 | Unnecessary re-build steps are performed | 40% / 20% (25) | — |
 | BP29 | Authentication data is hardcoded (in clear) under VCS | 52% / 32% (25) | **Relevant** |
 | BM1 | Absolute/machine-dependent paths are used | 65% / 31% (26) | **Relevant** |
 | BM4 | Build configurations are cloned in different environments | 29% / 50% (24) | — |
@@ -1272,6 +1272,21 @@ them; cite principles by title, as `security.md` does.
 each smell's definition and symptoms was not. | **Attempted**: UZH co-author PDF (read); ZHAW and ZORA
 repositories (connection refused); Springer (paywalled). | **Recommendation**: read the appendix before
 mapping a row to an id; confirm BP6, BP10, BP26, BP28 readings in particular.
+
+**V1, 2026-10-21 (feature `ci-pipeline-standard`):** the orchestrating session downloaded the UZH
+manuscript and checked every id the rule cites against Tables 4–10 and the body text. R10, BP2, BP6–BP8,
+BP10, BP11, BP13, BP16, BP17, BP25, BP26, BP28, BP29, BM1, Q5, Q10, Q11 and D1 match their names
+verbatim. Three readings change:
+- **BP8 is "skip of certain phases/tasks just to make a previously failing build passing"** (§4, and
+  §6.1: "important to not skip pipeline tasks only to have a passed build"). It fits a tolerated test
+  failure (P10, beside BP16), not a `rules:changes` skip on a schedule. **P5 cites BP11**, "poor build
+  triggering strategy", which §4 places in the triggering group BP10–BP15.
+- **BP28 and BP26 sit under builds that are "particularly long"** (§4). That supports the rework rows
+  (P11, P12, P20) as waste, not as integrity defects; CICD-SEC-9 carries the integrity reading.
+- **D1 is "Artifacts locally generated are deployed"** — an artifact built off the pipeline. P11's
+  deploy-stage rebuild is BP28; D1 applies only when the deployed artifact never passed the pipeline.
+The BP28 survey figure in 9.1 was misread as 28% disagree; Table 6 reads 20% disagree, 40% neutral,
+40% agree. The appendix remains unread.
 
 ### Gap 3: CD-Linter's four smells unconfirmed at paper level
 **Issue**: Fake Success, Retry Failure, Manual Execution, Fuzzy Version come from a slide deck via search

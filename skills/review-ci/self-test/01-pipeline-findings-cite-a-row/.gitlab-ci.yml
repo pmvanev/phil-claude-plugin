@@ -1,0 +1,137 @@
+# Storefront: a Node service mirrored to GitLab and GitHub. Review fixture for review-ci.
+
+stages: [test, verify, build, deploy, scheduled]
+
+default:
+  image: node:20.11.1@sha256:545ea538461003efdc8c81c244531b003f6f26cfccf6c0073b3239fdedf49446
+  cache:
+    key: deps
+    paths: [node_modules/]
+
+.mr-tests:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+unit-tests:
+  stage: test
+  extends: .mr-tests
+  script:
+    - npm ci
+    - npm test
+  allow_failure: true
+
+integration-tests:
+  stage: test
+  extends: .mr-tests
+  script:
+    - npm ci
+    - npm run test:integration
+  retry: 2
+
+mr-smoke:
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  interruptible: true
+  script:
+    - npm ci
+    - npm run test:smoke
+
+gitleaks:
+  stage: test
+  image:
+    name: zricethezav/gitleaks:latest
+    entrypoint: [""]
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - gitleaks detect --source . --verbose
+
+lint:
+  stage: verify
+  extends: .mr-tests
+  script:
+    - npm ci
+    - npm run lint
+
+coverage-trend:
+  stage: verify
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  # Reports the coverage trend to the dashboard; gates nothing.
+  allow_failure: true
+  script:
+    - npm ci
+    - npm run coverage:trend
+
+package:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - npm ci
+    - npm run build
+    - cd /builds/acme/storefront/dist && tar czf ../storefront.tgz .
+  cache:
+    key: build-output
+    paths: [dist/]
+  artifacts:
+    paths: [storefront.tgz, dist/]
+
+build-image:
+  stage: build
+  image: docker:27.3.1@sha256:d548c5b83fa61d8e3bd86ad42a7ffea9b7c86e3f9d8095c1577d3e1270bb9420
+  services:
+    - name: docker:27.3.1-dind@sha256:e982f17bcbe0f724063b708a4f76db211a999304e982f17bcbe0f724063b708a
+      alias: docker
+  needs: [package]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+
+deploy-dev:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: [src/**/*, package.json]
+  dependencies: []
+  cache:
+    key: build-output
+    paths: [dist/]
+    policy: pull
+  script:
+    - ./scripts/deploy.sh dev dist/
+
+deploy-staging:
+  stage: deploy
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - npm ci
+    - npm run build
+    - ./scripts/deploy.sh staging dist/
+
+release-prod:
+  stage: deploy
+  needs: [package]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  script:
+    - ./scripts/deploy.sh prod storefront.tgz
+
+mutation-full:
+  stage: scheduled
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  retry:
+    max: 2
+    when: [runner_system_failure, stuck_or_timeout_failure]
+  script:
+    - npm ci
+    - npx stryker run

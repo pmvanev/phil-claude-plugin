@@ -1,0 +1,18 @@
+{
+  "name": "storefront",
+  "version": "1.4.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test/unit",
+    "test:integration": "node --test test/integration",
+    "test:smoke": "node --test test/smoke",
+    "lint": "eslint src test",
+    "coverage:trend": "node scripts/coverage-trend.mjs"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "8.7.1",
+    "eslint": "9.17.0",
+    "typescript": "5.7.2"
+  }
+}

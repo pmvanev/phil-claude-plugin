@@ -151,8 +151,8 @@ Decision enabled: which pipeline defects to fix before the next merge.
       id, its Zampetti id (checked under V1) and a preferred form in GitLab and GitHub syntax.
 - [ ] A Do-not-flag list covers at least: aborting a superseded MR pipeline, a schedule that adds work
       rather than replacing per-change runs, retry limited to infrastructure failures, a manual
-      production approval, no parallelism in a pipeline inside its budget, and full mutation in a
-      small codebase's MR.
+      production approval, and no parallelism in a pipeline inside its budget. Full mutation in a
+      small codebase's MR moves to US-02 with the other mutation rows.
 - [ ] `/phil:review-ci` names each finding by row id, takes the fix from the row, and honours Do not
       flag.
 - [ ] A self-test fixture seeds at least eight Always-flag defects beside five look-alikes. A test
@@ -275,3 +275,48 @@ Decision enabled: which runner settings to change, and whether reuse is safe on 
 | Trigger-matrix cells matching the declared policy after `/phil:build-ci` | 100% on the fixture project | Fixture grading |
 | CI corrections the user types in a session that uses `/phil:build-ci` | Fewer than the mined baseline of nine corrections across 147 sessions | Re-mine sessions 30 days after release |
 | Runner findings confirmed on the real fleet | The `scale_factor` finding, plus every RUN row that fires, confirmed against live config | Slice 05 dogfood |
+
+## Wave: DISCUSS / [REF] Slice 01 delivered and dogfooded (2026-10-21)
+
+**V1 closed.** Every Zampetti id the rule cites was checked against Tables 4–10 and the body text of
+the accepted manuscript. The check moved P5 from BP8 to BP11. BP8 means skipping a phase to make a
+failing build pass, which fits a tolerated test failure, so PIPE-9 cites it beside BP16. The timeout
+row (research P21) moved to Advisory for slice 02, because it fired on nearly every job and the project
+timeout is a setting.
+
+**Fixture 01, two blind drives.** Each was a fresh agent that read only this working tree's skill, the
+two rules and the project copy.
+- *Drive 1* filed all thirteen and no look-alike. It also filed PIPE-12 twice (producer and consumer),
+  a PIPE-5 question with no premise in the files, and CWE-250 for a `Dockerfile` with no `USER`. These
+  led to the counting rule, the premise rule and `USER node` in the fixture. `plugin-dev:skill-reviewer`
+  ("needs improvement") and `plugin-dev:plugin-validator` (pass) ran over the same draft. Their findings
+  were fixed before drive 2: false fires in PIPE-8, -9, -13, -15 and -16; the reserved job name `image`;
+  a pointer to the unbuilt `/phil:build-ci`; and an inconsistent `security.md` scope.
+- *Drive 2* filed exactly the thirteen expected items, no question and no look-alike, with PIPE-1,
+  PIPE-12 and PIPE-13 one item each.
+
+**Dogfood: modive at `9c10d61` (origin/main, 2026-10-21), 1,014 lines plus a child pipeline.** A fresh
+agent followed the working tree's skill in a scratch clone, about ten minutes over seventeen files, and
+filed 28 must-fix items:
+- 20 CWE-829 items (images pinned by tag), 4 CWE-494 (tools fetched at run time outside the lockfile),
+  2 PIPE-3, 1 PIPE-15 and 1 PIPE-14.
+- After drafting, it read modive's `CLAUDE.md`, `renovate.json` and ADR-012. One recorded decision
+  changed a fix (the `!= "merge_request_event"` anchor exists for gitlab-ci-local), and none removed a
+  finding.
+
+**What it taught the rule, each fixed and pinned before this commit:**
+- *A stated premise fires.* Modive's own comment says a newer push cancels older checks, and
+  `default: interruptible: true` reaches main. The premise rule had told the reviewer to file nothing,
+  hiding the one Triggering defect the user named in the mined sessions. A row now fires when a file
+  the review read states its premise.
+- *One value, one item.* Six of the 20 CWE-829 items were the same `node:24-alpine` string. The same
+  value at several sites in one file is now one item listing the sites.
+- *`compare_to` guards a no-push pipeline.* GitLab's reference says so ("To cover these cases, use
+  `rules: changes: compare_to`"). An earlier rewording of PIPE-3 had dropped it.
+
+**Defects seen that no row covers, kept for slice 02 and not applied:** `--no-hashes` exports that
+install the lockfile's versions unverified; tests run against a different `Dockerfile` target than the
+one deployed; a deploy that ships an existing digest rather than the archive this pipeline scanned.
+
+**Not verified:** `/phil:review-ci` itself. It runs the installed copy, which is 1.2.23 until the plugin
+updates. No drive ran after the dogfood fixes; they change wording that fixture 01 does not exercise.
