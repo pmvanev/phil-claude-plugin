@@ -454,4 +454,16 @@ hand in a scratch clone. GitHub, no CI, `main` unprotected, no rulesets.
   - A project with no lockfile for its CI tools gets a hash-pinned one.
   - An action's commit is read with `gh api …/git/ref/tags/<tag>`.
   - Lint the script with `shellcheck` too.
-- *Not verified:* a run on GitHub's runners. The merge gate is unchanged, pending the user's answer.
+- *On GitHub's runners (pull request 51):* the first run passed all three jobs, and its secret scan
+  had read nothing. The gitleaks container runs as root over a checkout the runner's user owns, and
+  `actions/checkout` v7 trusts the directory only for its own commands. So git refused the checkout as
+  dubious ownership, the script read the failure as a missing base, and gitleaks logged the error,
+  scanned 0 commits and exited 0. The reference script now stops when git cannot read the checkout,
+  and the job trusts the directory through `GIT_CONFIG_*`; both are pinned and reproduced locally with
+  the same image. The second run scanned the pull request's 4 commits and passed 1853 tests.
+- *Merge gate, on the user's yes:* `main` requires a pull request whose `secret-scan`, `checks` and
+  `test` pass, tied to the GitHub Actions app, up to date with `main`, admins included; no force
+  pushes. Read back after writing. The merge itself is the user's.
+- *A lesson for the rule:* a check that passes after reading nothing is a tolerated failure the file
+  cannot show. This one showed only in the log, as "0 commits scanned". A candidate for slice 05's
+  runner rule, or for an Advisory bullet here; not yet written.
