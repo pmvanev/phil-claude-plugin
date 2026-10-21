@@ -14,6 +14,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,7 @@ RULE = REPO / "rules" / "ci-pipelines.md"
 SKILL = REPO / "skills" / "build-ci" / "SKILL.md"
 COMMAND = REPO / "commands" / "build-ci.md"
 FIXTURES = sorted((REPO / "skills" / "build-ci" / "self-test").glob("*/manifest.json"))
+BUILDS = [m for m in FIXTURES if json.loads(m.read_text())["mode"] == "build"]
 SOURCES = ["MR", "docs-only MR", "main push", "docs-only main", "schedule", "tag", "web or API"]
 SKIPPED = {"—", "exits early"}
 EXAMPLE = REPO / "skills" / "build-ci" / "examples" / "run.sh"
@@ -39,7 +41,9 @@ DEFAULT_BLOCK = """## CI policy
 
 
 def _skill():
-    return " ".join(SKILL.read_text().split())
+    """The skill and the references it sends each pass to."""
+    texts = [SKILL.read_text()] + [p.read_text() for p in sorted((SKILL.parent / "references").glob("*.md"))]
+    return " ".join(" ".join(texts).split())
 
 
 def _matrix(text):
@@ -104,7 +108,8 @@ def test_the_fixtures_are_found():
 
 
 def test_an_empty_project_holds_no_pipeline_yet():
-    for manifest in FIXTURES:
+    assert BUILDS, "no fixture builds a pipeline"
+    for manifest in BUILDS:
         project = manifest.parent / "project"
         assert project.is_dir(), f"{manifest.parent.name} has no project/ to build"
         assert not list(project.rglob(".gitlab-ci*")) and not (project / ".github").exists()
@@ -119,7 +124,7 @@ def test_the_expected_matrix_keeps_the_default_policy_in_every_cell():
     """D7: MR-only; change-scoped tests and mutation on the MR; a docs-only change runs the secret scan
     alone; main runs everything but mutation; a schedule runs full mutation and deploys nothing. A
     pipeline started by hand on main runs as main does, and no tag pipeline exists."""
-    for manifest in FIXTURES:
+    for manifest in BUILDS:
         kinds = json.loads(manifest.read_text())["kinds"]
         rows = _matrix((manifest.parent / "expected-matrix.md").read_text())
         assert rows.pop("(pipeline)") == {
@@ -150,7 +155,7 @@ def test_the_grant_holds_the_refusals_the_prose_states():
     grant = re.search(r"^allowed-tools: (.+)$", COMMAND.read_text(), re.M).group(1)
     for wide in ("Bash(sh:*)", "Bash(glab:*)", "Bash(gh:*)", "Bash(git:*)", "Bash(git remote:*)", "Bash"):
         assert wide not in [g.strip() for g in grant.split(",")], wide
-    assert "Write no digest or SHA you did not read" in _skill()
+    assert "Write no digest or SHA you did not read" in " ".join(SKILL.read_text().split())
 
 
 def test_the_schedule_and_the_secret_scan_do_not_contradict():
@@ -339,3 +344,64 @@ def test_a_checkout_git_cannot_read_fails_every_task(repo):
 
 def test_a_container_job_lets_git_read_the_checkout():
     assert "GIT_CONFIG_KEY_0: safe.directory" in SKILL.read_text()
+
+
+# Slice 04: the speed and rework passes.
+TIMINGS = REPO / "skills" / "build-ci" / "scripts" / "pipeline-timings.py"
+
+
+def test_the_command_offers_both_passes_and_can_run_the_timing_script():
+    text = COMMAND.read_text()
+    assert "--speed" in text and "--rework" in text
+    grant = re.search(r"^allowed-tools: (.+)$", text, re.M).group(1)
+    assert "Bash(python3:*)" in [g.strip() for g in grant.split(",")]
+
+
+def test_the_speed_pass_measures_before_it_ranks_and_says_where_it_stops():
+    """D11. Goldratt: only the critical path shortens the pipeline; queue wait belongs to the runners."""
+    skill = _skill()
+    assert "skills/build-ci/scripts/pipeline-timings.py" in skill
+    assert "only from jobs on the critical path" in skill
+    assert "Queue wait is mostly the runners' time" in skill
+    assert "a wait that gates is no candidate" in skill
+    assert "runner-up" in skill
+    assert "The stopping line" in skill
+    assert "re-measure" in skill
+
+
+def test_the_rework_pass_lists_every_artifacts_producers():
+    """D12. A package built in test and again in deploy is the mined case."""
+    skill = _skill()
+    assert "each artifact's producing jobs" in skill
+    assert "An artifact with two producers" in skill
+
+
+def _fixture(name):
+    return next(m for m in FIXTURES if m.parent.name == name)
+
+
+def test_the_rework_fixture_expects_an_artifact_built_twice_by_jobs_it_holds():
+    manifest = _fixture("02-rework")
+    ci = (manifest.parent / "project" / ".gitlab-ci.yml").read_text()
+    rows = [l for l in (manifest.parent / "expected-producers.md").read_text().splitlines()
+            if l.startswith("| ") and not l.startswith("| Artifact") and not l.startswith("|---")]
+    twice = [r for r in rows if "✗" in r]
+    assert twice, "the fixture seeds no artifact built twice"
+    for row in rows:
+        producers = [c.strip() for c in row.strip("|").split("|")][1]
+        for job in re.findall(r"`([^`]+)`", producers):
+            assert f"\n{job}:" in ci, f"{job} is not a job in the fixture"
+
+
+def test_the_speed_fixture_traces_to_the_path_it_expects():
+    """The script's reading of the fixture's history is the ground the expected ranking stands on."""
+    manifest = _fixture("03-speed")
+    want = json.loads(manifest.read_text())
+    files = sorted(str(p) for p in (manifest.parent / "project" / "history").glob("pipeline-*.json"))
+    out = subprocess.run([sys.executable, "-I", str(TIMINGS), "--forge", "gitlab", "--json", "--latest-shape",
+                          "--exclude", "release", *files], capture_output=True, text=True, check=True)
+    summary = json.loads(out.stdout)
+    assert summary["commonest_path"] == want["critical_path"]
+    assert (summary["median_wall"], summary["median_queue"]) == (757, 90), "expected.md states 12:37 and 1:30"
+    for decoy in want["off_path"]:
+        assert summary["jobs"][decoy]["on_path"] == 0, decoy

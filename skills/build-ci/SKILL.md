@@ -1,6 +1,6 @@
 ---
 name: build-ci
-description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "add mutation testing to CI", or runs /phil:build-ci. It declares the CI policy, writes or edits the pipeline so every trigger-matrix cell keeps it, with each job calling one entry-point script, lints the result, and asks before changing a forge setting.
+description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy and builds the pipeline to it, lints it, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
 ---
 
 # Build CI
@@ -14,17 +14,25 @@ installs from the lockfile, grants the narrowest token and holds no credential.
 
 **This skill writes repository files and reads the forge.** It writes the CI files, `scripts/ci/run.sh`,
 the project's instruction file, a hash-pinned lockfile for the tools CI installs where the project has
-none, and `.gitignore` entries for what the jobs leave behind, and nothing else.
+none, and `.gitignore` entries for what the jobs leave behind; the speed pass also writes the forge's job
+lists under the session's scratch directory; and nothing else.
 **Write no forge setting without an answer** — the merge gate, branch protection, auto-cancel, a pipeline
 schedule. `glab api` and `gh api` can write as well as read: send a `POST`, `PUT` or `PATCH` only after a
-yes, and never one that starts a pipeline. **Never push**, and never start a pipeline: a lint's dry run
+yes, and never one that starts a pipeline. `python3` runs the speed pass's timing script and nothing else.
+**Never push**, and never start a pipeline: a lint's dry run
 creates none, and a push to find out is a guess sent to a runner. **Write no digest or SHA you did not
 read** from a registry or the forge. Every ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`;
 load it before the first `AskUserQuestion` call.
 
 ## Parse the Argument
 
-A directory: the project rooted there. No argument: the repository root.
+| Argument | Runs |
+|---|---|
+| none, or a directory | Steps 1–9: declare the policy and build the pipeline to it |
+| `--speed` | the speed pass alone, over the pipeline already there |
+| `--rework` | the rework pass alone, over the pipeline already there |
+
+A directory names the project; without one, the repository root.
 
 ## Step 1: Survey the Project
 
@@ -219,10 +227,22 @@ lacks, with this project's commands written in:
 7. The local command for each job.
 8. Not verified: no pipeline ran. The first MR pipeline is the test.
 
+## The Speed and Rework Passes
+
+`--speed` follows `${CLAUDE_PLUGIN_ROOT}/skills/build-ci/references/speed-pass.md`: it measures the
+pipeline's history with `${CLAUDE_PLUGIN_ROOT}/skills/build-ci/scripts/pipeline-timings.py`, keeps queue
+wait apart, takes candidates only from jobs on the critical path, and stops at a drawn line. `--rework`
+follows `${CLAUDE_PLUGIN_ROOT}/skills/build-ci/references/rework-pass.md`: it lists each artifact's
+producing jobs and files every artifact built twice. Read the one the argument names, whole, before
+starting it.
+
 ## Self-test (regression gate)
 
 `skills/build-ci/self-test/01-empty-project/` holds a project with no CI and the matrix a build must
-reach. `tests/test_build_ci.py` holds that matrix to the default policy cell by cell, and pins
-`examples/run.sh`'s decision against a real git history. Whenever this skill, `examples/run.sh`,
+reach; `02-rework/`, a pipeline that builds its bundle and its image twice; `03-speed/`, a pipeline's
+recorded history whose slowest job is off the critical path. `tests/test_build_ci.py` holds the first
+matrix to the default policy cell by cell, pins `examples/run.sh`'s decision against a real git history,
+and checks the speed fixture's path with `scripts/pipeline-timings.py`, which `tests/test_pipeline_timings.py`
+pins on its own. Whenever this skill, `examples/run.sh`,
 `commands/build-ci.md` or `rules/ci-pipelines.md` changes, drive the fixture per `self-test/README.md`,
 from this working tree's `SKILL.md`, since `/phil:build-ci` runs the released copy.

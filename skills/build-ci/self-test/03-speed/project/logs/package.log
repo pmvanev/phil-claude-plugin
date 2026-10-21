@@ -1,0 +1,5 @@
+$ ./scripts/ci/run.sh package
+npm notice package: ledger-api@3.1.0
+npm notice total files: 214
+ledger-api-3.1.0.tgz
+Job succeeded

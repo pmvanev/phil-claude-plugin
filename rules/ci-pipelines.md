@@ -46,7 +46,7 @@ Keep triggers, stages and wiring in the CI file, and the work in the repository'
 
 ### Speed: the constraint first
 
-Goldratt's principle, as it reaches us through secondary sources: "an hour saved at a non-bottleneck is a mirage". Measure job durations and the time jobs wait for a runner, find the critical path, and shorten only that. Rank each change by the time it saves against the effort and runner cost it adds, make the large and medium ones, and stop where the curve flattens — Reinertsen's U-curve says an optimum exists. Caching is a bet to measure: it paid off substantially for only about a third of the projects that adopted it (Ghaleb et al. 2026). `test-architecture.md` owns how long the suite itself may take.
+Goldratt's principle, as it reaches us through secondary sources: "an hour saved at a non-bottleneck is a mirage". Measure job durations and the time jobs wait for a runner, find the critical path, and shorten only that. Rank each change by the time it saves against the effort and runner cost it adds, make the large and medium ones, and stop where the curve flattens or the pipeline is within its budget — Reinertsen's U-curve says an optimum exists. Caching is a bet to measure: it paid off substantially for only about a third of the projects that adopted it (Ghaleb et al. 2026). `test-architecture.md` owns how long the suite itself may take.
 
 ### Prefer the documented pattern
 
@@ -142,7 +142,7 @@ Name each finding by its `PIPE-n` id and take the fix from the row. Where the ro
 | PIPE-11 | A deploy or release job rebuilds — compiles, installs build dependencies, runs `docker build` or the build script — instead of using the artifact or image the tested job produced | Deploy what was tested: pass the build output as an artifact, or push the image once and deploy it by digest | Zampetti BP28 · Humble and Farley; SLSA v1.2 |
 | PIPE-12 | Build output passed between jobs through the cache — a GitLab `cache:` holding the build directory or package; GitHub `actions/cache` where an artifact belongs | Pass build output as an artifact (`artifacts:`; `upload-artifact` and `download-artifact`); keep the cache for dependencies | Zampetti BP28 · GitLab caching docs |
 | PIPE-13 | A dependency cache whose key does not change when the lockfile or dependency manifest changes | Derive the key from the lockfile or manifest (`cache:key:files`; `hashFiles(...)`) | GitLab caching docs; GitHub caching docs |
-| PIPE-14 | A Dockerfile that copies the whole source tree before installing dependencies, so any source change reinstalls them | Copy the manifest and lockfile, install, then copy the source | Zampetti BP28 · Docker cache docs |
+| PIPE-14 | A Dockerfile that copies the whole source tree, or files built from it, before installing dependencies, so any source change reinstalls them | Copy the manifest and lockfile, install, then copy the source | Zampetti BP28 · Docker cache docs |
 
 ### Order and portability
 

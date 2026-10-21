@@ -10,26 +10,32 @@ or `rules/ci-pipelines.md` changes.
 | Fixture | Situation | Expected outcome |
 |---|---|---|
 | `01-empty-project/` | a TypeScript CLI with tests, mutation and docs, and no CI; its remote unreachable | the default policy in `AGENTS.md`, a GitLab pipeline whose matrix keeps it in every cell, every job calling one entry-point script, no forge write, no push |
+| `02-rework/` | a pipeline that builds its bundle twice, once inside the Dockerfile, and its image twice, once in the deploy job | a producers table marking both, the image as PIPE-11; the single-producer package and per-job installs left alone |
+| `03-speed/` | five recorded main pipelines and their job logs; the slowest job is off the critical path | the path traced by the timing script, queue wait apart, one High candidate above a stopping line drawn at the budget, `lint` never ranked |
 
 ## Layout
 
 Each fixture holds the project under `project/`, plus:
 
-- `manifest.json` — what the fixture pins, and the kind of each job in the expected matrix;
-- `expected-matrix.md` — the trigger matrix a build must reach;
-- `expected.md` — the hard assertions, and what does not count as a failure.
+- `manifest.json` — what the fixture pins, its mode (`build`, `rework` or `speed`), and what the tests
+  check it against;
+- `expected-matrix.md` (build) or `expected-producers.md` (rework) — what the pass must produce;
+- `expected.md` — the hard assertions, how to drive the fixture, and what does not count as a failure.
 
 ## How to drive it
 
-1. Copy the fixture's `project/` to a scratch directory, then in it run `git init -q -b main`, `git add -A`,
-   `git commit -qm init` and `git remote add origin git@gitlab.example.invalid:acme/tally.git`.
-2. In that copy, follow this working tree's `skills/build-ci/SKILL.md` with `.` as the argument,
-   answering each question as the fixture's `expected.md` says.
-3. Compare the run's files and report with `expected-matrix.md` and `expected.md`. Any hard assertion
-   that fails blocks the change.
+1. Copy the fixture's `project/` to a scratch directory, then in it run `git init -q -b main`, `git add -A`
+   and `git commit -qm init`. Fixture 01 also needs
+   `git remote add origin git@gitlab.example.invalid:acme/tally.git`.
+2. In that copy, follow this working tree's `skills/build-ci/SKILL.md` with the argument the fixture's
+   `expected.md` names — `.`, `--rework` or `--speed` — answering each question as it says.
+3. Compare the run's files and report with the fixture's `expected-*.md` files. Any hard assertion that
+   fails blocks the change.
 
 ## What runs automatically, and what does not
 
-`tests/test_build_ci.py` holds each expected matrix to the default policy cell by cell, checks that each
-project holds no pipeline yet, and pins the skill's refusals. **Whether a run reaches that matrix is
-model judgement.** Step 2 needs an agent or a person, and step 3 needs a judge.
+`tests/test_build_ci.py` holds fixture 01's expected matrix to the default policy cell by cell, checks
+that each build-mode project holds no pipeline yet, checks that every job fixture 02's producers table
+names is a job in its pipeline, and runs `scripts/pipeline-timings.py` over fixture 03's history to
+confirm its path and medians. It also pins the skill's refusals. **Whether a run reaches those outcomes
+is model judgement.** Step 2 needs an agent or a person, and step 3 needs a judge.

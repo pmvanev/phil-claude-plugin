@@ -1,0 +1,8 @@
+{
+  "node_id": "BCI-SELFTEST-03",
+  "mode": "speed",
+  "target": "project",
+  "pins": "the speed pass measures from recorded history, keeps queue wait apart, ranks candidates only from the critical path, never ranks the slow off-path lint, and draws the stopping line",
+  "critical_path": ["build", "test", "package"],
+  "off_path": ["lint", "gitleaks"]
+}

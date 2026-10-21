@@ -1,0 +1,93 @@
+# storefront: build, test, package, verify, deploy.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - when: never
+
+stages: [build, test, package, verify, deploy]
+
+default:
+  image: node:24-alpine@sha256:4c2f1a0d9e8b7c6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a
+  timeout: 20m
+
+.npm:
+  cache:
+    key:
+      files: [package-lock.json]
+    paths: [.npm/]
+  before_script:
+    - npm ci --cache .npm --prefer-offline
+
+.docker:
+  image: docker:28.5@sha256:7d0b4f3e2a1c9b8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d
+  services: ["docker:28.5-dind@sha256:1e2d3c4b5a6f7e8d9c0b1a2f3e4d5c6b7a8f9e0d1c2b3a4f5e6d7c8b9a0f1e2d"]
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+
+build:
+  extends: .npm
+  stage: build
+  script:
+    - ./scripts/ci/run.sh build
+  artifacts:
+    paths: [dist/]
+    expire_in: 1 week
+
+test:
+  extends: .npm
+  stage: test
+  needs: [build]
+  script:
+    - ./scripts/ci/run.sh test
+
+pack:
+  extends: .npm
+  stage: package
+  needs: [build]
+  script:
+    - ./scripts/ci/run.sh pack
+  artifacts:
+    paths: [out/]
+    expire_in: 1 week
+
+build-image:
+  extends: .docker
+  stage: package
+  needs: [build]
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+
+e2e:
+  extends: .npm
+  stage: verify
+  needs: [build-image]
+  services:
+    - name: "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+      alias: app
+  script:
+    - ./scripts/ci/run.sh e2e http://app:8080
+
+deploy-staging:
+  extends: .docker
+  stage: deploy
+  needs: [e2e]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  environment: { name: staging }
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE:staging" .
+    - docker push "$CI_REGISTRY_IMAGE:staging"
+    - ./scripts/deploy.sh staging "$CI_REGISTRY_IMAGE:staging"
+
+# Publishes the tarball pack built; it installs nothing.
+release:
+  stage: deploy
+  needs: [pack, e2e]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  script:
+    - ./scripts/ci/run.sh release

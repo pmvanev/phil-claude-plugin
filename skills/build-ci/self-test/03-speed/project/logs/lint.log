@@ -1,0 +1,5 @@
+$ ./scripts/ci/run.sh lint
+added 1423 packages, and audited 1424 packages in 3m4s
+$ npx eslint .
+$ npx tsc --noEmit
+Job succeeded

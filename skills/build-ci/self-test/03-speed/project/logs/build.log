@@ -1,0 +1,9 @@
+$ ./scripts/ci/run.sh build
+npm warn deprecated inflight@1.0.6: This module is not supported
+added 1423 packages, and audited 1424 packages in 3m5s
+> ledger-api@3.1.0 build
+> vite build
+vite v7.1.12 building for production...
+✓ 412 modules transformed.
+✓ built in 49.81s
+Job succeeded
