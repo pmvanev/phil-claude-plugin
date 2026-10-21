@@ -109,8 +109,10 @@ The decision, which `./scripts/ci/run.sh scope` prints as `docs-only`, `scoped` 
   the run that would skip every task and report green.
 - **Full when a selector input changed**, or on the default branch; scoped otherwise.
 
-The secret scan never consults the decision. The job's image must hold `git`, and the checkout must
-reach the base: GitLab `GIT_DEPTH: "0"`, GitHub `fetch-depth: 0`.
+The secret scan never consults the decision. **The script stops when git cannot read the checkout**: a
+scanner that cannot read the history scans nothing and can still exit 0, as gitleaks does. The job's
+image must hold `git`, and the checkout must reach the base: GitLab `GIT_DEPTH: "0"`, GitHub
+`fetch-depth: 0`.
 
 ## Step 5: Write the Pipeline
 
@@ -154,6 +156,7 @@ put `interruptible: true` only on MR-pipeline jobs. Each line below answers the 
 | An image built in the pipeline | copy the manifest and lockfile, install, then copy the source | the same | PIPE-14 |
 | Portable paths | `$CI_PROJECT_DIR`, or a path relative to the checkout | `$GITHUB_WORKSPACE` | PIPE-16 |
 | A merge queue | — | `merge_group` in the required workflow's triggers | PIPE-5 |
+| A job in a container whose user does not own the checkout | — | job `env:` `GIT_CONFIG_COUNT: 1`, `GIT_CONFIG_KEY_0: safe.directory`, `GIT_CONFIG_VALUE_0: "*"`; `actions/checkout` trusts the directory only for its own commands | — |
 | Pinned, narrow and secret-free | images by digest; tools from their own image, never fetched by `curl`; installs from the lockfile; credentials from CI variables | actions by commit SHA; `permissions: contents: read` at the top; secrets from `secrets.*` | CWE-829, CWE-494, CWE-1357, CWE-250, CWE-798 |
 
 Give each job a `timeout`. Keep production deploys and rollbacks manual. Read an action's commit with
