@@ -320,3 +320,66 @@ one deployed; a deploy that ships an existing digest rather than the archive thi
 
 **Not verified:** `/phil:review-ci` itself. It runs the installed copy, which is 1.2.23 until the plugin
 updates. No drive ran after the dogfood fixes; they change wording that fixture 01 does not exercise.
+
+## Wave: DISCUSS / [REF] Slice 02 delivered and dogfooded (2026-10-21)
+
+**What landed.** `ci-pipelines.md` gained its Principles half, the declared policy (D6, D7) with its
+seven fields, eight Always-flag rows (PIPE-17 to PIPE-24) and an Advisory list. PIPE-2 now asks for the
+full suite on main. `review-ci` reads the `## CI policy` block and the project's recorded decisions,
+writes a jobs-by-source trigger matrix (D10) whose first row says whether the forge creates the
+pipeline, and files Advisory bullets as questions. `test-architecture.md` points at the pipeline rule
+for pipeline speed (D11, D17).
+
+**The empty-variable rule, root cause.** Slice 01 left it open. beatrix's commit `6424dce9` recorded
+that `$ROLLBACK_TAG && …` matched with the tag empty while a bare `$ROLLBACK_TAG` did not. GitLab's
+evaluator source explains it: `And#evaluate` returns Ruby's `left && right`, Ruby counts `""` as true,
+and `Statement#truthful?` tests only the whole result with `.present?`. The `rules:if` docs say the
+opposite. `!=` makes an undefined variable match `!= ""`, so PIPE-19's form compares with both `null`
+and `""`.
+
+**Fixture 02, three blind drives.**
+- *Drive 1* filed the five expected items and no look-alike. It marked fourteen cells for one refused
+  pipeline, and it found the skill's speed rule contradicting the rule's speed Advisory bullets.
+  `plugin-dev:skill-reviewer` ("needs improvement") and `plugin-dev:plugin-validator` (pass, with
+  warnings) found the same two and more:
+  - a refused pipeline had no cell value;
+  - `exits early` had no stated meaning;
+  - the skill misstated how GitLab joins inherited rules;
+  - PIPE-17 had no exception for a declared scheduled deploy;
+  - three decoys could draw a correct item: gitleaks skipped on rollback, full-run lists missing the
+    scripts and build config, and `--incremental` mutation with no baseline, which runs whole;
+  - a nested `CLAUDE.md` in the fixture would load as this repo's context. It is now `AGENTS.md`.
+- *Drive 2* filed exactly the five, and every cell the hard assertions name, except the tag column. The
+  skill told it to read job cells "as if the pipeline were created" even where no pipeline exists.
+- *Drive 3*, after the matrix wording was fixed, filed exactly the five, with an all-`—` tag column, and
+  met every hard assertion. It also raised one Advisory question (no `interruptible` on MR jobs), which
+  `expected.md` allows. It read PIPE-20's "scripts its jobs call" as possibly covering deploy scripts.
+  The row now says "the scripts that select the tests", a narrowing not re-driven.
+
+**Dogfood: beatrix at `4243b338` (origin/main, 2026-10-21), 628 lines.** It ran with the default
+policy block appended to a scratch clone's `CLAUDE.md`, since beatrix states its policy only in prose.
+A fresh agent followed the working tree's skill in about ten minutes over twelve files, and filed 9
+must-fix items, 1 question and 2 Advisory:
+- *Real:* two PIPE-11s, the sharpest of them `deploy-prod`. It rebuilds the SPA, the Lambda zip and the
+  extension at the press, so production ships a build `dev-parity` never proved. Also PIPE-17:
+  `dev-parity`, which deploys dev and wipes its data, runs in any schedule on main. Images are pinned
+  by tag (CWE-829) and `uvx` resolves the audit tools' dependencies unhashed (CWE-494). And a question
+  whether every `aws-linux` job gets the host's Docker socket (CWE-250).
+- *What it taught the rule, each fixed and pinned:*
+  - A pasted default can contradict a recorded decision. beatrix records mutation on demand only,
+    after three VM crashes (2026-10-19), so two PIPE-24 items existed only because of the paste. A
+    recorded decision that contradicts a field now makes a question.
+  - PIPE-3 was noise where a hand-run main pipeline is meant to run everything and a test pins it. That
+    is now Do not flag.
+  - PIPE-24 needed a home for a field no job carries out. It is one item, filed at the field.
+  - PIPE-22 stayed silent because two non-test jobs run on every change. It now asks whether a test
+    job runs.
+  - Where a `security.md` Cite cell tags neither id, the review takes the id whose definition fits. A
+    script read in part goes under Not read.
+
+**Seen, no row of this rule covers, for `security.md`:** a CA bundle fetched at build time with no
+checksum; a corepack-fetched package manager with no hash; `--no-hashes` exports, carried from slice 01.
+Each is a trust question, so each belongs to `security.md`'s Supply chain and build table, not here.
+
+**Not verified:** `/phil:review-ci` itself, which runs the installed copy (1.2.23). beatrix was not
+re-driven after the fixes.

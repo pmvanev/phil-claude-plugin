@@ -83,6 +83,8 @@ Inside a boundary, use the real collaborators. They are yours, they are fast, an
 
 **The threshold is behavioural, not numeric.** "The suite feels slow" is not a signal — people tolerate almost anything gradually. The signal is the moment someone **changes what they do** to avoid the wait: skipping the run, batching commits, pushing and hoping. Watch for that, because it arrives before the number does.
 
+**The suite's clock is this rule's; the pipeline's is `ci-pipelines.md`'s.** A suite inside its budget can still sit in a slow pipeline — queued for a runner, serialised behind other jobs, rebuilding what an earlier job built — and that rule's speed principle finds the job worth shortening.
+
 **A slow suite is a design finding.** Farley's forcing function applies to the suite itself: tests are slow because they cross boundaries they did not need to cross, and that is a statement about coupling. Treat the clock as a diagnostic instrument.
 
 **Which of these numbers is published.** Only the commit stage — *Continuous Delivery* puts it under five minutes and never past ten, and that is the single suite budget any of this rule's five sources states. The local and acceptance figures are this project's, scaled from that one to the loops they sit in; treat them as defaults to argue with rather than as findings. The allocation rule and the pyramid-trophy settlement below are likewise derived from the five sources, not quoted from any of them: **"be sociable inside a boundary, solitary across one" is this rule's synthesis.** Said plainly so nobody cites it back to a book that does not contain it.

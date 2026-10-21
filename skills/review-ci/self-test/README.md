@@ -11,6 +11,7 @@ contain. Run them whenever `skills/review-ci/SKILL.md`, `commands/review-ci.md` 
 | Fixture | Situation | Rule under test | Expected outcome |
 |---|---|---|---|
 | `01-pipeline-findings-cite-a-row/` | twelve pipeline defects and one mutable image tag beside six look-alikes, on both forges, including defects one edit fixes across several jobs | `rules/ci-pipelines.md` Always-flag and Do not flag; `security.md`'s CWE-829 row | thirteen must-fix items, each with its row's id and Preferred form, each shared defect filed once; no look-alike filed |
+| `02-trigger-matrix/` | a declared CI policy, and four defects only a job-by-source reading shows — a schedule that deploys, a rule on an empty variable, a `needs:` on a path-skipped job, a check skipped by any doc path — plus one policy departure, each beside a correct guard | the declared policy, the trigger matrix, PIPE-17 to PIPE-24 | five must-fix items and a matrix marking each one's cells; no look-alike filed |
 
 ## Layout
 

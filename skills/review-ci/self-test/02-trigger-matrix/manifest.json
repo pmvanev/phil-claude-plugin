@@ -1,0 +1,17 @@
+{
+  "node_id": "RCI-SELFTEST-02",
+  "mode": "review",
+  "target": ".",
+  "matrix": true,
+  "pins": "the review reads the declared CI policy and writes a jobs-by-sources trigger matrix; a schedule that deploys, a rule on an empty variable, a needs on a path-skipped job and a check skipped by any doc path are each filed by row and marked in the matrix; a policy departure is filed as PIPE-24; the correct guard beside each is not flagged",
+  "expected_guard": "five must-fix items: PIPE-21, PIPE-18, PIPE-24, PIPE-17, PIPE-19; six look-alikes unflagged; the matrix marks deploy-staging on a schedule, accessibility on an MR, mutation-diff on main, lint on an MR and rollback-prod on main, and its pipeline row reads some MR pipelines as refused",
+  "decoys": [
+    "deploy-dev",
+    "deploy-prod",
+    "mutation-full",
+    "e2e-report",
+    ".unless-rollback",
+    ".web-changes"
+  ],
+  "min_items": 5
+}

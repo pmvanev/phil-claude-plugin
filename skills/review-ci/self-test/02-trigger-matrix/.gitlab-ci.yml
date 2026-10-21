@@ -1,0 +1,217 @@
+# ledger: one pipeline per open MR, one per main commit, and a weekly schedule.
+# GitLab keeps the schedule (Sundays 02:00, on main) and "Pipelines must succeed"; this file keeps the rest.
+# Every job calls scripts/ci/run.sh, which skips the work for a docs-only change.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - when: never
+
+stages: [check, test, mutation, deploy, promote]
+
+variables:
+  # Run pipeline on main with this set, and the pipeline rolls production back to that tag.
+  ROLLBACK_TAG:
+    value: ""
+    description: "A release tag, vX.Y.Z, to roll production back to."
+
+default:
+  timeout: 15m
+
+# The schedule runs mutation-full and the secret scan, nothing else.
+.not-on-schedule:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+
+# A rollback pipeline runs rollback-prod alone. Alone, an empty tag reads as false.
+.unless-rollback:
+  rules:
+    - if: $ROLLBACK_TAG
+      when: never
+
+.node:
+  image: node:24@sha256:4c2f1a0d9e8b7c6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a
+  cache:
+    key:
+      files: [package-lock.json]
+    paths: [.npm/]
+  before_script:
+    - npm ci --cache .npm --prefer-offline
+
+# Deploy jobs take the tested build and install nothing.
+.deploy:
+  image: node:24@sha256:4c2f1a0d9e8b7c6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a
+
+# web/ and everything its end-to-end tests read; the lockfile, this file, the scripts it calls,
+# the build configuration and the shared test support force a run.
+.web-changes:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - web/**/*
+          - package.json
+          - package-lock.json
+          - .gitlab-ci.yml
+          - scripts/ci/**/*
+          - vite.config.ts
+          - playwright.config.ts
+          - tests/support/**/*
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+gitleaks:
+  stage: check
+  needs: []
+  image:
+    name: zricethezav/gitleaks:v8.24.3@sha256:9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d
+    entrypoint: [""]
+  script:
+    - gitleaks git --redact --verbose .
+
+lint:
+  extends: .node
+  stage: check
+  needs: []
+  rules:
+    - !reference [.not-on-schedule, rules]
+    - !reference [.unless-rollback, rules]
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes: ["docs/**/*", "**/*.md"]
+      when: never
+    - when: on_success
+  script:
+    - ./scripts/ci/run.sh lint
+
+unit-tests:
+  extends: .node
+  stage: test
+  rules:
+    - !reference [.not-on-schedule, rules]
+    - !reference [.unless-rollback, rules]
+    - when: on_success
+  script:
+    - ./scripts/ci/run.sh unit
+
+build:
+  extends: .node
+  stage: test
+  rules:
+    - !reference [.not-on-schedule, rules]
+    - !reference [.unless-rollback, rules]
+    - when: on_success
+  script:
+    - ./scripts/ci/run.sh build
+  artifacts:
+    paths: [dist/]
+    expire_in: 1 week
+
+e2e:
+  extends: .node
+  stage: test
+  rules:
+    - !reference [.not-on-schedule, rules]
+    - !reference [.unless-rollback, rules]
+    - !reference [.web-changes, rules]
+  script:
+    - ./scripts/ci/run.sh e2e
+  artifacts:
+    when: always
+    paths: [playwright-report/]
+    expire_in: 1 week
+
+e2e-report:
+  extends: .node
+  stage: mutation
+  needs:
+    - job: e2e
+      optional: true
+  rules:
+    - !reference [.not-on-schedule, rules]
+    - !reference [.unless-rollback, rules]
+    - when: always
+  script:
+    - ./scripts/ci/run.sh e2e-report
+
+accessibility:
+  extends: .node
+  stage: mutation
+  needs: [e2e]
+  rules:
+    - !reference [.not-on-schedule, rules]
+    - !reference [.unless-rollback, rules]
+    - when: on_success
+  script:
+    - ./scripts/ci/run.sh accessibility
+
+mutation-diff:
+  extends: .node
+  stage: mutation
+  rules:
+    - !reference [.not-on-schedule, rules]
+    - !reference [.unless-rollback, rules]
+    - when: on_success
+  script:
+    - ./scripts/ci/run.sh mutation-diff
+
+mutation-full:
+  extends: .node
+  stage: mutation
+  timeout: 3h
+  parallel: 4
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  retry:
+    max: 2
+    when: [runner_system_failure, stuck_or_timeout_failure]
+  script:
+    - ./scripts/ci/run.sh mutation-full "$CI_NODE_INDEX" "$CI_NODE_TOTAL"
+
+deploy-dev:
+  extends: .deploy
+  stage: deploy
+  needs: [build, unit-tests, e2e]
+  rules:
+    - !reference [.not-on-schedule, rules]
+    - !reference [.unless-rollback, rules]
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  environment: { name: dev }
+  script:
+    - ./scripts/ci/run.sh deploy dev
+
+# Promotes whatever dev runs, by digest.
+deploy-staging:
+  extends: .deploy
+  stage: promote
+  rules:
+    - !reference [.unless-rollback, rules]
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  environment: { name: staging }
+  script:
+    - ./scripts/ci/run.sh promote staging
+
+deploy-prod:
+  extends: .deploy
+  stage: promote
+  rules:
+    - !reference [.not-on-schedule, rules]
+    - !reference [.unless-rollback, rules]
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  environment: { name: production }
+  script:
+    - ./scripts/ci/run.sh promote production
+
+rollback-prod:
+  extends: .deploy
+  stage: promote
+  needs: []
+  rules:
+    - if: $ROLLBACK_TAG && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  environment: { name: production }
+  script:
+    - ./scripts/ci/run.sh rollback "$ROLLBACK_TAG"

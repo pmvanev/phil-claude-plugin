@@ -1,0 +1,12 @@
+{
+  "name": "ledger",
+  "private": true,
+  "scripts": { "build": "vite build" },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@stryker-mutator/core": "9.2.0",
+    "eslint": "9.38.0",
+    "vite": "7.1.12",
+    "vitest": "4.0.3"
+  }
+}
