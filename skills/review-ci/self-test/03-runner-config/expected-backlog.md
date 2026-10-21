@@ -44,3 +44,23 @@ Standard: rules/ci-pipelines.md; rules/ci-runners.md, where runner configuration
 - **Preferred form**: A protected runner (`access_level = "ref_protected"`) that refuses untagged jobs, and one pool per credential set; tags route, protection authorizes — here: in the deploy runner's registration, `access_level = "ref_protected"` and `untagged = false`
 - **Cite**: ci-runners.md — RUN-4 · CWE-266 · CICD-SEC-5; GitLab protected-runner docs; GitHub runner-group docs
 - **Status**: pending
+
+### [C005] CWE-1357 — `test` installs Python packages from an export that drops the lockfile's hashes
+
+- **File**: `scripts/ci.sh`
+- **Lines**: 7-8
+- **Severity**: must-fix
+- **Row**: CWE-1357
+- **Preferred form**: Commit the lockfile and install from it, its hashes checked — here: drop `--no-hashes`, so the exported requirements carry hashes and `pip` checks every one
+- **Cite**: security.md — CWE-1357 · CWE-1357 · v5.0.0 V15
+- **Status**: pending
+
+### [C006] CWE-494 — `test` fetches a CA bundle with no checksum and writes it where TLS will trust it
+
+- **File**: `scripts/ci.sh`
+- **Lines**: 9
+- **Severity**: must-fix
+- **Row**: CWE-494
+- **Preferred form**: Pin by digest or commit SHA; verify a checksum or signature before running or trusting it — here: check the bundle against a pinned SHA-256 before writing it to `aws/`
+- **Cite**: security.md — CWE-494 · CWE-494 (fetched code, and a CA bundle, which decides what code is trusted), CWE-829 (a CI action or image) · v5.0.0 V15
+- **Status**: pending
