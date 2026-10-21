@@ -1,0 +1,49 @@
+# Rendered by runners.tf onto the gateway as /etc/gitlab-runner/config.toml.
+concurrent = 24
+check_interval = 3
+
+[[runners]]
+  name = "open"
+  url = "https://gitlab.example.invalid"
+  token = "${open_token}"
+  executor = "docker-autoscaler"
+  [runners.docker]
+    image = "node:24-bookworm@sha256:6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f"
+    privileged = false
+    pull_policy = ["always"]
+    volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
+  [runners.autoscaler]
+    plugin = "aws"
+    capacity_per_instance = 1
+    max_use_count = 10
+    max_instances = 16
+    [runners.autoscaler.plugin_config]
+      name = "${open_asg}"
+    [[runners.autoscaler.policy]]
+      periods = ["* 7-19 * * mon-fri"]
+      timezone = "America/Denver"
+      idle_count = 2
+      idle_time = "20m"
+      scale_factor = 1.0
+      scale_factor_limit = 8
+
+[[runners]]
+  name = "deploy"
+  url = "https://gitlab.example.invalid"
+  token = "${deploy_token}"
+  executor = "docker-autoscaler"
+  [runners.docker]
+    image = "node:24-bookworm@sha256:6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f"
+    privileged = false
+    pull_policy = ["always"]
+    volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
+  [runners.autoscaler]
+    plugin = "aws"
+    capacity_per_instance = 1
+    max_use_count = 1
+    max_instances = 4
+    [runners.autoscaler.plugin_config]
+      name = "${deploy_asg}"
+    [[runners.autoscaler.policy]]
+      idle_count = 0
+      idle_time = "10m"

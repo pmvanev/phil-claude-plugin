@@ -1,0 +1,18 @@
+# The Azure fleet's runner manager, before 2026-10-08. Retired; kept as history.
+concurrent = 4
+
+[[runners]]
+  name = "azure-shared"
+  url = "https://gitlab.example.invalid"
+  token = "retired"
+  executor = "shell"
+
+[[runners]]
+  name = "azure-docker"
+  url = "https://gitlab.example.invalid"
+  token = "retired"
+  executor = "docker"
+  [runners.docker]
+    image = "alpine:latest"
+    privileged = true
+    pull_policy = ["if-not-present"]

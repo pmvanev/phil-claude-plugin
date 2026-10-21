@@ -1150,6 +1150,13 @@ rows where the vendor is the only authority. The OWASP CI/CD list originated at 
 session (budget). | **Recommendation**: resolve each through `cwe-api.mitre.org`, as the security research
 did, before a rule ships; key rows by OWASP CICD-SEC id meanwhile.
 
+**V2, closed 2026-10-21 (feature `ci-pipeline-standard`):** each id was read on cwe.mitre.org (CWE 4.20;
+the API refused TLS that day) for its vulnerability-mapping usage. CWE-668 and CWE-269 are DISCOURAGED,
+too abstract for a finding, and are dropped. CWE-250 is ALLOWED; CWE-522 and CWE-863 are
+ALLOWED-WITH-REVIEW. Two replacements were read and are ALLOWED: CWE-653, Improper Isolation or
+Compartmentalization, for the shared-machine rows (RUN-1, -3, -8, -9, -10); and CWE-266, Incorrect
+Privilege Assignment, for a role-holding pool open to unprotected refs (RUN-4).
+
 ### Gap 2: CIS Docker Benchmark primary text
 **Issue**: Control wording and numbers (5.31 in v1.2.0, 5.32 in v1.6.0) come from vendor mappings. |
 **Attempted**: search; CIS PDFs are registration-gated. | **Recommendation**: read the current CIS Docker
@@ -1167,6 +1174,12 @@ by a whole read of `main` (3.2), and the reading that `scale_factor ≤ 1` is a 
 open: `main` is not the revision Runner v19.5.0 pins (`1f87885729aa`). | **Recommendation**: diff the file
 at that revision, and add a worked test; file a GitLab docs issue on the "on top of" vs "minimum/maximum"
 wording.
+
+**V3, closed 2026-10-21:** `internal/capacity/capacity.go` at `1f87885729aa` is byte-identical to `main`
+(141 lines). `RequiredInstances` sets desired capacity to `max(acquired + max(idle_count, pending),
+ceil(scale_factor × acquired))`, the second term capped by `scale_factor_limit` only where the limit is
+above 0, so a `scale_factor` at or below 1.0 never wins.
+The docs issue is not filed.
 
 ### Gap 5: `max_use_count` default; runner token location on docker-autoscaler instances
 **Issue**: No default shown for `max_use_count`. Whether job instances hold the runner's authentication

@@ -1,0 +1,27 @@
+# The runners repository's own pipeline: it checks the fleet's code on every MR and on main.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - when: never
+
+default:
+  image: node:24-bookworm@sha256:6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f
+  timeout: 20m
+
+gitleaks:
+  needs: []
+  image:
+    name: ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    entrypoint: [""]
+  retry:
+    max: 2
+    when: [runner_system_failure, scheduler_failure]
+  script:
+    - ./scripts/ci.sh secret-scan
+
+test:
+  retry: 2
+  script:
+    - ./scripts/ci.sh test
