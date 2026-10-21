@@ -1,0 +1,14 @@
+{
+  "node_id": "BCI-SELFTEST-01",
+  "mode": "build",
+  "target": "project",
+  "pins": "a project with no CI gets the default policy block in its instruction file and a GitLab pipeline whose trigger matrix keeps that policy in every cell, every job calling one entry-point script; no forge setting written, no push",
+  "kinds": {
+    "secret-scan": ["gitleaks"],
+    "check": ["lint", "typecheck"],
+    "test": ["unit-tests"],
+    "build": ["build"],
+    "mutation-diff": ["mutation-diff"],
+    "mutation-full": ["mutation-full"]
+  }
+}

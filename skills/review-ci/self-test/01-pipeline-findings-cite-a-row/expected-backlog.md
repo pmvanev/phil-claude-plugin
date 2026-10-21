@@ -11,8 +11,8 @@ Standard: rules/ci-pipelines.md; rules/security.md (Supply chain and build, the 
 - **Lines**: 8-10
 - **Severity**: must-fix
 - **Row**: PIPE-6
-- **Preferred form**: Cancel only superseded MR runs: a GitHub group keyed on `github.head_ref || github.run_id`; GitLab `interruptible` only on MR-pipeline jobs — here: key the group on `${{ github.workflow }}-${{ github.head_ref || github.run_id }}`
-- **Cite**: ci-pipelines.md — PIPE-6 · Zampetti BP6, read inversely · Fowler 2024; GitHub `concurrency` docs; GitLab `interruptible` docs
+- **Preferred form**: Cancel only superseded MR runs: a GitHub group keyed on `github.head_ref || github.run_id`; GitLab `auto_cancel: on_new_commit: none` on the default branch's `workflow:rules` entry, or `interruptible` only on MR-pipeline jobs — here: key the group on `${{ github.workflow }}-${{ github.head_ref || github.run_id }}`
+- **Cite**: ci-pipelines.md — PIPE-6 · Zampetti BP6, read inversely · Fowler 2024; GitHub `concurrency` docs; GitLab `interruptible` and `workflow:rules:auto_cancel` docs
 - **Status**: pending
 
 ### [C002] PIPE-8 — secret scan skipped for docs-only changes

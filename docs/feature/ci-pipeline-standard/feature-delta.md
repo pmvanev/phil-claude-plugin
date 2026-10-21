@@ -383,3 +383,44 @@ Each is a trust question, so each belongs to `security.md`'s Supply chain and bu
 
 **Not verified:** `/phil:review-ci` itself, which runs the installed copy (1.2.23). beatrix was not
 re-driven after the fixes.
+
+## Wave: DISCUSS / [REF] Slice 03 delivered (2026-10-21); its dogfood waits on the user
+
+**What landed.** `/phil:build-ci` (`mutates: true`) surveys a project, adopts the policy — the rule's
+default block, with each field a recorded decision changes rewritten to it — and writes it into the
+project's instruction file. It maps each change class to its jobs, writes `scripts/ci/run.sh` and the
+pipeline, then checks its own work: the trigger matrix, `review-ci`'s Step 3, and the forge's lint dry
+run. It reads the merge gate, auto-cancel and the schedule, and writes one only on a yes. It records the
+branch, MR and merge-on-green workflow. Its grant names `glab ci lint`, `glab api`, `gh api`, `sh -n` and
+`chmod +x`, never bare `glab`, `gh` or `sh`, so "never push, never start a pipeline" is not prose alone.
+`glab api` and `gh api` can still write, and the prose bounds that.
+
+**The reference entry-point script, `skills/build-ci/examples/run.sh`.** The skill review found that the
+script shape, written as first described, failed open: an empty change list is vacuously "every path
+is a doc", so a schedule's full mutation would skip and report green. A failed diff did the same, and a
+rename of code into `docs/` read as docs-only. The script's decision is now pinned against real git
+histories in `tests/test_build_ci.py`, fifteen cases. Each guard was removed in turn to watch its test
+fail: the empty list, `--no-renames`, the root-markdown pattern, and a shard that finds no source file,
+which drive 2 caught hiding a failed `git ls-files` behind a pipe.
+
+**PIPE-6 learned GitLab's documented guard.** `workflow:rules:auto_cancel` with `on_new_commit: none` on
+the default branch's rule keeps main's pipelines uncancelled while every job stays `interruptible`.
+The row's Violation and Preferred form now accept it. Fixture 01 of `review-ci` changed with it and was
+not re-driven.
+
+**Fixture 01 (empty project), two blind drives.**
+- *Drive 1* reached the default policy in every job and wrote no forge setting. Several problems
+  surfaced: the PIPE-6 conflict; no way to find the default branch; no answer for a project with no
+  secret scanner; a task-runner branch that could never hold the script's logic; workflow lines with no
+  heading. `plugin-dev:skill-reviewer` ("needs improvement") and `plugin-dev:plugin-validator` (fail: an
+  unregistered shared fragment, and `Bash(sh:*)`, `Bash(glab:*)` and `Bash(gh:*)` grants wider than the
+  prose's refusals) found these and about twenty more. All were fixed.
+- *Drive 2* matched the expected matrix exactly and met every hard assertion. Its findings — a fail-open
+  shard, narrowed config globs, an unbounded shard count — were fixed after it, not re-driven.
+
+**Design choice recorded:** a pipeline started by hand on the default branch runs as main does. The
+default policy is silent on it; the drive's design kept it, and it is how a main pipeline is re-run.
+
+**Not verified:** `/phil:build-ci` itself (installed copy 1.2.23); a lint against a real forge, since the
+fixture's remote does not exist; any pipeline run. **US-03's last criterion is open:** a dogfood on one
+real repo, run with the user, its matrix recorded.
