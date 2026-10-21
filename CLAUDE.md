@@ -79,7 +79,11 @@ prose.
   before writing the file. Take the schema from plugin-dev, not from a sibling file — a copied shape
   carries the sibling's defects unchecked.
 - Run `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` over the result.
-- Name in the commit message which of `nw-discuss` and `plugin-dev` ran. Wound: `groom-issues` slice 03
+- Once a file's content is settled, edit a rule with `phil:eos`, which applies `rules/writing.md`, and
+  harden a skill, command, agent or hook prompt with `/phil:harden-instructions`, which applies
+  `rules/agent-instructions.md`. Run both before the release that ships the file.
+- Name in the commit message which of `nw-discuss`, `plugin-dev`, `phil:eos` and
+  `/phil:harden-instructions` ran. Wound: `groom-issues` slice 03
   was authored 2026-08-13 without plugin-dev, and nothing recorded it.
 
 ## Where a finding about a standard goes
