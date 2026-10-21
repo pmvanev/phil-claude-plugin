@@ -162,3 +162,21 @@ def test_review_code_counts_missing_protections_and_marks_the_instance():
     assert "File one item per missing protection, not per matching id" in body
     assert "write ` — here: `" in body
     assert "take the row whose Violation names its source" in body
+
+
+# Gaps the ci-pipeline-standard dogfoods found (2026-10-21), folded into the supply-chain rows.
+
+def _row_citing(cwe):
+    return next(r for r in _always_flag_rows() if cwe in r["Cite"] and r["Cite"].startswith(cwe))
+
+
+def test_an_install_that_skips_the_lockfiles_hashes_is_cwe_1357():
+    """modive exported requirements with `--no-hashes`: the lockfile's versions, installed unchecked."""
+    row = _row_citing("CWE-1357")
+    assert "--no-hashes" in row["Violation"] and "hashes checked" in row["Preferred form"]
+
+
+def test_a_ca_bundle_fetched_unchecked_is_cwe_494():
+    """beatrix's build fetched its database CA bundle with no checksum; a CA bundle decides what is trusted."""
+    row = _row_citing("CWE-494")
+    assert "CA bundle" in row["Violation"] and "trusting" in row["Preferred form"]

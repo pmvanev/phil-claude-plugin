@@ -12,7 +12,7 @@ or `rules/ci-runners.md` changes.
 |---|---|---|---|
 | `01-pipeline-findings-cite-a-row/` | twelve pipeline defects and one mutable image tag beside six look-alikes, on both forges, including defects one edit fixes across several jobs | `rules/ci-pipelines.md` Always-flag and Do not flag; `security.md`'s CWE-829 row | thirteen must-fix items, each with its row's id and Preferred form, each shared defect filed once; no look-alike filed |
 | `02-trigger-matrix/` | a declared CI policy, and four defects only a job-by-source reading shows — a schedule that deploys, a rule on an empty variable, a `needs:` on a path-skipped job, a check skipped by any doc path — plus one policy departure, each beside a correct guard | the declared policy, the trigger matrix, PIPE-17 to PIPE-24 | five must-fix items and a matrix marking each one's cells; no look-alike filed |
-| `03-runner-config/` | a GitLab runner fleet's configuration and Terraform beside a retired platform's, seeding a socket on reused machines, a no-op `scale_factor`, a role-holding pool open to unprotected refs and a bare `retry` | `rules/ci-runners.md` and PIPE-10 | four must-fix items by RUN and PIPE id; the retired fleet and the safe look-alikes unflagged |
+| `03-runner-config/` | a GitLab runner fleet's configuration and Terraform beside a retired platform's, seeding a socket on reused machines, a no-op `scale_factor`, a role-holding pool open to unprotected refs, a bare `retry`, an install that drops the lockfile's hashes and a CA bundle fetched unchecked | `rules/ci-runners.md`, PIPE-10, and `security.md`'s CWE-1357 and CWE-494 rows | six must-fix items by RUN, PIPE and CWE id; the retired fleet and the safe look-alikes unflagged |
 
 ## Layout
 

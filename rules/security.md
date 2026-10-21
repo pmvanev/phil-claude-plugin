@@ -139,10 +139,10 @@ A pipeline defect that is not a security defect — duplicate pipelines, a toler
 
 | Violation | Preferred form | Cite |
 |---|---|---|
-| Code run with no integrity check — `curl … \| sh`, a script fetched at build time, a third-party CI action or base image pinned by a mutable tag | Pin by digest or commit SHA; verify a checksum or signature before running | CWE-494 (fetched code), CWE-829 (a CI action or image) · v5.0.0 V15 |
+| Code run, or a CA bundle trusted, with no integrity check — `curl … \| sh`, a script or CA bundle fetched at build time, a third-party CI action or base image pinned by a mutable tag | Pin by digest or commit SHA; verify a checksum or signature before running or trusting it | CWE-494 (fetched code, and a CA bundle, which decides what code is trusted), CWE-829 (a CI action or image) · v5.0.0 V15 |
 | CI workflow that checks out untrusted code under a privileged trigger (`pull_request_target` running the PR's head) | Run untrusted code without secrets or write tokens | CWE-829 · v5.0.0 V15 |
 | Package resolution that lets a public registry answer for an internal package's name — `--extra-index-url` beside a private index, an unscoped internal npm name | One index per name: a scoped name (`@org/…`) bound to the private registry, or a single proxy index that serves internal names first | CWE-427 · v5.0.0 V15 |
-| An application's build that installs without its lockfile — `npm install` where `npm ci` would enforce it, a lockfile deleted or git-ignored | Commit the lockfile and install from it | CWE-1357 · v5.0.0 V15 |
+| An application's build that installs without its lockfile, or without the lockfile's hashes — `npm install` where `npm ci` would enforce it, a lockfile deleted or git-ignored, requirements exported with `--no-hashes` or `--without-hashes` | Commit the lockfile and install from it, its hashes checked | CWE-1357 · v5.0.0 V15 |
 
 ### Agents and hooks
 

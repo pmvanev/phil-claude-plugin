@@ -3,7 +3,12 @@
   "mode": "review",
   "target": ".",
   "pins": "runner configuration and the infrastructure code behind it are reviewed against rules/ci-runners.md: a socket on machines that run ten jobs each, a scale_factor the autoscaler never acts on, and a role-holding pool open to unprotected refs are filed by RUN id, a bare retry by PIPE-10; the retired platform's configuration and the safe look-alikes are not",
-  "expected_guard": "four must-fix items: PIPE-10, RUN-1, RUN-12, RUN-4; legacy-azure named as history and not reviewed; the deploy pool's socket on one-job machines unflagged",
-  "decoys": ["legacy-azure", "http_tokens", "StringEquals", "scheduler_failure"],
-  "min_items": 4
+  "expected_guard": "six must-fix items: PIPE-10, RUN-1, RUN-12, RUN-4, CWE-1357, CWE-494; legacy-azure named as history and not reviewed; the deploy pool's socket on one-job machines unflagged",
+  "decoys": [
+    "legacy-azure",
+    "http_tokens",
+    "StringEquals",
+    "scheduler_failure"
+  ],
+  "min_items": 6
 }

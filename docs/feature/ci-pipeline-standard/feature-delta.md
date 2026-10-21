@@ -596,3 +596,20 @@ read-only.**
 
 **Not verified:** `/phil:review-ci` itself (installed copy 1.2.23); a run against the live fleet; the
 runbooks dogfood after the four lessons were folded in.
+
+## Wave: DISCUSS / [REF] Closing the card's open items (2026-10-21)
+
+The user reviewed the six items left open and kept two:
+- *Folded into `security.md`:* the `--no-hashes` export (modive) and the CA bundle fetched without a
+  checksum (beatrix). CWE-1357's row now covers an install that drops the lockfile's hashes. CWE-494's
+  row now covers a CA bundle, which decides what code is trusted; MITRE's closer candidates are
+  discouraged (CWE-345) or about protocols (CWE-353, CWE-354). Both are seeded in `review-ci`'s fixture
+  03, whose third blind drive filed all six expected items.
+- *Dropped:*
+  - Image and log retention: a registry and an admin setting no reviewed file shows, on a fleet that
+    runs one job per machine.
+  - "A check that passes after reading nothing": `build-ci`'s reference script already stops before a
+    scan can read nothing, and a file cannot show the case.
+  - The corepack-fetched package manager: probably signature-checked by default, unconfirmed.
+- *Kept on the card:* one real run each of `/phil:review-ci` and `/phil:build-ci --speed` from the
+  released plugin.

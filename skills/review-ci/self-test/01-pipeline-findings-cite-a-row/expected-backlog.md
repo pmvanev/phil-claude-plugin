@@ -71,8 +71,8 @@ Standard: rules/ci-pipelines.md; rules/security.md (Supply chain and build, the 
 - **Lines**: 44
 - **Severity**: must-fix
 - **Row**: CWE-829
-- **Preferred form**: Pin by digest or commit SHA; verify a checksum or signature before running
-- **Cite**: security.md — CWE-829 · CWE-494 (fetched code), CWE-829 (a CI action or image) · v5.0.0 V15
+- **Preferred form**: Pin by digest or commit SHA; verify a checksum or signature before running or trusting it
+- **Cite**: security.md — CWE-829 · CWE-494 (fetched code, and a CA bundle, which decides what code is trusted), CWE-829 (a CI action or image) · v5.0.0 V15
 - **Status**: pending
 
 ### [C008] PIPE-15 — lint waits for the test stage

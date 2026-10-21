@@ -2,7 +2,7 @@
 
 A GitLab runner fleet on AWS: the runner manager's `config.toml` template, the runners' registration and
 their job instances in Terraform, the repository's own small pipeline, and the configuration of the Azure
-fleet it replaced. The `README.md` says which is live. Four defects are seeded, beside a correct setting
+fleet it replaced. The `README.md` says which is live. Six defects are seeded, beside a correct setting
 for each and a retired platform full of worse ones.
 
 **Pins:** the review gathers runner configuration and its infrastructure code, reads `ci-runners.md`,
@@ -12,7 +12,7 @@ the commit it read, and lists the live system as unread.
 **How to drive it:** per `../README.md`, over a copy holding only the project's files, as a git
 repository, since the review records the commit it read.
 
-**Expected:** a `.ci-review.md` holding the four must-fix items in `expected-backlog.md`, matched on the
+**Expected:** a `.ci-review.md` holding the six must-fix items in `expected-backlog.md`, matched on the
 Row and on a Preferred form that is the row's form verbatim, alone or followed by ` — here: `:
 
 1. **PIPE-10** — `test`'s `retry: 2` reruns any failure.
@@ -22,6 +22,9 @@ Row and on a Preferred form that is the row's form verbatim, alone or followed b
    `acquired + idle_count`, so neither setting acts.
 4. **RUN-4** — the deploy runner is registered `untagged = true` and `access_level = "not_protected"`,
    and its instances carry the deploy role.
+5. **CWE-1357** — `scripts/ci.sh` exports requirements with `--no-hashes`, so `pip` installs the
+   lockfile's versions unchecked.
+6. **CWE-494** — `scripts/ci.sh` fetches a CA bundle with no checksum.
 
 **Hard assertions (any failure blocks the change):**
 
