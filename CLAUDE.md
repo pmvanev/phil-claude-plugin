@@ -13,6 +13,28 @@ prose.
 - Before trusting a new check's green run, watch it refuse the input that motivated it. Wound: the first
   read-only check passed because its function was written and never called.
 
+## CI policy
+
+- **Pipelines**: open MR only
+- **Docs-only paths**: `docs/research/**`, `docs/feature/**`, `docs/evolution/**`, `docs/work/**`, `README.md`, `LICENSE`
+- **MR**: the full test suite and the repo checks
+- **Main**: everything
+- **Schedule**: none
+- **Merge**: a passing MR pipeline is required
+- **Secret scan**: every pipeline, docs-only included
+
+No mutation: the product is prose, and no mutation tool is installed (decided 2026-10-21). `docs/product/`
+is not docs-only: `scripts/check-product-ssot.py` reads it.
+
+## CI workflow
+
+- Land every change on `main` through a pull request: push a feature branch, open a pull request, and
+  merge once its pipeline passes.
+- A branch runs a pipeline only while its pull request is open, so test locally until then.
+- Reproduce a failing job with `./scripts/ci/run.sh <task>` — `secret-scan`, `checks` or `test` — and fix
+  it locally before the next push; the change that broke the pipeline owns the fix.
+- Lint a workflow change before pushing it: `actionlint`.
+
 ## Key Principles (always apply)
 
 - **Test first.** Write a failing test before production code.
