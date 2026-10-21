@@ -1,0 +1,8 @@
+$ ./scripts/ci/run.sh test
+added 1423 packages, and audited 1424 packages in 3m2s
+ RUN  v4.0.3 /builds/acme/ledger-api
+ Test Files  240 passed (240)
+      Tests  2188 passed (2188)
+   Start at  10:04:31
+   Duration  2m56s (transform 12.4s, setup 2.1s, collect 31.0s, tests 2m10s, environment 4.2s)
+Job succeeded

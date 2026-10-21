@@ -467,3 +467,64 @@ hand in a scratch clone. GitHub, no CI, `main` unprotected, no rulesets.
 - *A lesson for the rule:* a check that passes after reading nothing is a tolerated failure the file
   cannot show. This one showed only in the log, as "0 commits scanned". A candidate for slice 05's
   runner rule, or for an Advisory bullet here; not yet written.
+
+## Wave: DISCUSS / [REF] Slice 04 delivered and dogfooded (2026-10-21)
+
+**What landed.** `/phil:build-ci --speed` and `--rework`, each a reference file the skill sends the
+argument to, which keeps `SKILL.md` near 2,700 words. `skills/build-ci/scripts/pipeline-timings.py` measures from the
+forge's own job records, standard library only. For each pipeline it infers the critical path from
+timestamps, and reports queue wait and the time that is neither ("other") apart from execution. It also
+reports the runner-up, the latest job off the path, which caps every saving. `tests/test_pipeline_timings.py`
+pins it in thirteen cases. The speed pass names the budget by stage, ranks only critical-path candidates
+by one score with bands taken from it, and draws the stopping line. The rework pass lists each artifact's
+producers and consumers, defines "the same artifact", and files a second producer as PIPE-11 where it
+deploys.
+
+**What the reviews and drives caught, each fixed and pinned:**
+- *A hang.* The validator found that `critical_path` looped forever when two short sibling jobs ended
+  within the slack of each other's ready time. A predecessor must now end strictly earlier.
+- *Measuring the wrong thing.*
+  - A played manual job made a person's three-hour wait read as pipeline time; `--exclude` drops it.
+  - GitLab marks a pipeline that holds an unplayed blocking manual job `manual`, not `success`, so the
+    history query also asks for that status.
+  - The MR queries inherited the default branch's filter, and so returned nothing.
+  - On GitHub one commit can start several workflows, so the pass measures one at a time.
+  - A history that spans a redesign mixes shapes; `--latest-shape` keeps the newest.
+  - A job file that fails to parse is named rather than a traceback.
+- *An inconsistent ranking.* An L change could never rank above Low, and a Low could outrank a Medium.
+  Rank and band now come from one score. The saving is capped by the runner-up, and the scores are
+  redone after each change.
+- *Fixture errors the drives proved:* `deploy-staging` is a third producer of the bundle; `release`
+  installed build dependencies, which PIPE-11 names; fixture 03 had nothing showing that `test` never reads
+  `dist/`.
+- *Rule wording:* PIPE-14 now covers files built from the source, and the Speed principle stops at the
+  budget as the pass does.
+
+**Fixtures 02 (rework) and 03 (speed), two blind drives each.** The second of each met every hard
+assertion.
+- *Speed:* it traced `build` → `test` → `package`, kept the 1:30 queue wait apart, and never ranked the
+  slow off-path `lint`. It ranked dropping `test`'s unused wait on `build` first (High, S), and left the
+  dependency cache unranked because nothing showed what a restore would skip. It drew the line at the
+  budget, projected at 8:25.
+- *Rework:* it marked the bundle and the image as built twice, filed one PIPE-11 item at
+  `deploy-staging`, and filed the bundle rebuilt inside the Dockerfile as rework with no row id.
+
+**Dogfood: `--speed` over beatrix's history (gitlab.intaptai.dev, 40 pipelines, read-only).**
+- *Measured:* main is 20 pipelines in 7 shapes, 3 of the newest. Its median wall clock is 21:25, with a
+  queue wait of 5 seconds on the critical path, so the warm pool works and the mined 4.7-minute wait is
+  gone. The path is `python-fast` → `dev-parity`; the runner-up ends at 8:10. MR pipelines are 20 in 7
+  shapes, since path rules make every MR's jobs differ.
+- *The verdict, by the pass's own rules:* three pipelines of the newest shape is below the floor of five,
+  so nothing is ranked. And main deploys and tests the deployment, so its budget is the acceptance stage's
+  hour, and 21:25 is within it. Stop. The hypothesis held: queue wait was measured and reported apart,
+  and the pass named no off-path speed-up.
+- *What it taught the pass:* the budget is set by stage, not by one number. And a job log's
+  `prepare_executor` section — 83 seconds of image pull and start in `dev-parity` — is runner time that
+  GitLab counts in the job's duration, not its queue.
+- *`dev-parity`'s 710 seconds* are about fifty short parity steps run one after another. The largest
+  are a latency sample at 103 s, a CloudWatch poll at 62 s and a Playwright tier at 54 s. Under the
+  pass's bands none is High or Medium alone; splitting the tiers into parallel jobs is the structural
+  option, if main's hour ever tightens.
+
+**Not verified:** `/phil:build-ci` itself (installed copy 1.2.23); a `--speed` run over a GitHub
+workflow with `needs:`, where `created_at` as a job's ready time is unconfirmed.

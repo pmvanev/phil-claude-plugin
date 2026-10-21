@@ -1,0 +1,6 @@
+{
+  "node_id": "BCI-SELFTEST-02",
+  "mode": "rework",
+  "target": "project",
+  "pins": "the rework pass lists each artifact's producing and consuming jobs, marks every artifact with two producers, files the image rebuilt in deploy as PIPE-11 and the bundle rebuilt in the image as rework, and leaves the single-producer package and the per-job dependency install alone"
+}

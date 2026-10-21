@@ -1,0 +1,8 @@
+{
+  "name": "storefront",
+  "version": "2.4.0",
+  "type": "module",
+  "files": ["dist"],
+  "scripts": { "build": "vite build", "start": "node dist/server.js" },
+  "devDependencies": { "@playwright/test": "1.56.1", "vite": "7.1.12", "vitest": "4.0.3" }
+}

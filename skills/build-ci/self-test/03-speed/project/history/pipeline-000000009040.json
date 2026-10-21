@@ -1,0 +1,62 @@
+[
+ {
+  "id": 9041,
+  "name": "gitleaks",
+  "stage": "check",
+  "status": "success",
+  "queued_duration": 20.0,
+  "duration": 69.0,
+  "started_at": "2026-10-15T09:00:20.000Z",
+  "finished_at": "2026-10-15T09:01:29.000Z"
+ },
+ {
+  "id": 9042,
+  "name": "lint",
+  "stage": "check",
+  "status": "success",
+  "queued_duration": 25.0,
+  "duration": 489.0,
+  "started_at": "2026-10-15T09:00:25.000Z",
+  "finished_at": "2026-10-15T09:08:34.000Z"
+ },
+ {
+  "id": 9043,
+  "name": "build",
+  "stage": "build",
+  "status": "success",
+  "queued_duration": 35.0,
+  "duration": 249.0,
+  "started_at": "2026-10-15T09:00:35.000Z",
+  "finished_at": "2026-10-15T09:04:44.000Z"
+ },
+ {
+  "id": 9044,
+  "name": "test",
+  "stage": "test",
+  "status": "success",
+  "queued_duration": 30.0,
+  "duration": 369.0,
+  "started_at": "2026-10-15T09:05:14.000Z",
+  "finished_at": "2026-10-15T09:11:23.000Z"
+ },
+ {
+  "id": 9045,
+  "name": "package",
+  "stage": "package",
+  "status": "success",
+  "queued_duration": 30.0,
+  "duration": 60.0,
+  "started_at": "2026-10-15T09:11:53.000Z",
+  "finished_at": "2026-10-15T09:12:53.000Z"
+ },
+ {
+  "id": 9046,
+  "name": "release",
+  "stage": "package",
+  "status": "manual",
+  "queued_duration": null,
+  "duration": null,
+  "started_at": null,
+  "finished_at": null
+ }
+]
