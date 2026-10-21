@@ -1028,3 +1028,85 @@ jobs:
     features: [loop-agent-least-privilege]
     # Not a facet of keep-test-suite-trustworthy: that job protects what the tests verify; this one
     # bounds what the loop's agents can do at all. See docs/feature/loop-agent-least-privilege/.
+
+  - id: shape-a-pipeline-to-the-change
+    # Registered by DISCUSS wave, feature: ci-pipeline-standard (2026-10-21)
+    job_story: >
+      When I set up or change a project's CI, I want each change to run exactly the checks it needs —
+      gated so nothing merges untested, built once, and fast where the time actually goes — so I can
+      stop retyping the same pipeline policy into every project and stop learning from a red main
+      pipeline that a rule was wrong.
+    dimensions:
+      functional: >
+        Declare the project's pipeline policy once; get a pipeline whose jobs run for exactly the
+        sources the policy names; find the job or the wait that owns the pipeline's time; deploy the
+        artifact that was tested.
+      emotional: >
+        Trust that a green MR means the change was checked, and that a schedule or a docs-only push
+        will not do something nobody intended.
+      social: >
+        A pipeline teammates do not have to wait on or work around; not being the one whose rule
+        deployed from a schedule.
+    four_forces:
+      push: >
+        Mined 2026-10-21 from 147 sessions: the MR-only, changed-only, docs-only policy typed into two
+        repos on the same day; mutation running nowhere for two days after work merged to main
+        directly; `rollback-prod` firing on every main pipeline from an empty variable; schedules
+        treating every path as changed; nine corrections to Claude's CI work. No rule in `rules/` says
+        when a pipeline runs or what it runs.
+      pull: >
+        A standard that names each pipeline defect by row and fix, a policy declared once per project,
+        and a command that builds to it and shows which sources start each job.
+      anxiety: >
+        (A) Change-scoped tests that miss a failure a full run would catch. (B) A reviewer that flags a
+        project's deliberate choice as a defect. (C) Speed advice that optimises a job off the
+        critical path.
+      habit: >
+        Retyping the policy each session; running everything on every change because no rule says
+        what a change needs; learning a rule's truthiness from a failed pipeline.
+    opportunity_score: >
+      high importance, near-zero satisfaction — no rule or skill reads a pipeline for anything but
+      security.
+    status: validated
+    personas: [quinn-codebase-steward]
+    features: [ci-pipeline-standard]
+    # Not a facet of catch-security-defects-in-review: a pipeline row that is also a security defect
+    # stays in security.md. See docs/feature/ci-pipeline-standard/feature-delta.md.
+
+  - id: run-a-runner-fleet-knowingly
+    # Registered by DISCUSS wave, feature: ci-pipeline-standard (2026-10-21)
+    job_story: >
+      When I size, tune or ask about the runner fleet, I want each setting judged by the isolation,
+      wait and cost it really buys, and each answer drawn from what is live, so I can trade boot wait
+      against isolation and money on purpose instead of on a misremembered number.
+    dimensions:
+      functional: >
+        Know what each autoscaler setting does to warm capacity and queue wait; know whether reusing a
+        machine across jobs crosses a trust boundary; get answers about the fleet from its live state
+        or current IaC, named as such.
+      emotional: >
+        Confidence that one job cannot tamper with the next, and that a number about the fleet is
+        today's number.
+      social: >
+        A fleet the team can push CI to without asking who else runs on it.
+    four_forces:
+      push: >
+        2026-10-21: a session answered AWS runner questions from Azure-era docs; `scale_factor = 1.0`
+        sat in config believed to keep one warm instance per busy one, which taskscaler's code makes a
+        no-op; whether a fresh container per job isolates jobs with the Docker socket mounted went
+        unanswered.
+      pull: >
+        A runner standard grounded in SLSA, OWASP CI/CD and the autoscaler's own code, applied by the
+        same review that reads pipelines.
+      anxiety: >
+        (A) Isolation rules that forbid the cheapest cache fix on a pool where it is safe. (B) Advice
+        that drifts as the autoscaler's code changes.
+      habit: >
+        Answering from memory or from the nearest README; treating a fresh container as isolation.
+    opportunity_score: >
+      high importance, near-zero satisfaction — runner fleets appear nowhere in the plugin.
+    status: validated
+    personas: [quinn-codebase-steward]
+    features: [ci-pipeline-standard]
+    # Not a facet of shape-a-pipeline-to-the-change: different files, different sources, and a miss
+    # lets one job tamper with the next rather than wasting a day.

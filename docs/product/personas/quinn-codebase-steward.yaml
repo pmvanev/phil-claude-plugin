@@ -28,3 +28,14 @@ vocabulary:
 #     exemption, so findings are impressions
 #   vocabulary: CWE, ASVS, trust boundary, least privilege, fail-safe default, injection, secret,
 #     supply chain, prompt injection, lethal trifecta
+
+# CI facet (DISCUSS, feature ci-pipeline-standard, 2026-10-21):
+# Quinn writes the project's pipeline and runs the runners it executes on. Jobs:
+# shape-a-pipeline-to-the-change, run-a-runner-fleet-knowingly.
+#   goal: each change runs exactly the checks it needs, gated, built once, fast where the time goes;
+#     runner settings chosen for the isolation, wait and cost they buy
+#   frustration: the same pipeline policy retyped into every project; rules whose truthiness is learned
+#     from a red main pipeline; fleet answers drawn from a retired platform's docs
+#   vocabulary: MR pipeline, trigger, rules:changes, merge gate, change-scoped tests, mutation, schedule,
+#     critical path, queue wait, artifact, cache, runner, warm pool, scale factor, max_use_count,
+#     trust class
