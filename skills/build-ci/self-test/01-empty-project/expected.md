@@ -48,9 +48,12 @@ lines in `AGENTS.md`, and reports a trigger matrix matching `expected-matrix.md`
   each with the command that reads it, and `NOTIFY_TOKEN` as unread, with the steps that create it.
 - **No job tolerates its own failure** to inform: nothing carries `allow_failure`, and a job meant only
   to inform, if the run adds one, calls `./scripts/ci/run.sh inform <task>`.
+- **`tell-author` sits in the `.post` stage** with the schedule's `when: never` rule first and
+  `when: on_failure` as its last rule, never a job-level `when:` beside `rules:`.
 - **`AGENTS.md` gains the workflow lines:** push a feature branch, open an MR, and merge once its
   pipeline passes; a branch runs a pipeline only while its MR is open; reproduce a failing job locally
-  with the entry-point script; a red main stops the line; lint a pipeline change before pushing it.
+  with the entry-point script; a red main stops the line; under a Notify field, a failure or a warning
+  names its author; lint a pipeline change before pushing it.
 
 **Not a failure:** different job names, stage names or heading names, one more fail-fast job, a shard
 count other than four, a `.gitignore` entry for the cache or report directories, a question about

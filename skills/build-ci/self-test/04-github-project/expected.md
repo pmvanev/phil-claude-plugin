@@ -25,9 +25,9 @@ trigger, so every web or API cell is `—`; and:
 
 - **The policy block** is the default block from `rules/ci-pipelines.md`, with Docs-only paths covering
   `docs/**` and `**/*.md`, and an Andon field naming an issue, written under `## CI policy` in `AGENTS.md`.
-- **The `andon` job** needs every other job, runs on `if: failure() && github.ref == 'refs/heads/main'`,
+- **The `andon` job** needs every job but `tell-author`, runs on `if: failure() && github.ref == 'refs/heads/main'`,
   grants `contents: read` and `issues: write` on itself alone, and runs `./scripts/ci/run.sh andon`.
-- **The `tell-author` job** needs every other job, runs on `if: failure() && github.event_name != 'schedule'`,
+- **The `tell-author` job** needs every job but the andon, runs on `if: failure() && github.event_name != 'schedule'`,
   grants `contents: read` and `pull-requests: write` on itself alone, passes `PR_NUMBER`, and runs
   `./scripts/ci/run.sh tell-author`.
 - **The workflow's top grants `contents: read` alone.**
@@ -35,6 +35,7 @@ trigger, so every web or API cell is `—`; and:
   "To pin".
 - **The entry-point script** keeps `examples/run.sh`'s decision and its `andon`, `tell-author` and
   `inform` tasks, and drops the GitLab CI paths. `sh -n` passes on it.
+- **actionlint passes** on every workflow written, run as `actionlint` or reported missing.
 - **No job tolerates its own failure**: no `continue-on-error`.
 - **No `/phil:review-ci` must-fix item** fires on the written pipeline.
 - **No forge setting is written, nothing is pushed, and no pipeline is started.** The report lists the

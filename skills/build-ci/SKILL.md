@@ -1,6 +1,6 @@
 ---
 name: build-ci
-description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "tell the team when main breaks", "notify us when the main pipeline fails", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy, builds the pipeline to it, lints it, wires a red-main alert, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
+description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "tell the team when main breaks", "notify us when the main pipeline fails", "tell the author when their pipeline fails", "comment on the MR when CI fails", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy, builds the pipeline to it, lints it, wires a red-main alert, names whoever started a failed pipeline, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
 ---
 
 # Build CI
@@ -78,9 +78,11 @@ Read before proposing anything; the project may already have decided.
   emailed about. Write any other answer — a chat app, a webhook — into the field, and report it as not
   wired.
 - **On GitLab, wire the Notify field through a token the user creates**, since the job token cannot
-  write a comment. Ask, in the same request, whether the user will create a project access token with the `api` scope and the Reporter
-  role and store it as a masked CI variable named `NOTIFY_TOKEN`. The user creates it, so a token's value
-  never passes through this run; until the variable exists, report the field as not wired.
+  write a comment. Ask, in the same request, whether the user will create `NOTIFY_TOKEN` as
+  `references/alerts.md` describes. The user creates it, so a token's value never passes through this
+  run; on a yes, report the field as not wired until the user says the variable exists. On a no, leave
+  the Notify field out of the block, write no `tell-author` job, and keep each job meant only to inform
+  under `allow_failure`, with a comment that says it gates nothing.
 
 Write the block under `## CI policy` in the project's instruction file, in the rule's shape: its
 `CLAUDE.md`, or its `AGENTS.md` where that is the file it keeps; with neither, create `CLAUDE.md`.
@@ -175,13 +177,15 @@ put `interruptible: true` only on MR-pipeline jobs. Each line below answers the 
 | An image built in the pipeline | copy the manifest and lockfile, install, then copy the source | the same | PIPE-14 |
 | Portable paths | `$CI_PROJECT_DIR`, or a path relative to the checkout | `$GITHUB_WORKSPACE` | PIPE-16 |
 | A merge queue | — | `merge_group` in the required workflow's triggers | PIPE-5 |
-| A red main the whole team hears | the Pipeline status emails integration, a forge setting (Step 7) | a last job with `needs:` on every other job, `if: failure() && github.ref == 'refs/heads/<default branch>'`, `permissions:` `contents: read` and `issues: write` — a job's `permissions:` replace the top's — and `GH_TOKEN: ${{ github.token }}`, whose steps run `actions/checkout`, then `./scripts/ci/run.sh andon`. With several workflows, one `workflow_run` workflow instead: `on: workflow_run: {workflows: [<each workflow that runs on main>], types: [completed], branches: [<default branch>]}`, `if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event == 'push'`, since a pull request's runs fire it too, and in the step's `env:` `ANDON_RUN_URL: ${{ github.event.workflow_run.html_url }}` and `ANDON_SHA: ${{ github.event.workflow_run.head_sha }}` | PIPE-25 |
-| A failure or a warning that names whoever started the pipeline | a `tell-author` job in the `.post` stage with `when: on_failure`, in an image holding `git` and `curl`, its schedule `when: never` first, running `./scripts/ci/run.sh tell-author` with `NOTIFY_TOKEN` from the masked variable; each job meant only to inform runs `./scripts/ci/run.sh inform <task>`, with no `allow_failure` | a last job with `needs:` on every other job, `if: failure() && github.event_name != 'schedule'`, `permissions:` `contents: read` and `pull-requests: write`, `GH_TOKEN: ${{ github.token }}` and `PR_NUMBER: ${{ github.event.pull_request.number }}`, running `./scripts/ci/run.sh tell-author`; each job meant only to inform runs `./scripts/ci/run.sh inform <task>` with the same grant and `env:`, and no `continue-on-error` | PIPE-26 |
+| A red main the whole team hears | the Pipeline status emails integration, a forge setting (Step 7) | an `andon` job that needs every job but `tell-author`, with `issues: write`; with several workflows, one `workflow_run` andon | PIPE-25 |
+| A failure or a warning that names whoever started the pipeline | a `tell-author` job in the `.post` stage whose last rule is `when: on_failure`; each job meant only to inform runs `./scripts/ci/run.sh inform <task>` | a `tell-author` job that needs every job but the andon, with `pull-requests: write`; the same `inform` | PIPE-26 |
 | A job in a container whose user does not own the checkout | — | job `env:` `GIT_CONFIG_COUNT: 1`, `GIT_CONFIG_KEY_0: safe.directory`, `GIT_CONFIG_VALUE_0: "*"`; `actions/checkout` trusts the directory only for its own commands | — |
 | Pinned, narrow and secret-free | images by digest; tools from their own image, never fetched by `curl`; installs from the lockfile; credentials from CI variables | actions by commit SHA; `permissions: contents: read` at the top; secrets from `secrets.*` | CWE-829, CWE-494, CWE-1357, CWE-250, CWE-798 |
 
-The example's `andon` task opens one issue labelled `andon` and comments on it while main stays red; its
-body asks the team to close it once main is green.
+Read `${CLAUDE_PLUGIN_ROOT}/skills/build-ci/references/alerts.md` whole before writing either alert, and
+copy its forms: they fix each `needs:` list and the order of each job's rules. The example's `andon` task
+opens one issue labelled `andon` and comments on it while main stays red; its body asks the team to close
+it once main is green.
 
 Give each job a `timeout`. Keep production deploys and rollbacks manual. Read an action's commit with
 `gh api repos/<owner>/<action>/git/ref/tags/<tag>`, and write the tag beside it as a comment. Where the
@@ -219,8 +223,7 @@ Read each setting the policy depends on:
   off; the job itself lives in the workflow file, and a chat app's subscription in no setting this run
   can read.
 - **The Notify token.** GitLab only. Leave `NOTIFY_TOKEN` unread, since the variables API returns its
-  value, and list it under unread with the steps that create it: a project access token with the `api`
-  scope and the Reporter role, stored as a masked CI variable.
+  value, and list it under unread with the steps `references/alerts.md` gives to create it.
 
 For each setting that departs from the policy, ask one question — "Require a passing MR pipeline to
 merge?", "Email these addresses when main's pipeline fails?" with the addresses listed, or "Turn on
@@ -244,7 +247,8 @@ lacks, with this project's commands written in:
   change that broke the pipeline owns the fix.
 - A red main stops the line: <the Andon channel> tells everyone, and nothing merges but the fix or its
   revert until main is green.
-- A failure or a warning names you on the MR or PR that caused it, or on main's commit or merged PR.
+- Under a Notify field: a failure or a warning names you on the MR or PR that caused it; on main, on
+  the merged PR on GitHub or the commit on GitLab.
 - Lint a pipeline change before pushing it: `glab ci lint --dry-run --ref <default branch>`, or
   `actionlint`.
 

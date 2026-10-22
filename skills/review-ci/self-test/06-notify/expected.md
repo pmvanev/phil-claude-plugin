@@ -12,7 +12,7 @@ says so.
 **How to drive it:** per `../README.md`, over a copy holding only the project's files.
 
 **Expected:** a `.ci-review.md` whose Policy line lists the seven declared fields, whose matrix reads
-`tell-author` as `on failure` in every created pipeline, and whose backlog holds the one must-fix item in
+`tell-author` as `on failure` in every created pipeline but the schedule's, and whose backlog holds the one must-fix item in
 `expected-backlog.md`, matched on the Row and on a Preferred form that is the row's form verbatim, alone
 or followed by ` — here: ` and this pipeline's change.
 

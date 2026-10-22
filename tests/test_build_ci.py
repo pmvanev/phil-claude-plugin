@@ -554,7 +554,7 @@ def test_the_skill_tells_whoever_started_the_pipeline():
                  "`NOTIFY_TOKEN`"):
         assert form in skill, form
     assert "never passes through this run" in skill, "the user creates the token; its value stays out"
-    assert "A failure or a warning names you" in skill
+    assert "Under a Notify field: a failure or a warning names you" in skill
 
 
 def _task(repo, tmp_path, *args, gh_out="", **env):
@@ -627,3 +627,42 @@ def test_a_check_that_informs_and_passes_tells_nobody(repo, tmp_path):
     out, calls = _task(repo, tmp_path, "inform", "scope", PR_NUMBER="5", **GITHUB_RUN)
     assert out.returncode == 0, out.stderr
     assert "pr comment" not in calls
+
+
+
+def test_the_alert_wiring_is_written_out_where_it_cannot_be_misread():
+    """Two reviews found the table's prose read as a needs cycle and as job-level `when:` beside
+    `rules:`, which GitLab rejects; the forms now live as YAML in references/alerts.md (2026-10-22)."""
+    ref = (SKILL.parent / "references" / "alerts.md").read_text()
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/skills/build-ci/references/alerts.md` whole" in _skill()
+    assert '    - if: $CI_PIPELINE_SOURCE == "schedule"\n      when: never\n    - when: on_failure\n' in ref
+    assert "every job but tell-author" in ref and "every job but the andon" in ref
+    for fact in ("masked, not protected", "Premium or Ultimate", "365 days", "fork", "Dependabot",
+                 "a `workflow_run` notifier cannot use `tell-author`", "a schedule has no author"):
+        assert fact.lower() in " ".join(ref.split()).lower(), fact
+
+
+def test_a_declined_token_leaves_the_warning_under_allow_failure():
+    skill = _skill()
+    assert "On a no, leave the Notify field out of the block" in skill
+    assert "into `./scripts/ci/run.sh inform <task>`" in skill, "an existing pipeline's informational jobs convert"
+
+
+def test_a_warning_that_cannot_be_delivered_still_gates_nothing(repo, tmp_path):
+    """Both reviews: `inform` failed its job when the comment could not post, so a warning gated."""
+    out, calls = _task(repo, tmp_path, "inform", "no-such-task", "extra", CI_MERGE_REQUEST_IID="3",
+                       **{**GITLAB_RUN, "NOTIFY_TOKEN": ""})
+    assert out.returncode == 0, out.stderr
+    assert "warning not delivered" in out.stderr and "`no-such-task`" in out.stderr
+
+
+def test_a_warning_names_one_task_on_one_line(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "inform", "no-such-task", "extra", PR_NUMBER="5",
+                       GITHUB_ACTOR="alice", **GITHUB_RUN)
+    assert "warning: `no-such-task` failed; it gates nothing" in calls
+
+
+def test_the_command_says_what_the_author_tier_does():
+    head = COMMAND.read_text().split("\n---", 1)[0]
+    assert "names whoever started a failed pipeline" in head
+    assert "names whoever started a failed pipeline" in SKILL.read_text().split("\n---", 1)[0]

@@ -55,6 +55,9 @@ coverage-trend:
 tell-author:
   extends: .node
   stage: .post
-  when: on_failure
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - when: on_failure
   script:
     - ./scripts/ci/run.sh tell-author

@@ -480,3 +480,23 @@ def test_a_gitlab_fixture_expects_pipe_26_and_clears_pipe_9():
     for m in hits:
         assert "- **Row**: PIPE-9" not in (m.parent / "expected-backlog.md").read_text(), \
             "a job that gates nothing and says so is PIPE-9's Do-not-flag case"
+
+
+
+def test_pipe_9s_do_not_flag_clears_only_pipe_9():
+    """The second skill review: the bullet cleared fixture 06's only item, read literally (2026-10-22)."""
+    do_not = " ".join(RULE.read_text().split("## Do not flag", 1)[1].split("\n## ", 1)[0].split())
+    assert "That clears PIPE-9 only: under a declared Notify field it is PIPE-26" in do_not
+
+
+def test_pipe_26_keeps_the_schedule_and_the_andon_out_of_its_github_form():
+    """A schedule has no author; and two last jobs that each need every other job form a cycle."""
+    form = _row("PIPE-26")["Preferred form"]
+    assert "github.event_name != 'schedule'" in form
+    assert "every job but the andon" in form
+
+
+def test_review_ci_lists_ci_variables_as_unread_and_reads_head_by_a_granted_verb():
+    skill = " ".join(SKILL.read_text().split())
+    assert "CI/CD variables, such as a token a job reads" in skill
+    assert "git rev-parse --verify HEAD" in skill and "`git rev-parse HEAD`" not in skill

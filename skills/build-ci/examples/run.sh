@@ -140,7 +140,7 @@ tell_author() {
       echo "run.sh: no pull request holds $GITHUB_SHA, so nobody was told: $1: $run" >&2
       return 1
     fi
-    gh pr comment "$pr" --body "@${GITHUB_TRIGGERING_ACTOR:-$GITHUB_ACTOR}: $1: $run"
+    gh pr comment "$pr" --body "@${GITHUB_TRIGGERING_ACTOR:-${GITHUB_ACTOR:-}}: $1: $run"
   elif [ -n "${GITLAB_CI:-}" ]; then
     if [ -z "${NOTIFY_TOKEN:-}" ]; then
       echo "run.sh: NOTIFY_TOKEN is unset, so nobody was told: $1: $CI_PIPELINE_URL" >&2
@@ -248,11 +248,13 @@ Nothing merges but the fix or its revert until main is green. Close this issue o
     ;;
   inform)
     # A job meant only to inform runs its check here, never under allow_failure or continue-on-error,
-    # which tell nobody: on failure the check names whoever started the pipeline, and the job passes.
+    # which tell nobody: on failure the check names whoever started the pipeline, and the job passes,
+    # even when the comment cannot be posted, since a warning gates nothing.
     shift
     [ $# -gt 0 ] || { echo "usage: $0 inform <task>" >&2; exit 2; }
     if ! sh "$(pwd)/scripts/ci/run.sh" "$@"; then
-      tell_author "warning: \`$*\` failed; it gates nothing"
+      tell_author "warning: \`$1\` failed; it gates nothing" ||
+        echo "run.sh: warning not delivered: \`$1\` failed" >&2
     fi
     ;;
   *)

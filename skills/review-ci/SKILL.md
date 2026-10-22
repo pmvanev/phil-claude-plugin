@@ -1,6 +1,6 @@
 ---
 name: review-ci
-description: This skill should be used when the user asks to "review the CI pipeline", "check our .gitlab-ci.yml", "audit the GitHub Actions workflows", "is our pipeline gating correctly", "which jobs run on a schedule", "why wasn't my MR pipeline created", "does anyone hear when main breaks", "check the pipeline against our CI policy", "review our GitLab runner config", "is our runner fleet isolated", or runs /phil:review-ci. It applies rules/ci-pipelines.md, rules/ci-runners.md for runner configuration, and the pipeline rows of rules/security.md, builds a jobs-by-source trigger matrix against the project's declared CI policy, and writes a findings backlog without editing what it reviews.
+description: This skill should be used when the user asks to "review the CI pipeline", "check our .gitlab-ci.yml", "audit the GitHub Actions workflows", "is our pipeline gating correctly", "which jobs run on a schedule", "why wasn't my MR pipeline created", "does anyone hear when main breaks", "who hears when a pipeline fails", "are allowed-to-fail jobs hiding warnings", "check the pipeline against our CI policy", "review our GitLab runner config", "is our runner fleet isolated", or runs /phil:review-ci. It applies rules/ci-pipelines.md, rules/ci-runners.md for runner configuration, and the pipeline rows of rules/security.md, builds a jobs-by-source trigger matrix against the project's declared CI policy, and writes a findings backlog without editing what it reviews.
 ---
 
 # Review CI
@@ -53,7 +53,7 @@ Then collect, from the target:
   instance profiles, IAM trust policies, cloud-init, a GitHub runner scale set's values. Read
   `ci-runners.md` whole before judging it. Decide **which platform is live** from the README and the
   recorded decisions: a directory a file calls retired, and that nothing live applies, is history,
-  named on the backlog's History line and not reviewed. Where something live still applies it, review it. Record the commit the review read with `git rev-parse HEAD`, and list the live system — the
+  named on the backlog's History line and not reviewed. Where something live still applies it, review it. Record the commit the review read with `git rev-parse --verify HEAD`, and list the live system — the
   runner manager, the cloud account — under Not read (RUN-T1).
 - **Project files a row turns on:** the lockfile and the manifest a cache key or an install names, and
   any script a job calls whose behaviour decides a row — whether a deploy script rebuilds, whether a
@@ -65,8 +65,8 @@ CI files, Dockerfiles and runner configuration, and gather the whole pipeline or
 
 **List each source the review cannot read:** a remote, template, project or component `include:`; a
 reusable workflow in another repository; a forge setting, such as branch protection, required checks,
-the merge queue, auto-cancel, pipeline schedules, notification integrations, chat-app subscriptions or
-runner settings the target does not hold; a file a job calls that the target does not hold; a script
+the merge queue, auto-cancel, pipeline schedules, notification integrations, chat-app subscriptions,
+CI/CD variables, such as a token a job reads, or runner settings the target does not hold; a file a job calls that the target does not hold; a script
 read only in part, with the part read; and any other forge's
 pipeline file (`azure-pipelines*`, `.circleci/**`, `Jenkinsfile`), which the rule's rows do not cover. A
 row's guard or premise can live in any of them.
@@ -168,7 +168,7 @@ what a job does — a rebuild, a cache, a CWE — mark no cell.
 Generated: {date}
 Scope: {argument}
 Standard: rules/ci-pipelines.md; rules/ci-runners.md, where runner configuration was read; rules/security.md (Supply chain and build, the privilege row, the credential-literal row)
-Read at: {the commit `git rev-parse HEAD` printed, with "and uncommitted changes" where `git diff HEAD` shows any, and the branch where it is not the default branch, since the live fleet most likely runs the default branch's code; "not a git repository" where it fails}
+Read at: {the commit `git rev-parse --verify HEAD` printed, with "and uncommitted changes" where `git diff HEAD` shows any, and the branch where it is not the default branch, since the live fleet most likely runs the default branch's code; "not a git repository" where it fails}
 History: {each retired platform's configuration, named and not reviewed, or "none"}
 Policy: {each declared field as `Field: value`, or "none declared"}
 Not read: {each unread include, workflow, setting, missing or part-read file, or other forge's file, or "nothing"}
