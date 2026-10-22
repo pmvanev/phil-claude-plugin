@@ -47,3 +47,8 @@ trigger, so every web or API cell is `—`; and:
 provided the andon and the starter's comment cover every workflow that runs on main; a `workflow_run`
 andon in place of the `andon` job; a shard count other than four; a lint that could not run because
 `actionlint` is missing, said so in the report.
+
+**Driven 2026-10-22** blind, against this working tree's `SKILL.md` at 1.8.0: every hard assertion holds.
+One workflow; `andon` needs every job but `tell-author` and `tell-author` every job but the andon;
+actions pinned by commit SHAs read with `gh api`; actionlint 1.7.12 clean; the merge gate and Issues
+listed unread with their reads; the matrix matches cell for cell.

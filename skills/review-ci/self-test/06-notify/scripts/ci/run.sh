@@ -85,10 +85,10 @@ case "$task" in
     npm ci --no-audit --no-fund
     npm test
     ;;
-  coverage)
-    skip_if_docs_only coverage
-    npm ci --no-audit --no-fund
-    npm run coverage
+  outdated)
+    # npm outdated exits 1 when any dependency has a newer version.
+    skip_if_docs_only outdated
+    npm outdated
     ;;
   tell-author)
     # The pipeline's last job, run when an earlier one failed.
@@ -106,7 +106,7 @@ case "$task" in
     fi
     ;;
   *)
-    echo "usage: $0 secret-scan|lint|test|coverage|tell-author|inform <task>" >&2
+    echo "usage: $0 secret-scan|lint|test|outdated|tell-author|inform <task>" >&2
     exit 2
     ;;
 esac

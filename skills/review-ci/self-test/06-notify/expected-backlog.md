@@ -12,22 +12,22 @@ Policy: Pipelines: open MR only; Docs-only paths: `docs/**`, `**/*.md`; MR: ever
 | gitleaks | runs | runs | runs | runs | runs | — | runs |
 | lint | runs | exits early | runs | exits early | runs | — | runs |
 | unit-tests | runs | exits early | runs | exits early | runs | — | runs |
-| coverage-trend | runs | exits early | runs | exits early | runs | — | runs |
+| dependency-drift | runs | exits early | runs | exits early | runs | — | runs |
 | tell-author | on failure | on failure | on failure | on failure | — | — | on failure |
 
-- `tell-author` starts when `gitleaks`, `lint` or `unit-tests` fails; `coverage-trend`'s failure, allowed, never starts it.
+- `tell-author` starts when `gitleaks`, `lint` or `unit-tests` fails; `dependency-drift`'s failure, allowed, never starts it.
 - Schedule and web or API read a pipeline started on the default branch, which `workflow:rules` admit; whether a schedule exists is a forge setting. `tell-author` skips the schedule, which has no author.
 
 Read from the rules, not run; GitLab's CI lint API with `dry_run` confirms a cell.
 
 ## Backlog
 
-### [C001] PIPE-26 — coverage-trend's failure is allowed, so its warning names nobody
+### [C001] PIPE-26 — dependency-drift's failure is allowed, so its warning names nobody
 
 - **File**: `.gitlab-ci.yml`
 - **Lines**: 48-52
 - **Severity**: must-fix
 - **Row**: PIPE-26
-- **Preferred form**: Name whoever started the pipeline: a last job that runs `./scripts/ci/run.sh tell-author` when an earlier job fails — GitLab `when: on_failure` in the `.post` stage, GitHub `if: failure() && github.event_name != 'schedule'` with `needs:` on every job but the andon — and each job meant only to inform running its check as `./scripts/ci/run.sh inform <task>`, with no `allow_failure` or `continue-on-error` — here: drop `allow_failure: true` and run `./scripts/ci/run.sh inform coverage`
+- **Preferred form**: Name whoever started the pipeline: a last job that runs `./scripts/ci/run.sh tell-author` when an earlier job fails — GitLab a `.post`-stage job with `when: on_failure` as its last rule, after one that skips the schedule, GitHub `if: failure() && github.event_name != 'schedule'` with `needs:` on every job but the andon — and each job meant only to inform running its check as `./scripts/ci/run.sh inform <task>`, with no `allow_failure` or `continue-on-error` — here: drop `allow_failure: true` and run `./scripts/ci/run.sh inform outdated`
 - **Cite**: ci-pipelines.md — PIPE-26 · Fowler 2024 · GitLab `allow_failure` and notification-email docs; GitHub workflow-run notification docs
 - **Status**: pending

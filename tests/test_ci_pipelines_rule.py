@@ -493,6 +493,8 @@ def test_pipe_26_keeps_the_schedule_and_the_andon_out_of_its_github_form():
     """A schedule has no author; and two last jobs that each need every other job form a cycle."""
     form = _row("PIPE-26")["Preferred form"]
     assert "github.event_name != 'schedule'" in form
+    assert "`when: on_failure` as its last rule, after one that skips the schedule" in form, \
+        "the fixture 06 drive found the GitLab form silent on the schedule its GitHub form skips"
     assert "every job but the andon" in form
 
 

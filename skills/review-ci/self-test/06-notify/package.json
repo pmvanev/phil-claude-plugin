@@ -1,9 +1,11 @@
 {
   "name": "ledger",
   "private": true,
-  "scripts": { "lint": "eslint .", "test": "vitest run", "coverage": "vitest run --coverage" },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
   "devDependencies": {
-    "@vitest/coverage-v8": "4.0.3",
     "eslint": "9.38.0",
     "vitest": "4.0.3"
   }

@@ -64,3 +64,9 @@ said so in the report.
 every hard assertion holds. The policy and the andon channel came in one request; the Andon field names
 `dev@tally.invalid`; the `andon` task was dropped on GitLab; the Pipeline status emails integration was
 listed unread and not wired, with the write it would send.
+
+**Driven again 2026-10-22** blind, after the author tier landed: every hard assertion holds. One request
+held the policy, the andon channel and the token; `tell-author` sits in `.post` with the schedule's
+`when: never` first and `when: on_failure` last; no job tolerates its own failure; images stay at their
+tags under "To pin"; `NOTIFY_TOKEN` and the Pipeline status emails integration are listed unread, with
+the steps and the write each needs.

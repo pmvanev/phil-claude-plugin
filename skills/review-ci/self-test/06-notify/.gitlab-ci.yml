@@ -43,13 +43,13 @@ unit-tests:
   script:
     - ./scripts/ci/run.sh test
 
-# Gates nothing: a coverage trend for the reviewer, never a reason to block a merge.
-coverage-trend:
+# Gates nothing: dependency drift for the reviewer, never a reason to block a merge.
+dependency-drift:
   extends: .node
   stage: report
   allow_failure: true
   script:
-    - ./scripts/ci/run.sh coverage
+    - ./scripts/ci/run.sh outdated
 
 # The pipeline's last job: when an earlier job failed, name whoever started the pipeline.
 tell-author:
