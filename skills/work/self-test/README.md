@@ -1,10 +1,11 @@
 # phil-work — Acceptance Self-Test
 
-The `phil:work` **orchestrator** is the software under test. Its bugs are silent: a sequencing
-gate that fails to stop on a delegate failure, a router that sends prose to a code loop, or a
-VERIFY that calls a missed goal "done" — each looks exactly like a smooth run. These fixtures
-feed the orchestrator known situations and assert each produces the correct **decision outcome**
-(`REFUSE` / `OFF-RAMP` / `DELEGATE` / `STOP-LAST-GOOD` / `REPORT-NOT-DONE`).
+The `phil:work` **orchestrator** is the software under test. Its bugs are silent: a sequencing gate
+that fails to stop on a delegate failure, a router that sends prose to a code loop, or a VERIFY that
+calls a missed goal "done" — each looks exactly like a smooth run. These fixtures feed the
+orchestrator known situations and assert each produces the correct **decision outcome** (`REFUSE` /
+`OFF-RAMP` / `DELEGATE` / `STOP-LAST-GOOD` / `REPORT-NOT-DONE` / `SPLIT-EXPAND-CONTRACT` /
+`PAUSE-FOR-RELEASE`).
 
 This suite is the **acceptance + regression gate** for `skills/work/SKILL.md` (built in DELIVER).
 Run it whenever the skill or the command loader changes — every such edit is non-monotonic, so the
@@ -30,6 +31,8 @@ does not re-test them — it tests the contractor around them.
 | `05-route-prose-to-approval/` | wave changes a skill/rule/agent | slice-05, DDD3/DDD4/D9 | route prose → refactor-tests/redesign-tests (human oracle) | `DELEGATE` to the approval cleaner; no own gate |
 | `06-delegate-failure-leaves-last-good/` | a delegate fails mid-sequence | slice-02, DDD4 sequencing gate | stop-and-leave-last-good; never red; not done | `STOP-LAST-GOOD` — sequence halts, tree last-good, run not done |
 | `07-verify-reports-goal-not-met/` | behaviour preserved, goal missed | slice-04, VERIFY honesty | never fake done (habit/anxiety) | `REPORT-NOT-DONE` — goal not achieved, with metric evidence |
+| `08-migration-expand-contract/` | a migration renames a column a running release reads or writes | `rules/continuous-delivery.md` Database Changes + rollback | every wave leaves a rollback target | `SPLIT-EXPAND-CONTRACT` — expand and contract are separate waves, each its own release |
+| `09-pause-for-release/` | a `ships alone` wave succeeds with waves still to run | EXECUTE sequencing gate + Resume | the run stops for each release | `PAUSE-FOR-RELEASE` — next wave `awaiting-release`, run reported paused, neither done nor failed |
 
 `03` is the single walking-skeleton scenario. `06` is the safety core: the one bug class most
 likely to ship silently (a run that broke something reported as a clean success).
@@ -42,9 +45,9 @@ Each fixture is self-contained:
   where relevant, the `delegate_result` the driver should supply and the `expected_guard`.
 - `expected.md` — the decision outcome the orchestrator must produce, and the guard that must
   produce it, plus the gate-failure condition that blocks the skill change.
-- Minimal target files for the two routing fixtures — `04` (a tiny code module + test) and `05`
-  (a tiny prose skill file) — so the router has a concrete artifact to classify. Fixtures `01`,
-  `02`, `03`, `06`, `07` are manifest-driven (the situation and any delegate result live in
+- Minimal target files for the two routing fixtures — `04` (a tiny code module + test) and `05` (a
+  tiny prose skill file) — so the router has a concrete artifact to classify. Fixtures `01`, `02`,
+  `03`, `06`, `07`, `08`, `09` are manifest-driven (the situation and any delegate result live in
   `manifest.json`).
 
 ## How to drive it (as the skill acceptance/regression gate)

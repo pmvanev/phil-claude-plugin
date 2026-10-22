@@ -1,0 +1,17 @@
+{
+  "fixture_id": "WORK-SELFTEST-08",
+  "phase": "FRAME → MAP",
+  "initiative": "rename the orders.cust_id column to customer_id",
+  "declared_goal": "no code or query outside the migrations reads or writes orders.cust_id, and the schema has no cust_id column",
+  "goal_checkable": true,
+  "scope_signal": "not single-skill: the running release reads and writes the column",
+  "expected_roadmap": [
+    {"wave": 1, "change": "expand: add customer_id, make cust_id nullable, and write both columns", "artifact_kind": "code", "ships_alone": true},
+    {"wave": 2, "change": "backfill customer_id from cust_id", "artifact_kind": "code", "ships_alone": true},
+    {"wave": 3, "change": "switch reads to customer_id, still writing both", "artifact_kind": "code", "ships_alone": true},
+    {"wave": 4, "change": "stop writing cust_id", "artifact_kind": "code", "ships_alone": true},
+    {"wave": 5, "change": "contract: drop cust_id, once no release a rollback could restore reads or writes it", "artifact_kind": "code", "ships_alone": true}
+  ],
+  "expected_guard": "continuous-delivery.md: expand, then contract, in separate releases; every release stays a rollback target",
+  "expected_decision": "SPLIT-EXPAND-CONTRACT"
+}
