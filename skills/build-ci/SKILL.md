@@ -40,7 +40,8 @@ Read before proposing anything; the project may already have decided.
 
 - **The forge and its default branch.** GitLab or GitHub, from `git remote get-url origin` and any CI
   file present. The default branch from `git symbolic-ref --short refs/remotes/origin/HEAD`; failing
-  that, the one local branch named `main` or `master`; failing both, ask.
+  that, the one of `main` and `master` that `git rev-parse --verify -q refs/heads/<name>` finds; failing
+  both, ask.
 - **The pipeline already there.** With a CI file present this run edits; gather the whole pipeline as
   `${CLAUDE_PLUGIN_ROOT}/skills/review-ci/SKILL.md` Step 1 does, and keep every job a recorded decision
   explains.

@@ -502,3 +502,16 @@ def test_the_andon_never_pulls_outside_github_actions(repo, tmp_path):
     out, calls = _andon(repo, tmp_path)
     assert out.returncode != 0 and not calls
     assert "Pipeline status emails" in out.stderr
+
+
+def test_the_grant_covers_every_command_the_skill_runs():
+    """The plugin validator found three the skill named and the grant refused, from 1.5.0 and 1.5.1
+    (2026-10-22): a run that cannot write the lockfile it promises installs from none."""
+    grant = [g.strip() for g in re.search(r"^allowed-tools: (.+)$", COMMAND.read_text(), re.M).group(1).split(",")]
+    skill = _skill()
+    for command, granted in (("shellcheck -s sh", "Bash(shellcheck:*)"),
+                             ("uv pip compile --generate-hashes", "Bash(uv pip compile:*)"),
+                             ("npm install --package-lock-only", "Bash(npm install --package-lock-only:*)"),
+                             ("git rev-parse --verify -q refs/heads/", "Bash(git rev-parse --verify:*)")):
+        assert command in skill, command
+        assert granted in grant, granted
