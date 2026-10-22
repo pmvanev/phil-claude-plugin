@@ -10,7 +10,7 @@ paths:
 
 Guidelines drawn from Fiorella Zampetti et al.'s "An Empirical Characterization of Bad Practices in Continuous Integration" (EMSE 2020) and Carmine Vassallo et al.'s CD-Linter (ESEC/FSE 2020); Titus Winters, Tom Manshreck and Hyrum Wright's *Software Engineering at Google*; Martin Fowler's "Continuous Integration" (2024); Jez Humble and David Farley's *Continuous Delivery*, with SLSA v1.2's artifact verification; Atif Memon et al.'s "Taming Google-Scale Continuous Testing" (2017), Mateusz Machalica et al.'s "Predictive Test Selection" (2019) and Milos Gligoric et al.'s Ekstazi (2015) on change-scoped testing; Goran Petrović et al.'s two papers on mutation testing at Google (2018, 2022); Eliyahu Goldratt's *The Goal*, Donald Reinertsen's *The Principles of Product Development Flow* and Taher Ghaleb et al.'s "The Promise and Reality of CI Caching" (2026) on speed; Qingzhou Luo et al.'s "An Empirical Analysis of Flaky Tests" (FSE 2014); Michael Meli et al.'s "How Bad Can It Git?" (NDSS 2019); and the GitLab CI/CD and GitHub Actions documentation. Research: `docs/research/ci/ci-pipeline-canonical-sources.md`.
 
-This rule owns **when a pipeline runs, what it runs for a given change, how it fails, and whether it does any work twice**. Neighbouring rules keep what they already own: `continuous-delivery.md` the stages, "build once, deploy many times", trunk-based development, fixing broken builds and fixing flaky tests; `security.md` mutable-tag actions and images, `pull_request_target`, CI token scope, lockfile installs and credential literals; `test-architecture.md` how long a suite may take; `ci-runners.md` how the machines that run the jobs are configured. Complement those — do not restate them.
+This rule owns **when a pipeline runs, what it runs for a given change, how it fails and who hears it, and whether it does any work twice**. Neighbouring rules keep what they already own: `continuous-delivery.md` the stages, "build once, deploy many times", trunk-based development, fixing broken builds and fixing flaky tests; `security.md` mutable-tag actions and images, `pull_request_target`, CI token scope, lockfile installs and credential literals; `test-architecture.md` how long a suite may take; `ci-runners.md` how the machines that run the jobs are configured. Complement those — do not restate them.
 
 **The two halves divide on checkability.** The reviewer half — Always-flag, Advisory, Do not flag — names defects a pipeline file shows, each by its `PIPE-n` id. A Zampetti id stands beside it as the citation, never as the finding: BP11, "poor build triggering strategy", backs several rows, and a finding must point to one fix. The Principles half is design, and a review that files a principle as a defect lends it unearned authority.
 
@@ -44,6 +44,10 @@ Most pipeline surprises are jobs that ran when nobody expected them, or never ra
 
 Keep triggers, stages and wiring in the CI file, and the work in the repository's own entry-point scripts. A job that calls a script runs the same way on a laptop, so its author can reproduce and fix a failure there before the next push. `continuous-delivery.md` owns what happens when the build breaks.
 
+### A red main pulls the andon cord
+
+Fowler wants a broken mainline build "fixed right away", and wants "everyone" able to see the state of the build. Each forge tells one person: GitLab emails the pipeline's creator, and GitHub notifies the user who triggered the run. A red main is the whole team's problem, since every merge onto it builds on the fault. **So a failed default-branch pipeline notifies the whole team, through a channel the project declares** — the andon cord any worker on Toyota's production line pulls to stop the line. An MR pipeline's failure stays with its author, whom the forge already tells. `continuous-delivery.md` owns what the team does once someone pulls the cord.
+
 ### Speed: the constraint first
 
 Goldratt's principle, as it reaches us through secondary sources: "an hour saved at a non-bottleneck is a mirage". Measure job durations and the time jobs wait for a runner, find the critical path, and shorten only that. Rank each change by the time it saves against the effort and runner cost it adds, make the large and medium ones, and stop where the curve flattens or the pipeline is within its budget — Reinertsen's U-curve says an optimum exists. Caching is a bet to measure: it paid off substantially for only about a third of the projects that adopted it (Ghaleb et al. 2026). `test-architecture.md` owns how long the suite itself may take.
@@ -68,6 +72,7 @@ Some choices belong to the project, not the rule. GitLab's own pattern keeps bra
 - **Schedule**: full mutation, weekly, off-hours, sharded
 - **Merge**: a passing MR pipeline is required
 - **Secret scan**: every pipeline, docs-only included
+- **Andon**: a failed main pipeline notifies the whole team
 ```
 
 That block is the default policy offered to a project that has none.
@@ -81,6 +86,7 @@ That block is the default policy offered to a project that has none.
 | **Schedule** | free text | What a scheduled pipeline runs and how often. |
 | **Merge** | `a passing MR pipeline is required` | A forge setting; the file cannot show it. |
 | **Secret scan** | `every pipeline, docs-only included` | Where the secret scan runs. |
+| **Andon** | free text: `a failed main pipeline notifies the whole team`, `… emails dev@example.com` | Who hears a failed default-branch pipeline, and where. On GitHub a job pulls the cord, and the file shows it. Where the field names a setting or an app — GitLab's Pipeline status emails, a chat app's subscription — the file cannot show it, so a review lists it unread and asks. |
 
 **A policy row fires only against a field the project declared.** With no `## CI policy` block, PIPE-24 is silent and the backlog says no policy was declared. Prose elsewhere that states a choice is not a declaration. Read each field as written; a job whose script skips the work for a source satisfies a field that excludes it. **Where a recorded decision contradicts a declared field** — an ADR, a dated decision in `CLAUDE.md` — raise a question naming both, not a PIPE-24 item: the block may be a pasted default the project never adopted. Where two declarations differ, raise a question and fire no policy row.
 
@@ -133,6 +139,7 @@ Name each finding by its `PIPE-n` id and take the fix from the row. Where the ro
 | Id | Violation | Preferred form | Cite |
 |---|---|---|---|
 | PIPE-9 | A test, lint or other gating job tolerates its own failure — GitLab `allow_failure: true`, GitHub `continue-on-error: true`, `\|\| true` on the command that runs the check — so the pipeline passes when the job fails | Let the job fail the pipeline; move a job meant only to inform out of the gate and name it so | Zampetti BP16, BP8 · CD-Linter |
+| PIPE-25 | A declared Andon field that nothing the review read carries out, on a forge that tells only the person who started the run — a GitHub workflow on the default branch with no job that notifies the team when the run fails, and no `workflow_run` workflow that does | Pull the cord on every failed default-branch pipeline: GitHub a last job with `needs:` on every other job and `if: failure() && github.ref == 'refs/heads/<default branch>'`, or one `workflow_run` workflow on the default branch that tests `github.event.workflow_run.conclusion == 'failure'`, notifying the team where the Andon field says; GitLab the Pipeline status emails integration, with `notify_only_broken_pipelines: true` and `branches_to_be_notified: default` | Fowler 2024 · GitHub workflow-run notification docs; GitLab notification-email and pipeline-status-email docs |
 | PIPE-10 | Job-wide retry on a test job — GitLab `retry` with neither `when` nor `exit_codes`, or a `when` that includes `script_failure` or `always`; a wrapper that reruns failed tests with no flaky marker | Retry only infrastructure failures (GitLab `when: [runner_system_failure, stuck_or_timeout_failure]`); fix or delete the flaky test | Zampetti Q11, BP17 · Luo et al. 2014; CD-Linter; GitLab `retry` docs |
 
 ### Rework
@@ -151,7 +158,7 @@ Name each finding by its `PIPE-n` id and take the fix from the row. Where the ro
 | PIPE-15 | A fail-fast check — lint, format, type check, secret scan — that waits for the long test job: a later stage with no `needs: []`, or a `needs:` on the tests | Run fail-fast checks first or beside the tests, never after them | Zampetti BP7 · GitLab pipeline-efficiency docs |
 | PIPE-16 | An absolute path into the checkout or the runner's workspace (`/builds/…`, `/home/runner/work/…`) in a job's script | A path relative to the checkout (`$CI_PROJECT_DIR`, `$GITHUB_WORKSPACE`) | Zampetti BM1 |
 
-Checked against Zampetti et al. (EMSE 2020) on 2026-10-21, against Tables 4–10 of the accepted manuscript; GitLab and GitHub documentation as read on 2026-10-21; GitLab's expression evaluator at 19.6.0-pre, read on 2026-10-21.
+Checked against Zampetti et al. (EMSE 2020) on 2026-10-21, against Tables 4–10 of the accepted manuscript; GitLab and GitHub documentation as read on 2026-10-21, and their notification documentation on 2026-10-22; GitLab's expression evaluator at 19.6.0-pre, read on 2026-10-21.
 
 **One item per missing protection, filed where the edit goes.** A job with `allow_failure: true` and a bare `retry: 2` is two items, PIPE-9 and PIPE-10: either can be fixed without the other. A row that fires in three jobs needing three edits is three items; one edit that fixes them all — a shared template, a `default:` key, `workflow:rules` — is one item, filed at the lines the edit changes or governs. A defect between a producing and a consuming job is one item, filed at the consumer. The same value at several sites in one file — one image tag named by six jobs — is one item listing every site, since one edit fixes them all. One defect that two rows describe is one item, under the row whose Violation names it more closely. A field no job carries out — no mutation job at all under an MR field that asks for mutation — is one item, filed at the field.
 
@@ -173,6 +180,7 @@ A reviewer raises these; the author decides. Each needs a setting, a measurement
 - **Tests run against a different build target or image from the one deployed** — a `Dockerfile` stage the deploy does not ship.
 - **A GitHub schedule at minute 0**, or one on a public repository that may go 60 days without activity, which disables it.
 - **Quarantined tests with no cap on count or age.**
+- **A red main only its author hears about** — no Andon field declared, and no job that notifies the team when a default-branch pipeline fails. Both forges tell only the person who started the run, and the team's channel can be a setting or an app the file does not show.
 
 ---
 
@@ -190,15 +198,17 @@ A reviewer raises these; the author decides. Each needs a setting, a measurement
 - **Full tests or full mutation in an MR pipeline**, where no policy declares change-scoped MR work. Scoping is a cost measure, not a correctness rule.
 - **A `changes:` rule that, in a pipeline with no push event, runs a job the project means to run there** — a hand-run main pipeline that runs everything, where a comment or a test says so. PIPE-3 is the job nobody meant to run.
 - **A bare variable as a rule's whole expression** — `if: $ROLLBACK_TAG`. Alone, an empty value counts as false.
+- **An MR pipeline's failure that reaches only its author.** The cord is for main; the forge already tells the author.
+- **An andon job's own write grant** — `issues: write` or a webhook secret on that job alone, which its task needs.
 - **A mutable tag, an unpinned action or a broad token as a `PIPE-n` item.** Those are `security.md`'s rows; file them by CWE id.
 
 ---
 
 ## Sources and Synthesis
 
-The rows cite the works named at the top. Zampetti et al. supply the bad practice each row rests on; CD-Linter, a tolerated failure and a bare retry found mechanically in GitLab files; Fowler and *Software Engineering at Google*, the suite on every mainline commit; Humble and Farley with SLSA, deploying what was tested; Luo et al., retry hiding real failures; Meli et al., secrets leaking from any file. Zampetti's practitioners rejected Q11 and BP6 as smells: the rule sides with Luo, Fowler and Google on retry, and reads BP6 inversely, for main. The Principles half draws on Google's presubmit split, Memon, Machalica and Gligoric for change-scoped testing and the full run behind it, Petrović and the mutation tools' own documentation for diff-scoped mutation and its drift, and Goldratt, Reinertsen and Ghaleb for speed. The vendor documentation supplies each row's GitLab and GitHub form, including two traps: `rules:changes` "always evaluates to true" in a pipeline with no push event, and a required check that a path filter skips stays pending and blocks the merge.
+The rows cite the works named at the top. Zampetti et al. supply the bad practice each row rests on; CD-Linter, a tolerated failure and a bare retry found mechanically in GitLab files; Fowler and *Software Engineering at Google*, the suite on every mainline commit; Fowler, a broken mainline everyone can see; Humble and Farley with SLSA, deploying what was tested; Luo et al., retry hiding real failures; Meli et al., secrets leaking from any file. Zampetti's practitioners rejected Q11 and BP6 as smells: the rule sides with Luo, Fowler and Google on retry, and reads BP6 inversely, for main. The Principles half draws on Google's presubmit split, Memon, Machalica and Gligoric for change-scoped testing and the full run behind it, Petrović and the mutation tools' own documentation for diff-scoped mutation and its drift, and Goldratt, Reinertsen and Ghaleb for speed. The vendor documentation supplies each row's GitLab and GitHub form, including two traps: `rules:changes` "always evaluates to true" in a pipeline with no push event, and a required check that a path filter skips stays pending and blocks the merge.
 
-**This rule's own:** the `PIPE-n` ids and the wording of every row, which the research distilled from the catalogue and the docs rather than copied; the split into Principles, Always-flag, Advisory and Do not flag, which follows `ux.md` and `security.md`; the declared policy, without which a project's choice would read as a defect; and five readings. The catalogue places a tolerated test failure under BP8 beside BP16, and a `changes` rule firing on a schedule under BP11. A schedule exists to add work, so a deploy it starts on its own is a defect (PIPE-17). A path list fails closed only behind a guard (PIPE-22), which applies the fail-safe default to test selection. And PIPE-19 rests on GitLab's evaluator, not its documentation: the `rules:if` page says `$VAR1 && !$VAR2` is "True when `VAR1` exists and is not empty", but `And#evaluate` returns Ruby's `left && right`, Ruby counts an empty string as true, and only the whole result is tested for emptiness. A production rollback job ran on every default-branch pipeline that way until its rule compared the value.
+**This rule's own:** the `PIPE-n` ids and the wording of every row, which the research distilled from the catalogue and the docs rather than copied; the split into Principles, Always-flag, Advisory and Do not flag, which follows `ux.md` and `security.md`; the declared policy, without which a project's choice would read as a defect; and six readings. The catalogue places a tolerated test failure under BP8 beside BP16, and a `changes` rule firing on a schedule under BP11. A schedule exists to add work, so a deploy it starts on its own is a defect (PIPE-17). A path list fails closed only behind a guard (PIPE-22), which applies the fail-safe default to test selection. A red main is the team's, not its author's (PIPE-25), which carries Fowler's "everyone can see" to forges that tell only the person who started the run. And PIPE-19 rests on GitLab's evaluator, not its documentation: the `rules:if` page says `$VAR1 && !$VAR2` is "True when `VAR1` exists and is not empty", but `And#evaluate` returns Ruby's `left && right`, Ruby counts an empty string as true, and only the whole result is tested for emptiness. A production rollback job ran on every default-branch pipeline that way until its rule compared the value.
 
 This rule draws on the research document, not on the books in hand. Humble and Farley reach it through Humble's continuousdelivery.com; Goldratt and Reinertsen through secondary sources, so the rule cites them by title and quotes Goldratt as attributed. The research lists what it could not open under Knowledge Gaps, among them the catalogue's online appendix of definitions.
 
@@ -206,4 +216,4 @@ This rule draws on the research document, not on the books in hand. Humble and F
 
 ## The Mantra
 
-> **One pipeline per commit, a test suite on every mainline commit, a gate no filter can skip, a failure that fails, every skip naming its gate, and the tested artifact — not a rebuild — deployed.**
+> **One pipeline per commit, a test suite on every mainline commit, a gate no filter can skip, a failure that fails, a red main the whole team hears, every skip naming its gate, and the tested artifact — not a rebuild — deployed.**

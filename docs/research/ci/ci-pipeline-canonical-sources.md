@@ -1091,6 +1091,37 @@ Key the non-security rows to **Zampetti ids** (79-item, peer-reviewed, technolog
 use Scorecard names as ids — Scorecard is a tool whose checks change; cite them as corroboration.
 Confidence: Medium-High (one catalogue, one research group across 9.1–9.3; no competing catalogue found).
 
+## 10. Who hears a failure (added 2026-10-22)
+
+Asked after the rule landed: does a red main reach anyone but its author? `continuous-delivery.md` says
+"Stop the line on failure" and "Fix broken builds immediately", but nothing said how the team learns
+the line has stopped.
+
+**Fowler [1]**, re-read 2026-10-22: a failed mainline build "needs to be fixed right away"; the aim is that
+"everyone can easily see the state of the system"; "Many teams only send out notifications for build
+failures", though he finds it "worth sending out messages on success too"; an always-on display is
+"particularly valuable to alert everyone to a broken build"; and "the best way to fix the build is to
+revert the latest commit from the mainline".
+
+**GitLab [61][62]**: "CI/CD pipeline event notifications are sent to the pipeline creator" — at the Watch
+level a failed and a successful pipeline, at Custom whichever events are selected; "Fixed pipeline" is a
+Custom event. The Pipeline status emails integration, on every tier, sends "notifications about pipeline
+status changes … to a list of email addresses", with **Notify only broken pipelines**. Its API is
+`PUT /projects/:id/integrations/pipelines-email` with `recipients` (required),
+`notify_only_broken_pipelines`, and `branches_to_be_notified` — `all`, `default`, `protected` or
+`default_and_protected`, defaulting to `default`. Neither page defines "broken" or mentions a pipeline
+that passed with warnings.
+
+**GitHub [63]**: a user can "subscribe to notifications about workflow runs that you trigger", optionally
+"only when a workflow run has failed"; "Notifications for scheduled workflows are sent to the user who
+initially created the workflow". GitHub documents no team notification, so a job must pull the cord.
+
+**Reading.** Both forges tell one person; the team hears nothing by default. On GitLab a setting can
+email a list; on GitHub only a job can, which the file shows. That split decides PIPE-25: must-fix where
+the file can show the guard, a question where a setting or an app holds it. Toyota's andon cord names the
+practice; this research read no Toyota source, so the rule names it and cites nothing for it.
+Confidence: High for the forge behaviour, which each forge documents; Medium for the reading.
+
 ## Synthesis
 
 ### The rule's spine (ranked shortlist)
@@ -1431,6 +1462,9 @@ a rule. Flag only a cache that cannot invalidate (P13); advise measurement.
 [58] Biazotto, J.P.; Feitosa, D.; Avgeriou, P.; Nakagawa, E.Y. "Investigating CI/CD-based Technical Debt Management in Open-source Projects". arXiv:2604.10631v1. 2026-04-12. https://arxiv.org/html/2604.10631. Accessed 2026-10-21.
 [59] OWASP. *Top 10 CI/CD Security Risks*. https://owasp.org/www-project-top-10-ci-cd-security-risks/. Accessed 2026-10-21.
 [60] OpenSSF. *Scorecard* checks. https://github.com/ossf/scorecard/blob/main/docs/checks.md. Accessed 2026-10-21.
+[61] GitLab. "Notification emails" (CI/CD pipeline events). https://docs.gitlab.com/user/profile/notifications/. Accessed 2026-10-22.
+[62] GitLab. "Pipeline status emails"; "Project integrations API: Pipeline status emails". https://docs.gitlab.com/user/project/integrations/pipeline_status_emails/; https://docs.gitlab.com/api/project_integrations/. Accessed 2026-10-22.
+[63] GitHub. "Notifications for workflow runs". https://docs.github.com/en/actions/concepts/workflows-and-actions/notifications-for-workflow-runs. Accessed 2026-10-22.
 
 ## Research Metadata
 

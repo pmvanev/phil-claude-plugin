@@ -1,6 +1,6 @@
 ---
 name: review-ci
-description: This skill should be used when the user asks to "review the CI pipeline", "check our .gitlab-ci.yml", "audit the GitHub Actions workflows", "is our pipeline gating correctly", "which jobs run on a schedule", "why wasn't my MR pipeline created", "check the pipeline against our CI policy", "review our GitLab runner config", "is our runner fleet isolated", or runs /phil:review-ci. It applies rules/ci-pipelines.md, rules/ci-runners.md for runner configuration, and the pipeline rows of rules/security.md, builds a jobs-by-source trigger matrix against the project's declared CI policy, and writes a findings backlog without editing what it reviews.
+description: This skill should be used when the user asks to "review the CI pipeline", "check our .gitlab-ci.yml", "audit the GitHub Actions workflows", "is our pipeline gating correctly", "which jobs run on a schedule", "why wasn't my MR pipeline created", "does anyone hear when main breaks", "check the pipeline against our CI policy", "review our GitLab runner config", "is our runner fleet isolated", or runs /phil:review-ci. It applies rules/ci-pipelines.md, rules/ci-runners.md for runner configuration, and the pipeline rows of rules/security.md, builds a jobs-by-source trigger matrix against the project's declared CI policy, and writes a findings backlog without editing what it reviews.
 ---
 
 # Review CI
@@ -65,7 +65,7 @@ CI files, Dockerfiles and runner configuration, and gather the whole pipeline or
 
 **List each source the review cannot read:** a remote, template, project or component `include:`; a
 reusable workflow in another repository; a forge setting, such as branch protection, required checks,
-the merge queue, auto-cancel, pipeline schedules or runner settings the target does not hold; a file a job calls that
+the merge queue, auto-cancel, pipeline schedules, notification integrations or runner settings the target does not hold; a file a job calls that
 the target does not hold; a script read only in part, with the part read; and any other forge's
 pipeline file (`azure-pipelines*`, `.circleci/**`, `Jenkinsfile`), which the rule's rows do not cover. A
 row's guard or premise can live in any of them.
@@ -102,6 +102,7 @@ job that is skipped skips the jobs after it unless their `if:` says otherwise. W
 
 - `runs` — the job is created and starts on its own;
 - `manual` — the job is created and waits for a person;
+- `on failure` — the job is created and runs only when an earlier job fails, as an andon job does;
 - `exits early` — the job is created, and the script it calls skips the work for this source, as a
   docs-only check inside the script does;
 - `if paths` — whether the job runs turns on which paths the change touches;
@@ -233,7 +234,8 @@ a `needs:` on a path-skipped job, a check skipped by any doc path and a departur
 beside a correct guard; its expected backlog holds the matrix. `03-runner-config/` holds a GitLab
 runner fleet's configuration and its infrastructure code, seeding a socket on reused machines, a no-op
 `scale_factor`, a deploy pool open to unprotected refs and a bare `retry`, beside a retired platform's
-configuration and safe look-alikes.
+configuration and safe look-alikes. `04-andon/` holds a GitHub project that declares an Andon field,
+with one workflow pulling the cord on a red main and one that never does.
 `tests/test_ci_pipelines_rule.py` and `tests/test_ci_runners_rule.py` check that every item a fixture
 expects takes its id and fix from one row, and that no look-alike is expected.
 

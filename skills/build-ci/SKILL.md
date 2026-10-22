@@ -1,6 +1,6 @@
 ---
 name: build-ci
-description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy and builds the pipeline to it, lints it, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
+description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "tell the team when main breaks", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy and builds the pipeline to it, lints it, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
 ---
 
 # Build CI
@@ -71,6 +71,9 @@ Read before proposing anything; the project may already have decided.
 - A field the project cannot yet keep — mutation where no mutation tool is installed — is the user's
   call: ask, and write what they decide. The policy has no field for releases; where the project tags
   releases, ask what a tag pipeline runs.
+- **The Andon field names where the team hears a red main.** Where it names no channel, ask for one —
+  an email list, a chat channel, or on GitHub an issue the repository's watchers are emailed about — and
+  write the answer into the field.
 
 Write the block under `## CI policy` in the project's instruction file, in the rule's shape: its
 `CLAUDE.md`, or its `AGENTS.md` where that is the file it keeps; with neither, create `CLAUDE.md`.
@@ -164,8 +167,13 @@ put `interruptible: true` only on MR-pipeline jobs. Each line below answers the 
 | An image built in the pipeline | copy the manifest and lockfile, install, then copy the source | the same | PIPE-14 |
 | Portable paths | `$CI_PROJECT_DIR`, or a path relative to the checkout | `$GITHUB_WORKSPACE` | PIPE-16 |
 | A merge queue | — | `merge_group` in the required workflow's triggers | PIPE-5 |
+| A red main the whole team hears | the Pipeline status emails integration, a forge setting (Step 7) | a last job with `needs:` on every other job, `if: failure() && github.ref == 'refs/heads/<default branch>'`, `permissions:` `contents: read` and `issues: write` — a job's `permissions:` replace the top's — and `GH_TOKEN: ${{ github.token }}`, calling `./scripts/ci/run.sh andon`; with several workflows, one `workflow_run` workflow instead | PIPE-25 |
 | A job in a container whose user does not own the checkout | — | job `env:` `GIT_CONFIG_COUNT: 1`, `GIT_CONFIG_KEY_0: safe.directory`, `GIT_CONFIG_VALUE_0: "*"`; `actions/checkout` trusts the directory only for its own commands | — |
 | Pinned, narrow and secret-free | images by digest; tools from their own image, never fetched by `curl`; installs from the lockfile; credentials from CI variables | actions by commit SHA; `permissions: contents: read` at the top; secrets from `secrets.*` | CWE-829, CWE-494, CWE-1357, CWE-250, CWE-798 |
+
+The example's `andon` task opens one issue and comments on it while main stays red. Where the Andon
+field names a chat channel, post to its incoming webhook from a CI secret instead; in an organisation, set
+`ANDON_MENTION` to the team, since an @-mention reaches members who do not watch the repository.
 
 Give each job a `timeout`. Keep production deploys and rollbacks manual. Read an action's commit with
 `gh api repos/<owner>/<action>/git/ref/tags/<tag>`, and write the tag beside it as a comment. Where the
@@ -197,10 +205,14 @@ Read each setting the policy depends on:
 - **Auto-cancel.** GitLab: `auto_cancel_pending_pipelines` on the same project read.
 - **The schedule.** GitLab: `glab api projects/:id/pipeline_schedules`. A GitHub schedule lives in the
   workflow file.
+- **The andon.** GitLab: `glab api projects/:id/integrations/pipelines-email` for `active`, `recipients`,
+  `notify_only_broken_pipelines` and `branches_to_be_notified`. A GitHub andon lives in the workflow file.
 
 For each setting that departs from the policy, ask one question — "Require a passing MR pipeline to
-merge?" — and write it only on a yes, then read it back. Where the forge cannot be read, ask nothing and
-list each setting unread with the command that reads it.
+merge?", or "Email these addresses when main's pipeline fails?" with the addresses listed — and write it
+only on a yes, then read it back. The andon's write is a `PUT` to the same path with those `recipients`,
+`notify_only_broken_pipelines=true` and `branches_to_be_notified=default`. Where the forge cannot be read,
+ask nothing and list each setting unread with the command that reads it.
 
 ## Step 8: Record the Workflow
 
@@ -213,6 +225,8 @@ lacks, with this project's commands written in:
   until then.
 - Reproduce a failing job with `./scripts/ci/run.sh <task>` and fix it locally before the next push; the
   change that broke the pipeline owns the fix.
+- A red main stops the line: the Andon channel tells everyone, nobody merges until main is green, and the
+  change that broke it owns the fix — revert it first.
 - Lint a pipeline change before pushing it: `glab ci lint --dry-run --ref <default branch>`, or
   `actionlint`.
 

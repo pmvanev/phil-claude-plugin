@@ -239,7 +239,7 @@ def test_the_rule_has_both_halves_and_a_declared_policy():
 def test_the_policy_block_names_its_fields():
     section = RULE.read_text().split("## The declared policy", 1)[1].split("\n---\n", 1)[0]
     assert "## CI policy" in section, "the block's heading in a project's CLAUDE.md"
-    for field in ("Pipelines", "Docs-only paths", "MR", "Main", "Schedule", "Merge", "Secret scan"):
+    for field in ("Pipelines", "Docs-only paths", "MR", "Main", "Schedule", "Merge", "Secret scan", "Andon"):
         assert f"**{field}**" in section, field
 
 
@@ -373,3 +373,44 @@ def test_pipe_17_names_what_a_deploy_job_is_and_spares_a_declared_scheduled_depl
     row = _row("PIPE-17")
     assert "`environment:`" in row["Violation"]
     assert "Schedule field" in row["Violation"]
+
+
+# The andon: a red main is the team's, not its author's. Both forges tell only the person who started
+# the run, so a broken main went unheard until someone else's MR failed on it (2026-10-22).
+
+def test_a_red_main_pulls_the_andon_cord():
+    rule = " ".join(RULE.read_text().split())
+    assert "### A red main pulls the andon cord" in RULE.read_text()
+    assert "who hears it" in rule.split("This rule owns", 1)[1].split(".", 1)[0]
+    row = _row("PIPE-25")
+    assert "Andon field" in row["Violation"], "a policy row fires only against a declared field"
+    assert "only the person who started the run" in row["Violation"]
+    for form in ("if: failure()", "workflow_run", "notify_only_broken_pipelines: true", "branches_to_be_notified: default"):
+        assert form in row["Preferred form"], form
+
+
+def test_an_andon_in_a_setting_or_an_app_is_a_question():
+    """GitLab's Pipeline status emails and a chat app's subscription are both invisible to the file."""
+    policy = " ".join(RULE.read_text().split("## The declared policy", 1)[1].split("\n---\n", 1)[0].split())
+    assert "Pipeline status emails" in policy and "a chat app's subscription" in policy
+
+
+def test_an_undeclared_andon_is_advisory_and_an_mr_failure_is_its_authors():
+    advisory = RULE.read_text().split("## Advisory", 1)[1].split("\n## ", 1)[0]
+    do_not = RULE.read_text().split("## Do not flag", 1)[1].split("\n## ", 1)[0]
+    assert "A red main only its author hears about" in advisory
+    assert "An MR pipeline's failure that reaches only its author" in do_not
+    assert "An andon job's own write grant" in do_not
+
+
+def test_review_ci_reads_a_job_that_runs_on_failure_and_lists_notification_settings():
+    skill = " ".join(SKILL.read_text().split())
+    assert "`on failure`" in skill
+    assert "notification integrations" in skill
+
+
+def test_a_github_fixture_expects_pipe_25():
+    """Every other fixture is GitLab, where the andon is a setting and the row can only ask."""
+    hits = [m for m in FIXTURES if list(m.parent.glob(".github/workflows/*.yml"))
+            and "- **Row**: PIPE-25" in (m.parent / "expected-backlog.md").read_text()]
+    assert hits, "no GitHub fixture files a missing andon"

@@ -37,6 +37,7 @@ DEFAULT_BLOCK = """## CI policy
 - **Schedule**: full mutation, weekly, off-hours, sharded
 - **Merge**: a passing MR pipeline is required
 - **Secret scan**: every pipeline, docs-only included
+- **Andon**: a failed main pipeline notifies the whole team
 """
 
 
@@ -405,3 +406,68 @@ def test_the_speed_fixture_traces_to_the_path_it_expects():
     assert (summary["median_wall"], summary["median_queue"]) == (757, 90), "expected.md states 12:37 and 1:30"
     for decoy in want["off_path"]:
         assert summary["jobs"][decoy]["on_path"] == 0, decoy
+
+
+# The andon. GitLab pulls the cord with its Pipeline status emails integration, a forge setting; GitHub
+# tells only the user who triggered the run, so a job pulls it through the entry-point script.
+
+def test_the_skill_pulls_the_andon_cord_on_both_forges():
+    skill = _skill()
+    assert "integrations/pipelines-email" in skill, "read the GitLab setting before asking"
+    assert "Email these addresses when main's pipeline fails?" in skill
+    assert "./scripts/ci/run.sh andon" in skill
+    assert "issues: write" in skill and "contents: read" in skill, "a job's permissions replace the top's"
+    assert "A red main stops the line" in skill
+
+
+def test_the_empty_project_fixture_lists_the_andon_setting_unread():
+    expected = " ".join((REPO / "skills" / "build-ci" / "self-test" / "01-empty-project" / "expected.md").read_text().split())
+    assert "Pipeline status emails integration" in expected
+
+
+def _andon(repo, tmp_path, open_issue="", **env):
+    """Run the andon task with a fake `gh` that logs its arguments and answers the issue search."""
+    bin_ = tmp_path / "bin"
+    bin_.mkdir(exist_ok=True)
+    log = tmp_path / "gh.log"
+    (bin_ / "gh").write_text(f"""#!/bin/sh
+echo "$*" >> {log}
+case "$1 $2" in "issue list") printf '%s' "{open_issue}" ;; esac
+""")
+    (bin_ / "gh").chmod(0o755)
+    clean = {k: v for k, v in os.environ.items() if not k.startswith(("CI", "GITHUB_"))}
+    out = subprocess.run(["sh", "scripts/ci/run.sh", "andon"], cwd=repo, capture_output=True, text=True,
+                         env={**clean, "PATH": f"{bin_}:{os.environ['PATH']}", **env})
+    return out, (log.read_text().splitlines() if log.exists() else [])
+
+
+GITHUB_RUN = {"GITHUB_ACTIONS": "true", "GITHUB_EVENT_NAME": "push", "GITHUB_REPOSITORY": "acme/tally",
+              "GITHUB_SERVER_URL": "https://github.com", "GITHUB_RUN_ID": "42", "GITHUB_SHA": "abc123"}
+
+
+def test_a_red_main_opens_an_andon_issue(repo, tmp_path):
+    out, calls = _andon(repo, tmp_path, **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    created = [c for c in calls if c.startswith("issue create")]
+    assert len(created) == 1, calls
+    assert "main is red" in created[0] and "https://github.com/acme/tally/actions/runs/42" in created[0]
+
+
+def test_a_red_main_with_an_andon_open_comments_on_it(repo, tmp_path):
+    out, calls = _andon(repo, tmp_path, open_issue="7", **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    assert not [c for c in calls if c.startswith("issue create")], "one andon, not one per red run"
+    assert any(c.startswith("issue comment 7") for c in calls), calls
+
+
+def test_an_andon_mention_names_the_team(repo, tmp_path):
+    out, calls = _andon(repo, tmp_path, ANDON_MENTION="@acme/tally-devs", **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    assert "cc @acme/tally-devs" in "\n".join(calls)
+
+
+def test_the_andon_never_pulls_outside_github_actions(repo, tmp_path):
+    """A local run must not open an issue, and on GitLab the integration pulls the cord."""
+    out, calls = _andon(repo, tmp_path)
+    assert out.returncode != 0 and not calls
+    assert "Pipeline status emails" in out.stderr
