@@ -22,6 +22,7 @@ prose.
 - **Schedule**: none
 - **Merge**: a passing MR pipeline is required
 - **Secret scan**: every pipeline, docs-only included
+- **Andon**: a failed main pipeline notifies the whole team, through an issue the repository's watchers are emailed about
 
 No mutation: the product is prose, and no mutation tool is installed (decided 2026-10-21). `docs/product/`
 is not docs-only: `scripts/check-product-ssot.py` reads it.
@@ -33,6 +34,8 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
 - A branch runs a pipeline only while its pull request is open, so test locally until then.
 - Reproduce a failing job with `./scripts/ci/run.sh <task>` — `secret-scan`, `checks` or `test` — and fix
   it locally before the next push; the change that broke the pipeline owns the fix.
+- A red main stops the line: a "main is red" issue tells everyone, nobody merges until main is green, and
+  the change that broke it owns the fix — revert it first.
 - Lint a workflow change before pushing it: `actionlint`.
 
 ## Key Principles (always apply)

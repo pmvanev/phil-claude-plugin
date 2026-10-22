@@ -62,3 +62,18 @@ jobs:
         with:
           python-version: "3.14"
       - run: ./scripts/ci/run.sh test
+
+  # A red main is the team's: open one issue the repository's watchers are emailed about (PIPE-25).
+  andon:
+    needs: [secret-scan, checks, test]
+    if: failure() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: ./scripts/ci/run.sh andon
+        env:
+          GH_TOKEN: ${{ github.token }}

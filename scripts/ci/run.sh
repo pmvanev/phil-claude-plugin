@@ -129,8 +129,29 @@ case "$task" in
     install
     python3 -m pytest -q
     ;;
+  andon)
+    # A red main is the team's: open one issue the repository's watchers are emailed about, or comment
+    # on the one already open. Only GitHub needs this; on GitLab the Pipeline status emails integration
+    # pulls the cord. ANDON_MENTION, such as @org/team, notifies a team that does not watch the repo.
+    if [ -z "${GITHUB_ACTIONS:-}" ]; then
+      echo "run.sh: andon runs in GitHub Actions; on GitLab the Pipeline status emails integration pulls the cord" >&2
+      exit 1
+    fi
+    export GH_REPO="$GITHUB_REPOSITORY"
+    run="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+    open=$(gh issue list --state open --search 'in:title "main is red"' --json number --jq '.[0].number // empty')
+    if [ -n "$open" ]; then
+      gh issue comment "$open" --body "Still red at $GITHUB_SHA: $run"
+    else
+      gh issue create --title "main is red" --body "The default-branch pipeline failed at $GITHUB_SHA: $run
+
+Stop merging until main is green. The change that broke it owns the fix; revert it first.${ANDON_MENTION:+
+
+cc $ANDON_MENTION}"
+    fi
+    ;;
   *)
-    echo "usage: $0 scope|secret-scan|checks|test" >&2
+    echo "usage: $0 scope|secret-scan|checks|test|andon" >&2
     exit 2
     ;;
 esac
