@@ -23,7 +23,8 @@ CHECKS = [
     # Added 2026-08-31. Plugin-shipped rules do not auto-load — measured against 2.1.252 — so a rule
     # nothing names ships to every consumer and is applied by nobody, silently.
     ("rule reachability", "check-rule-reachability.py"),
-    ("repo test suite", "check-tests.py"),
+    # The suite left on 2026-10-22: it takes 25-90 s against the 30 s each check gets, so it reported a
+    # timeout every session; CI runs it on every pull request and main commit instead.
 ]
 
 
