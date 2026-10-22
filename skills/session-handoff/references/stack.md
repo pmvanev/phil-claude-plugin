@@ -46,7 +46,7 @@ against it. What read-back does with that is BOOTSTRAP step 5c, in `references/b
 **Never refresh the projection from `push`.** The card is refreshed at boundaries, by `/phil:handoff`;
 a forge write per push would put the board on the critical path of a mid-session note.
 
-## show — `/phil:stack`, bare
+## show — `/phil:stack` or `/phil:stack show`
 
 1. **Read the snapshot through `head`.** Ignore its hash; nothing is written. `SHA absent` is `unknown`.
 2. **Render the trace**: every frame with what it is, why it was pushed, and how long it has been open.
