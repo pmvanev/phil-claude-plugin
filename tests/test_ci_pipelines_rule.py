@@ -239,7 +239,7 @@ def test_the_rule_has_both_halves_and_a_declared_policy():
 def test_the_policy_block_names_its_fields():
     section = RULE.read_text().split("## The declared policy", 1)[1].split("\n---\n", 1)[0]
     assert "## CI policy" in section, "the block's heading in a project's CLAUDE.md"
-    for field in ("Pipelines", "Docs-only paths", "MR", "Main", "Schedule", "Merge", "Secret scan", "Andon"):
+    for field in ("Pipelines", "Docs-only paths", "MR", "Main", "Schedule", "Merge", "Secret scan", "Andon", "Notify"):
         assert f"**{field}**" in section, field
 
 
@@ -386,7 +386,7 @@ def test_a_red_main_pulls_the_andon_cord():
         "the principle hands the response to continuous-delivery.md, so the scope must say it owns it"
     row = _row("PIPE-25")
     assert "Andon field" in row["Violation"], "a policy row fires only against a declared field"
-    assert "only the person who started the run" in row["Violation"]
+    assert "at most the person who started the run" in row["Violation"]
     for form in ("if: failure()", "workflow_run", "notify_only_broken_pipelines: true", "branches_to_be_notified: default"):
         assert form in row["Preferred form"], form
 
@@ -445,3 +445,38 @@ def test_a_github_fixture_expects_pipe_25():
     hits = [m for m in FIXTURES if list(m.parent.glob(".github/workflows/*.yml"))
             and "- **Row**: PIPE-25" in (m.parent / "expected-backlog.md").read_text()]
     assert hits, "no GitHub fixture files a missing andon"
+
+
+# The author tier: a failure or a warning reaches the person who started the pipeline. GitLab sends
+# pipeline email only at the Watch or Custom level, GitHub only to users who subscribed, and a job
+# allowed to fail passes on both, so by default nobody hears either (docs read 2026-10-22).
+
+def test_the_rule_does_not_claim_a_forge_tells_anyone_by_default():
+    rule = " ".join(RULE.read_text().split())
+    assert "Each forge tells one person" not in rule
+    assert "Watch or Custom" in rule and "subscribed" in rule
+
+
+def test_a_failure_or_a_warning_names_the_person_who_started_the_pipeline():
+    assert "### A failure or a warning names whoever started the pipeline" in RULE.read_text()
+    row = _row("PIPE-26")
+    assert "Notify field" in row["Violation"], "a policy row fires only against a declared field"
+    assert "allow_failure: true" in row["Violation"] and "continue-on-error: true" in row["Violation"]
+    for form in ("when: on_failure", ".post", "if: failure()", "./scripts/ci/run.sh inform"):
+        assert form in row["Preferred form"], form
+
+
+def test_an_undeclared_notify_is_advisory_and_its_grants_are_not_flagged():
+    advisory = RULE.read_text().split("## Advisory", 1)[1].split("\n## ", 1)[0]
+    do_not = RULE.read_text().split("## Do not flag", 1)[1].split("\n## ", 1)[0]
+    assert "A failure or a warning that names nobody" in advisory
+    assert "`pull-requests: write`" in do_not and "`NOTIFY_TOKEN`" in do_not
+
+
+def test_a_gitlab_fixture_expects_pipe_26_and_clears_pipe_9():
+    hits = [m for m in FIXTURES if (m.parent / ".gitlab-ci.yml").exists()
+            and "- **Row**: PIPE-26" in (m.parent / "expected-backlog.md").read_text()]
+    assert hits, "no GitLab fixture files a silent warning"
+    for m in hits:
+        assert "- **Row**: PIPE-9" not in (m.parent / "expected-backlog.md").read_text(), \
+            "a job that gates nothing and says so is PIPE-9's Do-not-flag case"

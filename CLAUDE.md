@@ -23,6 +23,7 @@ prose.
 - **Merge**: a passing MR pipeline is required
 - **Secret scan**: every pipeline, docs-only included
 - **Andon**: a failed main pipeline notifies the whole team, through an issue the repository's watchers are emailed about
+- **Notify**: a failure or a warning names whoever started the pipeline
 
 No mutation: the product is prose, and no mutation tool is installed (decided 2026-10-21). `docs/product/`
 is not docs-only: `scripts/check-product-ssot.py` reads it.
@@ -36,6 +37,7 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
   it locally before the next push; the change that broke the pipeline owns the fix.
 - A red main stops the line: a "main is red" issue labelled `andon` tells everyone, and nothing merges but
   the fix or its revert until main is green. Close the issue once main is green.
+- A failure or a warning names you on the pull request that caused it.
 - Lint a workflow change before pushing it: `actionlint`.
 
 ## Key Principles (always apply)

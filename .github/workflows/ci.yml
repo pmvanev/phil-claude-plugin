@@ -77,3 +77,19 @@ jobs:
       - run: ./scripts/ci/run.sh andon
         env:
           GH_TOKEN: ${{ github.token }}
+
+  # A failed run names whoever started it on its pull request, or on main's merged one (PIPE-26).
+  tell-author:
+    needs: [secret-scan, checks, test]
+    if: failure()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: ./scripts/ci/run.sh tell-author
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}

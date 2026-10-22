@@ -12,6 +12,7 @@ or `rules/ci-pipelines.md` changes.
 | `01-empty-project/` | a TypeScript CLI with tests, mutation and docs, and no CI; its remote unreachable | the default policy in `AGENTS.md`, a GitLab pipeline whose matrix keeps it in every cell, every job calling one entry-point script, no forge write, no push |
 | `02-rework/` | a pipeline that builds its bundle twice, once inside the Dockerfile, and its image twice, once in the deploy job | a producers table marking both, the image as PIPE-11; the single-producer package and per-job installs left alone |
 | `03-speed/` | five recorded main pipelines and their job logs; the slowest job is off the critical path | the path traced by the timing script, queue wait apart, one High candidate above a stopping line drawn at the budget, `lint` never ranked |
+| `04-github-project/` | fixture 01's project on GitHub; its remote names a repository that does not exist | the default policy in `AGENTS.md`, one workflow whose matrix keeps it in every cell, an `andon` job and a `tell-author` job on failure, no forge write, no push |
 
 ## Layout
 
@@ -26,7 +27,8 @@ Each fixture holds the project under `project/`, plus:
 
 1. Copy the fixture's `project/` to a scratch directory, then in it run `git init -q -b main`, `git add -A`
    and `git commit -qm init`. Fixture 01 also needs
-   `git remote add origin git@gitlab.example.invalid:acme/tally.git`.
+   `git remote add origin git@gitlab.example.invalid:acme/tally.git`; fixture 04,
+   `git remote add origin https://github.com/phil-fixture-invalid-org/tally.git`.
 2. In that copy, follow this working tree's `skills/build-ci/SKILL.md` with the argument the fixture's
    `expected.md` names — `.`, `--rework` or `--speed` — answering each question as it says.
 3. Compare the run's files and report with the fixture's `expected-*.md` files. Any hard assertion that

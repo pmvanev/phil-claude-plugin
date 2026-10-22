@@ -1116,7 +1116,21 @@ that passed with warnings.
 "only when a workflow run has failed"; "Notifications for scheduled workflows are sent to the user who
 initially created the workflow". GitHub documents no team notification, so a job must pull the cord.
 
-**Reading.** Both forges tell one person; the team hears nothing by default. On GitLab a setting can
+**Who hears a warning, or anything by default (read the same day).** GitLab's notification table lists
+pipeline events under Watch and Custom only, not Participate, and names no default level; "you become a
+participant when you comment or edit, or someone mentions your username", and "anyone mentioned by
+username in the comment" hears of it. Its "does not send a notification when" list names a project bot
+as a recipient it skips, not a sender. A job with `allow_failure: true` that fails leaves the pipeline
+passed, and "later jobs with `when: on_failure` don't start if this job fails" [64]. GitHub's
+`continue-on-error: true` reports a failed job as `success` through `needs.<job>.result`
+(actions/toolkit issue 581; Ken Muse, "How to Handle Step and Job Errors in GitHub Actions"), so no
+later job can see it. No source documents whom a failed child pipeline emails; one GitLab issue
+(373200) reports the merge train's starter, not the MR author.
+
+**Reading.** Each forge tells at most the person who started the run, and only one who opted in; the
+team hears nothing, and nobody hears a warning. A comment that names the starter reaches them whatever
+their settings, so the author tier rests on a mention (PIPE-26), and a check that gates nothing tells
+rather than tolerates. On GitLab a setting can
 email a list; on GitHub only a job can, which the file shows. That split decides PIPE-25: must-fix where
 the file can show the guard, a question where a setting or an app holds it. Toyota's andon cord names the
 practice; this research read no Toyota source, so the rule names it and cites nothing for it.
@@ -1465,6 +1479,7 @@ a rule. Flag only a cache that cannot invalidate (P13); advise measurement.
 [61] GitLab. "Notification emails" (CI/CD pipeline events). https://docs.gitlab.com/user/profile/notifications/. Accessed 2026-10-22.
 [62] GitLab. "Pipeline status emails"; "Project integrations API: Pipeline status emails". https://docs.gitlab.com/user/project/integrations/pipeline_status_emails/; https://docs.gitlab.com/api/project_integrations/. Accessed 2026-10-22.
 [63] GitHub. "Notifications for workflow runs". https://docs.github.com/en/actions/concepts/workflows-and-actions/notifications-for-workflow-runs. Accessed 2026-10-22.
+[64] GitLab. "CI/CD YAML syntax reference: allow_failure". https://docs.gitlab.com/ci/yaml/#allow_failure. Accessed 2026-10-22.
 
 ## Research Metadata
 

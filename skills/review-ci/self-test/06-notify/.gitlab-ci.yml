@@ -1,0 +1,60 @@
+# ledger: one pipeline per open MR and one per main commit. Every job calls scripts/ci/run.sh, which
+# skips the work for a docs-only change. NOTIFY_TOKEN is a masked CI variable.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - when: never
+
+stages: [check, test, report]
+
+default:
+  timeout: 15m
+
+.node:
+  image: node:24@sha256:4c2f1a0d9e8b7c6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a
+  cache:
+    key:
+      files: [package-lock.json]
+    paths: [.npm/]
+
+gitleaks:
+  stage: check
+  needs: []
+  image:
+    name: zricethezav/gitleaks:v8.24.3@sha256:9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d
+    entrypoint: [""]
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - ./scripts/ci/run.sh secret-scan
+
+lint:
+  extends: .node
+  stage: check
+  needs: []
+  script:
+    - ./scripts/ci/run.sh lint
+
+unit-tests:
+  extends: .node
+  stage: test
+  script:
+    - ./scripts/ci/run.sh test
+
+# Gates nothing: a coverage trend for the reviewer, never a reason to block a merge.
+coverage-trend:
+  extends: .node
+  stage: report
+  allow_failure: true
+  script:
+    - ./scripts/ci/run.sh coverage
+
+# The pipeline's last job: when an earlier job failed, name whoever started the pipeline.
+tell-author:
+  extends: .node
+  stage: .post
+  when: on_failure
+  script:
+    - ./scripts/ci/run.sh tell-author

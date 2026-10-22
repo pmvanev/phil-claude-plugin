@@ -31,11 +31,12 @@ def _jobs():
 
 def test_the_policy_declares_an_andon():
     policy = POLICY.read_text().split("## CI policy", 1)[1].split("\n## ", 1)[0]
-    assert "- **Andon**:" in policy
+    assert "- **Andon**:" in policy and "- **Notify**:" in policy
 
 
 def test_the_workflow_pulls_the_cord_on_a_red_main():
     jobs = _jobs()
+    jobs.pop("tell-author", None)
     andon = jobs.pop("andon")
     needs = re.search(r"^    needs: \[(.+)\]$", andon, re.M)
     assert needs and set(n.strip() for n in needs.group(1).split(",")) == set(jobs), "needs every other job"
@@ -44,5 +45,19 @@ def test_the_workflow_pulls_the_cord_on_a_red_main():
     assert "./scripts/ci/run.sh andon" in andon and "GH_TOKEN: ${{ github.token }}" in andon
 
 
-def test_the_andon_task_is_the_reference_scripts():
-    assert _task(SCRIPT, "andon") == _task(EXAMPLE, "andon")
+def test_the_workflow_names_whoever_started_a_failed_run():
+    jobs = _jobs()
+    tell = jobs.pop("tell-author")
+    jobs.pop("andon")
+    needs = re.search(r"^    needs: \[(.+)\]$", tell, re.M)
+    assert needs and set(n.strip() for n in needs.group(1).split(",")) == set(jobs), "needs every gating job"
+    assert "if: failure()" in tell
+    assert re.search(r"^    permissions:\n      contents: read\n      pull-requests: write\n", tell, re.M)
+    assert "PR_NUMBER: ${{ github.event.pull_request.number }}" in tell and "./scripts/ci/run.sh tell-author" in tell
+
+
+def test_the_andon_and_author_tasks_are_the_reference_scripts():
+    for name in ("andon", "tell-author", "inform"):
+        assert _task(SCRIPT, name) == _task(EXAMPLE, name), name
+    fn = re.compile(r"^tell_author\(\) \{\n.*?^\}\n", re.M | re.S)
+    assert fn.search(SCRIPT.read_text()).group(0) == fn.search(EXAMPLE.read_text()).group(0)

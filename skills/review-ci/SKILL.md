@@ -237,7 +237,9 @@ runner fleet's configuration and its infrastructure code, seeding a socket on re
 `scale_factor`, a deploy pool open to unprotected refs and a bare `retry`, beside a retired platform's
 configuration and safe look-alikes. `04-andon/` holds a GitHub project that declares an Andon field,
 with one workflow pulling the cord on a red main and one that never does; `05-andon-unnamed/`, the
-same project with an Andon field that names no channel, where a missing andon is a question.
+same project with an Andon field that names no channel, where a missing andon is a question; and
+`06-notify/`, a GitLab project under a Notify field, where a job that gates nothing tolerates its own
+failure.
 `tests/test_ci_pipelines_rule.py` and `tests/test_ci_runners_rule.py` check that every item a fixture
 expects takes its id and fix from one row, and that no look-alike is expected.
 

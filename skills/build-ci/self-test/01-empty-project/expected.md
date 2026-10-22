@@ -9,8 +9,8 @@ instruction file, and writes a GitLab pipeline whose trigger matrix keeps that p
 job calling one entry-point script. It reads the forge before writing to it, and here can do neither.
 
 **How to drive it:** per `../README.md`, answering "adopt the default policy" to the policy question,
-"email dev@tally.invalid" to the question of where the team hears a red main, and "no" to any forge
-question.
+"email dev@tally.invalid" to the question of where the team hears a red main, "yes" to whether the user
+will create the `NOTIFY_TOKEN` variable, and "no" to any forge question.
 
 **Expected:** the run writes `.gitlab-ci.yml`, an entry-point script, and the policy block and workflow
 lines in `AGENTS.md`, and reports a trigger matrix matching `expected-matrix.md` job kind by job kind:
@@ -21,6 +21,7 @@ lines in `AGENTS.md`, and reports a trigger matrix matching `expected-matrix.md`
 | checks, tests, build | `lint`, `typecheck`, `unit-tests`, `build` | run on an MR, on main and in a pipeline started by hand on main; exit early or are absent on a docs-only change; absent from the schedule |
 | diff mutation | `mutation-diff` | runs on an MR only, scoped to the changed `src/` files |
 | full mutation | `mutation-full` | runs on the schedule alone, sharded |
+| tell the starter | `tell-author` | runs on failure in every created pipeline but the schedule's, in the `.post` stage |
 
 **Hard assertions (any failure blocks the change):**
 
@@ -44,7 +45,9 @@ lines in `AGENTS.md`, and reports a trigger matrix matching `expected-matrix.md`
   under "To pin", counts as a reported gap, not a failure.
 - **No forge setting is written, nothing is pushed, and no pipeline is started.** The report lists the
   merge gate, auto-cancel, the pipeline schedule and the Pipeline status emails integration as unread,
-  each with the command that reads it.
+  each with the command that reads it, and `NOTIFY_TOKEN` as unread, with the steps that create it.
+- **No job tolerates its own failure** to inform: nothing carries `allow_failure`, and a job meant only
+  to inform, if the run adds one, calls `./scripts/ci/run.sh inform <task>`.
 - **`AGENTS.md` gains the workflow lines:** push a feature branch, open an MR, and merge once its
   pipeline passes; a branch runs a pipeline only while its MR is open; reproduce a failing job locally
   with the entry-point script; a red main stops the line; lint a pipeline change before pushing it.

@@ -77,6 +77,10 @@ Read before proposing anything; the project may already have decided.
   status emails integration; on GitHub an issue labelled `andon`, which the repository's watchers are
   emailed about. Write any other answer — a chat app, a webhook — into the field, and report it as not
   wired.
+- **On GitLab, wire the Notify field through a token the user creates**, since the job token cannot
+  write a comment. Ask, in the same request, whether the user will create a project access token with the `api` scope and the Reporter
+  role and store it as a masked CI variable named `NOTIFY_TOKEN`. The user creates it, so a token's value
+  never passes through this run; until the variable exists, report the field as not wired.
 
 Write the block under `## CI policy` in the project's instruction file, in the rule's shape: its
 `CLAUDE.md`, or its `AGENTS.md` where that is the file it keeps; with neither, create `CLAUDE.md`.
@@ -162,7 +166,7 @@ put `interruptible: true` only on MR-pipeline jobs. Each line below answers the 
 | The secret scan in every pipeline | no rules, first stage, `needs: []` | its own job with no path filter | PIPE-8, PIPE-15 |
 | Fail-fast checks first | first stage, `needs: []` | no `needs:` on the tests | PIPE-15 |
 | A path rule that means something | only in MR pipelines, with `compare_to: refs/heads/<default branch>` | inside the job, never on a required workflow | PIPE-3, PIPE-4 |
-| A schedule that runs only its own work | `if: $CI_PIPELINE_SOURCE == "schedule"` with `when: never` first in every job except the schedule's own work and the secret scan; the schedule's job admits that source alone | `if: github.event_name != 'schedule'` on the same jobs | PIPE-17 |
+| A schedule that runs only its own work | `if: $CI_PIPELINE_SOURCE == "schedule"` with `when: never` first in every job except the schedule's own work, the secret scan and the andon; the schedule's job admits that source alone | `if: github.event_name != 'schedule'` on the same jobs | PIPE-17 |
 | An edge to a job that can skip | `needs:` with `optional: true`, or the same rules on both | an `if:` that tolerates the skip | PIPE-18 |
 | A rule on a variable | `$VAR != null && $VAR != ""` | — | PIPE-19 |
 | No manual step before the merge or the tests | `when: manual` only on a production deploy or rollback | `workflow_dispatch` only for the same | PIPE-7 |
@@ -172,6 +176,7 @@ put `interruptible: true` only on MR-pipeline jobs. Each line below answers the 
 | Portable paths | `$CI_PROJECT_DIR`, or a path relative to the checkout | `$GITHUB_WORKSPACE` | PIPE-16 |
 | A merge queue | — | `merge_group` in the required workflow's triggers | PIPE-5 |
 | A red main the whole team hears | the Pipeline status emails integration, a forge setting (Step 7) | a last job with `needs:` on every other job, `if: failure() && github.ref == 'refs/heads/<default branch>'`, `permissions:` `contents: read` and `issues: write` — a job's `permissions:` replace the top's — and `GH_TOKEN: ${{ github.token }}`, whose steps run `actions/checkout`, then `./scripts/ci/run.sh andon`. With several workflows, one `workflow_run` workflow instead: `on: workflow_run: {workflows: [<each workflow that runs on main>], types: [completed], branches: [<default branch>]}`, `if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event == 'push'`, since a pull request's runs fire it too, and in the step's `env:` `ANDON_RUN_URL: ${{ github.event.workflow_run.html_url }}` and `ANDON_SHA: ${{ github.event.workflow_run.head_sha }}` | PIPE-25 |
+| A failure or a warning that names whoever started the pipeline | a `tell-author` job in the `.post` stage with `when: on_failure`, in an image holding `git` and `curl`, its schedule `when: never` first, running `./scripts/ci/run.sh tell-author` with `NOTIFY_TOKEN` from the masked variable; each job meant only to inform runs `./scripts/ci/run.sh inform <task>`, with no `allow_failure` | a last job with `needs:` on every other job, `if: failure() && github.event_name != 'schedule'`, `permissions:` `contents: read` and `pull-requests: write`, `GH_TOKEN: ${{ github.token }}` and `PR_NUMBER: ${{ github.event.pull_request.number }}`, running `./scripts/ci/run.sh tell-author`; each job meant only to inform runs `./scripts/ci/run.sh inform <task>` with the same grant and `env:`, and no `continue-on-error` | PIPE-26 |
 | A job in a container whose user does not own the checkout | — | job `env:` `GIT_CONFIG_COUNT: 1`, `GIT_CONFIG_KEY_0: safe.directory`, `GIT_CONFIG_VALUE_0: "*"`; `actions/checkout` trusts the directory only for its own commands | — |
 | Pinned, narrow and secret-free | images by digest; tools from their own image, never fetched by `curl`; installs from the lockfile; credentials from CI variables | actions by commit SHA; `permissions: contents: read` at the top; secrets from `secrets.*` | CWE-829, CWE-494, CWE-1357, CWE-250, CWE-798 |
 
@@ -213,6 +218,9 @@ Read each setting the policy depends on:
   `gh api repos/{owner}/{repo} --jq .has_issues`, since an andon issue fails, unheard, where Issues are
   off; the job itself lives in the workflow file, and a chat app's subscription in no setting this run
   can read.
+- **The Notify token.** GitLab only. Leave `NOTIFY_TOKEN` unread, since the variables API returns its
+  value, and list it under unread with the steps that create it: a project access token with the `api`
+  scope and the Reporter role, stored as a masked CI variable.
 
 For each setting that departs from the policy, ask one question — "Require a passing MR pipeline to
 merge?", "Email these addresses when main's pipeline fails?" with the addresses listed, or "Turn on
@@ -236,6 +244,7 @@ lacks, with this project's commands written in:
   change that broke the pipeline owns the fix.
 - A red main stops the line: <the Andon channel> tells everyone, and nothing merges but the fix or its
   revert until main is green.
+- A failure or a warning names you on the MR or PR that caused it, or on main's commit or merged PR.
 - Lint a pipeline change before pushing it: `glab ci lint --dry-run --ref <default branch>`, or
   `actionlint`.
 
@@ -262,7 +271,8 @@ starting it.
 ## Self-test (regression gate)
 
 `skills/build-ci/self-test/01-empty-project/` holds a project with no CI and the matrix a build must
-reach; `02-rework/`, a pipeline that builds its bundle and its image twice; `03-speed/`, a pipeline's
+reach; `04-github-project/`, the same project on GitHub, whose matrix adds the `andon` and `tell-author`
+jobs; `02-rework/`, a pipeline that builds its bundle and its image twice; `03-speed/`, a pipeline's
 recorded history whose slowest job is off the critical path. `tests/test_build_ci.py` holds the first
 matrix to the default policy cell by cell, pins `examples/run.sh`'s decision against a real git history,
 and checks the speed fixture's path with `scripts/pipeline-timings.py`, which `tests/test_pipeline_timings.py`

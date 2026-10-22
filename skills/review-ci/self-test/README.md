@@ -15,6 +15,7 @@ or `rules/ci-runners.md` changes.
 | `03-runner-config/` | a GitLab runner fleet's configuration and Terraform beside a retired platform's, seeding a socket on reused machines, a no-op `scale_factor`, a role-holding pool open to unprotected refs, a bare `retry`, an install that drops the lockfile's hashes and a CA bundle fetched unchecked | `rules/ci-runners.md`, PIPE-10, and `security.md`'s CWE-1357 and CWE-494 rows | six must-fix items by RUN, PIPE and CWE id; the retired fleet and the safe look-alikes unflagged |
 | `04-andon/` | a GitHub project declaring an Andon field, with one workflow whose last job pulls the cord on a red main and one with no such job | PIPE-25, and the Do not flag entries for an MR's failure and an andon job's write grant | one must-fix item, PIPE-25 at the workflow with no andon; the andon job read as `on failure`; its `issues: write` grant unflagged |
 | `05-andon-unnamed/` | fixture 04's project with the default Andon text, which names no channel, and no andon job | PIPE-25's severity on GitHub | one question, PIPE-25 at `ci.yml`, since a chat app the review cannot read may pull the cord; no must-fix item |
+| `06-notify/` | a GitLab project declaring a Notify field, whose `.post` job names the starter on failure while a job that gates nothing tolerates its own failure | PIPE-26, and PIPE-9's Do-not-flag entry | one must-fix item, PIPE-26 at `coverage-trend`; no PIPE-9 item; `tell-author` and its masked token unflagged |
 
 ## Layout
 
