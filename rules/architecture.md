@@ -5,7 +5,7 @@ paths:
 
 # Architecture Guide
 
-Guidelines for software architecture, extracted from Robert C. Martin's *Clean Architecture*, Kent Beck's *Tidy First?*, Dave Farley's *Modern Software Engineering*, Dan North's *Best Simple System for Now*, and MinimumCD.org.
+Guidelines for software architecture, extracted from Robert C. Martin's *Clean Architecture*, Kent Beck's *Tidy First?*, Dave Farley's *Modern Software Engineering*, and Dan North's *Best Simple System for Now*.
 
 ---
 

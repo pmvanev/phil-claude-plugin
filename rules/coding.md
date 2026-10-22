@@ -5,7 +5,7 @@ paths:
 
 # Coding Guide
 
-Guidelines for writing clean code, extracted from Robert C. Martin's *Clean Code* and *Clean Craftsmanship*, Kent Beck's *Tidy First?*, Dan North's *Best Simple System for Now*, and MinimumCD.org.
+Guidelines for writing clean code, extracted from Robert C. Martin's *Clean Code* and *Clean Craftsmanship*, Kent Beck's *Tidy First?*, and Dan North's *Best Simple System for Now*.
 
 ---
 
