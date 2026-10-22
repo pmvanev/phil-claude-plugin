@@ -53,3 +53,8 @@ lines in `AGENTS.md`, and reports a trigger matrix matching `expected-matrix.md`
 count other than four, a `.gitignore` entry for the cache or report directories, a question about
 releases from tags answered "none", and a lint that could not run because `glab` cannot reach the host,
 said so in the report.
+
+**Driven 2026-10-22** blind, against this working tree's `SKILL.md` at 1.8.0, after the andon landed:
+every hard assertion holds. The policy and the andon channel came in one request; the Andon field names
+`dev@tally.invalid`; the `andon` task was dropped on GitLab; the Pipeline status emails integration was
+listed unread and not wired, with the write it would send.

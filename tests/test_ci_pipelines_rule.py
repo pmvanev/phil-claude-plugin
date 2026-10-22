@@ -382,6 +382,8 @@ def test_a_red_main_pulls_the_andon_cord():
     rule = " ".join(RULE.read_text().split())
     assert "### A red main pulls the andon cord" in RULE.read_text()
     assert "who hears it" in rule.split("This rule owns", 1)[1].split(".", 1)[0]
+    assert "stopping the line on a red main" in rule.split("Neighbouring rules", 1)[1].split(";", 1)[0], \
+        "the principle hands the response to continuous-delivery.md, so the scope must say it owns it"
     row = _row("PIPE-25")
     assert "Andon field" in row["Violation"], "a policy row fires only against a declared field"
     assert "only the person who started the run" in row["Violation"]
