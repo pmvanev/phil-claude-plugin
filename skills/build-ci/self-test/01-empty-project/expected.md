@@ -8,8 +8,9 @@ remote names a GitLab host the run cannot reach.
 instruction file, and writes a GitLab pipeline whose trigger matrix keeps that policy in every cell, every
 job calling one entry-point script. It reads the forge before writing to it, and here can do neither.
 
-**How to drive it:** per `../README.md`, answering "adopt the default policy" to the policy question and
-"no" to any forge question.
+**How to drive it:** per `../README.md`, answering "adopt the default policy" to the policy question,
+"email dev@tally.invalid" to the question of where the team hears a red main, "yes" to whether the user
+will create the `NOTIFY_TOKEN` variable, and "no" to any forge question.
 
 **Expected:** the run writes `.gitlab-ci.yml`, an entry-point script, and the policy block and workflow
 lines in `AGENTS.md`, and reports a trigger matrix matching `expected-matrix.md` job kind by job kind:
@@ -20,11 +21,13 @@ lines in `AGENTS.md`, and reports a trigger matrix matching `expected-matrix.md`
 | checks, tests, build | `lint`, `typecheck`, `unit-tests`, `build` | run on an MR, on main and in a pipeline started by hand on main; exit early or are absent on a docs-only change; absent from the schedule |
 | diff mutation | `mutation-diff` | runs on an MR only, scoped to the changed `src/` files |
 | full mutation | `mutation-full` | runs on the schedule alone, sharded |
+| tell the starter | `tell-author` | runs on failure in every created pipeline but the schedule's, in the `.post` stage |
 
 **Hard assertions (any failure blocks the change):**
 
 - **The policy block** is the default block from `rules/ci-pipelines.md`, with Docs-only paths covering
-  `docs/**` and `**/*.md`, written under `## CI policy` in `AGENTS.md`. No `CLAUDE.md` is created.
+  `docs/**` and `**/*.md` and an Andon field naming `dev@tally.invalid`, written under `## CI policy` in
+  `AGENTS.md`. No `CLAUDE.md` is created.
 - **Every job's `script:`** calls the entry-point script, one task per job. An install in
   `before_script` is allowed; any other command is not.
 - **The entry-point script** keeps `examples/run.sh`'s decision: it skips the work only when a
@@ -41,12 +44,29 @@ lines in `AGENTS.md`, and reports a trigger matrix matching `expected-matrix.md`
 - **No `/phil:review-ci` must-fix item** fires on the written pipeline. An image left at a tag, listed
   under "To pin", counts as a reported gap, not a failure.
 - **No forge setting is written, nothing is pushed, and no pipeline is started.** The report lists the
-  merge gate, auto-cancel and the pipeline schedule as unread, each with the command that reads it.
+  merge gate, auto-cancel, the pipeline schedule and the Pipeline status emails integration as unread,
+  each with the command that reads it, and `NOTIFY_TOKEN` as unread, with the steps that create it.
+- **No job tolerates its own failure** to inform: nothing carries `allow_failure`, and a job meant only
+  to inform, if the run adds one, calls `./scripts/ci/run.sh inform <task>`.
+- **`tell-author` sits in the `.post` stage** with the schedule's `when: never` rule first and
+  `when: on_failure` as its last rule, never a job-level `when:` beside `rules:`.
 - **`AGENTS.md` gains the workflow lines:** push a feature branch, open an MR, and merge once its
   pipeline passes; a branch runs a pipeline only while its MR is open; reproduce a failing job locally
-  with the entry-point script; lint a pipeline change before pushing it.
+  with the entry-point script; a red main stops the line; under a Notify field, a failure or a warning
+  names its author; lint a pipeline change before pushing it.
 
 **Not a failure:** different job names, stage names or heading names, one more fail-fast job, a shard
 count other than four, a `.gitignore` entry for the cache or report directories, a question about
 releases from tags answered "none", and a lint that could not run because `glab` cannot reach the host,
 said so in the report.
+
+**Driven 2026-10-22** blind, against this working tree's `SKILL.md` at 1.8.0, after the andon landed:
+every hard assertion holds. The policy and the andon channel came in one request; the Andon field names
+`dev@tally.invalid`; the `andon` task was dropped on GitLab; the Pipeline status emails integration was
+listed unread and not wired, with the write it would send.
+
+**Driven again 2026-10-22** blind, after the author tier landed: every hard assertion holds. One request
+held the policy, the andon channel and the token; `tell-author` sits in `.post` with the schedule's
+`when: never` first and `when: on_failure` last; no job tolerates its own failure; images stay at their
+tags under "To pin"; `NOTIFY_TOKEN` and the Pipeline status emails integration are listed unread, with
+the steps and the write each needs.

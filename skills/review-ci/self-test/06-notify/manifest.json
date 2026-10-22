@@ -1,0 +1,12 @@
+{
+  "node_id": "RCI-SELFTEST-06",
+  "mode": "review",
+  "target": ".",
+  "matrix": true,
+  "pins": "under a declared Notify field, a job meant only to inform that tolerates its own failure with allow_failure is PIPE-26, though PIPE-9's Do-not-flag entry clears it as PIPE-9; the .post job that names the starter on failure, and the masked token it reads, are not flagged",
+  "expected_guard": "one must-fix item, PIPE-26 at dependency-drift; no PIPE-9 item; tell-author read as on failure",
+  "decoys": [
+    "NOTIFY_TOKEN"
+  ],
+  "min_items": 1
+}

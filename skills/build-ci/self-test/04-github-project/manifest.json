@@ -1,0 +1,34 @@
+{
+  "node_id": "BCI-SELFTEST-04",
+  "mode": "build",
+  "target": "project",
+  "pins": "the same project on GitHub gets the default policy and one workflow whose trigger matrix keeps it in every cell: a last andon job pulls the cord on a red main or schedule, and a tell-author job names whoever started any failed pull-request or main run; no forge setting written, no push",
+  "kinds": {
+    "secret-scan": [
+      "gitleaks"
+    ],
+    "check": [
+      "lint",
+      "typecheck"
+    ],
+    "test": [
+      "unit-tests"
+    ],
+    "build": [
+      "build"
+    ],
+    "mutation-diff": [
+      "mutation-diff"
+    ],
+    "mutation-full": [
+      "mutation-full"
+    ],
+    "tell-author": [
+      "tell-author"
+    ],
+    "andon": [
+      "andon"
+    ]
+  },
+  "forge": "github"
+}

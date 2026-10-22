@@ -10,3 +10,4 @@
 | build | runs | exits early | runs | exits early | — | — | runs |
 | mutation-diff | runs | exits early | — | — | — | — | — |
 | mutation-full | — | — | — | — | runs | — | — |
+| tell-author | on failure | on failure | on failure | on failure | — | — | on failure |

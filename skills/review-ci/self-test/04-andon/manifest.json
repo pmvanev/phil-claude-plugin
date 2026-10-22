@@ -1,0 +1,12 @@
+{
+  "node_id": "RCI-SELFTEST-04",
+  "mode": "review",
+  "target": ".",
+  "matrix": true,
+  "pins": "under a declared Andon field on GitHub, a workflow that runs on main with no job that pulls the cord on its failure is PIPE-25, filed at that workflow; a workflow whose last job pulls it is not flagged, and neither is that job's issues: write grant nor an MR failure that only its author hears",
+  "expected_guard": "one must-fix item, PIPE-25 at build.yml; the andon job read as `on failure` on main and `—` elsewhere; its write grant unflagged",
+  "decoys": [
+    "issues: write"
+  ],
+  "min_items": 1
+}

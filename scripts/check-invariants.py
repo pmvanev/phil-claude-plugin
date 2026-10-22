@@ -17,13 +17,14 @@ from pathlib import Path
 CHECKS = [
     ("command mutation declarations", "check-readonly-commands.py"),
     ("product SSOT traceability", "check-product-ssot.py"),
-    # Added 2026-08-26. Nothing ran pytest automatically — no CI exists here — so every check written
-    # as a test reported compliance by staying quiet, which is the defect this runner exists to stop.
+    # Added 2026-08-26, before this repo had CI: nothing ran pytest automatically, so every check
+    # written as a test reported compliance by staying quiet, the defect this runner exists to stop.
     ("decision-request standard wiring", "check-decision-request-reference.py"),
     # Added 2026-08-31. Plugin-shipped rules do not auto-load — measured against 2.1.252 — so a rule
     # nothing names ships to every consumer and is applied by nobody, silently.
     ("rule reachability", "check-rule-reachability.py"),
-    ("repo test suite", "check-tests.py"),
+    # The suite left on 2026-10-22: it takes 25-90 s against the 30 s each check gets, so it reported a
+    # timeout every session; CI runs it on every pull request and main commit instead.
 ]
 
 

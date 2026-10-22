@@ -1,6 +1,6 @@
 ---
 name: build-ci
-description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy and builds the pipeline to it, lints it, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
+description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "tell the team when main breaks", "notify us when the main pipeline fails", "tell the author when their pipeline fails", "comment on the MR when CI fails", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy, builds the pipeline to it, lints it, wires a red-main alert, names whoever started a failed pipeline, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
 ---
 
 # Build CI
@@ -40,7 +40,8 @@ Read before proposing anything; the project may already have decided.
 
 - **The forge and its default branch.** GitLab or GitHub, from `git remote get-url origin` and any CI
   file present. The default branch from `git symbolic-ref --short refs/remotes/origin/HEAD`; failing
-  that, the one local branch named `main` or `master`; failing both, ask.
+  that, the one of `main` and `master` that `git rev-parse --verify -q refs/heads/<name>` finds; failing
+  both, ask.
 - **The pipeline already there.** With a CI file present this run edits; gather the whole pipeline as
   `${CLAUDE_PLUGIN_ROOT}/skills/review-ci/SKILL.md` Step 1 does, and keep every job a recorded decision
   explains.
@@ -71,6 +72,17 @@ Read before proposing anything; the project may already have decided.
 - A field the project cannot yet keep — mutation where no mutation tool is installed — is the user's
   call: ask, and write what they decide. The policy has no field for releases; where the project tags
   releases, ask what a tag pipeline runs.
+- **Name in the Andon field where the team hears a red main.** Where the field names no channel, ask for
+  one in the same request as the policy. The build wires two: on GitLab an email list, through the Pipeline
+  status emails integration; on GitHub an issue labelled `andon`, which the repository's watchers are
+  emailed about. Write any other answer — a chat app, a webhook — into the field, and report it as not
+  wired.
+- **On GitLab, wire the Notify field through a token the user creates**, since the job token cannot
+  write a comment. Ask, in the same request, whether the user will create `NOTIFY_TOKEN` as
+  `references/alerts.md` describes. The user creates it, so a token's value never passes through this
+  run; on a yes, report the field as not wired until the user says the variable exists. On a no, leave
+  the Notify field out of the block, write no `tell-author` job, and keep each job meant only to inform
+  under `allow_failure`, with a comment that says it gates nothing.
 
 Write the block under `## CI policy` in the project's instruction file, in the rule's shape: its
 `CLAUDE.md`, or its `AGENTS.md` where that is the file it keeps; with neither, create `CLAUDE.md`.
@@ -99,7 +111,8 @@ gets its file list split by shard index in the script, which `./scripts/ci/run.s
 wiring.** Write `scripts/ci/run.sh` in POSIX `sh` from `${CLAUDE_PLUGIN_ROOT}/skills/build-ci/examples/run.sh`,
 whose decision `tests/test_build_ci.py` pins. Keep its decision and its broad patterns
 (`vitest.config.*`, not `vitest.config.ts`); add this project's own paths, drop only another forge's CI
-paths, and point each task at the project's own task runner. Mark it executable with
+paths, and point each task at the project's own task runner. On GitLab, drop the `andon` task, which only
+GitHub runs. Mark it executable with
 `chmod +x scripts/ci/run.sh`.
 
 The decision, which `./scripts/ci/run.sh scope` prints as `docs-only`, `scoped` or `full`:
@@ -155,7 +168,7 @@ put `interruptible: true` only on MR-pipeline jobs. Each line below answers the 
 | The secret scan in every pipeline | no rules, first stage, `needs: []` | its own job with no path filter | PIPE-8, PIPE-15 |
 | Fail-fast checks first | first stage, `needs: []` | no `needs:` on the tests | PIPE-15 |
 | A path rule that means something | only in MR pipelines, with `compare_to: refs/heads/<default branch>` | inside the job, never on a required workflow | PIPE-3, PIPE-4 |
-| A schedule that runs only its own work | `if: $CI_PIPELINE_SOURCE == "schedule"` with `when: never` first in every job except the schedule's own work and the secret scan; the schedule's job admits that source alone | `if: github.event_name != 'schedule'` on the same jobs | PIPE-17 |
+| A schedule that runs only its own work | `if: $CI_PIPELINE_SOURCE == "schedule"` with `when: never` first in every job except the schedule's own work, the secret scan and the andon; the schedule's job admits that source alone | `if: github.event_name != 'schedule'` on the same jobs | PIPE-17 |
 | An edge to a job that can skip | `needs:` with `optional: true`, or the same rules on both | an `if:` that tolerates the skip | PIPE-18 |
 | A rule on a variable | `$VAR != null && $VAR != ""` | — | PIPE-19 |
 | No manual step before the merge or the tests | `when: manual` only on a production deploy or rollback | `workflow_dispatch` only for the same | PIPE-7 |
@@ -164,8 +177,15 @@ put `interruptible: true` only on MR-pipeline jobs. Each line below answers the 
 | An image built in the pipeline | copy the manifest and lockfile, install, then copy the source | the same | PIPE-14 |
 | Portable paths | `$CI_PROJECT_DIR`, or a path relative to the checkout | `$GITHUB_WORKSPACE` | PIPE-16 |
 | A merge queue | — | `merge_group` in the required workflow's triggers | PIPE-5 |
+| A red main the whole team hears | the Pipeline status emails integration, a forge setting (Step 7) | an `andon` job that needs every job but `tell-author`, with `issues: write`; with several workflows, one `workflow_run` andon | PIPE-25 |
+| A failure or a warning that names whoever started the pipeline | a `tell-author` job in the `.post` stage whose last rule is `when: on_failure`; each job meant only to inform runs `./scripts/ci/run.sh inform <task>` | a `tell-author` job that needs every job but the andon, with `pull-requests: write`; the same `inform` | PIPE-26 |
 | A job in a container whose user does not own the checkout | — | job `env:` `GIT_CONFIG_COUNT: 1`, `GIT_CONFIG_KEY_0: safe.directory`, `GIT_CONFIG_VALUE_0: "*"`; `actions/checkout` trusts the directory only for its own commands | — |
 | Pinned, narrow and secret-free | images by digest; tools from their own image, never fetched by `curl`; installs from the lockfile; credentials from CI variables | actions by commit SHA; `permissions: contents: read` at the top; secrets from `secrets.*` | CWE-829, CWE-494, CWE-1357, CWE-250, CWE-798 |
+
+Read `${CLAUDE_PLUGIN_ROOT}/skills/build-ci/references/alerts.md` whole before writing either alert, and
+copy its forms: they fix each `needs:` list and the order of each job's rules. The example's `andon` task
+opens one issue labelled `andon` and comments on it while main stays red; its body asks the team to close
+it once main is green.
 
 Give each job a `timeout`. Keep production deploys and rollbacks manual. Read an action's commit with
 `gh api repos/<owner>/<action>/git/ref/tags/<tag>`, and write the tag beside it as a comment. Where the
@@ -197,10 +217,22 @@ Read each setting the policy depends on:
 - **Auto-cancel.** GitLab: `auto_cancel_pending_pipelines` on the same project read.
 - **The schedule.** GitLab: `glab api projects/:id/pipeline_schedules`. A GitHub schedule lives in the
   workflow file.
+- **The andon.** GitLab: `glab api projects/:id/integrations/pipelines-email` for `active`, `recipients`,
+  `notify_only_broken_pipelines` and `branches_to_be_notified`. GitHub:
+  `gh api repos/{owner}/{repo} --jq .has_issues`, since an andon issue fails, unheard, where Issues are
+  off; the job itself lives in the workflow file, and a chat app's subscription in no setting this run
+  can read.
+- **The Notify token.** GitLab only. Leave `NOTIFY_TOKEN` unread, since the variables API returns its
+  value, and list it under unread with the steps `references/alerts.md` gives to create it.
 
 For each setting that departs from the policy, ask one question — "Require a passing MR pipeline to
-merge?" — and write it only on a yes, then read it back. Where the forge cannot be read, ask nothing and
-list each setting unread with the command that reads it.
+merge?", "Email these addresses when main's pipeline fails?" with the addresses listed, or "Turn on
+Issues so a red main can open one?" — and write it only on a yes, then read it back. The andon's GitLab
+write is `glab api -X PUT projects/:id/integrations/pipelines-email -f recipients=<the field's addresses,
+comma-separated> -f notify_only_broken_pipelines=true -f branches_to_be_notified=default`; its GitHub
+write, for Issues, is `gh api -X PATCH repos/{owner}/{repo} -F has_issues=true`, since `-F` sends the
+boolean the API requires and `-f` a string. Where the forge cannot be read, ask nothing and list each
+setting unread with the command that reads it.
 
 ## Step 8: Record the Workflow
 
@@ -213,6 +245,10 @@ lacks, with this project's commands written in:
   until then.
 - Reproduce a failing job with `./scripts/ci/run.sh <task>` and fix it locally before the next push; the
   change that broke the pipeline owns the fix.
+- A red main stops the line: <the Andon channel> tells everyone, and nothing merges but the fix or its
+  revert until main is green.
+- Under a Notify field: a failure or a warning names you on the MR or PR that caused it; on main, on
+  the merged PR on GitHub or the commit on GitLab.
 - Lint a pipeline change before pushing it: `glab ci lint --dry-run --ref <default branch>`, or
   `actionlint`.
 
@@ -239,7 +275,8 @@ starting it.
 ## Self-test (regression gate)
 
 `skills/build-ci/self-test/01-empty-project/` holds a project with no CI and the matrix a build must
-reach; `02-rework/`, a pipeline that builds its bundle and its image twice; `03-speed/`, a pipeline's
+reach; `04-github-project/`, the same project on GitHub, whose matrix adds the `andon` and `tell-author`
+jobs; `02-rework/`, a pipeline that builds its bundle and its image twice; `03-speed/`, a pipeline's
 recorded history whose slowest job is off the critical path. `tests/test_build_ci.py` holds the first
 matrix to the default policy cell by cell, pins `examples/run.sh`'s decision against a real git history,
 and checks the speed fixture's path with `scripts/pipeline-timings.py`, which `tests/test_pipeline_timings.py`

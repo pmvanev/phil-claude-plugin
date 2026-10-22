@@ -37,6 +37,8 @@ DEFAULT_BLOCK = """## CI policy
 - **Schedule**: full mutation, weekly, off-hours, sharded
 - **Merge**: a passing MR pipeline is required
 - **Secret scan**: every pipeline, docs-only included
+- **Andon**: a failed main pipeline notifies the whole team
+- **Notify**: a failure or a warning names whoever started the pipeline
 """
 
 
@@ -120,34 +122,59 @@ def test_the_rule_still_gives_the_default_this_file_checks_against():
     assert DEFAULT_BLOCK in RULE.read_text()
 
 
+# Each job kind's cells under the default policy, per forge. A GitLab pipeline started by hand on main
+# runs as main does; GitHub's default gives no hand-run trigger. Neither creates a tag pipeline. The
+# schedule runs full mutation and the secret scan; on GitHub the andon job watches it too.
+CHECK = {"MR": {"runs", "if paths"}, "docs-only MR": SKIPPED, "main push": {"runs"},
+         "docs-only main": SKIPPED, "schedule": {"—"}, "tag": {"—"}}
+EXPECTED = {
+    "gitlab": {
+        "(pipeline)": {"MR": {"created"}, "docs-only MR": {"created"}, "main push": {"created"},
+                       "docs-only main": {"created"}, "schedule": {"created"}, "tag": {"—"},
+                       "web or API": {"created"}},
+        "secret-scan": {**{s: {"runs"} for s in SOURCES}, "tag": {"—"}},
+        "check": {**CHECK, "web or API": {"runs"}},
+        "mutation-diff": {**{s: {"—"} for s in SOURCES}, "MR": {"runs", "if paths"}, "docs-only MR": SKIPPED},
+        "mutation-full": {**{s: {"—"} for s in SOURCES}, "schedule": {"runs"}},
+        "tell-author": {**{s: {"on failure"} for s in SOURCES}, "schedule": {"—"}, "tag": {"—"}},
+    },
+    "github": {
+        "(pipeline)": {"MR": {"created"}, "docs-only MR": {"created"}, "main push": {"created"},
+                       "docs-only main": {"created"}, "schedule": {"created"}, "tag": {"—"},
+                       "web or API": {"—"}},
+        "secret-scan": {**{s: {"runs"} for s in SOURCES}, "tag": {"—"}, "web or API": {"—"}},
+        "check": {**CHECK, "web or API": {"—"}},
+        "mutation-diff": {**{s: {"—"} for s in SOURCES}, "MR": {"runs", "if paths"}, "docs-only MR": SKIPPED},
+        "mutation-full": {**{s: {"—"} for s in SOURCES}, "schedule": {"runs"}},
+        "andon": {**{s: {"—"} for s in SOURCES}, "main push": {"on failure"}, "docs-only main": {"on failure"},
+                  "schedule": {"on failure"}},
+        "tell-author": {**{s: {"on failure"} for s in SOURCES}, "schedule": {"—"}, "tag": {"—"},
+                        "web or API": {"—"}},
+    },
+}
+KIND_ALIASES = {"test": "check", "build": "check"}
+
+
 def test_the_expected_matrix_keeps_the_default_policy_in_every_cell():
     """D7: MR-only; change-scoped tests and mutation on the MR; a docs-only change runs the secret scan
-    alone; main runs everything but mutation; a schedule runs full mutation and deploys nothing. A
-    pipeline started by hand on main runs as main does, and no tag pipeline exists."""
+    alone; main runs everything but mutation; a schedule runs full mutation and deploys nothing; a
+    failure on any MR or main pipeline names whoever started it, and on GitHub a red main pulls the
+    andon from the pipeline."""
     for manifest in BUILDS:
-        kinds = json.loads(manifest.read_text())["kinds"]
+        spec = json.loads(manifest.read_text())
+        want = EXPECTED[spec.get("forge", "gitlab")]
         rows = _matrix((manifest.parent / "expected-matrix.md").read_text())
-        assert rows.pop("(pipeline)") == {
-            "MR": "created", "docs-only MR": "created", "main push": "created",
-            "docs-only main": "created", "schedule": "created", "tag": "—", "web or API": "created"}
+        pipeline = rows.pop("(pipeline)")
+        assert all(pipeline[s] in want["(pipeline)"][s] for s in SOURCES), pipeline
+        kinds = spec["kinds"]
         assert set(rows) == {j for js in kinds.values() for j in js}, "every job has a kind"
+        assert set(KIND_ALIASES.get(k, k) for k in kinds) == set(want) - {"(pipeline)"}, \
+            f"{manifest.parent.name}: the kinds the default policy needs on this forge"
         for job, cells in rows.items():
-            kind = next(k for k, js in kinds.items() if job in js)
-            assert cells["tag"] == "—", f"{job}: no tag pipeline is created"
-            if kind == "secret-scan":
-                assert all(cells[s] == "runs" for s in SOURCES if s != "tag"), job
-                continue
-            assert cells["docs-only MR"] in SKIPPED and cells["docs-only main"] in SKIPPED, job
-            if kind == "mutation-diff":
-                assert cells["MR"] in {"runs", "if paths"} and cells["main push"] == "—", job
-                assert cells["schedule"] == "—" and cells["web or API"] == "—", job
-            elif kind == "mutation-full":
-                assert cells["schedule"] == "runs", job
-                assert all(cells[s] == "—" for s in SOURCES if s != "schedule"), job
-            else:
-                assert cells["MR"] in {"runs", "if paths"} and cells["main push"] == "runs", job
-                assert cells["web or API"] == "runs", f"{job}: a hand-run main pipeline runs as main does"
-                assert cells["schedule"] == "—", f"{job}: the schedule runs mutation alone"
+            kind = KIND_ALIASES.get(next(k for k, js in kinds.items() if job in js), None)
+            kind = kind or next(k for k, js in kinds.items() if job in js)
+            for source in SOURCES:
+                assert cells[source] in want[kind][source], f"{manifest.parent.name}: {job} × {source}: {cells[source]}"
 
 
 def test_the_grant_holds_the_refusals_the_prose_states():
@@ -160,7 +187,7 @@ def test_the_grant_holds_the_refusals_the_prose_states():
 
 def test_the_schedule_and_the_secret_scan_do_not_contradict():
     skill = _skill()
-    assert "every job except the schedule's own work and the secret scan" in skill
+    assert "every job except the schedule's own work, the secret scan and the andon" in skill
     assert "widens the tests only" in skill
 
 
@@ -405,3 +432,237 @@ def test_the_speed_fixture_traces_to_the_path_it_expects():
     assert (summary["median_wall"], summary["median_queue"]) == (757, 90), "expected.md states 12:37 and 1:30"
     for decoy in want["off_path"]:
         assert summary["jobs"][decoy]["on_path"] == 0, decoy
+
+
+# The andon. GitLab pulls the cord with its Pipeline status emails integration, a forge setting; GitHub
+# tells only the user who triggered the run, so a job pulls it through the entry-point script.
+
+def test_the_skill_pulls_the_andon_cord_on_both_forges():
+    skill = _skill()
+    assert "integrations/pipelines-email" in skill, "read the GitLab setting before asking"
+    assert "Email these addresses when main's pipeline fails?" in skill
+    assert "./scripts/ci/run.sh andon" in skill
+    assert "issues: write" in skill and "contents: read" in skill, "a job's permissions replace the top's"
+    assert "A red main stops the line" in skill
+    assert "nothing merges but the fix or its revert" in skill, "continuous-delivery.md owns the response"
+    assert "revert it first" not in skill
+
+
+def test_the_skill_wires_only_what_each_forge_carries_out():
+    """The skill review found Step 2 offering channels Steps 5 and 7 could not wire (2026-10-22)."""
+    skill = _skill()
+    assert "glab api -X PUT projects/:id/integrations/pipelines-email" in skill, "glab api POSTs given fields"
+    assert "--jq .has_issues" in skill, "an andon issue in a repository with Issues off fails unheard"
+    assert "gh api -X PATCH repos/{owner}/{repo} -F has_issues=true" in skill, "-f sends the string \"true\""
+    assert "github.event.workflow_run.event == 'push'" in skill, "a failed MR run must not pull the cord"
+    assert "red-main alert" in COMMAND.read_text().split("\n---", 1)[0], "the command says what the skill does"
+    assert "not wired" in skill, "a channel the build cannot carry out is reported, not guessed at"
+    assert "On GitLab, drop the `andon` task" in skill
+    assert "ANDON_MENTION" not in skill, "unverified: whether a bot's @-mention reaches a team"
+
+
+def test_the_workflow_run_form_reports_the_failed_run():
+    """In a workflow_run run, GITHUB_RUN_ID and GITHUB_SHA are the andon's own, not the failed run's."""
+    skill = _skill()
+    for form in ("types: [completed]", "github.event.workflow_run.conclusion == 'failure'",
+                 "ANDON_RUN_URL: ${{ github.event.workflow_run.html_url }}",
+                 "ANDON_SHA: ${{ github.event.workflow_run.head_sha }}"):
+        assert form in skill, form
+
+
+def test_the_empty_project_fixture_lists_the_andon_setting_unread():
+    expected = " ".join((REPO / "skills" / "build-ci" / "self-test" / "01-empty-project" / "expected.md").read_text().split())
+    assert "Pipeline status emails integration" in expected
+
+
+def _andon(repo, tmp_path, open_issue="", **env):
+    """Run the andon task with a fake `gh` that logs its arguments and answers the issue search."""
+    bin_ = tmp_path / "bin"
+    bin_.mkdir(exist_ok=True)
+    log = tmp_path / "gh.log"
+    (bin_ / "gh").write_text(f"""#!/bin/sh
+echo "$*" >> {log}
+case "$1 $2" in "issue list") printf '%s' "{open_issue}" ;; esac
+""")
+    (bin_ / "gh").chmod(0o755)
+    clean = {k: v for k, v in os.environ.items() if not k.startswith(("CI", "GITHUB_"))}
+    out = subprocess.run(["sh", "scripts/ci/run.sh", "andon"], cwd=repo, capture_output=True, text=True,
+                         env={**clean, "PATH": f"{bin_}:{os.environ['PATH']}", **env})
+    return out, (log.read_text().splitlines() if log.exists() else [])
+
+
+GITHUB_RUN = {"GITHUB_ACTIONS": "true", "GITHUB_EVENT_NAME": "push", "GITHUB_REPOSITORY": "acme/tally",
+              "GITHUB_SERVER_URL": "https://github.com", "GITHUB_RUN_ID": "42", "GITHUB_SHA": "abc123"}
+
+
+def test_a_red_main_opens_an_andon_issue(repo, tmp_path):
+    out, calls = _andon(repo, tmp_path, **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    created = [c for c in calls if c.startswith("issue create")]
+    assert len(created) == 1, calls
+    assert "main is red" in created[0] and "https://github.com/acme/tally/actions/runs/42" in created[0]
+    assert "--label andon" in created[0], "found again by its label, not a title a human might reuse"
+    assert calls.index(next(c for c in calls if c.startswith("label create andon"))) < calls.index(created[0])
+    assert "Close this issue once main is green." in "\n".join(calls), "the team resets the cord"
+
+
+def test_a_red_main_with_an_andon_open_comments_on_it(repo, tmp_path):
+    out, calls = _andon(repo, tmp_path, open_issue="7", **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    assert not [c for c in calls if c.startswith("issue create")], "one andon, not one per red run"
+    assert any(c.startswith("issue comment 7") for c in calls), calls
+    assert any(c.startswith("issue list") and "--label andon" in c for c in calls), calls
+
+
+def test_a_workflow_run_andon_names_the_failed_run_not_its_own(repo, tmp_path):
+    out, calls = _andon(repo, tmp_path, ANDON_RUN_URL="https://github.com/acme/tally/actions/runs/7",
+                        ANDON_SHA="def456", **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    created = next(c for c in calls if c.startswith("issue create"))
+    assert "def456: https://github.com/acme/tally/actions/runs/7" in created
+    assert "runs/42" not in created and "abc123" not in created
+
+
+def test_the_andon_never_pulls_outside_github_actions(repo, tmp_path):
+    """A local run must not open an issue, and on GitLab the integration pulls the cord."""
+    out, calls = _andon(repo, tmp_path)
+    assert out.returncode != 0 and not calls
+    assert "Pipeline status emails" in out.stderr
+
+
+def test_the_grant_covers_every_command_the_skill_runs():
+    """The plugin validator found three the skill named and the grant refused, from 1.5.0 and 1.5.1
+    (2026-10-22): a run that cannot write the lockfile it promises installs from none."""
+    grant = [g.strip() for g in re.search(r"^allowed-tools: (.+)$", COMMAND.read_text(), re.M).group(1).split(",")]
+    skill = _skill()
+    for command, granted in (("shellcheck -s sh", "Bash(shellcheck:*)"),
+                             ("uv pip compile --generate-hashes", "Bash(uv pip compile:*)"),
+                             ("npm install --package-lock-only", "Bash(npm install --package-lock-only:*)"),
+                             ("git rev-parse --verify -q refs/heads/", "Bash(git rev-parse --verify:*)")):
+        assert command in skill, command
+        assert granted in grant, granted
+
+
+# The author tier. `tell-author` names whoever started the pipeline on its MR, PR or commit; `inform`
+# runs a check that gates nothing and tells them when it fails, in place of allow_failure or
+# continue-on-error, which tell nobody.
+
+def test_the_skill_tells_whoever_started_the_pipeline():
+    skill = _skill()
+    for form in ("./scripts/ci/run.sh tell-author", "./scripts/ci/run.sh inform", "`when: on_failure`",
+                 "`.post`", "`pull-requests: write`", "PR_NUMBER: ${{ github.event.pull_request.number }}",
+                 "`NOTIFY_TOKEN`"):
+        assert form in skill, form
+    assert "never passes through this run" in skill, "the user creates the token; its value stays out"
+    assert "Under a Notify field: a failure or a warning names you" in skill
+
+
+def _task(repo, tmp_path, *args, gh_out="", **env):
+    """Run a task with a fake `gh` and `curl` that log their arguments; `gh api` answers `gh_out`."""
+    bin_ = tmp_path / "bin"
+    bin_.mkdir(exist_ok=True)
+    log = tmp_path / "calls.log"
+    for tool in ("gh", "curl"):
+        (bin_ / tool).write_text(f"""#!/bin/sh
+echo "{tool} $*" >> {log}
+case "$1" in api) printf '%s' "{gh_out}" ;; esac
+""")
+        (bin_ / tool).chmod(0o755)
+    clean = {k: v for k, v in os.environ.items() if not k.startswith(("CI", "GITHUB_", "GITLAB_"))}
+    out = subprocess.run(["sh", "scripts/ci/run.sh", *args], cwd=repo, capture_output=True, text=True,
+                         env={**clean, "PATH": f"{bin_}:{os.environ['PATH']}", **env})
+    return out, (log.read_text() if log.exists() else "")
+
+
+GITLAB_RUN = {"CI": "true", "GITLAB_CI": "true", "CI_PIPELINE_SOURCE": "merge_request_event",
+              "CI_API_V4_URL": "https://gitlab.example.invalid/api/v4", "CI_PROJECT_ID": "12",
+              "CI_PIPELINE_URL": "https://gitlab.example.invalid/acme/tally/-/pipelines/88",
+              "CI_COMMIT_SHA": "abc123", "GITLAB_USER_LOGIN": "bob", "NOTIFY_TOKEN": "t0ken"}
+
+
+def test_a_failed_pr_pipeline_names_whoever_started_it(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "tell-author", PR_NUMBER="5", GITHUB_TRIGGERING_ACTOR="alice", **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    assert "gh pr comment 5 --body @alice: the pipeline failed: https://github.com/acme/tally/actions/runs/42" in calls
+
+
+def test_a_failed_main_run_names_its_starter_on_the_merged_pr(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "tell-author", gh_out="9", GITHUB_TRIGGERING_ACTOR="alice", **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    assert "gh api repos/acme/tally/commits/abc123/pulls" in calls and "gh pr comment 9 " in calls
+
+
+def test_a_failed_mr_pipeline_comments_on_the_mr_naming_its_starter(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "tell-author", CI_MERGE_REQUEST_IID="3", **GITLAB_RUN)
+    assert out.returncode == 0, out.stderr
+    assert "/projects/12/merge_requests/3/notes" in calls and "body=@bob: the pipeline failed" in calls
+    assert "PRIVATE-TOKEN: t0ken" in calls
+
+
+def test_a_failed_main_pipeline_on_gitlab_comments_on_the_commit(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "tell-author", **{**GITLAB_RUN, "CI_PIPELINE_SOURCE": "push"})
+    assert out.returncode == 0, out.stderr
+    assert "/projects/12/repository/commits/abc123/comments" in calls and "note=@bob: " in calls
+
+
+def test_gitlab_without_its_token_fails_rather_than_lose_the_message(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "tell-author", CI_MERGE_REQUEST_IID="3", **{**GITLAB_RUN, "NOTIFY_TOKEN": ""})
+    assert out.returncode != 0 and "NOTIFY_TOKEN" in out.stderr and not calls
+
+
+def test_tell_author_never_runs_outside_ci(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "tell-author")
+    assert out.returncode != 0 and not calls
+    assert "tell-author runs in CI" in out.stderr
+
+
+def test_a_check_that_informs_tells_its_starter_and_passes(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "inform", "no-such-task", PR_NUMBER="5", GITHUB_TRIGGERING_ACTOR="alice",
+                       **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    assert "gh pr comment 5 --body @alice: warning: `no-such-task` failed; it gates nothing" in calls
+
+
+def test_a_check_that_informs_and_passes_tells_nobody(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "inform", "scope", PR_NUMBER="5", **GITHUB_RUN)
+    assert out.returncode == 0, out.stderr
+    assert "pr comment" not in calls
+
+
+
+def test_the_alert_wiring_is_written_out_where_it_cannot_be_misread():
+    """Two reviews found the table's prose read as a needs cycle and as job-level `when:` beside
+    `rules:`, which GitLab rejects; the forms now live as YAML in references/alerts.md (2026-10-22)."""
+    ref = (SKILL.parent / "references" / "alerts.md").read_text()
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/skills/build-ci/references/alerts.md` whole" in _skill()
+    assert '    - if: $CI_PIPELINE_SOURCE == "schedule"\n      when: never\n    - when: on_failure\n' in ref
+    assert "every job but tell-author" in ref and "every job but the andon" in ref
+    for fact in ("masked, not protected", "Premium or Ultimate", "365 days", "fork", "Dependabot",
+                 "a `workflow_run` notifier cannot use `tell-author`", "a schedule has no author"):
+        assert fact.lower() in " ".join(ref.split()).lower(), fact
+
+
+def test_a_declined_token_leaves_the_warning_under_allow_failure():
+    skill = _skill()
+    assert "On a no, leave the Notify field out of the block" in skill
+    assert "into `./scripts/ci/run.sh inform <task>`" in skill, "an existing pipeline's informational jobs convert"
+
+
+def test_a_warning_that_cannot_be_delivered_still_gates_nothing(repo, tmp_path):
+    """Both reviews: `inform` failed its job when the comment could not post, so a warning gated."""
+    out, calls = _task(repo, tmp_path, "inform", "no-such-task", "extra", CI_MERGE_REQUEST_IID="3",
+                       **{**GITLAB_RUN, "NOTIFY_TOKEN": ""})
+    assert out.returncode == 0, out.stderr
+    assert "warning not delivered" in out.stderr and "`no-such-task`" in out.stderr
+
+
+def test_a_warning_names_one_task_on_one_line(repo, tmp_path):
+    out, calls = _task(repo, tmp_path, "inform", "no-such-task", "extra", PR_NUMBER="5",
+                       GITHUB_ACTOR="alice", **GITHUB_RUN)
+    assert "warning: `no-such-task` failed; it gates nothing" in calls
+
+
+def test_the_command_says_what_the_author_tier_does():
+    head = COMMAND.read_text().split("\n---", 1)[0]
+    assert "names whoever started a failed pipeline" in head
+    assert "names whoever started a failed pipeline" in SKILL.read_text().split("\n---", 1)[0]

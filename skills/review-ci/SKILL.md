@@ -1,6 +1,6 @@
 ---
 name: review-ci
-description: This skill should be used when the user asks to "review the CI pipeline", "check our .gitlab-ci.yml", "audit the GitHub Actions workflows", "is our pipeline gating correctly", "which jobs run on a schedule", "why wasn't my MR pipeline created", "check the pipeline against our CI policy", "review our GitLab runner config", "is our runner fleet isolated", or runs /phil:review-ci. It applies rules/ci-pipelines.md, rules/ci-runners.md for runner configuration, and the pipeline rows of rules/security.md, builds a jobs-by-source trigger matrix against the project's declared CI policy, and writes a findings backlog without editing what it reviews.
+description: This skill should be used when the user asks to "review the CI pipeline", "check our .gitlab-ci.yml", "audit the GitHub Actions workflows", "is our pipeline gating correctly", "which jobs run on a schedule", "why wasn't my MR pipeline created", "does anyone hear when main breaks", "who hears when a pipeline fails", "are allowed-to-fail jobs hiding warnings", "check the pipeline against our CI policy", "review our GitLab runner config", "is our runner fleet isolated", or runs /phil:review-ci. It applies rules/ci-pipelines.md, rules/ci-runners.md for runner configuration, and the pipeline rows of rules/security.md, builds a jobs-by-source trigger matrix against the project's declared CI policy, and writes a findings backlog without editing what it reviews.
 ---
 
 # Review CI
@@ -53,7 +53,7 @@ Then collect, from the target:
   instance profiles, IAM trust policies, cloud-init, a GitHub runner scale set's values. Read
   `ci-runners.md` whole before judging it. Decide **which platform is live** from the README and the
   recorded decisions: a directory a file calls retired, and that nothing live applies, is history,
-  named on the backlog's History line and not reviewed. Where something live still applies it, review it. Record the commit the review read with `git rev-parse HEAD`, and list the live system — the
+  named on the backlog's History line and not reviewed. Where something live still applies it, review it. Record the commit the review read with `git rev-parse --verify HEAD`, and list the live system — the
   runner manager, the cloud account — under Not read (RUN-T1).
 - **Project files a row turns on:** the lockfile and the manifest a cache key or an install names, and
   any script a job calls whose behaviour decides a row — whether a deploy script rebuilds, whether a
@@ -65,8 +65,9 @@ CI files, Dockerfiles and runner configuration, and gather the whole pipeline or
 
 **List each source the review cannot read:** a remote, template, project or component `include:`; a
 reusable workflow in another repository; a forge setting, such as branch protection, required checks,
-the merge queue, auto-cancel, pipeline schedules or runner settings the target does not hold; a file a job calls that
-the target does not hold; a script read only in part, with the part read; and any other forge's
+the merge queue, auto-cancel, pipeline schedules, notification integrations, chat-app subscriptions,
+CI/CD variables, such as a token a job reads, or runner settings the target does not hold; a file a job calls that the target does not hold; a script
+read only in part, with the part read; and any other forge's
 pipeline file (`azure-pipelines*`, `.circleci/**`, `Jenkinsfile`), which the rule's rows do not cover. A
 row's guard or premise can live in any of them.
 
@@ -102,6 +103,7 @@ job that is skipped skips the jobs after it unless their `if:` says otherwise. W
 
 - `runs` — the job is created and starts on its own;
 - `manual` — the job is created and waits for a person;
+- `on failure` — the job is created and runs only when an earlier job fails, as an andon job does;
 - `exits early` — the job is created, and the script it calls skips the work for this source, as a
   docs-only check inside the script does;
 - `if paths` — whether the job runs turns on which paths the change touches;
@@ -166,7 +168,7 @@ what a job does — a rebuild, a cache, a CWE — mark no cell.
 Generated: {date}
 Scope: {argument}
 Standard: rules/ci-pipelines.md; rules/ci-runners.md, where runner configuration was read; rules/security.md (Supply chain and build, the privilege row, the credential-literal row)
-Read at: {the commit `git rev-parse HEAD` printed, with "and uncommitted changes" where `git diff HEAD` shows any, and the branch where it is not the default branch, since the live fleet most likely runs the default branch's code; "not a git repository" where it fails}
+Read at: {the commit `git rev-parse --verify HEAD` printed, with "and uncommitted changes" where `git diff HEAD` shows any, and the branch where it is not the default branch, since the live fleet most likely runs the default branch's code; "not a git repository" where it fails}
 History: {each retired platform's configuration, named and not reviewed, or "none"}
 Policy: {each declared field as `Field: value`, or "none declared"}
 Not read: {each unread include, workflow, setting, missing or part-read file, or other forge's file, or "nothing"}
@@ -183,9 +185,9 @@ Not read: {each unread include, workflow, setting, missing or part-read file, or
 | Job | MR | docs-only MR | main push | docs-only main | schedule | tag | web or API |
 |---|---|---|---|---|---|---|---|
 | (pipeline) | {created, —, or refused with its condition} | … |
-| {job} | {runs, manual, exits early, if paths, —, ? or n/a, with ✗ C00n where an item marks it} | … |
+| {job} | {runs, manual, on failure, exits early, if paths, —, ? or n/a, with ✗ C00n where an item marks it} | … |
 
-{a note for each `?` cell, each refused pipeline and each value that would change a cell; then: "Read from the rules, not run; GitLab's CI lint API with `dry_run` confirms a cell."}
+{a note for each `?` cell, each refused pipeline and each value that would change a cell; for each `on failure` cell, note the jobs whose failure starts it; then: "Read from the rules, not run; GitLab's CI lint API with `dry_run` confirms a cell."}
 
 ## Backlog
 
@@ -233,7 +235,11 @@ a `needs:` on a path-skipped job, a check skipped by any doc path and a departur
 beside a correct guard; its expected backlog holds the matrix. `03-runner-config/` holds a GitLab
 runner fleet's configuration and its infrastructure code, seeding a socket on reused machines, a no-op
 `scale_factor`, a deploy pool open to unprotected refs and a bare `retry`, beside a retired platform's
-configuration and safe look-alikes.
+configuration and safe look-alikes. `04-andon/` holds a GitHub project that declares an Andon field,
+with one workflow pulling the cord on a red main and one that never does; `05-andon-unnamed/`, the
+same project with an Andon field that names no channel, where a missing andon is a question; and
+`06-notify/`, a GitLab project under a Notify field, where a job that gates nothing tolerates its own
+failure.
 `tests/test_ci_pipelines_rule.py` and `tests/test_ci_runners_rule.py` check that every item a fixture
 expects takes its id and fix from one row, and that no look-alike is expected.
 

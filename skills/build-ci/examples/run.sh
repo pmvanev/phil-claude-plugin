@@ -128,6 +128,38 @@ changed_sources() {
   printf '%s' "$list"
 }
 
+# Name whoever started this pipeline on its MR or PR, or on main's commit or merged PR: a comment that
+# names them reaches them whatever their own pipeline notifications say. GitHub's job token can write
+# the comment; GitLab's cannot, so NOTIFY_TOKEN carries a project access token with the api scope.
+tell_author() {
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then
+    export GH_REPO="$GITHUB_REPOSITORY"
+    run="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+    pr=${PR_NUMBER:-$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq '.[0].number // empty')}
+    if [ -z "$pr" ]; then
+      echo "run.sh: no pull request holds $GITHUB_SHA, so nobody was told: $1: $run" >&2
+      return 1
+    fi
+    gh pr comment "$pr" --body "@${GITHUB_TRIGGERING_ACTOR:-${GITHUB_ACTOR:-}}: $1: $run"
+  elif [ -n "${GITLAB_CI:-}" ]; then
+    if [ -z "${NOTIFY_TOKEN:-}" ]; then
+      echo "run.sh: NOTIFY_TOKEN is unset, so nobody was told: $1: $CI_PIPELINE_URL" >&2
+      return 1
+    fi
+    api="$CI_API_V4_URL/projects/$CI_PROJECT_ID"
+    if [ -n "${CI_MERGE_REQUEST_IID:-}" ]; then
+      curl -fsS -o /dev/null --header "PRIVATE-TOKEN: $NOTIFY_TOKEN" \
+        --data-urlencode "body=@$GITLAB_USER_LOGIN: $1: $CI_PIPELINE_URL" "$api/merge_requests/$CI_MERGE_REQUEST_IID/notes"
+    else
+      curl -fsS -o /dev/null --header "PRIVATE-TOKEN: $NOTIFY_TOKEN" \
+        --data-urlencode "note=@$GITLAB_USER_LOGIN: $1: $CI_PIPELINE_URL" "$api/repository/commits/$CI_COMMIT_SHA/comments"
+    fi
+  else
+    echo "run.sh: tell-author runs in CI, where it knows whom to tell" >&2
+    return 1
+  fi
+}
+
 task=${1:-}
 case "$task" in
   scope)
@@ -188,8 +220,45 @@ case "$task" in
     install
     npx stryker run --mutate "$files"
     ;;
+  andon)
+    # A red main is the team's: open one issue labelled andon, which the repository's watchers are
+    # emailed about, or comment on the one already open. Only GitHub needs this; on GitLab the Pipeline
+    # status emails integration pulls the cord. A workflow_run andon passes the failed run's URL and
+    # commit as ANDON_RUN_URL and ANDON_SHA, since its own GITHUB_RUN_ID and GITHUB_SHA name itself.
+    if [ -z "${GITHUB_ACTIONS:-}" ]; then
+      echo "run.sh: andon runs in GitHub Actions; on GitLab the Pipeline status emails integration pulls the cord" >&2
+      exit 1
+    fi
+    export GH_REPO="$GITHUB_REPOSITORY"
+    run=${ANDON_RUN_URL:-$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID}
+    sha=${ANDON_SHA:-$GITHUB_SHA}
+    gh label create andon --color B60205 --description "main is red" --force
+    open=$(gh issue list --label andon --state open --json number --jq '.[0].number // empty')
+    if [ -n "$open" ]; then
+      gh issue comment "$open" --body "Still red at $sha: $run"
+    else
+      gh issue create --title "main is red" --label andon --body "The default-branch pipeline failed at $sha: $run
+
+Nothing merges but the fix or its revert until main is green. Close this issue once main is green."
+    fi
+    ;;
+  tell-author)
+    # The pipeline's last job, run when an earlier one failed.
+    tell_author "the pipeline failed"
+    ;;
+  inform)
+    # A job meant only to inform runs its check here, never under allow_failure or continue-on-error,
+    # which tell nobody: on failure the check names whoever started the pipeline, and the job passes,
+    # even when the comment cannot be posted, since a warning gates nothing.
+    shift
+    [ $# -gt 0 ] || { echo "usage: $0 inform <task>" >&2; exit 2; }
+    if ! sh "$(pwd)/scripts/ci/run.sh" "$@"; then
+      tell_author "warning: \`$1\` failed; it gates nothing" ||
+        echo "run.sh: warning not delivered: \`$1\` failed" >&2
+    fi
+    ;;
   *)
-    echo "usage: $0 scope|shard|secret-scan|lint|typecheck|test|build|mutate|mutate-full" >&2
+    echo "usage: $0 scope|shard|secret-scan|lint|typecheck|test|build|mutate|mutate-full|andon|tell-author|inform <task>" >&2
     exit 2
     ;;
 esac
