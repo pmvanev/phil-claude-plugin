@@ -418,6 +418,30 @@ def test_the_skill_pulls_the_andon_cord_on_both_forges():
     assert "./scripts/ci/run.sh andon" in skill
     assert "issues: write" in skill and "contents: read" in skill, "a job's permissions replace the top's"
     assert "A red main stops the line" in skill
+    assert "nothing merges but the fix or its revert" in skill, "continuous-delivery.md owns the response"
+    assert "revert it first" not in skill
+
+
+def test_the_skill_wires_only_what_each_forge_carries_out():
+    """The skill review found Step 2 offering channels Steps 5 and 7 could not wire (2026-10-22)."""
+    skill = _skill()
+    assert "glab api -X PUT projects/:id/integrations/pipelines-email" in skill, "glab api POSTs given fields"
+    assert "--jq .has_issues" in skill, "an andon issue in a repository with Issues off fails unheard"
+    assert "gh api -X PATCH repos/{owner}/{repo} -F has_issues=true" in skill, "-f sends the string \"true\""
+    assert "github.event.workflow_run.event == 'push'" in skill, "a failed MR run must not pull the cord"
+    assert "red-main alert" in COMMAND.read_text().split("\n---", 1)[0], "the command says what the skill does"
+    assert "not wired" in skill, "a channel the build cannot carry out is reported, not guessed at"
+    assert "On GitLab, drop the `andon` task" in skill
+    assert "ANDON_MENTION" not in skill, "unverified: whether a bot's @-mention reaches a team"
+
+
+def test_the_workflow_run_form_reports_the_failed_run():
+    """In a workflow_run run, GITHUB_RUN_ID and GITHUB_SHA are the andon's own, not the failed run's."""
+    skill = _skill()
+    for form in ("types: [completed]", "github.event.workflow_run.conclusion == 'failure'",
+                 "ANDON_RUN_URL: ${{ github.event.workflow_run.html_url }}",
+                 "ANDON_SHA: ${{ github.event.workflow_run.head_sha }}"):
+        assert form in skill, form
 
 
 def test_the_empty_project_fixture_lists_the_andon_setting_unread():
@@ -451,6 +475,9 @@ def test_a_red_main_opens_an_andon_issue(repo, tmp_path):
     created = [c for c in calls if c.startswith("issue create")]
     assert len(created) == 1, calls
     assert "main is red" in created[0] and "https://github.com/acme/tally/actions/runs/42" in created[0]
+    assert "--label andon" in created[0], "found again by its label, not a title a human might reuse"
+    assert calls.index(next(c for c in calls if c.startswith("label create andon"))) < calls.index(created[0])
+    assert "Close this issue once main is green." in "\n".join(calls), "the team resets the cord"
 
 
 def test_a_red_main_with_an_andon_open_comments_on_it(repo, tmp_path):
@@ -458,12 +485,16 @@ def test_a_red_main_with_an_andon_open_comments_on_it(repo, tmp_path):
     assert out.returncode == 0, out.stderr
     assert not [c for c in calls if c.startswith("issue create")], "one andon, not one per red run"
     assert any(c.startswith("issue comment 7") for c in calls), calls
+    assert any(c.startswith("issue list") and "--label andon" in c for c in calls), calls
 
 
-def test_an_andon_mention_names_the_team(repo, tmp_path):
-    out, calls = _andon(repo, tmp_path, ANDON_MENTION="@acme/tally-devs", **GITHUB_RUN)
+def test_a_workflow_run_andon_names_the_failed_run_not_its_own(repo, tmp_path):
+    out, calls = _andon(repo, tmp_path, ANDON_RUN_URL="https://github.com/acme/tally/actions/runs/7",
+                        ANDON_SHA="def456", **GITHUB_RUN)
     assert out.returncode == 0, out.stderr
-    assert "cc @acme/tally-devs" in "\n".join(calls)
+    created = next(c for c in calls if c.startswith("issue create"))
+    assert "def456: https://github.com/acme/tally/actions/runs/7" in created
+    assert "runs/42" not in created and "abc123" not in created
 
 
 def test_the_andon_never_pulls_outside_github_actions(repo, tmp_path):

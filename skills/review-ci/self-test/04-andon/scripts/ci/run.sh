@@ -52,14 +52,25 @@ case "${1:-}" in
     python3 -m zipapp src -m 'tally.__main__:main' -o dist/tally.pyz
     ;;
   andon)
-    [ -n "${GITHUB_ACTIONS:-}" ] || { echo "run.sh: andon runs in GitHub Actions" >&2; exit 1; }
+    # A red main is the team's: open one issue labelled andon, which the repository's watchers are
+    # emailed about, or comment on the one already open. Only GitHub needs this; on GitLab the Pipeline
+    # status emails integration pulls the cord. A workflow_run andon passes the failed run's URL and
+    # commit as ANDON_RUN_URL and ANDON_SHA, since its own GITHUB_RUN_ID and GITHUB_SHA name itself.
+    if [ -z "${GITHUB_ACTIONS:-}" ]; then
+      echo "run.sh: andon runs in GitHub Actions; on GitLab the Pipeline status emails integration pulls the cord" >&2
+      exit 1
+    fi
     export GH_REPO="$GITHUB_REPOSITORY"
-    run="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-    open=$(gh issue list --state open --search 'in:title "main is red"' --json number --jq '.[0].number // empty')
+    run=${ANDON_RUN_URL:-$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID}
+    sha=${ANDON_SHA:-$GITHUB_SHA}
+    gh label create andon --color B60205 --description "main is red" --force
+    open=$(gh issue list --label andon --state open --json number --jq '.[0].number // empty')
     if [ -n "$open" ]; then
-      gh issue comment "$open" --body "Still red at $GITHUB_SHA: $run"
+      gh issue comment "$open" --body "Still red at $sha: $run"
     else
-      gh issue create --title "main is red" --body "The default-branch pipeline failed at $GITHUB_SHA: $run"
+      gh issue create --title "main is red" --label andon --body "The default-branch pipeline failed at $sha: $run
+
+Nothing merges but the fix or its revert until main is green. Close this issue once main is green."
     fi
     ;;
   *)

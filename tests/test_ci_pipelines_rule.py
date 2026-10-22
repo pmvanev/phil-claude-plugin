@@ -389,6 +389,14 @@ def test_a_red_main_pulls_the_andon_cord():
         assert form in row["Preferred form"], form
 
 
+def test_a_workflow_run_andon_ignores_pull_request_runs():
+    """workflow_run fires for a pull request's runs too, and a fork's branch may be named main; the
+    plugin validator found the first form pulling the cord on a failed MR (2026-10-22)."""
+    form = _row("PIPE-25")["Preferred form"]
+    assert "branches: [<default branch>]" in form
+    assert "github.event.workflow_run.event == 'push'" in form
+
+
 def test_an_andon_in_a_setting_or_an_app_is_a_question():
     """GitLab's Pipeline status emails and a chat app's subscription are both invisible to the file."""
     policy = " ".join(RULE.read_text().split("## The declared policy", 1)[1].split("\n---\n", 1)[0].split())
@@ -407,6 +415,27 @@ def test_review_ci_reads_a_job_that_runs_on_failure_and_lists_notification_setti
     skill = " ".join(SKILL.read_text().split())
     assert "`on failure`" in skill
     assert "notification integrations" in skill
+
+
+def test_the_backlog_template_offers_the_on_failure_cell_and_notes_what_starts_it():
+    """The skill review found the template an agent copies missing the new value (2026-10-22)."""
+    text = SKILL.read_text()
+    template = next(l for l in text.splitlines() if l.startswith("| {job} |"))
+    assert "on failure" in template
+    assert "note the jobs whose failure starts it" in " ".join(text.split())
+
+
+def test_a_github_pipe_25_is_must_fix_only_where_a_workflow_must_carry_the_channel():
+    """A chat app's subscription can pull the cord unseen; only an issue or a webhook needs a job."""
+    policy = " ".join(RULE.read_text().split("## The declared policy", 1)[1].split("\n---\n", 1)[0].split())
+    assert "On GitHub, PIPE-25 is must-fix where the field names an issue or a webhook" in policy
+    severities = {}
+    for m in FIXTURES:
+        backlog = (m.parent / "expected-backlog.md").read_text()
+        for item in _items(backlog):
+            if _plain(_field(item, "Row")) == "PIPE-25":
+                severities[m.parent.name] = _field(item, "Severity")
+    assert "must-fix" in severities.values() and "question" in severities.values(), severities
 
 
 def test_a_github_fixture_expects_pipe_25():

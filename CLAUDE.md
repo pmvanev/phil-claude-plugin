@@ -34,8 +34,8 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
 - A branch runs a pipeline only while its pull request is open, so test locally until then.
 - Reproduce a failing job with `./scripts/ci/run.sh <task>` — `secret-scan`, `checks` or `test` — and fix
   it locally before the next push; the change that broke the pipeline owns the fix.
-- A red main stops the line: a "main is red" issue tells everyone, nobody merges until main is green, and
-  the change that broke it owns the fix — revert it first.
+- A red main stops the line: a "main is red" issue labelled `andon` tells everyone, and nothing merges but
+  the fix or its revert until main is green. Close the issue once main is green.
 - Lint a workflow change before pushing it: `actionlint`.
 
 ## Key Principles (always apply)

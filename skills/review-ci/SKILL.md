@@ -65,8 +65,9 @@ CI files, Dockerfiles and runner configuration, and gather the whole pipeline or
 
 **List each source the review cannot read:** a remote, template, project or component `include:`; a
 reusable workflow in another repository; a forge setting, such as branch protection, required checks,
-the merge queue, auto-cancel, pipeline schedules, notification integrations or runner settings the target does not hold; a file a job calls that
-the target does not hold; a script read only in part, with the part read; and any other forge's
+the merge queue, auto-cancel, pipeline schedules, notification integrations, chat-app subscriptions or
+runner settings the target does not hold; a file a job calls that the target does not hold; a script
+read only in part, with the part read; and any other forge's
 pipeline file (`azure-pipelines*`, `.circleci/**`, `Jenkinsfile`), which the rule's rows do not cover. A
 row's guard or premise can live in any of them.
 
@@ -184,9 +185,9 @@ Not read: {each unread include, workflow, setting, missing or part-read file, or
 | Job | MR | docs-only MR | main push | docs-only main | schedule | tag | web or API |
 |---|---|---|---|---|---|---|---|
 | (pipeline) | {created, —, or refused with its condition} | … |
-| {job} | {runs, manual, exits early, if paths, —, ? or n/a, with ✗ C00n where an item marks it} | … |
+| {job} | {runs, manual, on failure, exits early, if paths, —, ? or n/a, with ✗ C00n where an item marks it} | … |
 
-{a note for each `?` cell, each refused pipeline and each value that would change a cell; then: "Read from the rules, not run; GitLab's CI lint API with `dry_run` confirms a cell."}
+{a note for each `?` cell, each refused pipeline and each value that would change a cell; for each `on failure` cell, note the jobs whose failure starts it; then: "Read from the rules, not run; GitLab's CI lint API with `dry_run` confirms a cell."}
 
 ## Backlog
 
@@ -235,7 +236,8 @@ beside a correct guard; its expected backlog holds the matrix. `03-runner-config
 runner fleet's configuration and its infrastructure code, seeding a socket on reused machines, a no-op
 `scale_factor`, a deploy pool open to unprotected refs and a bare `retry`, beside a retired platform's
 configuration and safe look-alikes. `04-andon/` holds a GitHub project that declares an Andon field,
-with one workflow pulling the cord on a red main and one that never does.
+with one workflow pulling the cord on a red main and one that never does; `05-andon-unnamed/`, the
+same project with an Andon field that names no channel, where a missing andon is a question.
 `tests/test_ci_pipelines_rule.py` and `tests/test_ci_runners_rule.py` check that every item a fixture
 expects takes its id and fix from one row, and that no look-alike is expected.
 

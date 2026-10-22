@@ -37,3 +37,7 @@ read"; line numbers within ±2; a differently worded title.
 `build.yml` 15-26 with the row's form verbatim; `ci.yml: andon` read as `on failure` on main and `—`
 elsewhere; no item on the write grant or on an MR's failure. The drive gave each workflow its own
 `(pipeline)` row, which no assertion names.
+
+**Driven again 2026-10-22**, after the skill review's and plugin validator's fixes, against the corrected
+`workflow_run` form: exact on every hard assertion. Two extra Advisory items, one per workflow, for a
+superseded pull-request run left running.

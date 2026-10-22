@@ -1,0 +1,10 @@
+{
+  "node_id": "RCI-SELFTEST-05",
+  "mode": "review",
+  "target": ".",
+  "matrix": true,
+  "pins": "under a declared Andon field that names no channel, a GitHub workflow with no andon job is a PIPE-25 question, not a must-fix item: a chat app's subscription the review cannot read may pull the cord",
+  "expected_guard": "one question, PIPE-25 at ci.yml; no must-fix item; the app subscription listed under Not read",
+  "decoys": [],
+  "min_items": 1
+}
