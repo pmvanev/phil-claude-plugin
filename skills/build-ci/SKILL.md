@@ -1,6 +1,6 @@
 ---
 name: build-ci
-description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "tell the team when main breaks", "notify us when the main pipeline fails", "tell the author when their pipeline fails", "comment on the MR when CI fails", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy, builds the pipeline to it, lints it, wires a red-main alert, names whoever started a failed pipeline, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
+description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "tell the team when main breaks", "notify us when the main pipeline fails", "tell the author when their pipeline fails", "comment on the MR when CI fails", "add a deploy job", "deploy to staging and production", "promote to production", "roll back a deploy", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy, builds the pipeline to it, lints it, wires a red-main alert, names whoever started a failed pipeline, deploys, by digest, the one image built after its gates pass, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
 ---
 
 # Build CI
@@ -55,6 +55,11 @@ Read before proposing anything; the project may already have decided.
   --generate-hashes`, `npm install --package-lock-only` — and install from it, `pip` with
   `--require-hashes`. A project with no
   secret scanner gets gitleaks, in its own job and image: the policy's secret scan needs one.
+- **Deploys.** Each environment the project deploys to, in the order a change reaches them; the command
+  that deploys and whether it takes the artifact it ships; and where each environment's settings come
+  from. This run writes neither the Dockerfile nor the deploy script, so where the build bakes an
+  environment's settings in (PIPE-29) or the deploy cannot be handed the artifact by digest (PIPE-30),
+  write no deploy job around it: report the row it breaks and the change that would clear it.
 - **Change classes.** The areas a change can touch — packages, apps, services — and the selector's own
   inputs: the lockfile and manifest, the CI configuration, `scripts/ci/`, shared test files, the build,
   lint and mutation configuration.
@@ -111,9 +116,10 @@ gets its file list split by shard index in the script, which `./scripts/ci/run.s
 wiring.** Write `scripts/ci/run.sh` in POSIX `sh` from `${CLAUDE_PLUGIN_ROOT}/skills/build-ci/examples/run.sh`,
 whose decision `tests/test_build_ci.py` pins. Keep its decision and its broad patterns
 (`vitest.config.*`, not `vitest.config.ts`); add this project's own paths, drop only another forge's CI
-paths, and point each task at the project's own task runner. On GitLab, drop the `andon` task, which only
-GitHub runs. Mark it executable with
-`chmod +x scripts/ci/run.sh`.
+paths, and point each task at the project's own task runner. On GitLab, drop the `andon` and `promote`
+tasks, which only GitHub runs. For a project that deploys nothing, drop the `image`, `deploy` and `promote`
+tasks; otherwise list in `.gitignore` the `image.env` and `image.ref` the `image` task leaves. Mark it
+executable with `chmod +x scripts/ci/run.sh`.
 
 The decision, which `./scripts/ci/run.sh scope` prints as `docs-only`, `scoped` or `full`:
 
@@ -131,9 +137,10 @@ The decision, which `./scripts/ci/run.sh scope` prints as `docs-only`, `scoped` 
 - **Full when a selector input changed**, or on the default branch; scoped otherwise.
 
 The secret scan never consults the decision. **The script stops when git cannot read the checkout**: a
-scanner that cannot read the history scans nothing and can still exit 0, as gitleaks does. The job's
-image must hold `git`, and the checkout must reach the base: GitLab `GIT_DEPTH: "0"`, GitHub
-`fetch-depth: 0`.
+scanner that cannot read the history scans nothing and can still exit 0, as gitleaks does. Every job's
+image holds `git`, an image builder's and a deploy tool's included; where no image holds both, install
+`git` in `before_script` from the image's own package manager and list it under "To pin". The checkout
+must reach the base: GitLab `GIT_DEPTH: "0"`, GitHub `fetch-depth: 0`.
 
 ## Step 5: Write the Pipeline
 
@@ -175,6 +182,13 @@ put `interruptible: true` only on MR-pipeline jobs. Each line below answers the 
 | A gate that fails | no `allow_failure` on a test, lint or scan; `retry` only `when: [runner_system_failure, stuck_or_timeout_failure]` | no `continue-on-error` | PIPE-9, PIPE-10 |
 | Build once | `artifacts:` with `expire_in`; deploy takes the artifact or the image digest; `cache:key:files` on the lockfile | `upload-artifact` and `download-artifact`; `hashFiles` on the lockfile | PIPE-11–13 |
 | An image built in the pipeline | copy the manifest and lockfile, install, then copy the source | the same | PIPE-14 |
+| A deploy only after every gate passes | a `build-image` job — GitLab reserves `image` — in a stage after every gate's, with no `needs:`, so it waits for them all; deploy stages after it, each deploy needing `build-image`; never `when: always` | a `build-image` job and a staging deploy with `if: github.event_name == 'push'`, `build-image` needing every gate that runs on a push to the default branch and each deploy needing `build-image`; no status function in either `if:` | PIPE-27, PIPE-31 |
+| No switch that turns a gate off | no variable or input read by a gate's rules, `if:` or script | the same | PIPE-28 |
+| One image, promoted by digest | `build-image`, on the default branch alone, runs `./scripts/ci/run.sh image`, which pushes once and writes the digest to `artifacts: reports: dotenv: image.env`, kept by `expire_in` as long as a rollback should reach; each deploy runs `./scripts/ci/run.sh deploy <environment>` under `environment: <environment>` | `build-image`, with `packages: write`, hands the digest on as the output `image` and uploads `image.ref` as the artifact `image`, kept by `retention-days` as long as a rollback should reach; the staging deploy passes `IMAGE: ${{ needs.build-image.outputs.image }}` through `env:` | PIPE-11, PIPE-29, PIPE-30 |
+| Each environment's settings at deploy time | CI/CD variables scoped to its environment | the `vars` and `secrets` of the job's `environment:` | PIPE-29 |
+| A manual production deploy whose failure stops the line | `needs:` `build-image` and the staging deploy; `when: manual` in its rules, with no `allow_failure`, so each main pipeline waits as blocked until someone deploys it, and a failed deploy fails main | a `workflow_dispatch` workflow, with `actions: read`, that takes a commit and runs `./scripts/ci/run.sh promote production <commit>`, passing the commit through `env:`: it deploys the image that commit's green default-branch run built, read from that run's `image` artifact, and builds nothing | PIPE-7, PIPE-27 |
+| A rollback on demand | the environment's **Rollback environment** button, which reruns an earlier pipeline's deploy job with that pipeline's digest | the same dispatch, given an earlier commit | — |
+| One deploy at a time per environment | `resource_group: <environment>` | job `concurrency: deploy-<environment>` with `cancel-in-progress: false` | — |
 | Portable paths | `$CI_PROJECT_DIR`, or a path relative to the checkout | `$GITHUB_WORKSPACE` | PIPE-16 |
 | A merge queue | — | `merge_group` in the required workflow's triggers | PIPE-5 |
 | A red main the whole team hears | the Pipeline status emails integration, a forge setting (Step 7) | an `andon` job that needs every job but `tell-author`, with `issues: write`; with several workflows, one `workflow_run` andon | PIPE-25 |
@@ -187,7 +201,12 @@ copy its forms: they fix each `needs:` list and the order of each job's rules. T
 opens one issue labelled `andon` and comments on it while main stays red; its body asks the team to close
 it once main is green.
 
-Give each job a `timeout`. Keep production deploys and rollbacks manual. Read an action's commit with
+Give each job a `timeout`. Keep production deploys and rollbacks manual: on GitLab a manual job, on
+GitHub the dispatch, which works on every plan; a required reviewer on a private repository's
+environment needs GitHub Enterprise. A docs-only commit builds no image (PIPE-24), and its deploys
+exit early, leaving each environment on the image it runs. Roll back to a deployment whose pipeline
+built an image; `promote` refuses a commit whose run built none. Write a deploy only where the survey
+finds one or the user asks for one. Read an action's commit with
 `gh api repos/<owner>/<action>/git/ref/tags/<tag>`, and write the tag beside it as a comment. Where the
 environment cannot read an image digest or an action's commit, write the tag and list each one under
 "To pin". Editing an
@@ -224,6 +243,15 @@ Read each setting the policy depends on:
   can read.
 - **The Notify token.** GitLab only. Leave `NOTIFY_TOKEN` unread, since the variables API returns its
   value, and list it under unread with the steps `references/alerts.md` gives to create it.
+- **Each environment's settings.** Leave them unread for the same reason, and list, by environment, each
+  variable the deploy reads, for the user to create scoped to that environment. On GitHub, environment
+  variables and secrets need a public repository or a paid plan; where a private repository on GitHub
+  Free has none, the settings become repository secrets named for their environment, `STAGING_` first.
+- **The rollback.** GitLab: `ci_forward_deployment_enabled` and `ci_forward_deployment_rollback_allowed`
+  on the same project read. Where forward deployment is on and rollback is not allowed, the Rollback
+  environment button can be hidden or disabled; report it with where to allow it, Settings > CI/CD >
+  General pipelines, **Allow job retries for rollback deployments**. `ci_forward_deployment_enabled`
+  shows only to an Owner or an administrator; where it is missing, list it unread.
 
 For each setting that departs from the policy, ask one question — "Require a passing MR pipeline to
 merge?", "Email these addresses when main's pipeline fails?" with the addresses listed, or "Turn on
@@ -247,6 +275,8 @@ lacks, with this project's commands written in:
   change that broke the pipeline owns the fix.
 - A red main stops the line: <the Andon channel> tells everyone, and nothing merges but the fix or its
   revert until main is green.
+- Where a GitLab production deploy waits for a person: a main pipeline blocked at it has passed every
+  gate, and counts as green.
 - Under a Notify field: a failure or a warning names you on the MR or PR that caused it; on main, on
   the merged PR on GitHub or the commit on GitLab.
 - Lint a pipeline change before pushing it: `glab ci lint --dry-run --ref <default branch>`, or
@@ -261,7 +291,9 @@ lacks, with this project's commands written in:
 5. Each forge setting read, changed, declined or left unread.
 6. "To pin": each image or action written by tag.
 7. The local command for each job.
-8. Not verified: no pipeline ran. The first MR pipeline is the test.
+8. Each deploy: the gates it waits for, the digest it takes, and how to roll it back; on GitLab, that
+   each main pipeline shows blocked until its production deploy runs; or why no deploy was written.
+9. Not verified: no pipeline ran. The first MR pipeline is the test.
 
 ## The Speed and Rework Passes
 
@@ -276,9 +308,12 @@ starting it.
 
 `skills/build-ci/self-test/01-empty-project/` holds a project with no CI and the matrix a build must
 reach; `04-github-project/`, the same project on GitHub, whose matrix adds the `andon` and `tell-author`
-jobs; `02-rework/`, a pipeline that builds its bundle and its image twice; `03-speed/`, a pipeline's
-recorded history whose slowest job is off the critical path. `tests/test_build_ci.py` holds the first
-matrix to the default policy cell by cell, pins `examples/run.sh`'s decision against a real git history,
+jobs; `05-deploy/` and `06-github-deploy/`, that project on each forge with an image and a deploy
+script that falls back to `:latest`, where the matrix adds a `build-image` job and a deploy per environment;
+`02-rework/`, a pipeline that builds its
+bundle and its image twice; `03-speed/`, a pipeline's
+recorded history whose slowest job is off the critical path. `tests/test_build_ci.py` holds each build
+fixture's matrix to the default policy cell by cell, pins `examples/run.sh`'s decision against a real git history,
 and checks the speed fixture's path with `scripts/pipeline-timings.py`, which `tests/test_pipeline_timings.py`
 pins on its own. Whenever this skill, `examples/run.sh`,
 `commands/build-ci.md` or `rules/ci-pipelines.md` changes, drive the fixture per `self-test/README.md`,

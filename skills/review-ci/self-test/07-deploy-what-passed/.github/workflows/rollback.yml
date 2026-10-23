@@ -1,0 +1,24 @@
+# Roll the API back: redeploy an image digest an earlier ci.yml run built and tested.
+name: rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      digest:
+        description: The sha256 digest of the tally-api image to restore
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: ./scripts/ci/run.sh deploy-api production "ghcr.io/acme/tally-api@$DIGEST"
+        env:
+          DIGEST: ${{ inputs.digest }}
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}

@@ -211,6 +211,82 @@ case "$task" in
     install
     npx stryker run --mutate "$files"
     ;;
+  image)
+    # Build the one image every environment gets, push it once tagged by commit, and hand on its
+    # digest: a tag a later push can move would let a deploy ship what no pipeline tested (PIPE-30).
+    # A docs-only change builds nothing (PIPE-24). Buildah needs no host daemon (ci-runners.md RUN-1).
+    # GitLab reads the digest from the dotenv report image.env; GitHub from the job output `image`, and
+    # a promotion from image.ref, uploaded as the run's `image` artifact.
+    skip_if_docs_only image
+    repo=${IMAGE_REPO:-${CI_REGISTRY_IMAGE:-}}
+    [ -n "$repo" ] || { echo "run.sh: IMAGE_REPO names the registry repository" >&2; exit 1; }
+    ref="$repo:${CI_COMMIT_SHA:-${GITHUB_SHA:-$(git rev-parse HEAD)}}"
+    if [ -n "${REGISTRY_PASSWORD:-}" ]; then
+      printf '%s' "$REGISTRY_PASSWORD" |
+        buildah login --username "${REGISTRY_USER:?run.sh: REGISTRY_USER is unset}" --password-stdin "${repo%%/*}"
+    fi
+    digestfile=$(mktemp)
+    buildah build --tag "$ref" .
+    buildah push --digestfile="$digestfile" "$ref"
+    digest=$(cat "$digestfile")
+    rm -f "$digestfile"
+    case "$digest" in
+      sha256:*) ;;
+      *) echo "run.sh: buildah wrote no digest for $ref" >&2; exit 1 ;;
+    esac
+    echo "$repo@$digest" > image.ref
+    if [ -n "${GITHUB_ACTIONS:-}" ]; then
+      echo "image=$repo@$digest" >> "$GITHUB_OUTPUT"
+    else
+      echo "IMAGE=$repo@$digest" > image.env
+    fi
+    ;;
+  deploy)
+    # deploy <environment>: ship the image the build pushed, by digest, to one environment. IMAGE
+    # reaches the job through its variables — a dotenv report, a job output — never through the
+    # script's text. The environment's own settings reach deploy.sh the same way, from CI variables
+    # scoped to it, and are never built into the image (PIPE-29). A docs-only change built no image, so
+    # the environment keeps the one it runs; a rollback picks a deployment whose pipeline built one.
+    [ $# -eq 2 ] || { echo "usage: $0 deploy <environment>" >&2; exit 2; }
+    skip_if_docs_only "deploy: $2 keeps the image it runs"
+    repo=${IMAGE_REPO:-${CI_REGISTRY_IMAGE:-}}
+    case "${IMAGE:-}" in
+      "$repo"@sha256:?*) ;;
+      *@sha256:?*) [ -z "$repo" ] || { echo "run.sh: $IMAGE is not from $repo" >&2; exit 1; } ;;
+      *) echo "run.sh: deploy takes the image by digest, not '${IMAGE:-}'" >&2; exit 1 ;;
+    esac
+    echo "run.sh: deploying $IMAGE to $2"
+    if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+      echo "Deployed \`$IMAGE\` to $2" >> "$GITHUB_STEP_SUMMARY"
+    fi
+    ./scripts/deploy.sh "$2" "$IMAGE"
+    ;;
+  promote)
+    # promote <environment> <commit>: deploy the image a green default-branch run built for that
+    # commit, read back from that run's own record, so a production deploy or a rollback ships only
+    # what passed every gate (PIPE-27, PIPE-31). GitHub only: GitLab promotes with a manual job in the
+    # pipeline and rolls back with the environment's Rollback environment button.
+    [ $# -eq 3 ] || { echo "usage: $0 promote <environment> <commit>" >&2; exit 2; }
+    [ -n "${GITHUB_ACTIONS:-}" ] || { echo "run.sh: promote runs in GitHub Actions" >&2; exit 1; }
+    case "$3" in
+      *[!0-9a-f]* | "") echo "run.sh: promote takes a full commit SHA, not '$3'" >&2; exit 1 ;;
+    esac
+    [ ${#3} -eq 40 ] || { echo "run.sh: promote takes a full commit SHA, not '$3'" >&2; exit 1; }
+    export GH_REPO="$GITHUB_REPOSITORY"
+    run=$(gh run list --workflow "${CI_WORKFLOW:-ci.yml}" --commit "$3" --branch "$DEFAULT_BRANCH" \
+      --event push --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+    [ -n "$run" ] || { echo "run.sh: no green $DEFAULT_BRANCH run built $3" >&2; exit 1; }
+    dir=$(mktemp -d)
+    if ! gh run download "$run" --name image --dir "$dir" || [ ! -s "$dir/image.ref" ]; then
+      rm -rf "$dir"
+      echo "run.sh: run $run built no image for $3; a docs-only commit builds none" >&2
+      exit 1
+    fi
+    IMAGE=$(cat "$dir/image.ref")
+    rm -rf "$dir"
+    export IMAGE
+    sh "$(pwd)/scripts/ci/run.sh" deploy "$2"
+    ;;
   shard)
     shard_files
     ;;
@@ -258,7 +334,7 @@ Nothing merges but the fix or its revert until main is green. Close this issue o
     fi
     ;;
   *)
-    echo "usage: $0 scope|shard|secret-scan|lint|typecheck|test|build|mutate|mutate-full|andon|tell-author|inform <task>" >&2
+    echo "usage: $0 scope|shard|secret-scan|lint|typecheck|test|build|image|deploy <environment>|promote <environment> <commit>|mutate|mutate-full|andon|tell-author|inform <task>" >&2
     exit 2
     ;;
 esac

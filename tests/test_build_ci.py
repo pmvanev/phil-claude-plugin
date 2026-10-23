@@ -137,6 +137,15 @@ EXPECTED = {
         "mutation-diff": {**{s: {"—"} for s in SOURCES}, "MR": {"runs", "if paths"}, "docs-only MR": SKIPPED},
         "mutation-full": {**{s: {"—"} for s in SOURCES}, "schedule": {"runs"}},
         "tell-author": {**{s: {"on failure"} for s in SOURCES}, "schedule": {"—"}, "tag": {"—"}},
+        # A project that deploys: one image and a staging deploy on every main commit, after the gates;
+        # a docs-only commit builds nothing (PIPE-24); production waits for a person. Nothing deploys
+        # from an MR or the schedule.
+        "image": {**{s: {"—"} for s in SOURCES}, "main push": {"runs"}, "docs-only main": {"exits early"},
+                  "web or API": {"runs"}},
+        "deploy": {**{s: {"—"} for s in SOURCES}, "main push": {"runs"}, "docs-only main": {"exits early"},
+                   "web or API": {"runs"}},
+        "deploy-manual": {**{s: {"—"} for s in SOURCES}, "main push": {"manual"},
+                          "docs-only main": {"manual"}, "web or API": {"manual"}},
     },
     "github": {
         "(pipeline)": {"MR": {"created"}, "docs-only MR": {"created"}, "main push": {"created"},
@@ -150,9 +159,14 @@ EXPECTED = {
                   "schedule": {"on failure"}},
         "tell-author": {**{s: {"on failure"} for s in SOURCES}, "schedule": {"—"}, "tag": {"—"},
                         "web or API": {"—"}},
+        # Production deploys from a dispatch that names a commit, in a workflow of its own.
+        "image": {**{s: {"—"} for s in SOURCES}, "main push": {"runs"}, "docs-only main": {"exits early"}},
+        "deploy": {**{s: {"—"} for s in SOURCES}, "main push": {"runs"}, "docs-only main": {"exits early"}},
+        "deploy-manual": {**{s: {"—"} for s in SOURCES}, "web or API": {"manual", "runs"}},
     },
 }
 KIND_ALIASES = {"test": "check", "build": "check"}
+DEPLOY_KINDS = {"image", "deploy", "deploy-manual"}  # only a project that deploys has them
 
 
 def test_the_expected_matrix_keeps_the_default_policy_in_every_cell():
@@ -168,7 +182,8 @@ def test_the_expected_matrix_keeps_the_default_policy_in_every_cell():
         assert all(pipeline[s] in want["(pipeline)"][s] for s in SOURCES), pipeline
         kinds = spec["kinds"]
         assert set(rows) == {j for js in kinds.values() for j in js}, "every job has a kind"
-        assert set(KIND_ALIASES.get(k, k) for k in kinds) == set(want) - {"(pipeline)"}, \
+        have, every = set(KIND_ALIASES.get(k, k) for k in kinds), set(want) - {"(pipeline)"}
+        assert every - DEPLOY_KINDS <= have <= every, \
             f"{manifest.parent.name}: the kinds the default policy needs on this forge"
         for job, cells in rows.items():
             kind = KIND_ALIASES.get(next(k for k, js in kinds.items() if job in js), None)
@@ -457,7 +472,7 @@ def test_the_skill_wires_only_what_each_forge_carries_out():
     assert "github.event.workflow_run.event == 'push'" in skill, "a failed MR run must not pull the cord"
     assert "red-main alert" in COMMAND.read_text().split("\n---", 1)[0], "the command says what the skill does"
     assert "not wired" in skill, "a channel the build cannot carry out is reported, not guessed at"
-    assert "On GitLab, drop the `andon` task" in skill
+    assert "On GitLab, drop the `andon` and `promote`" in skill
     assert "ANDON_MENTION" not in skill, "unverified: whether a bot's @-mention reaches a team"
 
 
@@ -666,3 +681,198 @@ def test_the_command_says_what_the_author_tier_does():
     head = COMMAND.read_text().split("\n---", 1)[0]
     assert "names whoever started a failed pipeline" in head
     assert "names whoever started a failed pipeline" in SKILL.read_text().split("\n---", 1)[0]
+
+
+# Deploying what passed: a deploy waits for every gate and ships the one image the build pushed, by
+# digest, with each environment's settings injected at deploy time (PIPE-27 to PIPE-31, 2026-10-22).
+
+DIGEST = "registry.example.invalid/acme/tally@sha256:" + "ab" * 32
+
+
+def _deploy(repo, tmp_path, *args, **env):
+    """Run a deploy task against a stand-in for the project's deploy command, which logs its arguments."""
+    log = tmp_path / "deploy.log"
+    deploy = repo / "scripts" / "deploy.sh"
+    deploy.write_text(f'#!/bin/sh\necho "$*" >> {log}\n')
+    deploy.chmod(0o755)
+    out, _ = _task(repo, tmp_path, *args, **env)
+    return out, (log.read_text().splitlines() if log.exists() else [])
+
+
+GITLAB_MAIN = {"CI": "true", "GITLAB_CI": "true", "CI_PIPELINE_SOURCE": "push"}
+
+
+def test_a_deploy_ships_the_digest_the_build_pushed(repo, tmp_path):
+    out, calls = _deploy(repo, tmp_path, "deploy", "staging", IMAGE=DIGEST, **GITLAB_MAIN)
+    assert out.returncode == 0, out.stderr
+    assert calls == [f"staging {DIGEST}"]
+
+
+def test_a_deploy_refuses_a_reference_a_later_push_can_move(repo, tmp_path):
+    """PIPE-30: `:latest` or a branch tag can name an image no pipeline tested."""
+    for image in ("registry.example.invalid/acme/tally:latest", "registry.example.invalid/acme/tally:main", ""):
+        out, calls = _deploy(repo, tmp_path, "deploy", "production", IMAGE=image, **GITLAB_MAIN)
+        assert out.returncode != 0 and "digest" in out.stderr, image
+        assert calls == [], image
+
+
+def test_a_deploy_names_one_environment(repo, tmp_path):
+    out, calls = _deploy(repo, tmp_path, "deploy", IMAGE=DIGEST, **GITLAB_MAIN)
+    assert out.returncode == 2 and calls == []
+
+
+def test_a_docs_only_main_commit_deploys_nothing(repo, tmp_path):
+    """PIPE-24 names a build on a docs-only change, so the image job builds none and the deploy has
+    nothing new to ship; the environment keeps the image it runs."""
+    base = _change(repo, "docs/guide.md")
+    out, calls = _deploy(repo, tmp_path, "deploy", "staging", IMAGE=DIGEST,
+                         **{**GITLAB_MAIN, "CI_COMMIT_BEFORE_SHA": base})
+    assert out.returncode == 0 and calls == []
+    assert "staging keeps the image it runs" in out.stdout
+
+
+def test_a_deploy_refuses_another_repositorys_image(repo, tmp_path):
+    """A manual job's variables outrank the dotenv report, so a person could hand it any digest."""
+    out, calls = _deploy(repo, tmp_path, "deploy", "staging", IMAGE="evil.invalid/x@sha256:" + "ab" * 32,
+                         IMAGE_REPO="registry.example.invalid/acme/tally", **GITLAB_MAIN)
+    assert out.returncode != 0 and calls == []
+
+
+def _gh_runs(tmp_path, run_id="", ref=DIGEST, artifact=True):
+    """A stand-in for gh: `run list` answers run_id, and `run download` writes the run's image record."""
+    bin_ = tmp_path / "bin"
+    bin_.mkdir(exist_ok=True)
+    (bin_ / "gh").write_text(f"""#!/bin/sh
+echo "gh $*" >> {tmp_path / "gh.log"}
+case "$1 $2" in
+  "run list") printf '%s' "{run_id}" ;;
+  "run download")
+    dir=.; prev=; for arg; do [ "$prev" = --dir ] && dir=$arg; prev=$arg; done
+    {{download}} ;;
+esac
+""".replace("{download}", f'printf "%s\\n" "{ref}" > "$dir/image.ref"' if artifact
+            else 'echo "no artifact matches any of the names provided" >&2; exit 1'))
+    (bin_ / "gh").chmod(0o755)
+
+
+COMMIT = "c0ffee" * 6 + "c0ff"
+GITHUB_DISPATCH = {"GITHUB_ACTIONS": "true", "GITHUB_EVENT_NAME": "workflow_dispatch",
+                   "GITHUB_REPOSITORY": "acme/tally"}
+
+
+def test_a_promotion_ships_the_image_a_green_main_run_built(repo, tmp_path):
+    """A typed digest let a production dispatch ship what no gate passed (skill-reviewer C1, 2026-10-22).
+    The dispatch names a commit; the image comes from that commit's green default-branch run."""
+    log = tmp_path / "deploy.log"
+    (repo / "scripts" / "deploy.sh").write_text(f'#!/bin/sh\necho "$*" >> {log}\n')
+    (repo / "scripts" / "deploy.sh").chmod(0o755)
+    _gh_runs(tmp_path, run_id="4242")
+    clean = {k: v for k, v in os.environ.items() if not k.startswith(("CI", "GITHUB_", "GITLAB_"))}
+    out = subprocess.run(["sh", "scripts/ci/run.sh", "promote", "production", COMMIT], cwd=repo,
+                         capture_output=True, text=True,
+                         env={**clean, "PATH": f"{tmp_path / 'bin'}:{os.environ['PATH']}", **GITHUB_DISPATCH})
+    assert out.returncode == 0, out.stderr
+    assert log.read_text().splitlines() == [f"production {DIGEST}"]
+    listed = next(l for l in (tmp_path / "gh.log").read_text().splitlines() if l.startswith("gh run list"))
+    for flag in (f"--commit {COMMIT}", "--status success", "--event push", "--branch main"):
+        assert flag in listed, flag
+
+
+def test_a_commit_no_green_run_built_is_never_promoted(repo, tmp_path):
+    log = tmp_path / "deploy.log"
+    (repo / "scripts" / "deploy.sh").write_text(f'#!/bin/sh\necho "$*" >> {log}\n')
+    _gh_runs(tmp_path, run_id="")
+    clean = {k: v for k, v in os.environ.items() if not k.startswith(("CI", "GITHUB_", "GITLAB_"))}
+    for commit in (COMMIT, "main", "abc123"):
+        out = subprocess.run(["sh", "scripts/ci/run.sh", "promote", "production", commit], cwd=repo,
+                             capture_output=True, text=True,
+                             env={**clean, "PATH": f"{tmp_path / 'bin'}:{os.environ['PATH']}", **GITHUB_DISPATCH})
+        assert out.returncode != 0, commit
+    assert not log.exists()
+
+
+def _buildah(tmp_path, digest="sha256:" + "cd" * 32):
+    """A stand-in for buildah whose push writes the digest it was asked for."""
+    bin_ = tmp_path / "bin"
+    bin_.mkdir(exist_ok=True)
+    (bin_ / "buildah").write_text(f"""#!/bin/sh
+echo "buildah $*" >> {tmp_path / "buildah.log"}
+if [ "$1" = push ]; then
+  for arg; do case "$arg" in --digestfile=*) printf '%s' "{digest}" > "${{arg#--digestfile=}}" ;; esac; done
+fi
+""")
+    (bin_ / "buildah").chmod(0o755)
+    return digest
+
+
+def test_the_image_task_pushes_once_and_hands_on_the_digest(repo, tmp_path):
+    digest = _buildah(tmp_path)
+    out, _ = _task(repo, tmp_path, "image", IMAGE_REPO="registry.example.invalid/acme/tally",
+                   CI_COMMIT_SHA="abc123", REGISTRY_USER="ci", REGISTRY_PASSWORD="s3cret", **GITLAB_MAIN)
+    assert out.returncode == 0, out.stderr
+    assert (repo / "image.env").read_text() == f"IMAGE=registry.example.invalid/acme/tally@{digest}\n"
+    pushes = [l for l in (tmp_path / "buildah.log").read_text().splitlines() if l.startswith("buildah push")]
+    assert len(pushes) == 1 and "registry.example.invalid/acme/tally:abc123" in pushes[0]
+    calls = (tmp_path / "buildah.log").read_text()
+    assert "buildah login --username ci --password-stdin registry.example.invalid" in calls
+    assert "s3cret" not in calls, "the password goes through stdin, never the command line"
+
+
+def test_a_docs_only_main_commit_builds_no_image(repo, tmp_path):
+    _buildah(tmp_path)
+    base = _change(repo, "docs/guide.md")
+    out, _ = _task(repo, tmp_path, "image", IMAGE_REPO="registry.example.invalid/acme/tally",
+                   CI_COMMIT_SHA="abc123", **{**GITLAB_MAIN, "CI_COMMIT_BEFORE_SHA": base})
+    assert out.returncode == 0, out.stderr
+    assert not (repo / "image.env").exists() and not (tmp_path / "buildah.log").exists()
+
+
+def test_on_github_the_digest_is_a_job_output(repo, tmp_path):
+    digest = _buildah(tmp_path)
+    output = tmp_path / "github_output"
+    out, _ = _task(repo, tmp_path, "image", IMAGE_REPO="ghcr.io/acme/tally", GITHUB_ACTIONS="true",
+                   GITHUB_EVENT_NAME="push", GITHUB_SHA="abc123", GITHUB_OUTPUT=str(output))
+    assert out.returncode == 0, out.stderr
+    assert output.read_text() == f"image=ghcr.io/acme/tally@{digest}\n"
+    assert (repo / "image.ref").read_text() == f"ghcr.io/acme/tally@{digest}\n", "the record a promotion reads"
+
+
+def test_the_skill_shapes_every_deploy_to_the_deploy_rows():
+    skill = _skill()
+    for row in ("PIPE-27", "PIPE-28", "PIPE-29", "PIPE-30", "PIPE-31"):
+        assert row in skill, row
+    assert "reports: dotenv" in skill, "GitLab hands the digest on as a dotenv report"
+    assert "needs.build-image.outputs.image" in skill, "GitHub hands it on as a job output"
+    assert "scoped to its environment" in skill, "settings are injected at deploy time, never built in"
+    assert "Rollback environment" in skill, "GitLab's own rollback reruns an earlier deploy job"
+    assert "ci_forward_deployment_rollback_allowed" in skill, "a setting that can hide that rollback"
+    assert "no `allow_failure`" in skill and "blocked" in skill, "a failed production deploy stops the line"
+    assert "./scripts/ci/run.sh promote production <commit>" in skill, "GitHub promotes a commit, not a digest"
+    assert "drop the `image`, `deploy` and `promote` tasks" in skill, "a project that deploys nothing"
+    assert "Every job's image holds `git`" in skill, "run.sh stops where git cannot read the checkout"
+
+
+def test_the_skill_builds_around_no_deploy_that_breaks_a_row():
+    """build-ci writes no Dockerfile or deploy script, so a build that bakes an environment in is reported."""
+    skill = _skill()
+    assert "write no deploy job around it" in skill
+
+
+@pytest.mark.parametrize("name", ["05-deploy", "06-github-deploy"])
+def test_the_deploy_fixture_seeds_a_tag_the_build_must_not_ship(name):
+    project = _fixture(name).parent / "project"
+    assert ":latest" in (project / "scripts" / "deploy.sh").read_text(), "the default a deploy must override"
+    assert "TALLY_LEDGER_DIR" in (project / "AGENTS.md").read_text(), "an environment setting to inject"
+
+
+def test_a_commit_whose_run_built_no_image_is_never_promoted(repo, tmp_path):
+    """A docs-only commit's green run skips the image job, so it has no record to promote."""
+    log = tmp_path / "deploy.log"
+    (repo / "scripts" / "deploy.sh").write_text(f'#!/bin/sh\necho "$*" >> {log}\n')
+    _gh_runs(tmp_path, run_id="4242", artifact=False)
+    clean = {k: v for k, v in os.environ.items() if not k.startswith(("CI", "GITHUB_", "GITLAB_"))}
+    out = subprocess.run(["sh", "scripts/ci/run.sh", "promote", "production", COMMIT], cwd=repo,
+                         capture_output=True, text=True,
+                         env={**clean, "PATH": f"{tmp_path / 'bin'}:{os.environ['PATH']}", **GITHUB_DISPATCH})
+    assert out.returncode != 0 and "built no image" in out.stderr
+    assert not log.exists()

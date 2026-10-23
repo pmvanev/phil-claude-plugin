@@ -79,3 +79,21 @@ Feature: Carry an invisible technical initiative through with discipline
     When the tool verifies the initiative
     Then it reports the goal as not achieved, with the metric reading as evidence
     And it does not report the initiative as done
+
+  @execute @migration @fixture:08-migration-expand-contract
+  Scenario: A schema migration is planned as expand and contract waves, each its own release
+    Given an initiative that renames a column the running release reads and writes
+    When the tool frames and maps the initiative
+    Then it does not off-ramp the rename as a single-skill job
+    And it plans expand, backfill, switch reads, stop writing the old column, and contract
+    And each of those is a separate wave
+    And it marks every wave to ship alone, with the contract wave last
+
+  @execute @error @fixture:09-pause-for-release
+  Scenario: A wave that ships alone pauses the run until its release ships
+    Given a migration roadmap whose first wave ships alone
+    When that wave's delegate succeeds
+    Then the tool marks the next wave awaiting release and stops
+    And it reports the run as paused for release, neither done nor failed
+    And on resume it starts the next wave only once the developer confirms the release shipped
+

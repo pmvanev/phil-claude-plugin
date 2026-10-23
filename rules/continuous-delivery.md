@@ -21,7 +21,7 @@ paths:
 
 # Continuous Delivery Guide
 
-Guidelines for continuous delivery and DevOps practices, extracted from Jez Humble and David Farley's *Continuous Delivery*, Gene Kim et al.'s *The DevOps Handbook*, Dave Farley's *Modern Software Engineering*, and MinimumCD.org.
+Guidelines for continuous delivery and DevOps practices, extracted from Jez Humble and David Farley's *Continuous Delivery*, Gene Kim et al.'s *The DevOps Handbook*, Dave Farley's *Modern Software Engineering*, and the minimum practices of MinimumCD.org.
 
 ---
 
@@ -54,12 +54,21 @@ Every change flows through the same automated path from commit to production.
 
 #### Pipeline Principles
 
-- Build once, deploy many times
+- The pipeline is the only way to deploy, to any environment
+- Build once, deploy many times—no human changes an artifact after the pipeline builds it
 - Same process for every environment
 - Every commit is a release candidate
-- Stop the line on failure—all feature work halts until the build is green
+- Stop the line when trunk is red—all feature work halts, and nothing merges but the fix or its revert until trunk is green
 
 `ci-pipelines.md` names the defects in a pipeline file that break these principles, such as a deploy job that rebuilds or build output passed through the cache, each by its `PIPE-n` id.
+
+#### The Pipeline Decides
+
+The team agrees on a definition of deployable, and the pipeline enforces every criterion in it with an automated check. A green pipeline means the artifact is deployable; a red one means it is not, and no human overrides its verdict. A human may choose when a green artifact ships, never whether a red one does.
+
+#### Production-Like Environments
+
+Test in production-like environments. Match production wherever it shapes behavior: platform, network topology, database engine and version, operating system, runtime and libraries, and downstream services at production's versions or faithful test doubles of them. Scale may differ; architecture may not.
 
 #### Deterministic Pipeline
 
@@ -74,7 +83,8 @@ Every change flows through the same automated path from commit to production.
 
 - **Version everything** — Code, configuration, scripts, infrastructure
 - **Manage dependencies explicitly** — Pin versions; use artifact repositories
-- **Separate configuration from code** — Environment-specific values live outside the build
+- **Ship application configuration with the artifact** — Settings that hold in every environment, such as routing rules, default flag values and timeouts, deploy inside the artifact
+- **Inject environment configuration at deploy time** — Values that vary by target, such as connection strings and service URLs, stay out of the build and live in version control per environment; credentials come from a secret store, never the repository
 - **Reproduce any environment** — From scratch, using only version control
 
 ---
@@ -83,10 +93,12 @@ Every change flows through the same automated path from commit to production.
 
 - Integrate code at least daily—one commit per developer per day minimum
 - Every commit triggers the pipeline
+- Test every change automatically before it merges to trunk, and again with everyone else's work after it merges
+- Delivered work keeps working when new work lands—a change that breaks an existing test does not merge
 - Fix broken builds immediately—target < 1 hour
 - Keep the build under ten minutes
 
-**Trunk-based development enables continuous integration.** Long-lived branches delay integration and hide problems. A branch merged through an MR still counts as trunk-based while it lives about two days, review wait included (trunkbaseddevelopment.com); past that, it is a long-lived branch.
+**Trunk-based development enables continuous integration.** Long-lived branches delay integration and hide problems. A branch merged through an MR still counts as trunk-based while it lives about two days, review wait included (trunkbaseddevelopment.com); past that, it is a long-lived branch. Every branch starts from trunk, merges back to it, and is deleted after the merge.
 
 #### Evolutionary Coding Practices
 
@@ -126,6 +138,8 @@ Every change flows through the same automated path from commit to production.
 
 **Separate deployment from release.** Deployment puts code on servers. Release makes it available to users.
 
+**Roll back on demand.** A rollback redeploys the previous artifact, unchanged in the artifact repository, and restores service within five minutes of the decision. The on-call engineer rolls back without waiting for approval. Roll back by default; fix forward only when the cause is clear and the fix can pass the pipeline sooner than a rollback restores service.
+
 ---
 
 ### Infrastructure as Code
@@ -163,7 +177,7 @@ Deployability is a design property, not an afterthought. Code that resists deplo
 - Version database schemas
 - Use migrations, not manual scripts
 - Test data changes in the pipeline
-- Roll forward, not back—design migrations to be additive
+- Change a schema by expand, then contract, in separate releases: expand it so old and new code both run, then contract it once no release you might roll back to needs the old shape
 
 ---
 
@@ -185,7 +199,7 @@ Deployability is a design property, not an afterthought. Code that resists deplo
 - [ ] Can you deploy to any environment on demand?
 - [ ] Can you recreate any environment from scratch?
 - [ ] Do you deploy at least weekly?
-- [ ] Can you roll back in under 5 minutes?
+- [ ] Can you roll back within five minutes of deciding to?
 - [ ] Is production telemetry visible to developers?
 - [ ] Is your build success rate > 95%?
 - [ ] Is your development cycle time < 2 days?
@@ -197,7 +211,7 @@ Deployability is a design property, not an afterthought. Code that resists deplo
 - **Manual deployments** — Error-prone and unrepeatable
 - **Snowflake servers** — Environments that cannot be reproduced
 - **Long-lived branches** — Delay integration and hide problems
-- **Deploying only to production-like environments late** — Problems found late cost more
+- **Leaving production-like environments to the end** — Problems found late cost more
 - **Manual configuration changes** — Drift between environments
 - **Blaming individuals for failures** — Blame the process, not the person
 - **Bypassing CI for "urgent" hotfixes** — Urgency does not justify skipping the pipeline

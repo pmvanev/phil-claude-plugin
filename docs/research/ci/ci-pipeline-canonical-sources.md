@@ -1255,6 +1255,62 @@ installs and token scope; rows that touch them cross-reference instead.
 | Lockfile installs (CWE-1357) | `security.md` | Zampetti BP2, BP18; GitLab "Pin your dependency versions" |
 | Credential literal (CWE-798) | `security.md` | Zampetti BP29; Meli et al. 2019 |
 
+### Addendum 2026-10-22: MinimumCD.org's deploy minimums
+
+`rules/continuous-delivery.md` cites MinimumCD.org and now states its minimums, but this rule deferred
+to it, so no row checked them. Four rows and two Advisory bullets carry the minimums a pipeline file can
+show [65][66][67][68][69][70]:
+
+| MinimumCD minimum, as the site words it | Row |
+|---|---|
+| "The application pipeline is the only way to deploy to any environment"; "All changes reach production through the same automated pipeline - no exceptions" | PIPE-27 within a pipeline; PIPE-31 for a deploy path with no gate |
+| "The pipeline decides the releasability of changes, its verdict is definitive"; "The pipeline enforces the definition; no human override is possible", and the FAQ refuses skipped checks for urgent hotfixes | PIPE-27, PIPE-28 |
+| "Immutable artifact (no human changes after commit)"; "Build once, deploy everywhere. The same artifact is used in every environment" | PIPE-29, PIPE-30 |
+| "Application configuration deploys with artifact"; environment config "must be injected at deployment time" | PIPE-29 |
+| "Rollback on-demand"; "Target under 5 minutes from the decision to roll back to service restored" | Advisory: a deploy with no rollback the file shows |
+| "Production-like test environment" | Advisory: a deploy to production that no earlier environment precedes |
+
+All six practice pages were read in full. The site names no forge syntax, so each row's GitHub and
+GitLab form rests on the vendor documentation: GitHub's `needs` reference says "a failure or skip
+applies to all jobs in the dependency chain", and that "a default status check of `success()` is
+applied unless you include one of these functions" [71][72]; GitLab's says `needs` lets a job "ignore
+stage ordering", that `needs: []` starts a job "as soon as the pipeline is created", and that "jobs in
+the next stage run after the jobs from the previous stage complete successfully" [73]. GitHub's events
+reference says a `workflow_run` workflow is triggered "regardless of the conclusion of the previous
+workflow" and tests `github.event.workflow_run.conclusion == 'success'` [74]. Asking only a production
+deploy to reach every gate is the rule's own reading, not the sources': a deploy to a test environment
+that later gates run against is the pipeline's shape. Confidence: Medium — one practitioner site, not a
+study, read against the vendors' own references.
+
+### Addendum 2026-10-22: the deploy forms `build-ci` writes
+
+`build-ci` writes deploys to PIPE-27 to PIPE-31. Each form rests on a vendor page read on 2026-10-22:
+
+- **A GitLab manual production deploy blocks the pipeline.** `allow_failure` is "`false` for jobs that
+  use `when: manual` inside `rules`"; such a job is blocking: "The pipeline stops at the stage where the
+  job is defined" and "shows a status of **blocked**". An optional manual job's "status does not
+  contribute to the overall pipeline status", so a failed deploy would tell nobody, which PIPE-26 forbids
+  under a Notify field [75][76].
+- **GitLab rolls back by rerunning a deploy job.** "When you roll back a deployment on a specific commit,
+  a new deployment is created"; "For the rollback to succeed, the deployment process must be defined in
+  the job's `script`" [77]. Where outdated deployment jobs are prevented, "the rollback buttons might be
+  hidden or disabled", and clearing **Allow job retries for rollback deployments** stops them [78]. The
+  Projects API exposes `ci_forward_deployment_enabled`, visible "if you have administrator access or the
+  Owner role", and `ci_forward_deployment_rollback_allowed` [79].
+- **Buildah builds and pushes without a host daemon,** and `buildah push --digestfile` writes "the digest
+  of the resulting image to the file" [80][81]. GitLab's rootless tutorial sets `STORAGE_DRIVER: vfs` and
+  `BUILDAH_ISOLATION: chroot` [80].
+- **GitHub's required reviewers and environment secrets depend on the plan.** Required reviewers "are
+  only available for public repositories" on Free, Pro and Team; environment secrets on Free only in
+  public repositories; "If a job is rejected, the workflow will fail" [82][83]. A reviewer gate in the
+  gated run would fail the run on every rejection and so pull the andon; the dispatch that names a commit
+  works on every plan and fails only its own run.
+
+**Not read:** whether a GitLab job rerun from an old pipeline still downloads a dotenv report its needed
+job wrote, once that report's `expire_in` has passed; the reviewer's reading is that it fails. The
+skill keeps the report as long as a rollback should reach. Confidence: Medium — vendor references, no
+run.
+
 ## Source Analysis
 
 All accessed 2026-10-21. Reputation per the task's trusted-domain configuration; vendor docs count as
@@ -1370,6 +1426,16 @@ per-extension breakdown (SecretBench, MSR 2023, covers 311 file types) before cl
 No source gives a numeric stopping rule for pipeline optimisation; the rule should state the procedure
 (measure, critical path, stop when cost exceeds delay saved), not a number.
 
+### Gap 9: Status semantics inferred, not run
+
+Three behaviours the deploy rows lean on come from documentation, not a run: that a GitHub job with the
+default `success()` is skipped when any job up its chain failed, even past a job that ran under
+`always()` ("a failure or skip applies to all jobs in the dependency chain" [71]); that a GitLab job's
+`on_success` reads only the jobs it needs, so a `when: always` job between a gate and a deploy passes a
+failure through; and that a GitHub run in which a gate was skipped and nothing failed concludes `success`,
+which no page read says outright. Fixture 07's PIPE-28 path depends on the last. A three-job workflow on
+each forge would settle all three.
+
 ## Conflicting Information
 
 ### Conflict 1: How short must a PR branch be to count as trunk-based?
@@ -1413,6 +1479,14 @@ legitimate. The weekly-mutation row stands.
 caching roughly halves accelerated builds. **Position B**: Ghaleb 2026 — substantial gains for one-third
 of adopters; uploads in 97% of builds; 27% stale. **Assessment**: Caching is a hypothesis to measure, not
 a rule. Flag only a cache that cannot invalidate (P13); advise measurement.
+
+### Conflict 7: May a hotfix skip tests?
+
+MinimumCD's single-path page accepts a "fast-track" that skips some tests, provided it runs "the same
+pipeline, not a separate manual process" [66]. Its deployable-definition page says "the pipeline
+enforces the definition; no human override is possible", and its FAQ refuses skipped checks for urgent
+hotfixes [67]. PIPE-28 sides with the deployable definition: a switch a person flips to skip a gate is
+a human override, wherever it runs.
 
 ## Full Citations
 
@@ -1481,9 +1555,29 @@ a rule. Flag only a cache that cannot invalidate (P13); advise measurement.
 [63] GitHub. "Notifications for workflow runs". https://docs.github.com/en/actions/concepts/workflows-and-actions/notifications-for-workflow-runs. Accessed 2026-10-22.
 [64] GitLab. "CI/CD YAML syntax reference: allow_failure". https://docs.gitlab.com/ci/yaml/#allow_failure. Accessed 2026-10-22.
 
+[65] MinimumCD.org. "Minimum Viable Continuous Delivery". https://minimumcd.org/. Accessed 2026-10-22.
+[66] MinimumCD.org. "Single Path to Production"; "Immutable Artifacts". https://beyond.minimumcd.org/docs/pipeline/single-path-to-production/; https://beyond.minimumcd.org/docs/pipeline/immutable-artifacts/. Accessed 2026-10-22.
+[67] MinimumCD.org. "Deployable Definition". https://beyond.minimumcd.org/docs/pipeline/deployable-definition/. Accessed 2026-10-22.
+[68] MinimumCD.org. "Application Configuration". https://beyond.minimumcd.org/docs/pipeline/application-config/. Accessed 2026-10-22.
+[69] MinimumCD.org. "Production-Like Environments". https://beyond.minimumcd.org/docs/pipeline/production-like-environments/. Accessed 2026-10-22.
+[70] MinimumCD.org. "Rollback". https://beyond.minimumcd.org/docs/pipeline/rollback/. Accessed 2026-10-22.
+[71] GitHub. "Workflow syntax for GitHub Actions": `jobs.<job_id>.needs`. https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax. Accessed 2026-10-22.
+[72] GitHub. "Evaluate expressions in workflows and actions": status check functions. https://docs.github.com/en/actions/reference/workflows-and-actions/expressions. Accessed 2026-10-22.
+[73] GitLab. "CI/CD YAML syntax reference": `needs`, `stages`, `when`, `parallel:matrix`. https://docs.gitlab.com/ci/yaml/. Accessed 2026-10-22.
+[74] GitHub. "Events that trigger workflows": `workflow_run`. https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows. Accessed 2026-10-22.
+[75] GitLab. "Control how jobs run": manual jobs. https://docs.gitlab.com/ci/jobs/job_control/. Accessed 2026-10-22.
+[76] GitLab. "CI/CD YAML syntax reference": `allow_failure`. https://docs.gitlab.com/ci/yaml/. Accessed 2026-10-22.
+[77] GitLab. "Deployments": retry or roll back a deployment. https://docs.gitlab.com/ci/environments/deployments/. Accessed 2026-10-22.
+[78] GitLab. "Customize pipeline configuration": prevent outdated deployment jobs. https://docs.gitlab.com/ci/pipelines/settings/. Accessed 2026-10-22.
+[79] GitLab. "Projects API". https://docs.gitlab.com/api/projects/. Accessed 2026-10-22.
+[80] GitLab. "Use Buildah to build images in a rootless OpenShift container". https://docs.gitlab.com/ci/docker/buildah_rootless_tutorial/. Accessed 2026-10-22.
+[81] Buildah. "buildah-push(1)". https://github.com/containers/buildah/blob/main/docs/buildah-push.1.md. Accessed 2026-10-22.
+[82] GitHub. "Deployments and environments". https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments. Accessed 2026-10-22.
+[83] GitHub. "Reviewing deployments". https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments. Accessed 2026-10-22.
+
 ## Research Metadata
 
-Examined: ~75 pages and PDFs | Cited: 60 | Crossref citation counts retrieved: 16 papers (Memon 210,
+Examined: ~84 pages and PDFs | Cited: 83 | Crossref citation counts retrieved: 16 papers (Memon 210,
 Machalica 110, Gligoric 187, Jia & Harman 1,378, Petrović & Ivanković 83, Petrović et al. 66, Meli 109,
 Hilton 272, Ghaleb 2019 77, Gallaba TSE 29, Gallaba ICSE 31, Luo 411, Parry 154, Zampetti 87, Vassallo
 CD-Linter 41, Vassallo CI-Odor 56); Ghaleb 2026 and Biazotto 2026 too new for a count | Confidence by finding: High ≈ 55%,

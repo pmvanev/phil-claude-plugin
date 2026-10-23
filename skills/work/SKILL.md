@@ -19,9 +19,9 @@ Read the standards to work under before FRAME: `${CLAUDE_PLUGIN_ROOT}/rules/refa
 `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`.
 
 > **The workflow.** FRAME → MAP (a wave-by-wave roadmap, each wave routed to the fitting skill) →
-> SAFETY-NET (pin the change surface) → EXECUTE (each wave delegated and gated, the sequence stopping
-> cleanly on any failure) → VERIFY (both gates: preservation floor + declared goal metric) → document
-> (working trail + durable evolution summary).
+> SAFETY-NET (pin the change surface) → EXECUTE (each wave delegated and gated, the sequence
+> stopping cleanly on any failure or pausing for a release) → VERIFY (both gates: preservation floor
+> + declared goal metric) → document (working trail + durable evolution summary).
 
 ---
 
@@ -46,7 +46,7 @@ state, not the effort.
 | Pattern | Mode | Action |
 |---------|------|--------|
 | `"<initiative>"` | Start | Run FRAME on a new initiative, then the loop below. |
-| No argument | Resume | Resume the in-flight initiative from its `docs/work/<slug>/progress.md`: read the roadmap and the per-wave status, and continue from the first wave not yet `done`. Do not re-run completed waves or re-frame. With several in-flight initiatives under `docs/work/`, ask which; with none, say so and stop. When the run stopped on a failed wave, ask before re-running the wave that stopped it. |
+| No argument | Resume | Resume the in-flight initiative from its `docs/work/<slug>/progress.md`: read the roadmap and the per-wave status, and continue from the first wave not yet `done`. Do not re-run completed waves or re-frame. With several in-flight initiatives under `docs/work/`, ask which; with none, say so and stop. When that wave is `failed`, ask before re-running the wave that stopped it. When it is `awaiting-release`, ask the developer to confirm that the release containing the previous wave's commit reached production — and, before a contract wave, that no release a rollback could restore still reads or writes the old shape. On a yes, mark the wave `pending` and run it. On a no, leave it `awaiting-release`, report the run **paused for release**, and stop. |
 
 Derive a kebab-case `<slug>` from the initiative for the trail path `docs/work/<slug>/`.
 
@@ -64,6 +64,9 @@ directly — a lone rename, one extraction, a comment cleanup, a single-file str
 
 > "This is a single-skill job. Run `/phil:refactor <target>` (or `/phil:extract-method`,
 > `/phil:clean-comments`, …) directly — `/phil:work` would just add ceremony." Then **exit**.
+
+A rename of a shape a running release reads or writes — a column, a message field, an API field — is
+not a lone rename: it takes expand and contract waves (MAP §2).
 
 Do not build a roadmap, run a safety net, or open a `docs/work/<slug>/` trail for trivial work.
 Ceremony on small work is the thing developers resent; the off-ramp exists to prevent it.
@@ -107,8 +110,8 @@ yourself:
 
 Summarize goal + preservation contract + IN/OUT scope and get explicit confirmation
 (`AskUserQuestion`) before any change. Then record the framed decision: write
-`docs/work/<slug>/decisions.md` with the goal, the preservation contract, the chosen delegate and
-oracle, and the IN/OUT scope.
+`docs/work/<slug>/decisions.md` with the goal and its before reading, the preservation contract,
+the chosen delegate and oracle, and the IN/OUT scope.
 
 **This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the call.
 Every question this skill puts to the developer follows it — the goal restatement in §2, the roadmap
@@ -158,6 +161,19 @@ The same FRAME→MAP→SAFETY-NET→EXECUTE→VERIFY spine carries every initiat
 re-architecture, cleanup, migration, dependency/perf) — only the per-wave delegate differs. A
 migration is handled as a re-architecture initiative routed across these delegates; there is no
 bespoke migration engine.
+
+A migration that changes a database schema, or any other shape a running release reads or writes,
+works under `${CLAUDE_PLUGIN_ROOT}/rules/continuous-delivery.md` as well; a release here is an
+artifact deployed to production. Read the rule's Database Changes section and its *Roll back on
+demand* paragraph before the roadmap. Plan expand and contract as separate waves. The expand wave
+adds the new shape and writes both. Between them, plan a backfill wave when existing rows hold data
+the new shape needs, then a wave that switches reads to the new shape, then one that stops writing
+the old. Ship each of these waves as its own release: the release before a wave must still run
+against the schema that wave leaves, because that release is the rollback target. Each wave's own
+release must run against that schema too: the expand wave relaxes any constraint that forces a write
+to the old shape, such as `NOT NULL`, before a later wave stops writing it. Plan the contract wave
+last; Resume confirms before it runs that no release a rollback could restore still reads or writes
+the old shape. In the roadmap, mark each of these waves `ships alone`.
 
 Keep waves small and independently committable — one wave, one delegate, one commit, mirroring the
 delegates' own per-item discipline. Write the roadmap to `docs/work/<slug>/roadmap.md`, and write
@@ -233,12 +249,17 @@ defeat the whole design.
 React to each wave's delegate result:
 
 - **Delegate succeeded** (suite green / self-test green / diff approved) → mark the wave `done` in
-  `progress.md` (with its commit sha), and continue to the next wave.
+  `progress.md` with its commit sha and oracle result. Then:
+  - if no wave remains, go on to VERIFY;
+  - if this wave or the next is marked `ships alone`, mark the next wave `awaiting-release` and
+    stop. Report the run as **paused for release** — neither done nor failed — naming the wave that
+    waits and the commit its release must contain;
+  - otherwise, continue to the next wave.
 - **Delegate failed** (suite red / self-test broken / diff rejected) → the delegate has already
   reverted its own change. **Stop the sequence.** Do **not** run any later wave. Leave the working
-  tree in its **last-good** state (the last `done` wave's committed result) — never red. Record in
-  `decisions.md` **which wave failed and why**. Report the run as **stopped / incomplete** — never
-  as done.
+  tree in its **last-good** state (the last `done` wave's committed result) — never red. Mark the
+  wave `failed` in `progress.md`, and record in `decisions.md` **which wave failed and why**. Report
+  the run as **stopped / incomplete** — never as done.
 
 Never narrate past a delegate failure. A run that broke something — or that stopped with waves
 unfinished — is not a success. Grade the final state, not the effort.
@@ -246,6 +267,9 @@ unfinished — is not a success. Grade the final state, not the effort.
 ---
 
 ## VERIFY & DOCUMENT
+
+A run paused for release has not reached VERIFY: report it paused, never done, and leave the goal
+gate for the run that finishes the last wave.
 
 1. **Preservation gate** — confirm the preservation oracle passed for every wave (the delegates
    reported green / approved). If not, the run should already have stopped in EXECUTE — never report it
@@ -278,6 +302,8 @@ unfinished — is not a success. Grade the final state, not the effort.
   was declared. Miss either → not done.
 - **A delegate failure never leaves the tree red** and is never reported as done. Leave last-good;
   record it; stop.
+- **A wave that ships alone pauses the run for its release.** A paused run is neither done nor
+  failed.
 - **Off-ramp trivial work.** If one skill would do, recommend it and exit — no ceremony.
 - **Refuse an uncheckable goal.** No checkable metric and no explicit preservation-only → do not
   start.
@@ -289,9 +315,11 @@ unfinished — is not a success. Grade the final state, not the effort.
 ## Self-test (regression gate)
 
 `${CLAUDE_PLUGIN_ROOT}/skills/work/self-test/` holds golden fixtures that pin these safety
-behaviors: FRAME refuses an uncheckable goal (01), off-ramps trivial work (02), carries one initiative
-end-to-end (03, walking skeleton), routes code vs prose (04, 05), stops-and-leaves-last-good on a
-delegate failure (06), and reports a missed goal as not-done (07). Whenever this skill or
-`${CLAUDE_PLUGIN_ROOT}/commands/work.md` changes, drive the fixtures per its `README.md` and confirm
-each produces its `expected.md` decision — every edit here is non-monotonic, so the skill is changed
-and regression-tested, never changed and eyeballed.
+behaviors: FRAME refuses an uncheckable goal (01), off-ramps trivial work (02), carries one
+initiative end-to-end (03, walking skeleton), routes code vs prose (04, 05),
+stops-and-leaves-last-good on a delegate failure (06), reports a missed goal as not-done (07),
+splits a schema migration into expand and contract waves (08), and pauses for release after a wave
+that ships alone (09). Whenever this skill or `${CLAUDE_PLUGIN_ROOT}/commands/work.md` changes,
+drive the fixtures per its `README.md` and confirm each produces its `expected.md` decision — every
+edit here is non-monotonic, so the skill is changed and regression-tested, never changed and
+eyeballed.

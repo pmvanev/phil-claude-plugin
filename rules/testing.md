@@ -14,7 +14,7 @@ paths:
 
 # Testing Guide
 
-Guidelines for software testing, extracted from Robert C. Martin's *Clean Code* and *Clean Craftsmanship*, Kent Beck's *Tidy First?*, Dave Farley's *Modern Software Engineering*, and MinimumCD.org.
+Guidelines for software testing, extracted from Robert C. Martin's *Clean Code* and *Clean Craftsmanship*, Kent Beck's *Tidy First?*, and Dave Farley's *Modern Software Engineering*.
 
 ---
 

@@ -1,0 +1,39 @@
+{
+  "node_id": "BCI-SELFTEST-05",
+  "mode": "build",
+  "target": "project",
+  "pins": "a project that deploys gets one image pushed once on main and handed on by digest; a staging deploy after every gate and a manual production deploy of that digest, each with its environment's settings injected at deploy time, never the deploy script's :latest default; rollback through the environment's own button; no forge setting written, no push",
+  "kinds": {
+    "secret-scan": [
+      "gitleaks"
+    ],
+    "check": [
+      "lint",
+      "typecheck"
+    ],
+    "test": [
+      "unit-tests"
+    ],
+    "build": [
+      "build"
+    ],
+    "image": [
+      "build-image"
+    ],
+    "deploy": [
+      "deploy-staging"
+    ],
+    "deploy-manual": [
+      "deploy-production"
+    ],
+    "mutation-diff": [
+      "mutation-diff"
+    ],
+    "mutation-full": [
+      "mutation-full"
+    ],
+    "tell-author": [
+      "tell-author"
+    ]
+  }
+}

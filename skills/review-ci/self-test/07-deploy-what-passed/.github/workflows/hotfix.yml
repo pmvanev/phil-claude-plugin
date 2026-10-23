@@ -1,0 +1,42 @@
+# Ship an urgent API fix from any ref, without waiting for ci.yml.
+name: hotfix
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: The commit or branch to ship
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-hotfix:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+      - id: push
+        run: ./scripts/ci/run.sh build-api >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  deploy-hotfix:
+    needs: [build-hotfix]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: ./scripts/ci/run.sh deploy-api production "ghcr.io/acme/tally-api@$DIGEST"
+        env:
+          DIGEST: ${{ needs.build-hotfix.outputs.digest }}
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}

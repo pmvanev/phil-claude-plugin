@@ -502,3 +502,71 @@ def test_review_ci_lists_ci_variables_as_unread_and_reads_head_by_a_granted_verb
     skill = " ".join(SKILL.read_text().split())
     assert "CI/CD variables, such as a token a job reads" in skill
     assert "git rev-parse --verify HEAD" in skill and "`git rev-parse HEAD`" not in skill
+
+
+DEPLOY_ROWS = ("PIPE-27", "PIPE-28", "PIPE-29", "PIPE-30", "PIPE-31")
+
+
+def test_a_deploy_waits_for_every_gate_and_ships_the_one_tested_artifact():
+    """continuous-delivery.md states MinimumCD's single path, final verdict and immutable artifact, and
+    this rule deferred to it, so review-ci checked none of them (2026-10-22)."""
+    rows = {r["Id"]: r for r in _pipe_rows()}
+    assert "`always()`" in rows["PIPE-27"]["Violation"] and "`when: always`" in rows["PIPE-27"]["Violation"]
+    p27 = rows["PIPE-27"]["Violation"]
+    assert "directly or through the jobs they need" in p27, "`needs:` reach through chains on both forges"
+    assert "one GitHub workflow run with the `workflow_run` runs it starts" in p27, "the pipeline a gate must be in"
+    assert "whose `needs:` do not reach every gating job that checks what it ships" in p27, \
+        "a dev deploy that later gates run against is the pipeline's shape, not a defect (fixture 02)"
+    assert "a status function other than `success()`" in p27, "`success() || failure()` overrides it too"
+    assert "a GitLab deploy, or a job its `needs:` pass through, marked `when: always`" in p27, \
+        "GitHub skips down the whole chain; GitLab's `on_success` reads only the needed jobs"
+    assert "was not a `pull_request` run" in p27, "`branches:` matches a fork's branch named main"
+    assert "A job that stops or tears down an environment is no deploy" in p27
+    p31 = rows["PIPE-31"]["Violation"]
+    assert "A deploy no gate guards" in p31 and "of an artifact no gated run built" in p31, \
+        "MinimumCD's single path: a hotfix workflow beside the gating one (second review, 2026-10-22)"
+    assert "is PIPE-9" in p27 and "PIPE-17 or PIPE-28" in p27, "a tolerated or never-run gate has its own row"
+    assert "`workflow_run`" in p27 and "`workflow_run`" in rows["PIPE-28"]["Violation"]
+    for row_id in ("PIPE-29", "PIPE-30"):
+        assert "A deploy job that builds is PIPE-11" in rows[row_id]["Violation"], row_id
+    assert "`SKIP_TESTS`" in rows["PIPE-28"]["Violation"]
+    assert "the deploy still runs" in rows["PIPE-28"]["Violation"], "a GitHub deploy that needs the test skips with it"
+    assert "once per environment" in rows["PIPE-29"]["Violation"]
+    assert "digest" in rows["PIPE-30"]["Preferred form"]
+    for row_id in DEPLOY_ROWS:
+        assert "MinimumCD" in rows[row_id]["Cite"], row_id
+    rule = RULE.read_text()
+    assert "MinimumCD.org" in rule.split("Guidelines drawn from", 1)[1].split("\n\n", 1)[0], "the header names every source"
+    assert "MinimumCD.org's practice pages on 2026-10-22" in rule
+
+
+def test_a_rollback_and_a_runtime_matrix_are_not_deploy_defects():
+    do_not = " ".join(RULE.read_text().split("## Do not flag", 1)[1].split("\n## ", 1)[0].split())
+    assert "A rollback that redeploys an earlier artifact without rerunning the tests" in do_not
+    assert "A test matrix over runtimes or platforms" in do_not
+    assert "A third-party action or image pinned by a mutable tag" in do_not
+    assert "The pipeline's own image deployed by a tag that can move is PIPE-30" in do_not
+    assert "It clears PIPE-7, not PIPE-27" in do_not, "a manual production start still waits for every gate"
+    assert "It clears PIPE-27, PIPE-28 and PIPE-31" in do_not, "fixture 02's rollback skips the tests by design"
+    assert "A promotion that reads its digest, at promote time, from the record a gated run wrote" in do_not
+    assert "(a third-party action or image pinned by a mutable tag)" in RULE.read_text()
+
+
+def test_rollback_and_a_production_like_environment_are_questions():
+    advisory = " ".join(RULE.read_text().split("## Advisory", 1)[1].split("\n## ", 1)[0].split())
+    assert "**A deployable with no rollback the files show**" in advisory
+    assert "**A deploy to production that no earlier environment precedes.**" in advisory
+
+
+def test_a_fixture_expects_every_deploy_row_beside_its_look_alikes():
+    fixture = REPO / "skills" / "review-ci" / "self-test" / "07-deploy-what-passed"
+    backlog = (fixture / "expected-backlog.md").read_text()
+    rows = [_plain(_field(item, "Row")) for item in _items(backlog)]
+    assert sorted(r for r in rows if r.startswith("PIPE-")) == list(DEPLOY_ROWS), rows
+    assert "Cite**: ci-pipelines.md — Advisory: A deployable with no rollback the files show" in backlog
+    decoys = json.loads((fixture / "manifest.json").read_text())["decoys"]
+    for decoy in ("rollback.yml", "python-version", "DIGEST: ${{ needs.build.outputs.digest }}"):
+        assert decoy in decoys, decoy
+    assert "hotfix.yml" in backlog, "the hotfix path is PIPE-31's seed"
+    assert "`07-deploy-what-passed/`" in (SKILL.parent / "self-test" / "README.md").read_text()
+    assert "07-deploy-what-passed" in SKILL.read_text()

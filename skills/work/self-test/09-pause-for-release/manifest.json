@@ -1,0 +1,17 @@
+{
+  "fixture_id": "WORK-SELFTEST-09",
+  "phase": "EXECUTE (sequencing gate)",
+  "initiative": "rename the orders.cust_id column to customer_id",
+  "roadmap": [
+    {"wave": 1, "change": "expand: add customer_id and write both columns", "artifact_kind": "code", "ships_alone": true, "delegate_result": "green"},
+    {"wave": 2, "change": "backfill customer_id from cust_id", "artifact_kind": "code", "ships_alone": true, "delegate_result": "not-reached"},
+    {"wave": 3, "change": "switch reads to customer_id, still writing both", "artifact_kind": "code", "ships_alone": true, "delegate_result": "not-reached"},
+    {"wave": 4, "change": "stop writing cust_id", "artifact_kind": "code", "ships_alone": true, "delegate_result": "not-reached"},
+    {"wave": 5, "change": "contract: drop cust_id", "artifact_kind": "code", "ships_alone": true, "delegate_result": "not-reached"}
+  ],
+  "resume": {"developer_confirms_release": false},
+  "expected_progress": {"1": "done", "2": "awaiting-release", "3": "pending", "4": "pending", "5": "pending"},
+  "expected_progress_after_resume": {"1": "done", "2": "awaiting-release", "3": "pending", "4": "pending", "5": "pending"},
+  "expected_guard": "a wave marked ships alone stops the run for its release; a paused run is neither done nor failed",
+  "expected_decision": "PAUSE-FOR-RELEASE"
+}

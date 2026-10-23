@@ -1,0 +1,43 @@
+{
+  "node_id": "BCI-SELFTEST-06",
+  "mode": "build",
+  "target": "project",
+  "pins": "the same project on GitHub gets one image pushed once on main, after every gate that runs on a push, handed on as a job output and an artifact; a staging deploy in the gated run, and a production deploy by a dispatch that names a commit and ships the image that commit's green main run built; no forge setting written, no push",
+  "kinds": {
+    "secret-scan": [
+      "gitleaks"
+    ],
+    "check": [
+      "lint",
+      "typecheck"
+    ],
+    "test": [
+      "unit-tests"
+    ],
+    "build": [
+      "build"
+    ],
+    "image": [
+      "build-image"
+    ],
+    "deploy": [
+      "deploy-staging"
+    ],
+    "deploy-manual": [
+      "deploy-production"
+    ],
+    "mutation-diff": [
+      "mutation-diff"
+    ],
+    "mutation-full": [
+      "mutation-full"
+    ],
+    "tell-author": [
+      "tell-author"
+    ],
+    "andon": [
+      "andon"
+    ]
+  },
+  "forge": "github"
+}

@@ -37,11 +37,14 @@ this pipeline's change:
 **Hard assertions (any failure blocks the change):**
 
 - **No item names a look-alike:**
-  - `release-prod` — a manual start for a production release, taking the tested artifact.
+  - `release-prod` — a manual start for a production release, taking the tested artifact. Its `needs:`
+    name `package`, which waits for every earlier stage, so it reaches every gate: no PIPE-27 item.
   - `mutation-full` — a schedule that adds full mutation while per-change pipelines still run, with a
     retry limited to infrastructure failures.
   - `mr-smoke` — `interruptible` on a job that runs only in MR pipelines.
-  - `coverage-trend` — tolerates its own failure, gates nothing, and says so.
+  - `coverage-trend` — tolerates its own failure, gates nothing, and says so: no must-fix item. With no
+    Notify field declared, the rule asks for the Advisory question "A failure or a warning that names
+    nobody" there, which is not a failure.
   - `key: npm-` — `ci.yml`'s cache keyed on the lockfile's hash.
   - `group: secret-scan-` — `secrets.yml`'s group keyed on the PR ref.
 - **CWE-829 is filed under its CWE id, never as a `PIPE-n` item.**
@@ -51,7 +54,8 @@ this pipeline's change:
   extra item that a row does describe is not a failure: record it here, and pin it if it holds.
 
 **Not a failure:** naming under "Not read" the branch protection, required status checks, merge queue,
-auto-cancel and project timeout settings, with no item for them; line numbers within ±2; a differently
+auto-cancel and project timeout settings, with no item for them; Advisory items for an undeclared Andon
+or Notify field, or for a deploy with no rollback the files show; line numbers within ±2; a differently
 worded title.
 
 **Driven 2026-10-21** against this working tree's `SKILL.md` before the counting rule and the fixture's
