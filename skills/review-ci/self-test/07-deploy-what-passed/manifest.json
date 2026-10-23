@@ -1,0 +1,13 @@
+{
+  "node_id": "RCI-SELFTEST-07",
+  "mode": "review",
+  "target": ".",
+  "pins": "a production deploy that can start after a failed gate, a switch that turns the tests off while a workflow_run deploy still runs, an artifact built per environment, a deploy by a moving tag and a hotfix path no gate guards are PIPE-27 to PIPE-31; a rollback that redeploys a tested digest, a runtime matrix and a deploy by digest are not flagged; a deployable with no rollback is an Advisory question",
+  "expected_guard": "five must-fix items, PIPE-27 to PIPE-31, and one Advisory item at worker-deploy.yml; three look-alikes unflagged",
+  "decoys": [
+    "rollback.yml",
+    "python-version",
+    "DIGEST: ${{ needs.build.outputs.digest }}"
+  ],
+  "min_items": 6
+}

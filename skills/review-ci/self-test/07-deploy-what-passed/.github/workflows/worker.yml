@@ -1,0 +1,45 @@
+# The worker: triggers and wiring only; every job runs ./scripts/ci/run.sh <task>.
+# worker-deploy.yml deploys the images once a run of this workflow succeeds.
+name: worker
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: Ship a hotfix without waiting for the tests
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  test-worker:
+    if: ${{ !inputs.skip_tests }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - run: ./scripts/ci/run.sh test-worker
+
+  build-worker:
+    needs: [test-worker]
+    if: ${{ !failure() && !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        target: [staging, production]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: ./scripts/ci/run.sh build-worker ${{ matrix.target }}
+        env:
+          GH_TOKEN: ${{ github.token }}

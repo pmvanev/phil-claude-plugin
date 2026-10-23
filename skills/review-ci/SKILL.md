@@ -10,7 +10,7 @@ rows of `${CLAUDE_PLUGIN_ROOT}/rules/security.md`, then write a findings backlog
 `rules/ci-pipelines.md` on every run, before gathering the pipeline: the rule defines what counts as a
 defect, and a review from memory files impressions.
 
-`ci-pipelines.md` owns when a pipeline runs, what it runs, how it fails and whether it rebuilds.
+`ci-pipelines.md` owns when a pipeline runs, what it runs, how it fails and who hears it, whether it rebuilds and whether it deploys only what passed.
 `${CLAUDE_PLUGIN_ROOT}/rules/ci-runners.md` owns how the machines that run the jobs are configured; apply
 it whenever the target holds runner configuration. `security.md` owns what a pipeline trusts. From it, apply three things to every gathered file: the
 **Supply chain and build** table, the privilege row (CWE-250, CWE-732) and the credential-literal row
@@ -89,6 +89,8 @@ Write one row per job and one column per pipeline source, in this order: **MR**,
 - **Web or API** reads a pipeline started on the default branch, and so does **schedule**, whose
   existence is a forge setting; note where another ref differs.
 - **A child pipeline** gets a matrix of its own; its trigger job's cells say whether it exists.
+- **A `workflow_run` workflow's jobs** take the cells of the workflow they follow, read through their
+  own `if:`.
 
 **The first row, `(pipeline)`, says whether the forge creates the pipeline** for each source: `created`,
 `—`, or `refused` with the condition, as a `needs:` on a job the rules leave out makes it. Under a `—`,
@@ -157,7 +159,7 @@ files**, even for a one-token fix: this command reports and does not repair. If 
 the new items under a fresh `Scope:` line, continuing its id sequence and keeping every earlier item under its id.
 
 Once the items are numbered, mark the matrix. For an item about when a job runs — a Triggering, Every
-change, skip-gate or policy row — put `✗` and the item's id on each cell where the defect shows, in the
+change, skip-gate or policy row, PIPE-27, PIPE-28 or PIPE-31 — put `✗` and the item's id on each cell where the defect shows, in the
 row of the job whose rule or edge the fix changes, and on each `(pipeline)` cell the item refuses. Leave
 the cells of every other job alone, even where a refused pipeline means it never starts. Items about
 what a job does — a rebuild, a cache, a CWE — mark no cell.
@@ -239,7 +241,10 @@ configuration and safe look-alikes. `04-andon/` holds a GitHub project that decl
 with one workflow pulling the cord on a red main and one that never does; `05-andon-unnamed/`, the
 same project with an Andon field that names no channel, where a missing andon is a question; and
 `06-notify/`, a GitLab project under a Notify field, where a job that gates nothing tolerates its own
-failure.
+failure. `07-deploy-what-passed/` holds a GitHub project with two deployables: one deploys to
+production after a failed gate and ships hotfixes along a path no gate guards; the other lets a dispatch input turn its tests off, builds an image per
+environment, deploys it by a moving tag and has no rollback; beside them sit a rollback, a runtime
+matrix and a deploy by digest that are correct.
 `tests/test_ci_pipelines_rule.py` and `tests/test_ci_runners_rule.py` check that every item a fixture
 expects takes its id and fix from one row, and that no look-alike is expected.
 

@@ -1,0 +1,2 @@
+queue = "https://queue.acme.example/tally"
+batch_size = 500

@@ -1255,6 +1255,33 @@ installs and token scope; rows that touch them cross-reference instead.
 | Lockfile installs (CWE-1357) | `security.md` | Zampetti BP2, BP18; GitLab "Pin your dependency versions" |
 | Credential literal (CWE-798) | `security.md` | Zampetti BP29; Meli et al. 2019 |
 
+### Addendum 2026-10-22: MinimumCD.org's deploy minimums
+
+`rules/continuous-delivery.md` cites MinimumCD.org and now states its minimums, but this rule deferred
+to it, so no row checked them. Four rows and two Advisory bullets carry the minimums a pipeline file can
+show [65][66][67][68][69][70]:
+
+| MinimumCD minimum, as the site words it | Row |
+|---|---|
+| "The application pipeline is the only way to deploy to any environment"; "All changes reach production through the same automated pipeline - no exceptions" | PIPE-27 within a pipeline; PIPE-31 for a deploy path with no gate |
+| "The pipeline decides the releasability of changes, its verdict is definitive"; "The pipeline enforces the definition; no human override is possible", and the FAQ refuses skipped checks for urgent hotfixes | PIPE-27, PIPE-28 |
+| "Immutable artifact (no human changes after commit)"; "Build once, deploy everywhere. The same artifact is used in every environment" | PIPE-29, PIPE-30 |
+| "Application configuration deploys with artifact"; environment config "must be injected at deployment time" | PIPE-29 |
+| "Rollback on-demand"; "Target under 5 minutes from the decision to roll back to service restored" | Advisory: a deploy with no rollback the file shows |
+| "Production-like test environment" | Advisory: a deploy to production that no earlier environment precedes |
+
+All six practice pages were read in full. The site names no forge syntax, so each row's GitHub and
+GitLab form rests on the vendor documentation: GitHub's `needs` reference says "a failure or skip
+applies to all jobs in the dependency chain", and that "a default status check of `success()` is
+applied unless you include one of these functions" [71][72]; GitLab's says `needs` lets a job "ignore
+stage ordering", that `needs: []` starts a job "as soon as the pipeline is created", and that "jobs in
+the next stage run after the jobs from the previous stage complete successfully" [73]. GitHub's events
+reference says a `workflow_run` workflow is triggered "regardless of the conclusion of the previous
+workflow" and tests `github.event.workflow_run.conclusion == 'success'` [74]. Asking only a production
+deploy to reach every gate is the rule's own reading, not the sources': a deploy to a test environment
+that later gates run against is the pipeline's shape. Confidence: Medium — one practitioner site, not a
+study, read against the vendors' own references.
+
 ## Source Analysis
 
 All accessed 2026-10-21. Reputation per the task's trusted-domain configuration; vendor docs count as
@@ -1370,6 +1397,16 @@ per-extension breakdown (SecretBench, MSR 2023, covers 311 file types) before cl
 No source gives a numeric stopping rule for pipeline optimisation; the rule should state the procedure
 (measure, critical path, stop when cost exceeds delay saved), not a number.
 
+### Gap 9: Status semantics inferred, not run
+
+Three behaviours the deploy rows lean on come from documentation, not a run: that a GitHub job with the
+default `success()` is skipped when any job up its chain failed, even past a job that ran under
+`always()` ("a failure or skip applies to all jobs in the dependency chain" [71]); that a GitLab job's
+`on_success` reads only the jobs it needs, so a `when: always` job between a gate and a deploy passes a
+failure through; and that a GitHub run in which a gate was skipped and nothing failed concludes `success`,
+which no page read says outright. Fixture 07's PIPE-28 path depends on the last. A three-job workflow on
+each forge would settle all three.
+
 ## Conflicting Information
 
 ### Conflict 1: How short must a PR branch be to count as trunk-based?
@@ -1413,6 +1450,14 @@ legitimate. The weekly-mutation row stands.
 caching roughly halves accelerated builds. **Position B**: Ghaleb 2026 — substantial gains for one-third
 of adopters; uploads in 97% of builds; 27% stale. **Assessment**: Caching is a hypothesis to measure, not
 a rule. Flag only a cache that cannot invalidate (P13); advise measurement.
+
+### Conflict 7: May a hotfix skip tests?
+
+MinimumCD's single-path page accepts a "fast-track" that skips some tests, provided it runs "the same
+pipeline, not a separate manual process" [66]. Its deployable-definition page says "the pipeline
+enforces the definition; no human override is possible", and its FAQ refuses skipped checks for urgent
+hotfixes [67]. PIPE-28 sides with the deployable definition: a switch a person flips to skip a gate is
+a human override, wherever it runs.
 
 ## Full Citations
 
@@ -1481,9 +1526,20 @@ a rule. Flag only a cache that cannot invalidate (P13); advise measurement.
 [63] GitHub. "Notifications for workflow runs". https://docs.github.com/en/actions/concepts/workflows-and-actions/notifications-for-workflow-runs. Accessed 2026-10-22.
 [64] GitLab. "CI/CD YAML syntax reference: allow_failure". https://docs.gitlab.com/ci/yaml/#allow_failure. Accessed 2026-10-22.
 
+[65] MinimumCD.org. "Minimum Viable Continuous Delivery". https://minimumcd.org/. Accessed 2026-10-22.
+[66] MinimumCD.org. "Single Path to Production"; "Immutable Artifacts". https://beyond.minimumcd.org/docs/pipeline/single-path-to-production/; https://beyond.minimumcd.org/docs/pipeline/immutable-artifacts/. Accessed 2026-10-22.
+[67] MinimumCD.org. "Deployable Definition". https://beyond.minimumcd.org/docs/pipeline/deployable-definition/. Accessed 2026-10-22.
+[68] MinimumCD.org. "Application Configuration". https://beyond.minimumcd.org/docs/pipeline/application-config/. Accessed 2026-10-22.
+[69] MinimumCD.org. "Production-Like Environments". https://beyond.minimumcd.org/docs/pipeline/production-like-environments/. Accessed 2026-10-22.
+[70] MinimumCD.org. "Rollback". https://beyond.minimumcd.org/docs/pipeline/rollback/. Accessed 2026-10-22.
+[71] GitHub. "Workflow syntax for GitHub Actions": `jobs.<job_id>.needs`. https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax. Accessed 2026-10-22.
+[72] GitHub. "Evaluate expressions in workflows and actions": status check functions. https://docs.github.com/en/actions/reference/workflows-and-actions/expressions. Accessed 2026-10-22.
+[73] GitLab. "CI/CD YAML syntax reference": `needs`, `stages`, `when`, `parallel:matrix`. https://docs.gitlab.com/ci/yaml/. Accessed 2026-10-22.
+[74] GitHub. "Events that trigger workflows": `workflow_run`. https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows. Accessed 2026-10-22.
+
 ## Research Metadata
 
-Examined: ~75 pages and PDFs | Cited: 60 | Crossref citation counts retrieved: 16 papers (Memon 210,
+Examined: ~75 pages and PDFs | Cited: 74 | Crossref citation counts retrieved: 16 papers (Memon 210,
 Machalica 110, Gligoric 187, Jia & Harman 1,378, Petrović & Ivanković 83, Petrović et al. 66, Meli 109,
 Hilton 272, Ghaleb 2019 77, Gallaba TSE 29, Gallaba ICSE 31, Luo 411, Parry 154, Zampetti 87, Vassallo
 CD-Linter 41, Vassallo CI-Odor 56); Ghaleb 2026 and Biazotto 2026 too new for a count | Confidence by finding: High ≈ 55%,
