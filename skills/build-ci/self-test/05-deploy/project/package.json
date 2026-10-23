@@ -1,0 +1,20 @@
+{
+  "name": "tally",
+  "version": "0.3.1",
+  "type": "module",
+  "bin": { "tally": "dist/cli.js" },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.json",
+    "mutate": "stryker run"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "9.2.0",
+    "@stryker-mutator/vitest-runner": "9.2.0",
+    "eslint": "9.38.0",
+    "typescript": "5.9.3",
+    "vitest": "4.0.3"
+  }
+}

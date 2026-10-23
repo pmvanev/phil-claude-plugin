@@ -1282,6 +1282,35 @@ deploy to reach every gate is the rule's own reading, not the sources': a deploy
 that later gates run against is the pipeline's shape. Confidence: Medium — one practitioner site, not a
 study, read against the vendors' own references.
 
+### Addendum 2026-10-22: the deploy forms `build-ci` writes
+
+`build-ci` writes deploys to PIPE-27 to PIPE-31. Each form rests on a vendor page read on 2026-10-22:
+
+- **A GitLab manual production deploy blocks the pipeline.** `allow_failure` is "`false` for jobs that
+  use `when: manual` inside `rules`"; such a job is blocking: "The pipeline stops at the stage where the
+  job is defined" and "shows a status of **blocked**". An optional manual job's "status does not
+  contribute to the overall pipeline status", so a failed deploy would tell nobody, which PIPE-26 forbids
+  under a Notify field [75][76].
+- **GitLab rolls back by rerunning a deploy job.** "When you roll back a deployment on a specific commit,
+  a new deployment is created"; "For the rollback to succeed, the deployment process must be defined in
+  the job's `script`" [77]. Where outdated deployment jobs are prevented, "the rollback buttons might be
+  hidden or disabled", and clearing **Allow job retries for rollback deployments** stops them [78]. The
+  Projects API exposes `ci_forward_deployment_enabled`, visible "if you have administrator access or the
+  Owner role", and `ci_forward_deployment_rollback_allowed` [79].
+- **Buildah builds and pushes without a host daemon,** and `buildah push --digestfile` writes "the digest
+  of the resulting image to the file" [80][81]. GitLab's rootless tutorial sets `STORAGE_DRIVER: vfs` and
+  `BUILDAH_ISOLATION: chroot` [80].
+- **GitHub's required reviewers and environment secrets depend on the plan.** Required reviewers "are
+  only available for public repositories" on Free, Pro and Team; environment secrets on Free only in
+  public repositories; "If a job is rejected, the workflow will fail" [82][83]. A reviewer gate in the
+  gated run would fail the run on every rejection and so pull the andon; the dispatch that names a commit
+  works on every plan and fails only its own run.
+
+**Not read:** whether a GitLab job rerun from an old pipeline still downloads a dotenv report its needed
+job wrote, once that report's `expire_in` has passed; the reviewer's reading is that it fails. The
+skill keeps the report as long as a rollback should reach. Confidence: Medium — vendor references, no
+run.
+
 ## Source Analysis
 
 All accessed 2026-10-21. Reputation per the task's trusted-domain configuration; vendor docs count as
@@ -1536,10 +1565,19 @@ a human override, wherever it runs.
 [72] GitHub. "Evaluate expressions in workflows and actions": status check functions. https://docs.github.com/en/actions/reference/workflows-and-actions/expressions. Accessed 2026-10-22.
 [73] GitLab. "CI/CD YAML syntax reference": `needs`, `stages`, `when`, `parallel:matrix`. https://docs.gitlab.com/ci/yaml/. Accessed 2026-10-22.
 [74] GitHub. "Events that trigger workflows": `workflow_run`. https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows. Accessed 2026-10-22.
+[75] GitLab. "Control how jobs run": manual jobs. https://docs.gitlab.com/ci/jobs/job_control/. Accessed 2026-10-22.
+[76] GitLab. "CI/CD YAML syntax reference": `allow_failure`. https://docs.gitlab.com/ci/yaml/. Accessed 2026-10-22.
+[77] GitLab. "Deployments": retry or roll back a deployment. https://docs.gitlab.com/ci/environments/deployments/. Accessed 2026-10-22.
+[78] GitLab. "Customize pipeline configuration": prevent outdated deployment jobs. https://docs.gitlab.com/ci/pipelines/settings/. Accessed 2026-10-22.
+[79] GitLab. "Projects API". https://docs.gitlab.com/api/projects/. Accessed 2026-10-22.
+[80] GitLab. "Use Buildah to build images in a rootless OpenShift container". https://docs.gitlab.com/ci/docker/buildah_rootless_tutorial/. Accessed 2026-10-22.
+[81] Buildah. "buildah-push(1)". https://github.com/containers/buildah/blob/main/docs/buildah-push.1.md. Accessed 2026-10-22.
+[82] GitHub. "Deployments and environments". https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments. Accessed 2026-10-22.
+[83] GitHub. "Reviewing deployments". https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments. Accessed 2026-10-22.
 
 ## Research Metadata
 
-Examined: ~75 pages and PDFs | Cited: 74 | Crossref citation counts retrieved: 16 papers (Memon 210,
+Examined: ~84 pages and PDFs | Cited: 83 | Crossref citation counts retrieved: 16 papers (Memon 210,
 Machalica 110, Gligoric 187, Jia & Harman 1,378, Petrović & Ivanković 83, Petrović et al. 66, Meli 109,
 Hilton 272, Ghaleb 2019 77, Gallaba TSE 29, Gallaba ICSE 31, Luo 411, Parry 154, Zampetti 87, Vassallo
 CD-Linter 41, Vassallo CI-Odor 56); Ghaleb 2026 and Biazotto 2026 too new for a count | Confidence by finding: High ≈ 55%,

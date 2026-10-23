@@ -222,7 +222,7 @@ A reviewer raises these; the author decides. Each needs a setting, a measurement
 - **An andon job's own write grant** — `issues: write` or a webhook secret on that job alone, which its task needs.
 - **The grant that a comment naming the starter needs** — `pull-requests: write` on the job that writes it, or `NOTIFY_TOKEN` read from a masked variable.
 - **A rollback that redeploys an earlier artifact without rerunning the tests** — a manual job or workflow that takes a version or digest the pipeline already built. Its tests ran when it was built. It clears PIPE-27, PIPE-28 and PIPE-31; a dispatch that builds what it ships is PIPE-31.
-- **Promoting the digest the previous environment runs**, resolved at promote time from the record its deploy wrote. PIPE-30 is a reference a later push can move.
+- **A promotion that reads its digest, at promote time, from the record a gated run wrote** — the digest the previous environment runs, or the image a green default-branch run built for a named commit. The gates ran when that run built it, so it clears PIPE-27, PIPE-30 and PIPE-31. PIPE-30 is a reference a later push can move.
 - **A test matrix over runtimes or platforms, or a build matrix over architectures.** PIPE-29 is a build per environment.
 - **A third-party action or image pinned by a mutable tag, an unpinned action or a broad token as a `PIPE-n` item.** Those are `security.md`'s rows; file them by CWE id. The pipeline's own image deployed by a tag that can move is PIPE-30.
 

@@ -548,7 +548,7 @@ def test_a_rollback_and_a_runtime_matrix_are_not_deploy_defects():
     assert "The pipeline's own image deployed by a tag that can move is PIPE-30" in do_not
     assert "It clears PIPE-7, not PIPE-27" in do_not, "a manual production start still waits for every gate"
     assert "It clears PIPE-27, PIPE-28 and PIPE-31" in do_not, "fixture 02's rollback skips the tests by design"
-    assert "Promoting the digest the previous environment runs" in do_not
+    assert "A promotion that reads its digest, at promote time, from the record a gated run wrote" in do_not
     assert "(a third-party action or image pinned by a mutable tag)" in RULE.read_text()
 
 

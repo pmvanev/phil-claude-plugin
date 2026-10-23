@@ -1,0 +1,6 @@
+{
+  "testRunner": "vitest",
+  "mutate": ["src/**/*.ts"],
+  "reporters": ["clear-text", "html"],
+  "thresholds": { "high": 90, "low": 80, "break": 80 }
+}
