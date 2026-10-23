@@ -138,9 +138,9 @@ The decision, which `./scripts/ci/run.sh scope` prints as `docs-only`, `scoped` 
 
 The secret scan never consults the decision. **The script stops when git cannot read the checkout**: a
 scanner that cannot read the history scans nothing and can still exit 0, as gitleaks does. Every job's
-image holds `git`, an image builder's and a deploy tool's included — where none holds both, install `git`
-in `before_script` from the image's own package manager and list it under "To pin" — and the checkout must reach the base:
-GitLab `GIT_DEPTH: "0"`, GitHub `fetch-depth: 0`.
+image holds `git`, an image builder's and a deploy tool's included; where no image holds both, install
+`git` in `before_script` from the image's own package manager and list it under "To pin". The checkout
+must reach the base: GitLab `GIT_DEPTH: "0"`, GitHub `fetch-depth: 0`.
 
 ## Step 5: Write the Pipeline
 
@@ -202,12 +202,11 @@ opens one issue labelled `andon` and comments on it while main stays red; its bo
 it once main is green.
 
 Give each job a `timeout`. Keep production deploys and rollbacks manual: on GitLab a manual job, on
-GitHub the dispatch, which works on every plan, where a required reviewer on a private repository's
+GitHub the dispatch, which works on every plan; a required reviewer on a private repository's
 environment needs GitHub Enterprise. A docs-only commit builds no image (PIPE-24), and its deploys
-exit early, leaving each environment on the image it runs; its deployment record names code already live,
-so a rollback picks a deployment whose pipeline built an image, and `promote` refuses a commit whose run
-built none. A deploy shown nowhere in the survey is the
-user's to add; write none unasked. Read an action's commit with
+exit early, leaving each environment on the image it runs. Roll back to a deployment whose pipeline
+built an image; `promote` refuses a commit whose run built none. Write a deploy only where the survey
+finds one or the user asks for one. Read an action's commit with
 `gh api repos/<owner>/<action>/git/ref/tags/<tag>`, and write the tag beside it as a comment. Where the
 environment cannot read an image digest or an action's commit, write the tag and list each one under
 "To pin". Editing an
@@ -251,8 +250,8 @@ Read each setting the policy depends on:
 - **The rollback.** GitLab: `ci_forward_deployment_enabled` and `ci_forward_deployment_rollback_allowed`
   on the same project read. Where forward deployment is on and rollback is not allowed, the Rollback
   environment button can be hidden or disabled; report it with where to allow it, Settings > CI/CD >
-  General pipelines, **Allow job retries for rollback deployments**. The first field shows only to an
-  Owner; where it is missing, list it unread.
+  General pipelines, **Allow job retries for rollback deployments**. `ci_forward_deployment_enabled`
+  shows only to an Owner or an administrator; where it is missing, list it unread.
 
 For each setting that departs from the policy, ask one question — "Require a passing MR pipeline to
 merge?", "Email these addresses when main's pipeline fails?" with the addresses listed, or "Turn on

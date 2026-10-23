@@ -46,7 +46,7 @@ state, not the effort.
 | Pattern | Mode | Action |
 |---------|------|--------|
 | `"<initiative>"` | Start | Run FRAME on a new initiative, then the loop below. |
-| No argument | Resume | Resume the in-flight initiative from its `docs/work/<slug>/progress.md`: read the roadmap and the per-wave status, and continue from the first wave not yet `done`. Do not re-run completed waves or re-frame. With several in-flight initiatives under `docs/work/`, ask which; with none, say so and stop. When that wave is `failed`, the run stopped on it: ask before re-running the wave that stopped it. When it is `awaiting-release`, ask the developer to confirm that the release containing the previous wave's commit reached production — and, before a contract wave, that no release a rollback could restore still reads or writes the old shape. On a yes, mark the wave `pending` and run it. On a no, leave it `awaiting-release`, report the run **paused for release**, and stop. |
+| No argument | Resume | Resume the in-flight initiative from its `docs/work/<slug>/progress.md`: read the roadmap and the per-wave status, and continue from the first wave not yet `done`. Do not re-run completed waves or re-frame. With several in-flight initiatives under `docs/work/`, ask which; with none, say so and stop. When that wave is `failed`, ask before re-running the wave that stopped it. When it is `awaiting-release`, ask the developer to confirm that the release containing the previous wave's commit reached production — and, before a contract wave, that no release a rollback could restore still reads or writes the old shape. On a yes, mark the wave `pending` and run it. On a no, leave it `awaiting-release`, report the run **paused for release**, and stop. |
 
 Derive a kebab-case `<slug>` from the initiative for the trail path `docs/work/<slug>/`.
 
@@ -317,7 +317,7 @@ gate for the run that finishes the last wave.
 `${CLAUDE_PLUGIN_ROOT}/skills/work/self-test/` holds golden fixtures that pin these safety
 behaviors: FRAME refuses an uncheckable goal (01), off-ramps trivial work (02), carries one
 initiative end-to-end (03, walking skeleton), routes code vs prose (04, 05),
-stops-and-leaves-last-good on a delegate failure (06), reports a missed goal as not-done (07), and
+stops-and-leaves-last-good on a delegate failure (06), reports a missed goal as not-done (07),
 splits a schema migration into expand and contract waves (08), and pauses for release after a wave
 that ships alone (09). Whenever this skill or `${CLAUDE_PLUGIN_ROOT}/commands/work.md` changes,
 drive the fixtures per its `README.md` and confirm each produces its `expected.md` decision — every

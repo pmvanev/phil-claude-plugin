@@ -159,8 +159,8 @@ files**, even for a one-token fix: this command reports and does not repair. If 
 the new items under a fresh `Scope:` line, continuing its id sequence and keeping every earlier item under its id.
 
 Once the items are numbered, mark the matrix. For an item about when a job runs — a Triggering, Every
-change, skip-gate or policy row, PIPE-27, PIPE-28 or PIPE-31 — put `✗` and the item's id on each cell where the defect shows, in the
-row of the job whose rule or edge the fix changes, and on each `(pipeline)` cell the item refuses. Leave
+change, skip-gate or policy row, PIPE-27, PIPE-28 or PIPE-31 — put `✗` and the item's id on each cell
+where the defect shows, in the row of the job whose rule or edge the fix changes, and on each `(pipeline)` cell the item refuses. Leave
 the cells of every other job alone, even where a refused pipeline means it never starts. Items about
 what a job does — a rebuild, a cache, a CWE — mark no cell.
 
@@ -242,9 +242,9 @@ with one workflow pulling the cord on a red main and one that never does; `05-an
 same project with an Andon field that names no channel, where a missing andon is a question; and
 `06-notify/`, a GitLab project under a Notify field, where a job that gates nothing tolerates its own
 failure. `07-deploy-what-passed/` holds a GitHub project with two deployables: one deploys to
-production after a failed gate and ships hotfixes along a path no gate guards; the other lets a dispatch input turn its tests off, builds an image per
-environment, deploys it by a moving tag and has no rollback; beside them sit a rollback, a runtime
-matrix and a deploy by digest that are correct.
+production after a failed gate and ships hotfixes along a path no gate guards; the other lets a
+dispatch input turn its tests off, builds an image per environment, deploys it by a moving tag and has
+no rollback; beside them sit a rollback, a runtime matrix and a deploy by digest that are correct.
 `tests/test_ci_pipelines_rule.py` and `tests/test_ci_runners_rule.py` check that every item a fixture
 expects takes its id and fix from one row, and that no look-alike is expected.
 
