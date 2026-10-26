@@ -12,7 +12,7 @@ fix, and leaves the look-alikes alone.
   two lists.
 - A self-test fixture: at least eight seeded defects beside five look-alikes, and a test that pins every
   row id and each expected item.
-- One cross-reference line in `coding.md` §8 pointing at the Lambda-specific connection cap.
+- One cross-reference line in `coding.md` §8 pointing at LWS-1, the Lambda form of building once at the composition root.
 
 ## OUT scope
 - The Principles prose and the Advisory list (slices 02 and 04).
