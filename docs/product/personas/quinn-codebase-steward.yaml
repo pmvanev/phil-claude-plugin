@@ -39,3 +39,14 @@ vocabulary:
 #   vocabulary: MR pipeline, trigger, rules:changes, merge gate, change-scoped tests, mutation, schedule,
 #     critical path, queue wait, artifact, cache, runner, warm pool, scale factor, max_use_count,
 #     trust class
+
+# Speed facet (DISCUSS, feature lambda-web-app-speed, 2026-10-26):
+# Quinn owns a web app served from AWS Lambda, its infrastructure and its front end, and hears that the
+# first load "takes a while". Job: make-a-lambda-web-app-load-fast.
+#   goal: the largest share of a person's load time found and fixed with the standard pattern, warmth
+#     bought on purpose and priced, and the work stopped at a stated target
+#   frustration: the same levers rediscovered per project; levers copied that miss the project's real
+#     cost; platform facts that went stale
+#   vocabulary: cold start, INIT, REPORT line, first invoke, TTFB, LCP, provisioned concurrency,
+#     SnapStart, heartbeat, bytecode, immutable, ETag, code splitting, bundle budget,
+#     stale-while-revalidate

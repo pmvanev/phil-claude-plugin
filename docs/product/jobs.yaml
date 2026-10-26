@@ -1110,3 +1110,45 @@ jobs:
     features: [ci-pipeline-standard]
     # Not a facet of shape-a-pipeline-to-the-change: different files, different sources, and a miss
     # lets one job tamper with the next rather than wasting a day.
+
+  - id: make-a-lambda-web-app-load-fast
+    # Registered by DISCUSS wave, feature: lambda-web-app-speed (2026-10-26)
+    job_story: >
+      When people wait on a web app I serve from AWS Lambda, I want to find where the load time
+      actually goes and fix the largest share with the standard pattern — without paying to keep
+      servers warm for nobody — so I can stop rediscovering the same levers in each project and stop
+      copying levers that miss the cost a project actually has.
+    dimensions:
+      functional: >
+        Divide a cold and a warm load into INIT, first invoke, network and browser time from the
+        function's own logs and a browser trace; drill one level into the largest slice; rank fixes by
+        saving per effort; price the warmth options; catch file-visible defects in ordinary review.
+      emotional: >
+        Confidence that the next fix goes to the largest cost, and that a lever copied from another
+        project was measured here first.
+      social: >
+        An app colleagues open without waiting; not being the one who paid to keep it warm overnight.
+    four_forces:
+      push: >
+        Mined 2026-10-26 from 208 sessions: beatrix's cold first load took 13.4 s and was cut to 3.4 s
+        by measuring one level deeper each time; modive copied the levers and still hit Lambda's 10 s
+        INIT ceiling, 6.5 s of it on a first database connection no copied lever touched. No rule or
+        skill in the plugin mentions cold starts, INIT, cache headers or bundle budgets.
+      pull: >
+        A standard that names each file-visible defect by row and fix in ordinary review, and a command
+        that measures, divides, ranks and stops.
+      anxiety: >
+        (A) Advice that is stale on the platform's billing or availability, as "INIT is free" became in
+        2025. (B) A row that flags the only design a partition allows. (C) A measuring tool that deploys
+        or reconfigures a live function on its own.
+      habit: >
+        Fixing whatever looks slow; copying a sibling project's levers without measuring; arguing about
+        keeping warm instead of pricing it.
+    opportunity_score: >
+      high importance, zero satisfaction — the plugin says nothing about load time beyond pooling and
+      batching.
+    status: validated
+    personas: [quinn-codebase-steward]
+    features: [lambda-web-app-speed]
+    # Not a facet of shape-a-pipeline-to-the-change: that speed is the pipeline's, from forge job
+    # records; this one is a person's page load, from Lambda's logs and a browser.
