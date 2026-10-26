@@ -359,3 +359,79 @@ chunk (modive); a cold-start probe that opens its own connection outside the poo
 that write and roll back (beatrix); a render-blocking font stylesheet, which D15 leaves out.
 
 **Not verified:** `/phil:review-code` itself, which runs the installed copy (1.9.0) until this releases.
+
+## Wave: DISCUSS / [REF] Slice 02 delivered and dogfooded (2026-10-26)
+
+**What landed.** `/phil:lambda-web-app-speed` v1 (`commands/lambda-web-app-speed.md`,
+`skills/lambda-web-app-speed/`): it resolves a function, starts the window at the function's last change,
+fetches the `REPORT` and `INIT_REPORT` lines with `aws logs filter-log-events`, divides them with
+`scripts/cold-path.py`, names the layer to look inside, and cites both commands. The rule gained its
+first three Principles: measure, then divide the time; count every cold start, including the two that
+hide; measure the code that is running. `tests/test_lambda_cold_path.py` pins the script to fixture 01,
+31 recorded lines; `tests/test_lambda_web_app_speed_command.py` pins the grant to AWS read verbs and the
+prose to D12. Each test was watched failing first, and each detection branch was removed once to watch a
+test catch it.
+
+**V2 closed, and it changed the design.** The composed Logs Insights query ran over fourteen days of
+modive's simulation API (7,876 invokes) and was checked by hand against the raw lines the same day:
+
+| | Logs Insights | Hand count |
+|---|---|---|
+| `count(*)` | 7,876 | 7,876 |
+| `count(@initDuration)` | 96 | 96 |
+| `pct(@initDuration, 50 / 95)` | 1,691.19 / 8,906.14 ms | 1,691.19 / 8,906.14 ms, nearest rank |
+| `pct(@duration, 50 / 95)` | 18.04 / 297.13 ms | 18.05 / 297.19 ms, nearest rank |
+
+The functions agree: `pct()` returns the nearest-rank value over 96 values and approximates it, within
+0.1%, over 7,876. **The query is still wrong for this job**: reading each log stream in order found 105
+cold starts, not 96. After an INIT timeout, the first `REPORT` carries no `Init Duration` and its
+`Duration` holds the retried INIT (2,004 ms against a 112 ms START-to-END span); after an invoke timeout,
+the next `REPORT` folds a fresh INIT the same way (5,238 ms against 4,117 ms, memory back to a fresh
+environment's). Five and four such cold starts hid among the warm invokes. Logs Insights cannot order
+lines within a stream, so v1 reads the raw lines through the script instead of the brief's Insights
+queries. The CLI's filter pattern does the brief's `@type` filtering, and the script drops any other
+line unread.
+
+**Dogfood, read-only, against modive's simulation API in AWS GovCloud (US)**, driving the commands the
+skill names by hand. Since its last change (2026-10-26 14:37 UTC): 749 invokes, 9 cold starts (8
+recorded, 1 after an INIT timeout); INIT p50 2.40 s and p95 9.97 s; first invoke p50 0.14 s. **INIT owns
+the cold path, 97% of the split time**, and reached its 10 s ceiling once. Over fourteen days, which
+mixes 1,024 MB and 1,769 MB: 105 cold starts, five INIT timeouts, INIT 58% of the split time — the first
+invoke owned more of it before modive moved its checks into INIT. The learning hypothesis holds: the
+function's existing logs named the layer without new instrumentation.
+
+**Moved:** US-02 named a first-byte slice. A function's logs hold no first byte, so it moves to slice 04
+with the browser, where its brief already puts the browser.
+
+**What the reviews caught, each fixed.** `plugin-dev:plugin-validator` passed the change with two major
+gaps, and `plugin-dev:skill-reviewer` rated it "needs improvement".
+- The skill asked for epoch milliseconds with no tool to compute them, so a run would do the arithmetic
+  by hand and cite a silently wrong window. The script now computes the window (`--window`, `--days`).
+- No granted command returned the Region. The configuration read now takes `FunctionArn`, which holds
+  the partition, Region and account; `aws sts` left the grant.
+- The truncation warning could never fire, because the CLI drops `NextToken` once it fetches every page.
+  The fetch now carries `--max-items`, and the warning names where it stopped (checked against the real
+  log group with a cap of 50).
+- An INIT that errored was counted as a timeout; INIT failures are now counted by status, and the kind
+  renamed "after a failed INIT". A SnapStart restore, which carries `Restore Duration`, would have
+  counted as warm; the script now refuses it.
+- The rules for choosing a layer had a dead branch and no wording for "none". The choice moved into the
+  script as `Look inside:`, pinned by four tests.
+- A `REPORT` line with no `Duration` crashed the script, and its annotations failed on Python 3.9; both
+  fixed. The script is executable.
+
+**`phil:eos`** rewrote four sentences of the rule's new prose; one widened "an INIT timeout" to an INIT
+that times out or fails, to match the script. **`/phil:harden-instructions`** made two edits to the
+skill — a bare prohibition given its alternative, a vague timeout made exact — and none to the command.
+Every rule a test enforces is authoring-time only, so its prose stays.
+
+**Blind drive, read-only, of this working tree's `SKILL.md`** by a fresh agent against the same function:
+it ran the configuration read, the window and the fetch — read verbs only — and reached the hand run's
+numbers exactly: 9 cold starts, INIT 97%, `Look inside: INIT, because INIT reached its 10 s ceiling 1
+time`. It found four gaps, each fixed and not re-driven: the citation block left out the configuration
+read and shortened the script's path; the p75 line had no place in the report; the owner line did not
+say INIT's share includes failed INITs; and "move the start later by half" did not say half of what.
+It also noted, unfixed, that a window three hours long rests its verdict on nine cold starts, and that
+the window ends when `--window` runs, a moment before the fetch.
+
+**Not verified:** `/phil:lambda-web-app-speed` itself, which runs the installed copy until this releases.
