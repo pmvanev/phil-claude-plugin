@@ -255,3 +255,11 @@ def test_a_window_of_given_days_ignores_the_last_change():
     w = json.loads(result.stdout)
     assert w["start_ms"] == 1793037600000 - 30 * 86400 * 1000
     assert w["starts_at"] == "30 days ago"
+
+
+def test_an_init_within_a_second_of_the_ceiling_is_counted():
+    """A 9.97 s INIT made its person wait almost as long as a timeout, and no other line says so."""
+    s = _summary([_report("a", 1, 100.0, init=9970.0), _report("b", 2, 100.0, init=2400.0)])
+    assert s["near_ceiling"] == 1
+    m = _module()
+    assert "1 within a second of the 10 s ceiling" in m.report(s)

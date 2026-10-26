@@ -5,9 +5,9 @@ keeps it read-only is its grant and its prose together. This file holds the gran
 the prose to forbidding every write and every forced cold start (D12), the fetch to the one filter the
 script expects, and every number to the command that produced it.
 
-**What this cannot check.** `python3` is granted to run `cold-path.py`, and `python3` can write; that is
-why the command declares `mutates: true`. Whether a run uses it for anything else is model behaviour,
-which the skill's prose carries.
+**What this cannot check.** `python3` is granted to run `cold-path.py` and `phases.py`, and `python3`
+can write; that is why the command declares `mutates: true`. Whether a run uses it for anything else is
+model behaviour, which the skill's prose carries.
 
 Written 2026-10-26, with slice 02 of `docs/feature/lambda-web-app-speed/` (issue 59).
 """
@@ -57,7 +57,7 @@ def test_the_skill_forbids_every_write_and_every_forced_cold_start():
     for phrase in ("Never invoke the function", "deploy", "change its configuration", "force a cold start",
                    "do not suggest forcing one"):
         assert phrase in body, phrase
-    assert "`python3` runs `cold-path.py` and nothing else" in body
+    assert "`python3` runs `cold-path.py` and `phases.py`, and nothing else" in body
 
 
 def test_the_fetch_uses_the_filter_the_script_reads():
@@ -100,3 +100,9 @@ def test_the_rule_names_both_hidden_cold_starts():
 
 def test_the_readme_lists_the_command():
     assert "/phil:lambda-web-app-speed" in (REPO / "README.md").read_text()
+
+
+def test_the_rule_times_concurrent_work_by_the_clock_and_fixes_the_largest_slice_first():
+    principles = " ".join(RULE.read_text().split("## Principles", 1)[1].split("\n## ", 1)[0].split())
+    for phrase in ("by the clock", "never summed", "Fix the largest slice first", "measure again"):
+        assert phrase in principles, phrase

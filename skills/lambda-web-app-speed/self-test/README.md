@@ -1,18 +1,22 @@
 # lambda-web-app-speed — Self-Test
 
 The measurement is only as good as its count of cold starts, and two kinds of cold start carry no
-`Init Duration`. These fixtures hand the timing script recorded log lines and state the split it must
-reach. Run them whenever `SKILL.md`, `scripts/cold-path.py`, `commands/lambda-web-app-speed.md` or the
-Principles of `rules/lambda-web-app-speed.md` change.
+`Init Duration`. These fixtures hand the timing scripts recorded log lines and state the split each
+must reach.
+Run them whenever `SKILL.md`, a script under `scripts/`, a file under `references/`,
+`commands/lambda-web-app-speed.md` or the Principles of `rules/lambda-web-app-speed.md` change.
 
 ## What the fixtures pin
 
 | Fixture | Situation | Expected outcome |
 |---|---|---|
 | `01-cold-path-split/` | 31 recorded platform lines from six execution environments of one web API, renamed: four cold starts with `Init Duration`, two after a failed INIT (both timeouts), two suppressed inits after invoke timeouts, and a memory change mid-window | 8 cold starts in 29 invokes, in three kinds; 21 warm; INIT owns the cold path; the memory change named |
+| `02-init-phases/` | 12 recorded cold-start lines in Embedded Metric Format from the same API, renamed: three phases, and ten checks run concurrently, six of them waiting on one database | `ColdStartChecks` the largest phase, at 66% of the time the code timed; the ten checks reported beside it, never summed (their medians sum to 4.99 s inside 0.92 s); the six that wait alike marked |
 
 ## How to drive it
 
-`python3 -m pytest -q tests/test_lambda_cold_path.py` drives fixture 01 through the script, with no
-model in the loop. The skill's prose — the window, the read-only limits, the layer to look inside — has
-no driver; drive it by hand against a real function, as the feature delta's slice 02 record does.
+`python3 -m pytest -q tests/test_lambda_cold_path.py tests/test_lambda_init_phases.py` drives fixture 01
+through `cold-path.py` and fixture 02 through `phases.py`, with no model in the loop. The skill's prose
+— the window, the read-only limits, the layer to look inside, and Step 4's choice between a cause and
+the next instrument — has no driver; drive it by hand against a real function, as the feature delta's
+slice 02 record does.

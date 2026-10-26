@@ -62,6 +62,7 @@ from typing import Optional
 
 FAILED = ("timeout", "error")
 WINDOW_DAYS = 14
+NEAR_CEILING_MS = 9000  # an INIT this long left its person waiting almost as long as a timeout
 
 
 @dataclass(frozen=True)
@@ -204,6 +205,7 @@ def summarize(streams):
         "first_invoke": _spread(first),
         "warm": _spread(warm),
         "unsplit": _spread(unsplit),
+        "near_ceiling": sum(1 for ms in init if ms >= NEAR_CEILING_MS),
         "memory_sizes": sorted(memory),
         "environments": len(streams),
         "last_line_ms": max((l.time for lines in streams.values() for l in lines), default=None),
@@ -240,7 +242,8 @@ def report(summary, truncated=False):
         f"Invokes: {summary['invokes']} in {summary['environments']} execution environments",
         f"Cold starts: {cold['total']} ({share:.1f}%) — {cold['recorded']} with Init Duration, "
         f"{cold['after_failed_init']} after a failed INIT, {cold['suppressed']} suppressed init(s)",
-        f"Failed INITs: {failed_init['timeout']} timed out, {failed_init['error']} errored · "
+        f"Failed INITs: {failed_init['timeout']} timed out, {failed_init['error']} errored; "
+        f"{summary['near_ceiling']} within a second of the 10 s ceiling · "
         f"invokes that timed out or crashed: {summary['invoke_failures']}",
         "",
         "| Slice | Count | p50 | p95 | Max |",
