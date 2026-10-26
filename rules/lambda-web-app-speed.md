@@ -10,17 +10,31 @@ paths:
 
 # Lambda Web App Speed Guide
 
-Guidelines drawn from the AWS Lambda Developer Guide (the execution environment lifecycle, memory, Python packaging, provisioned concurrency and SnapStart), the AWS GovCloud (US) User Guide, AWS's posts on INIT billing (2025) and cold starts (2025), and the Serverless Applications Lens; RFC 9110, RFC 9111 and RFC 8246 with MDN's `Cache-Control` reference; web.dev on the HTTP cache, code splitting and performance budgets; the React, webpack, Vite and size-limit documentation; and the Python and PostgreSQL documentation. Research: `docs/research/web-speed/lambda-web-app-speed-canonical-sources.md`.
+Guidelines drawn from the AWS Lambda Developer Guide (the execution environment lifecycle, memory, Python packaging, provisioned concurrency and SnapStart), the AWS GovCloud (US) User Guide, AWS's posts on INIT billing (2025) and cold starts (2025), and the Serverless Applications Lens; RFC 9110, RFC 9111 and RFC 8246 with MDN's `Cache-Control` reference; web.dev on the HTTP cache, code splitting and performance budgets; the React, webpack, Vite and size-limit documentation; the Python and PostgreSQL documentation; and Brendan Gregg's *Performance Analysis Methodology*. Research: `docs/research/web-speed/lambda-web-app-speed-canonical-sources.md`.
 
 This rule owns **how fast a web app served from AWS Lambda loads**: work done at INIT and on each invoke, memory, the deployment package, the options for keeping warm, the HTTP front door and static assets, and the front-end bundle. Neighbouring rules keep what they already own: `coding.md` §8 pooling connections and clients, and §15 batching every call that crosses the network; `react.md` React's idioms; `security.md` every security defect; `ci-pipelines.md` how fast the pipeline runs. Complement those — do not restate them.
 
-**The two halves divide on checkability.** The reviewer half — Always-flag and Do not flag — names defects a handler, an IaC file, a response header or a bundler config shows, each by its `LWS-n` id. The Principles half, which arrives with the planned `/phil:lambda-web-app-speed` command, is design: choosing among fixes needs a measurement, and a file holds none.
+**The two halves divide on checkability.** The reviewer half — Always-flag and Do not flag — names defects a handler, an IaC file, a response header or a bundler config shows, each by its `LWS-n` id. The Principles half, which `/phil:lambda-web-app-speed` applies, is design: choosing among fixes needs a measurement, and a file holds none.
 
 ---
 
 ## Principles — design, not review criteria
 
-Not yet written. They land with the planned `/phil:lambda-web-app-speed` command, which measures a cold path before it ranks a fix. Until then, this rule is its reviewer half alone, and no principle yields a finding.
+No principle yields a review finding. Each governs how to measure a slow load before anyone fixes it.
+
+### 1. Measure, then divide the time
+
+State the problem as latency on a named path — a cold navigation, a warm one, a repeat visit — and divide that path's time into its layers before changing anything. Change only what a measurement points at: applying a list of fixes unmeasured is what Gregg calls the Random Change anti-method, and tuning whatever the team's tools happen to show is his Streetlight. A defect a file plainly shows is the exception, and the Always-flag rows below fix it on sight.
+
+### 2. Count every cold start, including the two that hide
+
+Lambda marks one kind of cold start with `Init Duration`; two other kinds carry none. After an INIT that times out or fails, Lambda retries it inside the first invoke, and that invoke's `REPORT` folds the retry into `Duration`. After an invoke that timed out or crashed, Lambda resets the environment, and the next invoke pays a *suppressed init*, folded the same way. Both read as slow warm invokes, so a count of `Init Duration` misses them, and a warm percentile absorbs them. Read each log stream — one execution environment — in time order to find them. Count INIT timeouts on their own: a person behind one waits ten seconds before the retry begins.
+
+### 3. Measure the code that is running
+
+A window that spans a deploy, or a change of memory, mixes two functions, and its percentiles describe neither. Start the window at the function's last change, and widen it only to gather enough cold starts, saying that the wider window mixes versions.
+
+Principles for acting on the measurement — fix the largest slice first, rank by saving per effort, price the warmth options, stop at the target — are still to come.
 
 ---
 
@@ -97,9 +111,9 @@ Name each finding by its `LWS-n` id and take the fix from the row: copy the row'
 
 ## Sources and Synthesis
 
-The rows cite the works named at the top. AWS's Lambda Developer Guide supplies INIT and the handler, memory, packaging and both warmth options; its GovCloud user guide, read on 2026-10-26, the two GovCloud rows and the absence of CloudFront there; its 2025 posts, that INIT has been billed since 2025-08-01 and that unused dependencies cost a cold start; its Serverless Lens, where static assets belong. RFC 9110, 9111 and 8246, MDN and web.dev supply the caching, compression and validator rows, and Chrome's Lighthouse the 1.4 KiB floor; web.dev, React, webpack, Vite and size-limit supply the bundle rows. PostgreSQL's documentation supplies `EXISTS`.
+The rows cite the works named at the top. Gregg supplies the first Principle, and AWS's lifecycle page the INIT retry and the suppressed init behind the second. AWS's Lambda Developer Guide supplies INIT and the handler, memory, packaging and both warmth options; its GovCloud user guide, read on 2026-10-26, the two GovCloud rows and the absence of CloudFront there; its 2025 posts, that INIT has been billed since 2025-08-01 and that unused dependencies cost a cold start; its Serverless Lens, where static assets belong. RFC 9110, 9111 and 8246, MDN and web.dev supply the caching, compression and validator rows, and Chrome's Lighthouse the 1.4 KiB floor; web.dev, React, webpack, Vite and size-limit supply the bundle rows. PostgreSQL's documentation supplies `EXISTS`.
 
-**This rule's own:** the `LWS-n` ids and the wording of every row, distilled from the research's twenty candidates and corrected against two real codebases; the split into Principles, Always-flag and Do not flag, which follows `security.md` and `ci-pipelines.md`; and four readings. Both codebases built their app on the first invoke and cached it, which a row about each invoke missed, so LWS-1 names the cached build too. LWS-15 adds Lambda's per-millisecond billing to RFC 9110's validator, which only implies a build step. LWS-16 fires only where CloudFront exists, because a row that flags the only design a partition allows teaches readers to skip it. And the projects behind this rule measured what the sources left open: in one, compiled bytecode halved import time, and pushed the package past Lambda's 50 MB direct-upload limit. The research lists what it could not settle under Knowledge Gaps.
+**This rule's own:** the `LWS-n` ids and the wording of every row, distilled from the research's twenty candidates and corrected against two real codebases; the split into Principles, Always-flag and Do not flag, which follows `security.md` and `ci-pipelines.md`; and four readings. Both codebases built their app on the first invoke and cached it, which a row about each invoke missed, so LWS-1 names the cached build too. LWS-15 adds Lambda's per-millisecond billing to RFC 9110's validator, which only implies a build step. LWS-16 fires only where CloudFront exists, because a row that flags the only design a partition allows teaches readers to skip it. And the projects behind this rule measured what the sources left open: in one, compiled bytecode halved import time, and pushed the package past Lambda's 50 MB direct-upload limit. The second Principle's signatures are this rule's own reading of a real function's logs on 2026-10-26: AWS names both hidden kinds without saying how a `REPORT` line shows them, and over fourteen days a count of `Init Duration` found 96 of that function's 105 cold starts. The research lists what it could not settle under Knowledge Gaps.
 
 ---
 
