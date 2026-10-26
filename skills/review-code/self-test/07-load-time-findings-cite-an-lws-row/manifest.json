@@ -1,0 +1,16 @@
+{
+  "node_id": "RC-SELFTEST-07",
+  "mode": "review",
+  "target": ".",
+  "pins": "a load-time finding in a Lambda web app is named by the LWS id of its rules/lambda-web-app-speed.md row and takes that row's Preferred form as its fix; a Do-not-flag case is not flagged",
+  "expected_guard": "fourteen LWS-named items across the handler, the shell, the Terraform, the build and the bundle; six look-alikes unflagged",
+  "decoys": [
+    "textract",
+    "report_count",
+    "S3_CLIENT",
+    "reports-thumbnailer",
+    "--no-compile",
+    "SettingsHelp"
+  ],
+  "min_items": 14
+}

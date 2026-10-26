@@ -288,3 +288,74 @@ Decision enabled: which fixes to make, which warmth to buy, and when to stop.
 | The skill names modive's dominant cold-start slice, then its cause | Slice from logs alone; cause one level down | Slices 02 and 03 dogfood |
 | The ranking reproduces beatrix 254's measured order | Its three largest gains in the top three | Slice 04 replay |
 | Levers copied without measuring | No lever adopted in a dogfood without a number behind it | Slice dogfood records |
+
+## Wave: DISCUSS / [REF] Slice 01 delivered and backtested (2026-10-26)
+
+**What landed.** `rules/lambda-web-app-speed.md`, its reviewer half: nineteen Always-flag rows (LWS-1 to
+LWS-19) in five tables — INIT and the handler, the deployment package, keeping warm, the front door and
+static assets, the bundle — and a Do-not-flag list. `review-code` reads the rule in a repository that
+deploys to Lambda, applies it to every file it gathers (build, dependency and CI files included), files
+each finding by its `LWS-n` id with the row's Preferred form, and counts load-time items on their own
+Summary line. `coding.md` §8 points at LWS-1. Fixture 07 seeds fourteen items beside six look-alikes;
+`tests/test_lambda_web_app_speed_rule.py` pins the ids, the dated GovCloud rows, D9, D10 and D11, the
+review's trigger and gather, and every expected item to its row. Each new test was watched failing on
+the input it guards before it passed.
+
+**V1 closed.** AWS's GovCloud (US) Lambda page, read 2026-10-26: "AWS Lambda Function URLs is not
+available" and "Lambda SnapStart for Python and .NET is not available". CloudFront has no page among the
+guide's 179 service pages, and its URL redirects to the guide's index; the rule cites that absence, not a
+quoted sentence. boto3's "Clients" guide, read the same day, backs LWS-3's build-clients-first clause.
+
+**Backtests, read-only, in scratch clones.** A fresh agent applied the rule alone to each project as it
+stood before its speed work, then I compared its items with the fixes each project made by hand. Fixes
+that a measurement chose — memory raised from 512 MB, bytecode, the cold-start timing line — are left
+out, since D8 and D11 keep them out of the file rows.
+
+| | beatrix before issue 254 | modive at `43e6b85` |
+|---|---|---|
+| First pass | 4 of 8 | 6 of 11 |
+| After the revisions below | 5 of 8 | 9 of 11 |
+
+- *What the first pass missed, and what changed:* both projects built their app on the first invoke and
+  cached it, which a row about "each invoke" missed, so LWS-1 now names the cached build. modive's
+  existence probes tested `bool(count)`, not `== 0`, so LWS-4 now covers any count run only to learn
+  whether a row exists. Neither project compressed its static files and no row said so, so LWS-13, from
+  Lighthouse's "Enable text compression", is new.
+- *Still missed, by design:* beatrix's Bedrock check moved to the first chat turn, its bucket check moved
+  to the deploy, and its alembic import replaced by a baked head. Each is a judgement about what a cold
+  start must prove, which slice 04's Principles own (D7); none is a file-visible defect. modive's S3
+  client, which the review read as a rare path the Do-not-flag list clears.
+- *One regression, fixed and not re-driven:* the second modive pass skipped the web UI object a route
+  built on every request, reading "every request uses" as the whole function's requests. LWS-1 now says
+  "every run of that path uses it", which should make modive 10 of 11.
+- *KPI:* 14 of 19 hand-found fixes caught across both projects (74%), against a target of 80%. Over the
+  sixteen that a file can show, 14 (88%). The three check-placement fixes are the gap, and slice 04 is
+  where they belong.
+
+**What the reviews and drives caught, each fixed:** `plugin-dev:plugin-validator` passed with warnings and
+`plugin-dev:skill-reviewer` rated the change "needs improvement".
+- The gather step checked build, dependency and CI files "against `security.md` alone", so LWS-5, LWS-6
+  and LWS-17 could never fire. Those files now meet the rule too.
+- The trigger read as "any web app"; it is now a repository that deploys to Lambda.
+- LWS-5 (VPC) had no cold-start cost to name once the Do-not-flag list said so; it became a Do-not-flag
+  entry. Rows now apply to functions a person waits on.
+- LWS-17 turned on intent; it now turns on a CI step the review read. LWS-19 covers navigation tables,
+  files one item per router, and its fix names `<Suspense>`.
+- An unsettled fact files an Advisory item naming the row and the unread source.
+- The fixture's path join, an expected fix naming the wrong function, a build script that shipped a test
+  file and no `dist/`, and an API with no route were fixed.
+
+**Fixture 07, two blind drives.** *Drive 1*, before the revisions, filed all fourteen then expected, no
+look-alike, and LWS-15 twice — now expected. *Drive 2*, after them, filed every expected item and no
+look-alike; it split LWS-19 into three and found the missing `<Suspense>`, both since fixed and not
+re-driven.
+
+**`phil:eos`** rewrote four sentences of the rule and changed no Preferred form.
+**`/phil:harden-instructions`** over the skill's new text made no edit; its checks are authoring-time
+tests only.
+
+**Seen, no row covers:** a provider at the app's root that statically imports three.js into the entry
+chunk (modive); a cold-start probe that opens its own connection outside the pool, and startup checks
+that write and roll back (beatrix); a render-blocking font stylesheet, which D15 leaves out.
+
+**Not verified:** `/phil:review-code` itself, which runs the installed copy (1.9.0) until this releases.

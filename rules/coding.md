@@ -86,6 +86,8 @@ Use **RAII** (Resource Acquisition Is Initialization) or equivalently **SBRM** (
 
 Pool HTTP connections the same way: create one long-lived client per remote service and reuse it, so its keep-alive connections are pooled.
 
+On AWS Lambda the composition root runs once per execution environment, during INIT; `lambda-web-app-speed.md` (LWS-1) owns that form.
+
 #### 9. Testing Principles
 | Principle | Meaning |
 |-----------|---------|

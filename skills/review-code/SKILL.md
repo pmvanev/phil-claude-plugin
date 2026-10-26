@@ -1,6 +1,6 @@
 ---
 name: review-code
-description: Skill bundle for phil:review-code command — code review against coding standards, and security defects by CWE, with prioritized refactoring backlog
+description: Skill bundle for phil:review-code command — code review against coding standards, security defects by CWE, and a Lambda web app's load-time defects by LWS row, with prioritized refactoring backlog
 ---
 
 # Review Code
@@ -10,6 +10,11 @@ Review code against the standards in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
 `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`: identify refactoring opportunities and produce a prioritized
 backlog. Read `${CLAUDE_PLUGIN_ROOT}/rules/security.md` on every run, before Priority 1: a security
 defect is invisible until the rule names it, so the read cannot wait for one to appear.
+
+**Where the repository deploys to AWS Lambda** — an `aws_lambda_function`, an
+`AWS::Serverless::Function` or a `serverless.y*ml` with `functions:` anywhere in it — also read
+`${CLAUDE_PLUGIN_ROOT}/rules/lambda-web-app-speed.md` before Priority 1, and apply it to every file the
+review gathers. Skip it in any other repository.
 
 Use `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md` as your dictionary of named refactorings.
 
@@ -50,10 +55,12 @@ Run `git diff HEAD~1 --name-only` to get changed files, and `git ls-files --othe
 for new files not yet added. With no parent commit, use `git diff HEAD --name-only` and say so. Skip
 deleted files. Filter to code files only (exclude configs, lockfiles, generated files), but keep shell
 scripts, CI workflows (`.github/workflows/**`, `.gitlab-ci*`), `Dockerfile*` and package-manager config
-(`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`) — check those against
-`security.md` alone. Read each changed
-file in full, plus run `git diff HEAD~1 -- <file>` to see what changed, and find the tests of each changed
-production file as File Path mode does.
+(`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and, where the review
+reads `lambda-web-app-speed.md`, Terraform (`*.tf`), SAM `template.y*ml`, `serverless.y*ml` and
+`.size-limit*`. Check those against `security.md` and, where the review read it,
+`lambda-web-app-speed.md`, and against no other standard. Read each changed file in full, plus run
+`git diff HEAD~1 -- <file>` to see what changed, and find the tests of each changed production file as
+File Path mode does.
 
 ### File Path
 
@@ -64,8 +71,11 @@ Read the entire file. If it is production code, find its tests by the project's 
 Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swift,cpp,c,h,hpp,scala,clj,ex,exs,hs,ml,fs,fsx}`),
 skipping vendored and generated trees — `node_modules/`, `.venv/`, `venv/`, `vendor/`, `dist/`, `build/`.
 Also gather `**/*.{sh,bash}`, `.github/workflows/**`, `.gitlab-ci*`, `Dockerfile*` and package-manager
-config (`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and check those
-against `security.md` alone.
+config (`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and, where the
+review reads `lambda-web-app-speed.md`, `**/*.tf`, `**/template.y*ml`, `**/serverless.y*ml` and
+`**/.size-limit*`. Check those against `security.md` and, where the review read it,
+`lambda-web-app-speed.md`, and against no other standard. A bundler config written in JavaScript or
+TypeScript (`vite.config.*`, `webpack.config.*`) is code and gets every check.
 Read each file. For large directories (>20 files), an Explore agent may locate the files, but read each
 one yourself: the backlog records exact lines, which a summary cannot give.
 
@@ -105,6 +115,23 @@ Apply `security.md`'s Always-flag tables:
 naming the bullet. Count it under Advisory, never under Priority 1, and leave it out of Step 4's top
 five. It is exempt from "single, atomic refactoring" and from "when uncertain, skip" — uncertainty is
 what makes it Advisory.
+
+#### Load time
+
+Where the review read `lambda-web-app-speed.md`, apply its Always-flag tables the way **Security**
+applies `security.md`'s:
+
+- **Name each finding by its row's `LWS-n` id**, and take the fix the same way: the row's Preferred
+  form verbatim, then ` — here: ` and this code's one change.
+- **File one item per missing protection.** A defect a row there and `coding.md` both describe is one
+  item, under the `LWS-n` id. A defect that is also a security defect is the security row's alone.
+- **Where a row turns on a fact the files do not settle** — the Region a stack deploys to, a value in
+  an unread variable, a CI pipeline the review did not read — file an Advisory item instead: Smell
+  `Advisory`, and a Rationale naming the `LWS-n` row and the unread source. Count it under Advisory.
+- Leave every case on the rule's Do-not-flag list alone.
+
+A load-time item carries `Priority: 1` and `Route: report only`: each fix changes what a person waits
+for, which no structural refactoring may do. Count it on its own Summary line, never under Priority 1's.
 
 ### Priority 2 — Structural Smells (High Impact)
 - **Long Functions** — Functions of 20 lines or more
@@ -180,7 +207,7 @@ claim about a whole suite.
 ### Priority 7 — Language Idioms
 Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1. An idiom that is also a security sink — `dangerouslySetInnerHTML` fed untrusted data — is a Priority 1 security item under its CWE id, filed once, never also at Priority 7.
 
-For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file, or for Priority 6 the fix from `test-patterns.md`'s Smell Catalogue, or for a security item the fix the **Security** subsection above defines) that addresses it.
+For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file, or for Priority 6 the fix from `test-patterns.md`'s Smell Catalogue, or for a security or load-time item the fix the **Security** or **Load time** subsection above defines) that addresses it.
 
 ---
 
@@ -199,7 +226,8 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 ## Summary
 
 - **Total items**: {count}
-- **Priority 1 (Correctness)**: {count, Advisory items excluded}
+- **Priority 1 (Correctness)**: {count, Advisory and load-time items excluded}
+- **Load time (`LWS-n` rows)**: {count}
 - **Advisory (questions for the author)**: {count}
 - **Priority 2 (Structure)**: {count}
 - **Priority 3 (Naming)**: {count}
@@ -215,10 +243,10 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 - **File**: `{file-path}`
 - **Lines**: {start}-{end}
 - **Priority**: {1-7}
-- **Smell**: {smell name from catalog; for a security item, its CWE id, e.g. `CWE-78`; `Advisory` for a question}
-- **Refactoring**: {named refactoring from catalog; for a security item, the row's Preferred form verbatim, then ` — here: ` and this code's one change}
+- **Smell**: {smell name from catalog; for a security item, its CWE id, e.g. `CWE-78`; for a load-time item, its `LWS-n` id; `Advisory` for a question}
+- **Refactoring**: {named refactoring from catalog; for a security or load-time item, the row's Preferred form verbatim, then ` — here: ` and this code's one change}
 - **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route; a Priority 7 item routes to `/phil:refactor` in production code and `report only` in a test file}
-- **Rationale**: {why this matters — which coding standard is violated; for a security item, `security.md` and the row's Cite column}
+- **Rationale**: {why this matters — which coding standard is violated; for a security or load-time item, the rule (`security.md` or `lambda-web-app-speed.md`) and the row's Cite column}
 - **Status**: pending
 ```
 
@@ -231,7 +259,8 @@ Rules for the backlog:
   Priority 7 idiom, name the idiom from the language rules file. Where the catalogue names no
   refactoring for it — most non-security Priority 1 items, a dependency-direction violation — state the fix in plain
   words and route it `report only`. For a security item, the smell is the CWE id and the fix is the
-  one the **Security** subsection defines
+  one the **Security** subsection defines; for a load-time item, the smell is the `LWS-n` id and the
+  fix the one **Load time** defines
 - `report only` is a valid route: no command applies the fix, and the item says so rather than
   pretending one does
 - Rationale must cite the specific principle or rule violated
@@ -243,7 +272,8 @@ Rules for the backlog:
 After writing the backlog, report to the user:
 
 1. Total findings by priority
-2. Top 5 highest-priority items with brief descriptions
+2. Top 5 highest-priority items with brief descriptions — load-time items compete as Priority 1 items
+   do
 3. The path to the backlog file
 4. Suggest the command for each route the backlog holds: "Run `/phil:refactor` to work through
    this backlog", plus `/phil:refactor-tests --review` or `/phil:redesign-tests --review` over the test
