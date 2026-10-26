@@ -17,8 +17,15 @@ resource "aws_lambda_function" "api" {
   }
 }
 
+resource "aws_lambda_alias" "api_live" {
+  name             = "live"
+  function_name    = aws_lambda_function.api.function_name
+  function_version = aws_lambda_function.api.version
+}
+
 resource "aws_lambda_function_url" "api" {
   function_name      = aws_lambda_function.api.function_name
+  qualifier          = aws_lambda_alias.api_live.name
   authorization_type = "AWS_IAM"
 }
 
@@ -43,6 +50,11 @@ resource "aws_lambda_provisioned_concurrency_config" "web" {
   function_name                     = aws_lambda_function.web.function_name
   qualifier                         = aws_lambda_alias.web_live.name
   provisioned_concurrent_executions = 1
+}
+
+resource "aws_apigatewayv2_api" "ledger" {
+  name          = "ledger"
+  protocol_type = "HTTP"
 }
 
 resource "aws_apigatewayv2_integration" "web" {

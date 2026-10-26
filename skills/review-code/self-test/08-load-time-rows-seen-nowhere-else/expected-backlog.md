@@ -29,7 +29,7 @@ Scope: .
 ### [R003] LWS-10 — a Lambda Function URL in an AWS GovCloud (US) stack
 
 - **File**: `main.tf`
-- **Lines**: 20-23
+- **Lines**: 26-30
 - **Priority**: 1
 - **Smell**: LWS-10
 - **Refactoring**: API Gateway or an Application Load Balancer — here: route the API through `aws_apigatewayv2_api.ledger` and remove `aws_lambda_function_url.api`
@@ -40,7 +40,7 @@ Scope: .
 ### [R004] LWS-7 — provisioned concurrency on the `live` alias, while the integration invokes the unqualified function
 
 - **File**: `main.tf`
-- **Lines**: 51
+- **Lines**: 63
 - **Priority**: 1
 - **Smell**: LWS-7
 - **Refactoring**: Point the integration at the alias that holds the provisioned concurrency — here: set `integration_uri` to `aws_lambda_alias.web_live.invoke_arn`
@@ -59,13 +59,13 @@ Scope: .
 - **Rationale**: lambda-web-app-speed.md — AWS SnapStart, "Compatibility considerations"
 - **Status**: pending
 
-### [R006] LWS-13 — the shell and its script, over 1.4 KiB each, sent with no `Content-Encoding`
+### [R006] LWS-13 — the 2.2 KiB HTML shell sent with no `Content-Encoding`
 
 - **File**: `web.py`
-- **Lines**: 16-20
+- **Lines**: 49-54
 - **Priority**: 1
 - **Smell**: LWS-13
-- **Refactoring**: Precompress static files at build time and compress dynamic text in the server, serving `br` or `gzip` with `Vary: Accept-Encoding`; behind CloudFront, store precompressed objects or set `compress = true` — here: write `.gz` copies of `dist/` in `build.sh`, and serve one with `Content-Encoding: gzip` and `Vary: Accept-Encoding` when the request accepts gzip
+- **Refactoring**: Precompress static files at build time and compress dynamic text in the server, serving `br` or `gzip` with `Vary: Accept-Encoding`; behind CloudFront, store precompressed objects or set `compress = true` — here: gzip `SHELL_HTML` once at module scope, and return it base64-encoded (`isBase64Encoded: true`) with `Content-Encoding: gzip` and `Vary: Accept-Encoding` when the request accepts gzip
 - **Route**: report only
 - **Rationale**: lambda-web-app-speed.md — Chrome Lighthouse, "Enable text compression"; RFC 9110 §8.4; CloudFront, "Serve compressed files"
 - **Status**: pending

@@ -2,7 +2,7 @@
 # Builds the two Lambda packages. The functions run python3.12.
 set -eu
 rm -rf build && mkdir -p build/api build/web
-pip install --require-hashes -r requirements.txt -t build/api
+pip install -r requirements.txt -t build/api
 cp app.py build/api/
 cp web.py paths.py build/web/
 cp -r dist build/web/

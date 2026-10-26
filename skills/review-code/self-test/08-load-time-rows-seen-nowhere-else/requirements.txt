@@ -1,2 +1,1 @@
-boto3==1.40.59 \
-    --hash=sha256:2f6d0b7c8f1a3e5d9c4b6a8e0f2d4c6b8a0e2f4d6c8b0a2e4f6d8c0b2a4e6f8d
+boto3==1.40.59
