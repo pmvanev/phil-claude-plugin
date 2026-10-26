@@ -435,3 +435,76 @@ It also noted, unfixed, that a window three hours long rests its verdict on nine
 the window ends when `--window` runs, a moment before the fetch.
 
 **Not verified:** `/phil:lambda-web-app-speed` itself, which runs the installed copy until this releases.
+
+## Wave: DISCUSS / [REF] Slice 03 delivered and dogfooded (2026-10-26)
+
+**What landed.** The command's Step 4 drills one level into the layer `Look inside:` names. It looks
+for a timing line the function already writes in CloudWatch's Embedded Metric Format, fetches its
+records over the same window, and divides them with `scripts/phases.py`: phases add up, concurrent
+members sit beside their phase unsummed, the largest phase is the one with the most time across the
+window, and members that wait alike are marked. Only where the slice stays unexplained does it propose
+an instrument, from `references/cold-start-line.md` or `references/connection-legs.md`, with its cost
+at INIT, for the person to deploy. The rule gained Principles 4 and 5: drill one level into the largest
+slice, timed by the clock; fix the largest slice first, then measure again. Fixture 02 holds twelve
+recorded lines; `tests/test_lambda_init_phases.py` pins the script, both references' Python and metric
+names, and the skill's drill. Each script guard was removed once to watch a test catch it.
+
+**The dogfood was already done by hand, and the skill reproduces its first level.** modive's
+`fix-listing-cold-start` RCA (its issue 21, 2026-10-26) drilled the simulation API's INIT the way this
+slice prescribes. Run read-only over the window since the function's last change — the commands driven by hand from
+this working tree, not the released command — the new step found the same thing from the logs alone: checks 66% of the time the code timed, ten checks whose medians sum to
+6.11 s inside a 0.99 s phase, and six — every check that opens a Postgres connection — waiting alike
+near 8 s at p95 while the rest finished in 0.21 s. The skill would then propose the connection-legs
+probe; modive's own probe, run in the API's subnets that day, timed DNS at 31–65 ms, TCP 1–5 ms, TLS
+42–69 ms and a password sign-in 45–109 ms, against 2,295–4,604 ms for the first IAM sign-in after 5 to
+40 minutes idle.
+
+**The learning hypothesis holds in part.** Two levels of timing named the cause's place — the first IAM
+sign-in to Aurora after idle — and not its reason: modive's memory explanation failed its own test when
+a 1-ACU floor left the sign-in at 4–5 s. "Named or narrowed" was the criterion, and this is narrowed.
+The fix modive chose, password sign-in for its app roles, acts on the place without the reason.
+
+**Moved, and why.** The brief's level 2 read the probe's output; modive's probe prints a Python dict,
+not EMF, so the reference probe writes EMF and the comparison above is against modive's recorded
+readings, not a fresh read.
+
+**What the reviews caught, each fixed.** `plugin-dev:plugin-validator` passed the change with three
+major findings, and `plugin-dev:skill-reviewer` rated it "needs improvement".
+- `phases.py` trusted the phase convention blindly: a line that writes a total beside its parts would be
+  summed with them and named the largest phase. It now refuses a phase within 10% of the others' sum in
+  every record, lists a member whose prefix starts two phases as unattached, and Step 4 confirms the
+  convention from the line's code first.
+- "Explained" could not be decided. Step 4 now decides in a fixed order from the report's own lines: no
+  timing line, the untimed gap, members that wait alike, otherwise the cause.
+- The gap to `Init Duration` was described and never computed; `phases.py --init-p50 --cold-starts`
+  reports it, and the lines against the cold starts they describe.
+- "Waits with the phase" compared two tails that could come from different cold starts; it now tests
+  record by record, in the slow half. The fixture still marks the same six checks.
+- A timed-out INIT writes no line, so the drill cannot see the attempts that made INIT the layer; the
+  skill and the reference now say so. The layer maps to its group (`INIT` to `init`, `first invoke` to
+  `first_request`), and the reference covers the first request.
+- `phases.py` missed truncation and crashed on a group with no phase and on a nameless metric; fixed.
+- The search found only hand-built EMF; it now looks for `add_metric` and `put_metric` too, and asks,
+  through the decision-request standard, when it finds none.
+- The probe had no handler, no read-back and an unverified sign-in. It gained a handler, string
+  dimensions, its prerequisites, `sslmode="verify-full"`, an SSL-reply check and a read-back block, and
+  Hard rule 4 admits a probe's lines.
+
+**`phil:eos`** found a wrong warrant, not a style fault: Principle 5 said a second saved outside the
+largest slice saves nothing. That is Goldratt's constraint, true of parallel work on a critical path;
+a cold start's phases run in sequence, where every second counts. The Principle now rests on Amdahl's
+law — a fix saves at most its slice's share — and its sources changed with it.
+**`/phil:harden-instructions`** over Step 4 and the references found nothing further.
+
+**Blind drive, read-only, of this working tree's `SKILL.md`** by a fresh agent from modive's directory:
+it ran read verbs and the two scripts only, found the cold-start line by its code, reached the same
+split, and traced the six waiting checks on its own to one SQLAlchemy engine that signs in to Aurora
+with a fresh IAM token — then proposed the connection-legs probe, adapted to modive's names. It found
+seven gaps, each fixed and not re-driven: the timed-out attempt writes no line but its retry does, so
+the caveat now says the attempt; "the same connection" now reads one engine, one pool, one sign-in; a
+probe the project already holds is asked about before another is proposed; the probe signs in with the
+function's own `sslmode`; the probe's CloudWatch cost is stated; the report cites the project files a
+Step 4 decision rests on; and the p75 line has its wording. It also noted an INIT of 9.97 s that no line
+remarked on, so `cold-path.py` now counts INITs within a second of the ceiling.
+
+**Not verified:** `/phil:lambda-web-app-speed` itself, which runs the installed copy until this releases.
