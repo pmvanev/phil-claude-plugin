@@ -1,0 +1,782 @@
+{
+  "formatVersion" : "v1.0",
+  "disclaimer" : "This pricing list is for informational purposes only. All prices are subject to the additional terms included in the pricing pages on http://aws.amazon.com. All Free Tier prices are also subject to the terms included at https://aws.amazon.com/free/",
+  "offerCode" : "AWSLambda",
+  "version" : "20261022183959",
+  "publicationDate" : "2026-10-22T18:39:59Z",
+  "products" : {
+    "8KN5M4Z3N93DH2UX" : {
+      "sku" : "8KN5M4Z3N93DH2UX",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Storage-Duration-ARM",
+        "groupDescription" : "Invocation duration weighted by ephemeral storage assigned to function, measured in GB-s for ARM",
+        "usagetype" : "UGW1-Lambda-Storage-GB-Second-ARM",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "XJDGEW4KCCD2P5TG" : {
+      "sku" : "XJDGEW4KCCD2P5TG",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Requests-ARM",
+        "groupDescription" : "Invocation call for a Lambda function for ARM",
+        "usagetype" : "UGW1-Request-ARM",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "3NTSY6TBUTNFSSPN" : {
+      "sku" : "3NTSY6TBUTNFSSPN",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Duration",
+        "groupDescription" : "Invocation duration weighted by memory assigned to function, measured in GB-s",
+        "usagetype" : "UGW1-Lambda-GB-Second",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "HBK2GFTXWZGRXMVW" : {
+      "sku" : "HBK2GFTXWZGRXMVW",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Durable-Execution-TimedStorage-ByteHrs",
+        "groupDescription" : "Data retained for running and completed durable executions of Durable Functions, measured in GigaBytesMonth",
+        "usagetype" : "UGW1-Lambda-Durable-Execution-TimedStorage-ByteHrs",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "V6BFH6BV7XDHRMKA" : {
+      "sku" : "V6BFH6BV7XDHRMKA",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Tenant-Isolated-Environment-Memory-GB-ARM",
+        "groupDescription" : "Tenant isolated execution environments weighted by memory assigned to function, for ARM",
+        "usagetype" : "UGW1-Lambda-Tenant-Isolated-Environment-Memory-GB-ARM",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "ZQVCC2M69R4S79XS" : {
+      "sku" : "ZQVCC2M69R4S79XS",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "Any",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Requests",
+        "groupDescription" : "Invocation call for a Lambda function",
+        "usagetype" : "Global-Request",
+        "operation" : "",
+        "regionCode" : "",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "A537DZHA4FPKMKUK" : {
+      "sku" : "A537DZHA4FPKMKUK",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Durable-Execution-Written-Bytes",
+        "groupDescription" : "Data written during durable executions of Durable Functions, measured in GigaBytes",
+        "usagetype" : "UGW1-Lambda-Durable-Execution-Written-Bytes",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "6SC4EVRJP2CVKTFD" : {
+      "sku" : "6SC4EVRJP2CVKTFD",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Tenant-Isolated-Environment-Memory-GB",
+        "groupDescription" : "Tenant isolated execution environments weighted by memory assigned to function",
+        "usagetype" : "UGW1-Lambda-Tenant-Isolated-Environment-Memory-GB",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "V3FAJBSMWXEXYUD7" : {
+      "sku" : "V3FAJBSMWXEXYUD7",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Duration-ARM",
+        "groupDescription" : "Invocation duration weighted by memory assigned to function, measured in GB-s for ARM",
+        "usagetype" : "UGW1-Lambda-GB-Second-ARM",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "VVD7HSXRRHFPEE7X" : {
+      "sku" : "VVD7HSXRRHFPEE7X",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Storage-Duration",
+        "groupDescription" : "Invocation duration weighted by ephemeral storage assigned to function, measured in GB-s",
+        "usagetype" : "UGW1-Lambda-Storage-GB-Second",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "YSWRWHMDHU3V2CTP" : {
+      "sku" : "YSWRWHMDHU3V2CTP",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Provisioned-Concurrency-ARM",
+        "groupDescription" : "Concurrency weighted by memory assigned to function over the period for which it is provisioned, measured in GB-s for ARM",
+        "usagetype" : "UGW1-Lambda-Provisioned-Concurrency-ARM",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "8HWAV82CCXMVVZEC" : {
+      "sku" : "8HWAV82CCXMVVZEC",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Durable-Execution-Operations",
+        "groupDescription" : "Durable operations performed by durable executions of Durable Functions, measured in DurableOperations",
+        "usagetype" : "UGW1-Lambda-Durable-Execution-Operations",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "R9M6TSAJNH6SQYR8" : {
+      "sku" : "R9M6TSAJNH6SQYR8",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Edge-Requests",
+        "groupDescription" : "Invocation call for a Lambda function",
+        "usagetype" : "UGW1-Lambda-Edge-Request",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "UXM3E4KXARWTEAEM" : {
+      "sku" : "UXM3E4KXARWTEAEM",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Duration-Provisioned-ARM",
+        "groupDescription" : "Invocation duration, during provisioned period, weighted by memory assigned to function, measured in GB-s for ARM",
+        "usagetype" : "UGW1-Lambda-Provisioned-GB-Second-ARM",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "DUD8UGBJPHZXCZX8" : {
+      "sku" : "DUD8UGBJPHZXCZX8",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Duration-Provisioned",
+        "groupDescription" : "Invocation duration, during provisioned period, weighted by memory assigned to function, measured in GB-s",
+        "usagetype" : "UGW1-Lambda-Provisioned-GB-Second",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "M6PXMHV854FJKTEY" : {
+      "sku" : "M6PXMHV854FJKTEY",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Event-Poller-Unit-Duration",
+        "groupDescription" : "Duration weighted by Event Poller Units consumed by Provisioned mode for ESM, measured in Event-Poller-Unit-Hours",
+        "usagetype" : "UGW1-Lambda-Event-Poller-Unit-Hour",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "PYYRMKNCPXA7UN4A" : {
+      "sku" : "PYYRMKNCPXA7UN4A",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Provisioned-Concurrency",
+        "groupDescription" : "Concurrency weighted by memory assigned to function over the period for which it is provisioned, measured in GB-s",
+        "usagetype" : "UGW1-Lambda-Provisioned-Concurrency",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "9WRNTFTWDEYN9NAV" : {
+      "sku" : "9WRNTFTWDEYN9NAV",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Edge-Duration",
+        "groupDescription" : "Invocation duration weighted by memory assigned to function, measured in GB-s",
+        "usagetype" : "UGW1-Lambda-Edge-GB-Second",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "4VCGJ7EG8PJVZG7S" : {
+      "sku" : "4VCGJ7EG8PJVZG7S",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "Any",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Duration",
+        "groupDescription" : "Invocation duration weighted by memory assigned to function, measured in GB-s",
+        "usagetype" : "Global-Lambda-GB-Second",
+        "operation" : "",
+        "regionCode" : "",
+        "servicename" : "AWS Lambda"
+      }
+    },
+    "DJNVRSYVP8QY93QP" : {
+      "sku" : "DJNVRSYVP8QY93QP",
+      "productFamily" : "Serverless",
+      "attributes" : {
+        "servicecode" : "AWSLambda",
+        "location" : "AWS GovCloud (US-West)",
+        "locationType" : "AWS Region",
+        "group" : "AWS-Lambda-Requests",
+        "groupDescription" : "Invocation call for a Lambda function",
+        "usagetype" : "UGW1-Request",
+        "operation" : "",
+        "regionCode" : "us-gov-west-1",
+        "servicename" : "AWS Lambda"
+      }
+    }
+  },
+  "terms" : {
+    "OnDemand" : {
+      "UXM3E4KXARWTEAEM" : {
+        "UXM3E4KXARWTEAEM.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "UXM3E4KXARWTEAEM",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "UXM3E4KXARWTEAEM.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "UXM3E4KXARWTEAEM.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "USD7.7778E-6 per Lambda-GB-Second for Lambda-Provisioned-GB-Second-ARM in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000077778"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "HBK2GFTXWZGRXMVW" : {
+        "HBK2GFTXWZGRXMVW.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "HBK2GFTXWZGRXMVW",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "HBK2GFTXWZGRXMVW.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "HBK2GFTXWZGRXMVW.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "$0.20 per GigaBytesMonth for Lambda-Durable-Execution-TimedStorage-ByteHrs in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "GigaBytesMonth",
+              "pricePerUnit" : {
+                "USD" : "0.2000000000"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "ZQVCC2M69R4S79XS" : {
+        "ZQVCC2M69R4S79XS.A429C66SYZ" : {
+          "offerTermCode" : "A429C66SYZ",
+          "sku" : "ZQVCC2M69R4S79XS",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "ZQVCC2M69R4S79XS.A429C66SYZ.SB2VSFF4TP" : {
+              "rateCode" : "ZQVCC2M69R4S79XS.A429C66SYZ.SB2VSFF4TP",
+              "description" : "AWS Lambda - Requests Free Tier - 1,000,000 Requests",
+              "beginRange" : "0",
+              "endRange" : "1000000",
+              "unit" : "Request",
+              "pricePerUnit" : {
+                "USD" : "0.0000000000"
+              },
+              "appliesTo" : [ "8FY96CH95ZA8NU5C", "VXJTSR9CJSBFXG5K", "KY96C7U4EB95UXGK", "F9T53VWVKRT6G32X", "EXZWANHF3J8G524N", "B22EKFMS5UB7E4DB", "XM5KDGVKY9KYJWCG", "VPGUBFQ4KNZKMKGJ", "89U8ZQR2ZV45HXWY", "4JWH9XJEQW57HPK7", "D9Z54P78JUX2Y552", "DMJPKNDPVRPMG2E7", "476SBHCHQKEMB5CF", "EMZ8YZDPGWMDYZNK", "75D867BXR9WJ9F77", "E7YK4NJVGVSYK2HH", "XPFR3MTP3RW5GRTN", "YV5CBXWN5ARWJ7V9", "R3N9VPKCMSVAJDEH", "NCR6U4F9R96E94YR", "PV7EVKE5W5DV9HR7", "2PJ77N2RZDFUWCYT", "ZWHFK83WS2P4WZR6", "BVPQ9WHBE3SM65K7", "FPS5FM45229RTFBT", "B5V2RNHAWGVJBZD3", "5JXCX35TH2MPMFMW", "G87G4VHC8MFGZYZU", "ED4MANDMTGZ4Z9QF", "RN53C25R9GDX9T49", "68H82NC62DFBNEVM", "XJDGEW4KCCD2P5TG", "92KS5FMQEEJ39ACN", "GU2ZS9HVP6QTQ7KE", "NFXH9EUGP7BUPE4A", "FMKMXUNY35KEUAM3", "CKZQ3D25MV9ET243", "YY4C5XTAZNQPB6J6", "K4KA7GJPQTT3ZJ5A", "V5T5H5YEU5SUN3C2", "4KD96CKPZF9FJUJ9", "VUQUVJRYRZKGXHKX", "EQE7YY7WBWZFB46G", "7TZ969MZND3Z6HD7", "BBNA8X4S2N3SMD7K", "6GFK8TZW8U8G9MUB", "UVYYDZQ83GKQ2K6C", "W5998MSDP4P5N43C", "K9DMCWXXQT7TQSWX", "AA4Q79463N2JQHZA", "KERWZD8CJ22SEZWT", "ZW6UHD4Q6EPUCZWU", "NDYBVXT3KB548Z2A", "RYFSQRRXQ4R9CK7A", "UH8TQNRPPRZ9TJ4V", "RKMA4PX3K8H4VAP4", "DV2YFXRNHNJFTDP3", "3T9634R2MFT46X4K", "EE6A5VEB3PCF9VKU", "HPTUCREBP3C88BAZ", "GVB4MJBFXA3BX4M6", "36D3E7396ZKUSWWW", "D4TPQYY66DKTZWX9", "R2QWMZCXCNAMHHT9", "BNQXHCKJQCQXPHE8", "MN74ND7YYK8MBEC6", "K7BX6567RJ67A2KE", "6SKZPR8753NAAQ4W", "T34KQWJP89CNB5GZ", "3BE8DYKG4FYSZGDW", "DJNVRSYVP8QY93QP", "GRP2QG4WUGQFGJ6T", "574VQJ288VE2ZGMU", "ZEA64MMVK5QRB5TC" ]
+            }
+          },
+          "termAttributes" : {
+            "Restriction" : "Limited SKU Usage"
+          }
+        }
+      },
+      "3NTSY6TBUTNFSSPN" : {
+        "3NTSY6TBUTNFSSPN.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "3NTSY6TBUTNFSSPN",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "3NTSY6TBUTNFSSPN.JRTCKXETXF.CUKFZ388N3" : {
+              "rateCode" : "3NTSY6TBUTNFSSPN.JRTCKXETXF.CUKFZ388N3",
+              "description" : "AWS Lambda - Total Compute - AWS GovCloud (US)-Tier-1",
+              "beginRange" : "0",
+              "endRange" : "6000000000",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000166667"
+              },
+              "appliesTo" : [ ]
+            },
+            "3NTSY6TBUTNFSSPN.JRTCKXETXF.QZE2SB4KVB" : {
+              "rateCode" : "3NTSY6TBUTNFSSPN.JRTCKXETXF.QZE2SB4KVB",
+              "description" : "AWS Lambda - Total Compute - AWS GovCloud (US)-Tier-2",
+              "beginRange" : "6000000000",
+              "endRange" : "15000000000",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000150000"
+              },
+              "appliesTo" : [ ]
+            },
+            "3NTSY6TBUTNFSSPN.JRTCKXETXF.V7R92EXG27" : {
+              "rateCode" : "3NTSY6TBUTNFSSPN.JRTCKXETXF.V7R92EXG27",
+              "description" : "AWS Lambda - Total Compute - AWS GovCloud (US)-Tier-3",
+              "beginRange" : "15000000000",
+              "endRange" : "Inf",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000133334"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "V6BFH6BV7XDHRMKA" : {
+        "V6BFH6BV7XDHRMKA.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "V6BFH6BV7XDHRMKA",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "V6BFH6BV7XDHRMKA.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "V6BFH6BV7XDHRMKA.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "$0.000133333 per GB for Lambda-Tenant-Isolated-Environment-Memory-GB-ARM in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "GB",
+              "pricePerUnit" : {
+                "USD" : "0.0001333330"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "R9M6TSAJNH6SQYR8" : {
+        "R9M6TSAJNH6SQYR8.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "R9M6TSAJNH6SQYR8",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "R9M6TSAJNH6SQYR8.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "R9M6TSAJNH6SQYR8.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "AWS Lambda Edge - Total Requests - AWS GovCloud (US)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "Request",
+              "pricePerUnit" : {
+                "USD" : "0.0000006000"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "YSWRWHMDHU3V2CTP" : {
+        "YSWRWHMDHU3V2CTP.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "YSWRWHMDHU3V2CTP",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "YSWRWHMDHU3V2CTP.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "YSWRWHMDHU3V2CTP.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "USD3.3334E-6 per Lambda-GB-Second for Lambda-Provisioned-Concurrency-ARM in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000033334"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "VVD7HSXRRHFPEE7X" : {
+        "VVD7HSXRRHFPEE7X.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "VVD7HSXRRHFPEE7X",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "VVD7HSXRRHFPEE7X.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "VVD7HSXRRHFPEE7X.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "AWS Lambda - Ephemeral Storage - AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "GB-Seconds",
+              "pricePerUnit" : {
+                "USD" : "0.0000000370"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "6SC4EVRJP2CVKTFD" : {
+        "6SC4EVRJP2CVKTFD.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "6SC4EVRJP2CVKTFD",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "6SC4EVRJP2CVKTFD.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "6SC4EVRJP2CVKTFD.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "$0.000166667 per GB for Lambda-Tenant-Isolated-Environment-Memory-GB in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "GB",
+              "pricePerUnit" : {
+                "USD" : "0.0001666670"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "4VCGJ7EG8PJVZG7S" : {
+        "4VCGJ7EG8PJVZG7S.A429C66SYZ" : {
+          "offerTermCode" : "A429C66SYZ",
+          "sku" : "4VCGJ7EG8PJVZG7S",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "4VCGJ7EG8PJVZG7S.A429C66SYZ.KJYPJPDD2A" : {
+              "rateCode" : "4VCGJ7EG8PJVZG7S.A429C66SYZ.KJYPJPDD2A",
+              "description" : "AWS Lambda - Compute Free Tier - 400,000 GB-Seconds",
+              "beginRange" : "0",
+              "endRange" : "400000",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000000000"
+              },
+              "appliesTo" : [ "RUA4GEMXYRH9896Q", "79GRE5UQB86PEDTE", "ACUC37K5K3N7C85Q", "3BYZH4NKJN8TJUQ6", "CHGDQQ3YSPF93CBA", "72SBSFWPMDTH8S3J", "H6FQK2WA7RDQ5V8X", "TV26AWZ6ZNPAX59Z", "D9T9NECWKTB5WH67", "VGMFG9KJ58Z2FK83", "92C8Z466WVKPRP7S", "X48KB4DPQX4RKSY4", "WH7JAAY3UGC8KHEC", "6PPNGCBXY95TENXZ", "AW8K7Q9ZMMBBP9W6", "JNXN2GCNDMDR7JAF", "TG3M4CAGBA3NYQBH", "JUEJEGS4CE8UUZEP", "Z6UGBG979PFHQNPH", "6W6YS8N9UUWK42HD", "Q5FVKYAA7TVWEYJW", "GJ7G7EUMDKUWJE2B", "P44629QEZBV3SH4T", "RP9RSZYUC96SQ4G2", "PHDF9YNAFR3HDSR8", "HTQZ78UWV8DFX49Y", "Y9MYZCDTMAKCDR6D", "46GNEXAQAPS9YGE2", "KS26AK5FJMDYPXSF", "69Y7TUFYEF9HAV59", "9EQKNHGVQZ99FYAZ", "JZF5EBXY9YXH6KJZ", "K7NQZ75EHFKR2U2R", "U6YRFNVKQZTX8VF2", "BF3RMJFYR9ZK3K9E", "WW6YFYVSDJAEJEZW", "2PW46FQRKMQMYQVF", "TYPBRHCXJ9JT6HMW", "UBVQ8M4ZYG32RFDU", "NYVZUNE2ERJBX52D", "FSYUV9NMNDEXRJ5H", "XX6J9KCM423YDBZM", "HBHNHZU5GAMUNNJH", "S4ZKFHQ6B28FBYVW", "ZSE7CMBEBTMPH8ET", "4NX7CSSF3DVPXWBT", "V3FAJBSMWXEXYUD7", "KDEJ26SV7QK2N7DW", "XVFAA23C65JJZNNW", "DQSCCD3863BVQARD", "JMYXZ4MKRUCS2X8Q", "R3C6YVZV7TF52KUE", "VRFJ836X75T58FNT", "XZG2GSVN4SF6M4GV", "KXNSA7NBRHBHXXPS", "N7S38YMSMVSPHNAH", "3NTSY6TBUTNFSSPN", "TZ37H3DV8JXUESM7", "SGGKTWDV7PGMPPSJ", "XCU6U9G4FCKZQWG9", "TQNRYWE9JKMETPM3", "7N49FRQMXS49C2QS", "Y3J9NSBFENB45VFD", "7V27U9PFRJGUDWJ8", "67ZV6RMYY72YSRDC", "EZZMW8SEEDT6E2G5", "T3BEHFG5V4TZDT76", "4KSP88F2GNAU7KED", "HQWXQQHHTTTVSUH2", "SWU8SVYB8U6S2RXR", "SKKKJURRUZNWWKF9", "QVV5SPACJCKHAF8A", "U9BBUJHRSYYFC597", "KSD76ZR243WEPWRS" ]
+            }
+          },
+          "termAttributes" : {
+            "Restriction" : "Limited SKU Usage"
+          }
+        }
+      },
+      "8KN5M4Z3N93DH2UX" : {
+        "8KN5M4Z3N93DH2UX.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "8KN5M4Z3N93DH2UX",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "8KN5M4Z3N93DH2UX.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "8KN5M4Z3N93DH2UX.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "AWS Lambda - Ephemeral Storage for ARM - AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "GB-Seconds",
+              "pricePerUnit" : {
+                "USD" : "0.0000000370"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "XJDGEW4KCCD2P5TG" : {
+        "XJDGEW4KCCD2P5TG.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "XJDGEW4KCCD2P5TG",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "XJDGEW4KCCD2P5TG.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "XJDGEW4KCCD2P5TG.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "USD2.0E-7 per Requests for Request-ARM in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "Requests",
+              "pricePerUnit" : {
+                "USD" : "0.0000002000"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "V3FAJBSMWXEXYUD7" : {
+        "V3FAJBSMWXEXYUD7.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "V3FAJBSMWXEXYUD7",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "V3FAJBSMWXEXYUD7.JRTCKXETXF.6NBUNBXSC3" : {
+              "rateCode" : "V3FAJBSMWXEXYUD7.JRTCKXETXF.6NBUNBXSC3",
+              "description" : "USD1.33334E-5 per Lambda-GB-Second for Lambda-GB-Second-ARM in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "7500000000",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000133334"
+              },
+              "appliesTo" : [ ]
+            },
+            "V3FAJBSMWXEXYUD7.JRTCKXETXF.6JGAYSJBNY" : {
+              "rateCode" : "V3FAJBSMWXEXYUD7.JRTCKXETXF.6JGAYSJBNY",
+              "description" : "USD1.20001E-5 per Lambda-GB-Second for Lambda-GB-Second-ARM in AWS GovCloud (US-West)",
+              "beginRange" : "7500000000",
+              "endRange" : "18750000000",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000120001"
+              },
+              "appliesTo" : [ ]
+            },
+            "V3FAJBSMWXEXYUD7.JRTCKXETXF.AVR3V96UTF" : {
+              "rateCode" : "V3FAJBSMWXEXYUD7.JRTCKXETXF.AVR3V96UTF",
+              "description" : "USD1.06667E-5 per Lambda-GB-Second for Lambda-GB-Second-ARM in AWS GovCloud (US-West)",
+              "beginRange" : "18750000000",
+              "endRange" : "Inf",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000106667"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "DUD8UGBJPHZXCZX8" : {
+        "DUD8UGBJPHZXCZX8.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "DUD8UGBJPHZXCZX8",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "DUD8UGBJPHZXCZX8.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "DUD8UGBJPHZXCZX8.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "AWS Lambda - Total Compute (Provisioned) - AWS GovCloud (US)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000123033"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "8HWAV82CCXMVVZEC" : {
+        "8HWAV82CCXMVVZEC.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "8HWAV82CCXMVVZEC",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "8HWAV82CCXMVVZEC.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "8HWAV82CCXMVVZEC.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "$0.000008 per DurableOperation for Lambda-Durable-Execution-Operations in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "DurableOperations",
+              "pricePerUnit" : {
+                "USD" : "0.0000080000"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "A537DZHA4FPKMKUK" : {
+        "A537DZHA4FPKMKUK.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "A537DZHA4FPKMKUK",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "A537DZHA4FPKMKUK.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "A537DZHA4FPKMKUK.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "$0.35 per GigaByte for Lambda-Durable-Execution-Written-Bytes in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "GigaBytes",
+              "pricePerUnit" : {
+                "USD" : "0.3500000000"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "M6PXMHV854FJKTEY" : {
+        "M6PXMHV854FJKTEY.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "M6PXMHV854FJKTEY",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "M6PXMHV854FJKTEY.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "M6PXMHV854FJKTEY.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "$0.221 per Event-Poller-Unit-Hour for Lambda-Event-Poller-Unit-Hour in AWS GovCloud (US-West)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "Event-Poller-Unit-Hours",
+              "pricePerUnit" : {
+                "USD" : "0.2210000000"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "PYYRMKNCPXA7UN4A" : {
+        "PYYRMKNCPXA7UN4A.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "PYYRMKNCPXA7UN4A",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "PYYRMKNCPXA7UN4A.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "PYYRMKNCPXA7UN4A.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "AWS Lambda - Provisioned Concurrency - AWS GovCloud (US)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000052729"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "9WRNTFTWDEYN9NAV" : {
+        "9WRNTFTWDEYN9NAV.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "9WRNTFTWDEYN9NAV",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "9WRNTFTWDEYN9NAV.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "9WRNTFTWDEYN9NAV.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "AWS Lambda Edge - Total Compute - AWS GovCloud (US)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "Lambda-GB-Second",
+              "pricePerUnit" : {
+                "USD" : "0.0000500100"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      },
+      "DJNVRSYVP8QY93QP" : {
+        "DJNVRSYVP8QY93QP.JRTCKXETXF" : {
+          "offerTermCode" : "JRTCKXETXF",
+          "sku" : "DJNVRSYVP8QY93QP",
+          "effectiveDate" : "2026-10-01T00:00:00Z",
+          "priceDimensions" : {
+            "DJNVRSYVP8QY93QP.JRTCKXETXF.6YS6EN2CT7" : {
+              "rateCode" : "DJNVRSYVP8QY93QP.JRTCKXETXF.6YS6EN2CT7",
+              "description" : "AWS Lambda - Total Requests - AWS GovCloud (US)",
+              "beginRange" : "0",
+              "endRange" : "Inf",
+              "unit" : "Request",
+              "pricePerUnit" : {
+                "USD" : "0.0000002000"
+              },
+              "appliesTo" : [ ]
+            }
+          },
+          "termAttributes" : { }
+        }
+      }
+    }
+  },
+  "attributesList" : { }
+}

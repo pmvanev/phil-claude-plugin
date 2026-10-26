@@ -580,3 +580,70 @@ LWS-13's Preferred form names and no row's Violation covers.
 **Not verified:** a run of Step 5 on live data. modive's drill ends at the probe, and beatrix's
 cold-start line declares one metric and keeps its phases as plain properties, so Step 4 rightly finds no
 usable line there — a project with a rich line in another shape gets no drill yet.
+
+## Wave: DISCUSS / [REF] Slice 04b delivered and dogfooded (2026-10-26)
+
+**What landed.** Step 6 prices keeping the function warm: `cold-path.py` now reports the traffic —
+active hours, the peak of environments busy in a minute, the invoke time — and `scripts/warmth.py`
+fetches the Region's prices from AWS's public price list, which needs no credentials, and prices
+provisioned concurrency for one environment and the peak, SnapStart where the runtime and partition
+offer it, and a heartbeat from open pages, each per month and per cold start at least. Step 7 measures
+one page load: `scripts/firstbyte.py --get` times DNS, TCP, TLS and the wait of one GET, and `--split`
+matches the function's `REPORT` to it and divides the first byte into the network, the function and the
+front door — the first-byte slice US-02 moved here. LCP comes from a browser trace where the session has
+one, or the person's Lighthouse run. Step 5's candidate format moved to `references/candidates.md`.
+Fixtures 04 and 05 hold real prices, real traffic and a real cold load; each pricing and matching rule
+was removed once to watch a test catch it.
+
+**Dogfood, read-only.** Warmth for modive's simulation API, priced from fourteen days of its traffic and
+GovCloud West's price list (published 2026-10-22): provisioned concurrency $23.92 a month for one
+environment, $95.74 for the measured peak of four, at least $0.10 for each cold start removed; SnapStart not available
+for Python in GovCloud; a heartbeat while pages are open, under a cent. One page load of beatrix's
+production landing route, after a quiet spell: first byte 4.21 s — network 0.27 s, the function 3.33 s
+(INIT 3.31 s), the front door 0.62 s — against TTFB's 0.8 s; the next load, warm, 0.48 s, most of it
+the client's network. A Chrome DevTools trace of a warm load gave LCP 1.17 s (first byte 0.25 s, render
+delay 0.91 s); CrUX holds no field data for the page. One load each, not the 75th percentile.
+
+**What the live runs taught.** The first split found no `REPORT`: CloudWatch receives lines seconds
+late, so the step fetches again once. The second found none either: the `REPORT` was stamped 285 ms
+before the GET began, since the client's clock and AWS's differ, so the window now reaches three
+seconds either side.
+
+**What the reviews caught, each fixed.** `plugin-dev:plugin-validator` failed the change and
+`plugin-dev:skill-reviewer` rated it "needs improvement".
+- Hard rule 1 forbade invoking the function while Step 7 loaded a page that runs it, and can start it
+  cold. Step 7 now asks the person first, as D12 requires of forcing a cold start, and the rule names it
+  as its one exception; the command takes `--url`.
+- The per-cold-start price was labelled "at most"; divided by every cold start, it is the least each
+  removed one costs. Relabelled "at least" everywhere.
+- SnapStart for Java was priced as for Python and called unavailable in GovCloud; AWS charges nothing
+  for Java's, and GovCloud bars only Python and .NET. An arm64 function was priced at x86 rates; Step 1
+  now reads the architecture and `warmth.py --arch` the `-ARM` prices. A container image is named as
+  having no SnapStart.
+- A truncated fetch was priced as a whole window, and a stopped `cold-path.py` read as a price failure;
+  both are refused with their own message. Warmth is now priced over fourteen days whatever window
+  Step 3 measured, so its length comes from the script.
+- The first-byte match accepted a `REPORT` whose invoke began before the GET; it now matches on the
+  invoke's span, refuses a split the figures cannot hold, refuses a response that is not 2xx and a
+  SnapStart restore, and names everything the remainder holds — the front door, placement, one round
+  trip and, cold, Lambda's setup before INIT. `--get` prints the fetch window, so no step works it out.
+- Step 7 now runs GET, trace, split, so the trace gives CloudWatch its seconds; the trace takes one load
+  with no other interaction, reported as warm, and says whether the browser was signed in.
+- The skill description had grown past Claude Code's 1,024-character limit; it is 796, and a test holds
+  the limit. The stop-handling lists moved to `references/when-a-script-stops.md`, bringing the body under
+  plugin-dev's 3,000-word flag.
+
+**Blind drive, read-only, of the whole command** by a fresh agent, against beatrix's production function
+and its landing page, the person's agreement given: INIT owns 99% of the cold path, 3.10 s at p50 over 59
+cold starts; provisioned concurrency $23.94 a month for one environment, $71.81 for the peak of three,
+SnapStart unavailable in GovCloud; a cold load's first byte 4.57 s — network 0.74 s, the function 3.11 s
+(INIT 3.10 s), the rest 0.72 s; a warm traced load's LCP 1.00 s, in an isolated browser, not signed in.
+Read verbs and the five scripts only. It found five gaps, each fixed and not re-driven: Step 4 had no
+way to find a timing line whose name no one knew, so it now filters on the layer's dimension; beatrix's
+line times INIT as one undivided phase, which the decision list let pass as a cause, so a one-phase
+line now counts as no timing line and `phases.py` says it divides nothing; the convention could not be
+confirmed without the code, and now says so; `warmth.py` did not print the cold starts Step 6 names;
+and the trace's sequence risked loading the page twice. It also met more timing lines than cold starts,
+which `phases.py` now explains, and warm invokes up to 4.6 s that no step addresses.
+
+**Not verified:** `/phil:lambda-web-app-speed` itself, which runs the installed copy until this releases.

@@ -271,3 +271,18 @@ def test_the_cold_wait_is_each_recorded_cold_starts_init_plus_its_first_invoke()
                   _report("c", 3, 200.0, init=1000.0)])
     assert s["cold_wait"]["p50"] == 3100.0  # sums 3100, 4500, 1200
     assert "Cold wait" in _module().report(s)
+
+
+def test_the_traffic_figures_warmth_is_priced_from():
+    """Active hours, the most environments busy in one minute, and the time every invoke took."""
+    hour = 3_600_000
+    s = _summary([_report("a", 10, 100.0, init=900.0), _report("a", 20, 50.0), _report("b", 30, 30.0),
+                  _report("a", 2 * hour + 5, 20.0), _report("c", 5 * hour, 40.0, init=800.0)])
+    assert s["active_hours"] == 3
+    assert s["peak_environments"] == 2
+    assert s["duration_total_ms"] == 240.0
+
+
+def test_the_window_reports_its_length_in_days_for_the_warmth_price():
+    w = json.loads(_run("--window", "2026-10-26T14:37:09.000+0000", "--now", "2026-10-26T18:00:00Z").stdout)
+    assert w["days"] == round((1793037600000 - 1793025429000) / 86_400_000, 4)

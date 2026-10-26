@@ -239,3 +239,17 @@ def test_the_skill_proposes_an_instrument_only_for_an_unexplained_slice():
                    "references/connection-legs.md", "what it costs at INIT", "the person deploys it",
                    "scripts/phases.py"):
         assert phrase in body, phrase
+
+
+def test_more_lines_than_cold_starts_is_explained_too(tmp_path):
+    f = tmp_path / "events.json"
+    f.write_text(json.dumps({"events": [_emf(1, Import=900.0, Checks=100.0), _emf(2, Import=800.0, Checks=90.0)]}))
+    result = _run(str(f), "--init-p50", "2.0", "--cold-starts", "1")
+    assert "more lines than cold starts" in result.stdout
+
+
+def test_a_line_of_one_undivided_phase_is_named_as_dividing_nothing(tmp_path):
+    f = tmp_path / "events.json"
+    f.write_text(json.dumps({"events": [_emf(1, cold_start=2400.0), _emf(2, cold_start=2500.0)]}))
+    result = _run(str(f))
+    assert "divides nothing" in result.stdout

@@ -57,7 +57,7 @@ def test_the_skill_forbids_every_write_and_every_forced_cold_start():
     for phrase in ("Never invoke the function", "deploy", "change its configuration", "force a cold start",
                    "do not suggest forcing one"):
         assert phrase in body, phrase
-    assert "`python3` runs `cold-path.py`, `phases.py` and `rank.py`, and nothing else" in body
+    assert "`python3` runs `cold-path.py`, `phases.py`, `rank.py`, `warmth.py` and `firstbyte.py`, and nothing" in body
 
 
 def test_the_fetch_uses_the_filter_the_script_reads():
@@ -118,3 +118,31 @@ def test_the_skill_ranks_by_time_saved_and_draws_the_line():
 def test_the_target_is_the_projects_or_named_as_an_assumption():
     body = _body(SKILL)
     assert "the project's own cold-path budget" in body and "Borrow no client-side target" in body
+
+
+def test_the_skill_prices_warmth_and_leaves_the_purchase_to_the_person():
+    body = _body(SKILL)
+    for phrase in ("scripts/warmth.py", "--window-days <days>", "the person decides", "public price list",
+                   "--arch <Architectures>", "cold-path.py --days 14"):
+        assert phrase in body, phrase
+
+
+def test_the_skill_measures_one_page_load_and_calls_it_one_sample():
+    body = _body(SKILL)
+    for phrase in ("scripts/firstbyte.py --get", "one sample", "LCP", "Lighthouse", "fetch again once",
+                   "ask the person to agree", "<fetch_start_ms>", "one load, no other interaction"):
+        assert phrase in body, phrase
+    assert "`python3` runs `cold-path.py`, `phases.py`, `rank.py`, `warmth.py` and `firstbyte.py`, and nothing else" in body
+
+
+def test_the_one_page_load_is_the_hard_rules_named_exception():
+    body = _body(SKILL)
+    assert "with one exception: Step 7 loads one page the person names" in body
+    assert "--url <page>" in _frontmatter(COMMAND)
+
+
+def test_the_skill_description_fits_its_limit():
+    """Claude Code truncates a skill description past 1,024 characters, and the triggers sit first."""
+    frontmatter = SKILL.read_text().split("---", 2)[1]
+    description = re.search(r"^description: (.+)$", frontmatter, re.M).group(1)
+    assert len(description) <= 1024, len(description)
