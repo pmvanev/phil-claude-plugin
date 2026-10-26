@@ -21,9 +21,8 @@ define what a cold start is, the two kinds that hide, and why the window starts 
    deploy it, change its configuration or force a cold start, and do not suggest forcing one, with one
    exception: Step 7 loads one page the person names, once by `firstbyte.py` and once in a browser trace,
    after the person agrees, since each load runs the function and may meet a cold start. The role in use
-   can usually do far more than
-   read, so these limits rest on this prose. Read the project's code with Read, Grep and Glob to find a
-   timing line; edit nothing.
+   can usually do far more than read, so these limits rest on this prose. Read the project's code with
+   Read, Grep and Glob to find a timing line; edit nothing.
 2. **`python3` runs `cold-path.py`, `phases.py`, `rank.py`, `warmth.py` and `firstbyte.py`, and nothing
    else.** The scripts compute every figure, so no step needs arithmetic done by hand. Two of them read
    the network: `warmth.py` fetches AWS's public price list, and `firstbyte.py --get` loads the page the
@@ -32,8 +31,7 @@ define what a cold start is, the two kinds that hide, and why the window starts 
    run, so the person can rerun them.
 4. **Read no application line but a timing line**: the function's own, or a probe's the person names.
    Each filter pattern selects platform lines or a timing line's records, and each script drops any
-   other line unread. Print no
-   raw log event; show the scripts' reports instead.
+   other line unread. Print no raw log event; show the scripts' reports instead.
 
 Put `--profile` and `--region` after the subcommand (`aws logs filter-log-events --profile …`), never
 before it, so each call matches its grant.

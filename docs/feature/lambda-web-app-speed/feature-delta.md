@@ -647,3 +647,29 @@ and the trace's sequence risked loading the page twice. It also met more timing 
 which `phases.py` now explains, and warm invokes up to 4.6 s that no step addresses.
 
 **Not verified:** `/phil:lambda-web-app-speed` itself, which runs the installed copy until this releases.
+
+## Wave: DISCUSS / [REF] Closing round (2026-10-26)
+
+**Every Always-flag row is now planted in a fixture.** Fixture 07 planted fourteen rows and left six —
+LWS-5, LWS-7, LWS-8, LWS-9, LWS-10 and LWS-13 — with wording tests alone. `review-code` fixture 08, a
+GovCloud ledger app, plants all six beside two look-alikes the rule clears: static assets the function
+serves where no CloudFront exists, and a reply under 1.4 KiB. `tests/test_lambda_web_app_speed_rule.py`
+now fails while any row goes unplanted; without fixture 08 it named exactly those six.
+
+**Blind drive of fixture 08** against this working tree's `review-code`: all six items, each with its
+row's Preferred form; neither look-alike; no other load-time row fired. Its extra items — error handling
+at two boundaries, an Advisory question on caller-chosen keys, two missing tests — are allowed. It noted
+that the gather skips `dist/`, while LWS-13 turns on the sizes there; it read the two files for that fact
+alone.
+
+**The whole-file editing passes** the card asked for, once every slice had landed. `phil:eos` over the
+whole rule repaired the intro's two-halves sentence, which an earlier edit had broken, brought the sixth
+Principle's replay figures up to the rebuilt fixture, and put measuring first in the Mantra.
+`/phil:harden-instructions` over the whole skill rewrapped two hard rules an earlier edit had broken, and
+found nothing else.
+
+**Issue 59's targets, reconciled.** Each target is encoded and pinned: measuring by fixtures 01 and 02;
+INIT, checks, connections and bytecode by `review-code` fixtures 07 and 08 and the Advisory list;
+memory by LWS-2 and the ranking's experiments; static assets, caching and the bundle by LWS-11 to LWS-19;
+warmth by fixture 04. The per-view cache is Principle 12 alone, pinned by a wording test, since a
+principle yields no finding.
