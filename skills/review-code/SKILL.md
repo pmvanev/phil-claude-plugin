@@ -128,6 +128,9 @@ applies `security.md`'s:
 - **Where a row turns on a fact the files do not settle** — the Region a stack deploys to, a value in
   an unread variable, a CI pipeline the review did not read — file an Advisory item instead: Smell
   `Advisory`, and a Rationale naming the `LWS-n` row and the unread source. Count it under Advisory.
+- **Raise the rule's Advisory bullets** as **Security** defines an Advisory item, and only where a file
+  the review read shows the subject — a connection opened per environment with no cap in the stack, a
+  heartbeat that touches the session — with a Rationale naming the bullet.
 - Leave every case on the rule's Do-not-flag list alone.
 
 A load-time item carries `Priority: 1` and `Route: report only`: each fix changes what a person waits

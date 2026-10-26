@@ -508,3 +508,75 @@ Step 4 decision rests on; and the p75 line has its wording. It also noted an INI
 remarked on, so `cold-path.py` now counts INITs within a second of the ceiling.
 
 **Not verified:** `/phil:lambda-web-app-speed` itself, which runs the installed copy until this releases.
+
+## Wave: DISCUSS / [REF] Slice 04a delivered and replayed (2026-10-26)
+
+**D17, decided 2026-10-26 by the user:** rank fixes by the time each saves, largest first; effort breaks
+near-ties, and the standard pattern goes first among equals (D13). A fix no measurement can predict is
+listed apart as an experiment. This replaces US-04's "saving per unit of effort", which put a quick
+0.7 s fix above a day's 2.3 s one and so could never pass its own replay test, and it agrees with
+Principle 5. The replay's pass test becomes: where the measurement divides the time, the real gains
+fall in the order estimated.
+
+**Slice 04 split.** 04a, here: the ranking and its stopping line, V3, the rule's remaining Principles and
+its Advisory list. 04b: pricing the warmth options from the app's own traffic, and the browser trace.
+
+**V3 closed.** NIST SP 800-63B-4, read 2026-10-26: an inactivity timeout ends a session "without
+activity from the subscriber"; "The RP SHALL NOT interpret the presence of an access token as an
+indicator of the subscriber's presence in the absence of other signals"; nothing defines activity or
+names polling or heartbeats. So "a background request is not the person's activity" stays an Advisory
+question, framed by those two sentences.
+
+**What landed.** `scripts/rank.py` orders the candidates, lists experiments, drops savings inside the
+noise below the line, keeps other paths apart, draws the stopping line, and refuses a candidate with no
+evidence. The skill's Step 5 builds the candidates from Steps 3 and 4 alone. The rule gained Principles
+6 to 12 — rank by time saved and try what no measurement predicts; stop at the target; hold INIT to a
+budget; buy warmth on purpose; static assets; the bundle; cached views — and an Advisory list: bytecode,
+a background request as activity, deployment checks in INIT, Lambda Web Functions, and an uncapped
+connection count. Each rank rule was removed once to watch a test catch it.
+
+**The replay holds the revised hypothesis, after the fact.** Fixture 03 replays beatrix's record at two
+points, every figure from a measurement taken before its fix and cited by issue note. After memory, with
+per-phase and per-call timings, the ranking put concurrent checks with Bedrock moved out (2.13–2.47 s
+estimated) above bytecode (0.74–1.02 s); the real gains were 2.3–2.4 s and 0.69–0.86 s, the largest
+first. Before the INIT move, no timing line existed, so the ranking claimed nothing and listed building
+during INIT (first byte −5.3 s, with smaller changes) and more memory (1.2–1.5 s) as experiments — which
+is what beatrix did, unmeasured. The original hypothesis, the three largest gains in the top three by
+saving per effort, fails on this record by construction. Two limits: D17 was chosen knowing this record,
+and only two fixes rank, so no tie-break is exercised on real figures. A held-out case waits for a project
+that measures before it fixes.
+
+**What the reviews caught, each fixed.** `plugin-dev:plugin-validator` passed with one major finding and
+`plugin-dev:skill-reviewer` rated the change "needs improvement".
+- The first fixture broke Step 5's own definitions: a browser first byte as `now_ms`, a noise figure with
+  no source, kilobytes read as milliseconds, and a bytecode estimate no rule derived. It was rebuilt on
+  the cold wait, the spread of repeated cold starts, and a stated basis per saving.
+- Step 5 needed arithmetic by hand. Each saving now names its basis — a call removed, calls made
+  concurrent, a batch, a time scaled by a measured fraction — and `rank.py` computes it; `cold-path.py`
+  reports the cold wait, each cold start's INIT plus its first invoke, since medians do not add.
+- The default target borrowed TTFB's 0.8 s, a client-side p75 over all page loads, for a server-side cold
+  path. The target is now the project's or the person's, and with none there is no stopping line.
+- `rank.py` recommended a fix for a path already within its target, accepted any `kind` and a string
+  `standard`, and hid why a range was too wide; all fixed, each with a test watched failing.
+- Step 5 never said where candidates come from, or showed their full shape; it now does both, and lists
+  experiments even where Step 4 proposed an instrument.
+- Principle 9 said no option survives Lambda's recycle; provisioned environments are re-initialised in
+  the background, so it now says a ping cannot stop the recycle. Principle 6 overstated the INIT move's
+  gain. Every Advisory bullet now names its source, and a test checks each; the bytecode bullet no longer
+  reads as a question about a package without bytecode.
+- `review-code` never said to raise this rule's Advisory bullets. It now raises them where a file shows
+  the subject, and fixture 07 expects one: the module-scope connection with no cap in the stack.
+
+**`phil:eos`** rewrote two sentences of the new Principles; **`/phil:harden-instructions`** closed one
+case Step 5 left open, and flags the skill body at about 2,450 words, past plugin-dev's 2,000-word ideal:
+Step 5's candidate format is the first to move to a reference.
+
+**Fixture 07, third blind drive**, of this working tree's `review-code` after the Advisory bullet landed:
+all fourteen load-time items, LWS-15 twice; the expected Advisory question on the uncapped connection;
+no look-alike. It also raised the deployment-checks Advisory question and a `coding.md` §8 item on the
+bare connection, both allowed. Noted, unfixed: the fixture gzips without `Vary: Accept-Encoding`, which
+LWS-13's Preferred form names and no row's Violation covers.
+
+**Not verified:** a run of Step 5 on live data. modive's drill ends at the probe, and beatrix's
+cold-start line declares one metric and keeps its phases as plain properties, so Step 4 rightly finds no
+usable line there — a project with a rich line in another shape gets no drill yet.

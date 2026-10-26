@@ -203,6 +203,7 @@ def summarize(streams):
         "invoke_failures": invoke_failures,
         "init": _spread(init),
         "first_invoke": _spread(first),
+        "cold_wait": _spread([a + b for a, b in zip(init, first)]),
         "warm": _spread(warm),
         "unsplit": _spread(unsplit),
         "near_ceiling": sum(1 for ms in init if ms >= NEAR_CEILING_MS),
@@ -250,6 +251,7 @@ def report(summary, truncated=False):
         "|---|---|---|---|---|",
     ]
     for label, key in (("INIT (recorded)", "init"), ("First invoke after INIT", "first_invoke"),
+                       ("Cold wait: INIT and its first invoke", "cold_wait"),
                        ("INIT and invoke, unsplit", "unsplit"), ("Warm invoke", "warm")):
         s = summary[key]
         p95 = "p95 is the max" if 0 < s["count"] <= 20 else _s(s["p95"])

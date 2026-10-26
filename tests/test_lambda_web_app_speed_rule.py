@@ -150,6 +150,8 @@ def test_every_expected_item_takes_its_id_and_fix_from_its_row():
         items = _items((manifest.parent / "expected-backlog.md").read_text())
         assert len(items) >= want, f"{manifest.parent.name} seeds {want} defects"
         for item in items:
+            if _plain(_field(item, "Smell")) == "Advisory":
+                continue
             row_id = _plain(_field(item, "Smell"))
             assert row_id in rows, f"{row_id} heads no always-flag row"
             fix = _plain(_field(item, "Refactoring"))
@@ -174,3 +176,64 @@ def test_every_look_alike_is_in_the_fixture():
                          and p.name not in {"manifest.json", "expected.md", "expected-backlog.md"})
         for decoy in json.loads(manifest.read_text())["decoys"]:
             assert decoy in corpus, f"{manifest.parent.name}: {decoy} is not in the fixture"
+
+
+def _section(heading):
+    return RULE.read_text().split(f"## {heading}", 1)[1].split("\n## ", 1)[0]
+
+
+def test_the_principles_cover_ranking_stopping_init_warmth_assets_bundle_and_views():
+    """Slice 04: the Principles half is whole once each part of the path has one."""
+    principles = " ".join(_section("Principles").split())
+    for phrase in ("Rank fixes by the time they save", "Stop at the target", "Hold INIT to a budget",
+                   "Buy warmth on purpose", "Serve what never changes from the edge",
+                   "Send the first route's code alone", "Show a view's cached data at once"):
+        assert phrase in principles, phrase
+
+
+def test_the_advisory_list_holds_the_judgement_calls_and_cites_each():
+    advisory = " ".join(_section("Advisory").split())
+    assert "A reviewer raises these; the author decides." in advisory
+    for phrase in ("compiled bytecode", "50 MB", "background request", "Lambda Web Functions",
+                   "proves the deployment"):
+        assert phrase in advisory, phrase
+
+
+def test_a_background_request_as_activity_cites_the_nist_text_read_for_v3():
+    advisory = " ".join(_section("Advisory").split())
+    assert "SP 800-63B-4" in advisory and "read 2026-10-26" in advisory
+    assert "presence of an access token" in advisory
+
+
+def test_no_principle_or_advisory_line_is_an_always_flag_row():
+    """D8: a judgement call filed as a defect borrows authority it has not earned."""
+    for heading in ("Principles", "Advisory"):
+        assert "| LWS-" not in _section(heading), heading
+
+
+def test_every_advisory_bullet_names_its_source():
+    bullets = [b for b in _section("Advisory").split("\n- ")[1:]]
+    assert len(bullets) >= 5
+    for bullet in bullets:
+        assert "*Source:" in bullet, bullet[:60]
+
+
+def _advisory_titles():
+    return [b.split("**")[1].rstrip(".") for b in _section("Advisory").split("\n- ")[1:]]
+
+
+def test_every_expected_advisory_item_is_a_question_naming_its_bullet():
+    titles = _advisory_titles()
+    for manifest in FIXTURES:
+        items = [i for i in _items((manifest.parent / "expected-backlog.md").read_text())
+                 if _plain(_field(i, "Smell")) == "Advisory"]
+        assert items, f"{manifest.parent.name} expects no Advisory question"
+        for item in items:
+            assert _field(item, "Refactoring") == "none — the author decides"
+            assert _field(item, "Route") == "report only" and _field(item, "Priority") == "1"
+            assert any(title in _field(item, "Rationale") for title in titles), _field(item, "Rationale")
+
+
+def test_review_code_raises_the_rules_advisory_bullets_only_where_a_file_shows_the_subject():
+    body = " ".join(SKILL.read_text().split())
+    assert "Raise the rule's Advisory bullets" in body and "only where a file the review read shows" in body

@@ -15,9 +15,10 @@ the plugin named any of these defects.
 **How to drive it:** drive this working tree's `skills/review-code/SKILL.md` by hand over this
 directory (`/phil:review-code` runs the released copy).
 
-**Expected:** a `.refactoring-backlog.md` holding the fourteen items in `expected-backlog.md`, matched
-on the Smell and on a Refactoring that is the row's Preferred form verbatim, alone or followed by
-` — here: ` and this code's one change. Order is not checked.
+**Expected:** a `.refactoring-backlog.md` holding the fourteen load-time items and one Advisory question
+in `expected-backlog.md`. A load-time item matches on the Smell and on a Refactoring that is the row's
+Preferred form verbatim, alone or followed by ` — here: ` and this code's one change; the Advisory
+question matches on the bullet its Rationale names. Order is not checked.
 
 1. **LWS-17** — CI builds the production bundle and no size budget fails it; Vite's raised
    `chunkSizeWarningLimit` is the evidence.
@@ -34,6 +35,8 @@ on the Smell and on a Refactoring that is the row's Preferred form verbatim, alo
 12. **LWS-12** — the HTML shell goes out with `max-age=600` and no `no-cache`.
 13. **LWS-11** — hashed assets go out with `max-age=3600` and no `immutable`.
 14. **LWS-15** — `serve` gzips the file on every request: a second missing protection under the same row.
+15. **Advisory** — the module-scope connection, with no RDS Proxy or reserved concurrency in `main.tf`,
+    raises the rule's question "Database connections with no cap outside the function".
 
 **Hard assertions (any failure blocks the skill change):**
 
@@ -52,7 +55,7 @@ on the Smell and on a Refactoring that is the row's Preferred form verbatim, alo
 - Every load-time item carries `Priority: 1` and `Route: report only`, names its `LWS-n` id in the
   Smell field, and is counted on the Summary's load-time line, not under Priority 1 (Correctness).
 
-**Not a failure:** security items, since the fixture is not hardened beyond the path join (an unhashed
+**Not a failure:** other Advisory questions, where a file shows their subject; security items, since the fixture is not hardened beyond the path join (an unhashed
 `pip install`, an unchecked export location); a `coding.md` §8 item on the module-scope
 `psycopg.connect`, which is one connection rather than a pool; items about error handling, structure,
 naming or tests; line numbers within ±2.
