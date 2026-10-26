@@ -10,17 +10,17 @@ paths:
 
 # Lambda Web App Speed Guide
 
-Guidelines drawn from the AWS Lambda Developer Guide (the execution environment lifecycle, memory, Python packaging, provisioned concurrency and SnapStart), the AWS GovCloud (US) User Guide, AWS's posts on INIT billing (2025) and cold starts (2025), and the Serverless Applications Lens; RFC 9110, RFC 9111 and RFC 8246 with MDN's `Cache-Control` reference; web.dev on the HTTP cache, code splitting and performance budgets; the React, webpack, Vite and size-limit documentation; the Python and PostgreSQL documentation; Brendan Gregg's *Performance Analysis Methodology*; and Amdahl's law. Research: `docs/research/web-speed/lambda-web-app-speed-canonical-sources.md`.
+Guidelines drawn from the AWS Lambda Developer Guide (the execution environment lifecycle, memory, Python packaging, provisioned concurrency and SnapStart), the AWS GovCloud (US) User Guide, AWS's posts on INIT billing (2025) and cold starts (2025), and the Serverless Applications Lens; RFC 9110, RFC 9111, RFC 8246 and RFC 5861 with MDN's `Cache-Control` reference; NIST SP 800-63B-4 on session management; web.dev on the HTTP cache, code splitting and performance budgets; the React, webpack, Vite and size-limit documentation; the Python and PostgreSQL documentation; Brendan Gregg's *Performance Analysis Methodology*; and Amdahl's law. Research: `docs/research/web-speed/lambda-web-app-speed-canonical-sources.md`.
 
 This rule owns **how fast a web app served from AWS Lambda loads**: work done at INIT and on each invoke, memory, the deployment package, the options for keeping warm, the HTTP front door and static assets, and the front-end bundle. Neighbouring rules keep what they already own: `coding.md` §8 pooling connections and clients, and §15 batching every call that crosses the network; `react.md` React's idioms; `security.md` every security defect; `ci-pipelines.md` how fast the pipeline runs. Complement those — do not restate them.
 
-**The two halves divide on checkability.** The reviewer half — Always-flag and Do not flag — names defects a handler, an IaC file, a response header or a bundler config shows, each by its `LWS-n` id. The Principles half, which `/phil:lambda-web-app-speed` applies, is design: choosing among fixes needs a measurement, and a file holds none.
+**The two halves divide on checkability.** The reviewer half — Always-flag, Advisory and Do not flag — names defects, and the questions a reviewer asks, a handler, an IaC file, a response header or a bundler config shows, each by its `LWS-n` id. The Principles half, which `/phil:lambda-web-app-speed` applies, is design: choosing among fixes needs a measurement, and a file holds none.
 
 ---
 
 ## Principles — design, not review criteria
 
-No principle yields a review finding. Each governs how to measure a slow load before anyone fixes it.
+No principle yields a review finding. The first seven govern how to measure a slow load and choose its fixes; the last five, how a web app on Lambda is built to load fast.
 
 ### 1. Measure, then divide the time
 
@@ -42,7 +42,33 @@ When a slice has a size but no cause, time one level inside it — its phases, t
 
 A fix can save no more than the time its slice holds, so the largest slice has the most to give. After each fix, measure again: the largest slice moves, and the next fix belongs to whatever now holds it.
 
-Principles for ranking fixes by saving per effort, pricing the warmth options and knowing when to stop are still to come.
+### 6. Rank fixes by the time they save; try what no measurement predicts
+
+Order the fixes on one measured path by the time each saves, largest first; where two save about the same, the cheaper goes first, and among equals the standard, documented pattern. Read each saving off the measurement: a call taken off the path saves its time, calls run one after another and made concurrent save their sum less the slowest, a batch of N calls saves N − 1 of them. A fix that changes the machine rather than the work — more memory, work moved into INIT — has a saving no log measurement predicts: on one project, moving the build into INIT, with smaller changes alongside, cut first byte by 5.3 s, where moving work should save nothing. List it apart as an experiment: make it, measure, keep it or revert it, the cheapest first.
+
+### 7. Stop at the target
+
+Stop when the path meets its target — LCP within 2.5 s and TTFB within 0.8 s at the 75th percentile of page loads, and a cold-path budget the project declares — or when the next fix saves less than the run-to-run noise, or costs more than the delay it removes. A p75 over all requests hides cold starts that are under a quarter of them, so a cold path is measured, and budgeted, as its own population.
+
+### 8. Hold INIT to a budget under its ceiling
+
+Build what every request uses during INIT, and declare how long INIT may take, well under its 10 s limit: an INIT that reaches the limit is retried inside the first invoke, and the person behind it waits for both. AWS has billed INIT since 2025-08-01, so a slow INIT costs money as well as time. When INIT nears its budget, move each check that proves the deployment rather than the instance — a bucket's semantics, a schema's version — to the deploy, and each check a rare path needs to that path's first use.
+
+### 9. Buy warmth on purpose, at a price
+
+Keeping an environment warm is a purchase, never a default. Price each option for the app's own traffic: provisioned concurrency, AWS's documented answer for interactive functions; SnapStart, where the runtime and partition offer it; and a heartbeat from open, signed-in pages, where use is sparse and idle billing unwanted. The cold start worth buying away is the one a present person pays. Lambda recycles environments every few hours even under steady traffic, re-initialising provisioned ones in the background; a ping or heartbeat cannot stop that recycle, so call no scheduled ping a guarantee.
+
+### 10. Serve what never changes from the edge, named by its content
+
+Name each static asset by a hash of its content, let browsers keep it a year, and let the HTML shell revalidate on every load; make validators and compressed copies once, at build time; and serve the assets from S3 behind CloudFront wherever the partition offers CloudFront. LWS-11 to LWS-16 name the defects.
+
+### 11. Send the first route's code alone, and fail the build past its budget
+
+Load every view but the landing one on demand, and hold the bundle to a size budget that fails the build, so growth is a decision rather than drift. LWS-17 to LWS-19 name the defects.
+
+### 12. Show a view's cached data at once, and revalidate behind it
+
+A view a person returns to renders from its cache at once and refreshes in the background, as RFC 5861's stale-while-revalidate does for HTTP; only a failed refresh keeps stale data on screen.
 
 ---
 
@@ -100,6 +126,18 @@ Name each finding by its `LWS-n` id and take the fix from the row: copy the row'
 
 ---
 
+## Advisory — judgment calls, not hard blocks
+
+A reviewer raises these; the author decides. Each needs a measurement, a traffic figure or an intent the files do not show.
+
+- **Shipping compiled bytecode.** Bytecode compiled by the runtime's own Python, in `unchecked-hash` mode, halved one project's imports — and pushed its zip past Lambda's 50 MB direct-upload limit, failing a production deploy. Ask whether the gain was measured, and what holds the zip under 50 MB zipped and 250 MB unzipped. Bytecode from another Python version is LWS-5. *Source: AWS, Python `.zip` packaging and Lambda quotas; Python `compileall`.*
+- **A background request that counts as the person's activity.** A keep-warm heartbeat or a poll that resets the session's idle timer keeps a session alive with nobody there. NIST SP 800-63B-4 (read 2026-10-26) ends a session "without activity from the subscriber" and forbids reading "the presence of an access token as an indicator of the subscriber's presence in the absence of other signals"; it does not define activity. Ask whether the idle timer ignores such requests. *Source: NIST SP 800-63B-4, §5.2 and the AAL reauthentication sections.*
+- **A check in INIT that proves the deployment rather than the instance** — a bucket's semantics, a schema's version, a model's availability — while INIT nears its budget. Ask whether it belongs in the deploy, or at its feature's first use. *Source: AWS, the Lambda execution environment lifecycle, on INIT's 10 s limit and its billing.*
+- **A Node.js web app on a Lambda function and an adapter, in a Region that offers Lambda Web Functions.** Web Functions multiplex up to 128 requests per environment, so cold starts follow environments rather than concurrent requests; at launch (2026-10-12) they ran Node.js 24 only, in five commercial Regions. Ask whether the app should move. *Source: AWS News Blog, "Announcing AWS Lambda Web Functions", 2026-10-12, read 2026-10-26.*
+- **Database connections with no cap outside the function.** Connections scale with execution environments, so a pool caps nothing across them. Ask where the cap sits: RDS Proxy, or reserved concurrency. `coding.md` §8 owns the pool itself. *Source: AWS, "Using AWS Lambda with Amazon RDS" and "Understanding Lambda function scaling".*
+
+---
+
 ## Do not flag
 
 - **A client built inside the handler on a path few requests take** — an export, an admin action. AWS recommends lazy loading there. It clears LWS-1.
@@ -119,9 +157,9 @@ Name each finding by its `LWS-n` id and take the fix from the row: copy the row'
 
 ## Sources and Synthesis
 
-The rows cite the works named at the top. Gregg supplies the first Principle and, with his Drill-Down method, the fourth; AWS's lifecycle page the INIT retry and the suppressed init behind the second; Amdahl's law, that speeding up one part saves at most that part's share, the fifth. AWS's Lambda Developer Guide supplies INIT and the handler, memory, packaging and both warmth options; its GovCloud user guide, read on 2026-10-26, the two GovCloud rows and the absence of CloudFront there; its 2025 posts, that INIT has been billed since 2025-08-01 and that unused dependencies cost a cold start; its Serverless Lens, where static assets belong. RFC 9110, 9111 and 8246, MDN and web.dev supply the caching, compression and validator rows, and Chrome's Lighthouse the 1.4 KiB floor; web.dev, React, webpack, Vite and size-limit supply the bundle rows. PostgreSQL's documentation supplies `EXISTS`.
+The rows cite the works named at the top. Gregg supplies the first Principle and, with his Drill-Down method, the fourth; AWS's lifecycle page the INIT retry and the suppressed init behind the second; Amdahl's law, that speeding up one part saves at most that part's share, the fifth. web.dev's Core Web Vitals and TTFB pages supply the seventh's targets, and Reinertsen's U-curve, as this plugin's CI research cites it, its cost test; AWS's lifecycle, billing, provisioned concurrency and SnapStart pages the eighth and ninth; the rows' own sources the tenth and eleventh; RFC 5861 the twelfth. NIST SP 800-63B-4, read 2026-10-26, frames the background-request question, which it does not answer. AWS's Lambda Developer Guide supplies INIT and the handler, memory, packaging and both warmth options; its GovCloud user guide, read on 2026-10-26, the two GovCloud rows and the absence of CloudFront there; its 2025 posts, that INIT has been billed since 2025-08-01 and that unused dependencies cost a cold start; its Serverless Lens, where static assets belong. RFC 9110, 9111 and 8246, MDN and web.dev supply the caching, compression and validator rows, and Chrome's Lighthouse the 1.4 KiB floor; web.dev, React, webpack, Vite and size-limit supply the bundle rows. PostgreSQL's documentation supplies `EXISTS`.
 
-**This rule's own:** the `LWS-n` ids and the wording of every row, distilled from the research's twenty candidates and corrected against two real codebases; the split into Principles, Always-flag and Do not flag, which follows `security.md` and `ci-pipelines.md`; and four readings. Both codebases built their app on the first invoke and cached it, which a row about each invoke missed, so LWS-1 names the cached build too. LWS-15 adds Lambda's per-millisecond billing to RFC 9110's validator, which only implies a build step. LWS-16 fires only where CloudFront exists, because a row that flags the only design a partition allows teaches readers to skip it. And the projects behind this rule measured what the sources left open: in one, compiled bytecode halved import time, and pushed the package past Lambda's 50 MB direct-upload limit. The second Principle's signatures are this rule's own reading of a real function's logs on 2026-10-26: AWS names both hidden kinds without saying how a `REPORT` line shows them, and over fourteen days a count of `Init Duration` found 96 of that function's 105 cold starts. The fourth Principle's arithmetic is the same function's, over its last twelve cold starts on 2026-10-25 and 26: ten concurrent checks whose medians summed to 4.99 s inside a phase the clock timed at 0.92 s. The research lists what it could not settle under Knowledge Gaps.
+**This rule's own:** the `LWS-n` ids and the wording of every row, distilled from the research's twenty candidates and corrected against two real codebases; the split into Principles, Always-flag, Advisory and Do not flag, which follows `security.md` and `ci-pipelines.md`; and four readings. Both codebases built their app on the first invoke and cached it, which a row about each invoke missed, so LWS-1 names the cached build too. LWS-15 adds Lambda's per-millisecond billing to RFC 9110's validator, which only implies a build step. LWS-16 fires only where CloudFront exists, because a row that flags the only design a partition allows teaches readers to skip it. And the projects behind this rule measured what the sources left open: in one, compiled bytecode halved import time, and pushed the package past Lambda's 50 MB direct-upload limit. The second Principle's signatures are this rule's own reading of a real function's logs on 2026-10-26: AWS names both hidden kinds without saying how a `REPORT` line shows them, and over fourteen days a count of `Init Duration` found 96 of that function's 105 cold starts. The sixth Principle's experiments come from replaying the other project's record: where the logs divided the time, the estimates fell in the order the real gains did — 2.13–2.47 s estimated for concurrent checks against 2.3 s, 0.73–0.99 s for bytecode against 0.7 s — while the two fixes that changed the machine, building during INIT and more memory, saved first byte 5.3 s, with smaller changes, and 1.2–1.5 s, that no measurement had predicted. The fourth Principle's arithmetic is the same function's, over its last twelve cold starts on 2026-10-25 and 26: ten concurrent checks whose medians summed to 4.99 s inside a phase the clock timed at 0.92 s. The research lists what it could not settle under Knowledge Gaps.
 
 ---
 

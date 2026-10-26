@@ -1,0 +1,9 @@
+{
+  "path": {"name": "cold wait: INIT and its first invoke", "now_ms": 11630, "target_ms": null, "noise_ms": 1790},
+  "candidates": [
+    {"name": "build the app during INIT", "kind": "experiment", "effort": "M", "standard": true,
+     "evidence": "first invoke 8.45-9.47 s holds the app build (beatrix 254, note 14438); moving it into INIT moves the work, so no measurement this skill takes predicts the saving"},
+    {"name": "raise memory from 512 MB to 1769 MB", "kind": "experiment", "effort": "S", "standard": true,
+     "evidence": "INIT 2.28-3.05 s and first invoke 8.45-9.47 s at 512 MB (note 14438); how much is CPU-bound is unmeasured"}
+  ]
+}

@@ -1,13 +1,14 @@
 ---
 name: lambda-web-app-speed
-description: This skill should be used when the user asks to "measure the cold start", "count our Lambda cold starts", "is it INIT or the handler", "why is the first load of our Lambda app slow", "why does our Lambda app take a while after idle", "read Init Duration or INIT_REPORT from CloudWatch", "what inside INIT takes the time", "which startup check makes the cold start slow", or runs /phil:lambda-web-app-speed. It measures an AWS Lambda function's cold path from its REPORT and INIT_REPORT lines, including the cold starts that carry no Init Duration, names the layer that owns it and times one level inside it, citing every command. Read-only; it recommends no fix. For load-time defects a file shows, use /phil:review-code.
+description: This skill should be used when the user asks to "measure the cold start", "count our Lambda cold starts", "is it INIT or the handler", "why is the first load of our Lambda app slow", "why does our Lambda app take a while after idle", "read Init Duration or INIT_REPORT from CloudWatch", "what inside INIT takes the time", "which startup check makes the cold start slow", "which cold-start fix first", or runs /phil:lambda-web-app-speed. It measures an AWS Lambda function's cold path from its REPORT and INIT_REPORT lines, including the cold starts that carry no Init Duration, names the layer that owns it, times one level inside it, and ranks the fixes by the time each saves, citing every command. Read-only. For load-time defects a file shows, use /phil:review-code.
 ---
 
 # Lambda Web App Speed
 
-Answer two questions from the function's own logs — **which layer owns this function's cold path, and
-what inside that layer takes the time?** — and stop. This version measures, divides and drills one
-level. It does not yet rank fixes, price the warmth options or measure the browser.
+Answer three questions from the function's own logs — **which layer owns this function's cold path,
+what inside that layer takes the time, and which fixes to make, in what order, before stopping?** This
+version measures, divides, drills one level and ranks. It does not yet price the warmth options or
+measure the browser.
 
 **Read the Principles in `${CLAUDE_PLUGIN_ROOT}/rules/lambda-web-app-speed.md` before measuring.** They
 define what a cold start is, the two kinds that hide, and why the window starts at the last change.
@@ -20,8 +21,8 @@ define what a cold start is, the two kinds that hide, and why the window starts 
    version measures the cold starts that already happened. The role in use can usually do far more than
    read, so these limits rest on this prose. Read the project's code with Read, Grep and Glob to find a
    timing line; edit nothing.
-2. **`python3` runs `cold-path.py` and `phases.py`, and nothing else.** `cold-path.py` computes the
-   window and `phases.py` the gap to INIT, so no step needs arithmetic done by hand.
+2. **`python3` runs `cold-path.py`, `phases.py` and `rank.py`, and nothing else.** The scripts compute
+   the window, the gap to INIT and the stopping line, so no step needs arithmetic done by hand.
 3. **Cite every number.** The report ends with a `Measured with:` block holding every command exactly as
    run, so the person can rerun them.
 4. **Read no application line but a timing line**: the function's own, or a probe's the person names.
@@ -160,7 +161,61 @@ ceiling.
 above, filtering on `"ConnectSignIn"` from the probe's deployment to now, and set its `method` and
 `idle` groups side by side.
 
-## Step 5 — Report
+## Step 5 — Rank the fixes and draw the line
+
+Skip this step where Step 4 was skipped, or found the untimed gap. Where Step 4 named a `Cause:`, rank
+the fixes that act on it. Where it proposed an instrument, rank nothing — no slice is divided yet — but
+still list the experiments.
+
+**The candidates.** For a `Cause:`, take each fix that acts on it: the Preferred form of the rule's
+`LWS-n` row that names it, where one does, otherwise the Principle that does. Add the machine changes
+as experiments: memory, from Step 1's `MemorySize`, and moving work from the first invoke into INIT
+where the first invoke owns the path. Draw every figure from Steps 1, 3 and 4, or from a measurement
+the person gives and you cite.
+
+```
+python3 -I ${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/scripts/rank.py - <<'JSON'
+{"path": {"name": "cold wait: INIT and its first invoke", "now_ms": <cold wait p50>,
+          "target_ms": <budget, or null>, "noise_ms": <spread of repeated runs, or null>},
+ "candidates": [
+  {"name": "<the fix>", "kind": "removes", "effort": "S|M|L", "standard": true,
+   "saves": [{"basis": "removes", "low": <p50>, "high": <p95>}],
+   "evidence": "<the report lines the figures come from>"},
+  {"name": "<the machine change>", "kind": "experiment", "effort": "S|M|L", "standard": true,
+   "evidence": "<why no measurement predicts it>"}]}
+JSON
+```
+
+- **A fix that removes measured work** (`"kind": "removes"`) lists, under `saves`, each part it removes
+  with the part's measured p50 as `low` and its p95 as `high`, and the script computes the saving:
+  `removes` for a call or phase taken off the path; `concurrent` for calls run one after another made
+  concurrent, with their `sum` and their `slowest`; `batch` for N calls made one, with `calls` and one
+  call's figures; `scaled` for a time a fix shrinks by a fraction the person measured, as `fraction`.
+- **Effort**: `S` within hours, `M` about a day, `L` longer. **`standard`**: true where the fix is a
+  documented pattern — AWS's guidance, or a Preferred form of the rule's rows.
+- **`now_ms`**: the `Cold wait` row's p50 from Step 3's report — each recorded cold start's INIT plus
+  its first invoke.
+- **`target_ms`**: the project's own cold-path budget, where its docs or the person state one. Where
+  none is stated, ask the person for one, following
+  `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`; where they give none, pass `null`: the
+  report then draws no stopping line. Borrow no client-side target such as TTFB's 0.8 s, which counts
+  every page load and the network besides.
+- **`noise_ms`**: the spread of repeated measurements of the same path, where the project has them;
+  otherwise `null`.
+
+`scripts/rank.py` computes each saving from its basis; orders the fixes by the time each saves, largest
+first, effort breaking near-ties and the standard pattern first among equals; lists the experiments
+apart, cheapest first; lists a range that starts at nothing or spans more than three times its bottom
+as too wide to rank; drops below the line each fix whose saving stays inside the noise; and draws the
+stopping line where the path meets the target, or says the ranked fixes cannot reach it. It refuses a
+candidate with no evidence, or a field it cannot read.
+
+**Stop at the line.** Recommend the ranked fixes down to it, and the experiments as experiments: make
+one, measure again, keep it or revert it. After any fix the next run measures again, since the largest
+slice moves. A load-time defect a file shows is `/phil:review-code`'s, under the rule's `LWS-n` rows,
+whether or not it ranks here.
+
+## Step 6 — Report
 
 ```
 Function: <name> · account <id> · <partition>/<region> · <memory> MB · last changed <LastModified>
@@ -174,23 +229,26 @@ Inside <the layer>:
 Cause: <what the largest phase names> — or — Next instrument: <which, what it costs at INIT, and that
 the person deploys it>
 
+<rank.py's report, where Step 5 ran>
+
 Measured with:
   <the configuration read, exactly as run>
   <the --window call, exactly as run>
   <each fetch pipeline, exactly as run>
-Read: <each project file a decision in Step 4 rests on>
+  <the rank.py call, with its candidates>
+Read: <each project file a decision in Step 4 or 5 rests on>
 ```
 
 Write each command with `${CLAUDE_PLUGIN_ROOT}` expanded, so it reruns as pasted. **The p75 line**,
 where cold starts are under a quarter of invokes: `Cold starts are <share> of invokes: a p75 over all
 requests cannot see them, so the cold path needs measuring as its own population, as here.`
 
-Then stop. Recommend no fix: ranking fixes by what they save is not in this version. A load-time
-defect a file shows is `/phil:review-code`'s, under the rule's `LWS-n` rows.
+Then stop.
 
 ## Self-test
 
 `self-test/README.md` registers the fixtures. `tests/test_lambda_cold_path.py` drives
 `self-test/01-cold-path-split/` through `cold-path.py`, `tests/test_lambda_init_phases.py` drives
-`self-test/02-init-phases/` through `phases.py` and holds the references, and
-`tests/test_lambda_web_app_speed_command.py` holds the grant and this file's limits.
+`self-test/02-init-phases/` through `phases.py` and holds the references, `tests/test_lambda_rank.py`
+drives `self-test/03-rank-replay/` through `rank.py`, and `tests/test_lambda_web_app_speed_command.py`
+holds the grant and this file's limits.

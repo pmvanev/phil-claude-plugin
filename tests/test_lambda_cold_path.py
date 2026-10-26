@@ -263,3 +263,11 @@ def test_an_init_within_a_second_of_the_ceiling_is_counted():
     assert s["near_ceiling"] == 1
     m = _module()
     assert "1 within a second of the 10 s ceiling" in m.report(s)
+
+
+def test_the_cold_wait_is_each_recorded_cold_starts_init_plus_its_first_invoke():
+    """Medians do not add: the p50 of INIT plus the p50 of the first invoke is not the p50 of either's sum."""
+    s = _summary([_report("a", 1, 100.0, init=3000.0), _report("b", 2, 4000.0, init=500.0),
+                  _report("c", 3, 200.0, init=1000.0)])
+    assert s["cold_wait"]["p50"] == 3100.0  # sums 3100, 4500, 1200
+    assert "Cold wait" in _module().report(s)

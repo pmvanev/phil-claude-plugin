@@ -1,0 +1,21 @@
+{
+  "path": {"name": "cold wait: INIT and its first invoke", "now_ms": 6000, "target_ms": null, "noise_ms": 320},
+  "candidates": [
+    {"name": "startup checks run concurrently and Bedrock checked on first chat", "kind": "removes", "effort": "M",
+     "standard": true,
+     "saves": [{"basis": "removes", "low": 1200, "high": 1250},
+               {"basis": "concurrent", "sum": {"low": 1210, "high": 1320}, "slowest": {"low": 100, "high": 285}}],
+     "evidence": "per-call timing: Bedrock Converse 1.20-1.25 s at INIT (note 14518); per-phase line: 22 canaries run one after another summing 1.21-1.32 s, slowest 0.10-0.285 s (note 14480)"},
+    {"name": "compiled bytecode for the runtime's Python", "kind": "removes", "effort": "S", "standard": true,
+     "saves": [{"basis": "scaled", "low": 1530, "high": 1910, "fraction": [0.486, 0.536]}],
+     "evidence": "per-phase line: imports 1.53-1.91 s (note 14480); the person's local measurement: imports 1.05-1.12 s without .pyc, 0.52-0.54 s with (note 14494)"},
+    {"name": "trim the app's own module imports", "kind": "removes", "effort": "L", "standard": false,
+     "saves": [{"basis": "removes", "low": 0, "high": 180}],
+     "evidence": "the person's local profile: 248 own modules cost about 180 ms, with no hotspot (note 14193)"},
+    {"name": "drop the Secrets Manager read", "kind": "removes", "effort": "S", "standard": true,
+     "saves": [{"basis": "removes", "low": 45, "high": 58}],
+     "evidence": "per-call timing: Secrets Manager 45-58 ms at INIT (note 14518)"},
+    {"name": "raise memory past 1769 MB", "kind": "experiment", "effort": "S", "standard": true,
+     "evidence": "one vCPU at 1769 MB; the checks would run on threads, but how CPU-bound they are is unmeasured"}
+  ]
+}

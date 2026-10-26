@@ -57,7 +57,7 @@ def test_the_skill_forbids_every_write_and_every_forced_cold_start():
     for phrase in ("Never invoke the function", "deploy", "change its configuration", "force a cold start",
                    "do not suggest forcing one"):
         assert phrase in body, phrase
-    assert "`python3` runs `cold-path.py` and `phases.py`, and nothing else" in body
+    assert "`python3` runs `cold-path.py`, `phases.py` and `rank.py`, and nothing else" in body
 
 
 def test_the_fetch_uses_the_filter_the_script_reads():
@@ -106,3 +106,15 @@ def test_the_rule_times_concurrent_work_by_the_clock_and_fixes_the_largest_slice
     principles = " ".join(RULE.read_text().split("## Principles", 1)[1].split("\n## ", 1)[0].split())
     for phrase in ("by the clock", "never summed", "Fix the largest slice first", "measure again"):
         assert phrase in principles, phrase
+
+
+def test_the_skill_ranks_by_time_saved_and_draws_the_line():
+    body = _body(SKILL)
+    for phrase in ("scripts/rank.py", "Draw every figure from Steps 1, 3 and 4", "experiment",
+                   "the target", "Stop at the line"):
+        assert phrase in body, phrase
+
+
+def test_the_target_is_the_projects_or_named_as_an_assumption():
+    body = _body(SKILL)
+    assert "the project's own cold-path budget" in body and "Borrow no client-side target" in body

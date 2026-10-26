@@ -157,3 +157,14 @@ Scope: .
 - **Route**: report only
 - **Rationale**: lambda-web-app-speed.md — RFC 9110 §8.8.3; AWS Lambda billing per millisecond
 - **Status**: pending
+
+### [R015] Advisory — a database connection with no cap outside the function
+
+- **File**: `handler.py`
+- **Lines**: 11
+- **Priority**: 1
+- **Smell**: Advisory
+- **Refactoring**: none — the author decides
+- **Route**: report only
+- **Rationale**: lambda-web-app-speed.md, Advisory: Database connections with no cap outside the function — every execution environment opens its own `psycopg.connect`, and `main.tf` defines no RDS Proxy and no reserved concurrency; where is the cap?
+- **Status**: pending
