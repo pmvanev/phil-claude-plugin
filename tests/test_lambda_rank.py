@@ -163,3 +163,16 @@ def test_the_report_names_each_fix_its_range_and_its_evidence():
     assert result.returncode == 0, result.stderr
     for phrase in ("1. startup checks", "−2.30 s", "Experiments", "Inside the noise", "note 14518"):
         assert phrase in result.stdout, phrase
+
+
+def test_the_candidates_reference_names_every_basis_the_script_computes_and_no_other():
+    """The skill writes candidates from the reference; a basis the script lacks is refused at run time."""
+    import re
+    text = (REPO / "skills" / "lambda-web-app-speed" / "references" / "candidates.md").read_text()
+    documented = set(re.findall(r"^\| `(\w+)` \|", text, re.M)) - {"basis"}
+    m = _module()
+    for basis in documented:
+        part = {"basis": basis, "low": 1, "high": 2, "calls": 2, "fraction": [0.5, 0.5],
+                "sum": {"low": 3, "high": 4}, "slowest": {"low": 1, "high": 1}}
+        m.saving([part])
+    assert documented == {"removes", "concurrent", "batch", "scaled"}

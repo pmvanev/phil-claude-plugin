@@ -1,0 +1,4 @@
+{"events": [
+ {"logStreamName": "2026/10/26/web[$LATEST]5d1c", "timestamp": 1793040004190,
+  "message": "REPORT RequestId: 487b2abf-401f-4b44-a3de-3a2cd750b7d0\tDuration: 15.88 ms\tBilled Duration: 3328 ms\tMemory Size: 1769 MB\tMax Memory Used: 170 MB\tInit Duration: 3311.87 ms\t\n"}
+]}

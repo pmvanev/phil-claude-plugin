@@ -1,0 +1,1 @@
+{"invokes": 7876, "cold": {"recorded": 96, "after_failed_init": 5, "suppressed": 4, "total": 105}, "active_hours": 40, "peak_environments": 4, "duration_total_ms": 933861.42, "memory_sizes": [1024, 1769]}

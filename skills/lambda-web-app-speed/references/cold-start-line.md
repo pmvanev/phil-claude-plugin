@@ -2,7 +2,8 @@
 
 One record per cold start, in CloudWatch's Embedded Metric Format (EMF), timing the code's own share of
 INIT one level down: its imports, its build, and its startup checks, each check on its own. `phases.py`
-reads it. Propose it only where the layer `cold-path.py` named has no timing line already.
+reads it. Propose it only where the layer `cold-path.py` named has no timing line already, or one that
+times the layer as a single undivided phase.
 
 ## What it times, and how
 

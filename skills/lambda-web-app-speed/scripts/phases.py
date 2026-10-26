@@ -189,8 +189,13 @@ def report(summary, truncated_at=None, init_p50_ms=None, cold_starts=None):
                 lines.append("The untimed gap outweighs the largest phase: look first at what the code does not "
                              "time.")
         if cold_starts is not None:
-            lines.append(f"{_plural(g['lines'], 'line')} for {cold_starts} cold starts: a timed-out INIT attempt "
-                         "writes no line, though its retry may; a cold start that wrote none is missing here")
+            if g["lines"] > cold_starts:
+                why = ("more lines than cold starts: a line whose cold start fell outside the window, or an INIT "
+                       "that wrote twice")
+            else:
+                why = ("a timed-out INIT attempt writes no line, though its retry may; a cold start that wrote "
+                       "none is missing here")
+            lines.append(f"{_plural(g['lines'], 'line')} for {cold_starts} cold starts: {why}")
         lines += ["", "| Phase | p50 | p95 | Max | Total | Share |", "|---|---|---|---|---|---|"]
         for p in g["phases"]:
             share = p["total_ms"] / timed["total_ms"] * 100 if timed["total_ms"] else 0
@@ -199,6 +204,9 @@ def report(summary, truncated_at=None, init_p50_ms=None, cold_starts=None):
                          f"{_s(p['total_ms'])} | {share:.0f}% |")
         share = largest["total_ms"] / timed["total_ms"] * 100 if timed["total_ms"] else 0
         lines += ["", f"Largest phase: {largest['name']}, {share:.0f}% of the time the code timed"]
+        if len(g["phases"]) == 1 and not largest["members"]:
+            lines.append("The line holds one undivided phase, so it divides nothing: treat the layer as having no "
+                         "timing line.")
         if largest["members"]:
             lines += [f"Inside it, {len(largest['members'])} members ran concurrently: their medians sum to "
                       f"{_s(largest['members_p50_sum_ms'])} inside a phase the clock timed at "

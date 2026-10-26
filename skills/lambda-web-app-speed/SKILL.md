@@ -1,28 +1,33 @@
 ---
 name: lambda-web-app-speed
-description: This skill should be used when the user asks to "measure the cold start", "count our Lambda cold starts", "is it INIT or the handler", "why is the first load of our Lambda app slow", "why does our Lambda app take a while after idle", "read Init Duration or INIT_REPORT from CloudWatch", "what inside INIT takes the time", "which startup check makes the cold start slow", "which cold-start fix first", or runs /phil:lambda-web-app-speed. It measures an AWS Lambda function's cold path from its REPORT and INIT_REPORT lines, including the cold starts that carry no Init Duration, names the layer that owns it, times one level inside it, and ranks the fixes by the time each saves, citing every command. Read-only. For load-time defects a file shows, use /phil:review-code.
+description: This skill should be used when the user asks to "measure the cold start", "count our Lambda cold starts", "is it INIT or the handler", "why is our Lambda app slow after idle", "what inside INIT takes the time", "which cold-start fix first", "what would keeping it warm cost", "what is our TTFB or LCP", or runs /phil:lambda-web-app-speed. From an AWS Lambda function's REPORT and INIT_REPORT lines it counts every cold start, including those with no Init Duration, names the layer that owns the wait and times one level inside it, ranks the fixes by time saved, prices keeping it warm, and splits one page load's first byte, citing every command. It reads AWS and changes nothing; with the person's agreement it loads one page they name. For load-time defects a file shows, use /phil:review-code.
 ---
 
 # Lambda Web App Speed
 
-Answer three questions from the function's own logs — **which layer owns this function's cold path,
-what inside that layer takes the time, and which fixes to make, in what order, before stopping?** This
-version measures, divides, drills one level and ranks. It does not yet price the warmth options or
-measure the browser.
+Answer five questions from the function's own logs, its prices and one page load — **which layer owns
+this function's cold path, what inside that layer takes the time, which fixes to make, in what order,
+before stopping, what keeping it warm would cost, and where a page load's first byte goes?** The skill
+measures, divides, drills one level, ranks, prices and stops. It decides no purchase and changes
+nothing.
 
 **Read the Principles in `${CLAUDE_PLUGIN_ROOT}/rules/lambda-web-app-speed.md` before measuring.** They
 define what a cold start is, the two kinds that hide, and why the window starts at the last change.
 
 ## Hard rules
 
-1. **Read AWS; change nothing.** Run only `aws lambda list-functions`,
+1. **Read AWS; change nothing.** Against AWS, run only `aws lambda list-functions`,
    `aws lambda get-function-configuration` and `aws logs filter-log-events`. Never invoke the function,
-   deploy it, change its configuration or force a cold start, and do not suggest forcing one: this
-   version measures the cold starts that already happened. The role in use can usually do far more than
+   deploy it, change its configuration or force a cold start, and do not suggest forcing one, with one
+   exception: Step 7 loads one page the person names, once by `firstbyte.py` and once in a browser trace,
+   after the person agrees, since each load runs the function and may meet a cold start. The role in use
+   can usually do far more than
    read, so these limits rest on this prose. Read the project's code with Read, Grep and Glob to find a
    timing line; edit nothing.
-2. **`python3` runs `cold-path.py`, `phases.py` and `rank.py`, and nothing else.** The scripts compute
-   the window, the gap to INIT and the stopping line, so no step needs arithmetic done by hand.
+2. **`python3` runs `cold-path.py`, `phases.py`, `rank.py`, `warmth.py` and `firstbyte.py`, and nothing
+   else.** The scripts compute every figure, so no step needs arithmetic done by hand. Two of them read
+   the network: `warmth.py` fetches AWS's public price list, and `firstbyte.py --get` loads the page the
+   person names, once, as a first visit would — no cookie, no credential.
 3. **Cite every number.** The report ends with a `Measured with:` block holding every command exactly as
    run, so the person can rerun them.
 4. **Read no application line but a timing line**: the function's own, or a probe's the person names.
@@ -42,7 +47,7 @@ before it, so each call matches its grant.
   name it. **This ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before
   the call.
 - **Configuration.** Run `aws lambda get-function-configuration --function-name <f> --output json --query
-  '{FunctionArn:FunctionArn,LastModified:LastModified,MemorySize:MemorySize,Runtime:Runtime,LogGroup:LoggingConfig.LogGroup,LogFormat:LoggingConfig.LogFormat}'`.
+  '{FunctionArn:FunctionArn,LastModified:LastModified,MemorySize:MemorySize,Runtime:Runtime,Architectures:Architectures[0],LogGroup:LoggingConfig.LogGroup,LogFormat:LoggingConfig.LogFormat}'`.
   Take the partition, Region and account from `FunctionArn`
   (`arn:<partition>:lambda:<region>:<account>:function:<name>`).
 - **Stop** where `LogFormat` is `JSON`: this version reads the text format only. Where `LogGroup` is not
@@ -70,15 +75,8 @@ aws logs filter-log-events --log-group-name <group> --start-time <start_ms> --en
 cold starts with `Init Duration`, measure again with `--days 14` in place of `--window`, and report both
 under their own `Window:` lines, saying the second mixes versions.
 
-**When the script stops instead of reporting:**
-
-- *Not a complete response*: the fetch was cut off. Move the window's start later by half its length, refetch, and
-  say the window was narrowed.
-- *SnapStart restores*: stop and say this version does not divide restores.
-- *No REPORT line*: the function served nothing in the window. Where the window starts at the last
-  change, measure `--days 14` and say it mixes versions; otherwise report that it served nothing.
-- *Truncated*, in the report itself: the fetch hit its item cap, and the report names where it stopped.
-  Say so beside the numbers; they cover the window up to that moment.
+**When the script stops instead of reporting**, or reports a truncated fetch, follow its entry in
+`${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/references/when-a-script-stops.md`.
 
 The script reads each log stream in time order and reports:
 
@@ -107,12 +105,15 @@ written once per cold start, that times the layer's phases. Grep the project's c
 `CloudWatchMetrics`, `add_metric` and `put_metric` beside `Milliseconds`, and keep the line written
 during INIT — at module scope or from the build — not a per-request latency line. Where the search
 finds none, or the code is not in the working directory, ask the person whether such a line exists and
-its metric names; **this ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.**
+its metric names; **this ask follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Where
+no name is known, filter on the layer's dimension instead, `'{ $.phase = "init" }'` for INIT: `phases.py`
+keeps only Embedded Metric Format records and drops any other line unread.
 
 **Confirm the line keeps the convention `phases.py` reads**, from its code: each name without a dot is a
 phase, and phases run one after another without overlapping; each name with a dot is a member that ran
 concurrently inside the one phase its prefix starts. A line that writes a total beside its parts, or
-phases that overlap, breaks it: treat the layer as having no timing line.
+phases that overlap, breaks it: treat the layer as having no timing line. Where the code is not at
+hand, say the convention went unconfirmed; a line of one phase cannot break it.
 
 **Divide the line's records** over the window Step 3 last measured — the narrowed one where it narrowed,
 the first where it reported two — with the Bash tool's timeout set to 600000 ms. Filter on a phase name
@@ -130,14 +131,13 @@ timed itself, and the untimed gap to `Init Duration`; the largest phase, by tota
 window; and that phase's members beside it, unsummed, each marked where it waits with the phase in the
 same cold starts. It names a truncated fetch as `cold-path.py` does.
 
-**When `phases.py` stops instead of reporting:** *not a complete response* — move the start later by
-half the window's length and refetch; *no Embedded Metric Format line* — check the filter names one of
-the line's phases, then treat the layer as having no timing line; *breaks the phase convention* — treat
-the layer as having no timing line, and say why.
+**When `phases.py` stops instead of reporting**, follow its entry in
+`${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/references/when-a-script-stops.md`.
 
 **Decide from the report, in this order:**
 
-1. **No timing line for the layer** → `Next instrument:` the cold-start line in
+1. **No timing line for the layer**, or a line of one undivided phase, which divides nothing →
+   `Next instrument:` the cold-start line in
    `${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/references/cold-start-line.md`.
 2. **"The untimed gap outweighs the largest phase"** → `Cause:` time spent outside the code's own
    clock; name it, and propose nothing in this version.
@@ -173,26 +173,9 @@ as experiments: memory, from Step 1's `MemorySize`, and moving work from the fir
 where the first invoke owns the path. Draw every figure from Steps 1, 3 and 4, or from a measurement
 the person gives and you cite.
 
-```
-python3 -I ${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/scripts/rank.py - <<'JSON'
-{"path": {"name": "cold wait: INIT and its first invoke", "now_ms": <cold wait p50>,
-          "target_ms": <budget, or null>, "noise_ms": <spread of repeated runs, or null>},
- "candidates": [
-  {"name": "<the fix>", "kind": "removes", "effort": "S|M|L", "standard": true,
-   "saves": [{"basis": "removes", "low": <p50>, "high": <p95>}],
-   "evidence": "<the report lines the figures come from>"},
-  {"name": "<the machine change>", "kind": "experiment", "effort": "S|M|L", "standard": true,
-   "evidence": "<why no measurement predicts it>"}]}
-JSON
-```
+Write each candidate in the shape `${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/references/candidates.md`
+gives — read it before the first candidate — and pass the path's figures with them:
 
-- **A fix that removes measured work** (`"kind": "removes"`) lists, under `saves`, each part it removes
-  with the part's measured p50 as `low` and its p95 as `high`, and the script computes the saving:
-  `removes` for a call or phase taken off the path; `concurrent` for calls run one after another made
-  concurrent, with their `sum` and their `slowest`; `batch` for N calls made one, with `calls` and one
-  call's figures; `scaled` for a time a fix shrinks by a fraction the person measured, as `fraction`.
-- **Effort**: `S` within hours, `M` about a day, `L` longer. **`standard`**: true where the fix is a
-  documented pattern — AWS's guidance, or a Preferred form of the rule's rows.
 - **`now_ms`**: the `Cold wait` row's p50 from Step 3's report — each recorded cold start's INIT plus
   its first invoke.
 - **`target_ms`**: the project's own cold-path budget, where its docs or the person state one. Where
@@ -215,7 +198,68 @@ one, measure again, keep it or revert it. After any fix the next run measures ag
 slice moves. A load-time defect a file shows is `/phil:review-code`'s, under the rule's `LWS-n` rows,
 whether or not it ranks here.
 
-## Step 6 — Report
+## Step 6 — Price the warmth
+
+Price keeping the function warm for its own traffic — one environment and the measured peak under
+provisioned concurrency, SnapStart where the runtime and partition offer it, a heartbeat from open
+pages — over fourteen days, whatever window Step 3 measured: traffic does not change with the code, and
+a short window scales a few hours up to a month. Run `cold-path.py --days 14` for the window, then, with
+the Bash tool's timeout set to 600000 ms:
+
+```
+aws logs filter-log-events --log-group-name <group> --start-time <start_ms> --end-time <end_ms> \
+  --max-items 200000 --filter-pattern '?"REPORT RequestId" ?INIT_REPORT' --output json [--profile <p>] [--region <r>] \
+  | python3 -I ${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/scripts/cold-path.py --json - \
+  | python3 -I ${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/scripts/warmth.py --region <region> \
+      --memory-mb <MemorySize> --runtime <Runtime> --arch <Architectures> --window-days <days> -
+```
+
+Take `<days>` from that `--days 14` output, and the rest from Step 1. `scripts/warmth.py` fetches the
+Region's prices from AWS's public price list, which needs no credentials, scales the traffic to a month,
+and reports each option's monthly price, what it removes and what it leaves, and its price per cold
+start, at least. It refuses a truncated fetch, and names `cold-path.py` where that stage stopped first;
+say either, and price nothing.
+
+Present the table as prices, not advice: keeping warm is a purchase, and the person decides. The cold
+start worth buying away is the one a present person pays; the table's header names how many the window
+held.
+
+## Step 7 — Measure one page load
+
+**The page.** Take the URL from `--url`; otherwise ask the person for the page a first visit lands on,
+or whether to skip this step. Before loading it, say that each load runs the function and may meet a
+cold start, and ask the person to agree. **Both asks follow
+`${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Where the person declines or names no page,
+skip this step and say the browser went unmeasured.
+
+1. **Time the first byte.** Run `python3 -I ${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/scripts/firstbyte.py --get <url>`
+   once. It prints one JSON line: the status, the GET's DNS, TCP, TLS and wait, and the window to
+   fetch, `fetch_start_ms` to `fetch_end_ms`.
+2. **Trace the largest paint.** Where the session offers a browser performance trace, such as the
+   Chrome DevTools MCP server's, open a blank page in an isolated context, start the trace without a
+   reload, navigate once to the URL, stop the trace and close the page — one load, no other interaction; it
+   meets the environment step 1 warmed, so report it as a warm load, and say whether the browser was
+   signed in. Otherwise ask the person, under the same standard, for the LCP of a Lighthouse run of the
+   page, and cite it; failing both, say LCP went unmeasured.
+3. **Split the first byte.** The trace gave CloudWatch time to receive the function's lines. Run:
+
+   ```
+   aws logs filter-log-events --log-group-name <group> --start-time <fetch_start_ms> \
+     --end-time <fetch_end_ms> --max-items 200000 --filter-pattern '?"REPORT RequestId" ?INIT_REPORT' \
+     --output json [--profile <p>] [--region <r>] \
+     | python3 -I ${CLAUDE_PLUGIN_ROOT}/skills/lambda-web-app-speed/scripts/firstbyte.py --split '<the JSON line>' -
+   ```
+
+   It splits the first byte into the network, the function — INIT on a cold start, and the invoke —
+   and the rest: the front door, placement, one round trip and, on a cold start, Lambda's setup before
+   INIT. It leaves the function unsplit where the response was not 2xx, where no single `REPORT`
+   matches, or where the figures cannot hold together; say which. Where it finds no `REPORT`, fetch again
+   once: CloudWatch receives lines seconds late.
+
+Set each against its target — TTFB within 0.8 s, LCP within 2.5 s — as one sample: the targets name the
+75th percentile of real page loads, which one load cannot show. Say whether the GET met a cold start.
+
+## Step 8 — Report
 
 ```
 Function: <name> · account <id> · <partition>/<region> · <memory> MB · last changed <LastModified>
@@ -231,12 +275,18 @@ the person deploys it>
 
 <rank.py's report, where Step 5 ran>
 
+<warmth.py's table>
+
+<firstbyte.py's split, and the LCP with its source — or that the browser went unmeasured, and why>
+
 Measured with:
   <the configuration read, exactly as run>
   <the --window call, exactly as run>
   <each fetch pipeline, exactly as run>
   <the rank.py call, with its candidates>
+  <the warmth pipeline, and each firstbyte.py call, exactly as run>
 Read: <each project file a decision in Step 4 or 5 rests on>
+Prices: <the price list's publication date>
 ```
 
 Write each command with `${CLAUDE_PLUGIN_ROOT}` expanded, so it reruns as pasted. **The p75 line**,
@@ -247,8 +297,9 @@ Then stop.
 
 ## Self-test
 
-`self-test/README.md` registers the fixtures. `tests/test_lambda_cold_path.py` drives
-`self-test/01-cold-path-split/` through `cold-path.py`, `tests/test_lambda_init_phases.py` drives
-`self-test/02-init-phases/` through `phases.py` and holds the references, `tests/test_lambda_rank.py`
-drives `self-test/03-rank-replay/` through `rank.py`, and `tests/test_lambda_web_app_speed_command.py`
-holds the grant and this file's limits.
+`self-test/README.md` registers the fixtures, each driven through its script by its test:
+`01-cold-path-split/` by `tests/test_lambda_cold_path.py`, `02-init-phases/` and the references by
+`tests/test_lambda_init_phases.py`, `03-rank-replay/` by `tests/test_lambda_rank.py`,
+`04-warmth-prices/` by `tests/test_lambda_warmth.py`, and `05-first-byte/` by
+`tests/test_lambda_first_byte.py`. `tests/test_lambda_web_app_speed_command.py` holds the grant and this
+file's limits.

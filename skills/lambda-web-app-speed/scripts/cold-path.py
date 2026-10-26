@@ -164,6 +164,18 @@ def look_inside(summary):
     return {"layer": owner["layer"], "because": f"it took {share:.0f}% of the split cold-start time"}
 
 
+def _traffic(streams):
+    """What warmth is priced from: the clock hours that saw a request, the most environments busy in one
+    minute, and the time every invoke took."""
+    reports = [l for lines in streams.values() for l in lines if l.kind == "report"]
+    minutes = defaultdict(set)
+    for l in reports:
+        minutes[l.time // 60_000].add(l.stream)
+    return {"active_hours": len({l.time // 3_600_000 for l in reports}),
+            "peak_environments": max((len(s) for s in minutes.values()), default=0),
+            "duration_total_ms": round(sum(l.duration for l in reports), 2)}
+
+
 def summarize(streams):
     init, first, warm, unsplit = [], [], [], []
     cold = {"recorded": 0, "after_failed_init": 0, "suppressed": 0}
@@ -207,6 +219,7 @@ def summarize(streams):
         "warm": _spread(warm),
         "unsplit": _spread(unsplit),
         "near_ceiling": sum(1 for ms in init if ms >= NEAR_CEILING_MS),
+        **_traffic(streams),
         "memory_sizes": sorted(memory),
         "environments": len(streams),
         "last_line_ms": max((l.time for lines in streams.values() for l in lines), default=None),
@@ -292,6 +305,7 @@ def window(last_change=None, now=None, days=None):
         start, starts_at = floor, f"{days or WINDOW_DAYS} days ago"
     return {"start_ms": int(start.timestamp() * 1000), "end_ms": int(end.timestamp() * 1000),
             "start": _iso(start.timestamp() * 1000), "end": _iso(end.timestamp() * 1000),
+            "days": round((end - start).total_seconds() / 86_400, 4),
             "starts_at": starts_at}
 
 

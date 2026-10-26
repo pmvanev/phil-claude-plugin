@@ -1,0 +1,2 @@
+{"url": "https://app.example/", "status": 200, "started_ms": 1793040000000, "ended_ms": 1793040004215,
+ "dns_ms": 61.3, "connect_ms": 56.4, "tls_ms": 149.9, "wait_ms": 3947.2, "ttfb_ms": 4214.8}
