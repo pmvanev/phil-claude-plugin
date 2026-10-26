@@ -19,6 +19,7 @@ flags. Format mirrors `skills/redesign-tests/self-test/`.
 | `05-security-guard-integrity/` | a write guard that works until its subject attacks it, and the transcript it keeps | the guard-integrity rows (CWE-180, CWE-807); the transcript Advisory bullet | two guard items; the transcript raised as Advisory |
 | `06-security-agent-grant/` | a subagent narrowed by `Bash(git log:*)` beside a read-only one | the CWE-250 agent row: a command pattern grants the whole shell | one CWE-250 item on the history reader; the read-only drafter left alone |
 | `07-load-time-findings-cite-an-lws-row/` | fourteen load-time defects in a Lambda web app beside six look-alikes | `rules/lambda-web-app-speed.md` Always-flag rows; its Do-not-flag list | fourteen load-time items, each with its row's `LWS-n` id and Preferred form; no look-alike flagged |
+| `08-load-time-rows-seen-nowhere-else/` | the six load-time defects fixture 07 plants nothing for, in a GovCloud stack, beside two look-alikes | `rules/lambda-web-app-speed.md` LWS-5, LWS-7 to LWS-10 and LWS-13; its Do-not-flag list | six load-time items, each with its row's `LWS-n` id and Preferred form; GovCloud's function-served assets and a tiny reply unflagged |
 
 ## Layout
 

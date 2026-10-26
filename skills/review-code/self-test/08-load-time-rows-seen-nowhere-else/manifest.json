@@ -1,0 +1,12 @@
+{
+  "node_id": "RC-SELFTEST-08",
+  "mode": "review",
+  "target": ".",
+  "pins": "the six rules/lambda-web-app-speed.md rows fixture 07 plants nothing for — wrong-version bytecode, provisioned concurrency off the invoked path, SnapStart where GovCloud bars it and with a unique id at INIT, a Function URL in GovCloud, uncompressed text — are each found and named by their LWS id; GovCloud's function-served assets and a tiny uncompressed reply are not flagged",
+  "expected_guard": "six LWS-named items across the build, the Terraform, the API and the shell server; two look-alikes unflagged",
+  "decoys": [
+    "assets_route",
+    "HEALTH_BODY"
+  ],
+  "min_items": 6
+}

@@ -17,7 +17,7 @@ nothing ranked; memory then the INIT move listed as experiments, cheapest first.
 and both made the largest gains.
 
 **`after-memory.json`** — at 1769 MB, after the INIT move, with the per-phase line (note 14480) and the
-per-call timings (note 14518). **Expected:** the checks (2.13–2.47 s, from Bedrock's 1.20–1.25 s plus
+per-call timings (note 14518). **Expected:** the checks (2.12–2.47 s, from Bedrock's 1.20–1.25 s plus
 canaries summing 1.21–1.32 s with the slowest at 0.10–0.285 s) ranked above bytecode (0.74–1.02 s, from
 imports of 1.53–1.91 s scaled by the person's local measurement, note 14494); more memory an
 experiment; the module trim and the Secrets Manager read inside the 0.32 s noise; and no stopping line.

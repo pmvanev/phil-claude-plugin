@@ -1,0 +1,25 @@
+export function formatLine1(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine2(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine3(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine4(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine5(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine6(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine7(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine8(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine9(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine10(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine11(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine12(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine13(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine14(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine15(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine16(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine17(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine18(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine19(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine20(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine21(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine22(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine23(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+export function formatLine24(entry) { return `${entry.date} ${entry.account} ${entry.amount.toFixed(2)}`; }
+document.getElementById('root').textContent = 'Ledger';

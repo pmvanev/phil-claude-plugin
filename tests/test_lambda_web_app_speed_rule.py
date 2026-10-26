@@ -224,10 +224,12 @@ def _advisory_titles():
 
 def test_every_expected_advisory_item_is_a_question_naming_its_bullet():
     titles = _advisory_titles()
+    expected = [i for m in FIXTURES for i in _items((m.parent / "expected-backlog.md").read_text())
+                if _plain(_field(i, "Smell")) == "Advisory"]
+    assert expected, "no fixture expects an Advisory question"
     for manifest in FIXTURES:
         items = [i for i in _items((manifest.parent / "expected-backlog.md").read_text())
                  if _plain(_field(i, "Smell")) == "Advisory"]
-        assert items, f"{manifest.parent.name} expects no Advisory question"
         for item in items:
             assert _field(item, "Refactoring") == "none — the author decides"
             assert _field(item, "Route") == "report only" and _field(item, "Priority") == "1"
@@ -237,3 +239,11 @@ def test_every_expected_advisory_item_is_a_question_naming_its_bullet():
 def test_review_code_raises_the_rules_advisory_bullets_only_where_a_file_shows_the_subject():
     body = " ".join(SKILL.read_text().split())
     assert "Raise the rule's Advisory bullets" in body and "only where a file the review read shows" in body
+
+
+def test_every_always_flag_row_is_planted_in_some_fixture():
+    """A row no fixture plants can drift from what a review files, and no drive would notice."""
+    planted = {_plain(_field(i, "Smell")) for m in FIXTURES
+               for i in _items((m.parent / "expected-backlog.md").read_text())}
+    missing = sorted({_plain(r["Id"]) for r in _rows()} - planted, key=lambda i: int(i.split("-")[1]))
+    assert not missing, f"no fixture plants {missing}"
