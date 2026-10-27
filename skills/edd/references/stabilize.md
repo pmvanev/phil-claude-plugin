@@ -24,7 +24,8 @@ Then check three things; none re-runs a check in the oracle's place:
   outside test files is a rebuild — follow BUILD's rebuild rule.
 - **Green.** Each pinning test passes in the engine's oracle run after pinning. A pin that run omits,
   or shows red, is no pin.
-- **Matched.** Each approved-output file equals the evidence the developer accepted, byte for byte. A
+- **Matched.** Each approved-output file equals the test's output alone — the output the producer
+  captured when it ran that approval test at EVIDENCE, and the developer accepted — byte for byte. A
   difference is no pin.
 
 An accepted expectation or trusted row left without a pin goes to FINDINGS. One spot-checked by hand
@@ -37,16 +38,18 @@ only `waive` and `stop`, since nothing here can show it green.
 
 ## 2. Review the code
 
-List every file changed since `base`: `git diff --name-only <base>` and the untracked files from
-`git ls-files --others --exclude-standard`, leaving out the review backlogs. Run `phil:review-code`
+List every file the run's commits changed since `base`: `git diff --name-only --diff-filter=d
+<base> HEAD`, leaving out the review backlogs and anything uncommitted before the run began. Run `phil:review-code`
 (Skill tool) once per changed file, pinning tests included: it takes one path, and its `--changes`
 sees only the last commit. Each run adds a `Scope:` block to `.refactoring-backlog.md`; read only the
 blocks this run wrote. A file's run also judges that file's tests, so two runs can file the same item:
-items naming the same file, lines and smell are one finding, however many runs filed it.
+items naming the same file, smell and offending content are one finding, however many runs filed it.
 
-- **Blocking** — every Priority 1 item, except an item whose Smell is `Advisory` or an `LWS-n` id: one
-  is a question for the author, the other a load-time finding, and both advise. And every Priority 6
-  item whose File holds a pinning test: a weak pin is no regression alarm.
+- **Blocking** — every Priority 1 item on lines changed since `base` (`git diff -U0 <base> HEAD`
+  gives them), except an item whose Smell is `Advisory` or an `LWS-n` id: one is a question for the
+  author, the other a load-time finding, and both advise. A defect the run did not write advises. And
+  every Priority 6 item whose Lines fall inside a pinning test's body: a weak pin is no regression
+  alarm.
 - **Advisory** — every other item, for REPAIR.
 
 ## 3. Audit the UI
@@ -57,6 +60,6 @@ no repair skill owns one, so REPAIR lists it and runs nothing.
 
 ## Re-entry
 
-After a rebuild, or a pinning fix from FINDINGS, repeat all three over everything changed since
-`base`. Match each new finding with the old by FINDINGS' sameness rule. A blocker the re-run does not
+After a rebuild, repeat all three over everything changed since `base`. After a test-only fix — a
+pin, or a weak pinning test split — re-check the pins and re-review only the changed tests. Match each new finding with the old by FINDINGS' sameness rule. A blocker the re-run does not
 reproduce is cleared; one it reproduces keeps its fix-round count.

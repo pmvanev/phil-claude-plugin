@@ -28,6 +28,8 @@ For every other expectation, do the least that yields real evidence:
    - For a **checkable** expectation, the evidence is one scenario run: its inputs and the verbatim
      output, with the reproduce command.
    - For a **qualitative** expectation, it is the thing run or rendered, captured verbatim.
+   - For a row the classification table marks `approval test`, send `classification: approval test`:
+     the evidence is the test's output alone, which STABILIZE later matches byte for byte.
    - A **partially verifiable** run — a Terraform plan, a dry run, a migration against a test
      database — is executed evidence of what it shows. The producer says in its return what the run
      leaves unshown, so the developer judges the gap, not only the output.
@@ -44,7 +46,7 @@ For every other expectation, do the least that yields real evidence:
    has given neither evidence nor narration: report it to the developer rather than re-commissioning,
    since the same run fails the same way. Act on its cause:
    - **the build is missing** — an entry point not found, a build absent: route the expectation back
-     to the engine, then gather evidence again; after a second cannot-run for the same expectation, ask
+     to the engine — a rebuild, under BUILD's rule — then gather evidence again; after a second cannot-run for the same expectation, ask
      the developer to send it back again, spot-check it by hand, or stop;
    - **the environment cannot run it** — a browser, a paid API, a production-only condition: tell the
      developer, who confirms it as a blocker and spot-checks it by hand or stops, as above.

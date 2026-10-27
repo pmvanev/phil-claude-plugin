@@ -70,7 +70,7 @@ Load it before the first ask. On top of that standard:
 | No argument | Ask for an intent. No-argument **resume** of an in-flight loop does not exist. |
 
 Derive a kebab-case `<slug>` from the intent for the trail path `docs/edd/<slug>/`. Create it only when
-DOCUMENT writes the trail, once the engine has built.
+DOCUMENT writes the trail, once BUILD has started.
 
 ---
 
@@ -200,7 +200,8 @@ Delegate the build to the fitting engine and let its native oracle prove the che
   oracle).
 
 Hand the engine the confirmed expectations, in risk order, as its specification — not the intent they
-came from — then let it work uninterrupted. If the engine reports it cannot meet an expectation, put
+came from — with the classification table, so it writes the approval tests the table names. Then let
+it work uninterrupted. If the engine reports it cannot meet an expectation, put
 its explanation to the developer, who may reword it, drop it on the record, or stop. This report
 comes before the red-oracle rule: the red oracle an unmet expectation produces goes to the developer
 with the engine's explanation, not back to the engine. A reworded expectation is the developer's —
@@ -221,12 +222,13 @@ sends it back again or stops. An approval test still awaiting its first approval
 first output goes to the developer at EVIDENCE. Record which engine built. The evidence adds what the
 oracle cannot: the scenario's real inputs and output in front of the developer.
 
-A rebuild re-runs REVIEW on the whole target — a reject, a red oracle, or a FINDINGS fix that changes
-more than tests sends the work back to the engine — and re-asks every expectation whose evidence the
+Any return to the engine that changes files outside the tests is a rebuild — a reject, a red oracle, a
+missing build EVIDENCE found, or a FINDINGS fix. A rebuild re-runs REVIEW on the whole target, replaces
+`oracle_result`, and re-asks every expectation whose evidence the
 change touched: re-gather that evidence, review, and put it to the developer again. An accept on
 evidence the rebuild invalidated no longer stands. Once the developer has adjudicated again, the run
-re-enters STABILIZE over everything changed since `base`. A waiver stands only while its finding's
-span is unchanged.
+re-enters STABILIZE over everything changed since `base`. A waiver stands only while the content it
+waived is unchanged.
 
 ## EVIDENCE — executed evidence for every expectation not opted out
 
@@ -278,7 +280,7 @@ what they meant.
   not a reject. The developer names the scenario to run, or an expectation to add.
   - A challenge commissions evidence for the named scenario and rebuilds nothing. The producer
     receives it as `scenario`; the evidence goes through EVIDENCE's steps and returns to this ask with
-    its findings attached.
+    its findings already attached; REVIEW does not re-run, since nothing was rebuilt.
   - A challenge on a spot-checked expectation asks the developer to spot-check the named scenario.
   - A challenge that adds an expectation sends it through CLASSIFY, labelled `you wrote`, into its
     place in the risk order; it gets evidence whatever OPT-OUT said, since the opt-out never saw it.
@@ -309,7 +311,8 @@ pin dispatch and its checks, and how to run each review.
   assert, is pinned by an approval test whose approved output is the evidence the developer accepted,
   verbatim. An accepted expectation no test pins blocks done.
 - **Review the code.** `phil:review-code` runs over every file changed since `base`, pinning tests
-  included. A Priority 1 finding, and a Priority 6 finding on a pinning test, block done.
+  included. On lines changed since `base`, a Priority 1 finding (not an `Advisory` or `LWS-n` item)
+  blocks done, as does a Priority 6 finding on a pinning test.
 - **Audit the UI.** When the change touches UI files, `phil:ux-review` runs over them; a `must-fix`
   blocks done.
 
@@ -324,7 +327,8 @@ and evidence in the context block:
 
 - a judge-confirmed `major` from REVIEW — attached to an expectation, on a row trusted to the tests,
   or bearing on none;
-- a Priority 1 finding, or a Priority 6 finding on a pinning test, from `phil:review-code`;
+- from `phil:review-code`, a Priority 1 finding on a line changed since `base` — not an `Advisory` or
+  `LWS-n` item — or a Priority 6 finding on a pinning test;
 - a `must-fix` from `phil:ux-review`;
 - an accepted expectation, or a row trusted to the tests, that no test pins.
 
@@ -343,8 +347,8 @@ Three answers, `fix`, `waive` and `stop`, each with its cost:
 An accepted expectation spot-checked by hand, which no test can pin here, comes to FINDINGS too, with
 only `waive` and `stop`: no fix can pin it, so the developer decides, by name, to finish without one.
 
-Treat a finding in a later review as the same finding when its span names the same lines and its
-mechanism the same defect: it keeps its fix-round count, and a waived one stays waived. After a second
+Treat a finding in a later review as the same finding when it names the same file, the same mechanism
+and the same offending content — never by line numbers, which every fix shifts: it keeps its fix-round count, and a waived one stays waived. After a second
 fix round on the same finding, offer only `waive` and `stop`: the engine has failed it twice. List the
 confirmed `minor` and `nit` findings from REVIEW after the blockers; the developer may send any of them
 to the engine as a `fix`, and the record keeps each one either way.
@@ -357,10 +361,11 @@ plugin skills that own them, so line numbers stop moving only after every blocke
 each skill's argument and gate, and the clean-tree rule. Each repair runs only on the developer's `run`,
 and the record keeps every repair offered, run or skipped.
 
-## DOCUMENT — living documentation (every run that built)
+## DOCUMENT — living documentation (every run in which BUILD started)
 
-Write the trail under `docs/edd/<slug>/` for every run that built, opt-out runs included — a run
-stopped over a standing reject writes the trail too, its verdicts included. Compose it and review its
+Write the trail under `docs/edd/<slug>/` for every run in which BUILD started, opt-out runs
+included. If that directory already exists, append the date to the slug: never overwrite an earlier
+trail; a run stopped over a standing reject writes the trail too, its verdicts included. Compose it and review its
 prose before anything is written to disk:
 
 ```

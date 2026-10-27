@@ -17,6 +17,9 @@ nothing touches the working tree before the review. In each draft:
 - every piece of evidence is referenced by path, never inlined: it is never passed to the review, and
   `evidence/` holds it out of the review's reach.
 
+Tell the review that each placeholder stands for content the written document holds. Drop any
+`[fitness]` finding whose only cause is a placeholder: no fix of composed text can answer it.
+
 ## 2. Review each draft
 
 Run `phil:red-team-prose` (Skill tool) once per draft, with the draft's path, and use its Steps 1 to 5

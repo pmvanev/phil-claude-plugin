@@ -119,7 +119,7 @@ def test_an_expectation_not_executable_in_the_loop_goes_to_the_developer():
 
 def test_the_trail_is_written_for_every_run_that_built():
     document = _section("DOCUMENT")
-    assert "every run that built" in document
+    assert "every run in which BUILD started" in document
     assert "≥1 adjudicated" not in document
 
 
@@ -303,7 +303,7 @@ def test_build_captures_the_oracle_run_and_replaces_it_on_every_rebuild():
 def test_a_rebuild_re_runs_review_and_a_waiver_lapses_when_its_span_changes():
     body = _flat()
     assert "A rebuild re-runs REVIEW on the whole target" in body
-    assert "A waiver stands only while its finding's span is unchanged" in body
+    assert "A waiver stands only while the content it waived is unchanged" in body
 
 
 def test_review_routes_on_corrected_severity_and_shows_the_label():
@@ -374,7 +374,7 @@ def test_every_second_cap_binds_from_the_second_on():
 
 def test_a_recurring_finding_keeps_its_count_and_its_waiver():
     findings = _section("FINDINGS")
-    assert "the same finding when its span names the same lines and its mechanism the same defect" in findings
+    assert "the same finding when it names the same file, the same mechanism and the same offending content" in findings
 
 
 def test_the_developer_gives_the_qualitative_reason():
@@ -684,3 +684,58 @@ def test_a_dropped_expectation_never_counts_as_met_and_does_not_block_done():
 
 def test_a_build_reword_gets_evidence_whatever_opt_out_said():
     assert "gets evidence whatever OPT-OUT said, since the opt-out never saw it" in _section("BUILD")
+
+
+# --- final plugin-dev:skill-reviewer pass (2026-10-27): ten material defects. REPAIR deleted the
+# developer's backlogs; line-matched findings reset the fix-round cap; the approval-test path never
+# reached the producer or the engine; a missing-build return skipped the rebuild rule; placeholders
+# could raise unfixable fitness findings; blocking covered code the run never touched; re-review scope
+# disagreed; a stop during BUILD had no trail rule; FINDINGS lacked the Advisory exemption; scoped test
+# backlogs were left behind and a second run overwrote the first trail.
+
+def test_repair_restores_every_backlog_file_to_its_state_before_the_run():
+    repair = " ".join(REPAIR_REF.read_text().split())
+    assert "restore each to what it held before this run" in repair
+    assert "`.test-refactoring-backlog.md`" in repair
+    assert "`.test-redesign-backlog.md`" in repair
+    assert "delete `.ux-review-backlog.md`" not in repair
+
+
+def test_findings_match_by_content_not_line_numbers():
+    findings = _section("FINDINGS")
+    assert "same file, the same mechanism and the same offending content" in findings
+    assert "span names the same lines" not in findings
+
+
+def test_approval_test_rows_reach_the_producer_and_the_engine():
+    assert "the classification table" in _section("BUILD")
+    assert "send `classification: approval test`" in _section("EVIDENCE")
+    assert "the test's output alone" in _section("STABILIZE")
+
+
+def test_any_return_to_the_engine_that_changes_code_is_a_rebuild():
+    assert "Any return to the engine that changes files outside the tests" in _section("BUILD")
+
+
+def test_placeholders_never_raise_an_unfixable_fitness_finding():
+    assert "whose only cause is a placeholder" in _document_ref()
+
+
+def test_blocking_review_covers_only_lines_the_run_changed():
+    stabilize = _section("STABILIZE")
+    assert "lines changed since `base`" in stabilize
+    assert "whose File holds a pinning test" not in stabilize
+
+
+def test_re_review_after_a_test_only_fix_covers_the_changed_tests():
+    assert "re-review only the changed tests" in _section("STABILIZE")
+
+
+def test_a_run_in_which_build_started_writes_the_trail_and_never_overwrites_one():
+    document = _section("DOCUMENT")
+    assert "every run in which BUILD started" in document
+    assert "never overwrite an earlier trail" in document
+
+
+def test_findings_names_the_priority_1_exemption():
+    assert "not an `Advisory` or `LWS-n` item" in _section("FINDINGS")
