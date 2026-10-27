@@ -10,8 +10,8 @@ The article's third category of evidence.
 **Expected decision:** `SPOT-CHECK`.
 - CLASSIFY marks the expectation `not executable in the loop` only after the developer confirms the
   blocker — the skill never makes that call alone.
-- EVIDENCE handles it first, before any dispatch: it commissions nothing, tells the developer the
-  blocker, and asks them to spot-check it by hand or stop.
+- EVIDENCE handles it in its place in the risk order, without any dispatch: it commissions nothing,
+  tells the developer the blocker, and asks them to spot-check it by hand or stop.
 - The developer spot-checks; the record keeps their observation in their own words, labelled
   `you wrote`.
 - ADJUDICATE asks for a verdict on what they observed: here, `accept`. Had they seen the bar jump

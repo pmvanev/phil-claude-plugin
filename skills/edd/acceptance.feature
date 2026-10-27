@@ -18,7 +18,8 @@
 #
 # Decision outcomes the loop must produce:
 #   CAPTURE-GAPS · CLASSIFY-CHECKABLE · OPT-OUT · GATE-RERUN-EXISTING · GATE-COMMISSION ·
-#   REJECT-NARRATION · SPOT-CHECK · BLOCK-DONE · DOCUMENT-TRAIL
+#   REJECT-NARRATION · SPOT-CHECK · REVIEW-THEN-ASK · CHALLENGE · BLOCK-DONE · WAIVE-RECORDED ·
+#   REPORT-NOT-DONE · DOCUMENT-TRAIL
 
 Feature: Prove every expectation is met with executed evidence
   As Avery, an expectation owner delegating build work to AI agents,
@@ -118,6 +119,40 @@ Feature: Prove every expectation is met with executed evidence
     Then it does not report the work as done
     And it iterates that expectation rather than moving on
     And no completion is claimed while any expectation stands rejected
+
+  # --- REVIEW: an independent adversary before any verdict -------------------------------
+  @edd-article-alignment @slice-02 @review @separation-of-powers @fixture:12-review-before-verdict
+  Scenario: The built work is attacked by an independent reviewer before Avery judges it
+    Given evidence has been gathered for every expectation not opted out
+    When the review runs
+    Then an independent reviewer attacks the built work against the expectations and the standards, never seeing the builder's reasoning
+    And an independent judge confirms or refutes each finding
+    And each confirmed finding reaches Avery beside the evidence it bears on, with the four challenge questions
+
+  @edd-article-alignment @slice-02 @review @error @fixture:14-unwaived-major-blocks-done
+  Scenario: A confirmed major finding blocks done until it is fixed or waived by name
+    Given Avery has accepted an expectation and a confirmed major finding still stands
+    When the tool determines whether the work is done
+    Then the tool puts the finding to Avery to fix, waive or stop
+    And it does not report the work as done while the finding stands
+    And a waiver must name the finding and give a reason, which the record keeps with a timestamp
+
+  # --- CHALLENGE and STOP: Avery pushes on the evidence, and can end any loop -------------
+  @edd-article-alignment @slice-02 @adjudicate @fixture:13-challenge-rebuilds-nothing
+  Scenario: A challenge gathers evidence for the named scenario and rebuilds nothing
+    Given Avery has read the evidence and the four challenge questions
+    When Avery challenges it, naming the scenario that would break it
+    Then evidence is gathered for that scenario
+    And nothing is rebuilt
+    And Avery is asked again, with all four answers offered
+
+  @edd-article-alignment @slice-02 @adjudicate @error @fixture:15-stop-over-a-standing-challenge
+  Scenario: A stop over a standing challenge ends the run, not done, with the challenge on record
+    Given Avery has challenged an expectation
+    When Avery stops instead of answering
+    Then nothing more is commissioned or asked
+    And the record keeps the standing challenge and the expectation as unproven
+    And the run is reported not done
 
   # --- DOCUMENT: a trail for every run that built ----------------------------------------
   @edd-article-alignment @slice-01 @document @fixture:07-trail-every-run-that-built

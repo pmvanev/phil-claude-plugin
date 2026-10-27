@@ -1,0 +1,39 @@
+{
+  "fixture_id": "EDD-SELFTEST-14",
+  "phase": "FINDINGS",
+  "intent": "add a --dry-run flag to the export command that prints what would be written without writing it",
+  "expectations": [
+    {
+      "text": "export --dry-run prints the file paths that would be written and writes nothing",
+      "classification": "checkable",
+      "engine": "nwave",
+      "human_verdict": "accept"
+    }
+  ],
+  "confirmed_findings": [
+    {
+      "id": "F1",
+      "kind": "soft",
+      "severity": "major",
+      "title": "dry-run takes the export lock before it checks the flag",
+      "mechanism": "export() acquires ./out/.lock at src/export.py:41 and only then branches on dry_run; when ./out is a symlink, the lock file is written into the link's target",
+      "evidence": "src/export.py:41-44 — lock acquired on line 41, `if dry_run:` on line 44; the captured run had no ./out at all, so it never exercised a symlinked ./out",
+      "span": "src/export.py:41",
+      "confidence": 0.7
+    }
+  ],
+  "runs": {
+    "a": {
+      "human_answer_at_FINDINGS": "none — the ask is left unanswered twice"
+    },
+    "b": {
+      "human_answer_at_FINDINGS": "waive",
+      "waiver_reason": "./out is never a symlink in our deploy layout; tracked for the next release"
+    }
+  },
+  "expected_guard": "a judge-confirmed major blocks done until FINDINGS clears it by fix or a named waiver, and the record keeps the waiver, its reason and a timestamp (D2)",
+  "expected_decision": {
+    "a": "BLOCK-DONE",
+    "b": "WAIVE-RECORDED"
+  }
+}

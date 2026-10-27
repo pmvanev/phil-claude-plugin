@@ -1,0 +1,18 @@
+{
+  "fixture_id": "EDD-SELFTEST-13",
+  "phase": "ADJUDICATE",
+  "intent": "add a --dry-run flag to the export command that prints what would be written without writing it",
+  "expectations": [
+    {"text": "export --dry-run prints the file paths that would be written and writes nothing", "classification": "checkable", "engine": "nwave"}
+  ],
+  "evidence_shown": "two records, ./out absent → two 'would write' lines, exit 0, ./out still absent",
+  "human_answer": "challenge",
+  "human_challenge": "Run it when ./out already exists and holds an older records-001.json — does dry-run leave that file untouched?",
+  "producer_result_after_challenge": {
+    "inputs": "two records; ./out/records-001.json present with mtime 2026-10-01 and content 'OLD'",
+    "reproduce_command": "myapp export --out ./out --dry-run; stat -c '%y' ./out/records-001.json; cat ./out/records-001.json",
+    "captured_verbatim": "would write ./out/records-001.json\nwould write ./out/records-002.json\n2026-10-01 09:00:00.000000000 +0000\nOLD"
+  },
+  "expected_guard": "a challenge commissions evidence for the named scenario and rebuilds nothing; it is not a reject (D7)",
+  "expected_decision": "CHALLENGE"
+}

@@ -6,8 +6,8 @@ qualitative, a gate that accepts narration — a pass count included — as evid
 evidence-producer that is secretly the builder, or a completion reported over a rejected expectation —
 each looks exactly like a smooth run. These fixtures feed the tool known situations and assert each
 produces the correct **decision outcome** (`CAPTURE-GAPS` / `CLASSIFY-CHECKABLE` / `OPT-OUT` /
-`GATE-RERUN-EXISTING` / `GATE-COMMISSION` / `REJECT-NARRATION` / `SPOT-CHECK` / `BLOCK-DONE` /
-`DOCUMENT-TRAIL`).
+`GATE-RERUN-EXISTING` / `GATE-COMMISSION` / `REJECT-NARRATION` / `SPOT-CHECK` / `REVIEW-THEN-ASK` /
+`CHALLENGE` / `BLOCK-DONE` / `WAIVE-RECORDED` / `REPORT-NOT-DONE` / `DOCUMENT-TRAIL`).
 
 **No driver runs these fixtures** (issue 42). They gate a change only when a human or the model drives
 them as described below. `tests/test_edd_skill.py` is what fails the build.
@@ -41,10 +41,15 @@ tests the loop and the gate around them.
 | `09-pass-count-is-narration/` | "evidence" is a test runner's pass count | AC2.3 (edd-article-alignment) | a pass count is narration (D6) | `REJECT-NARRATION` — re-commission the scenario itself |
 | `10-not-executable-in-the-loop/` | a rendered animation no agent can watch | AC2.4 (edd-article-alignment) | the article's third evidence category (D5) | `SPOT-CHECK` — commission nothing; developer spot-checks or stops; record says which |
 | `11-capture-coverage-size-risk/` | draft misses categories and packs two behaviours | AC1.1–AC1.4 (edd-article-alignment) | the article's capture guidance (D4) | `CAPTURE-GAPS` — gaps named, split proposed, risk-ordered, provenance labelled |
+| `12-review-before-verdict/` | evidence in; reviewer raises two findings, judge confirms one | AC3.1 (edd-article-alignment) | review before any verdict, curated input, judge per finding (D7) | `REVIEW-THEN-ASK` — confirmed finding and four questions in the ask |
+| `13-challenge-rebuilds-nothing/` | Avery asks for the scenario that would break it | AC3.2 (edd-article-alignment) | a challenge is not a reject (D7) | `CHALLENGE` — evidence for the named scenario; no rebuild |
+| `14-unwaived-major-blocks-done/` | expectation accepted; a confirmed major stands | AC3.3 (edd-article-alignment), KPI no-standing-blocker | a confirmed major blocks done until fixed or waived by name (D2) | `BLOCK-DONE` (run a); `WAIVE-RECORDED` (run b) — waiver, reason and timestamp recorded |
+| `15-stop-over-a-standing-challenge/` | Avery challenges, then stops | AC3.4 (edd-article-alignment) | stop ends the run at any round (D7) | `REPORT-NOT-DONE` — trail written with the standing challenge |
 
-`04`, `05`, `06`, `09` are the safety core: the bug classes most likely to ship silently — the builder
-grading its own homework, narration masquerading as proof, a green suite standing in for evidence,
-and a rejected expectation reported as done.
+`04`, `05`, `06`, `09`, `12`, `14` are the safety core: the bug classes most likely to ship silently —
+the builder grading its own homework, narration masquerading as proof, a green suite standing in for
+evidence, a rejected expectation reported as done, the builder's reasoning reaching the reviewer, and
+a confirmed defect waved through.
 
 ## Layout
 

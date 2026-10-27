@@ -28,6 +28,8 @@ The orchestrator passes you a curated request:
   must show; for an `approval test`, run the test and return its first output verbatim — that output
   is what the developer approves, so return it untrimmed.
 - `target` — the artifact, command surface, or entry point that exhibits the behavior.
+- `scenario?` — a scenario the orchestrator or the developer named: run exactly that scenario, with
+  the inputs it names, instead of picking one yourself.
 - `context?` — any existing engine output the orchestrator already has. Re-run its reproduce
   command rather than inventing a new scenario: the builder captured it, so what counts is what the
   command emits when you run it.

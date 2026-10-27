@@ -39,7 +39,7 @@ def test_a_producer_that_cannot_execute_goes_to_the_developer():
 def test_the_dispatch_names_the_agent_type_and_its_inputs():
     body = _flat()
     assert "`phil:edd-evidence-producer`" in body
-    assert "`expectation`, its `classification`, the `target` and any `context`" in body
+    assert "`expectation`, its `classification`, the `target`, any named `scenario` and any `context`" in body
 
 
 def test_the_evolution_summary_has_a_home_in_any_repo():
@@ -198,18 +198,18 @@ def test_a_test_suite_run_is_not_reusable_evidence():
 
 
 def test_a_retry_after_narration_names_the_scenario_and_drops_the_context():
-    assert "name the scenario to run and send no `context`" in _section("EVIDENCE")
+    assert "name the scenario to run as `scenario` and send no `context`" in _section("EVIDENCE")
 
 
 def test_every_repeat_failure_goes_to_the_developer_with_a_stop():
     assert "after a second red oracle on the same expectation" in _section("BUILD")
     gate = _section("EVIDENCE")
-    assert "after a second cannot-run for the same build" in gate
+    assert "after a second cannot-run for the same expectation" in gate
     assert "spot-check it by hand, or stop" in gate
 
 
 def test_a_second_unanswered_ask_ends_the_run_not_done():
-    assert "a second unanswered ask ends the run, reported not done" in _section("ADJUDICATE")
+    assert "two consecutive unanswered asks end the run, reported not done" in _section("Every ask")
 
 
 def test_the_developer_outranks_a_green_oracle():
@@ -219,3 +219,155 @@ def test_the_developer_outranks_a_green_oracle():
 def test_the_producer_has_an_approval_test_path():
     agent = " ".join(AGENT.read_text().split())
     assert "`approval test`" in agent
+
+
+# --- edd-article-alignment slice 02 (2026-10-27): an independent adversary attacks the work before any
+# verdict, and the developer can challenge evidence instead of only accepting or rejecting it.
+# Decisions D2 (adversarial-review row) and D7.
+
+ADVERSARIAL = REPO / "skills" / "adversarial-review" / "SKILL.md"
+
+
+def test_review_runs_after_evidence_and_before_any_verdict():
+    text = SKILL.read_text()
+    assert text.index("\n## EVIDENCE") < text.index("\n## REVIEW") < text.index("\n## ADJUDICATE")
+
+
+def test_review_composes_the_reviewer_and_judge_under_their_contract():
+    review = _section("REVIEW")
+    assert "`phil:adversarial-reviewer`" in review
+    assert "`phil:adversarial-verifier`" in review
+    assert "`{ target, intent, standards, oracle_result? }`" in review
+    assert "never the builder's reasoning" in review
+
+
+def test_a_confirmed_major_blocks_done_until_fixed_or_waived_by_name():
+    review = _section("REVIEW")
+    assert "A judge-confirmed `major` finding blocks done" in review
+    assert "waives it by name, with a reason the record keeps" in review
+
+
+def test_the_ask_carries_the_articles_four_challenge_questions():
+    adjudicate = _section("ADJUDICATE")
+    for question in ("Do the numbers add up?", "Were the edge cases actually run?",
+                     "What input would break it?", "What scenario is missing?"):
+        assert question in adjudicate, question
+
+
+def test_the_answer_set_is_accept_reject_challenge_stop():
+    adjudicate = _section("ADJUDICATE")
+    assert "`accept`, `reject`, `challenge` and `stop`" in adjudicate
+
+
+def test_a_challenge_gathers_evidence_and_rebuilds_nothing():
+    adjudicate = _section("ADJUDICATE")
+    assert "A challenge commissions evidence for the named scenario and rebuilds nothing" in adjudicate
+    assert "A challenge that adds an expectation sends it through CLASSIFY" in adjudicate
+
+
+def test_the_trail_records_challenges_and_waivers():
+    document = _section("DOCUMENT")
+    assert "challenge" in document
+    assert "waiver" in document
+
+
+def test_adversarial_review_names_edd_as_a_composing_host():
+    flat = " ".join(ADVERSARIAL.read_text().split())
+    assert "`phil:edd` composes it at its REVIEW step" in flat
+
+
+# --- slice 02 review findings (skill-reviewer, plugin-validator, fixture driver; 2026-10-27).
+# The first draft blocked done on a confirmed major with no way to clear it, routed on raw severity,
+# hid the review's label, let a stale oracle result and the builder's notes reach the reviewer, and
+# left free-text answers and several asks without a stop.
+
+COMMAND = REPO / "commands" / "edd.md"
+
+
+def test_build_captures_the_oracle_run_and_replaces_it_on_every_rebuild():
+    build = _section("BUILD")
+    assert "`oracle_result`" in build
+    assert "replaced on every rebuild" in build
+
+
+def test_a_rebuild_re_runs_review_and_a_waiver_lapses_when_its_span_changes():
+    body = _flat()
+    assert "A rebuild re-runs REVIEW on the whole target" in body
+    assert "A waiver stands only while its finding's span is unchanged" in body
+
+
+def test_review_routes_on_corrected_severity_and_shows_the_label():
+    review = _section("REVIEW")
+    assert "after the judge's `corrected_severity`" in review
+    assert "`overall_label`" in review
+    assert "`cannot-assess`" in review
+    assert "never as approval" in review
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/skills/adversarial-review/SKILL.md`" in review
+
+
+def test_review_target_excludes_the_engines_own_notes():
+    assert "excluding the engine's own logs, plans, notes and commit messages" in _section("REVIEW")
+
+
+def test_findings_step_clears_a_confirmed_major_by_fix_waive_or_stop_and_is_bounded():
+    text = SKILL.read_text()
+    assert text.index("\n## ADJUDICATE") < text.index("\n## FINDINGS") < text.index("\n## DOCUMENT")
+    findings = _section("FINDINGS")
+    assert "`fix`, `waive` and `stop`" in findings
+    assert "rows trusted to the tests" in findings
+    assert "After a second fix round on the same finding" in findings
+
+
+def test_every_adjudication_answer_names_its_cost_and_the_questions_sit_in_the_context_block():
+    adjudicate = _section("ADJUDICATE")
+    assert "Name each answer's cost" in adjudicate
+    assert "four challenge questions in the context block" in adjudicate
+
+
+def test_a_challenge_respects_spot_checks_and_reviews_an_added_expectation():
+    adjudicate = _section("ADJUDICATE")
+    assert "asks the developer to spot-check the named scenario" in adjudicate
+    assert "re-run REVIEW with the added expectation in its intent" in adjudicate
+
+
+def test_every_ask_offers_stop_and_two_consecutive_unanswered_asks_end_the_run():
+    asks = _section("Every ask")
+    assert "offers `stop`" in asks
+    assert "two consecutive unanswered asks end the run" in asks
+
+
+def test_only_a_row_with_a_concrete_oracle_can_be_opted_out():
+    assert "cannot name as a concrete assertion cannot be opted out" in _section("OPT-OUT")
+
+
+def test_the_command_describes_review_and_challenge():
+    description = COMMAND.read_text().split("\n")[1]
+    assert "review" in description
+    assert "challenge" in description
+
+
+# --- slice 02 second re-drive (2026-10-27): 14 of 15; fixture 13 ambiguous for want of a channel.
+
+def test_a_named_scenario_reaches_the_producer():
+    agent = " ".join(AGENT.read_text().split())
+    assert "`scenario?`" in agent
+    assert "run exactly that scenario" in agent
+
+
+def test_findings_starts_once_every_asked_expectation_is_accepted():
+    assert "Once every expectation put to the developer is accepted" in _section("FINDINGS")
+
+
+def test_every_second_cap_binds_from_the_second_on():
+    assert "the second and every one after it" in _section("Every ask")
+
+
+def test_a_recurring_finding_keeps_its_count_and_its_waiver():
+    findings = _section("FINDINGS")
+    assert "the same finding when its span names the same lines and its mechanism the same defect" in findings
+
+
+def test_the_developer_gives_the_qualitative_reason():
+    classify = _section("CLASSIFY")
+    assert "only when the developer gives a **concrete reason**" in classify
+    assert "gives or confirms" not in classify

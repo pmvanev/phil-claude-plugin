@@ -1,0 +1,58 @@
+{
+  "fixture_id": "EDD-SELFTEST-12",
+  "phase": "REVIEW",
+  "intent": "add a --dry-run flag to the export command that prints what would be written without writing it",
+  "expectations": [
+    {
+      "text": "export --dry-run prints the file paths that would be written and writes nothing",
+      "classification": "checkable",
+      "engine": "nwave"
+    }
+  ],
+  "human_opt_out": "no",
+  "engine_oracle_result": "nwave acceptance run: 3 scenarios, 3 passed (captured output attached by the engine)",
+  "builder_reasoning_available": "the crafter's notes: 'dry-run reuses the real writer with a no-op sink, so it is obviously safe'",
+  "producer_result": {
+    "inputs": "two exportable records; no ./out",
+    "reproduce_command": "myapp export --out ./out --dry-run; echo exit=$?; ls ./out 2>&1",
+    "captured_verbatim": "would write ./out/records-001.json\nwould write ./out/records-002.json\nexit=0\nls: cannot access './out': No such file or directory"
+  },
+  "reviewer_result": {
+    "overall_label": "sound-gate",
+    "verdict": "findings",
+    "findings": [
+      {
+        "id": "F1",
+        "kind": "soft",
+        "severity": "major",
+        "title": "dry-run takes the export lock before it checks the flag",
+        "mechanism": "export() acquires ./out/.lock at src/export.py:41 and only then branches on dry_run; when ./out is a symlink, the lock file is written into the link's target",
+        "evidence": "src/export.py:41-44 — lock acquired on line 41, `if dry_run:` on line 44; the captured run had no ./out at all, so it never exercised a symlinked ./out",
+        "span": "src/export.py:41",
+        "confidence": 0.7
+      },
+      {
+        "id": "F2",
+        "kind": "soft",
+        "severity": "nit",
+        "title": "'would write' could say how many files",
+        "mechanism": "the listing has no count line",
+        "evidence": "src/export.py:58",
+        "span": "src/export.py:58",
+        "confidence": 0.4
+      }
+    ]
+  },
+  "verifier_results": {
+    "F1": {
+      "verdict": "confirmed"
+    },
+    "F2": {
+      "verdict": "refuted",
+      "confidence": 0.8,
+      "basis": "the count is visible from the line count; not a defect"
+    }
+  },
+  "expected_guard": "review after evidence and before any verdict; curated input without builder reasoning; judge per finding; confirmed findings attached to their expectation; the four questions in the ask (D7)",
+  "expected_decision": "REVIEW-THEN-ASK"
+}

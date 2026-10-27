@@ -210,8 +210,9 @@ A host command or an ad-hoc Workflow script composes adversarial review by invok
   agent's advisory output is ever treated as an adjudication of "done" (invariant 2) — the host owns its
   gate.
 
-`phil:work`, `phil:edd` and `phil:refactor-tests` adopt this contract later, each as its own work, once a
-real second consumer exists; this skill edits none of them.
+`phil:edd` composes it at its REVIEW step, running the reviewer and then the judge per finding, and
+blocks done on a confirmed `major` (2026-10-27). `phil:work` and `phil:refactor-tests` adopt this
+contract later, each as its own work; this skill edits none of them.
 
 ---
 
