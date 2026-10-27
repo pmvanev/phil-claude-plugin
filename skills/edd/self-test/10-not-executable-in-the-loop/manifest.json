@@ -1,0 +1,19 @@
+{
+  "fixture_id": "EDD-SELFTEST-10",
+  "phase": "EVIDENCE",
+  "intent": "show a progress bar in the browser while a large export runs",
+  "expectations": [
+    {
+      "text": "the progress bar moves smoothly and never jumps backwards",
+      "classification": "not executable in the loop",
+      "blocker": "a rendered animation in a browser; no agent in this run can watch it",
+      "blocker_confirmed_by": "the developer, at CLASSIFY"
+    }
+  ],
+  "human_opt_out": "no",
+  "human_choice": "spot-check",
+  "human_observation": "Exported 40k rows in Firefox; the bar filled steadily and never went back.",
+  "expected_guard": "not executable in the loop only on a developer-confirmed blocker; commission nothing; the developer spot-checks by hand or stops; the spot-check ends in a verdict and the record says which (D5)",
+  "expected_decision": "SPOT-CHECK",
+  "human_verdict": "accept"
+}

@@ -1,0 +1,23 @@
+{
+  "fixture_id": "EDD-SELFTEST-08",
+  "phase": "EVIDENCE",
+  "intent": "add a --dry-run flag to the export command that prints what would be written without writing it",
+  "expectations": [
+    {
+      "text": "running export --dry-run prints the file paths that would be written and writes nothing",
+      "classification": "checkable",
+      "engine": "nwave",
+      "oracle": "an acceptance test asserts stdout lists the paths and the filesystem is unchanged"
+    }
+  ],
+  "human_opt_out": "no",
+  "builder_agent": "nwave DELIVER crafter",
+  "producer_agent": "phil:edd-evidence-producer",
+  "producer_result": {
+    "inputs": "a project with two exportable records; no files under ./out",
+    "reproduce_command": "myapp export --out ./out --dry-run; echo exit=$?; ls ./out 2>&1",
+    "captured_verbatim": "would write ./out/records-001.json\nwould write ./out/records-002.json\nexit=0\nls: cannot access './out': No such file or directory"
+  },
+  "expected_guard": "with no opt-out, a checkable expectation gets its scenario run — inputs plus verbatim output — from a non-builder (D1, D5, D6)",
+  "expected_decision": "GATE-COMMISSION"
+}

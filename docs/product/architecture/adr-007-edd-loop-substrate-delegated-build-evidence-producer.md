@@ -66,3 +66,13 @@ subagent; the human is the adjudicating oracle.**
 - Open (→ DELIVER): the exact invocation mechanism for the evidence-producer subagent (Agent vs
   Task) and for the engine build — settled empirically by the slice-01 walking skeleton, as
   ADR-005 settled its delegate-invocation question.
+
+## Amendment — 2026-10-27 (edd-article-alignment)
+
+The off-ramp is retired. CLASSIFY now picks the kind of evidence an expectation needs — checkable,
+qualitative, or not executable in the loop — and every expectation gets executed evidence from the
+non-builder producer unless the developer opts the checkable ones out, an opt-out the record names.
+The rest of this decision stands: the prose spine, the delegated build, the inherited oracle (the
+evidence shows the developer the scenario; it re-runs no check in the oracle's place), the structural
+separation of powers, and the human adjudicator. Source and rationale:
+`docs/feature/edd-article-alignment/feature-delta.md`, decisions D1, D5 and D6.

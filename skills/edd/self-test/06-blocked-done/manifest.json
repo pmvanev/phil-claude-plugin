@@ -9,7 +9,7 @@
       "reason": "'helpful / actionable' is a judgment about wording"
     }
   ],
-  "engine": "phil:work",
+  "engine": "nwave",
   "producer_result": {
     "reproduce_command": "myapp export --out /nonexistent/dir 2>&1; echo exit=$?",
     "captured_verbatim": "Error: EACCES\nexit=2"

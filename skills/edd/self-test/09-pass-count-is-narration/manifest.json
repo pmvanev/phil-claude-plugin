@@ -1,0 +1,19 @@
+{
+  "fixture_id": "EDD-SELFTEST-09",
+  "phase": "EVIDENCE",
+  "intent": "add a --dry-run flag to the export command that prints what would be written without writing it",
+  "expectations": [
+    {
+      "text": "export --dry-run writes nothing",
+      "classification": "checkable",
+      "engine": "nwave"
+    }
+  ],
+  "human_opt_out": "no",
+  "producer_result": {
+    "reproduce_command": "pytest tests/acceptance -q",
+    "captured_verbatim": "........ \n8 passed in 0.41s"
+  },
+  "expected_guard": "a pass count reports a verdict without showing the behaviour — narration for this gate (D6)",
+  "expected_decision": "REJECT-NARRATION"
+}

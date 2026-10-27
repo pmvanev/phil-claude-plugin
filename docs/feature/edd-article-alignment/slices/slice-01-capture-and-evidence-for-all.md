@@ -9,18 +9,21 @@ Stories 1 and 2 · Decisions D1, D4, D5, D6.
 - CAPTURE: coverage check (happy path, past edge cases, non-functional, must-not-happen), split any
   expectation of more than one breath, expand any too thin to test, order by risk; composed
   suggestions follow `rules/writing.md` and are labelled composed.
-- The opt-out question at capture, asked once, for checkable expectations only.
+- The opt-out question after classification, asked once, for checkable expectations only; an
+  expectation an approval test pins cannot be opted out.
 - CLASSIFY rewritten to pick the evidence kind: checkable, qualitative, not executable in the loop.
 - Evidence for checkable expectations: scenario inputs plus verbatim output from the non-builder
   producer; "all tests passed" alone is narration.
 - Retire the off-ramp exit. Fixtures 01 and 02 rewritten; new fixtures for the opt-out and for
   not-executable-in-the-loop.
+- The trail for every run that built (AC5.1), pulled forward from slice 04: retiring the off-ramp
+  leaves an opt-out run with no other rule. Fixture 07 rewritten. The prose review stays in slice 04.
 - `tests/test_edd_skill.py` assertions for the opt-out, the coverage categories and the
   `rules/writing.md` citation, each watched failing first.
 
 ## OUT of scope
-- Adversarial review and challenge (slice 02); stabilize and code review (slice 03); prose review
-  and the always-written trail (slice 04).
+- Adversarial review and challenge (slice 02); stabilize and code review (slice 03); the prose
+  review of composed documents (slice 04).
 
 ## Learning hypothesis
 - **Disproves** "evidence for checkable expectations is worth its cost" if, on a real intent, the

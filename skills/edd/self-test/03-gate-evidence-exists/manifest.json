@@ -1,6 +1,6 @@
 {
   "fixture_id": "EDD-SELFTEST-03",
-  "phase": "EVIDENCE-GATE",
+  "phase": "EVIDENCE",
   "intent": "make the onboarding CLI wizard feel welcoming to a first-time user",
   "expectations": [
     {
@@ -13,6 +13,10 @@
   "engine_evidence_present": true,
   "engine_evidence": "self-test/03-gate-evidence-exists/existing-wizard-transcript.txt",
   "engine_evidence_note": "nwave DELIVER already produced a real end-to-end run transcript of the wizard as its demo/e2e step",
-  "expected_guard": "scaled gate reuses evidence the engine already produced (DDD3) — no new commission",
-  "expected_decision": "GATE-POINT-EXISTING"
+  "expected_guard": "evidence reuse: the engine's existing artifact is re-run by the non-builder producer through its reproduce command — no new scenario, and no builder-produced evidence reaches Avery (DDD3, D6)",
+  "expected_decision": "GATE-RERUN-EXISTING",
+  "producer_result": {
+    "reproduce_command": "myapp init  # on a clean profile",
+    "note": "re-run of the engine transcript's own reproduce command; output matches the transcript"
+  }
 }

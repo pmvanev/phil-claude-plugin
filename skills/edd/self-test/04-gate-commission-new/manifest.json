@@ -1,6 +1,6 @@
 {
   "fixture_id": "EDD-SELFTEST-04",
-  "phase": "EVIDENCE-GATE",
+  "phase": "EVIDENCE",
   "intent": "make the export command's failure messages helpful when the output path is bad",
   "expectations": [
     {
@@ -9,7 +9,7 @@
       "reason": "'helpful / actionable' is a judgment about wording that no cheap assertion captures"
     }
   ],
-  "engine": "phil:work",
+  "engine": "nwave",
   "engine_evidence_present": false,
   "builder_agent": "the crafter/engine that changed the error-handling code",
   "producer_agent": "agents/edd-evidence-producer (independent; NOT the builder)",

@@ -6,14 +6,14 @@
 Story 5 · Decisions D2 (red-team-prose row), D9, D11.
 
 ## IN scope
-- The trail and evolution summary written for every run that built, opt-out runs included; nothing
-  for a run that stopped at capture. Records opt-outs, challenges, waivers and verdicts.
+- The trail for every run that built landed in slice 01; this slice adds challenges and waivers to
+  what it records.
 - Provenance per field (`you wrote` vs composed), as `phil:groom-ask` labels them.
 - `phil:red-team-prose` over every composed document before it is written; auto-applicable fixes to
   composed words only; a `[fitness]` finding blocks done until fixed or waived.
 - `evidence/` byte-identical to capture.
-- Fixture 07 rewritten: trail on an opt-out run, none on a capture-only stop. New fixtures: evidence
-  hash unchanged after prose review; a `you wrote` field untouched by an applied fix.
+- New fixtures: evidence hash unchanged after prose review; a `you wrote` field untouched by an
+  applied fix.
 - `tests/test_edd_skill.py` fails without the `rules/writing.md` and
   `rules/technical-communication.md` citations, watched red first.
 

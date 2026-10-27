@@ -1,6 +1,6 @@
 {
   "fixture_id": "EDD-SELFTEST-05",
-  "phase": "EVIDENCE-GATE",
+  "phase": "EVIDENCE",
   "intent": "make the export command's failure messages helpful when the output path is bad",
   "expectations": [
     {
@@ -9,7 +9,7 @@
       "reason": "'helpful / actionable' is a judgment about wording"
     }
   ],
-  "engine": "phil:work",
+  "engine": "nwave",
   "offered_evidence": "self-test/05-reject-narration/narrated-claim.txt",
   "offered_evidence_kind": "narration — a description of what the message would say, with no captured run and no reproduce command",
   "expected_guard": "evidence must be EXECUTED, never narrated (D2/DDD5)",
