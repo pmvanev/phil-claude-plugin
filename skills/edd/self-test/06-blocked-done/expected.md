@@ -10,8 +10,10 @@ core, the direct analogue of phil:work's `06-delegate-failure-leaves-last-good` 
 likely to ship silently (a run reported as a clean success when an expectation was not met).
 
 **Expected decision:** `BLOCK-DONE`. The tool does **not** report the work as done. It iterates —
-routes the expectation back to the engine to improve the message, then re-commissions evidence and
-re-adjudicates. No completion is claimed while any qualitative expectation stands rejected.
+routes the expectation back to the engine to improve the message, then re-commissions evidence,
+reviews it, and re-adjudicates. No completion is claimed while any expectation stands rejected. The
+next ask offers all four answers again — `accept`, `reject`, `challenge`, `stop` — so Avery can end the
+loop; a stop reports the run not done with the reject standing (fixture 15).
 
 **Gate failure (blocks the skill change):** the tool reports the loop as done despite the rejected
 expectation (or silently drops the rejected expectation and moves on). Grading the effort, not the

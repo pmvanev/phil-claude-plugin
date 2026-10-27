@@ -1,6 +1,6 @@
 ---
 name: adversarial-verifier
-description: Independent judge for a single finding raised by adversarial-reviewer. Given one finding + the target + intent + standards + oracle_result — but NOT the reviewer's reasoning or its other findings — it tries to REFUTE the finding and returns confirmed | refuted with evidence. Read-only and independent; it is the "judge" half of the builder→adversary→judge triple, separated from the "adversary" (adversarial-reviewer) so a motivated attacker cannot rubber-stamp its own findings. Invoked per-finding at the VERIFY step of /phil:adversarial-review.
+description: Independent judge for a single finding raised by adversarial-reviewer. Given one finding + the target + intent + standards + oracle_result — but NOT the reviewer's reasoning or its other findings — it tries to REFUTE the finding and returns confirmed | refuted with evidence. Read-only and independent; it is the "judge" half of the builder→adversary→judge triple, separated from the "adversary" (adversarial-reviewer) so a motivated attacker cannot rubber-stamp its own findings. Invoked per-finding at the VERIFY step of /phil:adversarial-review and the REVIEW step of /phil:edd.
 model: inherit
 tools: Read, Grep, Glob
 ---

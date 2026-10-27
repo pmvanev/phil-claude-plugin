@@ -1,0 +1,31 @@
+{
+  "fixture_id": "EDD-SELFTEST-15",
+  "phase": "ADJUDICATE",
+  "intent": "make the export command's failure messages helpful when the output path is bad",
+  "slug": "export-failure-messages-helpful",
+  "expectations": [
+    {
+      "text": "when the output path does not exist, the error tells the user what was wrong and what to do",
+      "classification": "qualitative",
+      "reason": "'helpful / actionable' is a judgment about wording"
+    }
+  ],
+  "engine": "nwave",
+  "rounds": [
+    {
+      "answer": "challenge",
+      "challenge": "show it for a path whose parent exists but is read-only",
+      "producer_result": {
+        "inputs": "an output path under a read-only parent directory",
+        "reproduce_command": "mkdir -p ro && chmod a-w ro && myapp export --out ro/sub 2>&1; echo exit=$?",
+        "captured_verbatim": "Error: cannot create 'ro/sub' — permission denied.\nexit=2"
+      }
+    },
+    {
+      "answer": "stop",
+      "note": "Avery has seen enough for today"
+    }
+  ],
+  "expected_guard": "stop ends the run at any round; standing challenges are recorded; the trail is written; the run is reported not done (D7)",
+  "expected_decision": "REPORT-NOT-DONE"
+}
