@@ -1,0 +1,23 @@
+{
+  "fixture_id": "EDD-SELFTEST-17",
+  "phase": "STABILIZE",
+  "intent": "make the export command's failure messages helpful when the output path is bad",
+  "expectations": [
+    {
+      "text": "when the output path does not exist, the error tells the user what was wrong and what to do",
+      "classification": "qualitative",
+      "reason": "'helpful / actionable' is a judgment about wording",
+      "human_verdict": "accept"
+    }
+  ],
+  "engine": "nwave",
+  "accepted_evidence": {
+    "reproduce_command": "myapp export --out /nonexistent/dir 2>&1; echo exit=$?",
+    "captured_verbatim": "Error: cannot write to '/nonexistent/dir' — the directory does not exist.\n  Try: mkdir -p /nonexistent/dir, or pass an existing --out path.\nexit=2"
+  },
+  "engine_pin_report": {
+    "when the output path does not exist, the error tells the user what was wrong and what to do": "tests/approval/test_export_errors.py::test_missing_out_dir (approved: test_missing_out_dir.approved.txt)"
+  },
+  "expected_guard": "an accepted qualitative output is pinned by an approval test whose approved output is the evidence the developer accepted, verbatim (D8)",
+  "expected_decision": "PIN-APPROVAL"
+}

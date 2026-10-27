@@ -19,7 +19,7 @@
 # Decision outcomes the loop must produce:
 #   CAPTURE-GAPS · CLASSIFY-CHECKABLE · OPT-OUT · GATE-RERUN-EXISTING · GATE-COMMISSION ·
 #   REJECT-NARRATION · SPOT-CHECK · REVIEW-THEN-ASK · CHALLENGE · BLOCK-DONE · WAIVE-RECORDED ·
-#   REPORT-NOT-DONE · DOCUMENT-TRAIL
+#   REPORT-NOT-DONE · PIN-APPROVAL · REVIEW-CODE-GATE · UX-GATE · DOCUMENT-TRAIL
 
 Feature: Prove every expectation is met with executed evidence
   As Avery, an expectation owner delegating build work to AI agents,
@@ -153,6 +153,35 @@ Feature: Prove every expectation is met with executed evidence
     Then nothing more is commissioned or asked
     And the record keeps the standing challenge and the expectation as unproven
     And the run is reported not done
+
+  # --- STABILIZE: pin to the testing standards, review and repair with this plugin's skills -
+  @edd-article-alignment @slice-03 @stabilize @error @fixture:16-unpinned-expectation-blocks-done
+  Scenario: An accepted expectation no test pins blocks done until the engine pins it
+    Given two accepted expectations and an engine that pins only one of them
+    When the tool stabilizes the work
+    Then the unpinned expectation blocks done
+    And fixing it means the engine writes the pinning test, without a rebuild or a new round of verdicts
+
+  @edd-article-alignment @slice-03 @stabilize @fixture:17-approval-test-from-accepted-evidence
+  Scenario: An accepted qualitative output is pinned by an approval test of exactly what Avery accepted
+    Given Avery accepted a qualitative expectation on a captured output
+    When the tool stabilizes the work
+    Then the engine pins it with an approval test whose approved output is that evidence, word for word
+    And Avery's accept counts as the first approval
+
+  @edd-article-alignment @slice-03 @stabilize @error @fixture:18-review-code-priority-1-blocks
+  Scenario: The plugin's code review blocks on serious findings and hands the rest to their owners
+    Given the plugin's code review finds a security defect, a weak pinning test, and two smaller smells
+    When the tool stabilizes the work
+    Then the security defect and the weak pinning test block done until fixed or waived
+    And the smaller smells are offered to the plugin skill that owns each, which runs under its own gate
+
+  @edd-article-alignment @slice-03 @stabilize @fixture:19-ui-change-runs-ux-review
+  Scenario: A change to the UI is audited for usability and accessibility
+    Given the change touches UI files
+    When the tool stabilizes the work
+    Then the plugin's UX audit runs over them
+    And a must-fix finding blocks done while a consider finding advises
 
   # --- DOCUMENT: a trail for every run that built ----------------------------------------
   @edd-article-alignment @slice-01 @document @fixture:07-trail-every-run-that-built

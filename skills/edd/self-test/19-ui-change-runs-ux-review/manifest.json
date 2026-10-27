@@ -1,0 +1,25 @@
+{
+  "fixture_id": "EDD-SELFTEST-19",
+  "phase": "STABILIZE",
+  "intent": "show a progress bar in the browser while a large export runs",
+  "changed_files": [
+    "web/src/ExportProgress.tsx",
+    "web/src/ExportProgress.css"
+  ],
+  "ux_review_findings": [
+    {
+      "severity": "must-fix",
+      "summary": "the progress bar has no accessible name and no aria-valuenow; a screen reader announces nothing",
+      "file": "web/src/ExportProgress.tsx",
+      "lines": "12-20"
+    },
+    {
+      "severity": "consider",
+      "summary": "a percentage label beside the bar would help low-vision users",
+      "file": "web/src/ExportProgress.tsx",
+      "lines": "22"
+    }
+  ],
+  "expected_guard": "a change that touches UI runs phil:ux-review; a must-fix blocks done via FINDINGS; a consider advises (D2)",
+  "expected_decision": "UX-GATE"
+}

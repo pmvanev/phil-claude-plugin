@@ -1,0 +1,61 @@
+{
+  "fixture_id": "EDD-SELFTEST-18",
+  "phase": "STABILIZE",
+  "intent": "add a --dry-run flag to the export command that prints what would be written without writing it",
+  "changed_files": [
+    "src/export.py",
+    "tests/acceptance/test_export.py"
+  ],
+  "review_code_backlog": [
+    {
+      "id": "R001",
+      "priority": 1,
+      "smell": "CWE-22",
+      "file": "src/export.py",
+      "lines": "40-44",
+      "route": "report only",
+      "summary": "--out joined to a record name without normalisation: a record named '../../etc/x' escapes the output directory"
+    },
+    {
+      "id": "R002",
+      "priority": 3,
+      "smell": "Mysterious Name",
+      "file": "src/export.py",
+      "lines": "58-60",
+      "route": "/phil:refactor",
+      "summary": "`d` holds the dry-run flag"
+    },
+    {
+      "id": "R003",
+      "priority": 5,
+      "smell": "Redundant comment",
+      "file": "src/export.py",
+      "lines": "61",
+      "route": "/phil:refactor",
+      "summary": "comment restates the next line"
+    },
+    {
+      "id": "R004",
+      "priority": 6,
+      "smell": "Eager Test",
+      "file": "tests/acceptance/test_export.py",
+      "lines": "10-48",
+      "route": "report only",
+      "summary": "one test asserts dry-run, real run and error path"
+    }
+  ],
+  "pinning_tests": [
+    "tests/acceptance/test_export.py::test_dry_run_lists_paths"
+  ],
+  "human_answers": {
+    "FINDINGS R001": "waive",
+    "R001 waiver reason": "record names are generated internally and never contain '/'; tracked as a follow-up",
+    "FINDINGS R004": "fix",
+    "REPAIR": {
+      "phil:refactor (R002)": "run",
+      "phil:clean-comments (R003)": "run"
+    }
+  },
+  "expected_guard": "phil:review-code runs once per changed file; Priority 1 (not Advisory) and Priority 6 on a pinning test's file block done via FINDINGS; after FINDINGS, advisories are grouped by smell and offered to their owners (D2, D8)",
+  "expected_decision": "REVIEW-CODE-GATE"
+}

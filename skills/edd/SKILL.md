@@ -1,6 +1,6 @@
 ---
 name: edd
-description: Skill bundle for phil:edd command — Expectation-Driven Development, after Andrea Laforgia's protocol. Captures intent as expectations checked for coverage, size and risk; delegates the build to nwave or phil:work; gathers executed evidence for every expectation, from someone other than the builder, unless the developer trusts the tests for the checkable ones or spot-checks one no agent can run; has an independent adversary review the work; and puts evidence and findings to the developer to accept, reject, challenge or stop.
+description: Skill bundle for phil:edd command — Expectation-Driven Development, after Andrea Laforgia's protocol. Captures intent as expectations checked for coverage, size and risk; delegates the build to nwave or phil:work; gathers executed evidence for every expectation, from someone other than the builder, unless the developer trusts the tests for the checkable ones or spot-checks one no agent can run; has an independent adversary review the work; puts evidence and findings to the developer to accept, reject, challenge or stop; then pins every accepted expectation with a test and reviews and repairs the code with this plugin's own skills.
 ---
 
 # EDD — Expectation-Driven Development
@@ -13,17 +13,17 @@ holds, and put that evidence to the developer, who decides. The protocol's sourc
 This is the **expectation-driven sibling to `phil:work`**. `phil:work` is the general contractor for
 invisible work (preserve behavior + hit a checkable goal); this is the contractor for
 expectation-driven work: **frame the expectations → delegate the build to the fitting engine →
-gather executed evidence for each expectation → the developer adjudicates → leave a trail.**
-
-The standards to work under are `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`, and
-`${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`.
+gather executed evidence for each expectation → the developer adjudicates → pin, review and repair to
+this plugin's standards → leave a trail.** Each step reads the standard it applies, where it applies
+it.
 
 > **The full flow.** CAPTURE (intent → expectations, checked for coverage, size and risk) → CLASSIFY
 > (which kind of evidence) → OPT-OUT (trust the tests for the checkable ones this run?) → BUILD
 > (delegate to one engine, inherit its oracle) → EVIDENCE (executed, producer ≠ builder, for every
 > expectation not opted out) → REVIEW (an independent adversary, its findings judged) → ADJUDICATE
-> (the developer accepts, rejects, challenges or stops) → FINDINGS (clear each confirmed major) →
-> DOCUMENT (every run that built).
+> (the developer accepts, rejects, challenges or stops) → STABILIZE (pin each accepted expectation;
+> review the code) → FINDINGS (clear each blocking finding) → REPAIR (the advisories, by their owners)
+> → DOCUMENT (every run that built).
 
 ---
 
@@ -44,7 +44,7 @@ The standards to work under are `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAU
 ## Every ask
 
 Every question this skill puts to the developer — CAPTURE's confirmation, OPT-OUT, EVIDENCE's
-spot-check, ADJUDICATE, FINDINGS — follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.
+spot-check, ADJUDICATE, FINDINGS, REPAIR's offer — follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.
 Load it before the first ask. On top of that standard:
 
 - **Every ask offers `stop`.** A stop before BUILD ends the run and writes nothing; a stop after BUILD
@@ -196,6 +196,7 @@ out, whatever the answer:
 
 ## BUILD — delegate to one engine, inherit its oracle
 
+Record the commit the build starts from as `base`: STABILIZE reviews every file changed since it.
 Delegate the actual build to the fitting engine and let its native oracle prove the checkable
 expectations:
 
@@ -207,17 +208,19 @@ two runs, one per engine, with the developer's agreement; sequencing across engi
 
 Run no preservation or acceptance check of your own — that is the engine's job, and its verdict
 stands. Capture its run verbatim as `oracle_result` — the output, not the engine's summary of it —
-replaced on every rebuild; when the engine returns no oracle run, record that none exists. A red
+replaced on every rebuild and every pin commit; when the engine returns no oracle run, record that
+none exists. A red
 oracle blocks done: route the failing expectation back to the engine, as a reject would — and after
 a second red oracle on the same expectation, put the failure to the developer, who sends it back
 again or stops. An approval test still awaiting its first approval is not red: its first output goes
 to the developer at EVIDENCE. Record which engine built. The evidence below adds what the oracle
 cannot give the developer: the scenario's real inputs and output in front of their eyes.
 
-A rebuild re-runs REVIEW on the whole target — a reject, a red oracle or a FINDINGS fix sends the work
-back to the engine — and re-asks every expectation whose evidence the change touched: re-gather that
+A rebuild re-runs REVIEW on the whole target — a reject, a red oracle, or a FINDINGS fix that changes
+more than tests sends the work back to the engine — and re-asks every expectation whose evidence the change touched: re-gather that
 evidence, review, and put it to the developer again. An accept on evidence the rebuild invalidated no
-longer stands. A waiver stands only while its finding's span is unchanged.
+longer stands. Once the developer has adjudicated again, the run re-enters STABILIZE over everything
+changed since `base`. A waiver stands only while its finding's span is unchanged.
 
 ## EVIDENCE — executed evidence for every expectation not opted out
 
@@ -232,7 +235,8 @@ dispatch contract.
 Before any verdict, an independent adversary attacks the built work, and an independent judge
 confirms or refutes each of its findings. Read `${CLAUDE_PLUGIN_ROOT}/skills/edd/references/review.md`
 before dispatching anything: it holds the curated input, the two dispatches, how to route on the
-typed verdict, and where each confirmed finding goes. A judge-confirmed `major` blocks done until
+typed verdict, and where each confirmed finding goes. The reviewer never sees the builder's reasoning,
+and each finding gets its own fresh judge. A judge-confirmed `major` blocks done until
 FINDINGS clears it. The review advises; the developer decides every verdict.
 
 ## ADJUDICATE — the human decides
@@ -282,23 +286,65 @@ what they meant.
 A reject or challenge re-asks only on new evidence. After a second reject or a second challenge on the
 same expectation, say so in the next ask and recommend stop; the developer may go on.
 
-## FINDINGS — clear each confirmed major
+## STABILIZE — pin every accepted expectation, then review the code
+
+The article's stabilize step: turn what the developer accepted into the regression alarm, and hold the
+built code to this plugin's standards rather than the engine's. Read
+`${CLAUDE_PLUGIN_ROOT}/rules/testing.md` and `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md` first.
+Read `${CLAUDE_PLUGIN_ROOT}/skills/edd/references/stabilize.md` before pinning anything: it holds the
+pin dispatch and its checks, and how to run each review.
+
+- **Pin.** This skill writes no test itself; the engine that built pins every accepted expectation, and
+  every row trusted to the tests, with a test. An accepted qualitative output, or one too large to
+  assert, is pinned by an approval test whose approved output is the evidence the developer accepted,
+  verbatim. An accepted expectation no test pins blocks done.
+- **Review the code.** `phil:review-code` runs over every file changed since `base`, pinning tests
+  included. A Priority 1 finding, and a Priority 6 finding on a pinning test, block done.
+- **Audit the UI.** When the change touches UI files, `phil:ux-review` runs over them; a `must-fix`
+  blocks done.
+
+Pinning tests and running a repair are not rebuilds: neither changes what the code does, and each runs
+under the suite.
+
+## FINDINGS — clear each blocking finding
 
 Once every expectation put to the developer is accepted — rows trusted to the tests are never put —
-put each unwaived confirmed `major` to the developer — those attached to an expectation, those on
-rows trusted to the tests, and those bearing on none — with its span, mechanism and evidence in the
-context block. Three answers, `fix`, `waive` and `stop`, each with its cost:
+and STABILIZE has run, put each unwaived blocking finding to the developer, with its span, mechanism
+and evidence in the context block:
+
+- a judge-confirmed `major` from REVIEW — attached to an expectation, on a row trusted to the tests,
+  or bearing on none;
+- a Priority 1 finding, or a Priority 6 finding on a pinning test, from `phil:review-code`;
+- a `must-fix` from `phil:ux-review`;
+- an accepted expectation, or a row trusted to the tests, that no test pins.
+
+Three answers, `fix`, `waive` and `stop`, each with its cost:
 
 - **fix** — route the finding to the engine and follow BUILD's rebuild rule; costs a rebuild, a
-  re-review and a re-ask of every expectation the change touched.
+  re-review, a re-ask of every expectation the change touched, and STABILIZE again. A fix whose change
+  touches only test and approved-output files is not a rebuild — an unpinned expectation's pin, or a
+  weak pinning test split — and STABILIZE re-checks the pins and re-reviews the changed tests. A finding from `phil:review-code` or `phil:ux-review` never clears on the
+  engine's word: STABILIZE's re-run clears it only when the re-run does not reproduce it.
 - **waive** — take the developer's reason; record the finding, the reason and a timestamp. Done is no
   longer blocked by it, while its span is unchanged.
 - **stop** — end the run not done, with the finding recorded as standing.
 
+An accepted expectation spot-checked by hand, which no test can pin here, comes to FINDINGS too, with
+only `waive` and `stop`: no fix can pin it, so the developer decides, by name, to finish without one.
+
 Treat a finding in a later review as the same finding when its span names the same lines and its
-mechanism the same defect: it keeps its fix-round count, and a waived one stays waived. After a
-second fix round on the same finding, offer only `waive` and `stop`: the engine has failed it twice. List the confirmed `minor` and `nit` findings after the majors; the developer may send any of
-them to the engine as a `fix`, and the record keeps each one either way.
+mechanism the same defect: it keeps its fix-round count, and a waived one stays waived. After a second
+fix round on the same finding, offer only `waive` and `stop`: the engine has failed it twice. List the
+confirmed `minor` and `nit` findings from REVIEW after the blockers; the developer may send any of them
+to the engine as a `fix`, and the record keeps each one either way.
+
+## REPAIR — the advisories, by the skills that own them
+
+Once FINDINGS has cleared every blocker, offer the advisory findings from `phil:review-code` to the
+plugin skills that own them, so line numbers stop moving only after every blocker is settled. Read
+`${CLAUDE_PLUGIN_ROOT}/skills/edd/references/repair.md` before offering anything: it holds the grouping,
+each skill's argument and gate, and the clean-tree rule. Each repair runs only on the developer's `run`,
+and the record keeps every repair offered, run or skipped.
 
 ## DOCUMENT — living documentation (every run that built)
 
@@ -313,11 +359,14 @@ docs/edd/<slug>/
                     #   + timestamp + evidence reference; each challenge and the evidence it brought;
                     # the review's label, verdict and raised/confirmed/refuted counts; each confirmed finding,
                     #   and each waiver with its reason and timestamp
+  stabilize.md      # per accepted expectation and trusted row, the pinning test that pins it, or `pinned by nothing`
+                    #   and why; every phil:review-code and phil:ux-review finding, blocking or advisory, every
+                    #   `consider` included; each repair offered, run or skipped
 ```
 
 and a durable summary at `docs/evolution/<date>-<slug>.md`, creating `docs/evolution/` if absent.
 Report a summary naming, per expectation, the verdict and the evidence it rested on — or that it was
-trusted to the tests.
+trusted to the tests — and the test that now pins it.
 
 A run that stops before BUILD writes **none** of this.
 
@@ -343,6 +392,12 @@ A run that stops before BUILD writes **none** of this.
   fix round and a second consecutive unanswered ask each go to the developer or end the run; every ask
   offers `stop`; a reject or challenge re-asks only on new evidence. Nothing re-commissions or rebuilds
   forever.
+- **Pinned, reviewed and repaired to this plugin's standards.** Every accepted expectation is pinned
+  by a test the engine writes to `rules/testing.md`, or blocks done — a spot-checked one until the
+  developer waives it by name; `phil:review-code`'s Priority 1
+  findings, its Priority 6 findings on pinning tests, and `phil:ux-review`'s `must-fix` findings block
+  done until FINDINGS clears them, a fix only on a re-run that does not reproduce the finding. Repairs
+  run after every blocker clears, never over a pinning test with a skill that changes what it asserts.
 - **Keep the developer's words.** A `you wrote` line is never edited.
 - **Report honestly.** Grade the final state, not the effort. Never claim done over an unmet or
   unproven expectation.
@@ -357,7 +412,9 @@ a non-builder (04), narration rejection (05), blocked-done (06), the trail for e
 (07), scenario evidence for a checkable expectation (08), a pass count rejected as narration (09), an
 expectation not executable in the loop (10), capture's coverage, size and risk checks (11), the
 review before any verdict (12), a challenge that rebuilds nothing (13), an unwaived major finding
-blocking done (14), and a stop over a standing challenge (15).
+blocking done (14), a stop over a standing challenge (15), an unpinned expectation blocking done
+(16), an approval test pinned to the accepted evidence (17), a Priority 1 review finding blocking
+done while advisories go to their owners (18), and a UI change audited by `phil:ux-review` (19).
 Whenever this skill, its `references/`, `commands/edd.md`, `agents/edd-evidence-producer.md`,
 `agents/adversarial-reviewer.md` or `agents/adversarial-verifier.md` changes, drive the
 fixtures per `self-test/README.md` and confirm each produces its `expected.md` decision — every edit

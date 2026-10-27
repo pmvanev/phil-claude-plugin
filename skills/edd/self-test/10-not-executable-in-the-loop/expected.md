@@ -14,7 +14,9 @@ The article's third category of evidence.
   tells the developer the blocker, and asks them to spot-check it by hand or stop.
 - The developer spot-checks; the record keeps their observation in their own words, labelled
   `you wrote`.
-- ADJUDICATE asks for a verdict on what they observed: here, `accept`. Had they seen the bar jump
+- ADJUDICATE asks for a verdict on what they observed: here, `accept`. No test can pin a hand
+  spot-check, so STABILIZE records it `pinned by nothing` and FINDINGS asks Avery to `waive` or `stop`
+  — a fix is not offered. Had they seen the bar jump
   back, a `reject` would block done; had they stopped, the run would be reported not done with the
   expectation unproven.
 

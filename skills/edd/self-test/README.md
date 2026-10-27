@@ -7,7 +7,8 @@ evidence-producer that is secretly the builder, or a completion reported over a 
 each looks exactly like a smooth run. These fixtures feed the tool known situations and assert each
 produces the correct **decision outcome** (`CAPTURE-GAPS` / `CLASSIFY-CHECKABLE` / `OPT-OUT` /
 `GATE-RERUN-EXISTING` / `GATE-COMMISSION` / `REJECT-NARRATION` / `SPOT-CHECK` / `REVIEW-THEN-ASK` /
-`CHALLENGE` / `BLOCK-DONE` / `WAIVE-RECORDED` / `REPORT-NOT-DONE` / `DOCUMENT-TRAIL`).
+`CHALLENGE` / `BLOCK-DONE` / `WAIVE-RECORDED` / `REPORT-NOT-DONE` / `PIN-APPROVAL` /
+`REVIEW-CODE-GATE` / `UX-GATE` / `DOCUMENT-TRAIL`).
 
 **No driver runs these fixtures** (issue 42). They gate a change only when a human or the model drives
 them as described below. `tests/test_edd_skill.py` is what fails the build.
@@ -45,6 +46,10 @@ tests the loop and the gate around them.
 | `13-challenge-rebuilds-nothing/` | Avery asks for the scenario that would break it | AC3.2 (edd-article-alignment) | a challenge is not a reject (D7) | `CHALLENGE` — evidence for the named scenario; no rebuild |
 | `14-unwaived-major-blocks-done/` | expectation accepted; a confirmed major stands | AC3.3 (edd-article-alignment), KPI no-standing-blocker | a confirmed major blocks done until fixed or waived by name (D2) | `BLOCK-DONE` (run a); `WAIVE-RECORDED` (run b) — waiver, reason and timestamp recorded |
 | `15-stop-over-a-standing-challenge/` | Avery challenges, then stops | AC3.4 (edd-article-alignment) | stop ends the run at any round (D7) | `REPORT-NOT-DONE` — trail written with the standing challenge |
+| `16-unpinned-expectation-blocks-done/` | the engine pins one of two accepted expectations | AC4.1 (edd-article-alignment), KPI pinned-expectations | every accepted expectation is pinned (D8) | `BLOCK-DONE` — unpinned goes to FINDINGS; its fix is the pin, not a rebuild |
+| `17-approval-test-from-accepted-evidence/` | a qualitative expectation was accepted | AC4.2 (edd-article-alignment) | the accepted evidence becomes the approved output (D8) | `PIN-APPROVAL` — approval test, approved output verbatim |
+| `18-review-code-priority-1-blocks/` | review-code writes a Priority 1, a Priority 6 on a pinning test, and two advisories | AC4.3, AC4.4 (edd-article-alignment) | serious findings block; advisories go to their owners (D2, D8) | `REVIEW-CODE-GATE` — two blockers to FINDINGS, repairs offered by owner |
+| `19-ui-change-runs-ux-review/` | the change touches UI files | AC4.5 (edd-article-alignment) | `phil:ux-review` on a UI change; `must-fix` blocks (D2) | `UX-GATE` — must-fix to FINDINGS, consider advises |
 
 `04`, `05`, `06`, `09`, `12`, `14` are the safety core: the bug classes most likely to ship silently —
 the builder grading its own homework, narration masquerading as proof, a green suite standing in for
