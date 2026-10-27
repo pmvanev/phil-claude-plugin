@@ -11,6 +11,7 @@ Found 2026-10-13, all predating that day's hardening:
   agent's contract expects.
 - "The plugin's evolution convention" names a directory a user's repository does not have.
 """
+import re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -18,7 +19,11 @@ SKILL = REPO / "skills" / "edd" / "SKILL.md"
 
 
 def _flat():
-    return " ".join(SKILL.read_text().split())
+    """The skill and every `skills/edd/references/` file it tells the executor to read, flattened."""
+    text = SKILL.read_text()
+    for name in dict.fromkeys(re.findall(r"skills/edd/references/([\w-]+\.md)", text)):
+        text += "\n" + (SKILL.parent / "references" / name).read_text()
+    return " ".join(text.split())
 
 
 def test_an_irrelevance_reject_commissions_evidence_and_rebuilds_nothing():
@@ -57,11 +62,16 @@ AGENT = REPO / "agents" / "edd-evidence-producer.md"
 
 
 def _section(heading):
-    """The flattened text of the `## <heading>` section, up to the next `## ` heading."""
+    """The flattened text of the `## <heading>` section, up to the next `## ` heading, followed by any
+    `skills/edd/references/` file the section tells the executor to read — the step's detail lives
+    there, and an assertion about the step must reach it."""
     text = SKILL.read_text()
     start = text.index(f"\n## {heading}")
     end = text.find("\n## ", start + 1)
-    return " ".join(text[start:end if end != -1 else None].split())
+    section = text[start:end if end != -1 else None]
+    for name in re.findall(r"skills/edd/references/([\w-]+\.md)", section):
+        section += "\n" + (SKILL.parent / "references" / name).read_text()
+    return " ".join(section.split())
 
 
 def test_capture_checks_the_article_coverage_categories():
@@ -371,3 +381,16 @@ def test_the_developer_gives_the_qualitative_reason():
     classify = _section("CLASSIFY")
     assert "only when the developer gives a **concrete reason**" in classify
     assert "gives or confirms" not in classify
+
+
+# --- slice 03 structure (2026-10-27): EVIDENCE and REVIEW detail moved verbatim to references/, to keep
+# the always-loaded body under plugin-dev's 5,000-word cap. A step that points at a file that is not
+# there would load nothing, silently.
+
+def test_every_reference_the_skill_names_exists_and_is_read_before_its_step():
+    text = SKILL.read_text()
+    names = re.findall(r"`\$\{CLAUDE_PLUGIN_ROOT\}/skills/edd/references/([\w-]+\.md)`", text)
+    assert names, "the skill names no reference"
+    for name in names:
+        assert (SKILL.parent / "references" / name).is_file(), name
+        assert f"Read `${{CLAUDE_PLUGIN_ROOT}}/skills/edd/references/{name}` before" in " ".join(text.split()), name

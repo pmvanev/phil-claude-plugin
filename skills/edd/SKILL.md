@@ -221,97 +221,19 @@ longer stands. A waiver stands only while its finding's span is unchanged.
 
 ## EVIDENCE — executed evidence for every expectation not opted out
 
-Skip every expectation trusted to the tests. Gather evidence for the rest in the risk order CAPTURE
-set.
-
-**An expectation not executable in the loop** dispatches nothing: handle it in its place in the risk
-order, without reaching the steps below. Commission nothing for it. Tell the developer
-the confirmed blocker and ask them to spot-check it by hand or stop. Record which they chose and, for
-a spot-check, what they observed, in their own words, labelled `you wrote`. A spot-check goes to
-ADJUDICATE like any other evidence.
-
-For every other expectation, do the least that yields real evidence:
-
-1. **Reuse if it already exists.** If the engine already produced relevant executed evidence — a
-   DELIVER demo, a captured transcript of the behaviour itself — the builder made it. Dispatch the
-   producer (step 2) with that artifact as `context`, to re-run its reproduce command and capture
-   what that emits. That costs one run and keeps the evidence out of the builder's hands. A
-   test-suite run is not reusable evidence: re-running it yields a pass count, which step 3 rejects.
-   (Whether the existing evidence is actually *relevant* is the developer's call at ADJUDICATE, not
-   this skill's — if they say it isn't, commission fresh evidence and rebuild nothing: the thing
-   itself was never judged.)
-2. **Otherwise commission it — from a non-builder.** Dispatch `phil:edd-evidence-producer` (Agent/Task)
-   with the `expectation`, its `classification`, the `target`, any named `scenario` and any `context`
-   its contract names,
-   to actually run or render the thing and capture the raw output **verbatim** with the command that
-   reproduces it. The producer is a **different actor than whatever built the thing** — it has no
-   Edit or Write tool, and its contract forbids changing what it runs against. This separation of
-   powers is non-negotiable; it is the whole reason the gate exists.
-   - For a **checkable** expectation, the evidence is one scenario run: its inputs and the verbatim
-     output, with the reproduce command.
-   - For a **qualitative** expectation, it is the thing run or rendered, captured verbatim.
-   - For a checkable expectation an **approval test** pins, it is the test's first output.
-3. **Reject narration.** If what comes back (from either path) is a description, a summary, or a
-   claim with no reproducible artifact, it is **narration, not evidence** — the article calls it
-   *generative* evidence. Reject it and re-commission a real run. A test runner's `"all tests passed"`,
-   or a pass count, is narration for this gate: it reports a verdict without showing the behaviour.
-   Never adjudicate against narration. When re-commissioning, name the scenario to run as `scenario`
-   and send no `context`, so the producer runs the behaviour, not the suite. On a second narrated return for the
-   same expectation, stop re-commissioning and put both returns to the developer, who names the
-   scenario to try, spot-checks it by hand, or stops.
-4. **A producer that cannot run it.** A producer that reports it *cannot produce executed evidence*
-   has given neither evidence nor narration: report it to the developer rather than re-commissioning,
-   since the same run fails the same way, and act on its cause:
-   - **the build is missing** — an entry point not found, a build absent: route the expectation back
-     to the engine, then gather evidence again; after a second cannot-run for the same expectation, ask
-     the developer to send it back again, spot-check it by hand, or stop;
-   - **the environment cannot run it** — a browser, a paid API, a production-only condition: tell the
-     developer, who confirms it as a blocker and spot-checks it by hand or stops, as above.
-
-The output, per expectation, is an **executed artifact + its reproduce command**, a recorded opt-out,
-or a recorded hand spot-check — ready for the developer.
+Every expectation not trusted to the tests gets executed evidence, from the non-builder producer, in
+the risk order CAPTURE set — or, for one not executable in the loop, the developer's hand spot-check.
+Read `${CLAUDE_PLUGIN_ROOT}/skills/edd/references/evidence.md` before gathering any evidence: it holds
+the steps in order — reuse, commission, reject narration, a producer that cannot run — and the
+dispatch contract.
 
 ## REVIEW — an independent adversary attacks the work
 
-Before any verdict, put the built work in front of an adversary — the article's second agent auditing
-the first. Read `${CLAUDE_PLUGIN_ROOT}/skills/adversarial-review/SKILL.md` and compose its agents under
-the contract it documents:
-
-1. **Curate the input** as exactly `{ target, intent, standards, oracle_result? }`:
-   - `target` — what the engine built: the changed source, test and prose files, and the entry points
-     the evidence ran — excluding the engine's own logs, plans, notes and commit messages, which carry
-     the builder's reasoning;
-   - `intent` — the confirmed expectations, in risk order, each with its classification;
-   - `standards` — for code, `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`,
-     `${CLAUDE_PLUGIN_ROOT}/rules/testing.md` and `${CLAUDE_PLUGIN_ROOT}/rules/architecture.md`, plus
-     `${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md` when tests changed; for prose,
-     `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` and any rule the prose is about;
-   - `oracle_result` — the run BUILD captured, inherited, never re-run; omitted when none exists.
-
-   Pass the machine-produced oracle run, never the builder's reasoning, its self-assessment, or a
-   claim that the tests pass.
-2. **Dispatch `phil:adversarial-reviewer`** (Agent/Task) with that input. It returns a typed verdict;
-   rewrite nothing in it.
-3. **Verify each finding** by dispatching `phil:adversarial-verifier`, one fresh dispatch per finding,
-   with `{ finding, target, intent, standards, oracle_result? }` and without the reviewer's
-   justification, confidence or other findings. Keep the findings the judge confirms, applying any
-   `corrected_severity`. List separately the refutes the judge marks as could-not-establish with low
-   `confidence`. Count the rest of the refutes and drop them.
-
-Route on the typed fields only, and re-judge nothing:
-
-- **The label and verdict lead.** The developer's first ask opens its context block with the
-  reviewer's `overall_label` (`sound-gate` or `draft-signal`), its `verdict`, and "raised N, confirmed
-  M, refuted K", then the could-not-confirm list. Report `clean` with its label — a draft signal is not
-  a verified pass — and `cannot-assess` as exactly that, never as approval.
-- **Severity after the judge's `corrected_severity`.** A judge-confirmed `major` finding blocks done
-  until the engine fixes it, or the developer waives it by name, with a reason the record keeps — both
-  in FINDINGS. A confirmed `minor` or `nit` advises.
-
-Attach a confirmed finding to an expectation only where its `span` or `evidence` names that
-expectation's entry point or scenario; the developer sees it in that expectation's ask. Every other
-confirmed finding — and every finding on a row trusted to the tests — goes to FINDINGS. The review
-advises; the developer still decides every verdict.
+Before any verdict, an independent adversary attacks the built work, and an independent judge
+confirms or refutes each of its findings. Read `${CLAUDE_PLUGIN_ROOT}/skills/edd/references/review.md`
+before dispatching anything: it holds the curated input, the two dispatches, how to route on the
+typed verdict, and where each confirmed finding goes. A judge-confirmed `major` blocks done until
+FINDINGS clears it. The review advises; the developer decides every verdict.
 
 ## ADJUDICATE — the human decides
 
@@ -436,7 +358,7 @@ a non-builder (04), narration rejection (05), blocked-done (06), the trail for e
 expectation not executable in the loop (10), capture's coverage, size and risk checks (11), the
 review before any verdict (12), a challenge that rebuilds nothing (13), an unwaived major finding
 blocking done (14), and a stop over a standing challenge (15).
-Whenever this skill, `commands/edd.md`, `agents/edd-evidence-producer.md`,
+Whenever this skill, its `references/`, `commands/edd.md`, `agents/edd-evidence-producer.md`,
 `agents/adversarial-reviewer.md` or `agents/adversarial-verifier.md` changes, drive the
 fixtures per `self-test/README.md` and confirm each produces its `expected.md` decision — every edit
 here is non-monotonic, so the skill is changed and regression-tested, never changed and eyeballed.
