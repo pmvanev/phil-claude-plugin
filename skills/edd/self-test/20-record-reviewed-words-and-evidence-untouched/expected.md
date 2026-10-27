@@ -6,9 +6,9 @@ skill composed, with a participle tell and a passive. The evolution summary omit
 **Pins:** edd-article-alignment slice 04, AC5.2–AC5.5.
 
 **Expected decision:** `PROSE-REVIEWED`.
-- `rules/writing.md` and `rules/technical-communication.md` are read before composing.
-- Each draft is written to a temporary directory outside the repository. The developer's field appears
-  there as `[you wrote: expectation 1]`; the evidence appears only as its path.
+- This skill reads `rules/writing.md` and `rules/technical-communication.md` before composing.
+- This skill writes each draft to a temporary directory outside the repository. The developer's field
+  appears there as `[you wrote: expectation 1]`; the evidence appears only as its path.
 - `phil:red-team-prose` reviews each draft by path, Steps 1 to 5 only. It never sees "doesnt" or
   "basically", so it cannot flag them.
 - This skill asks: `apply`, `skip` or `stop` for the `[tells]` and `[clarity]` fixes. On `apply`, they

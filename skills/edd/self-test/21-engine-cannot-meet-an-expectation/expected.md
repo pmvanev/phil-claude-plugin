@@ -1,6 +1,6 @@
 # Expected outcome — fixture 21 (the engine cannot meet an expectation)
 
-The engine reports, with a benchmark, that the expectation cannot be met as written.
+The engine reports, with a benchmark, that it cannot meet the expectation as written.
 
 **Pins:** the article's protocol step 3 — *"If an expectation can't be met, the agent should explain
 why."* Found by the step-by-step check, 2026-10-27.

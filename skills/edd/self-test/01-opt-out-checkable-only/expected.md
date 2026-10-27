@@ -9,12 +9,12 @@ expectations were trusted to the tests."* Replaces edd-loop's off-ramp fixture: 
 exits; it builds.
 
 **Expected decision:** `OPT-OUT`.
-- The opt-out question is asked once, after the classification table.
-- Both checkable rows are marked `trusted to the tests`; no evidence is commissioned for either, and
-  the engine's oracle alone proves them.
+- The tool asks the opt-out question once, after the classification table.
+- The tool marks both checkable rows `trusted to the tests` and commissions evidence for neither; the
+  engine's oracle alone proves them.
 - The qualitative expectation still gets executed evidence from the non-builder producer and goes to
   the developer to adjudicate.
-- The build is delegated to nwave — the run does **not** exit after classification.
+- The tool delegates the build to nwave — the run does **not** exit after classification.
 - The trail names both checkable expectations as trusted to the tests.
 
 **Gate failure (blocks the skill change):** evidence is commissioned for a checkable expectation

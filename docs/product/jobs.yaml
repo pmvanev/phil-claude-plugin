@@ -178,7 +178,7 @@ jobs:
       pull: >
         A lightweight expectation -> executed-evidence -> human-adjudication loop
         that REUSES nwave / phil:work for the build — the missing third option for the
-        qualitative goals phil:work's FRAME currently refuses. Revised 2026-10-27:
+        qualitative goals phil:work's FRAME refuses. Revised 2026-10-27:
         the loop follows Laforgia's EDD protocol end to end and applies this plugin's
         standards where the engines apply their own.
       anxiety: >
@@ -203,10 +203,10 @@ jobs:
     features: [edd-loop, edd-article-alignment]
     # Relationship to deliver-invisible-work-with-discipline (phil-work): distinct outcome.
     # phil-work's job is PRESERVE behavior through invisible change (preservation floor +
-    # checkable goal). This job is PROVE a qualitative expectation is met with executed
-    # evidence, and it spans BOTH visible (nwave) and invisible (phil:work) work. phil:edd
-    # delegates the build to those engines and inherits their oracle (ADR-005 lineage); it
-    # adds only the qualitative-evidence gate they structurally lack.
+    # checkable goal). This job is PROVE every expectation is met with executed evidence the
+    # developer adjudicates, and it spans BOTH visible (nwave) and invisible (phil:work) work.
+    # phil:edd delegates the build to those engines and inherits their oracle (ADR-005
+    # lineage); it adds the evidence, review and stabilize gates they lack (revised 2026-10-27).
 
   - id: get-independent-adversarial-critique-of-completed-work
     # Registered by DISCUSS wave, feature: adversarial-review (2026-07-15)

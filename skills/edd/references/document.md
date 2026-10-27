@@ -15,7 +15,10 @@ nothing touches the working tree before the review. In each draft:
   `[you wrote: expectation 2]`, `[you wrote: waiver reason, R001]` — so the review never sees the
   developer's words and no fix can reach them;
 - every piece of evidence is referenced by path, never inlined: it is never passed to the review, and
-  `evidence/` holds it outside the review's reach.
+  `evidence/` holds it out of the review's reach.
+
+Tell the review that each placeholder stands for content the written document holds. Drop any
+`[fitness]` finding whose only cause is a placeholder: no fix of composed text can answer it.
 
 ## 2. Review each draft
 

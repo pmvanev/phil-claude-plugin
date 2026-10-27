@@ -4,8 +4,8 @@ The `phil:edd` **expectation loop and its evidence gate** are the software under
 silent: an opt-out that quietly skips a qualitative expectation, a classifier that marks provable work
 qualitative, a gate that accepts narration — a pass count included — as evidence, an
 evidence-producer that is secretly the builder, or a completion reported over a rejected expectation —
-each looks exactly like a smooth run. These fixtures feed the tool known situations and assert each
-produces the correct **decision outcome** (`CAPTURE-GAPS` / `CLASSIFY-CHECKABLE` / `OPT-OUT` /
+each looks like a smooth run. These fixtures feed the tool known situations and assert each produces
+the correct **decision outcome** (`CAPTURE-GAPS` / `CLASSIFY-CHECKABLE` / `OPT-OUT` /
 `GATE-RERUN-EXISTING` / `GATE-COMMISSION` / `REJECT-NARRATION` / `SPOT-CHECK` / `REVIEW-THEN-ASK` /
 `CHALLENGE` / `BLOCK-DONE` / `WAIVE-RECORDED` / `REPORT-NOT-DONE` / `PIN-APPROVAL` /
 `REVIEW-CODE-GATE` / `UX-GATE` / `PROSE-REVIEWED` / `ENGINE-CANNOT-MEET` / `DOCUMENT-TRAIL`).
@@ -15,16 +15,14 @@ them as described below. `tests/test_edd_skill.py` is what fails the build.
 
 This suite is the **acceptance + regression suite** for `skills/edd/SKILL.md`. Run
 it whenever the skill or the command loader changes — every such edit is non-monotonic, so the skill
-is never changed and eyeballed; it is changed and regression-tested here. Format and intent mirror
-`skills/work/self-test/` and `skills/refactor-tests/self-test/` — the plugin's established way to
-test a skill/gate.
+is regression-tested here, never eyeballed. Format and intent mirror `skills/work/self-test/` and
+`skills/refactor-tests/self-test/` — the plugin's established way to test a skill/gate.
 
 Unlike `phil:work` (which delegates a *change*), `phil:edd` delegates the *build* and then gates
 *each expectation* on executed evidence. So most fixtures pin a loop/gate **decision**
-given a situation described in `manifest.json`, and the engine build result and the evidence-producer
-result are supplied by the manifest (`engine_evidence`, `producer_result`) so the suite runs
-unattended. In live use those come from the real engine (nwave / `phil:work`) and the real
-non-builder producer subagent. Those have their own gates; this suite does not re-test them — it
+given a situation `manifest.json` describes, and the manifest supplies the engine build result and the
+evidence-producer result (`engine_evidence`, `producer_result`) so the suite runs unattended. In live
+use those come from the real engine (nwave / `phil:work`) and the real non-builder producer subagent. Those have their own gates; this suite does not re-test them — it
 tests the loop and the gate around them.
 
 ## What the fixtures pin

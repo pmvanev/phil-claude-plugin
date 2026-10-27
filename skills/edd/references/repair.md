@@ -16,11 +16,11 @@ The full REPAIR step of `skills/edd/SKILL.md`. Read in full before offering any 
 | A redundant or unclear comment (Priority 5) | `phil:clean-comments` | the file's path and the item's lines | none of its own — see below |
 | An item routed `report only`, or a `phil:ux-review` `consider` | none | — | listed and recorded, never run |
 
-Never run `phil:redesign-tests` over a pinning test, never over a pinning test with any skill that
-changes what a test asserts: the pin was recorded against what it asserts now. Each repair skill
-re-detects with its own rules, so an item may not reappear when it runs; record that, too.
+Run `phil:redesign-tests`, and any other skill that changes what a test asserts, never over a pinning
+test: the pin was recorded against what it asserts now. Each repair skill re-detects with its own
+rules, so an item may not reappear when it runs; record that too.
 
-`phil:clean-comments` has no gate of its own — it runs no suite and asks no approval. Supply one: run
+`phil:clean-comments` has no gate of its own: it runs no suite and asks no approval. Supply one: run
 the suite after it, put its diff to the developer, and revert the change on a red suite or a reject.
 
 `phil:refactor-loop` runs under the Workflow tool, which this command is not granted and which a
@@ -50,8 +50,13 @@ Every repair skill except `phil:clean-comments` stops on a dirty tree. Before th
 - the engine has committed the pins;
 - record every finding from both backlogs in the draft of `stabilize.md`, held in the conversation,
   never on disk until DOCUMENT;
-- delete `.ux-review-backlog.md`, and keep `.refactoring-backlog.md` while the `phil:refactor` group
-  runs — that skill excludes it from its own check — then delete it.
+- note what each backlog file held before this run's first write: `.refactoring-backlog.md`,
+  `.ux-review-backlog.md`, and the `.test-refactoring-backlog.md` and `.test-redesign-backlog.md`
+  that a scoped `phil:refactor-tests` or `phil:redesign-tests` run writes. Keep `.refactoring-backlog.md`
+  while the `phil:refactor` group runs — that skill works it and excludes it from its own check.
+
+After the last repair, restore each to what it held before this run: delete a file the run created,
+and put back the earlier content of one that existed. A developer's pending items are theirs.
 
 If a repair skill still reports a dirty tree, stop and tell the developer what is uncommitted.
 

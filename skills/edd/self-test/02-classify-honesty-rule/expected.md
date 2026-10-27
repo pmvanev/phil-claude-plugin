@@ -1,6 +1,6 @@
 # Expected outcome — fixture 02 (the honesty rule in classification)
 
-Two expectations arrive under-specified. The first has a cheaply-assertable core (non-zero exit,
+Two expectations arrive under-specified. The first has a cheaply assertable core (non-zero exit,
 stderr names the path). The second is *offered* as qualitative ("helpful") with **no concrete
 reason** why it can't be reduced to a cheap assertion.
 

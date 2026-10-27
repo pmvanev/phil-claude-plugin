@@ -21,7 +21,7 @@ Story 5 · Decisions D2 (red-team-prose row), D9, D11.
 - Editing evidence or the developer's words, ever.
 
 ## Learning hypothesis
-- **Disproves** "composed records need a prose pass" if `phil:red-team-prose` finds no
+- **Disproves** "composed records need a prose pass" if `phil:red-team-prose` raises no
   `[fitness]` finding and nothing auto-applicable across two real records.
 - **Confirms** it if a real record changes, or a teammate can answer "what does this do, and how do
   we know?" from it unaided.

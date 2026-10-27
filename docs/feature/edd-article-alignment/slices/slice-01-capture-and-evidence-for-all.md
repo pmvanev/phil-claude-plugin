@@ -1,7 +1,8 @@
 # Slice 01 — Capture that covers the ground, and evidence for every expectation
 
-**Goal (one sentence):** `/phil:edd` checks the confirmed expectations for coverage, size and risk,
-then gathers executed evidence for every one of them unless the developer opts out the checkable ones.
+**Goal (one sentence):** `/phil:edd` checks the expectations for coverage, size and risk before the
+developer confirms them, then gathers executed evidence for each unless the developer opts out the
+checkable ones.
 
 Stories 1 and 2 · Decisions D1, D4, D5, D6.
 
@@ -44,5 +45,5 @@ None beyond the shipped skill.
 A real intent on this repo, run without the opt-out.
 
 ## Dogfood moment
-Run `/phil:edd` on a real intent with at least three checkable expectations the same day; compare
+The same day, run `/phil:edd` on a real intent with at least three checkable expectations; compare
 the evidence with what the suite reported.

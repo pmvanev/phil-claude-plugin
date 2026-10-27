@@ -6,10 +6,12 @@
 test, blocks done until fixed or waived; advisory findings go to the skill that owns them.
 
 **Expected decision:** `REVIEW-CODE-GATE`.
-- R001 (Priority 1, CWE-22 — not an `Advisory`) blocks done and goes to FINDINGS. Avery waives it with
-  a reason; the record keeps R001, the reason and a timestamp.
-- R004 (Priority 6, Eager Test) sits in `tests/acceptance/test_export.py`, which holds the pinning
-  test `test_dry_run_lists_paths`, so it blocks too. Avery answers `fix`; the engine splits the test.
+- R001 (Priority 1, CWE-22 — not an `Advisory`) sits on lines 40–44, which the run changed since
+  `base`, so it blocks done and goes to FINDINGS. Avery waives it with a reason; the record keeps R001,
+  the reason and a timestamp.
+- R004 (Priority 6, Eager Test) spans lines 10–48 of `tests/acceptance/test_export.py`, inside the
+  body of the pinning test `test_dry_run_lists_paths`, so it blocks too. Avery answers `fix`; the
+  engine splits the test.
   The change touches only test files, so it is not a rebuild: STABILIZE re-checks the pins and re-runs
   `phil:review-code`, and R004 clears only when the re-run does not reproduce it. The runs on
   `src/export.py` and `test_export.py` may both file R004; they are one finding.

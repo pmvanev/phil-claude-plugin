@@ -14,7 +14,7 @@
 # every expectation unless the developer trusts the tests for the checkable ones; evidence only from
 # a non-builder; narration — a pass count included — never accepted; and no done over a rejected
 # expectation. These bugs are silent: an opt-out that skips a qualitative expectation, or a gate
-# that accepts a green suite as proof, looks exactly like a smooth run.
+# that accepts a green suite as proof, looks like a smooth run.
 #
 # Decision outcomes the loop must produce:
 #   CAPTURE-GAPS · CLASSIFY-CHECKABLE · OPT-OUT · GATE-RERUN-EXISTING · GATE-COMMISSION ·
@@ -42,7 +42,7 @@ Feature: Prove every expectation is met with executed evidence
 
   # --- CLASSIFY: the honesty rule ---------------------------------------------------------
   @edd-loop @classify @fixture:02-classify-honesty-rule
-  Scenario: An unclear expectation is treated as checkable unless there is a concrete reason otherwise
+  Scenario: An unclear expectation is treated as checkable unless a concrete reason says otherwise
     Given an expectation whose provability by an engine is unclear
     When the tool classifies it
     Then it treats the expectation as checkable by default
@@ -98,7 +98,7 @@ Feature: Prove every expectation is met with executed evidence
   # --- EVIDENCE GATE: commission new executed evidence, from a non-builder ----------------
   @edd-loop @gate @separation-of-powers @fixture:04-gate-commission-new
   Scenario: A qualitative expectation with no evidence gets fresh executed evidence from a non-builder
-    Given a qualitative expectation for which no relevant evidence exists yet
+    Given a qualitative expectation with no relevant evidence yet
     When the gate runs for that expectation
     Then the tool commissions a fresh executed artifact — a real run or render captured verbatim with the command that reproduces it
     And whoever produced the evidence is not whoever built the thing
@@ -116,7 +116,7 @@ Feature: Prove every expectation is met with executed evidence
   @edd-loop @adjudicate @error @fixture:06-blocked-done
   Scenario: A rejected expectation is never reported as done
     Given an expectation whose executed evidence Avery has rejected
-    When the tool determines whether the work is done
+    When the tool decides whether the work is done
     Then it does not report the work as done
     And it iterates that expectation rather than moving on
     And no completion is claimed while any expectation stands rejected
@@ -133,7 +133,7 @@ Feature: Prove every expectation is met with executed evidence
   @edd-article-alignment @slice-02 @review @error @fixture:14-unwaived-major-blocks-done
   Scenario: A confirmed major finding blocks done until it is fixed or waived by name
     Given Avery has accepted an expectation and a confirmed major finding still stands
-    When the tool determines whether the work is done
+    When the tool decides whether the work is done
     Then the tool puts the finding to Avery to fix, waive or stop
     And it does not report the work as done while the finding stands
     And a waiver must name the finding and give a reason, which the record keeps with a timestamp

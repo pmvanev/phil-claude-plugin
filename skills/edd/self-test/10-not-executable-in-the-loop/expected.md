@@ -16,10 +16,9 @@ The article's third category of evidence.
   `you wrote`.
 - ADJUDICATE asks for a verdict on what they observed: here, `accept`. No test can pin a hand
   spot-check here, so STABILIZE asks the engine for a test that runs outside the loop — a browser test
-  in CI — and records it `pinned, not run here`. FINDINGS then asks Avery to `waive` or `stop`, since
-  nothing here can show it green — a fix is not offered. Had they seen the bar jump
-  back, a `reject` would block done; had they stopped, the run would be reported not done with the
-  expectation unproven.
+  in CI — and records it `pinned, not run here`. FINDINGS then asks Avery to `waive` or `stop`, offering
+  no fix, since nothing here can show it green. Had they seen the bar jump back, a `reject` would
+  block done; had they stopped, the run would be reported not done with the expectation unproven.
 
 **Gate failure (blocks the skill change):** the skill marks the expectation not executable on its
 own; a producer is dispatched and its failure re-commissioned in a loop; the spot-check ends without

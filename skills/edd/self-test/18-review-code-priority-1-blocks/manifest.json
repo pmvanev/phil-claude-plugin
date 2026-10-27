@@ -45,7 +45,10 @@
     }
   ],
   "pinning_tests": [
-    "tests/acceptance/test_export.py::test_dry_run_lists_paths"
+    {
+      "test": "tests/acceptance/test_export.py::test_dry_run_lists_paths",
+      "body_lines": "10-48"
+    }
   ],
   "human_answers": {
     "FINDINGS R001": "waive",
@@ -57,5 +60,9 @@
     }
   },
   "expected_guard": "phil:review-code runs once per changed file; Priority 1 (not Advisory) and Priority 6 on a pinning test's file block done via FINDINGS; after FINDINGS, advisories are grouped by smell and offered to their owners (D2, D8)",
-  "expected_decision": "REVIEW-CODE-GATE"
+  "expected_decision": "REVIEW-CODE-GATE",
+  "changed_since_base": {
+    "src/export.py": "lines 36-61",
+    "tests/acceptance/test_export.py": "lines 1-60 (new file)"
+  }
 }
