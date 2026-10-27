@@ -1,61 +1,100 @@
 # Acceptance specification — phil:edd
 #
-# Scenario SSOT for the feature. Business language only (per DISTILL Pillar 1); the mechanics
-# live in the self-test fixtures (self-test/) and, at runtime, in SKILL.md (built in DELIVER).
+# Scenario SSOT for the feature. Business language only; the mechanics live in the self-test
+# fixtures (self-test/) and, at runtime, in SKILL.md.
 #
 # Validated two ways, exactly as phil:work / refactor-tests are:
 #   - deterministic decision mechanics -> the golden fixtures under self-test/ (see each @fixture tag)
 #   - human-gated / judgment scenarios -> same-day dogfood on this plugin's own intents (the slices)
-# There is no CI runner in this plugin; the fixtures are driven by a human or the model, exactly as
-# skills/work/self-test/ is. Tags carry traceability, not a pytest collector.
+# No driver runs the fixtures (issue 42); a human or the model drives them. Tags carry traceability,
+# not a pytest collector. tests/test_edd_skill.py is what fails the build.
 #
-# The software under test is the FRONT-DOOR + GATE decision behaviour: how phil:edd classifies an
-# expectation, when it off-ramps (adding NOTHING), and — above all — that the qualitative gate
-# accepts only EXECUTED evidence, keeps the evidence-producer distinct from the builder, and never
-# reports done over a rejected expectation. These bugs are silent: an off-ramp that quietly builds a
-# gate, or a gate that accepts narration, looks exactly like a smooth run.
+# The software under test is the expectation loop and its evidence gate, after Andrea Laforgia's
+# Expectation-Driven Development: capture checked for coverage, size and risk; executed evidence for
+# every expectation unless the developer trusts the tests for the checkable ones; evidence only from
+# a non-builder; narration — a pass count included — never accepted; and no done over a rejected
+# expectation. These bugs are silent: an opt-out that skips a qualitative expectation, or a gate
+# that accepts a green suite as proof, looks exactly like a smooth run.
 #
-# Decision outcomes the front-door/gate must produce:
-#   OFF-RAMP · CLASSIFY-CHECKABLE · GATE-POINT-EXISTING · GATE-COMMISSION ·
-#   REJECT-NARRATION · BLOCK-DONE · DOCUMENT-TRAIL
+# Decision outcomes the loop must produce:
+#   CAPTURE-GAPS · CLASSIFY-CHECKABLE · OPT-OUT · GATE-RERUN-EXISTING · GATE-COMMISSION ·
+#   REJECT-NARRATION · SPOT-CHECK · BLOCK-DONE · DOCUMENT-TRAIL
 
-Feature: Prove qualitative expectations are met with executed evidence
+Feature: Prove every expectation is met with executed evidence
   As Avery, an expectation owner delegating build work to AI agents,
-  I want a thin front-door that off-ramps to my existing engines whenever they already prove my
-  intent, and only for the expectations no test can cheaply assert attaches a gate that makes me
-  adjudicate EXECUTED evidence,
-  so I can trust AI-produced work against my real intent — without ceremony where it isn't needed,
-  and without the builder grading its own homework.
+  I want my expectations checked for coverage, size and risk, and executed evidence for each one —
+  gathered by someone other than the builder — unless I choose to trust the tests for the checkable
+  ones,
+  so I can trust AI-produced work against my real intent, without trusting a green suite the builder
+  wrote and without the builder grading its own homework.
 
-  # --- OFF-RAMP: add nothing when the engine already proves it ----------------------------
-  @slice-01 @walking_skeleton @offramp @fixture:01-offramp-all-checkable
-  Scenario: An all-checkable intent is sent straight to the engine, with no ceremony
-    Given an intent whose every expectation the existing engines can already prove
-    When Avery runs the expectation loop
-    Then the tool shows how each expectation is provable and by which engine
-    And it recommends running that engine directly
-    And it exits without commissioning evidence or opening any trail
+  # --- CAPTURE: coverage, size and risk ---------------------------------------------------
+  @edd-article-alignment @slice-01 @capture @fixture:11-capture-coverage-size-risk
+  Scenario: A draft that misses categories and packs two behaviours is filled in before anything is built
+    Given a draft with no past edge case and one expectation stating two behaviours
+    When the tool checks the draft before Avery confirms it
+    Then it names each missing category with a suggestion marked as its own, not Avery's, never inventing a past bug
+    And it proposes splitting the double expectation in two
+    And it orders the list by risk, worst first
+    And Avery's own wording reaches the list unchanged
 
-  # --- CLASSIFY: bias toward the off-ramp -------------------------------------------------
-  @slice-01 @classify @fixture:02-classify-bias-to-offramp
-  Scenario: An unclear expectation is treated as provable unless there is a concrete reason otherwise
+  # --- CLASSIFY: the honesty rule ---------------------------------------------------------
+  @edd-loop @classify @fixture:02-classify-honesty-rule
+  Scenario: An unclear expectation is treated as checkable unless there is a concrete reason otherwise
     Given an expectation whose provability by an engine is unclear
     When the tool classifies it
-    Then it treats the expectation as engine-provable by default
+    Then it treats the expectation as checkable by default
     And it asks Avery to confirm before it will ever treat an expectation as qualitative
-    And an expectation offered as qualitative without a concrete reason is treated as engine-provable
+    And an expectation offered as qualitative without a concrete reason is treated as checkable
+
+  # --- OPT-OUT: trusting the tests is Avery's call, and covers checkable expectations only --
+  @edd-article-alignment @slice-01 @opt-out @fixture:01-opt-out-checkable-only
+  Scenario: Trusting the tests skips evidence for checkable expectations only, and the record says so
+    Given checkable expectations and one qualitative expectation
+    And Avery chooses to trust the tests for the checkable ones this run
+    When the loop runs
+    Then no evidence is gathered for the checkable expectations
+    And the qualitative expectation still gets executed evidence for Avery to judge
+    And the build still runs
+    And the record names every expectation trusted to the tests
+
+  # --- EVIDENCE: a checkable expectation shows its scenario --------------------------------
+  @edd-article-alignment @slice-01 @gate @separation-of-powers @fixture:08-checkable-scenario-evidence
+  Scenario: A checkable expectation gets its scenario run when Avery has not opted out
+    Given a checkable expectation and no opt-out
+    When evidence is gathered for it
+    Then Avery sees one scenario's inputs and its verbatim output, with the command that reproduces it
+    And whoever produced the evidence is not whoever built the thing
+
+  @edd-article-alignment @slice-01 @gate @error @fixture:09-pass-count-is-narration
+  Scenario: A test runner's pass count is rejected as narration
+    Given evidence for a checkable expectation that shows only how many tests passed
+    When the gate checks whether it is acceptable evidence
+    Then the tool rejects it as narration
+    And it gathers the scenario itself in its place
+
+  @edd-article-alignment @slice-01 @gate @fixture:10-not-executable-in-the-loop
+  Scenario: An expectation no agent can run here goes to Avery to spot-check
+    Given an expectation that cannot be run or watched inside the loop
+    And Avery has confirmed what stops it running here
+    When evidence is gathered for it
+    Then the tool commissions nothing and names that blocker
+    And Avery spot-checks it by hand or stops
+    And a spot-check ends in Avery's accept or reject, like any other evidence
+    And the record says which, in Avery's own words
 
   # --- EVIDENCE GATE: reuse evidence the engine already produced --------------------------
-  @slice-02 @gate @fixture:03-gate-evidence-exists
-  Scenario: A qualitative expectation reuses evidence the engine already produced
-    Given a qualitative expectation and an engine run that already produced relevant executed evidence
+  @edd-loop @gate @fixture:03-gate-evidence-exists
+  Scenario: Evidence the engine already captured is re-run by the producer, not taken from the builder
+    Given a qualitative expectation and an engine run that already captured executed evidence with its reproduce command
     When the gate runs for that expectation
-    Then the tool points Avery at the existing executed evidence
-    And it does not commission any new evidence
-    And it asks Avery to adjudicate the expectation against that evidence
+    Then the producer re-runs that reproduce command and captures what it emits
+    And no new scenario is designed
+    And Avery adjudicates the expectation against the producer's capture
+    And if Avery says it does not show the expectation, fresh evidence is gathered and nothing is rebuilt
 
   # --- EVIDENCE GATE: commission new executed evidence, from a non-builder ----------------
-  @slice-02 @gate @separation-of-powers @fixture:04-gate-commission-new
+  @edd-loop @gate @separation-of-powers @fixture:04-gate-commission-new
   Scenario: A qualitative expectation with no evidence gets fresh executed evidence from a non-builder
     Given a qualitative expectation for which no relevant evidence exists yet
     When the gate runs for that expectation
@@ -64,7 +103,7 @@ Feature: Prove qualitative expectations are met with executed evidence
     And it asks Avery to adjudicate the expectation against that evidence
 
   # --- EVIDENCE GATE: narration is not evidence -------------------------------------------
-  @slice-02 @gate @error @fixture:05-reject-narration
+  @edd-loop @gate @error @fixture:05-reject-narration
   Scenario: A described-but-not-run claim is rejected as insufficient
     Given a claim offered as evidence that is only a description, with no reproducible artifact
     When the gate checks whether it is acceptable evidence
@@ -72,19 +111,20 @@ Feature: Prove qualitative expectations are met with executed evidence
     And it commissions a real executed artifact in its place before any adjudication
 
   # --- ADJUDICATE: a rejected expectation blocks done -------------------------------------
-  @slice-02 @adjudicate @error @fixture:06-blocked-done
-  Scenario: A rejected qualitative expectation is never reported as done
-    Given a qualitative expectation whose executed evidence Avery has rejected
+  @edd-loop @adjudicate @error @fixture:06-blocked-done
+  Scenario: A rejected expectation is never reported as done
+    Given an expectation whose executed evidence Avery has rejected
     When the tool determines whether the work is done
     Then it does not report the work as done
     And it iterates that expectation rather than moving on
     And no completion is claimed while any expectation stands rejected
 
-  # --- DOCUMENT: living docs only when the gate actually ran ------------------------------
-  @slice-02 @document @fixture:07-living-docs-gate-ran-only
-  Scenario: Expectations, evidence, and verdicts are recorded only when the gate ran
-    Given a completed loop in which at least one qualitative expectation was adjudicated
+  # --- DOCUMENT: a trail for every run that built ----------------------------------------
+  @edd-article-alignment @slice-01 @document @fixture:07-trail-every-run-that-built
+  Scenario: Every run that built leaves a record, and a run stopped before building leaves none
+    Given a completed loop in which the engine built
     When the tool finishes
     Then it records the expectations, the executed evidence, and Avery's verdicts as living documentation
-    And it writes a durable summary alongside the plugin's other evolution records
-    But an off-ramp-only run records no such trail at all
+    And it writes a durable summary alongside the repository's other evolution records
+    And a run in which Avery trusted the tests records which expectations were trusted
+    But a run Avery stopped before anything was built records no trail at all

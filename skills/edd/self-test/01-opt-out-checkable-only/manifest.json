@@ -1,0 +1,30 @@
+{
+  "fixture_id": "EDD-SELFTEST-01",
+  "phase": "OPT-OUT",
+  "intent": "add a --dry-run flag to the export command that prints what would be written without writing it",
+  "expectations": [
+    {
+      "text": "running export --dry-run prints the file paths that would be written and writes nothing",
+      "provenance": "you wrote",
+      "classification": "checkable",
+      "engine": "nwave",
+      "oracle": "an acceptance test asserts stdout lists the paths and the filesystem is unchanged"
+    },
+    {
+      "text": "export --dry-run exits 0",
+      "provenance": "composed",
+      "classification": "checkable",
+      "engine": "nwave",
+      "oracle": "an acceptance test asserts exit code 0"
+    },
+    {
+      "text": "the dry-run listing is easy to scan when it names hundreds of files",
+      "provenance": "you wrote",
+      "classification": "qualitative",
+      "reason": "'easy to scan' is a judgment about layout; the developer confirmed no assertion captures it"
+    }
+  ],
+  "human_opt_out": "yes",
+  "expected_guard": "the opt-out covers checkable expectations only, and the record names them (D1)",
+  "expected_decision": "OPT-OUT"
+}

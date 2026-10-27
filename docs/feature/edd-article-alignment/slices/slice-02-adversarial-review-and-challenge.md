@@ -12,6 +12,9 @@ Story 3 · Decisions D2 (adversarial-review row), D7.
   questions, under `skills/shared/decision-request.md`.
 - Three answers: accept, reject (rebuild, then re-gather evidence), challenge (commission evidence for
   the named scenario or expectation, rebuild nothing).
+  Slice 01 already offers `stop` and treats "the evidence does not show this" as no reject (fresh
+  evidence, no rebuild); this slice names that reply `challenge`, lets it add a scenario or an
+  expectation, and bounds repeated rejects and challenges.
 - A confirmed `major` finding blocks done until fixed or waived by name.
 - Fixtures: challenge commissions without a rebuild; unwaived `major` blocks done; stop over a
   standing challenge reports not done. Fixture 06 extended to the three-answer set.

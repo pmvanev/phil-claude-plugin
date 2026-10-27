@@ -52,3 +52,12 @@ docs/evolution/<date>-<slug>.md   # durable summary: expectations, verdicts, evi
   (expectations/evidence/verdicts mirrors work's frame/roadmap/decisions/progress).
 - Open (→ DELIVER): git-ignore `docs/edd/` while in flight vs commit per adjudication — deferred,
   leaning committed (matching ADR-006's lean and the delegates' per-item commit discipline).
+
+## Amendment — 2026-10-27 (edd-article-alignment)
+
+The trail is written for **every run that built**, opt-out runs included, not only when the evidence
+gate ran; a run the developer stops at CAPTURE, before any build, still writes nothing. The namespace
+and schema stand; `expectations.md` gains each expectation's provenance and opt-out, and
+`verdicts.md` records `trusted to the tests` and hand spot-checks alongside verdicts. Rationale: an
+opt-out recorded nowhere is the silent trust this feature removes —
+`docs/feature/edd-article-alignment/feature-delta.md`, decision D9.

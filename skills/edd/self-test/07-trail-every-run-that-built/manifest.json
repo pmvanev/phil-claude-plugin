@@ -10,13 +10,16 @@
       "reason": "'helpful / actionable' is a judgment about wording"
     }
   ],
-  "engine": "phil:work",
+  "engine": "nwave",
   "producer_result": {
     "reproduce_command": "myapp export --out /nonexistent/dir 2>&1; echo exit=$?",
     "captured_verbatim": "Error: cannot write to '/nonexistent/dir' — the directory does not exist.\n  Try: mkdir -p /nonexistent/dir, or pass an existing --out path.\nexit=2"
   },
   "human_verdict": "accept",
-  "contrast_offramp_run": "fixture 01 (all-checkable) — must produce NO trail",
-  "expected_guard": "trail written only when the gate ran (DDD6/ADR-009); off-ramp writes none",
+  "contrast_runs": {
+    "opt_out_run": "fixture 01 (built, checkable expectations trusted to the tests) — MUST write a trail naming them",
+    "capture_only_run": "the developer stops at CAPTURE, before any build — MUST write no trail"
+  },
+  "expected_guard": "the trail is written for every run that built, opt-out runs included; a capture-only stop writes none (D9)",
   "expected_decision": "DOCUMENT-TRAIL"
 }

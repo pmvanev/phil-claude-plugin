@@ -56,9 +56,11 @@ D1–D3 were put to the developer on 2026-10-27 and answered; the rest follow fr
 the article.
 
 - **[D1] Every expectation gets executed evidence by default; the developer may opt out the
-  checkable ones for a run.** *(Developer's answer.)* At capture, `/phil:edd` asks once whether to
-  trust the engine's tests for this run's checkable expectations. On a yes, those get no evidence and
-  the record says so in as many words. Qualitative expectations cannot be opted out. Revises edd-loop
+  checkable ones for a run.** *(Developer's answer.)* After classification, `/phil:edd` asks once
+  whether to trust the engine's tests for this run's checkable expectations. On a yes, those get no
+  evidence and the record says so in as many words. Qualitative expectations cannot be opted out, nor
+  can an expectation an approval test pins: its first output needs a human read (amended at slice 01
+  review, 2026-10-27). Revises edd-loop
   D1 and the off-ramp (see Changed Assumptions).
 
 - **[D2] Serious findings from the plugin's own reviews block done; the developer can waive one by
@@ -303,7 +305,8 @@ existing skills composed, none modified; no new mechanism beyond the gates and t
 
 ## Wave: DISCUSS / [REF] Definition of Done
 
-1. `skills/edd/SKILL.md` runs the article's seven steps in its order, with the opt-out at capture.
+1. `skills/edd/SKILL.md` runs the article's seven steps in its order, with the opt-out after
+   classification.
 2. Every story traces to `prove-qualitative-expectations-with-evidence`.
 3. Every story has an Elevator Pitch with a real entry point and observable output.
 4. Each blocking source in D2's table blocks done in a fixture, and its waiver is recorded.

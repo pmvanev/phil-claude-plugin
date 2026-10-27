@@ -183,8 +183,11 @@ jobs:
         standards where the engines apply their own.
       anxiety: >
         (A) yet another orchestrator that merely duplicates nwave/phil:work — countered
-        by the central off-ramp; (B) ceremony on work that did not need it — countered
-        by bias-to-off-ramp + a gate that scales to zero when evidence already exists;
+        by delegating the build and inheriting the engine's oracle (the off-ramp that
+        first answered this was retired 2026-10-27); (B) ceremony on work that did not
+        need it — countered by the developer's opt-out for checkable expectations, the
+        honesty rule in classification, and evidence reuse when the engine already
+        produced it;
         (C) evidence that is narrated, not executed — countered by the executed-artifact
         rule; (D) the builder grading its own homework — countered by separation of
         powers (builder != evidence-producer; human is the final adjudicator);

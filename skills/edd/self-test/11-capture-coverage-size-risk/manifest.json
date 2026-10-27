@@ -1,0 +1,30 @@
+{
+  "fixture_id": "EDD-SELFTEST-11",
+  "phase": "CAPTURE",
+  "intent": "let users export their records as CSV, quickly, without breaking the JSON export",
+  "draft_expectations": [
+    {
+      "text": "export --format csv writes one row per record with a header row, and finishes in under a second for 10k records",
+      "provenance": "you wrote",
+      "note": "two behaviours in one breath: content and speed"
+    },
+    {
+      "text": "the JSON export is unchanged",
+      "provenance": "you wrote"
+    }
+  ],
+  "known_history": {
+    "source": "git log",
+    "entry": "fix: quote fields containing commas in the CSV writer (a past bug: records containing commas broke a hand-rolled CSV writer)"
+  },
+  "expected_findings": {
+    "missing_categories": [
+      "past edge cases"
+    ],
+    "covered_note": "'the JSON export is unchanged' covers must-not-happen: it is an expectation that existing behaviour stays unchanged",
+    "split": "the first expectation splits into a content expectation and a speed expectation; the original you-wrote line stays in the record beside the composed halves",
+    "risk_order": "the JSON export first (breaking it hits every existing user and is hard to undo), then CSV content, then speed"
+  },
+  "expected_guard": "capture checks coverage, size and risk before confirming, and labels every line's provenance (D4)",
+  "expected_decision": "CAPTURE-GAPS"
+}
