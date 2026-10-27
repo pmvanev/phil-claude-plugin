@@ -23,6 +23,10 @@ mental_model:
   - "I adjudicate qualitative claims; tests/metrics adjudicate the checkable ones"
   - "Don't add ceremony where my engine already proves it — get out of the way"
   - "Whoever built it shouldn't be the one certifying it met my intent"
+  # Extended by DISCUSS wave, feature: edd-article-alignment (2026-10-27)
+  - "A green suite the builder wrote is not proof; I'll trust the tests only when I say so"
+  - "Before I accept, I want to ask for the scenario that would break it"
+  - "The standards this plugin wrote down are the ones my work should meet, not the engine's"
 vocabulary:
   - expectation, executed evidence, narration, off-ramp, separation of powers,
     fox guarding the henhouse, oracle, adjudication, living documentation,

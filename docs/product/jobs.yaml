@@ -139,23 +139,29 @@ jobs:
 
   - id: prove-qualitative-expectations-with-evidence
     # Registered by DISCUSS wave, feature: edd-loop (2026-07-15)
+    # Revised by DISCUSS wave, feature: edd-article-alignment (2026-10-27): every expectation,
+    # not only the qualitative residue, gets executed evidence unless the developer opts the
+    # checkable ones out; the plugin's own standards and skills are applied, not cited. The id
+    # is kept for edd-loop's traceability and now undersells the scope.
     job_story: >
-      When I've handed building or changing something to AI agents and my intent
-      includes qualitative expectations that formal tests can't cheaply assert
-      (e.g. "error messages are helpful", "the API feels ergonomic", "the migration
-      guide is clear to a newcomer"), I want a disciplined loop that captures those
-      expectations, gets EXECUTED evidence they're met, and lets me adjudicate —
-      without adding ceremony where my existing engines (nwave, phil:work) already
-      prove the checkable ones — so I can trust AI-produced work against my real
+      When I've handed building or changing something to AI agents, I want every
+      expectation in my intent — the checkable ones and the qualitative ones no test
+      cheaply asserts (e.g. "error messages are helpful", "the migration guide is
+      clear to a newcomer") — proven by EXECUTED evidence that someone other than the
+      builder gathered and that I can challenge before I adjudicate, with the result
+      tested and recorded to this plugin's own standards, and a short path when I
+      choose to trust the tests — so I can trust AI-produced work against my real
       intent instead of reading every line or trusting the AI's narration.
     dimensions:
       functional: >
-        Capture expectations in plain language; classify each as engine-checkable
-        vs qualitative; OFF-RAMP the checkable ones to nwave (user-facing) or
-        phil:work (invisible) unchanged; and for the qualitative residue commission
-        or collect EXECUTED evidence produced by someone other than the builder,
-        put it to human adjudication, and persist expectations + verdicts as living
-        documentation.
+        Capture expectations in plain language, checked for coverage, size and risk;
+        delegate the build to nwave (user-facing) or phil:work (invisible) unchanged;
+        gather EXECUTED evidence for each expectation from a non-builder unless the
+        developer opts the checkable ones out; run an independent adversarial review;
+        let the developer accept, reject or challenge; pin every accepted expectation
+        with a test meeting rules/testing.md; review and repair the built code with the
+        plugin's own skills; and persist expectations, evidence and verdicts as a living
+        record whose composed prose meets rules/writing.md.
       emotional: >
         Confidence the qualitative intent was actually met, not narrated; relief
         from the "the AI says it's fine, but did it really?" (fox-guarding-the-
@@ -171,23 +177,27 @@ jobs:
         on narration.
       pull: >
         A lightweight expectation -> executed-evidence -> human-adjudication loop
-        that REUSES nwave / phil:work for everything checkable and adds a gate ONLY
-        for the qualitative residue — the missing third option for the qualitative
-        goals phil:work's FRAME currently refuses.
+        that REUSES nwave / phil:work for the build — the missing third option for the
+        qualitative goals phil:work's FRAME currently refuses. Revised 2026-10-27:
+        the loop follows Laforgia's EDD protocol end to end and applies this plugin's
+        standards where the engines apply their own.
       anxiety: >
         (A) yet another orchestrator that merely duplicates nwave/phil:work — countered
         by the central off-ramp; (B) ceremony on work that did not need it — countered
         by bias-to-off-ramp + a gate that scales to zero when evidence already exists;
         (C) evidence that is narrated, not executed — countered by the executed-artifact
         rule; (D) the builder grading its own homework — countered by separation of
-        powers (builder != evidence-producer; human is the final adjudicator).
+        powers (builder != evidence-producer; human is the final adjudicator);
+        (E, 2026-10-27) a green suite the builder wrote standing in for proof —
+        countered by evidence for every expectation by default, with an opt-out the
+        record names.
       habit: >
         Trusting AI narration ("looks good to me"), reading every diff by hand, or
         silently dropping qualitative intent because no test exists for it.
     opportunity_score: not-scored   # single new job; priority by default
     status: validated
     personas: [avery-expectation-owner]
-    features: [edd-loop]
+    features: [edd-loop, edd-article-alignment]
     # Relationship to deliver-invisible-work-with-discipline (phil-work): distinct outcome.
     # phil-work's job is PRESERVE behavior through invisible change (preservation floor +
     # checkable goal). This job is PROVE a qualitative expectation is met with executed
