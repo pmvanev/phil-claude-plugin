@@ -547,3 +547,140 @@ def test_refactor_loop_is_recommended_never_run():
     repair = " ".join(REPAIR_REF.read_text().split())
     assert "recommend `/phil:refactor-loop`" in repair
     assert "never runs it" in repair
+
+
+# --- edd-article-alignment slice 04 (2026-10-27): the living record is written to this plugin's writing
+# standards, and neither the evidence nor the developer's words are edited. Decisions D9, D11.
+
+def test_document_reads_the_writing_standards_and_reviews_composed_drafts_before_writing():
+    document = _section("DOCUMENT")
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/rules/writing.md`" in document
+    assert "`${CLAUDE_PLUGIN_ROOT}/rules/technical-communication.md`" in document
+    assert "`phil:red-team-prose`" in document
+    assert "before anything is written to disk" in document
+
+
+def test_fixes_touch_composed_spans_only_and_evidence_never_enters_the_review():
+    document = _section("DOCUMENT")
+    assert "only to spans inside a `composed` field" in document
+    assert "never passed to the review" in document
+    assert "byte-identical to what the producer captured" in document
+
+
+def test_a_fitness_finding_blocks_done_until_fixed_or_waived():
+    document = _section("DOCUMENT")
+    assert "A `[fitness]` finding blocks done" in document
+    assert "After a second fix round on the same document" in document
+
+
+# --- the article's "A Practical Protocol", checked step by step (2026-10-27): six gaps.
+
+def test_step_2_the_engine_builds_from_the_confirmed_expectations():
+    assert "Hand the engine the confirmed expectations, in risk order, as its specification" in _section("BUILD")
+
+
+def test_step_1_non_functional_requirements_include_error_handling():
+    assert "performance, error handling, security, limits" in _section("CAPTURE")
+
+
+def test_step_3_an_engine_that_cannot_meet_an_expectation_explains_why_and_the_developer_decides():
+    build = _section("BUILD")
+    assert "If the engine reports it cannot meet an expectation" in build
+    assert "reword it, drop it on the record, or stop" in build
+
+
+def test_step_5_a_challenge_can_tighten_a_vague_expectation():
+    adjudicate = _section("ADJUDICATE")
+    assert "a rewording that tightens a vague expectation" in adjudicate
+    assert "its earlier evidence no longer stands" in adjudicate
+
+
+def test_partially_verifiable_evidence_is_named():
+    assert "partially verifiable" in _section("EVIDENCE")
+
+
+def test_step_6_a_not_executable_expectation_is_pinned_outside_the_loop():
+    assert "a test that runs outside the loop" in _section("STABILIZE")
+    assert "`pinned, not run here`" in _section("STABILIZE")
+
+
+# --- slice 04 review findings (skill-reviewer, plugin-validator; 2026-10-27). red-team-prose's Step 6
+# applies every fix on one yes and cannot filter by provenance, and its no-argument mode reviews the
+# whole conversation, evidence included. The draft now leaves the developer's words and the evidence
+# out of the review structurally, and this skill owns the apply question.
+
+DOCUMENT_REF = SKILL.parent / "references" / "document.md"
+
+
+def _document_ref():
+    return " ".join(DOCUMENT_REF.read_text().split())
+
+
+def test_drafts_live_outside_the_repository_with_the_developers_words_as_placeholders():
+    ref = _document_ref()
+    assert "a temporary directory outside the repository" in ref
+    assert "replaced by a placeholder naming it" in ref
+    assert "referenced by path, never inlined" in ref
+
+
+def test_this_skill_owns_the_apply_question_not_red_team_prose():
+    ref = _document_ref()
+    assert "its Steps 1 to 5 only" in ref
+    assert "this skill's own ask replaces its Step 6" in ref
+
+
+def test_the_fitness_ask_names_fix_waive_and_stop_and_a_fix_invents_nothing():
+    ref = _document_ref()
+    assert "`fix`, `waive` and `stop`" in ref
+    assert "never inventing one" in ref
+
+
+def test_writing_restores_the_developers_words_and_checks_both_against_the_record():
+    ref = _document_ref()
+    assert "restore each placeholder with the developer's words, verbatim" in ref
+    assert "against the hash recorded at capture" in ref
+
+
+def test_every_free_text_answer_is_recorded_as_the_developers():
+    assert "Every free-text answer is recorded labelled `you wrote`" in _section("Every ask")
+
+
+def test_only_the_developer_drops_an_expectation_and_the_record_says_so():
+    assert "only the developer may drop one, at BUILD's cannot-meet ask" in _section("ADJUDICATE")
+    assert "dropped by the developer" in _section("DOCUMENT")
+
+
+def test_a_stop_once_build_has_started_writes_the_trail():
+    assert "a stop once BUILD has started writes the trail" in _section("Every ask")
+
+
+def test_an_out_of_loop_pin_has_its_own_dispatch_and_is_exempt_from_the_green_check():
+    assert "exempt from the green check" in _section("STABILIZE")
+
+
+def test_a_reworded_expectation_gets_evidence_and_a_fresh_review():
+    adjudicate = _section("ADJUDICATE")
+    assert "gets evidence whatever OPT-OUT said, and REVIEW re-runs with the new wording" in adjudicate
+
+
+def test_the_producer_says_what_a_partial_run_leaves_unshown():
+    agent = " ".join(AGENT.read_text().split())
+    assert "what the run leaves unshown" in agent
+
+
+# --- slice 04 fixture drive (2026-10-27): 18 of 22; 15 regressed when DOCUMENT began asking after a stop.
+
+def test_a_run_that_has_ended_writes_its_reviewed_trail_without_asking():
+    assert "ask nothing: apply no fix, record every finding as standing" in _document_ref()
+
+
+def test_an_engines_cannot_meet_report_comes_before_the_red_oracle_rule():
+    assert "comes before the red-oracle rule" in _section("BUILD")
+
+
+def test_a_dropped_expectation_never_counts_as_met_and_does_not_block_done():
+    assert "does not block done: the developer decided it" in _section("BUILD")
+
+
+def test_a_build_reword_gets_evidence_whatever_opt_out_said():
+    assert "gets evidence whatever OPT-OUT said, since the opt-out never saw it" in _section("BUILD")

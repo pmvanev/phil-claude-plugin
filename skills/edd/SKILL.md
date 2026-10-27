@@ -43,18 +43,22 @@ it.
 
 ## Every ask
 
-Every question this skill puts to the developer — CAPTURE's confirmation, OPT-OUT, EVIDENCE's
-spot-check, ADJUDICATE, FINDINGS, REPAIR's offer — follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.
+Every question this skill puts to the developer — CAPTURE's confirmation, OPT-OUT, BUILD's
+cannot-meet, EVIDENCE's spot-check, ADJUDICATE, FINDINGS, REPAIR's offer, and DOCUMENT's apply and
+fitness asks — follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.
 Load it before the first ask. On top of that standard:
 
-- **Every ask offers `stop`.** A stop before BUILD ends the run and writes nothing; a stop after BUILD
-  writes the trail as it stands and reports the run not done.
+- **Every ask offers `stop`.** A stop before BUILD starts ends the run and writes nothing; a stop once
+  BUILD has started writes the trail as it stands and reports the run not done.
 - **Unanswered.** An ambiguous or empty reply is unanswered, and two consecutive unanswered asks end
   the run, reported not done — this skill overrides the standard's "treat it as a decline", because a
   decline has no meaning for most of these asks. OPT-OUT alone treats an ambiguous reply as a no.
 - **Caps.** Every "second" cap in this skill — a second red oracle, narrated return, cannot-run, fix
-  round, reject or challenge — means the second and every one after it.
-- **Free text.** An answer that needs words — a challenge's scenario, a reject's reason, a waiver's
+  round, prose fix round, reject or challenge — means the second and every one after it.
+- **Free text is the developer's.** Every free-text answer is recorded labelled `you wrote` — a
+  reject's reason, a challenge's scenario, a waiver's or a drop's reason, a reworded expectation, a
+  spot-check's observation. An answer that needs words — a challenge's scenario, a reject's reason,
+  a waiver's
   reason — comes through the ask's "Other" field or one follow-up ask; an empty follow-up is
   unanswered.
 - **The developer's words stay theirs.** Quote a `you wrote` line word for word in the context block;
@@ -88,7 +92,7 @@ Before showing the list, check it the way the article asks:
   - the **happy path**;
   - **past edge cases** — the bugs this area has had before. Ask the developer, or search the
     history (`git log`, the issue tracker, tests that pin old bugs); never invent a past bug;
-  - **non-functional requirements** the intent implies — performance, security, limits;
+  - **non-functional requirements** the intent implies — performance, error handling, security, limits;
   - behaviour that **must not happen** — what the change must never do: break existing behaviour,
     lose or leak data, act without being asked. An expectation that existing behaviour stays
     unchanged covers this category.
@@ -201,7 +205,19 @@ Delegate the actual build to the fitting engine and let its native oracle prove 
 expectations:
 
 - **user-facing behavior** → nwave (its acceptance-test run is the oracle);
-- **invisible / developer-facing** → `/phil:work` (its preservation floor + checkable goal is the oracle).
+- **invisible / developer-facing** → `/phil:work` (its preservation floor + checkable goal is the
+  oracle).
+
+Hand the engine the confirmed expectations, in risk order, as its specification — not the intent they
+came from — then let it work; do not interrupt the build. If the engine reports it cannot meet an
+expectation, put its explanation to the developer, who may reword it, drop it on the record, or stop.
+This report comes before the red-oracle rule: the red oracle an unmet expectation produces goes to
+the developer with the engine's explanation, not back to the engine. A reworded expectation is the
+developer's — `you wrote`, or `you edited` if it started from a suggestion — goes back through
+CLASSIFY, gets evidence whatever OPT-OUT said, since the opt-out never saw it, and the engine
+continues against the new wording. A dropped one is recorded as dropped by the developer, with their
+reason. It never counts as met, and it does not block done: the developer decided it, and the report
+names it.
 
 This skill runs one engine per run. If the expectations need both, say so and split the intent into
 two runs, one per engine, with the developer's agreement; sequencing across engines is not supported.
@@ -217,7 +233,8 @@ to the developer at EVIDENCE. Record which engine built. The evidence below adds
 cannot give the developer: the scenario's real inputs and output in front of their eyes.
 
 A rebuild re-runs REVIEW on the whole target — a reject, a red oracle, or a FINDINGS fix that changes
-more than tests sends the work back to the engine — and re-asks every expectation whose evidence the change touched: re-gather that
+more than tests sends the work back to the engine — and re-asks every expectation whose evidence the
+change touched: re-gather that
 evidence, review, and put it to the developer again. An accept on evidence the rebuild invalidated no
 longer stands. Once the developer has adjudicated again, the run re-enters STABILIZE over everything
 changed since `base`. A waiver stands only while its finding's span is unchanged.
@@ -265,7 +282,8 @@ what they meant.
 - **accept** → the expectation is met; record the verdict.
 - **reject** → the expectation is **not** met. **Block done.** Take the developer's reason, route the
   expectation back to the engine to change the thing, and follow BUILD's rebuild rule. Never move on,
-  never drop a rejected expectation, and never report the run done while any expectation stands
+  never drop a rejected expectation — only the developer may drop one, at BUILD's cannot-meet ask, on
+  the record — and never report the run done while any expectation stands
   rejected. Grade the final state, not the effort. The developer may stop instead: the reject stands,
   recorded.
 - **challenge** → the evidence is not enough; the thing itself was never judged, so a challenge is
@@ -277,6 +295,10 @@ what they meant.
   - A challenge that adds an expectation sends it through CLASSIFY, labelled `you wrote`, into its
     place in the risk order; it gets evidence whatever OPT-OUT said, since the opt-out never saw it.
     Before its ask, re-run REVIEW with the added expectation in its intent.
+  - A challenge may be a rewording that tightens a vague expectation. The new wording is the
+    developer's — `you wrote`, or `you edited` if it started from a suggestion — and goes back through
+    CLASSIFY; its earlier evidence no longer stands. It gets evidence whatever OPT-OUT said, and REVIEW
+    re-runs with the new wording in its intent, before its next ask.
   - A reply that the evidence does not show this expectation — the wrong scenario, irrelevant reused
     evidence — is a challenge: commission fresh evidence and rebuild nothing.
 - **stop** → end the run. Record every standing reject, challenge and unproven expectation as it
@@ -323,7 +345,8 @@ Three answers, `fix`, `waive` and `stop`, each with its cost:
 - **fix** — route the finding to the engine and follow BUILD's rebuild rule; costs a rebuild, a
   re-review, a re-ask of every expectation the change touched, and STABILIZE again. A fix whose change
   touches only test and approved-output files is not a rebuild — an unpinned expectation's pin, or a
-  weak pinning test split — and STABILIZE re-checks the pins and re-reviews the changed tests. A finding from `phil:review-code` or `phil:ux-review` never clears on the
+  weak pinning test split — and STABILIZE re-checks the pins and re-reviews the changed tests. A
+  finding from `phil:review-code` or `phil:ux-review` never clears on the
   engine's word: STABILIZE's re-run clears it only when the re-run does not reproduce it.
 - **waive** — take the developer's reason; record the finding, the reason and a timestamp. Done is no
   longer blocked by it, while its span is unchanged.
@@ -349,24 +372,33 @@ and the record keeps every repair offered, run or skipped.
 ## DOCUMENT — living documentation (every run that built)
 
 Write the trail under `docs/edd/<slug>/` for every run that built, opt-out runs included — a run
-stopped over a standing reject writes the trail too, its verdicts included:
+stopped over a standing reject writes the trail too, its verdicts included. Compose and review it as
+`references/document.md` says, before anything is written to disk:
 
 ```
 docs/edd/<slug>/
   expectations.md   # each expectation + provenance + classification and its reason or blocker + routing + `trusted to the tests`
   evidence/         # the captured EXECUTED artifacts (verbatim) with their reproduce commands, one per expectation that has one
-  verdicts.md       # per expectation: accept, reject, unproven (stopped), `trusted to the tests`, or a hand spot-check and its verdict
+  verdicts.md       # per expectation: accept, reject, unproven (stopped), dropped by the developer (with their reason),
+                    #   `trusted to the tests`, or a hand spot-check and its verdict
                     #   + timestamp + evidence reference; each challenge and the evidence it brought;
                     # the review's label, verdict and raised/confirmed/refuted counts; each confirmed finding,
-                    #   and each waiver with its reason and timestamp
-  stabilize.md      # per accepted expectation and trusted row, the pinning test that pins it, or `pinned by nothing`
+                    #   and each waiver — FINDINGS' or DOCUMENT's fitness — with its reason and timestamp
+  stabilize.md      # per accepted expectation and trusted row, the pinning test that pins it, `pinned, not run here`, or `pinned by nothing`
                     #   and why; every phil:review-code and phil:ux-review finding, blocking or advisory, every
                     #   `consider` included; each repair offered, run or skipped
 ```
 
 and a durable summary at `docs/evolution/<date>-<slug>.md`, creating `docs/evolution/` if absent.
+
+**Review the composed prose before anything reaches disk.** Read
+`${CLAUDE_PLUGIN_ROOT}/skills/edd/references/document.md` before composing: it holds the standards to
+read, how `phil:red-team-prose` runs over the drafts, and what it may touch. In short: fixes land only
+in `composed` fields, the evidence is never passed to the review, and a `[fitness]` finding blocks done
+until rewritten or waived by name.
+
 Report a summary naming, per expectation, the verdict and the evidence it rested on — or that it was
-trusted to the tests — and the test that now pins it.
+trusted to the tests, or dropped by the developer — and the test that now pins it.
 
 A run that stops before BUILD writes **none** of this.
 
@@ -389,7 +421,8 @@ A run that stops before BUILD writes **none** of this.
   correction, blocks done until FINDINGS clears it by fix or a named waiver; no reviewer output is ever
   a verdict, and a draft signal is never a verified pass.
 - **Every loop ends.** A second red oracle, a second narrated return, a second cannot-run, a second
-  fix round and a second consecutive unanswered ask each go to the developer or end the run; every ask
+  fix round or prose fix round and a second consecutive unanswered ask each go to the developer or
+  end the run; every ask
   offers `stop`; a reject or challenge re-asks only on new evidence. Nothing re-commissions or rebuilds
   forever.
 - **Pinned, reviewed and repaired to this plugin's standards.** Every accepted expectation is pinned
@@ -398,7 +431,13 @@ A run that stops before BUILD writes **none** of this.
   findings, its Priority 6 findings on pinning tests, and `phil:ux-review`'s `must-fix` findings block
   done until FINDINGS clears them, a fix only on a re-run that does not reproduce the finding. Repairs
   run after every blocker clears, never over a pinning test with a skill that changes what it asserts.
-- **Keep the developer's words.** A `you wrote` line is never edited.
+- **Keep the developer's words, and the evidence.** A `you wrote` or `you edited` line is never
+  edited, by this skill or by a prose review; every file under `evidence/` stays byte-identical to its
+  capture.
+- **Compose to this plugin's writing standards.** Every document this skill composes — never the
+  evidence — passes `phil:red-team-prose` before it reaches disk; a `[fitness]` finding blocks done
+  until rewritten or
+  waived by name.
 - **Report honestly.** Grade the final state, not the effort. Never claim done over an unmet or
   unproven expectation.
 
@@ -414,7 +453,9 @@ expectation not executable in the loop (10), capture's coverage, size and risk c
 review before any verdict (12), a challenge that rebuilds nothing (13), an unwaived major finding
 blocking done (14), a stop over a standing challenge (15), an unpinned expectation blocking done
 (16), an approval test pinned to the accepted evidence (17), a Priority 1 review finding blocking
-done while advisories go to their owners (18), and a UI change audited by `phil:ux-review` (19).
+done while advisories go to their owners (18), a UI change audited by `phil:ux-review` (19), the
+record reviewed with the evidence and the developer's words untouched (20), an engine that cannot
+meet an expectation (21), and a challenge that tightens a vague expectation (22).
 Whenever this skill, its `references/`, `commands/edd.md`, `agents/edd-evidence-producer.md`,
 `agents/adversarial-reviewer.md` or `agents/adversarial-verifier.md` changes, drive the
 fixtures per `self-test/README.md` and confirm each produces its `expected.md` decision — every edit

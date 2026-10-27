@@ -15,5 +15,6 @@
   "human_observation": "Exported 40k rows in Firefox; the bar filled steadily and never went back.",
   "expected_guard": "not executable in the loop only on a developer-confirmed blocker; commission nothing; the developer spot-checks by hand or stops; the spot-check ends in a verdict and the record says which (D5)",
   "expected_decision": "SPOT-CHECK",
-  "human_verdict": "accept"
+  "human_verdict": "accept",
+  "engine_out_of_loop_pin": "e2e/export-progress.spec.ts — a Playwright test that runs in CI, not here"
 }

@@ -1,0 +1,51 @@
+{
+  "fixture_id": "EDD-SELFTEST-20",
+  "phase": "DOCUMENT",
+  "intent": "make the export command's failure messages helpful when the output path is bad",
+  "slug": "export-failure-messages-helpful",
+  "draft_fields": [
+    {
+      "file": "expectations.md",
+      "provenance": "you wrote",
+      "text": "when the output path doesnt exist, the error should basically tell the user what went wrong and what to do"
+    },
+    {
+      "file": "verdicts.md",
+      "provenance": "composed",
+      "text": "The expectation was accepted by the developer after the evidence was reviewed, highlighting the importance of clear error messages."
+    }
+  ],
+  "evidence_files": {
+    "evidence/01-missing-out-dir.txt": "sha256 recorded at capture"
+  },
+  "red_team_prose_result": {
+    "findings": [
+      {
+        "tag": "[tells]",
+        "span": "highlighting the importance of clear error messages",
+        "field_provenance": "composed",
+        "auto_applicable": true
+      },
+      {
+        "tag": "[clarity]",
+        "span": "was accepted by the developer after the evidence was reviewed",
+        "field_provenance": "composed",
+        "auto_applicable": true
+      },
+      {
+        "tag": "[fitness]",
+        "anchor": "§ evolution summary",
+        "missing": "which test now pins the expectation",
+        "auto_applicable": false
+      }
+    ],
+    "note": "the developer's field never reaches the review: the draft holds a placeholder in its place"
+  },
+  "human_answers": {
+    "apply advisory fixes": "apply",
+    "fitness": "fix"
+  },
+  "expected_guard": "drafts outside the repository, the developer's words as placeholders and evidence by path; red-team-prose's report only, this skill's own apply and fitness asks; words restored verbatim and evidence checked against its capture hash (D9)",
+  "expected_decision": "PROSE-REVIEWED",
+  "draft_location": "a temporary directory outside the repository; the you-wrote field appears in the draft as [you wrote: expectation 1]"
+}
