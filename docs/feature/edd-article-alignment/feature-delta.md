@@ -313,8 +313,21 @@ existing skills composed, none modified; no new mechanism beyond the gates and t
 5. Every accepted expectation is pinned by a test in a fixture.
 6. `evidence/` and the developer's words survive the prose review untouched in a fixture.
 7. Every new citation and gate has a `tests/test_edd_skill.py` assertion, watched red first.
-8. `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` run over the result; `phil:eos` and
-   `/phil:harden-instructions` run before the release that ships it.
+8. `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` run over the result. Before the
+   release that ships it — once every slice's content is settled, and before the work is closed — two
+   editing passes run (the developer's instruction, 2026-10-27):
+   - **`/phil:harden-instructions`** over every instruction file the work touched:
+     `skills/edd/SKILL.md` and `skills/edd/references/*.md`, `commands/edd.md`,
+     `agents/edd-evidence-producer.md`, `agents/adversarial-reviewer.md`,
+     `agents/adversarial-verifier.md`, and `skills/adversarial-review/SKILL.md`;
+   - **`phil:eos`** over the rules and documentation it touched: any `rules/*.md` slice 04 changes
+     (none so far), this file and its slice briefs, the ADR-007 and ADR-009 amendments, the
+     architecture brief, the job, journey and persona entries, `skills/edd/self-test/README.md`, the
+     fixtures' `expected.md` files, and `skills/edd/acceptance.feature`.
+
+   Both passes edit content, so `python3 -m pytest -q` and a by-hand fixture drive run again after
+   them. `/phil:*` commands run the released copy, not this tree (CLAUDE.md): name the version each
+   pass ran against in its commit, or say the pass drove the command's prose by hand.
 9. Issue 38's checklist item is ticked with the merging PR named.
 
 ## Wave: DISCUSS / [REF] Definition of Ready — validation
