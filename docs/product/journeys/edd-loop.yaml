@@ -1,105 +1,127 @@
 # Journey (SSOT) — bootstrapped by DISCUSS wave, feature: edd-loop (2026-07-15)
+# Revised by DISCUSS wave, feature: edd-article-alignment (2026-10-27): the steps follow
+# Laforgia's EDD protocol (write → hand over → evidence → adversarial review → challenge →
+# stabilize → archive); the off-ramp exit is replaced by an opt-out the record names.
+# Prior version: git show dc60f44:docs/product/journeys/edd-loop.yaml
 
 id: edd-loop
-name: Prove qualitative expectations are met with executed evidence
+name: Prove every expectation is met with executed evidence
 persona: avery-expectation-owner
 job: prove-qualitative-expectations-with-evidence
 summary: >
-  Avery runs /phil:edd with an intent. The command captures the expectations, classifies
-  each (engine-checkable vs qualitative), and — biased toward getting out of the way — OFF-RAMPS
-  to nwave / phil:work when everything is already provable by those engines' native oracles.
-  Only for the qualitative residue does it delegate the build to one engine and attach a
-  scaled EXECUTED-evidence gate that Avery adjudicates. Expectations + evidence + verdicts
-  become living documentation. It is the expectation-driven sibling to phil:work: same
-  contractor pattern (delegate the build, inherit the oracle, add exactly the one gate the
-  engine lacks, leave a trail).
+  Avery runs /phil:edd with an intent. The command captures the expectations, checked for
+  coverage, size and risk, and asks once whether to trust the tests for the checkable ones.
+  It delegates the build to nwave or phil:work, gathers EXECUTED evidence for every expectation
+  not opted out from an agent that is not the builder, and runs an independent adversarial
+  review. Avery accepts, rejects or challenges each expectation. Every accepted expectation is
+  pinned by a test meeting the plugin's testing standards; the plugin's own review and repair
+  skills run over the built code, and their serious findings block done. Expectations, evidence
+  and verdicts become a living record whose composed prose meets the plugin's writing standards.
 
-# Research depth: LIGHTWEIGHT (DISCUSS Decision 3) — happy path + key error paths.
+# Research depth: LIGHTWEIGHT — happy path + key error paths.
 
 steps:
   - id: invoke
-    action: Avery runs `/phil:edd "<intent>"` (no-arg resumes an in-flight loop, like phil:work)
+    action: Avery runs `/phil:edd "<intent>"`
     output: Tool acknowledges the intent and enters CAPTURE
-    emotion: uncertain — "the AI built a lot; did it actually meet what I meant, especially the fuzzy parts?"
+    emotion: uncertain — "the AI will build a lot; will it meet what I meant, fuzzy parts included?"
   - id: capture
     action: >
-      Tool restates the intent as a list of discrete EXPECTATIONS in plain language, surfacing
-      the qualitative ones explicitly ("error messages should be helpful"). Avery confirms/edits.
-    output: expectations list — each a single checkable-or-qualitative statement
-    emotion: clarity — the fuzzy intent is now named, itemized expectations
-  - id: classify
+      Tool restates the intent as discrete expectations, names any missing category (happy path,
+      past edge cases, non-functional, must-not-happen), proposes splits for any expectation of
+      more than one breath, and orders the list by risk. Its suggestions are labelled composed;
+      Avery's wording is kept. Avery confirms, and answers once whether to trust the tests for
+      the checkable expectations this run.
+    output: risk-ordered expectations list, each labelled checkable / qualitative / not executable in the loop, plus the opt-out answer
+    emotion: clarity — the gaps surfaced while they were cheap to fill
+  - id: hand-over
     action: >
-      Tool classifies each expectation: engine-checkable (an nwave AT can assert it, or a phil:work
-      metric can measure it) vs qualitative (would require encoding a subjective judgment). Bias to
-      off-ramp: default to engine-checkable; only mark qualitative when Avery confirms a concrete
-      reason it can't be cheaply asserted.
-    output: classification table — expectation -> {engine-checkable + engine + oracle | qualitative + reason}
-    emotion: reassurance — nothing is being wrapped in ceremony just because it's AI-built
-  - id: off-ramp
+      Tool delegates the build to one engine (nwave for user-facing, phil:work for invisible),
+      unchanged. The engine's own oracle still proves the checkable expectations.
+    output: built work; the engine's oracle result
+    emotion: trust building — the proven engine does the build
+  - id: evidence
     action: >
-      If ALL expectations are engine-checkable, tool recommends the specific engine command
-      (`/nw-...` or `/phil:work "<...>"`) and EXITS — "phil:edd would only add ceremony." No trail
-      is created. (This is the whole run for a fully-checkable intent — the walking skeleton.)
-    output: off-ramp recommendation naming the engine; clean exit, zero trail files
-    emotion: relief — told honestly to use the right tool directly; no wasted ceremony
-  - id: build-via-engine
+      For every expectation not opted out, a non-builder producer runs the scenario or renders
+      the thing and captures inputs and verbatim output with a reproduce command. Narration —
+      "all tests passed", a description, a summary — is rejected. An expectation that cannot be
+      run in the loop goes to Avery to spot-check by hand or stop.
+    output: per-expectation EXECUTED evidence (raw + reproduce command), or a recorded opt-out or hand spot-check
+    emotion: confidence — "I'm looking at what it actually did"
+  - id: adversarial-review
     action: >
-      For an intent with qualitative residue, tool delegates the BUILD to one engine (nwave for
-      user-facing, phil:work for invisible) and inherits its native oracle for the checkable
-      expectations — it does NOT re-verify those (ADR-005 lineage).
-    output: engine builds; checkable expectations proven by the engine's own oracle
-    emotion: trust building — the checkable parts are handled by the proven engine, not re-litigated
-  - id: evidence-gate
+      An independent adversarial reviewer attacks the built work against the expectations and
+      the plugin's standards; a judge confirms or refutes each finding.
+    output: confirmed findings, ranked worst-first, each with a span and evidence
+    emotion: vigilance — someone tried to break it before I trusted it
+  - id: challenge
     action: >
-      For each qualitative expectation, the gate SCALES: if the engine already produced relevant
-      executed evidence (a DELIVER demo/e2e run), point Avery at it; otherwise commission a NEW
-      executed artifact (real run / render, captured verbatim + the reproducing command) produced
-      by an agent that is NOT the builder. Narrated "evidence" is rejected and re-commissioned.
-    output: per-qualitative-expectation EXECUTED evidence artifact (raw + reproducing command)
-    emotion: confidence — "I'm looking at what it actually did, not a summary of it"
-  - id: adjudicate
+      Per expectation, Avery sees the evidence, the confirmed findings and four challenge
+      questions, and answers accept, reject (the engine changes the thing, evidence is
+      re-gathered) or challenge (new evidence for a named scenario, no rebuild).
+    output: per-expectation verdict, or a challenge that loops back to evidence
+    emotion: ownership — the verdict rests on evidence Avery pushed on
+  - id: stabilize
     action: >
-      Avery reviews the executed evidence and accepts or rejects each qualitative expectation
-      (human is the final adjudicator — mirrors redesign-tests' human-validated claim). A rejected
-      expectation blocks "done" and iterates the relevant expectation.
-    output: per-expectation verdict (accept/reject) with the evidence it was judged against
-    emotion: ownership — the qualitative call is Avery's, made on real evidence
-  - id: document
+      Every accepted expectation is pinned by a test meeting rules/testing.md and
+      rules/test-patterns.md; an accepted large or subjective output becomes an approval test.
+      The plugin's code review runs over the changed code and tests; its serious findings, and a
+      UI audit's must-fix findings, block done until fixed or waived by name. The rest are
+      offered to the plugin's refactor, test-refactor, test-redesign and comment-cleanup skills.
+    output: pinning tests; review findings fixed, waived or declined, each recorded
+    emotion: assurance — the standards written down here are the ones applied
+  - id: archive
     action: >
-      On completion, tool persists expectations + evidence + verdicts to the living-doc trail and
-      writes a durable evolution summary. (Only when the gate ran — an off-ramp run leaves no trail.)
+      For every run that built, the tool composes the trail and evolution summary, runs the
+      plugin's prose review over what it composed, applies the safe fixes to composed words only,
+      and writes the record. Evidence and Avery's words are never edited.
     output: docs/edd/<slug>/ (expectations, evidence/, verdicts) + docs/evolution/<date>-<slug>.md
-    emotion: satisfaction — intent, proof, and verdict are on record and outlive the session
+    emotion: satisfaction — a teammate can see what was expected and how we know
 
-emotional_arc: uncertain -> clarity -> reassurance -> trust -> confidence -> ownership -> satisfaction  # upward
+emotional_arc: uncertain -> clarity -> trust -> confidence -> vigilance -> ownership -> assurance -> satisfaction  # upward
 
 shared_artifacts:
   - name: expectations_list
     source: capture
-    consumed_by: [classify, off-ramp, build-via-engine, evidence-gate, adjudicate, document]
-  - name: classification_table
-    source: classify
-    consumed_by: [off-ramp, build-via-engine, evidence-gate]  # routes checkable vs qualitative
+    consumed_by: [hand-over, evidence, adversarial-review, challenge, stabilize, archive]
+  - name: opt_out
+    source: capture
+    consumed_by: [evidence, archive]  # the record names every expectation trusted to tests
   - name: executed_evidence_artifacts
-    source: evidence-gate
-    consumed_by: [adjudicate, document]
+    source: evidence
+    consumed_by: [challenge, stabilize, archive]  # accepted evidence becomes an approval test's approved output
+  - name: confirmed_findings
+    source: adversarial-review
+    consumed_by: [challenge, archive]
   - name: verdicts
-    source: adjudicate
-    consumed_by: [document]  # blocks done until every qualitative expectation is accepted
+    source: challenge
+    consumed_by: [stabilize, archive]
+  - name: waivers
+    source: [adversarial-review, stabilize, archive]
+    consumed_by: [archive]
 
 error_paths:
-  - step: classify
+  - step: capture
     failure: An expectation is marked qualitative without a concrete reason it can't be cheaply asserted
-    recovery: Default it back to engine-checkable — no unjustified ceremony (bias-to-off-ramp)
-  - step: off-ramp
-    failure: All expectations engine-checkable, but tool still tries to build a gate
-    recovery: Must recommend the engine and EXIT with zero trail — off-ramp is mandatory when fully checkable
-  - step: evidence-gate
-    failure: The "evidence" is narration (no raw artifact / not reproducible)
-    recovery: Reject as insufficient and re-commission a real executed artifact — narration never satisfies the gate
-  - step: evidence-gate
+    recovery: Treat it as checkable; it still gets evidence unless opted out
+  - step: evidence
+    failure: The "evidence" is narration ("all tests passed", a description, a summary)
+    recovery: Reject it and re-commission a real executed artifact
+  - step: evidence
     failure: The builder and the evidence-producer are the same agent
-    recovery: Separation of powers is mandatory — evidence must come from a non-builder; re-commission from an independent producer
-  - step: adjudicate
-    failure: A qualitative expectation is rejected on the evidence
-    recovery: Block "done", iterate that expectation via the engine, re-gather evidence — never report done with a rejected expectation
+    recovery: Re-commission from the independent producer — separation of powers is mandatory
+  - step: evidence
+    failure: The producer cannot run the expectation in the loop
+    recovery: Report it to Avery, who spot-checks by hand or stops; the record says which
+  - step: adversarial-review
+    failure: A confirmed major finding is neither fixed nor waived
+    recovery: Block done
+  - step: challenge
+    failure: Avery rejects or challenges an expectation
+    recovery: Reject rebuilds via the engine then re-gathers evidence; challenge re-gathers only; Avery may stop, and the run is reported not done
+  - step: stabilize
+    failure: An accepted expectation has no test pinning it, or a serious review finding stands unwaived
+    recovery: Block done
+  - step: archive
+    failure: The prose review would edit evidence or Avery's words
+    recovery: Fixes apply to composed words only; evidence stays byte-identical
