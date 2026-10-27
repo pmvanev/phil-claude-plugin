@@ -206,14 +206,19 @@ full DISCUSS+DESIGN+DISTILL record; DELIVER progress in `docs/feature/edd-loop/d
 01–02 (triage + off-ramp; single-engine qualitative gate). Cross-domain multi-initiative sequencing +
 seam-level expectations deferred to slice 03.
 
-**Revision in flight — edd-article-alignment (2026-10-27).** `/phil:edd` is being reworked to follow
-Andrea Laforgia's EDD protocol end to end; see `docs/feature/edd-article-alignment/feature-delta.md`.
-Slice 01 has landed: the **off-ramp exit is retired** — every expectation gets executed evidence unless
-the developer opts the checkable ones out, an opt-out the record names; capture checks coverage, size
-and risk; a pass count is narration; an expectation not executable in the loop goes to the developer
-to spot-check; and the trail is written for **every run that built**. The engine's oracle is still
-inherited, never re-run. Where the text and diagrams below say OFF-RAMP or "only when the gate ran",
-read them as the shipped 2026-07-15 design, superseded by the amendments to ADR-007 and ADR-009.
+**Revision landed — edd-article-alignment (2026-10-27).** All four slices have landed, reworking
+`/phil:edd` to follow Andrea Laforgia's EDD protocol end to end; see
+`docs/feature/edd-article-alignment/feature-delta.md`. Slice 01 **retired the off-ramp exit**: every
+expectation gets executed evidence unless the developer opts the checkable ones out, an opt-out the
+record names; capture checks coverage, size and risk; a pass count is narration; an expectation not
+executable in the loop goes to the developer to spot-check; and the trail is written for **every run
+that built**. Slice 02 added an independent adversarial REVIEW before any verdict, a `challenge`
+answer, and FINDINGS to clear confirmed majors. Slice 03 added STABILIZE — pinning tests written to
+`rules/testing.md`, `phil:review-code` and `phil:ux-review` gates — and REPAIR by each advisory's
+owning skill. Slice 04 reviews the composed record with `phil:red-team-prose`, leaving the evidence
+and the developer's words untouched. The engine's oracle is still inherited, never re-run. Where the
+text and diagrams below say OFF-RAMP or "only when the gate ran", read them as the shipped 2026-07-15
+design, superseded by the amendments to ADR-007 and ADR-009.
 
 **Pattern:** modular prose skill, ports-and-adapters (same lineage as `phil:work`).
 **Substrate (ADR-007):** prose spine (`skills/edd/SKILL.md`) owns the interactive flow

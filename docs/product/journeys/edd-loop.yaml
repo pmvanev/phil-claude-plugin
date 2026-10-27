@@ -12,7 +12,7 @@ summary: >
   Avery runs /phil:edd with an intent. The command captures the expectations, checked for
   coverage, size and risk, and asks once whether to trust the tests for the checkable ones.
   It delegates the build to nwave or phil:work, gathers EXECUTED evidence for every expectation
-  not opted out from an agent that is not the builder, and runs an independent adversarial
+  not opted out, from an agent that is not the builder, and runs an independent adversarial
   review. Avery accepts, rejects or challenges each expectation. Every accepted expectation is
   pinned by a test meeting the plugin's testing standards; the plugin's own review and repair
   skills run over the built code, and their serious findings block done. Expectations, evidence
@@ -118,7 +118,7 @@ error_paths:
     recovery: Block done
   - step: challenge
     failure: Avery rejects or challenges an expectation
-    recovery: Reject rebuilds via the engine then re-gathers evidence; challenge re-gathers only; Avery may stop, and the run is reported not done
+    recovery: Reject rebuilds via the engine, then re-gathers evidence; challenge re-gathers only; Avery may stop, and the run is reported not done
   - step: stabilize
     failure: An accepted expectation has no test pinning it, or a serious review finding stands unwaived
     recovery: Block done

@@ -52,16 +52,14 @@ clear the bar and fix nothing."
 
 ## Wave: DISCUSS / [REF] Locked decisions
 
-D1–D3 were put to the developer on 2026-10-27 and answered; the rest follow from those answers and
-the article.
+The developer answered D1–D3 on 2026-10-27; the rest follow from those answers and the article.
 
 - **[D1] Every expectation gets executed evidence by default; the developer may opt out the
   checkable ones for a run.** *(Developer's answer.)* After classification, `/phil:edd` asks once
   whether to trust the engine's tests for this run's checkable expectations. On a yes, those get no
-  evidence and the record says so in as many words. Qualitative expectations cannot be opted out, nor
-  can an expectation an approval test pins: its first output needs a human read (amended at slice 01
-  review, 2026-10-27). Revises edd-loop
-  D1 and the off-ramp (see Changed Assumptions).
+  evidence and the record says so explicitly. Qualitative expectations cannot be opted out, nor can
+  an expectation an approval test pins: its first output needs a human read (amended at slice 01
+  review, 2026-10-27). Revises edd-loop D1 and the off-ramp (see Changed Assumptions).
 
 - **[D2] Serious findings from the plugin's own reviews block done; the developer can waive one by
   name.** *(Developer's answer.)* "Serious" is fixed per source, not judged per run:
@@ -74,17 +72,17 @@ the article.
   | `phil:ux-review` | changed UI files, when the change touches UI | `must-fix` | `consider` |
 
   A waiver names the finding and the developer's reason, and the record keeps both. An advisory
-  finding is offered for repair (D7) and recorded whether taken or not.
+  finding is offered for repair (D8) and recorded whether taken or not.
 
 - **[D3] The work lives on issue 38 as a checklist item.** *(Developer's answer.)* It is a worked
   example of that card's demand that a standard be *applied*, not cited — a check that fails, a gate
   that blocks, a reviewer that reads it. It settles none of issue 38's larger questions.
 
-- **[D4] Capture follows the article's guidance.** Before confirming the list, `/phil:edd` checks it
-  covers the happy path, past edge cases, non-functional requirements and behaviour that must not
-  happen; splits any expectation that takes more than one breath to say; expands any too thin to
-  test; and orders the list by risk. Evidence, review and challenge then run in that risk order. The
-  restatements and suggestions `/phil:edd` composes follow `rules/writing.md`; the developer's own
+- **[D4] Capture follows the article's guidance.** Before the developer confirms the list, `/phil:edd`
+  checks that it covers the happy path, past edge cases, non-functional requirements and behaviour
+  that must not happen; splits any expectation that takes more than one breath to say; expands any
+  too thin to test; and orders the list by risk. Evidence, review and challenge then run in that risk
+  order. The restatements and suggestions `/phil:edd` composes follow `rules/writing.md`; the developer's own
   wording stays as written.
 
 - **[D5] Classification chooses the kind of evidence, not whether to exit.**
@@ -300,8 +298,8 @@ None new. The shipped `/phil:edd` is the skeleton; each slice extends one step o
 
 ## Wave: DISCUSS / [REF] Scope Assessment
 
-**PASS (right-sized).** 5 stories across 4 slices; one skill, one command, one agent revised; nine
-existing skills composed, none modified; no new mechanism beyond the gates and their assertions.
+**PASS (right-sized).** Five stories across four slices; one skill, one command, one agent revised;
+nine existing skills composed, none modified; no new mechanism beyond the gates and their assertions.
 
 ## Wave: DISCUSS / [REF] Definition of Done
 
@@ -314,8 +312,8 @@ existing skills composed, none modified; no new mechanism beyond the gates and t
 6. `evidence/` and the developer's words survive the prose review untouched in a fixture.
 7. Every new citation and gate has a `tests/test_edd_skill.py` assertion, watched red first.
 8. `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` run over the result. Before the
-   release that ships it — once every slice's content is settled, and before the work is closed — two
-   editing passes run (the developer's instruction, 2026-10-27):
+   release that ships it — once every slice's content is settled, and before the work closes — these
+   passes run (the developer's instruction, 2026-10-27):
    - **`/phil:harden-instructions`** over every instruction file the work touched:
      `skills/edd/SKILL.md` and `skills/edd/references/*.md`, `commands/edd.md`,
      `agents/edd-evidence-producer.md`, `agents/adversarial-reviewer.md`,
@@ -352,12 +350,12 @@ existing skills composed, none modified; no new mechanism beyond the gates and t
 | 9 | Scope right-sized | ✅ | Scope Assessment above |
 
 Requirements completeness: every article step and every skill named in the request maps to a
-decision and an AC. One open item, the pinning delegate (decided at authoring), is a design choice, not a missing
-requirement.
+decision and an AC. One open item, the pinning delegate (decided at authoring), is a design choice,
+not a missing requirement.
 
 ## Wave: DISCUSS / [REF] Changed Assumptions
 
-DISCOVER and DIVERGE never ran; the assumptions changed are edd-loop's DISCUSS and DESIGN decisions.
+DISCOVER and DIVERGE never ran; the changed assumptions are edd-loop's DISCUSS and DESIGN decisions.
 Those documents stay unedited.
 
 - **edd-loop D1**, `docs/feature/edd-loop/feature-delta.md`:

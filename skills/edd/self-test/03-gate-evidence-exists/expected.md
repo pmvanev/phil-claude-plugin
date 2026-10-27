@@ -1,6 +1,6 @@
 # Expected outcome — fixture 03 (evidence already exists: the producer re-runs it)
 
-The expectation ("the wizard feels welcoming") is genuinely qualitative — with a concrete reason
+The expectation ("the wizard feels welcoming") is qualitative, with a concrete reason
 ("welcoming" is a tone judgment). The engine (nwave DELIVER) **already produced** a real end-to-end
 run transcript of the wizard as its demo step (`existing-wizard-transcript.txt`), with its reproduce
 command (`myapp init` on a clean profile).

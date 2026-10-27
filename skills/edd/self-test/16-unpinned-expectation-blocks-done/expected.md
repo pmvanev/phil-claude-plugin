@@ -8,7 +8,7 @@ pinning it, then done is blocked."*
 
 **Expected decision:** `BLOCK-DONE` until the pin lands.
 - STABILIZE sends both accepted expectations to the engine; `/phil:edd` writes no test itself.
-- "writes nothing" comes back pinned by nothing, so it goes to FINDINGS as a blocker.
+- "writes nothing" comes back unpinned, so it goes to FINDINGS as a blocker.
 - Avery answers `fix`: the engine writes the pinning test. That is not a rebuild — REVIEW does not
   re-run and no expectation is re-asked — but `phil:review-code` reviews the new test.
 - `stabilize.md` records each expectation and the test that pins it.

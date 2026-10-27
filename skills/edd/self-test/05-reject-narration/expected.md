@@ -6,8 +6,7 @@ captured run and no way to reproduce it. It is a claim *about* the output, not t
 
 **Pins:** slice-02, AC2.3, KPI narration-rejection — *"Evidence that is narration (no raw artifact /
 not reproducible) is rejected and re-commissioned; narration never satisfies the gate."* This is the
-single most important safety behaviour of the gate: it is what makes "executed evidence" mean
-something.
+gate's most important safety behaviour: it makes "executed evidence" mean something.
 
 **Expected decision:** `REJECT-NARRATION`. The tool judges the offered text insufficient — it is
 narration, not an executed artifact — and commissions a real run in its place (as in fixture 04)
@@ -17,4 +16,4 @@ before any adjudication happens. Avery is never asked to adjudicate against narr
 proceeds to adjudication (or straight to done). This is the EDD failure mode the article names
 explicitly — evidence that is *narrated* rather than *executed* — and it is silent: the adjudication
 prompt looks identical whether it rests on a real transcript or on a paragraph of prose. If this
-fixture passes wrongly, the whole "executed evidence" guarantee is hollow.
+fixture passes wrongly, the "executed evidence" guarantee is hollow.

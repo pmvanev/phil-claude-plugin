@@ -21,7 +21,7 @@ Story 3 · Decisions D2 (adversarial-review row), D7.
 - `tests/test_edd_skill.py` assertions for the review dispatch, the three answers and the block.
 
 ## OUT of scope
-- An automated verdict: `phil:adversarial-review` advises, the developer decides.
+- An automated verdict: `phil:adversarial-review` advises; the developer decides.
 
 ## Learning hypothesis
 - **Disproves** "an adversary before the verdict earns its time" if, on a real run, it confirms no

@@ -1,6 +1,6 @@
 # Expected outcome — fixture 11 (capture checks coverage, size and risk)
 
-The developer's draft has two expectations. One packs two behaviours into one breath. The second —
+The developer's draft has two expectations. The first packs two behaviours into one breath. The second —
 "the JSON export is unchanged" — covers must-not-happen: it says existing behaviour stays unchanged.
 No expectation covers a past edge case, though the repository's history records one: a CSV writer
 broken by records containing commas.
@@ -19,7 +19,7 @@ broken by records containing commas.
   follow `rules/writing.md`; the list sits in the ask's context block.
 
 The developer accepts, edits or declines each suggestion; an edited suggestion becomes `you edited`.
-Nothing proceeds until the list is confirmed.
+Nothing proceeds until the developer confirms the list.
 
 **Gate failure (blocks the skill change):** past edge cases go unnamed; a past bug is invented rather
 than found in the history or asked of the developer; must-not-happen is named as missing although

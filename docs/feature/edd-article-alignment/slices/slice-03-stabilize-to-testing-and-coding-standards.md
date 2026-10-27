@@ -28,7 +28,7 @@ Story 4 · Decisions D2 (review-code and ux-review rows), D8.
 ## Learning hypothesis
 - **Disproves** "this plugin's review catches what the engine's own standards let through" if, on
   real nwave-built work, `phil:review-code` finds nothing at Priority 1 or 6.
-- **Confirms** it if it blocks at least one run, or a pinning test fails `rules/testing.md`.
+- **Confirms** it if the review blocks at least one run, or a pinning test fails `rules/testing.md`.
 
 ## Acceptance criteria
 AC4.1–AC4.5 in `feature-delta.md`.
