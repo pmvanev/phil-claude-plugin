@@ -1,0 +1,29 @@
+{
+  "fixture_id": "EDD-SELFTEST-16",
+  "phase": "STABILIZE",
+  "intent": "add a --dry-run flag to the export command that prints what would be written without writing it",
+  "expectations": [
+    {
+      "text": "export --dry-run prints the file paths that would be written",
+      "classification": "checkable",
+      "engine": "nwave",
+      "human_verdict": "accept"
+    },
+    {
+      "text": "export --dry-run writes nothing",
+      "classification": "checkable",
+      "engine": "nwave",
+      "human_verdict": "accept"
+    }
+  ],
+  "engine_pin_report": {
+    "export --dry-run prints the file paths that would be written": "tests/acceptance/test_export.py::test_dry_run_lists_paths",
+    "export --dry-run writes nothing": null
+  },
+  "human_answer_at_FINDINGS": "fix",
+  "engine_pin_report_after_fix": {
+    "export --dry-run writes nothing": "tests/acceptance/test_export.py::test_dry_run_leaves_out_dir_untouched"
+  },
+  "expected_guard": "every accepted expectation is pinned by a test the engine writes; an unpinned one blocks done and goes to FINDINGS, whose fix is the pinning test, not a rebuild (D8)",
+  "expected_decision": "BLOCK-DONE"
+}

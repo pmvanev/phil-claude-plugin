@@ -19,7 +19,8 @@ nothing is."*
 and a durable summary at `docs/evolution/<date>-export-failure-messages-helpful.md`.
 
 **Three checkable assertions (all must hold):**
-1. **This** run creates the three-part trail + the evolution summary.
+1. **This** run creates the trail — `expectations.md`, `evidence/`, `verdicts.md`, and `stabilize.md`
+   with the pin and the review findings — plus the evolution summary.
 2. Fixture 01's opt-out run creates a trail whose `verdicts.md` names each checkable expectation as
    `trusted to the tests`.
 3. A run stopped at CAPTURE creates **zero** trail files.

@@ -40,3 +40,9 @@ The records from slices 01–03's dogfood runs.
 
 ## Dogfood moment
 Hand one record to a reader who did not run it, the same day.
+
+## Close-out (after this slice, before the work closes)
+Run the editing passes Definition of Done item 8 lists in `feature-delta.md`: `/phil:harden-instructions`
+over every instruction file the feature touched, and `phil:eos` over every rule and document it touched.
+Then re-run `python3 -m pytest -q` and a by-hand fixture drive, cut the release, and tick issue 38's
+checklist item with the merging PR named.

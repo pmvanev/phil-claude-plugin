@@ -11,6 +11,7 @@ Found 2026-10-13, all predating that day's hardening:
   agent's contract expects.
 - "The plugin's evolution convention" names a directory a user's repository does not have.
 """
+import re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -18,7 +19,11 @@ SKILL = REPO / "skills" / "edd" / "SKILL.md"
 
 
 def _flat():
-    return " ".join(SKILL.read_text().split())
+    """The skill and every `skills/edd/references/` file it tells the executor to read, flattened."""
+    text = SKILL.read_text()
+    for name in dict.fromkeys(re.findall(r"skills/edd/references/([\w-]+\.md)", text)):
+        text += "\n" + (SKILL.parent / "references" / name).read_text()
+    return " ".join(text.split())
 
 
 def test_an_irrelevance_reject_commissions_evidence_and_rebuilds_nothing():
@@ -57,11 +62,16 @@ AGENT = REPO / "agents" / "edd-evidence-producer.md"
 
 
 def _section(heading):
-    """The flattened text of the `## <heading>` section, up to the next `## ` heading."""
+    """The flattened text of the `## <heading>` section, up to the next `## ` heading, followed by any
+    `skills/edd/references/` file the section tells the executor to read — the step's detail lives
+    there, and an assertion about the step must reach it."""
     text = SKILL.read_text()
     start = text.index(f"\n## {heading}")
     end = text.find("\n## ", start + 1)
-    return " ".join(text[start:end if end != -1 else None].split())
+    section = text[start:end if end != -1 else None]
+    for name in re.findall(r"skills/edd/references/([\w-]+\.md)", section):
+        section += "\n" + (SKILL.parent / "references" / name).read_text()
+    return " ".join(section.split())
 
 
 def test_capture_checks_the_article_coverage_categories():
@@ -371,3 +381,169 @@ def test_the_developer_gives_the_qualitative_reason():
     classify = _section("CLASSIFY")
     assert "only when the developer gives a **concrete reason**" in classify
     assert "gives or confirms" not in classify
+
+
+# --- slice 03 structure (2026-10-27): EVIDENCE and REVIEW detail moved verbatim to references/, to keep
+# the always-loaded body under plugin-dev's 5,000-word cap. A step that points at a file that is not
+# there would load nothing, silently.
+
+def test_every_reference_the_skill_names_exists_and_is_read_before_its_step():
+    text = SKILL.read_text()
+    names = re.findall(r"`\$\{CLAUDE_PLUGIN_ROOT\}/skills/edd/references/([\w-]+\.md)`", text)
+    assert names, "the skill names no reference"
+    for name in names:
+        assert (SKILL.parent / "references" / name).is_file(), name
+        assert f"Read `${{CLAUDE_PLUGIN_ROOT}}/skills/edd/references/{name}` before" in " ".join(text.split()), name
+
+
+# --- edd-article-alignment slice 03 (2026-10-27): every accepted expectation is pinned by a test meeting
+# this plugin's testing standards, and the built code is reviewed and repaired with this plugin's own
+# skills, serious findings blocking done. Decisions D2 (review-code and ux-review rows) and D8.
+
+def test_stabilize_runs_after_adjudicate_and_before_findings():
+    text = SKILL.read_text()
+    assert text.index("\n## ADJUDICATE") < text.index("\n## STABILIZE") < text.index("\n## FINDINGS")
+
+
+def test_stabilize_reads_the_testing_standards_and_writes_no_test_itself():
+    stabilize = _section("STABILIZE")
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`" in stabilize
+    assert "`${CLAUDE_PLUGIN_ROOT}/rules/test-patterns.md`" in stabilize
+    assert "writes no test itself" in stabilize
+
+
+def test_an_accepted_qualitative_output_is_pinned_by_an_approval_test_of_the_accepted_evidence():
+    assert "whose approved output is the evidence the developer accepted" in _section("STABILIZE")
+
+
+def test_an_unpinned_accepted_expectation_blocks_done():
+    assert "An accepted expectation no test pins blocks done" in _section("STABILIZE")
+
+
+def test_review_code_runs_and_its_serious_findings_block():
+    stabilize = _section("STABILIZE")
+    assert "`phil:review-code`" in stabilize
+    assert "Priority 1" in stabilize
+    assert "Priority 6 finding on a pinning test" in stabilize
+
+
+def test_advisory_findings_go_to_the_skill_that_owns_them():
+    stabilize = _section("REPAIR")
+    for skill in ("`phil:refactor`", "`phil:refactor-loop`", "`phil:refactor-tests`",
+                  "`phil:redesign-tests`", "`phil:clean-comments`"):
+        assert skill in stabilize, skill
+
+
+def test_a_ui_change_runs_ux_review_and_a_must_fix_blocks():
+    stabilize = _section("STABILIZE")
+    assert "`phil:ux-review`" in stabilize
+    assert "`must-fix`" in stabilize
+
+
+def test_findings_clears_every_blocking_source():
+    findings = _section("FINDINGS")
+    for source in ("Priority 1", "`must-fix`", "no test pins"):
+        assert source in findings, source
+
+
+def test_pinning_and_repair_are_not_rebuilds():
+    assert "Pinning tests and running a repair are not rebuilds" in _section("STABILIZE")
+
+
+def test_the_one_line_standards_citation_is_retired():
+    assert "The standards to work under are" not in SKILL.read_text()
+
+
+def test_the_trail_records_pins_and_repairs():
+    document = _section("DOCUMENT")
+    assert "pinning test" in document
+    assert "repair" in document
+
+
+# --- slice 03 review findings (skill-reviewer, plugin-validator, fixture driver; 2026-10-27). The first
+# draft cleared a fixed review-code finding on the builder's word, blocked spot-checks with no exit,
+# called review-code with an argument it does not take, made its Advisory questions block, never ran
+# or compared the pins, routed repairs by a Route that does not name their owner, claimed gates three
+# repair skills lack, and ran repairs before the blockers cleared.
+
+def test_a_rebuild_re_enters_stabilize_and_a_finding_clears_only_on_a_clean_re_run():
+    assert "re-enters STABILIZE" in _section("BUILD")
+    assert "clears it only when the re-run does not reproduce it" in _section("FINDINGS")
+
+
+def test_a_spot_checked_expectation_reaches_findings_with_only_waive_and_stop():
+    assert "spot-checked by hand, which no test can pin here" in _section("FINDINGS")
+
+
+def test_build_records_a_base_and_review_code_runs_once_per_changed_file():
+    assert "`base`" in _section("BUILD")
+    assert "once per changed file" in _section("STABILIZE")
+
+
+def test_review_codes_advisory_and_load_time_items_do_not_block():
+    stabilize = _section("STABILIZE")
+    assert "except an item whose Smell is `Advisory` or an `LWS-n` id" in stabilize
+
+
+def test_pins_are_test_only_shown_green_and_matched_byte_for_byte():
+    stabilize = _section("STABILIZE")
+    assert "a change outside test files is a rebuild" in stabilize
+    assert "the engine's oracle run after pinning" in stabilize
+    assert "byte for byte" in stabilize
+
+
+def test_repair_runs_after_findings_and_before_document():
+    text = SKILL.read_text()
+    assert (text.index("\n## STABILIZE") < text.index("\n## FINDINGS")
+            < text.index("\n## REPAIR") < text.index("\n## DOCUMENT"))
+
+
+def test_repairs_are_grouped_by_smell_and_each_gate_is_stated_truthfully():
+    repair = _section("REPAIR")
+    assert "group them by Smell and Priority, not by Route" in repair
+    assert "`phil:clean-comments` has no gate of its own" in repair
+    assert "never over a pinning test" in repair
+
+
+def test_advisory_ux_findings_are_recorded():
+    assert "every `consider`" in _section("STABILIZE")
+
+
+def test_the_reviewers_independence_is_stated_in_the_body():
+    text = " ".join(SKILL.read_text().split())
+    review = text[text.index("## REVIEW"):text.index("## ADJUDICATE")]
+    assert "never sees the builder's reasoning" in review
+
+
+# --- slice 03 re-drive (2026-10-27): 16 of 19; 17 and 18 open. No post-pin oracle run was ever asked
+# for, a test-only fix was both a rebuild and not, the repair order fought phil:refactor's inline mode,
+# per-file review double-filed a test finding, and refactor-loop needs a Workflow grant edd lacks.
+
+REPAIR_REF = SKILL.parent / "references" / "repair.md"
+
+
+def test_the_engine_runs_its_oracle_after_pinning_and_that_run_replaces_oracle_result():
+    assert "replaced on every rebuild and every pin commit" in _section("BUILD")
+    assert "run its oracle with the pins committed" in _section("STABILIZE")
+
+
+def test_a_test_only_fix_is_not_a_rebuild():
+    assert "A fix whose change touches only test and approved-output files is not a rebuild" in _section("FINDINGS")
+
+
+def test_a_finding_filed_by_two_per_file_runs_is_one_finding():
+    assert "one finding, however many runs filed it" in _section("STABILIZE")
+
+
+def test_repairs_run_in_an_order_that_respects_each_skills_interface():
+    repair = " ".join(REPAIR_REF.read_text().split())
+    assert "Run the `phil:clean-comments` group first" in repair
+    assert "commit each diff the developer approves" in repair
+    assert "also removes the comment items in that file" in repair
+    assert "held in the conversation, never on disk" in repair
+
+
+def test_refactor_loop_is_recommended_never_run():
+    repair = " ".join(REPAIR_REF.read_text().split())
+    assert "recommend `/phil:refactor-loop`" in repair
+    assert "never runs it" in repair
