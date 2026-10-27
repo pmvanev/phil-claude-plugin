@@ -8,7 +8,7 @@ each looks exactly like a smooth run. These fixtures feed the tool known situati
 produces the correct **decision outcome** (`CAPTURE-GAPS` / `CLASSIFY-CHECKABLE` / `OPT-OUT` /
 `GATE-RERUN-EXISTING` / `GATE-COMMISSION` / `REJECT-NARRATION` / `SPOT-CHECK` / `REVIEW-THEN-ASK` /
 `CHALLENGE` / `BLOCK-DONE` / `WAIVE-RECORDED` / `REPORT-NOT-DONE` / `PIN-APPROVAL` /
-`REVIEW-CODE-GATE` / `UX-GATE` / `DOCUMENT-TRAIL`).
+`REVIEW-CODE-GATE` / `UX-GATE` / `PROSE-REVIEWED` / `ENGINE-CANNOT-MEET` / `DOCUMENT-TRAIL`).
 
 **No driver runs these fixtures** (issue 42). They gate a change only when a human or the model drives
 them as described below. `tests/test_edd_skill.py` is what fails the build.
@@ -50,6 +50,9 @@ tests the loop and the gate around them.
 | `17-approval-test-from-accepted-evidence/` | a qualitative expectation was accepted | AC4.2 (edd-article-alignment) | the accepted evidence becomes the approved output (D8) | `PIN-APPROVAL` — approval test, approved output verbatim |
 | `18-review-code-priority-1-blocks/` | review-code writes a Priority 1, a Priority 6 on a pinning test, and two advisories | AC4.3, AC4.4 (edd-article-alignment) | serious findings block; advisories go to their owners (D2, D8) | `REVIEW-CODE-GATE` — two blockers to FINDINGS, repairs offered by owner |
 | `19-ui-change-runs-ux-review/` | the change touches UI files | AC4.5 (edd-article-alignment) | `phil:ux-review` on a UI change; `must-fix` blocks (D2) | `UX-GATE` — must-fix to FINDINGS, consider advises |
+| `20-record-reviewed-words-and-evidence-untouched/` | the drafted trail mixes the developer's words, composed prose, and a missing pin | AC5.2–AC5.5 (edd-article-alignment), KPI untouched-evidence | composed prose reviewed before disk; developer's words and evidence untouched (D9) | `PROSE-REVIEWED` — fixes on composed spans only; fitness blocks until rewritten |
+| `21-engine-cannot-meet-an-expectation/` | the engine reports, with a benchmark, it cannot meet an expectation | protocol step 3 | the engine explains; the developer decides | `ENGINE-CANNOT-MEET` — reword, drop on the record, or stop |
+| `22-challenge-tightens-a-vague-expectation/` | the developer rewords a vague expectation | protocol step 5 | a challenge may tighten; old evidence lapses | `CHALLENGE` — reclassified, fresh evidence, no rebuild |
 
 `04`, `05`, `06`, `09`, `12`, `14` are the safety core: the bug classes most likely to ship silently —
 the builder grading its own homework, narration masquerading as proof, a green suite standing in for

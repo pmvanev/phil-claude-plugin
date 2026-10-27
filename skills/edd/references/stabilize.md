@@ -28,8 +28,12 @@ Then check three things; none re-runs a check in the oracle's place:
   difference is no pin.
 
 An accepted expectation or trusted row left without a pin goes to FINDINGS. One spot-checked by hand
-cannot be pinned in the loop: record it as `pinned by nothing`, and it goes to FINDINGS with only
-`waive` and `stop`.
+cannot be pinned in the loop — but the article asks for more stabilizing there, not less. In a
+separate dispatch, ask the engine for a test that runs outside the loop, where the thing can run: a
+browser test, a CI job, a staging check. Its commit may touch test files and CI configuration, and it
+is exempt from the green check, since no oracle run here contains it. Record it as `pinned, not run
+here`, or `pinned by nothing` when no such test can be written; either way it goes to FINDINGS with
+only `waive` and `stop`, since nothing here can show it green.
 
 ## 2. Review the code
 

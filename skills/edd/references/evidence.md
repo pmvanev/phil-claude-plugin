@@ -31,6 +31,9 @@ For every other expectation, do the least that yields real evidence:
    - For a **checkable** expectation, the evidence is one scenario run: its inputs and the verbatim
      output, with the reproduce command.
    - For a **qualitative** expectation, it is the thing run or rendered, captured verbatim.
+   - A **partially verifiable** run — a Terraform plan, a dry run, a migration against a test
+     database — is executed evidence of what it shows. The producer says in its return what the run
+     leaves unshown, so the developer judges the gap, not only the output.
    - For a checkable expectation an **approval test** pins, it is the test's first output.
 3. **Reject narration.** If what comes back (from either path) is a description, a summary, or a
    claim with no reproducible artifact, it is **narration, not evidence** — the article calls it
@@ -48,6 +51,8 @@ For every other expectation, do the least that yields real evidence:
      the developer to send it back again, spot-check it by hand, or stop;
    - **the environment cannot run it** — a browser, a paid API, a production-only condition: tell the
      developer, who confirms it as a blocker and spot-checks it by hand or stops, as above.
+
+Record a hash of each captured artifact when it arrives: DOCUMENT checks `evidence/` against it.
 
 The output, per expectation, is an **executed artifact + its reproduce command**, a recorded opt-out,
 or a recorded hand spot-check — ready for the developer.

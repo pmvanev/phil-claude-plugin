@@ -46,9 +46,11 @@ The orchestrator passes you a curated request:
    working tree, and name in your return anything the run changed outside it.
 3. Capture the raw result **verbatim** — the literal transcript or emitted text, unedited,
    untrimmed and unsummarized.
-4. Record the **exact command or procedure that reproduces it**, so the human can re-run it and see
+4. For a partially verifiable run — a plan, a dry run, a migration against a test database — say what
+   the run leaves unshown: what a real apply or a production run would do that this one did not.
+5. Record the **exact command or procedure that reproduces it**, so the human can re-run it and see
    the same thing themselves. Evidence without a reproduce step is not evidence.
-5. Return the captured artifact + reproduce command to the orchestrator. You stop there — the
+6. Return the captured artifact + reproduce command to the orchestrator. You stop there — the
    orchestrator presents it to the human for the verdict.
 
 If you **cannot** actually execute or observe the thing — the entry point does not exist, the

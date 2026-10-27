@@ -1,0 +1,18 @@
+{
+  "fixture_id": "EDD-SELFTEST-22",
+  "phase": "ADJUDICATE",
+  "intent": "make the export command's failure messages helpful when the output path is bad",
+  "expectations": [
+    {
+      "text": "error messages are helpful",
+      "classification": "qualitative",
+      "reason": "'helpful' is a judgment about wording",
+      "provenance": "you wrote"
+    }
+  ],
+  "evidence_shown": "Error: cannot write to '/nonexistent/dir' — the directory does not exist.",
+  "human_answer": "challenge",
+  "human_rewording": "when the output path does not exist, the error names the path and says how to create it",
+  "expected_guard": "a challenge may tighten a vague expectation; the new wording is the developer's, is reclassified, and its earlier evidence no longer stands (protocol step 5)",
+  "expected_decision": "CHALLENGE"
+}

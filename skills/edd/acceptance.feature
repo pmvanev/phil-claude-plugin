@@ -19,7 +19,8 @@
 # Decision outcomes the loop must produce:
 #   CAPTURE-GAPS · CLASSIFY-CHECKABLE · OPT-OUT · GATE-RERUN-EXISTING · GATE-COMMISSION ·
 #   REJECT-NARRATION · SPOT-CHECK · REVIEW-THEN-ASK · CHALLENGE · BLOCK-DONE · WAIVE-RECORDED ·
-#   REPORT-NOT-DONE · PIN-APPROVAL · REVIEW-CODE-GATE · UX-GATE · DOCUMENT-TRAIL
+#   REPORT-NOT-DONE · PIN-APPROVAL · REVIEW-CODE-GATE · UX-GATE · PROSE-REVIEWED ·
+#   ENGINE-CANNOT-MEET · DOCUMENT-TRAIL
 
 Feature: Prove every expectation is met with executed evidence
   As Avery, an expectation owner delegating build work to AI agents,
@@ -192,3 +193,27 @@ Feature: Prove every expectation is met with executed evidence
     And it writes a durable summary alongside the repository's other evolution records
     And a run in which Avery trusted the tests records which expectations were trusted
     But a run Avery stopped before anything was built records no trail at all
+
+  # --- DOCUMENT: the record meets this plugin's writing standards --------------------------
+  @edd-article-alignment @slice-04 @document @fixture:20-record-reviewed-words-and-evidence-untouched
+  Scenario: The record is reviewed before it is written, and only the tool's own words are edited
+    Given a drafted record holding Avery's words, the tool's composed prose, and references to the evidence
+    When the tool reviews the record against the plugin's writing standards
+    Then fixes land only in the prose the tool composed, after Avery approves them
+    And Avery's words and the captured evidence are left exactly as they were
+    And a document its reader cannot use blocks done until it is rewritten or Avery waives it
+
+  # --- The article's protocol, steps 3 and 5 ---------------------------------------------
+  @edd-article-alignment @slice-04 @build @fixture:21-engine-cannot-meet-an-expectation
+  Scenario: An engine that cannot meet an expectation explains why, and Avery decides
+    Given the engine reports it cannot meet an expectation, with its reason
+    When the tool hears the report
+    Then Avery sees the explanation and may reword the expectation, drop it on the record, or stop
+    And a dropped expectation is never counted as met
+
+  @edd-article-alignment @slice-04 @adjudicate @fixture:22-challenge-tightens-a-vague-expectation
+  Scenario: A challenge can tighten a vague expectation
+    Given an expectation too vague to judge on its evidence
+    When Avery rewords it as a challenge
+    Then the new wording is Avery's and is classified again
+    And its earlier evidence no longer stands, so fresh evidence is gathered before the next ask

@@ -1,0 +1,19 @@
+{
+  "fixture_id": "EDD-SELFTEST-21",
+  "phase": "BUILD",
+  "intent": "export finishes in under a second for a million records",
+  "expectations": [
+    {
+      "text": "export of 1,000,000 records finishes in under one second on the CI runner",
+      "classification": "checkable",
+      "engine": "nwave",
+      "provenance": "you wrote"
+    }
+  ],
+  "engine_report": "cannot meet: serialising 1M records alone measures 3.2 s on the CI runner (benchmark attached); under 1 s would need a streaming format change outside this intent",
+  "human_answer": "reword",
+  "reworded": "export of 1,000,000 records finishes in under five seconds on the CI runner",
+  "expected_guard": "an engine that cannot meet an expectation explains why; the developer rewords, drops it on the record, or stops (protocol step 3)",
+  "expected_decision": "ENGINE-CANNOT-MEET",
+  "engine_oracle_result": "red: test_export_million_under_one_second failed (3.2 s)"
+}

@@ -15,8 +15,9 @@ The article's third category of evidence.
 - The developer spot-checks; the record keeps their observation in their own words, labelled
   `you wrote`.
 - ADJUDICATE asks for a verdict on what they observed: here, `accept`. No test can pin a hand
-  spot-check, so STABILIZE records it `pinned by nothing` and FINDINGS asks Avery to `waive` or `stop`
-  — a fix is not offered. Had they seen the bar jump
+  spot-check here, so STABILIZE asks the engine for a test that runs outside the loop — a browser test
+  in CI — and records it `pinned, not run here`. FINDINGS then asks Avery to `waive` or `stop`, since
+  nothing here can show it green — a fix is not offered. Had they seen the bar jump
   back, a `reject` would block done; had they stopped, the run would be reported not done with the
   expectation unproven.
 
