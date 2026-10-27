@@ -24,8 +24,8 @@ the contract it documents:
 3. **Verify each finding** by dispatching `phil:adversarial-verifier`, one fresh dispatch per finding,
    with `{ finding, target, intent, standards, oracle_result? }` and without the reviewer's
    justification, confidence or other findings. Keep the findings the judge confirms, applying any
-   `corrected_severity`. List separately the refutes the judge marks as could-not-establish with low
-   `confidence`. Count the rest of the refutes and drop them.
+   `corrected_severity`. List separately the refutes the judge marks could-not-establish with low
+   `confidence`. Count the other refutes and drop them.
 
 Route on the typed fields only, and re-judge nothing:
 

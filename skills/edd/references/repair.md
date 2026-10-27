@@ -16,11 +16,11 @@ The full REPAIR step of `skills/edd/SKILL.md`. Read in full before offering any 
 | A redundant or unclear comment (Priority 5) | `phil:clean-comments` | the file's path and the item's lines | none of its own — see below |
 | An item routed `report only`, or a `phil:ux-review` `consider` | none | — | listed and recorded, never run |
 
-Never run `phil:redesign-tests` over a pinning test, never over a pinning test with any skill that
-changes what a test asserts: the pin was recorded against what it asserts now. Each repair skill
-re-detects with its own rules, so an item may not reappear when it runs; record that, too.
+Run `phil:redesign-tests`, and any other skill that changes what a test asserts, never over a pinning
+test: the pin was recorded against what it asserts now. Each repair skill re-detects with its own
+rules, so an item may not reappear when it runs; record that too.
 
-`phil:clean-comments` has no gate of its own — it runs no suite and asks no approval. Supply one: run
+`phil:clean-comments` has no gate of its own: it runs no suite and asks no approval. Supply one: run
 the suite after it, put its diff to the developer, and revert the change on a red suite or a reject.
 
 `phil:refactor-loop` runs under the Workflow tool, which this command is not granted and which a

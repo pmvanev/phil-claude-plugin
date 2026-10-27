@@ -105,15 +105,16 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
 - Read `plugin-dev:skill-development`, `command-development`, `agent-development` or `plugin-structure`
   before writing the file. Take the schema from plugin-dev, not from a sibling file — a copied shape
   carries the sibling's defects unchecked.
-- Before calling a task or issue done, run these unasked over every file it touched, once the content
-  is settled, then re-run the tests — the passes edit content:
+- Once the content is settled, and before calling a task or issue done, run these passes unasked over
+  every file it touched:
   - `/phil:harden-instructions` over a skill, its references, a command, an agent or a hook prompt; it
     applies `rules/agent-instructions.md`.
   - `phil:eos` over a rule or a document; it applies `rules/writing.md`.
   - `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` over a skill, command or agent.
 
-  No check enforces this; the commit-message line below records it (decided 2026-10-27, after the
-  developer kept asking for the passes by hand).
+  Re-run the tests after them, because the passes edit content. No check enforces this; the
+  commit-message line below records which ran (decided 2026-10-27, after the developer kept asking
+  for the passes by hand).
 - Name in the commit message which of `nw-discuss`, `plugin-dev`, `phil:eos` and
   `/phil:harden-instructions` ran. Wound: `groom-issues` slice 03
   was authored 2026-08-13 without plugin-dev, and nothing recorded it.

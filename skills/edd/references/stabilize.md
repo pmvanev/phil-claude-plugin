@@ -13,7 +13,7 @@ trusted to the tests, to the engine that built it, with `${CLAUDE_PLUGIN_ROOT}/r
   scenario showed;
 - a qualitative expectation, or an output too large to assert — an approval test whose approved output
   is the evidence the developer accepted, verbatim. The developer's accept was the first human read;
-  the approval test makes every later change a diff they see;
+  the test shows them every later change as a diff;
 - a row trusted to the tests — the name of the test that already pins it.
 
 The engine commits the pins and names the test that pins each expectation. Ask it to run its oracle
@@ -28,8 +28,8 @@ Then check three things; none re-runs a check in the oracle's place:
   difference is no pin.
 
 An accepted expectation or trusted row left without a pin goes to FINDINGS. One spot-checked by hand
-cannot be pinned in the loop — but the article asks for more stabilizing there, not less. In a
-separate dispatch, ask the engine for a test that runs outside the loop, where the thing can run: a
+cannot be pinned in the loop, and the article asks for more stabilizing there, not less: in a
+separate dispatch, ask the engine for a test that runs outside the loop, where the thing can run — a
 browser test, a CI job, a staging check. Its commit may touch test files and CI configuration, and it
 is exempt from the green check, since no oracle run here contains it. Record it as `pinned, not run
 here`, or `pinned by nothing` when no such test can be written; either way it goes to FINDINGS with
