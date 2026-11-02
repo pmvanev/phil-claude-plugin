@@ -47,7 +47,7 @@ resolves or any push URL names another repo, hold every remote delete and say wh
 ## Hold what must survive
 
 These are listed as surviving, with the reason. Of them, only the developer's own unmerged branch
-reaches FORCE; the rest are never offered for deletion:
+reaches FORCE; never offer the rest for deletion:
 
 - `<default>` itself, a branch with a `branchProtectionRule`, a branch from a pull request from a fork
   or a pull request someone else opened, and any branch that is the head or the base of an open pull
@@ -129,9 +129,9 @@ checkout this session runs in holds one — and **stop**.
 2. **Local branches** — `git branch -d <branch>`. A squash or rebase merge leaves the branch unmerged in
    git's eyes, so git refuses it; that is a `LEFT`, not an error to work around.
 3. **Remote branches** — `git push --delete --force-with-lease=refs/heads/<branch>:<headRefOid> <remote>
-   refs/heads/<branch>`.
-4. **Force-deletes** — the developer's chosen branches, as FORCE gives them. The lease refuses the delete if the tip moved after the check; the qualified ref
+   refs/heads/<branch>`. The lease refuses the delete if the tip moved after the check; the qualified ref
    keeps a tag of the same name from matching.
+4. **Force-deletes** — the developer's chosen branches, as FORCE gives them.
 
 Any refusal or error in CLEAR leaves that item and goes on with the rest: report the refusal and leave
 the item.

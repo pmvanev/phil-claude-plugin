@@ -14,14 +14,18 @@ name `/phil:board-setup`. Pass `-R <owner/repo>` on every `gh issue` call, and t
 variables to `gh api graphql`, which takes no `-R`.
 
 **Write nothing before the developer's one yes, and never merge.** After the yes, write only the closing
-comment, the Status, the close, the generated block's refresh and the cleanup, in that order, and stop at
-the first close write that fails; a git refusal during the cleanup leaves that item and goes on. Send only `query` documents through `gh api graphql`. Use `gh issue edit` only with
-`--body-file`, and only inside the block refresh; use `git log` and `ls` only for that refresh's reads and FORCE's
-list of the commits a delete would lose.
-Never remove a worktree; list it with its commands. Never pass `--force` or `-f`. Pass `-D` only for a
-branch the developer chose to force-delete at its own question. The one force-family flag allowed is the
-remote delete's `--force-with-lease=<ref>:<oid>`. Run `python3` only on `${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py` with `head` or
-`retire`, and on `${CLAUDE_PLUGIN_ROOT}/scripts/worktree-state.py`.
+comment, the Status, the close, the generated block's refresh and the cleanup, in that order. Stop at the
+first close write that fails; a refusal during the cleanup leaves that item and goes on.
+
+- Send only `query` documents through `gh api graphql`.
+- Use `gh issue edit` only with `--body-file`, and only inside the block refresh.
+- Use `git log` and `ls` only for the refresh's reads and FORCE's list of the commits a delete would lose.
+- Never remove a worktree; list it with its commands.
+- Never pass `--force` or `-f`. Pass `-D` only for a branch the developer chose to force-delete at its own
+  question. The one force-family flag allowed is the remote delete's `--force-with-lease=<ref>:<oid>`.
+- Run `python3` only on `${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py` with `head` or `retire`, and
+  on `${CLAUDE_PLUGIN_ROOT}/scripts/worktree-state.py`.
+
 No tool boundary backs these limits.
 
 Read `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` before composing the report and the closing comment, as the
