@@ -1,6 +1,9 @@
 # Rendering a projected snapshot
 
-Part of the `nwave-issue-board` skill. Read it whole before rendering the why, the next action and the stack from `.session-handoff.md`, whether `phil:session-handoff` handed them over at a capture or a refresh re-read them. Its `SKILL.md` governs this file too.
+Part of the `nwave-issue-board` skill. Read it whole before rendering the why, the next action and the
+stack from `.session-handoff.md` — whether `phil:session-handoff` handed them over at a capture or a
+refresh re-read them — and before rendering a closed card's finished line. Its `SKILL.md` governs this
+file too.
 
 `phil:session-handoff` hands over three things from `.session-handoff.md`, each with the snapshot's capture
 timestamp: the **why** (decisions reached, approaches ruled out), the **next action**, and the **work
@@ -24,7 +27,8 @@ Five rules, and the first is the one that makes this legal:
 - **Write-only, like everything else in the block.** `/phil:resume` reads the local snapshot; nothing reads
   this. The local file stays the single authority, so no second authority exists to drift — which is the
   whole reason the reasoning can live on a board at all.
-- **Absent renders as `unknown`, never as empty** — under *Project the reasoning, not just the position* in `SKILL.md`.
+- **Absent renders as `unknown`, never as empty** — under *Project the reasoning, not just the position*
+  in `SKILL.md`.
 - **A closed card renders `Finished <YYYY-MM-DD>.` in place of all three.** Take the UTC date of the
   issue's `closedAt`, read fresh at the refresh, whether or not a snapshot exists. Finished work has no
   next action and no stack: a snapshot left behind is stale, and rendering it, or `unknown`, would

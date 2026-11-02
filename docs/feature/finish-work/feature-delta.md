@@ -318,7 +318,11 @@ DISCOVER and DIVERGE never ran; the changed assumptions are the session-handoff 
   `git push --delete` checks nothing, `git branch -d` accepts a branch merged only into its own remote,
   `-f` forces either, and a dirty worktree's snapshot was retired before git refused the worktree. A
   dirty worktree is now found before the plan by `scripts/worktree-state.py`, and held with its
-  snapshot. A branch held or left keeps its remote branch.
+  snapshot. A branch held or left keeps its remote branch. The snapshot goes through a new
+  `session-exchanges.py retire`, with the same compare-and-swap as every write, never a bare `rm`; and
+  the plan gains a third answer, *yes, and retire the snapshot here too*: the snapshot in the checkout
+  `/phil:done` runs in records no branch, so a plain yes keeps it. The two entries below overturn two
+  rules here: worktrees are no longer removed at all, and an unmerged branch is offered after all.
 - **Worktrees are listed, never removed (the developer's answer, 2026-11-02).** An adversarial run,
   verified in scratch repositories, showed `git worktree remove` deleting, with exit 0, a repository
   nested in an ignored folder, edits hidden by `--assume-unchanged` or `--skip-worktree`, and commits
@@ -331,8 +335,7 @@ DISCOVER and DIVERGE never ran; the changed assumptions are the session-handoff 
   close of issue 75, 2026-11-02).** This reverses the slice 03 settlement for branches only. FORCE asks
   about each of the developer's own unmerged branches on its own, before the plan, listing every commit a
   delete would lose; keep is the default, and force-delete runs `git branch -D` and a remote delete
-  leased on the tip shown. Worktrees stay listed, never removed, with a dirty one's changes shown. The snapshot is deleted through a new
-  `session-exchanges.py retire`, with the same compare-and-swap as every write, never a bare `rm`; and
-  the plan gains a third answer, *yes, and retire the snapshot here too*: the snapshot in the checkout
-  `/phil:done` runs in records no branch, so a plain yes keeps it.
+  leased on the tip shown. It offers only a branch that still descends from the pull request's head and
+  whose lost commits the developer wrote; past 50 commits it offers nothing. Worktrees stay listed,
+  never removed, with a dirty one's changes shown.
 - **Upstream changes:** see Changed Assumptions.

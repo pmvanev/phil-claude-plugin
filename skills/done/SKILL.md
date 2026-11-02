@@ -27,12 +27,13 @@ to remove.
   successfully (`phil:issue-board`). With no forge line, stop and name `/phil:board-setup`. On a GitLab
   forge line, stop and say this skill covers GitHub only.
 - **The board constants** — the project id, the `Status` field id and the `Done` option id, from the
-  same `CLAUDE.md` block. Read them; never probe for them. With none, the Status write is skipped and
-  reported, and `/phil:board-setup` named.
+  same `CLAUDE.md` block. Read them; never probe for them. With none, skip the Status write, report the
+  skip, and name `/phil:board-setup`.
 
-Run `git` only for `rev-parse`, the `log` reads of the block refresh, and CLEAR's `worktree list`,
-`remote get-url`, `merge-base --is-ancestor`, `branch -d`, FORCE's `branch -D` and `push --delete`. A `<branch>:<path>` lookup through local git reads a ref that may be stale; use the
-forge.
+Run `git` only for `rev-parse`, the `log` reads of the block refresh and of FORCE, and CLEAR's
+`worktree list`, `remote get-url`, `merge-base --is-ancestor`, `branch -d`, `branch -D` and
+`push --delete`. Look files up on the forge: a `<branch>:<path>` lookup through local git reads a ref
+that may be stale.
 
 ## FIND — the card, its pull requests and the default branch
 
@@ -178,25 +179,26 @@ Ask about each open ask on its own, with `AskUserQuestion`, offering three answe
 - **name its evidence** — verify it as ACCOUNT would; where it fails, the ask stays open: `NOT-READY`;
 - **stop** — `STOPPED`, with `OPEN-ASKS`.
 
-To drop it with a reason, the developer chooses Other and types the reason. A dropped ask leaves the list with its
-reason, typed as given; it is never marked done. The closing comment quotes every dropped ask with its
-reason.
+To drop it with a reason, the developer chooses Other and types the reason. A dropped ask leaves the
+list with its reason, typed as given; it is never marked done. The closing comment quotes every dropped
+ask with its reason.
 
 ## PLAN — one yes
 
-Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/clear.md` whole before composing the plan: it finds the work's snapshots, branches and
-worktrees, holds what must survive, asks FORCE's question for each of the developer's own unmerged
-branches, and adds the cleanup lines and the third answer.
+Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/clear.md` whole before composing the plan: it finds
+the work's snapshots, branches and worktrees, holds what must survive, asks FORCE's question for each of
+the developer's own unmerged branches, and adds the cleanup lines and the third answer.
 
 Compose the closing comment: one short paragraph naming the pull requests that landed and the asks they
 met, then each dropped ask quoted with its reason. Apply `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` to
 every word this run composed; quoted asks keep the developer's words.
 
 Show the plan: the comment in full, the Status write, the close, the generated block's refresh by its
-writer where the card's body holds `<!-- nwave:status:begin -->`, and CLEAR's lines. The comment goes in the
-context block above the ask, outside its word count. Ask once, with `AskUserQuestion`: **yes**,
+writer where the card's body holds `<!-- nwave:status:begin -->`, and CLEAR's lines. Put the comment in
+the context block above the ask, outside its word count. Ask once, with `AskUserQuestion`: **yes**,
 **yes, and retire the snapshot here too** where CLEAR offers it, or **stop**. Any answer but the two
-yeses, Other included, is a stop: this skill asks the plan once, a tighter cap than the standard's. A `stop` writes nothing: `STOPPED`. Write nothing before the developer's yes.
+yeses, Other included, is a stop: this skill asks the plan once, a tighter cap than the standard's. A
+`stop` writes nothing: `STOPPED`. Write nothing before the developer's yes.
 
 ## CLOSE — comment first, then Done, then read it back
 
@@ -262,8 +264,8 @@ Report these alongside, each only when it fires: `OPEN-ASKS` (any ask open after
 where a pipeline exists, or a list cut short) · `NO-PIPELINE` (no commit carries a check rollup) ·
 `ASK-DROPPED` (the developer dropped an ask with a reason) · `READ-BACK-MISMATCH` (the card did not
 read back closed, with the comment, in Done where a Status write ran) · `BLOCK-REFRESHED` (the generated
-block was refreshed) · `CLEARED` (CLEAR deleted at least one item) · `LEFT` (an item survived: held, kept at
-the developer's answer, or refused).
+block was refreshed) · `CLEARED` (CLEAR deleted at least one item) · `LEFT` (an item survived: held,
+kept at the developer's answer, or refused).
 
 Report `WROTE-NOTHING` on every run that wrote nothing. It asserts that every call the run made was a
 read: the grant accepts writes, and only the invariants below forbid them before the yes.
