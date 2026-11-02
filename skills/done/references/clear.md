@@ -5,9 +5,10 @@ Part of the `done` skill. Read it whole before composing the plan. Its `SKILL.md
 CLEAR retires the work's handoff snapshots and deletes its branches, local and remote, under the plan's
 one yes. **The guard is this skill's own tip check, not git.** `git push --delete` checks nothing, and
 `git branch -d` accepts a branch merged only into its own remote copy. Git's refusals stand behind the
-check as a second line. **Never pass `--force`, `-f` or `-D`**: each removes that second line. Use
-`git branch -d`, never `-D`. The one force-family flag allowed is `--force-with-lease=<ref>:<oid>` on a
-remote delete, which makes the delete refuse a tip that moved.
+check as a second line. **Never pass `--force` or `-f`**: each removes that second line. Pass `-D` only
+for a branch the developer chose to force-delete at its own question (FORCE, below); use `git branch -d`
+for everything else. The one force-family flag allowed is `--force-with-lease=<ref>:<oid>` on a remote
+delete, which makes the delete refuse a tip that moved.
 
 **Never remove a worktree.** A clean-looking worktree can hold work nothing else has — a repository
 nested in an ignored folder, edits git was told to ignore, submodules, commits only its own history
@@ -29,7 +30,9 @@ Delete a branch only when its tip is the `headRefOid` of a pull request merged i
 - **Local branch** — `git rev-parse --verify --quiet refs/heads/<branch>` prints its tip, or nothing.
 - **Worktrees** — `git worktree list --porcelain` gives each worktree's path, `HEAD` and `branch`. Run
   `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/worktree-state.py <path>...` over those on a candidate branch:
-  it prints `CLEAN`, `DIRTY` or `UNREADABLE` for each, and writes nothing.
+  it prints `CLEAN`, `DIRTY` or `UNREADABLE` for each, with a `DIRTY` worktree's changes indented under
+  it, and writes nothing. Where the plan lists a `DIRTY` worktree, show the changes `worktree-state.py`
+  printed under it.
 - **Snapshot** — `<worktree>/.session-handoff.md` in each worktree on a candidate branch whose `HEAD` is
   the merged tip and which reads `CLEAN`, read with
   `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py head --file <path>`: it prints the file
@@ -43,7 +46,8 @@ resolves or any push URL names another repo, hold every remote delete and say wh
 
 ## Hold what must survive
 
-These are listed as surviving, with the reason, and never offered for deletion:
+These are listed as surviving, with the reason. Of them, only the developer's own unmerged branch
+reaches FORCE; the rest are never offered for deletion:
 
 - `<default>` itself, a branch with a `branchProtectionRule`, a branch from a pull request from a fork
   or a pull request someone else opened, and any branch that is the head or the base of an open pull
@@ -60,6 +64,43 @@ These are listed as surviving, with the reason, and never offered for deletion:
 The snapshot in the checkout this session runs in records no branch, so it may belong to other work. A
 plain yes keeps it; it goes only on the third answer.
 
+## FORCE — an unmerged branch, one at a time
+
+An unmerged branch survives unless the developer says otherwise, for that branch alone. Offer it only for
+the developer's own branch: one whose pull request closed unmerged or merged into another base, or whose
+tip is past the merged `headRefOid` — and which is not `<default>`, protected, from a fork, someone
+else's, the head or base of an open pull request, or checked out in any worktree. Never offer to remove a
+worktree.
+
+A name is not ownership: a colleague can push a new branch under an old name. Offer it only where the
+branch still descends from the pull request's `headRefOid` and every commit it would lose was authored by
+`viewer.login`:
+
+- local — `git merge-base --is-ancestor <headRefOid> refs/heads/<branch>` exits 0, and
+  `git log --format='%h %an <%ae> %s' <remote>/<default>..refs/heads/<branch>` lists what it would lose,
+  each with its author;
+- remote — read the list, the tip and the ancestry in one query, so the shown tip is the tip the list
+  came from:
+  `ref(qualifiedName:"refs/heads/<default>"){ compare(headRef:"refs/heads/<branch>"){ aheadBy
+  headTarget{ oid } commits(first:50){ nodes{ abbreviatedOid messageHeadline author{ name user{ login }
+  } } } } }` and `ref(qualifiedName:"refs/heads/<branch>"){ compare(headRef:"<headRefOid>"){ status } }`,
+  whose `status` must read `BEHIND` or `IDENTICAL`. Keep `headTarget.oid` as the shown tip.
+
+Where `aheadBy` exceeds 50, do not offer it: the list shows the oldest commits first, so the newest,
+the tip among them, would go unshown. Hold the branch and say how many commits it carries.
+
+Ask about each branch that passes on its own, before the plan, showing every commit the delete would
+lose with its author. Offer **keep** — the default — or **force-delete**, and stop. Any answer but
+force-delete keeps both copies. A force-delete joins the plan as its own line, and the plan's one yes
+runs it with the rest:
+
+- local — `git branch -D <branch>`. Read the local tip again just before `-D`, and skip the delete where
+  it moved from the tip the list came from.
+- remote — `git push --delete --force-with-lease=refs/heads/<branch>:<shown tip> <remote>
+  refs/heads/<branch>`, so a commit pushed after the question refuses the delete. Force-delete the remote
+  copy only after the local delete succeeded, or where no local copy exists: where git refuses the local
+  delete — a worktree mid-rebase hides its branch from `git worktree list` — the remote copy stays.
+
 ## The plan's cleanup lines
 
 Add to the plan, after the close's writes:
@@ -68,9 +109,11 @@ Add to the plan, after the close's writes:
 CLEAR
   retire snapshot  ../fw-02/.session-handoff.md — next: "verify the wave table"; stack: 2 frames
   delete branch    finish-work/slice-01 (local and remote)
+  FORCE-DELETE     finish-work/spike (local and remote) — 2 unmerged commits, at your answer
 FOR YOU TO RUN — worktrees are never removed for you
   git worktree remove ../fw-02 && git branch -d finish-work/slice-02 &&
     git push --delete origin refs/heads/finish-work/slice-02
+  ../fw-03 has uncommitted changes:  M src/a.py  ?? notes.md
 SURVIVES
   finish-work/spike and ../fw-spike — PR 86 closed unmerged
   ./.session-handoff.md — may be other work; the third answer retires it
@@ -86,7 +129,8 @@ checkout this session runs in holds one — and **stop**.
 2. **Local branches** — `git branch -d <branch>`. A squash or rebase merge leaves the branch unmerged in
    git's eyes, so git refuses it; that is a `LEFT`, not an error to work around.
 3. **Remote branches** — `git push --delete --force-with-lease=refs/heads/<branch>:<headRefOid> <remote>
-   refs/heads/<branch>`. The lease refuses the delete if the tip moved after the check; the qualified ref
+   refs/heads/<branch>`.
+4. **Force-deletes** — the developer's chosen branches, as FORCE gives them. The lease refuses the delete if the tip moved after the check; the qualified ref
    keeps a tag of the same name from matching.
 
 Any refusal or error in CLEAR leaves that item and goes on with the rest: report the refusal and leave

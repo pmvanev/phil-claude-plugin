@@ -10,7 +10,8 @@ For each path, prints one line:
 
 - `CLEAN <path>` — no modified, staged or untracked file. Ignored files may remain, and
   `git worktree remove` deletes them with the worktree; the plan says so.
-- `DIRTY <path>` — something git would refuse to discard.
+- `DIRTY <path>` — something git would refuse to discard, followed by one indented line per change, as
+  `git status --porcelain` prints it, so the plan can show what would be lost.
 - `UNREADABLE <path>` — not a worktree, or git could not read it.
 
 Reads only; writes nothing. Exits 0 whenever it could judge its arguments.
@@ -24,7 +25,10 @@ def judge(path: str) -> str:
                             capture_output=True, text=True)
     if result.returncode != 0:
         return f"UNREADABLE {path}"
-    return f"{'DIRTY' if result.stdout.strip() else 'CLEAN'} {path}"
+    changes = [line for line in result.stdout.splitlines() if line.strip()]
+    if not changes:
+        return f"CLEAN {path}"
+    return "\n".join([f"DIRTY {path}", *(f"  {line}" for line in changes)])
 
 
 def main(argv: list[str]) -> int:

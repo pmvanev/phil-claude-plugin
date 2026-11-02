@@ -34,7 +34,7 @@ the fixtures are model-driven, and that read is by hand.
 | `21-card-not-on-this-board` | `CLOSED` | — | A card on another board gets no Status write and no false mismatch |
 | `22-card-already-closed` | `CLOSED` | — | A closed card gets its comment, never `close -c` |
 | `23-worktree-listed-never-removed` | `CLOSED` | `CLEARED` | Worktrees are listed with their commands, never removed |
-| `24-unmerged-branch-survives` | `CLOSED` | `CLEARED` `LEFT` | An unmerged branch survives with its worktree and snapshot |
+| `24-unmerged-branch-survives` | `CLOSED` | `CLEARED` `LEFT` | A branch a worktree holds is never offered for force-delete |
 | `25-dirty-worktree-survives` | `CLOSED` | `LEFT` | A dirty worktree keeps its snapshot |
 | `26-name-only-branch-is-no-candidate` | `CLOSED` | `CLEARED` | A branch that only looks like the card's is never touched |
 | `27-clean-finish-asks-once` | `CLOSED` | `CLEARED` | A clean finish asks exactly one question |
@@ -46,5 +46,8 @@ the fixtures are model-driven, and that read is by hand.
 | `33-shared-or-foreign-branch-held` | `CLOSED` | `LEFT` | Protected, fork and shared branches are never deleted |
 | `34-push-url-names-another-repo` | `CLOSED` | `CLEARED` `LEFT` | The push URL, not the fetch URL, decides the remote |
 | `35-another-authors-pull-request` | `CLOSED` | `CLEARED` `LEFT` | A colleague's branch is never a candidate |
+| `36-force-delete-an-unmerged-branch` | `CLOSED` | `CLEARED` | An unmerged branch goes only on its own answer, its commits shown |
+| `37-colleague-reused-the-name` | `CLOSED` | `LEFT` | A branch under an old name is not the developer's to force-delete |
+| `38-too-many-commits-to-show` | `CLOSED` | `LEFT` | Past 50 commits the tip goes unshown, so nothing is offered |
 
 `WROTE-NOTHING` is expected on every fixture that writes nothing.

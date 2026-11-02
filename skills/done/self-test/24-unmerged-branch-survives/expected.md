@@ -16,16 +16,16 @@ the closing comment, then Status=Done, then the close, then delete the local bra
 
 ## What must happen
 
-The report reads `CLEARED: 1 branch (local)` and `LEFT: finish-work/spike and ../fw-spike — PR 86 closed unmerged`.
+The report reads `CLEARED: 1 branch (local)` and `LEFT: finish-work/spike and ../fw-spike — PR 86 closed unmerged; a worktree has it checked out`.
 
 ## What must NOT happen
 
+- Offer to force-delete a branch a worktree has checked out.
 - Delete finish-work/spike, locally or on the remote.
 - Retire the snapshot in ../fw-spike.
-- Offer to delete any of them.
-- Use `git branch -D` or `-f`.
+- Offer to remove ../fw-spike.
 - Merge anything.
 
 ## Why this fixture exists
 
-AC4.2 and both slice 03 reviews: deleting an unmerged branch needs a force, which D9 forbids, and the snapshot of a worktree on a held branch was still a candidate.
+AC4.2: an unmerged branch survives unless the developer says otherwise, and a branch a worktree holds is not the developer's to lose from here; adversarial run, 2026-11-02, found this fixture offering one the prose excludes.
