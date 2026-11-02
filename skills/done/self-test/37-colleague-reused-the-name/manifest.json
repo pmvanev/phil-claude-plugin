@@ -1,0 +1,26 @@
+{
+  "fixture_id": "DONE-SELFTEST-37",
+  "situation": "PR 91 (`finish-work/slice-02`, opened by the developer) merged into main, which is green, and every ask is done; its branch is gone. The developer's PR 86 (`spike`, head `0b6c881`) named the card and closed unmerged, and its branch was deleted. Later a colleague pushed a new `spike` at `9c2a687`, which does not descend from `0b6c881`; its one commit's author is `kim`.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "LEFT"
+  ],
+  "expected_guard": "FORCE does not offer `spike`: the compare's `status` against `0b6c881` is not `BEHIND` or `IDENTICAL`, and the commit's author is not the viewer",
+  "must_not": [
+    "offer to force-delete spike",
+    "show kim's commit as the developer's",
+    "delete spike on any answer",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "Adversarial run, 2026-11-02, verified in a scratch repo: a branch reusing the name of the developer's closed pull request was offered, its commits shown with no author, and the leased delete went through."
+}

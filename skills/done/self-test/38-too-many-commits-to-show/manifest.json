@@ -1,0 +1,25 @@
+{
+  "fixture_id": "DONE-SELFTEST-38",
+  "situation": "PR 91 (`finish-work/slice-02`, opened by the developer) merged into main, which is green, and every ask is done; its branch is gone. The developer's PR 86 (`finish-work/spike`) closed unmerged; its branch, at a tip that descends from its `headRefOid`, carries 73 commits not in main, all the developer's, and no worktree has it checked out.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "LEFT"
+  ],
+  "expected_guard": "FORCE holds the branch without asking, because `aheadBy` exceeds 50 and the list would not reach the tip",
+  "must_not": [
+    "offer to force-delete a branch whose commits the list cannot all show",
+    "show the first 50 and a count, then delete",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "Adversarial run, 2026-11-02: compare lists the oldest commits first, so past 50 the newest, the tip among them, went unshown before a force-delete."
+}

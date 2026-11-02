@@ -115,7 +115,9 @@ def test_slice_03_fixtures_exist():
                    "28-retire-the-snapshot-here", "29-current-worktree-is-held",
                    "30-remote-tip-ahead-of-the-merge", "31-local-tip-ahead-of-the-merge",
                    "32-retire-refused", "33-shared-or-foreign-branch-held",
-                   "34-push-url-names-another-repo", "35-another-authors-pull-request"):
+                   "34-push-url-names-another-repo", "35-another-authors-pull-request",
+                   "36-force-delete-an-unmerged-branch", "37-colleague-reused-the-name",
+                   "38-too-many-commits-to-show"):
         assert wanted in names, f"slice 03 brief names fixture {wanted}"
 
 
@@ -129,8 +131,11 @@ def test_a_clean_finish_asks_exactly_one_question():
 def test_no_fixture_expects_a_force(manifest):
     """D9: a fixture expecting a forced delete would teach the run to use one."""
     d = json.loads(manifest.read_text())
-    forced = [w for w in d.get("writes", []) if " -D" in w or " -f " in w
+    forced = [w for w in d.get("writes", []) if " -f " in w
               or ("--force" in w and "--force-with-lease=" not in w)]
     assert not forced, d["fixture_id"]
+    if any(" -D" in w for w in d.get("writes", [])):
+        assert any(a.startswith("force-delete") for a in d.get("developer_answers", [])), \
+            f"{d['fixture_id']}: `-D` runs only on the developer's own answer for that branch"
     assert not any("remove the worktree" in w for w in d.get("writes", [])), \
         f"{d['fixture_id']}: the developer removes worktrees, never the run"

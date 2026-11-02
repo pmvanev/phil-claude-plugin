@@ -311,7 +311,8 @@ def test_the_cleanup_grants_are_narrow():
     """D9: every delete is a named subcommand. No `rm`, no `git branch` with its `-D`, no `git -C`."""
     front, _ = _parts(COMMAND)
     tools = {t.strip() for t in front["allowed-tools"].split(",")}
-    for grant in ("Bash(git worktree list:*)", "Bash(git branch -d:*)", "Bash(git push --delete:*)",
+    for grant in ("Bash(git worktree list:*)", "Bash(git branch -d:*)", "Bash(git branch -D:*)",
+                  "Bash(git merge-base:*)", "Bash(git push --delete:*)",
                   "Bash(python3:*)", "Bash(git remote get-url:*)"):
         assert grant in tools, grant
     for broad in ("Bash(rm:*)", "Bash(git branch:*)", "Bash(git -C:*)", "Bash(git push:*)", "Bash(git:*)",
@@ -319,13 +320,16 @@ def test_the_cleanup_grants_are_narrow():
         assert broad not in tools, broad
 
 
-def test_nothing_is_forced():
-    """D9: git's own refusals guard uncommitted and unmerged work, so a force would remove the guard."""
+def test_nothing_is_forced_but_a_branch_the_developer_chose():
+    """D9, amended 2026-11-02 by the developer: `-D` only for an unmerged branch the developer chose to
+    force-delete at its own question; `--force` and `-f` never."""
     clear = _clear()
-    assert "Never pass `--force`, `-f` or `-D`" in clear, \
+    assert "Never pass `--force` or `-f`" in clear, \
         "plugin-validator, 2026-11-02: `git branch -d -f` deleted a branch git had just refused"
-    assert "Never pass `--force`, `-f` or `-D`" in _parts(COMMAND)[1]
-    assert "`git branch -d`, never `-D`" in clear
+    assert "Never pass `--force` or `-f`" in _parts(COMMAND)[1]
+    assert "Pass `-D` only for a branch the developer chose to force-delete at its own question" in clear
+    assert "Pass `-D` only for a branch the developer chose to force-delete at its own question" \
+        in _parts(COMMAND)[1]
     assert "report the refusal and leave the item" in clear
 
 
@@ -437,3 +441,61 @@ def test_python3_runs_only_the_two_scripts_and_their_read_or_retire():
     _, body = _parts(COMMAND)
     assert "Run `python3` only on `${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py` with `head` or" \
         " `retire`, and on `${CLAUDE_PLUGIN_ROOT}/scripts/worktree-state.py`" in body
+
+
+def test_an_unmerged_branch_is_offered_for_force_delete_one_at_a_time():
+    """The developer's answer, 2026-11-02, closing issue 75's last requirement: an unmerged branch
+    survives unless the developer says otherwise, and says so for that branch alone."""
+    clear = _clear()
+    assert "## FORCE — an unmerged branch, one at a time" in clear
+    assert "**keep** — the default" in clear
+    assert "showing every commit the delete would lose" in clear
+    assert "git log --format='%h %an <%ae> %s' <remote>/<default>..refs/heads/<branch>" in clear
+    assert "compare(headRef:" in clear
+    assert "--force-with-lease=refs/heads/<branch>:<shown tip>" in clear
+
+
+def test_force_is_never_offered_for_what_is_not_the_developers_to_lose():
+    """A colleague's branch, a fork's, a protected one, or one an open pull request or a worktree uses is
+    held whatever the developer answers; only the developer's own unmerged branch is offered."""
+    clear = _clear()
+    assert "Offer it only for the developer's own branch" in clear
+    assert "Never offer to remove a worktree" in clear
+
+
+def test_a_dirty_worktree_is_listed_with_its_changes():
+    """The developer's answer, 2026-11-02: worktrees stay listed, never removed, with any uncommitted
+    changes shown beside them."""
+    assert "show the changes `worktree-state.py` printed under it" in _clear()
+
+
+def test_force_is_offered_only_for_a_branch_that_is_still_the_developers():
+    """Adversarial run, 2026-11-02: a colleague's branch reusing the name of the developer's closed pull
+    request was offered, its commits shown with no author, and the leased delete went through."""
+    clear = _clear()
+    assert "descends from the pull request's `headRefOid`" in clear
+    assert "git merge-base --is-ancestor <headRefOid> refs/heads/<branch>" in clear
+    assert "every commit it would lose was authored by `viewer.login`" in clear
+    assert "author{ name user{ login } }" in clear
+
+
+def test_the_local_force_delete_rechecks_its_tip():
+    """Adversarial run, 2026-11-02: `git branch -D` has no lease, and a commit made after the question
+    was deleted unseen."""
+    assert "Read the local tip again just before `-D`" in _clear()
+
+
+def test_a_list_too_long_to_show_is_never_offered():
+    """Adversarial run, 2026-11-02: compare lists the oldest commits first, so past 50 the tip went
+    unshown."""
+    assert "Where `aheadBy` exceeds 50, do not offer it" in _clear()
+
+
+def test_the_shown_tip_comes_from_the_same_read_as_the_list():
+    assert "headTarget{ oid }" in _clear()
+
+
+def test_the_remote_copy_goes_only_after_the_local_one():
+    """Adversarial run, 2026-11-02: a worktree mid-rebase hides its branch from `git worktree list`, git
+    refused the local `-D`, and the remote delete still ran."""
+    assert "Force-delete the remote copy only after the local delete succeeded" in _clear()

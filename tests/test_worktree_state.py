@@ -40,16 +40,17 @@ def test_a_clean_worktree_reads_clean(tmp_path):
     assert state(wt) == (0, [f"CLEAN {wt}"])
 
 
-def test_a_modified_file_reads_dirty(tmp_path):
+def test_a_modified_file_reads_dirty_and_is_named(tmp_path):
+    """The plan shows a dirty worktree's changes beside it (the developer's answer, 2026-11-02)."""
     wt = repo_with_worktree(tmp_path)
     (wt / "a.txt").write_text("changed\n")
-    assert state(wt) == (0, [f"DIRTY {wt}"])
+    assert state(wt) == (0, [f"DIRTY {wt}", "   M a.txt"])
 
 
-def test_an_untracked_file_reads_dirty(tmp_path):
+def test_an_untracked_file_reads_dirty_and_is_named(tmp_path):
     wt = repo_with_worktree(tmp_path)
     (wt / "notes.md").write_text("x\n")
-    assert state(wt) == (0, [f"DIRTY {wt}"])
+    assert state(wt) == (0, [f"DIRTY {wt}", "  ?? notes.md"])
 
 
 def test_ignored_files_alone_read_clean(tmp_path):

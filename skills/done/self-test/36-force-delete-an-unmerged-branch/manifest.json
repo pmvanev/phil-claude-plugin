@@ -1,0 +1,30 @@
+{
+  "fixture_id": "DONE-SELFTEST-36",
+  "situation": "PR 91 (`finish-work/slice-02`, opened by the developer) merged into main, which is green, and every ask is done; its branch is gone. The developer's PR 86 (`finish-work/spike`) names the card and closed unmerged. Its branch descends from the pull request's `headRefOid` and holds two commits not in main, `c1d2e3f` and `f4a5b6c`, both authored by the developer, locally and on the remote at `f4a5b6c`. No worktree has it checked out.",
+  "developer_answers": [
+    "force-delete finish-work/spike",
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "force-delete the local branch finish-work/spike (git branch -D)",
+    "force-delete the remote branch finish-work/spike with --force-with-lease=refs/heads/finish-work/spike:f4a5b6c"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED"
+  ],
+  "expected_guard": "FORCE asks about the branch on its own before the plan, listing both commits; on force-delete the plan shows it as its own line, and the one yes runs `git branch -D` and a remote delete leased on the shown tip",
+  "must_not": [
+    "force-delete without listing the commits it loses",
+    "ask about two branches in one question",
+    "delete the remote without the lease on the tip it showed",
+    "use `--force` or `-f`",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "The developer's answer, 2026-11-02, closing issue 75's last requirement: an unmerged branch survives unless the developer says otherwise, for that branch alone, with what it would lose in front of them."
+}

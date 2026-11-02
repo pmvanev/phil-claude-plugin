@@ -31,7 +31,7 @@ to remove.
   reported, and `/phil:board-setup` named.
 
 Run `git` only for `rev-parse`, the `log` reads of the block refresh, and CLEAR's `worktree list`,
-`remote get-url`, `branch -d` and `push --delete`. A `<branch>:<path>` lookup through local git reads a ref that may be stale; use the
+`remote get-url`, `merge-base --is-ancestor`, `branch -d`, FORCE's `branch -D` and `push --delete`. A `<branch>:<path>` lookup through local git reads a ref that may be stale; use the
 forge.
 
 ## FIND — the card, its pull requests and the default branch
@@ -185,7 +185,8 @@ reason.
 ## PLAN — one yes
 
 Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/clear.md` whole before composing the plan: it finds the work's snapshots, branches and
-worktrees, holds what must survive, and adds the cleanup lines and the third answer.
+worktrees, holds what must survive, asks FORCE's question for each of the developer's own unmerged
+branches, and adds the cleanup lines and the third answer.
 
 Compose the closing comment: one short paragraph naming the pull requests that landed and the asks they
 met, then each dropped ask quoted with its reason. Apply `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` to
@@ -274,8 +275,9 @@ read: the grant accepts writes, and only the invariants below forbid them before
   worktree; list it with its commands. The command grants no `Write` and no `Edit`.
 - **Run `python3` only on `${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py`, with `head` or `retire`,
   and on `${CLAUDE_PLUGIN_ROOT}/scripts/worktree-state.py`.**
-- **Never pass `--force`, `-f` or `-D`.** The one force-family flag allowed is CLEAR's
-  `--force-with-lease=<ref>:<oid>`, which makes a remote delete refuse a tip that moved.
+- **Never pass `--force` or `-f`.** Pass `-D` only for a branch the developer chose to force-delete at
+  its own question. The one force-family flag allowed is CLEAR's `--force-with-lease=<ref>:<oid>`, which
+  makes a remote delete refuse a tip that moved.
 - **Send only `query` documents through `gh api graphql`, never `mutation`.** Writes go through
   `gh issue comment`, `gh project item-edit`, `gh issue close` and, for the refresh alone,
   `gh issue edit --body-file`. Use none of `gh issue comment --edit-last` or `--delete-last`,

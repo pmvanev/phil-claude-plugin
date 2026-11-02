@@ -326,7 +326,12 @@ DISCOVER and DIVERGE never ran; the changed assumptions are the session-handoff 
   known way and leaves unknown ones open, so the plan lists each finished worktree with its commands and
   the developer runs them. This revises story 4 and issue 75's step 5. The same run moved three more
   rules into place: the remote is judged by every push URL, the remote delete carries the merged tip as
-  `--force-with-lease`, and only the developer's own pull requests give candidates. The snapshot is deleted through a new
+  `--force-with-lease`, and only the developer's own pull requests give candidates.
+- **An unmerged branch survives unless the developer says otherwise (the developer's answer at the
+  close of issue 75, 2026-11-02).** This reverses the slice 03 settlement for branches only. FORCE asks
+  about each of the developer's own unmerged branches on its own, before the plan, listing every commit a
+  delete would lose; keep is the default, and force-delete runs `git branch -D` and a remote delete
+  leased on the tip shown. Worktrees stay listed, never removed, with a dirty one's changes shown. The snapshot is deleted through a new
   `session-exchanges.py retire`, with the same compare-and-swap as every write, never a bare `rm`; and
   the plan gains a third answer, *yes, and retire the snapshot here too*: the snapshot in the checkout
   `/phil:done` runs in records no branch, so a plain yes keeps it.
