@@ -1,0 +1,17 @@
+{
+  "fixture_id": "DONE-SELFTEST-07",
+  "situation": "Every checklist item is done, but the only pull request naming the card was closed without merging. Main's head is SUCCESS.",
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "NOT-LANDED",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "LANDED reports that no pull request for the card merged; the closed one is listed and never counted as landed work",
+  "must_not": [
+    "count the closed pull request as landed because none is open",
+    "merge or reopen anything"
+  ],
+  "why_this_fixture_exists": "plugin-validator, 2026-11-02: the landing rule accepted 'every one found is merged or was closed unmerged', so a card whose only pull request was abandoned read as landed."
+}

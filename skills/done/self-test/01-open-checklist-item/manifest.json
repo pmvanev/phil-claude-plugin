@@ -1,0 +1,18 @@
+{
+  "fixture_id": "DONE-SELFTEST-01",
+  "situation": "Card 75 has three checklist items. Two name a merged pull request; the third, unticked, names nothing. Every pull request naming the card is merged and main's head is SUCCESS.",
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "OPEN-ASKS",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "the report lists the unticked item open, quoted as written, and the verdict names it as the cause",
+  "must_not": [
+    "mark the unticked item done because the work around it merged",
+    "merge or close anything",
+    "drop the open item from the list to reach READY"
+  ],
+  "why_this_fixture_exists": "AC1.1. The whole command exists to stop a close over an ask nobody did; a checklist item with no evidence is the plainest case."
+}

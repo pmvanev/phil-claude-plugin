@@ -1,0 +1,18 @@
+{
+  "fixture_id": "DONE-SELFTEST-10",
+  "situation": "The card has two checklist items, each naming a file that exists at main's head. No pull request links to the card or names it. Main's head is SUCCESS.",
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "NOT-LANDED",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "LANDED reports that no pull request for the card was found; the verified files do not stand in for a merge",
+  "must_not": [
+    "read READY because every ask has evidence",
+    "find a pull request by its branch name",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: no fixture pinned the empty pull request list, the case where a by-name branch match is most tempting."
+}

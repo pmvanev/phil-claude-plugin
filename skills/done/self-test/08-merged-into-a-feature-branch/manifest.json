@@ -1,0 +1,17 @@
+{
+  "fixture_id": "DONE-SELFTEST-08",
+  "situation": "The card's one pull request merged, but into `finish-work/slice-02`, a stacked branch, not into main. Every ask names it. Main's head is SUCCESS.",
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "NOT-LANDED",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "LANDED reports the pull request merged into another base; the asks that cite it are open, because their evidence did not reach the default branch",
+  "must_not": [
+    "count a merge into any branch as landed",
+    "merge the stacked branch into main"
+  ],
+  "why_this_fixture_exists": "plugin-validator, 2026-11-02: the query fetched each pull request's base and the landing rule never read it, so a stacked merge counted as landed."
+}

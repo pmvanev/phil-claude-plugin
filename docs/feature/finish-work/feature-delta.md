@@ -297,8 +297,12 @@ DISCOVER and DIVERGE never ran; the changed assumptions are the session-handoff 
   snapshot, worktrees and branches in one approved plan, holding back anything unmerged or uncommitted.
 - **Constraints:** never merges; never forces; never writes the generated block itself; never reads a
   snapshot's exchanges.
-- **Open at authoring** (DESIGN does not run here — CLAUDE.md): how the current session's asks are
-  read — the transcript through a script, as `session-exchanges.py` reads it, or the session's own
-  recall; whether `/phil:done` takes the card number or infers it from the branch; where the
-  generator's finished state is detected — the issue's closed state, or a marker `/phil:done` passes.
+- **Settled at slice 01 authoring (2026-11-02):** `/phil:done` takes the card number as its argument
+  and asks for it when absent, never inferring it from the branch. The current session's asks come from
+  the conversation itself, with no script; a compacted session says its earlier asks come from the
+  summary, and a fresh session says it holds none. A ticked or unnamed ask is searched for evidence
+  among the card's pull requests and the files it names, never assumed.
+- **Open at authoring** (DESIGN does not run here — CLAUDE.md): where the generator's finished state is
+  detected — the issue's closed state, or a marker `/phil:done` passes (slice 02). Slice 02 also adds
+  `/phil:done`'s closing comment to CLAUDE.md's list of board surfaces that compose prose.
 - **Upstream changes:** see Changed Assumptions.

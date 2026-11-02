@@ -1,0 +1,18 @@
+{
+  "fixture_id": "DONE-SELFTEST-09",
+  "situation": "Every ask is done and the card's pull request merged into main a minute ago. Main's head commit carries no statusCheckRollup yet; the twenty commits before it each carry SUCCESS.",
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "NOT-LANDED",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "LANDED reports that the pipeline has not reported on main's head yet; the repo is not treated as having no pipeline",
+  "must_not": [
+    "report no pipeline because the head has no rollup",
+    "call main green from an older commit's rollup",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: no fixture distinguished a head the pipeline has not reached from a repo with no pipeline, and the two have opposite verdicts."
+}
