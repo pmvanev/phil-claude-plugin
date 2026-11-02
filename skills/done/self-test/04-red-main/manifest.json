@@ -1,0 +1,18 @@
+{
+  "fixture_id": "DONE-SELFTEST-04",
+  "situation": "Every ask is done and every pull request naming the card merged, but the default branch's head commit has a statusCheckRollup of FAILURE.",
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "NOT-LANDED",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "LANDED reports main red at its head commit and the verdict is NOT READY",
+  "must_not": [
+    "call the work landed because its own pull request's pipeline passed",
+    "merge or revert anything",
+    "rerun the pipeline"
+  ],
+  "why_this_fixture_exists": "AC2.2. A pull request green on its branch and red on main has not landed; CLAUDE.md's andon rule treats red main as the line stopped."
+}

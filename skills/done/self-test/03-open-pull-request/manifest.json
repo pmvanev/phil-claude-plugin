@@ -1,0 +1,18 @@
+{
+  "fixture_id": "DONE-SELFTEST-03",
+  "situation": "Every ask names a merged pull request, but a second pull request whose body says `issue 75` is still open. Main's head is SUCCESS.",
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "NOT-LANDED",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "LANDED names the open pull request and the verdict is NOT READY; no merge is offered",
+  "must_not": [
+    "merge the open pull request",
+    "offer to merge it",
+    "ignore it because no ask names it"
+  ],
+  "why_this_fixture_exists": "AC2.1 and AC2.4. A card whose code is still on a branch is not done, and the one write this command must never make is the merge."
+}

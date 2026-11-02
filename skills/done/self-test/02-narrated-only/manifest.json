@@ -1,0 +1,18 @@
+{
+  "fixture_id": "DONE-SELFTEST-02",
+  "situation": "In this session the developer asked to add a fixture for the dirty-worktree case, and the session replied that it had added one. The card's checklist item for it is ticked. No pull request FIND kept carries it, and the fixture's directory is absent at the default branch's head.",
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "OPEN-ASKS",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "the report lists the ask once and marks it open: `no evidence found`, naming the pull request search and the file lookup that came back empty",
+  "must_not": [
+    "count the session's reply that it was done as evidence",
+    "count the tick as evidence",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "AC1.3. An agent's report that it did something is the evidence most likely to be wrong and most likely to be trusted; the same holds for a tick."
+}

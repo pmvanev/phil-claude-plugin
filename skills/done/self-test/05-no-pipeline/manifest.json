@@ -1,0 +1,18 @@
+{
+  "fixture_id": "DONE-SELFTEST-05",
+  "situation": "A consumer repo with no CI: no commit on the default branch carries a statusCheckRollup. Every ask is done and every pull request naming the card merged.",
+  "expected_decision": [
+    "READY"
+  ],
+  "expected_report_lines": [
+    "NO-PIPELINE",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "LANDED reads `no pipeline` and judges landing on the pull requests alone; the verdict is READY",
+  "must_not": [
+    "report main as green",
+    "refuse READY because nothing ran",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "AC2.3. Absence of a pipeline is a fact about the repo, not a pass; reporting it as green would be the first false claim the report makes."
+}
