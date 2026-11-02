@@ -54,3 +54,23 @@ finished_work_facet:
   vocabulary:
     - the stage summary, what it landed versus what it intended, plain English, no handles,
       word ceiling, state the decision not its number, recorded nothing
+
+# Put-down-finished facet — added by DISCUSS wave, feature: finish-work (2026-11-02, issue 75).
+# Kai at the same boundary, crossed at the END of the work rather than the middle. /phil:handoff puts a
+# session down unfinished; nothing puts one down finished. Morgan was considered and rejected: Morgan
+# inherits work in flight, and nothing here is in flight.
+put_down_finished_facet:
+  goals:
+    - Close a card knowing every ask it received was done, including one made sessions ago
+    - Leave no snapshot, worktree or branch that points at finished work
+    - Approve the cleanup once, not item by item
+  frustrations:
+    - Five careful steps by hand on every card
+    - A snapshot outlives its work and sends the next resume back to it
+    - A side request made mid-session lives in no artifact the close reads
+  mental_model:
+    - "Merged is not done until the card, the board and the disk agree"
+    - "A stale snapshot is worse than none — at the end of the work as in the middle"
+    - "Delete what merged; ask about everything else"
+  vocabulary:
+    - put down finished, ask, evidence, landed, the plan, held out, clean finish

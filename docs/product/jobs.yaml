@@ -1165,3 +1165,45 @@ jobs:
     features: [lambda-web-app-speed]
     # Not a facet of shape-a-pipeline-to-the-change: that speed is the pipeline's, from forge job
     # records; this one is a person's page load, from Lambda's logs and a browser.
+
+  - id: put-finished-work-down
+    # Registered by DISCUSS wave, feature: finish-work (2026-11-02, issue 75)
+    job_story: >
+      When a card's work has merged, I want the card closed and everything the work left behind
+      cleared — every ask checked, the snapshot, the worktrees and the branches — without dropping an
+      ask or deleting anything unmerged, so done means done and the next session starts clean.
+    dimensions:
+      functional: >
+        List every ask the work received, from the card and the session, with its evidence; confirm
+        the work merged and main is green; close the card comment-first and read it back; clear the
+        snapshot, worktrees and branches in one approved plan, holding back anything unmerged or
+        uncommitted.
+      emotional: >
+        Confidence that a closed card is finished, not merely closed; relief from running five careful
+        steps by hand on every card.
+      social: >
+        A board a teammate can trust when it says Done; a repo with no debris for the next person.
+    four_forces:
+      push: >
+        Measured 2026-11-02 on this repo: every close is done by hand in five steps — comment, Status,
+        branch, worktree, the side request — and done carefully: 40 of 40 closed cards carry a closing
+        comment and none disagrees with its Status. The cost is labour, not debris. Nothing retires a
+        .session-handoff.md: the session-handoff journey's "marked consumed" step was never built, so a
+        snapshot outlives its work. Nothing in the plugin touches a worktree.
+      pull: >
+        One command that puts a session down finished, as /phil:handoff puts one down unfinished, and
+        asks once.
+      anxiety: >
+        (A) Deleting something unmerged or uncommitted — a branch, a worktree, or a git-ignored
+        snapshot with no undo. (B) Closing over an ask nobody did, because it lived in an earlier
+        session. (C) A closing comment dropped silently: `gh issue close -c` on a closed issue drops it.
+        (D) Ceremony: a clean finish that asks five questions.
+      habit: >
+        Closing from memory; deleting branches whenever someone notices them; leaving the snapshot
+        until a resume trips on it.
+    opportunity_score: not-scored   # single new job; priority by default
+    status: validated
+    personas: [kai-session-relay]
+    features: [finish-work]
+    # Not a facet of carry-work-across-session-boundaries: that job carries UNFINISHED work across the
+    # boundary; this one ends it. The two meet at the snapshot — one writes it, this one retires it.

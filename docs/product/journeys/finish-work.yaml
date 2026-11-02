@@ -1,0 +1,81 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: finish-work (2026-11-02, issue 75)
+
+id: finish-work
+name: Put a session down finished
+persona: kai-session-relay
+job: put-finished-work-down
+summary: >
+  Kai's card has merged. /phil:done lists every ask with its evidence, confirms the work landed,
+  shows one plan for the close and the cleanup, and on one yes closes the card comment-first and
+  clears the snapshot, worktrees and branches — holding back anything unmerged or uncommitted.
+
+steps:
+  - id: account
+    action: >
+      Read the card's checklist and Done-when items and the current session's requests and tasks; mark
+      each done with its evidence, or open.
+    output: "ASKS n: d done, o open — each with its evidence or quoted as open"
+    emotion: wary — did I forget something?
+  - id: landed
+    action: >
+      Confirm every pull request found for the card merged and the default branch's pipeline is green
+      at or after the last merge.
+    output: "LANDED: PR merged; main green at <sha>  |  NOT LANDED: <reason> — nothing closed"
+    emotion: steadier — the work is really in
+  - id: plan
+    action: >
+      List every write — comment, Status, snapshots, worktrees, branches — and ask once. Hold out an
+      open ask, an unmerged branch and a dirty worktree, each with its own question.
+    output: "PLAN: <writes> — yes / stop; HELD: <item> — <question>"
+    emotion: in control — I see everything before anything happens
+  - id: close
+    action: >
+      Post the closing comment, write Status=Done, close where no workflow does, read both back; have
+      the generated block show the finished line.
+    output: "CLOSED: comment, Done, closed — read back"
+    emotion: relief — the board agrees
+  - id: clear
+    action: >
+      Delete each snapshot, then remove each worktree, then delete each branch local and remote;
+      nothing forced.
+    output: "DONE: <what it did>; LEFT: <item> — <reason>"
+    emotion: clean slate — the next session starts on the next card
+
+emotional_arc: wary → steadier → in control → relief → clean slate  # upward
+
+shared_artifacts:
+  - name: asks (each with evidence or open)
+    source: account
+    consumed_by: [plan, close]   # dropped asks and their reasons reach the closing comment
+  - name: the work's pull requests and branches
+    source: landed               # forge links, or merged PRs naming the card (D8)
+    consumed_by: [plan, clear]
+  - name: snapshot next action and stack
+    source: plan                 # read via session-exchanges.py head; exchanges never read
+    consumed_by: [plan]
+  - name: the approved plan
+    source: plan
+    consumed_by: [close, clear]
+
+error_paths:
+  - step: account
+    failure: An ask has no evidence
+    recovery: Hold the close; the developer does it or drops it with a reason the comment records
+  - step: landed
+    failure: A pull request is open, or main is red after the last merge
+    recovery: Close nothing; name the pull request or the run. Never offer to merge
+  - step: landed
+    failure: The repo has no pipeline
+    recovery: Report `no pipeline`, never green, and continue
+  - step: plan
+    failure: A branch is unmerged, or a worktree has uncommitted or unpushed changes
+    recovery: Hold it out of the plan; it survives unless the developer says otherwise
+  - step: plan
+    failure: The forge links no pull request to the card
+    recovery: List merged pull requests that name the card as candidates; never match a branch by name alone
+  - step: close
+    failure: Read-back finds a closed card outside Done, or an open one in Done
+    recovery: Report the mismatch; do not paper over it
+  - step: clear
+    failure: git refuses a delete or a worktree removal
+    recovery: Report the refusal and leave the item; never retry with force
