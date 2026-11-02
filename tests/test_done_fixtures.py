@@ -19,7 +19,7 @@ FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
 TERMINAL = {"NOT-READY", "STOPPED", "CLOSED", "CLOSE-FAILED"}
 REPORT_LINES = {"OPEN-ASKS", "NOT-LANDED", "NO-PIPELINE", "ASK-DROPPED", "READ-BACK-MISMATCH",
-                "BLOCK-REFRESHED", "WROTE-NOTHING"}
+                "BLOCK-REFRESHED", "CLEARED", "LEFT", "WROTE-NOTHING"}
 
 
 def test_the_skill_defines_exactly_these_outcomes():
@@ -106,3 +106,31 @@ def test_every_outcome_has_a_fixture():
         lines |= set(d["expected_report_lines"])
     assert TERMINAL - decisions == set(), TERMINAL - decisions
     assert REPORT_LINES - lines == set(), REPORT_LINES - lines
+
+
+def test_slice_03_fixtures_exist():
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("23-worktree-listed-never-removed", "24-unmerged-branch-survives", "25-dirty-worktree-survives",
+                   "26-name-only-branch-is-no-candidate", "27-clean-finish-asks-once",
+                   "28-retire-the-snapshot-here", "29-current-worktree-is-held",
+                   "30-remote-tip-ahead-of-the-merge", "31-local-tip-ahead-of-the-merge",
+                   "32-retire-refused", "33-shared-or-foreign-branch-held",
+                   "34-push-url-names-another-repo", "35-another-authors-pull-request"):
+        assert wanted in names, f"slice 03 brief names fixture {wanted}"
+
+
+def test_a_clean_finish_asks_exactly_one_question():
+    """KPI and AC4.5: ceremony on a clean finish is the anxiety the plan's one yes answers."""
+    d = json.loads((SKILL_DIR / "self-test" / "27-clean-finish-asks-once" / "manifest.json").read_text())
+    assert d["questions_asked"] == 1
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_no_fixture_expects_a_force(manifest):
+    """D9: a fixture expecting a forced delete would teach the run to use one."""
+    d = json.loads(manifest.read_text())
+    forced = [w for w in d.get("writes", []) if " -D" in w or " -f " in w
+              or ("--force" in w and "--force-with-lease=" not in w)]
+    assert not forced, d["fixture_id"]
+    assert not any("remove the worktree" in w for w in d.get("writes", [])), \
+        f"{d['fixture_id']}: the developer removes worktrees, never the run"

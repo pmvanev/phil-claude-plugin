@@ -308,4 +308,26 @@ DISCOVER and DIVERGE never ran; the changed assumptions are the session-handoff 
   /phil:done" would be a claim it cannot derive. The terminal outcomes became `NOT-READY`, `STOPPED` and
   `CLOSED`: slice 01's `READY` named a verdict, not what the run did. `/phil:done`'s closing comment
   joined CLAUDE.md's list of board surfaces that compose prose.
+- **Settled at slice 03 authoring (2026-11-02):** D3 and D9 conflicted. Deleting an unmerged branch or
+  a worktree with uncommitted changes needs `-D` or `--force`, which D9 forbids, so "survives unless the
+  developer says otherwise" cannot be honoured. Such items are listed in the plan as surviving, with the
+  reason, and never offered. **The guard is the skill's own tip check**: a branch, local or remote, or a
+  worktree goes only when its tip is the `headRefOid` of a pull request merged into the default branch,
+  and the branch is not the default, protected, from a fork, or used by an open pull request. Both
+  slice 03 reviews disproved the first draft's premise that git's refusals were the guard:
+  `git push --delete` checks nothing, `git branch -d` accepts a branch merged only into its own remote,
+  `-f` forces either, and a dirty worktree's snapshot was retired before git refused the worktree. A
+  dirty worktree is now found before the plan by `scripts/worktree-state.py`, and held with its
+  snapshot. A branch held or left keeps its remote branch.
+- **Worktrees are listed, never removed (the developer's answer, 2026-11-02).** An adversarial run,
+  verified in scratch repositories, showed `git worktree remove` deleting, with exit 0, a repository
+  nested in an ignored folder, edits hidden by `--assume-unchanged` or `--skip-worktree`, and commits
+  only the worktree's history held; and git refuses any worktree with a submodule. Each check closes one
+  known way and leaves unknown ones open, so the plan lists each finished worktree with its commands and
+  the developer runs them. This revises story 4 and issue 75's step 5. The same run moved three more
+  rules into place: the remote is judged by every push URL, the remote delete carries the merged tip as
+  `--force-with-lease`, and only the developer's own pull requests give candidates. The snapshot is deleted through a new
+  `session-exchanges.py retire`, with the same compare-and-swap as every write, never a bare `rm`; and
+  the plan gains a third answer, *yes, and retire the snapshot here too*: the snapshot in the checkout
+  `/phil:done` runs in records no branch, so a plain yes keeps it.
 - **Upstream changes:** see Changed Assumptions.

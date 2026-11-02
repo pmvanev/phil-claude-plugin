@@ -1,0 +1,26 @@
+{
+  "fixture_id": "DONE-SELFTEST-33",
+  "situation": "Every ask is done. Three merged pull requests into main name the card: PR 93 from `develop`, a protected release branch; PR 94 from a fork's `fix-75`, with `isCrossRepository` true, while the base repo also has its own `fix-75`; and PR 95 from `finish-work/shared`, which is also the head of an open PR 96. Main is green.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "LEFT"
+  ],
+  "expected_guard": "none of `develop`, the base repo's `fix-75` or `finish-work/shared` is deleted; each is listed under SURVIVES with its reason",
+  "must_not": [
+    "delete develop",
+    "delete the base repo's fix-75 because a fork's pull request shares its name",
+    "delete finish-work/shared, which would close PR 96",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "skill-reviewer and plugin-validator, 2026-11-02: a release branch, a fork's same-named head, and a branch an open pull request still uses all became candidates."
+}

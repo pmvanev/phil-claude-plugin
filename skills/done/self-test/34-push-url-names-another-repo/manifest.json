@@ -1,0 +1,27 @@
+{
+  "fixture_id": "DONE-SELFTEST-34",
+  "situation": "PR 91 (`finish-work/slice-02`, head `a1b2c3d`, opened by the developer) merged into main, which is green, and every ask is done. Its branch sits at `a1b2c3d` on the remote, with no worktree. `origin`'s fetch URL is `git@github.com:owner/repo.git`, but `remote.origin.pushurl` points at the developer's fork, `git@github.com:me/repo.git`.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "delete the local branch"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED",
+    "LEFT"
+  ],
+  "expected_guard": "`git remote get-url --push --all origin` names the fork, so every remote delete is held and the report says why",
+  "must_not": [
+    "judge the remote by its fetch URL alone",
+    "run `git push --delete` against origin",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "Adversarial run, 2026-11-02, verified in a scratch repo: with a pushurl, `get-url` printed the canonical URL and `git push --delete` deleted the fork's branch, holding a commit in no other ref."
+}

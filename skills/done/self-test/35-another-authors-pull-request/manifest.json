@@ -1,0 +1,27 @@
+{
+  "fixture_id": "DONE-SELFTEST-35",
+  "situation": "PR 91 (`finish-work/slice-02`, head `a1b2c3d`, opened by the developer) merged into main, which is green, and every ask is done. Its branch exists locally only. A colleague's PR 97 (`kim/follow-up`, opened by `kim`) says `follow-up to #75` and merged into main; its branch sits at its merged tip, locally and on the remote.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "delete the local branch finish-work/slice-02"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED",
+    "LEFT"
+  ],
+  "expected_guard": "`kim/follow-up` is listed under SURVIVES as a pull request someone else opened, and never deleted",
+  "must_not": [
+    "delete kim/follow-up, locally or on the remote",
+    "treat a mention of the card as ownership of the branch",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "Adversarial run, 2026-11-02: any merged pull request whose body named the card made its branch a candidate, a colleague's included."
+}

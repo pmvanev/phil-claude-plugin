@@ -1,0 +1,26 @@
+{
+  "fixture_id": "DONE-SELFTEST-25",
+  "situation": "PR 91 (`finish-work/slice-02`, head `a1b2c3d`, opened by the developer) merged into main, which is green, and every ask is done. The worktree `../fw-02` on that branch, at the merged tip, holds an uncommitted edit and a snapshot; `worktree-state.py` reads it `DIRTY`.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "LEFT"
+  ],
+  "expected_guard": "the snapshot in the dirty worktree is kept, the worktree and its branch survive, and the report lists them",
+  "must_not": [
+    "retire the snapshot in ../fw-02",
+    "run `git worktree remove`",
+    "pass `--force` or `-f`",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "AC4.3 and the skill-reviewer, 2026-11-02: a dirty worktree's snapshot describes unfinished work, and the first draft retired it before git refused the worktree."
+}

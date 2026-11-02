@@ -603,3 +603,47 @@ def test_a_new_snapshot_is_owner_only_whatever_the_umask(tmp_path):
         os.umask(old)
 
     assert snap.stat().st_mode & 0o777 == 0o600
+
+
+# ---------------------------------------------------------------- retire (finish-work slice 03)
+# `/phil:done` deletes a finished checkout's snapshot. The file is git-ignored and has no undo, so the
+# delete takes the same compare-and-swap as every write, and a bare `rm` grant is never needed.
+
+
+def test_retire_deletes_the_snapshot_the_developer_was_shown(tmp_path):
+    path = tmp_path / ".session-handoff.md"
+    path.write_text(BODY)
+    assert se.main(["retire", "--file", str(path), "--expect-sha", git_hash(path)]) == 0
+    assert not path.exists()
+
+
+def test_retire_refuses_when_the_file_changed_after_it_was_shown(tmp_path):
+    path = tmp_path / ".session-handoff.md"
+    path.write_text(BODY)
+    shown = git_hash(path)
+    path.write_text(BODY + "\n- A later session pushed a frame.\n")
+    assert se.main(["retire", "--file", str(path), "--expect-sha", shown]) == se.REFUSED
+    assert path.exists()
+
+
+def test_retire_refuses_any_file_but_a_snapshot(tmp_path):
+    """The subcommand is the only delete `/phil:done` holds; it must not become a general `rm`."""
+    other = tmp_path / "README.md"
+    other.write_text(BODY)
+    assert se.main(["retire", "--file", str(other), "--expect-sha", git_hash(other)]) == se.MALFORMED
+    assert other.exists()
+
+
+def test_retire_on_a_missing_snapshot_deletes_nothing_and_says_absent(tmp_path, capsys):
+    path = tmp_path / ".session-handoff.md"
+    assert se.main(["retire", "--file", str(path), "--expect-sha", "absent"]) == 0
+    assert "ABSENT" in capsys.readouterr().out
+
+
+def test_retire_on_a_directory_reports_unreadable_rather_than_crashing(tmp_path, capsys):
+    """plugin-validator and skill-reviewer, 2026-11-02: a directory by the snapshot's name raised an
+    uncaught IsADirectoryError."""
+    path = tmp_path / ".session-handoff.md"
+    path.mkdir()
+    assert se.main(["retire", "--file", str(path), "--expect-sha", "absent"]) == se.UNREADABLE
+    assert path.exists()

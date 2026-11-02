@@ -33,5 +33,18 @@ the fixtures are model-driven, and that read is by hand.
 | `20-stop-at-resolve` | `STOPPED` | `OPEN-ASKS` `WROTE-NOTHING` | A stop at RESOLVE; the quoted ask stays out of the question |
 | `21-card-not-on-this-board` | `CLOSED` | — | A card on another board gets no Status write and no false mismatch |
 | `22-card-already-closed` | `CLOSED` | — | A closed card gets its comment, never `close -c` |
+| `23-worktree-listed-never-removed` | `CLOSED` | `CLEARED` | Worktrees are listed with their commands, never removed |
+| `24-unmerged-branch-survives` | `CLOSED` | `CLEARED` `LEFT` | An unmerged branch survives with its worktree and snapshot |
+| `25-dirty-worktree-survives` | `CLOSED` | `LEFT` | A dirty worktree keeps its snapshot |
+| `26-name-only-branch-is-no-candidate` | `CLOSED` | `CLEARED` | A branch that only looks like the card's is never touched |
+| `27-clean-finish-asks-once` | `CLOSED` | `CLEARED` | A clean finish asks exactly one question |
+| `28-retire-the-snapshot-here` | `CLOSED` | `CLEARED` | The snapshot here goes only on the third answer |
+| `29-current-worktree-is-held` | `CLOSED` | `LEFT` | The session's worktree keeps its branch; the commands are named |
+| `30-remote-tip-ahead-of-the-merge` | `CLOSED` | `CLEARED` `LEFT` | A remote branch past the merge survives; git would not guard it |
+| `31-local-tip-ahead-of-the-merge` | `CLOSED` | `LEFT` | A local commit after the merge holds the branch and its remote |
+| `32-retire-refused` | `CLOSED` | `LEFT` | A snapshot changed after the plan survives |
+| `33-shared-or-foreign-branch-held` | `CLOSED` | `LEFT` | Protected, fork and shared branches are never deleted |
+| `34-push-url-names-another-repo` | `CLOSED` | `CLEARED` `LEFT` | The push URL, not the fetch URL, decides the remote |
+| `35-another-authors-pull-request` | `CLOSED` | `CLEARED` `LEFT` | A colleague's branch is never a candidate |
 
 `WROTE-NOTHING` is expected on every fixture that writes nothing.
