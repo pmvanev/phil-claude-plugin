@@ -1,0 +1,22 @@
+{
+  "fixture_id": "DONE-SELFTEST-19",
+  "situation": "Every ask is done and the work landed. After the yes the comment posts, then `gh project item-edit` fails: `your token has not been granted the required scopes`.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment"
+  ],
+  "expected_decision": [
+    "CLOSE-FAILED"
+  ],
+  "expected_report_lines": [],
+  "expected_guard": "the run stops at the failed Status write, reports that the comment posted, quotes the error, names `gh auth refresh -s project`, and runs no close",
+  "must_not": [
+    "run the close after the Status write failed",
+    "delete or edit the posted comment",
+    "retry the write",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: CLOSE had no stop rule, so a failed write left the run going and no outcome described it. The order the skill protects holds only if a failure stops the sequence."
+}

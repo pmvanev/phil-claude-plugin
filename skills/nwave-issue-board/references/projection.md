@@ -19,12 +19,16 @@ Stack
 2. └ The observed population · it was partial, so the rule needed changing first · open since 2026-08-14T02:02Z · crossed 0
 ```
 
-Four rules, and the first is the one that makes this legal:
+Five rules, and the first is the one that makes this legal:
 
 - **Write-only, like everything else in the block.** `/phil:resume` reads the local snapshot; nothing reads
   this. The local file stays the single authority, so no second authority exists to drift — which is the
   whole reason the reasoning can live on a board at all.
 - **Absent renders as `unknown`, never as empty** — under *Project the reasoning, not just the position* in `SKILL.md`.
+- **A closed card renders `Finished <YYYY-MM-DD>.` in place of all three.** Take the UTC date of the
+  issue's `closedAt`, read fresh at the refresh, whether or not a snapshot exists. Finished work has no
+  next action and no stack: a snapshot left behind is stale, and rendering it, or `unknown`, would
+  mislead. Derive the state from the closed issue; never from a marker a command leaves.
 - **A frame whose `crossed` is 2 or more is marked `⚠ stale`.** A push that survived two wind-downs is
   stale, and a stale stack is worse than none for the same reason a stale snapshot is: the next reader
   trusts it.

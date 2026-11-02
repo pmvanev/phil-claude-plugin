@@ -6,6 +6,10 @@
 
 Every ask names a merged pull request, but a second pull request whose body says `issue 75` is still open. Main's head is SUCCESS.
 
+## Writes, in order
+
+None.
+
 ## What must happen
 
 All asks are done. LANDED reads `NOT LANDED: PR 82 open`. The report names the developer, or `superpowers:finishing-a-development-branch`, as who merges.

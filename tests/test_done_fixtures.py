@@ -17,8 +17,9 @@ import pytest
 SKILL_DIR = Path(__file__).resolve().parent.parent / "skills" / "done"
 FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
-TERMINAL = {"READY", "NOT-READY"}
-REPORT_LINES = {"OPEN-ASKS", "NOT-LANDED", "NO-PIPELINE", "WROTE-NOTHING"}
+TERMINAL = {"NOT-READY", "STOPPED", "CLOSED", "CLOSE-FAILED"}
+REPORT_LINES = {"OPEN-ASKS", "NOT-LANDED", "NO-PIPELINE", "ASK-DROPPED", "READ-BACK-MISMATCH",
+                "BLOCK-REFRESHED", "WROTE-NOTHING"}
 
 
 def test_the_skill_defines_exactly_these_outcomes():
@@ -54,17 +55,40 @@ def test_exactly_one_terminal_outcome_and_only_known_report_lines(manifest):
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
-def test_every_run_claims_it_wrote_nothing(manifest):
-    """Slice 01 writes nothing. The grant accepts a mutation document, so the run vouches for itself."""
-    assert "WROTE-NOTHING" in json.loads(manifest.read_text())["expected_report_lines"]
+def test_wrote_nothing_exactly_when_nothing_was_written(manifest):
+    """Keyed on the writes, not the close: a run whose read-back finds the card open still wrote, and a
+    CLOSE-FAILED run whose first write failed wrote nothing (skill-reviewer, 2026-11-02)."""
+    d = json.loads(manifest.read_text())
+    assert isinstance(d.get("writes"), list), f"{d['fixture_id']} must list the writes it expects"
+    assert ("WROTE-NOTHING" in d["expected_report_lines"]) is (d["writes"] == []), d["fixture_id"]
+    if d["expected_decision"][0] in ("NOT-READY", "STOPPED"):
+        assert d["writes"] == [], d["fixture_id"]
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_run_past_the_report_states_the_developers_answers(manifest):
+    """STOPPED and CLOSED depend on what the developer answered; a fixture that omits it is unjudgeable."""
+    d = json.loads(manifest.read_text())
+    if d["expected_decision"][0] in ("STOPPED", "CLOSED", "CLOSE-FAILED"):
+        assert d.get("developer_answers"), d["fixture_id"]
+
+
+def test_slice_02_fixtures_exist():
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("14-ask-dropped-with-a-reason", "15-comment-before-done", "16-read-back-mismatch",
+                   "17-finished-block", "18-stop-at-the-plan", "19-a-write-fails",
+                   "20-stop-at-resolve", "21-card-not-on-this-board", "22-card-already-closed"):
+        assert wanted in names, f"slice 02 brief names fixture {wanted}"
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
 def test_an_open_ask_or_an_unlanded_merge_never_reads_ready(manifest):
     d = json.loads(manifest.read_text())
     lines = set(d["expected_report_lines"])
-    if lines & {"OPEN-ASKS", "NOT-LANDED"}:
+    if "NOT-LANDED" in lines:
         assert d["expected_decision"] == ["NOT-READY"], d["fixture_id"]
+    if "OPEN-ASKS" in lines and "ASK-DROPPED" not in lines:
+        assert d["expected_decision"] in (["NOT-READY"], ["STOPPED"]), d["fixture_id"]
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)

@@ -161,7 +161,7 @@ silently dropped and the board never disagrees with the issue.
 
 ### Elevator Pitch
 Before: I post the comment, set Done and close by hand, and on a closed issue `gh issue close -c` drops the comment without a word.
-After: run `/phil:done 75` → sees `CLOSED: comment posted, Status Done, issue closed — read back` and, on a card with a generated block, `Finished 2026-11-03 — closed by /phil:done.` in place of its next action.
+After: run `/phil:done 75` → sees `CLOSED: comment posted, Status Done, issue closed — read back` and, on a card with a generated block, `Finished 2026-11-03.` in place of its next action.
 Decision enabled: I move to the next card, trusting the board says this one is finished.
 
 **Acceptance criteria**
@@ -302,7 +302,10 @@ DISCOVER and DIVERGE never ran; the changed assumptions are the session-handoff 
   the conversation itself, with no script; a compacted session says its earlier asks come from the
   summary, and a fresh session says it holds none. A ticked or unnamed ask is searched for evidence
   among the card's pull requests and the files it names, never assumed.
-- **Open at authoring** (DESIGN does not run here — CLAUDE.md): where the generator's finished state is
-  detected — the issue's closed state, or a marker `/phil:done` passes (slice 02). Slice 02 also adds
-  `/phil:done`'s closing comment to CLAUDE.md's list of board surfaces that compose prose.
+- **Settled at slice 02 authoring (2026-11-02):** the generator detects the finished state from the
+  issue's closed state and its `closedAt`, never from a marker a command leaves, so the line reads
+  `Finished <YYYY-MM-DD>.` — the generator cannot know which command closed a card, and D4's "closed by
+  /phil:done" would be a claim it cannot derive. The terminal outcomes became `NOT-READY`, `STOPPED` and
+  `CLOSED`: slice 01's `READY` named a verdict, not what the run did. `/phil:done`'s closing comment
+  joined CLAUDE.md's list of board surfaces that compose prose.
 - **Upstream changes:** see Changed Assumptions.

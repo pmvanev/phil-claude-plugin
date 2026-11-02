@@ -14,5 +14,6 @@
     "offer to merge it",
     "ignore it because no ask names it"
   ],
-  "why_this_fixture_exists": "AC2.1 and AC2.4. A card whose code is still on a branch is not done, and the one write this command must never make is the merge."
+  "why_this_fixture_exists": "AC2.1 and AC2.4. A card whose code is still on a branch is not done, and the one write this command must never make is the merge.",
+  "writes": []
 }

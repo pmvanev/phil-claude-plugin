@@ -6,6 +6,10 @@
 
 Every ask is done and every pull request naming the card merged, but the default branch's head commit has a statusCheckRollup of FAILURE.
 
+## Writes, in order
+
+None.
+
 ## What must happen
 
 All asks are done. LANDED reads `NOT LANDED: main red at <sha>`. The verdict names that cause alone.

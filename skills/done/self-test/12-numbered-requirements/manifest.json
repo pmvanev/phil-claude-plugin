@@ -1,0 +1,21 @@
+{
+  "fixture_id": "DONE-SELFTEST-12",
+  "situation": "The card has no checklist and no Done-when heading. Under `## What it does` it lists four numbered steps; the merged pull request delivers the first two. Main's head is SUCCESS.",
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "OPEN-ASKS",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "the report lists all four numbered steps as asks, two done with the pull request and two open",
+  "must_not": [
+    "read a card with no checkboxes as having no asks",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "Dogfood, `/phil:done 75` on 1.17.0 (2026-11-02): the card's six steps sat under *What it does*, outside every source the skill read, and reached the report only by accident.",
+  "developer_answers": [
+    "do it"
+  ],
+  "writes": []
+}

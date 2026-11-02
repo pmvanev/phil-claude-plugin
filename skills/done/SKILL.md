@@ -1,71 +1,88 @@
 ---
 name: done
 description: >-
-  This skill should be used when the user asks "is this card done", "is this card ready to close",
-  "can I close this issue", "did everything I asked for land", "wrap up this card", or runs /phil:done.
-  It lists every ask the card received, each with verified evidence or marked open, and checks that every
-  pull request merged into the default branch and that branch is green. Read-only, GitHub only, never
-  merges. For unfinished work, use /phil:handoff.
+  This skill should be used when the user asks "is this card done", "can I close this issue", "close
+  out card N", "mark this card done", "did everything I asked for land", or runs /phil:done. It lists
+  every ask with verified evidence, checks every pull request merged into a green default branch, then,
+  on one yes, comments, sets Status to Done and closes the issue. GitHub only; never merges. For
+  unfinished work, use /phil:handoff.
 ---
 
 # Done — is this card ready to close?
 
 `/phil:handoff` puts a session down unfinished. This skill answers the question that comes before
-putting one down **finished**: did every ask land, and did the work reach the default branch? It reports
-`READY` or `NOT-READY` with the evidence behind each line.
+putting one down **finished**: did every ask land, and did the work reach the default branch? Then, on
+the developer's one yes, it closes the card comment-first and reads it back.
 
-**This version reports and writes nothing.** Closing the card and clearing what the work left behind are
-not part of it.
+Clearing what the work left behind — the snapshot, worktrees and branches — is not part of this
+version.
 
 ## Inputs
 
 - **The card** — the issue number from the argument. With none, ask for it; never infer it from the
   branch name.
 - **The repo** — the forge line in the working tree's `CLAUDE.md`; `git rev-parse --show-toplevel` finds
-  the root. Use `git rev-parse` for nothing else: a `<branch>:<path>` lookup reads a local ref that may be
-  stale. Pass `-R <owner/repo>` on every `gh issue` call, and the owner and repo as variables to every
+  the root. Pass `-R <owner/repo>` on every `gh issue` call, and the owner and repo as variables to every
   `gh api graphql` query, which takes no `-R`: an inferred remote reads the wrong repo's issues
   successfully (`phil:issue-board`). With no forge line, stop and name `/phil:board-setup`. On a GitLab
   forge line, stop and say this skill covers GitHub only.
+- **The board constants** — the project id, the `Status` field id and the `Done` option id, from the
+  same `CLAUDE.md` block. Read them; never probe for them. With none, the Status write is skipped and
+  reported, and `/phil:board-setup` named.
+
+Run `git` for two things only: `rev-parse --show-toplevel`, and the `log` reads of the block refresh in
+CLOSE. A `<branch>:<path>` lookup through local git reads a ref that may be stale; use the forge.
 
 ## FIND — the card, its pull requests and the default branch
 
-Read the issue body with `gh issue view <n> -R <owner/repo> --json body`. Then run one query for the
-default branch, the pull requests the forge links to the card, and the pull requests that mention it:
+Read the issue body with `gh issue view <n> -R <owner/repo> --json body,state`. Then read the default
+branch and the pull requests the forge links to the card:
 
 ```bash
 gh api graphql -f query='
-query($o:String!,$r:String!,$n:Int!,$q:String!){
+query($o:String!,$r:String!,$n:Int!){
   repository(owner:$o,name:$r){
     defaultBranchRef{ name target{ ... on Commit{ oid statusCheckRollup{ state }
       history(first:20){ nodes{ oid statusCheckRollup{ state } } } } } }
-    issue(number:$n){ closedByPullRequestsReferences(first:20, includeClosedPrs:true){
-      pageInfo{ hasNextPage } nodes{ number title state merged baseRefName } } } }
-  search(query:$q, type:ISSUE, first:50){ issueCount nodes{ ... on PullRequest{
-    number title body state merged mergedAt baseRefName } } } }' \
-  -f o=<owner> -f r=<repo> -F n=<n> -f q='repo:<owner>/<repo> is:pr <n> in:title,body'
+    issue(number:$n){ closedByPullRequestsReferences(first:50, includeClosedPrs:true){
+      pageInfo{ hasNextPage } nodes{ number title state merged baseRefName } } } } }' \
+  -f o=<owner> -f r=<repo> -F n=<n>
+```
+
+Then search every page for the pull requests that mention the card, filtering in `--jq`:
+
+```bash
+gh api graphql --paginate -f query='
+query($q:String!,$endCursor:String){
+  search(query:$q, type:ISSUE, first:50, after:$endCursor){ pageInfo{ hasNextPage endCursor }
+    nodes{ ... on PullRequest{ number title body state merged mergedAt baseRefName } } } }' \
+  -f q='repo:<owner>/<repo> is:pr <n> in:title,body' \
+  --jq '.data.search.nodes[] | select((.title+" "+.body) | test("(#|issue )<n>([^0-9]|$)"; "i"))'
 ```
 
 The default branch is `defaultBranchRef.name`; call it `<default>` below.
 
-**Find the card's pull requests, never by a branch name.** Keep every linked pull request. Keep a search
-hit only where its title or body contains `#<n>` or `issue <n>`, case-insensitive, with `<n>` not
-followed by a digit: `line 75` and `#175` do not name issue 75. Some repos mention a card in prose and
-never link it, because a closing keyword closes the card early; the search finds those.
+**Find the card's pull requests, never by a branch name.** Keep every linked pull request, and every
+search hit whose title or body contains `#<n>` or `issue <n>`, case-insensitive, with `<n>` not followed
+by a digit: `line 75` and `#175` do not name issue 75. Some repos mention a card in prose and never link
+it, because a closing keyword closes the card early; the search finds those.
 
-**Judge no list the query cut short.** Where `issueCount` exceeds 50 or `hasNextPage` is true, report
-the pull request list incomplete and the card `NOT-READY`.
+**Judge no list the query cut short.** Where the linked list's `hasNextPage` is true or a search page
+errors, report the pull request list incomplete and the card `NOT-READY`.
 
 ## ACCOUNT — every ask, with evidence or open
 
 Collect the asks from the card and the current session:
 
-1. **The card.** Every checklist item in the issue body, ticked or not, and every item under a heading
-   containing *Done when*.
+1. **The card.** Every checklist item in the issue body, ticked or not; every item under a heading
+   containing *Done when*; and every item, numbered or bulleted, under a heading containing
+   *What it does*, *Scope*, *Requirements* or *Acceptance criteria*.
 2. **The current session.** Each request the developer made in this conversation that bears on the
-   card, and each task the session took on for it. Quote the developer's words as written. Where the
-   conversation holds no such request, say so; earlier sessions' requests are not read. Where the
-   conversation was compacted, say that asks before the compaction come from its summary.
+   card, and each task the session took on for it. Quote the developer's words as written; follow a
+   terse reply with what it approved, in parentheses, so the ask reads on its own:
+   `"proceed" (commit, push, open the pull request)`. Where the conversation holds no such request, say
+   so; earlier sessions' requests are not read. Where the conversation was compacted, say that asks
+   before the compaction come from its summary.
 
 List an ask once even when both places hold it. Mark each **done** or **open**. Done needs evidence a
 call in this run verified, against `<default>`:
@@ -75,12 +92,16 @@ call in this run verified, against `<default>`:
 | A pull request | `merged` is true and `baseRefName` is `<default>` | `pullRequest(number:<p>){ merged baseRefName }` |
 | A commit | one of its associated pull requests merged into `<default>` | `object(expression:"<sha>"){ ... on Commit{ associatedPullRequests(first:5){ nodes{ number merged baseRefName } } } }`; a short sha works |
 | A file | it exists at `<default>`'s head | `object(expression:"<branch>:<path>"){ id }`, with `<branch>` = `<default>`; null means absent |
+| The card's body | the body holds the change an ask made to the card | `gh issue view <n> -R <owner/repo> --json body` |
+| The card's board state | Status, assignee or label reads as the ask set it | `issue(number:<n>){ assignees(first:5){ nodes{ login } } labels(first:20){ nodes{ name } } projectItems(first:5){ nodes{ project{ id } fieldValueByName(name:"Status"){ ... on ProjectV2ItemFieldSingleSelectValue{ name } } } } }` |
 
-Each lookup goes inside `repository(owner:$o,name:$r){ … }` in a `gh api graphql` query.
+Each GraphQL lookup goes inside `repository(owner:$o,name:$r){ … }` in a `gh api graphql` query. Use
+the card's body and board state only for an ask that edits the card or the board; code needs code's
+evidence.
 
 **Look for evidence an ask does not name.** Search the pull requests FIND kept for one whose title or
-body carries the ask, and look up any file the ask names. Verify what you find. Where nothing turns up,
-the ask is open: `no evidence found`, naming the lookups that came back empty.
+body carries the ask, and look up any file the ask names. Verify each find. Where nothing turns up, the
+ask is open: `no evidence found`, naming the lookups that came back empty.
 
 A sentence saying an ask was done is not evidence — not the developer's, not this session's, not a
 comment's. A ticked box is not evidence either: it is a claim that the work happened, and a ticked ask
@@ -126,34 +147,122 @@ The LANDED line takes one of these shapes, with every cause that fired:
 ```
 LANDED: PR 90 merged into main; no pipeline
 NOT LANDED: PR 82 open
+NOT LANDED: PR 84 closed unmerged; no pull request for the card merged
 NOT LANDED: PR 85 merged into finish-work/slice-02, not main
+NOT LANDED: no pull request names or links to the card
 NOT LANDED: main red at 7358cad (FAILURE)
-NOT LANDED: pull request list incomplete (73 search hits)
+NOT LANDED: main's head has not reported yet
+NOT LANDED: pull request list incomplete (a search page failed)
 ```
 
-The last line, `READY` or `NOT READY: <causes>`, is for the developer. Then report the decision outcome
-tokens below; the two are separate outputs.
+The last line, `READY` or `NOT READY: <causes>`, is for the developer. The decision outcome tokens
+below are a separate output, reported when the run ends.
+
+Where the work has not landed, stop here: `NOT-READY`. Closing nothing is the only answer to an open pull
+request or a red default branch.
+
+## RESOLVE — every open ask answered
+
+**Every ask this skill puts — here and at PLAN — follows
+`${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it before the first ask. Quote the open
+ask in the context block above the question, and describe it in plain words in the question itself: a
+quoted ask often holds a path or an issue number, which a strict repo's hook refuses in a question.
+
+Ask about each open ask on its own, with `AskUserQuestion`, offering three answers and Other:
+
+- **do it** — stop here and go do it: `NOT-READY`;
+- **name its evidence** — verify it as ACCOUNT would; where it fails, the ask stays open: `NOT-READY`;
+- **stop** — `STOPPED`, with `OPEN-ASKS`.
+
+To drop it with a reason, the developer chooses Other and types the reason. A dropped ask leaves the list with its
+reason, typed as given; it is never marked done. The closing comment quotes every dropped ask with its
+reason.
+
+## PLAN — one yes
+
+Compose the closing comment: one short paragraph naming the pull requests that landed and the asks they
+met, then each dropped ask quoted with its reason. Apply `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` to
+every word this run composed; quoted asks keep the developer's words.
+
+Show the plan: the comment in full, the Status write, the close, and — where the card's body holds
+`<!-- nwave:status:begin -->` — the generated block's refresh by its writer. The comment goes in the
+context block above the ask, outside its word count. Ask once, with `AskUserQuestion`: **yes** or
+**stop**. Any answer but yes, Other included, is a stop: this skill asks the plan once, a tighter cap
+than the standard's. A `stop` writes nothing: `STOPPED`. Write nothing before the developer's yes.
+
+## CLOSE — comment first, then Done, then read it back
+
+On the yes, run these in order, and **stop at the first write that fails**: report which writes ran,
+quote the error, and repair nothing: `CLOSE-FAILED`. Where the error names a missing `project` scope, name
+`gh auth refresh -s project`.
+
+1. **Post the closing comment** — quote the heredoc's delimiter, because the body quotes the developer's
+   words and an unquoted one runs their backticks and `$`:
+
+   ```bash
+   gh issue comment <n> -R <owner/repo> --body-file - <<'EOF'
+   …
+   EOF
+   ```
+
+   Keep the comment URL it prints.
+2. **Write Status=Done** — read `issue(number:<n>){ projectItems(first:5){ nodes{ id project{ id } } } }`
+   and take the node whose `project.id` is the board's project id; none means the card is not on this
+   board, so skip the write and say so. Then `gh project item-edit --id <item> --project-id <project>
+   --field-id <status-field> --single-select-option-id <done>`.
+3. **Close the issue if it is still open** — read `issue(number:<n>){ state }` and run
+   `gh issue close <n> -R <owner/repo>` only on `OPEN`, and never `gh issue close -c`: on a closed issue
+   it drops the comment silently. A board workflow may close the issue moments after the read; a plain
+   close on a closed issue writes nothing.
+4. **Refresh the generated block through its one writer**, where the card's body holds
+   `<!-- nwave:status:begin -->`: run `phil:nwave-issue-board`'s refresh for the card, which renders a
+   closed card as finished. Edit nothing between the markers yourself.
+
+The comment goes first because Done can close the issue, and a comment on a closed issue is easy to lose.
+**Read the card back** with `issue(number:<n>){ state comments(last:5){ nodes{ url } }
+projectItems(first:5){ nodes{ project{ id } fieldValueByName(name:"Status"){ ... on
+ProjectV2ItemFieldSingleSelectValue{ name } } } } }`. The card must read closed, hold the comment's URL,
+and — where a Status write ran — read Done on the board's project. Report any difference as found, and
+repair nothing: an open card in Done, or a closed one outside it, is a defect for the developer.
+
+The CLOSE line takes one of these shapes:
+
+```
+CLOSED: comment posted, Status Done, issue closed — read back clean
+CLOSED: comment posted, Status skipped (card not on this board), issue closed — read back clean
+CLOSED: read back closed but in Todo — expected Done
+CLOSE FAILED: comment posted; Status write failed: <error> — nothing else ran
+```
 
 ## Decision outcomes
 
-Report exactly one terminal outcome, every run: `READY` · `NOT-READY`.
+Report exactly one terminal outcome, every run: `NOT-READY` · `STOPPED` · `CLOSED` · `CLOSE-FAILED`.
 
-- **`READY`** — every ask is done with verified evidence, and the work landed.
-- **`NOT-READY`** — anything else. Name every cause; never only the first.
+- **`NOT-READY`** — an ask stayed open or the work had not landed. Name every cause; never only the
+  first.
+- **`STOPPED`** — the developer answered stop, at RESOLVE or at the plan.
+- **`CLOSED`** — the comment posted, the Status write ran or was reported skipped, the issue reads
+  closed — by this run or a workflow — and the card was read back.
+- **`CLOSE-FAILED`** — a write failed and the run stopped there.
 
-Report these alongside, each only when it fires: `OPEN-ASKS` (any ask open) · `NOT-LANDED` (a pull
-request open, missing or merged elsewhere, or a head rollup of anything but success where a pipeline
-exists, or a list cut short) · `NO-PIPELINE` (no commit carries a check rollup).
+Report these alongside, each only when it fires: `OPEN-ASKS` (any ask open after ACCOUNT) ·
+`NOT-LANDED` (a pull request open, missing or merged elsewhere, or a head rollup of anything but success
+where a pipeline exists, or a list cut short) · `NO-PIPELINE` (no commit carries a check rollup) ·
+`ASK-DROPPED` (the developer dropped an ask with a reason) · `READ-BACK-MISMATCH` (the card did not
+read back closed, with the comment, in Done where a Status write ran) · `BLOCK-REFRESHED` (the generated
+block was refreshed).
 
-Report `WROTE-NOTHING` on every run. It asserts that every call this run made was a read: the
-`gh api graphql` grant accepts a mutation document, and only the invariants below forbid one.
+Report `WROTE-NOTHING` on every run that wrote nothing. It asserts that every call the run made was a
+read: the grant accepts writes, and only the invariants below forbid them before the yes.
 
 ## Invariants
 
-- **Write nothing.** No comment, label, Status, close or edit; no file. The command grants no `Write`
-  and no `Edit`.
-- **Send only `query` documents through `gh api graphql`, never `mutation`.** No tool boundary backs
-  this.
+- **Write nothing before the developer's yes**, and after it only the comment, the Status, the close and
+  the generated block's refresh. The command grants no `Write` and no `Edit`.
+- **Send only `query` documents through `gh api graphql`, never `mutation`.** Writes go through
+  `gh issue comment`, `gh project item-edit`, `gh issue close` and, for the refresh alone,
+  `gh issue edit --body-file`. Use none of `gh issue comment --edit-last` or `--delete-last`,
+  `gh project item-edit --clear`, or any other `gh issue edit` flag. No tool boundary backs this.
 - **Leave every merge and every new pull request to the developer.**
 - **Count only verified evidence.** An unverified ask is open.
 - **Find the work by the forge's link or the card's number in a title or body, never by a branch name.**

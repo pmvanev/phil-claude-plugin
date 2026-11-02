@@ -14,5 +14,6 @@
     "find a pull request by its branch name",
     "merge anything"
   ],
-  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: no fixture pinned the empty pull request list, the case where a by-name branch match is most tempting."
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: no fixture pinned the empty pull request list, the case where a by-name branch match is most tempting.",
+  "writes": []
 }

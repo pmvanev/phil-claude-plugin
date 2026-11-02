@@ -14,5 +14,6 @@
     "call main green from an older commit's rollup",
     "merge anything"
   ],
-  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: no fixture distinguished a head the pipeline has not reached from a repo with no pipeline, and the two have opposite verdicts."
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: no fixture distinguished a head the pipeline has not reached from a repo with no pipeline, and the two have opposite verdicts.",
+  "writes": []
 }

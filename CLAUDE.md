@@ -79,10 +79,10 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
 ## Board surfaces that compose prose
 
 - A board surface that composes prose for the team names `rules/writing.md` and ships a fixture that
-  fails without that citation. Eight surfaces do: `groom-ask`'s fields, the generated block's roster
+  fails without that citation. Nine surfaces do: `groom-ask`'s fields, the generated block's roster
   descriptions and clauses, the projected why/next/stack, a `## Chain` line's clause, the ranking basis,
   the `assumed`-line rationale strings in `probe-board.py` (at build time; a run composes none),
-  `board-snapshot`'s descriptions and report lines, and `nwave-wave-summary`.
+  `board-snapshot`'s descriptions and report lines, `nwave-wave-summary`, and `/phil:done`'s closing comment.
 - Apply the standard only to words the surface composed; leave a human's words untouched. At `groom-ask`,
   decide per field by its provenance label: a suggestion or an `I rephrased your answer` rewrite is
   composed, a `you wrote` field is the human's.

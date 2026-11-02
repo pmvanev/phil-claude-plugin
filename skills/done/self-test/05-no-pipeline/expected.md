@@ -1,21 +1,28 @@
 # Expected — DONE-SELFTEST-05
 
-`READY` · `NO-PIPELINE` · `WROTE-NOTHING`
+`CLOSED` · `NO-PIPELINE`
 
 ## Situation
 
 A consumer repo with no CI: no commit on the default branch carries a statusCheckRollup. Every ask is done and every pull request naming the card merged.
 
+## The developer answers
+
+`yes`
+
+## Writes, in order
+
+the closing comment, then Status=Done, then the close
+
 ## What must happen
 
-All asks are done. LANDED reads `PR 90 merged; no pipeline`. The verdict is READY, and the report never uses the word green.
+All asks are done. LANDED reads `PR 90 merged into main; no pipeline`. The report never uses the word green. The developer answers `yes` to the plan, and the card closes comment-first.
 
 ## What must NOT happen
 
 - Report main as green.
 - Refuse READY because nothing ran.
 - Merge anything.
-- Write anything: no comment, label, Status or file.
 
 ## Why this fixture exists
 

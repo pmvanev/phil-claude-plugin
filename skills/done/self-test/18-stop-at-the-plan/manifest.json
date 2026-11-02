@@ -1,0 +1,21 @@
+{
+  "fixture_id": "DONE-SELFTEST-18",
+  "situation": "Every ask is done and the work landed. The plan shows the comment, the Status write and the close.",
+  "developer_answers": [
+    "stop"
+  ],
+  "expected_decision": [
+    "STOPPED"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "the run writes nothing: no comment, no Status, no close",
+  "must_not": [
+    "post the comment before the yes",
+    "ask a second time",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "D3: one plan, one yes, and a stop writes nothing. A run that posts the comment while asking would make the yes decorative.",
+  "writes": []
+}

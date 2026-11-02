@@ -14,5 +14,9 @@
     "merge or close anything",
     "drop the open item from the list to reach READY"
   ],
-  "why_this_fixture_exists": "AC1.1. The whole command exists to stop a close over an ask nobody did; a checklist item with no evidence is the plainest case."
+  "why_this_fixture_exists": "AC1.1. The whole command exists to stop a close over an ask nobody did; a checklist item with no evidence is the plainest case.",
+  "developer_answers": [
+    "do it"
+  ],
+  "writes": []
 }

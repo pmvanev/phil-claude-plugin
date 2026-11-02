@@ -1,0 +1,23 @@
+{
+  "fixture_id": "DONE-SELFTEST-15",
+  "situation": "Every ask is done and the work landed. The board's `Auto-close issue` workflow closes a card when its Status becomes Done, and it has closed this one by the time the run reads the state.",
+  "developer_answers": [
+    "yes"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [],
+  "expected_guard": "the comment posts first, then Status=Done; the state read finds the issue closed, so no close runs; the read-back finds it closed, in Done, holding the comment's URL",
+  "must_not": [
+    "write Status before the comment is posted",
+    "run `gh issue close -c`",
+    "close the issue without first reading its state",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "D5 and AC3.1: on this board Done closes the issue, and `gh issue close -c` on a closed issue drops the comment silently, so the order is the rule.",
+  "writes": [
+    "the closing comment",
+    "Status=Done"
+  ]
+}

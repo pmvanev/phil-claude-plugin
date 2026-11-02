@@ -6,9 +6,17 @@
 
 Card 75 has three checklist items. Two name a merged pull request; the third, unticked, names nothing. Every pull request naming the card is merged and main's head is SUCCESS.
 
+## The developer answers
+
+`do it`
+
+## Writes, in order
+
+None.
+
 ## What must happen
 
-The two items with merged pull requests are done, each naming its pull request. The third is open: `no evidence`. LANDED reads green. The verdict is `NOT READY: 1 open ask`.
+The two items with merged pull requests are done, each naming its pull request. The third is open: `no evidence found`. LANDED reads green. The verdict is `NOT READY: 1 open ask`. The developer answers `do it`, so the run stops and closes nothing.
 
 ## What must NOT happen
 

@@ -1,0 +1,28 @@
+{
+  "fixture_id": "DONE-SELFTEST-14",
+  "situation": "Every pull request merged into main, which is green. One checklist item, `Add a GitLab path`, has no evidence.",
+  "developer_answers": [
+    "drop it with a reason: GitLab is out of scope for v1; issue 79 carries it",
+    "yes"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "OPEN-ASKS",
+    "ASK-DROPPED"
+  ],
+  "expected_guard": "the closing comment quotes the dropped ask and the developer's reason, and the ask is never marked done",
+  "must_not": [
+    "mark the dropped ask done",
+    "drop the ask without its reason reaching the comment",
+    "reword the developer's reason",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "D1 and AC1.4: an open ask holds the close until the developer answers it, and a drop is the developer's call that must survive on the card.",
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ]
+}
