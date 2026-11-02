@@ -1,0 +1,27 @@
+{
+  "fixture_id": "DONE-SELFTEST-27",
+  "situation": "PR 91 (`finish-work/slice-02`, head `a1b2c3d`, opened by the developer) merged into main, which is green, and every ask is done. Its branch exists locally only, at `a1b2c3d`, with no worktree. No other pull request names the card, and the main checkout holds no snapshot.",
+  "developer_answers": [
+    "yes"
+  ],
+  "questions_asked": 1,
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "delete the local branch"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED"
+  ],
+  "expected_guard": "the run asks exactly one question, the plan, and nothing else",
+  "must_not": [
+    "ask about each item separately",
+    "ask a confirming question after the yes",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "AC4.5 and the one-question KPI: a clean finish that asks several questions is the ceremony anxiety the one-yes plan answers."
+}

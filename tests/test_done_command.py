@@ -292,3 +292,148 @@ def test_the_writing_flags_the_grant_allows_are_forbidden():
     inv = _section("Invariants")
     for flag in ("--edit-last", "--delete-last", "--clear"):
         assert flag in inv, flag
+
+
+CLEAR = REPO / "skills" / "done" / "references" / "clear.md"
+
+
+def _clear():
+    return " ".join(CLEAR.read_text().split())
+
+
+def test_clear_is_read_before_the_plan():
+    """Slice 03 keeps the skill body under plugin-dev's 3,000-word flag by moving CLEAR to a reference."""
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/clear.md` whole before composing the plan" \
+        in _parts(SKILL)[1], "skill-reviewer, 2026-11-02: a bare reference path resolves against the user's repo"
+
+
+def test_the_cleanup_grants_are_narrow():
+    """D9: every delete is a named subcommand. No `rm`, no `git branch` with its `-D`, no `git -C`."""
+    front, _ = _parts(COMMAND)
+    tools = {t.strip() for t in front["allowed-tools"].split(",")}
+    for grant in ("Bash(git worktree list:*)", "Bash(git branch -d:*)", "Bash(git push --delete:*)",
+                  "Bash(python3:*)", "Bash(git remote get-url:*)"):
+        assert grant in tools, grant
+    for broad in ("Bash(rm:*)", "Bash(git branch:*)", "Bash(git -C:*)", "Bash(git push:*)", "Bash(git:*)",
+                  "Bash(git worktree remove:*)"):
+        assert broad not in tools, broad
+
+
+def test_nothing_is_forced():
+    """D9: git's own refusals guard uncommitted and unmerged work, so a force would remove the guard."""
+    clear = _clear()
+    assert "Never pass `--force`, `-f` or `-D`" in clear, \
+        "plugin-validator, 2026-11-02: `git branch -d -f` deleted a branch git had just refused"
+    assert "Never pass `--force`, `-f` or `-D`" in _parts(COMMAND)[1]
+    assert "`git branch -d`, never `-D`" in clear
+    assert "report the refusal and leave the item" in clear
+
+
+def test_worktrees_are_listed_and_never_removed():
+    """The developer's answer, 2026-11-02, after an adversarial run showed a clean-looking worktree can
+    hold a nested repository, hidden edits, submodules or commits only its own history remembers."""
+    clear = _clear()
+    assert "Never remove a worktree" in clear
+    assert "session-exchanges.py retire" in clear and "session-exchanges.py head" in clear
+    assert clear.index("1. **Snapshots**") < clear.index("2. **Local branches**") \
+        < clear.index("3. **Remote branches**")
+    assert "the developer runs them" in clear
+
+
+def test_branches_come_from_the_cards_pull_requests():
+    """D8: a branch matching the card only by name is never a candidate."""
+    assert "headRefName" in _parts(SKILL)[1]
+    assert "never a branch matched by name" in _clear()
+
+
+def test_held_items_survive_and_are_never_offered_for_deletion():
+    """Slice 03 settled D3 against D9: deleting an unmerged branch needs a force, so it is listed as
+    surviving, with the reason, and never offered."""
+    clear = _clear()
+    assert "listed as surviving, with the reason" in clear
+    assert "A branch any worktree has checked out, locally and on the remote" in clear
+
+
+def test_the_plan_lets_the_developer_keep_the_local_snapshot():
+    """The snapshot where `/phil:done` runs may belong to other work, and one yes is all or nothing."""
+    clear = _clear()
+    assert "**yes, and retire the snapshot here too**" in clear, \
+        "skill-reviewer, 2026-11-02: the snapshot here records no branch, so keeping it is the default"
+    assert "A plain yes keeps it" in clear
+
+
+def test_the_cleanup_outcomes_are_defined():
+    _, body = _parts(SKILL)
+    section = body.split("## Decision outcomes", 1)[1]
+    assert "`CLEARED`" in section and "`LEFT`" in section
+
+
+def test_every_delete_needs_the_merged_tip():
+    """plugin-validator and skill-reviewer, 2026-11-02: `git push --delete` has no merge check, and
+    `git branch -d` passes a branch merged only into its own remote. The skill's tip check is the guard."""
+    clear = _clear()
+    assert "only when its tip is the `headRefOid` of a pull request merged into `<default>`" in clear
+    assert "target{ oid }" in clear
+    assert "The lease refuses the delete if the tip moved after the check" in clear
+
+
+def test_shared_and_foreign_branches_are_held():
+    """skill-reviewer and plugin-validator, 2026-11-02: a release branch, a fork's head, a protected
+    branch or one an open pull request uses became a candidate."""
+    assert _parts(SKILL)[1].count("isCrossRepository") == 2, "both FIND queries must read it"
+    clear = _clear()
+    for phrase in ("`<default>` itself", "a pull request from a fork", "branchProtectionRule",
+                   "the head or the base of an open pull request"):
+        assert phrase in clear, phrase
+
+
+def test_a_held_branch_holds_its_worktree_and_snapshot():
+    """Both reviewers, 2026-11-02: a worktree on a held branch, and the snapshot in it, were deleted."""
+    assert "A worktree whose branch is held, and the snapshot inside it" in _clear()
+
+
+def test_a_dirty_worktree_is_held_before_the_plan():
+    """skill-reviewer, 2026-11-02: the snapshot was retired before git refused the worktree."""
+    clear = _clear()
+    assert "scripts/worktree-state.py" in clear
+    assert "In a worktree that reads `DIRTY` or `UNREADABLE`, keep the snapshot" in clear
+
+
+def test_the_remote_is_the_forges():
+    """skill-reviewer, 2026-11-02: the remote came from local config and was never checked."""
+    clear = _clear()
+    assert "git remote get-url --push --all <remote>" in clear, \
+        "adversarial run, 2026-11-02: a pushurl or pushInsteadOf sent the delete to a fork"
+    assert "--force-with-lease=refs/heads/<branch>:<headRefOid> <remote> refs/heads/<branch>" in clear, \
+        "adversarial run, 2026-11-02: a commit pushed between the re-read and the delete was lost"
+    assert "git push --delete <remote> <branch>" not in clear, "an unqualified refspec can match a tag"
+
+
+def test_only_the_developers_own_pull_requests_give_candidates():
+    """adversarial run, 2026-11-02: a colleague's merged pull request that mentioned the card made their
+    branch a candidate."""
+    assert _parts(SKILL)[1].count("author{ login }") == 2
+    assert "viewer{ login }" in _parts(SKILL)[1]
+    assert "a pull request someone else opened" in _clear()
+
+
+def test_the_card_is_read_back_before_anything_is_cleared():
+    close = _section("CLOSE")
+    assert close.index("**Read the card back**") < close.index("**Clear what the work left behind**")
+
+
+def test_left_covers_every_way_an_item_survives():
+    _, body = _parts(SKILL)
+    assert "held, kept at the developer's answer, or refused" in body
+    assert "Any refusal or error in CLEAR leaves that item and goes on" in _clear()
+
+
+def test_the_plan_stop_rule_spares_both_yeses():
+    """Both reviewers, 2026-11-02: "any answer but yes" made the third answer a stop."""
+    assert "Any answer but the two yeses, Other included, is a stop" in _section("PLAN")
+
+
+def test_python3_runs_only_the_two_scripts_and_their_read_or_retire():
+    _, body = _parts(COMMAND)
+    assert "Run `python3` only on `${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py` with `head` or" \
+        " `retire`, and on `${CLAUDE_PLUGIN_ROOT}/scripts/worktree-state.py`" in body

@@ -1,0 +1,26 @@
+{
+  "fixture_id": "DONE-SELFTEST-26",
+  "situation": "PR 91 (`finish-work/slice-02`) merged into main, which is green; every ask is done. A local branch `issue-75-scratch` exists; no pull request has it as its head.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "delete the local branch finish-work/slice-02"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED"
+  ],
+  "expected_guard": "the plan and the report never mention `issue-75-scratch`; only the pull request's head branch is a candidate",
+  "must_not": [
+    "list, hold or delete issue-75-scratch",
+    "match any branch by the card's number in its name",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "D8 and AC4.4: a branch that only looks like the card's may be someone else's work."
+}

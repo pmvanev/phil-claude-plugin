@@ -1,0 +1,26 @@
+{
+  "fixture_id": "DONE-SELFTEST-29",
+  "situation": "PR 92 (`finish-work/slice-03`, opened by the developer) merged into main, which is green, and every ask is done. This session runs in the worktree `../fw-03`, which has that branch checked out at its merged tip and holds no snapshot; the branch also exists on the remote.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "LEFT"
+  ],
+  "expected_guard": "the branch survives locally and on the remote while the worktree has it checked out; the report names the commands to run after switching",
+  "must_not": [
+    "run `git worktree remove`",
+    "delete the branch the worktree has checked out, or its remote copy",
+    "tell the developer to run /phil:done again, which would post a second closing comment",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "Git refuses a checked-out branch, and a rerun of /phil:done on a closed card posts another comment (both reviewers, 2026-11-02), so the report names the git commands instead."
+}

@@ -4,18 +4,18 @@ description: >-
   This skill should be used when the user asks "is this card done", "can I close this issue", "close
   out card N", "mark this card done", "did everything I asked for land", or runs /phil:done. It lists
   every ask with verified evidence, checks every pull request merged into a green default branch, then,
-  on one yes, comments, sets Status to Done and closes the issue. GitHub only; never merges. For
-  unfinished work, use /phil:handoff.
+  on one yes, comments, sets Status to Done, closes the issue, retires its snapshots, deletes its
+  branches and lists its worktrees. GitHub only; never merges or forces. For unfinished work, use
+  /phil:handoff.
 ---
 
 # Done — is this card ready to close?
 
 `/phil:handoff` puts a session down unfinished. This skill answers the question that comes before
 putting one down **finished**: did every ask land, and did the work reach the default branch? Then, on
-the developer's one yes, it closes the card comment-first and reads it back.
-
-Clearing what the work left behind — the snapshot, worktrees and branches — is not part of this
-version.
+the developer's one yes, it closes the card comment-first, reads it back, and clears what the work left
+behind: it retires the handoff snapshots, deletes the branches, and lists the worktrees for the developer
+to remove.
 
 ## Inputs
 
@@ -30,8 +30,9 @@ version.
   same `CLAUDE.md` block. Read them; never probe for them. With none, the Status write is skipped and
   reported, and `/phil:board-setup` named.
 
-Run `git` for two things only: `rev-parse --show-toplevel`, and the `log` reads of the block refresh in
-CLOSE. A `<branch>:<path>` lookup through local git reads a ref that may be stale; use the forge.
+Run `git` only for `rev-parse`, the `log` reads of the block refresh, and CLEAR's `worktree list`,
+`remote get-url`, `branch -d` and `push --delete`. A `<branch>:<path>` lookup through local git reads a ref that may be stale; use the
+forge.
 
 ## FIND — the card, its pull requests and the default branch
 
@@ -41,11 +42,13 @@ branch and the pull requests the forge links to the card:
 ```bash
 gh api graphql -f query='
 query($o:String!,$r:String!,$n:Int!){
+  viewer{ login }
   repository(owner:$o,name:$r){
     defaultBranchRef{ name target{ ... on Commit{ oid statusCheckRollup{ state }
       history(first:20){ nodes{ oid statusCheckRollup{ state } } } } } }
     issue(number:$n){ closedByPullRequestsReferences(first:50, includeClosedPrs:true){
-      pageInfo{ hasNextPage } nodes{ number title state merged baseRefName } } } } }' \
+      pageInfo{ hasNextPage } nodes{ number title state merged baseRefName headRefName headRefOid
+      isCrossRepository author{ login } } } } } }' \
   -f o=<owner> -f r=<repo> -F n=<n>
 ```
 
@@ -55,7 +58,8 @@ Then search every page for the pull requests that mention the card, filtering in
 gh api graphql --paginate -f query='
 query($q:String!,$endCursor:String){
   search(query:$q, type:ISSUE, first:50, after:$endCursor){ pageInfo{ hasNextPage endCursor }
-    nodes{ ... on PullRequest{ number title body state merged mergedAt baseRefName } } } }' \
+    nodes{ ... on PullRequest{ number title body state merged mergedAt baseRefName headRefName
+      headRefOid isCrossRepository author{ login } } } } }' \
   -f q='repo:<owner>/<repo> is:pr <n> in:title,body' \
   --jq '.data.search.nodes[] | select((.title+" "+.body) | test("(#|issue )<n>([^0-9]|$)"; "i"))'
 ```
@@ -180,15 +184,18 @@ reason.
 
 ## PLAN — one yes
 
+Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/clear.md` whole before composing the plan: it finds the work's snapshots, branches and
+worktrees, holds what must survive, and adds the cleanup lines and the third answer.
+
 Compose the closing comment: one short paragraph naming the pull requests that landed and the asks they
 met, then each dropped ask quoted with its reason. Apply `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` to
 every word this run composed; quoted asks keep the developer's words.
 
-Show the plan: the comment in full, the Status write, the close, and — where the card's body holds
-`<!-- nwave:status:begin -->` — the generated block's refresh by its writer. The comment goes in the
-context block above the ask, outside its word count. Ask once, with `AskUserQuestion`: **yes** or
-**stop**. Any answer but yes, Other included, is a stop: this skill asks the plan once, a tighter cap
-than the standard's. A `stop` writes nothing: `STOPPED`. Write nothing before the developer's yes.
+Show the plan: the comment in full, the Status write, the close, the generated block's refresh by its
+writer where the card's body holds `<!-- nwave:status:begin -->`, and CLEAR's lines. The comment goes in the
+context block above the ask, outside its word count. Ask once, with `AskUserQuestion`: **yes**,
+**yes, and retire the snapshot here too** where CLEAR offers it, or **stop**. Any answer but the two
+yeses, Other included, is a stop: this skill asks the plan once, a tighter cap than the standard's. A `stop` writes nothing: `STOPPED`. Write nothing before the developer's yes.
 
 ## CLOSE — comment first, then Done, then read it back
 
@@ -225,6 +232,10 @@ ProjectV2ItemFieldSingleSelectValue{ name } } } } }`. The card must read closed,
 and — where a Status write ran — read Done on the board's project. Report any difference as found, and
 repair nothing: an open card in Done, or a closed one outside it, is a defect for the developer.
 
+**Clear what the work left behind** only after the read-back, as
+`${CLAUDE_PLUGIN_ROOT}/skills/done/references/clear.md` orders it. Any refusal or error there leaves that
+item and goes on; it is not a failed close.
+
 The CLOSE line takes one of these shapes:
 
 ```
@@ -250,15 +261,21 @@ Report these alongside, each only when it fires: `OPEN-ASKS` (any ask open after
 where a pipeline exists, or a list cut short) · `NO-PIPELINE` (no commit carries a check rollup) ·
 `ASK-DROPPED` (the developer dropped an ask with a reason) · `READ-BACK-MISMATCH` (the card did not
 read back closed, with the comment, in Done where a Status write ran) · `BLOCK-REFRESHED` (the generated
-block was refreshed).
+block was refreshed) · `CLEARED` (CLEAR deleted at least one item) · `LEFT` (an item survived: held, kept at
+the developer's answer, or refused).
 
 Report `WROTE-NOTHING` on every run that wrote nothing. It asserts that every call the run made was a
 read: the grant accepts writes, and only the invariants below forbid them before the yes.
 
 ## Invariants
 
-- **Write nothing before the developer's yes**, and after it only the comment, the Status, the close and
-  the generated block's refresh. The command grants no `Write` and no `Edit`.
+- **Write nothing before the developer's yes**, and after it only the comment, the Status, the close,
+  the generated block's refresh and CLEAR's snapshot retires and branch deletes. Never remove a
+  worktree; list it with its commands. The command grants no `Write` and no `Edit`.
+- **Run `python3` only on `${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py`, with `head` or `retire`,
+  and on `${CLAUDE_PLUGIN_ROOT}/scripts/worktree-state.py`.**
+- **Never pass `--force`, `-f` or `-D`.** The one force-family flag allowed is CLEAR's
+  `--force-with-lease=<ref>:<oid>`, which makes a remote delete refuse a tip that moved.
 - **Send only `query` documents through `gh api graphql`, never `mutation`.** Writes go through
   `gh issue comment`, `gh project item-edit`, `gh issue close` and, for the refresh alone,
   `gh issue edit --body-file`. Use none of `gh issue comment --edit-last` or `--delete-last`,

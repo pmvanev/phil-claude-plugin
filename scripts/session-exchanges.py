@@ -17,7 +17,7 @@ Here the words never pass through the model. **Nothing any subcommand prints con
 exchange** — counts, hashes and reasons only — because echoing the region would put the duplicate
 straight back into the context this script exists to keep it out of.
 
-Five subcommands, and the session touches the snapshot through nothing else:
+Six subcommands, and a session touches the snapshot through nothing else:
 
 - `head`   — print the file above the region on stdout, and `SHA <h>` on stderr from the same read.
   That hash is the session's `h1`; `SHA absent` with empty output means there is no snapshot.
@@ -25,6 +25,7 @@ Five subcommands, and the session touches the snapshot through nothing else:
 - `write`  — CAPTURE step 9: replace the file with a regenerated body, dropping any previous region.
 - `record` — CAPTURE step 12: replace or append the region from this session's transcript.
 - `carry`  — `push` and `pop`: swap in a regenerated body and keep the region byte-for-byte.
+- `retire` — `/phil:done`: delete a finished checkout's snapshot, if it still hashes to what was shown.
 
 `write` and `carry` take the body on stdin (`--body -`), so nothing is left in the repo and the session
 never needs the Write tool — which refuses to overwrite a file it has not Read whole, and reading the
@@ -50,7 +51,7 @@ Every byte above the region is preserved; separators are only ever appended.
   it.
 - Compacted exchanges are recorded word for word. The transcript keeps them; the summary is never used.
 
-Reads the transcript and one local file; writes that file only. No network, no other program.
+Reads the transcript and one local file; writes or deletes that file only. No network, no other program.
 """
 
 import argparse
@@ -308,6 +309,32 @@ def _body_write(args, keep_region: bool, verb: str) -> int:
     return 0
 
 
+def cmd_retire(args) -> int:
+    """Delete a finished checkout's snapshot, only if it still hashes to what the developer was shown.
+
+    `/phil:done` runs this; it is the only delete that command holds, so it refuses any file not named
+    `.session-handoff.md` rather than serve as a general `rm`. The check and the unlink are two steps, as
+    in `swap`; a writer landing between them loses its write, which a finished checkout should not have.
+    """
+    path = Path(args.file)
+    if path.name != ".session-handoff.md":
+        print(f"MALFORMED retire deletes only .session-handoff.md, not {path.name}")
+        return MALFORMED
+    if not path.exists():
+        print(f"ABSENT {path}")
+        return 0
+    try:
+        if current_sha(path) != args.expect_sha:
+            print(f"REFUSED {args.expect_sha} {current_sha(path)}")
+            return REFUSED
+        path.unlink()
+    except OSError as e:
+        print(f"UNREADABLE {path}: {e.strerror}")
+        return UNREADABLE
+    print(f"RETIRED {args.expect_sha}")
+    return 0
+
+
 def cmd_write(args) -> int:
     return _body_write(args, keep_region=False, verb="WROTE")
 
@@ -333,6 +360,11 @@ def main(argv=None) -> int:
     p = sub.add_parser("head", help="print the file above the region")
     p.add_argument("--file", required=True)
     p.set_defaults(run=cmd_head)
+
+    p = sub.add_parser("retire", help="delete the snapshot, if it is still the one the developer was shown")
+    p.add_argument("--file", required=True)
+    p.add_argument("--expect-sha", required=True)
+    p.set_defaults(run=cmd_retire)
 
     for name, run, text in (("write", cmd_write, "replace the file with the body, dropping any region"),
                             ("carry", cmd_carry, "replace the body and keep the region byte-for-byte")):

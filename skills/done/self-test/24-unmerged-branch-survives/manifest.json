@@ -1,0 +1,29 @@
+{
+  "fixture_id": "DONE-SELFTEST-24",
+  "situation": "PR 91 (`finish-work/slice-02`, head `a1b2c3d`, opened by the developer) merged into main, which is green, and every ask is done. Its remote branch was deleted at the merge; the local branch sits at `a1b2c3d` with no worktree. PR 86 (`finish-work/spike`) names the card and closed unmerged; its branch exists locally and on the remote, and a worktree at `../fw-spike` has it checked out and holds a snapshot.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "delete the local branch finish-work/slice-02"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED",
+    "LEFT"
+  ],
+  "expected_guard": "the plan lists `finish-work/spike`, `../fw-spike` and its snapshot under SURVIVES with `PR 86 closed unmerged`, never as deletions to approve",
+  "must_not": [
+    "delete finish-work/spike, locally or on the remote",
+    "retire the snapshot in ../fw-spike",
+    "offer to delete any of them",
+    "use `git branch -D` or `-f`",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "AC4.2 and both slice 03 reviews: deleting an unmerged branch needs a force, which D9 forbids, and the snapshot of a worktree on a held branch was still a candidate."
+}

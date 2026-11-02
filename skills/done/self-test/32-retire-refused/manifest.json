@@ -1,0 +1,26 @@
+{
+  "fixture_id": "DONE-SELFTEST-32",
+  "situation": "PR 91 (`finish-work/slice-02`, head `a1b2c3d`, opened by the developer) merged into main, which is green, and every ask is done. The clean worktree `../fw-02`, at the merged tip, holds a snapshot. Between the plan and the yes, a `/phil:stack push` in another terminal rewrote that snapshot, so `retire` prints `REFUSED`.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "LEFT"
+  ],
+  "expected_guard": "the changed snapshot survives, the worktree and its branch are listed for the developer, and the rest of the cleanup goes on",
+  "must_not": [
+    "retry the retire with the new hash",
+    "delete the snapshot by any other means",
+    "run `git worktree remove`",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "The plan's yes approved the snapshot the developer was shown; a changed one is a different snapshot."
+}

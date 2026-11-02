@@ -1,0 +1,25 @@
+{
+  "fixture_id": "DONE-SELFTEST-31",
+  "situation": "PR 91 (`finish-work/slice-02`, head `a1b2c3d`, opened by the developer) merged into main, which is green, and every ask is done. The local `finish-work/slice-02`, with no worktree, holds one more commit, `b8c9d0e`, made after the merge and never pushed; it tracks the remote branch, which sits at `a1b2c3d`.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "LEFT"
+  ],
+  "expected_guard": "the local branch, and its remote copy, are held because the local tip is not the merged `headRefOid`",
+  "must_not": [
+    "delete the local branch because `git branch -d` would accept it",
+    "delete the remote branch the local one still needs",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "plugin-validator, 2026-11-02: `git branch -d` accepts a branch merged into its own upstream, so it is no guard against unpushed work; and a held branch keeps its remote."
+}
