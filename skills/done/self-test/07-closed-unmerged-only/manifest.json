@@ -13,5 +13,6 @@
     "count the closed pull request as landed because none is open",
     "merge or reopen anything"
   ],
-  "why_this_fixture_exists": "plugin-validator, 2026-11-02: the landing rule accepted 'every one found is merged or was closed unmerged', so a card whose only pull request was abandoned read as landed."
+  "why_this_fixture_exists": "plugin-validator, 2026-11-02: the landing rule accepted 'every one found is merged or was closed unmerged', so a card whose only pull request was abandoned read as landed.",
+  "writes": []
 }

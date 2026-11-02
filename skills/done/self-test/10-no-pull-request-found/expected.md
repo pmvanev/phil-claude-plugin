@@ -6,6 +6,10 @@
 
 The card has two checklist items, each naming a file that exists at main's head. No pull request links to the card or names it. Main's head is SUCCESS.
 
+## Writes, in order
+
+None.
+
 ## What must happen
 
 ASKS reads `2: 2 done, 0 open`. LANDED reads `NOT LANDED: no pull request names or links to the card`. The verdict is NOT READY.

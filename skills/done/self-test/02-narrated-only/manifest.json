@@ -14,5 +14,9 @@
     "count the tick as evidence",
     "merge anything"
   ],
-  "why_this_fixture_exists": "AC1.3. An agent's report that it did something is the evidence most likely to be wrong and most likely to be trusted; the same holds for a tick."
+  "why_this_fixture_exists": "AC1.3. An agent's report that it did something is the evidence most likely to be wrong and most likely to be trusted; the same holds for a tick.",
+  "developer_answers": [
+    "do it"
+  ],
+  "writes": []
 }

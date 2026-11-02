@@ -13,5 +13,6 @@
     "count a merge into any branch as landed",
     "merge the stacked branch into main"
   ],
-  "why_this_fixture_exists": "plugin-validator, 2026-11-02: the query fetched each pull request's base and the landing rule never read it, so a stacked merge counted as landed."
+  "why_this_fixture_exists": "plugin-validator, 2026-11-02: the query fetched each pull request's base and the landing rule never read it, so a stacked merge counted as landed.",
+  "writes": []
 }

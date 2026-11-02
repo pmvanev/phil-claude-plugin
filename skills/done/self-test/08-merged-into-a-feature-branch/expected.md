@@ -6,6 +6,10 @@
 
 The card's one pull request merged, but into `finish-work/slice-02`, a stacked branch, not into main. Every ask names it. Main's head is SUCCESS.
 
+## Writes, in order
+
+None.
+
 ## What must happen
 
 LANDED reads `NOT LANDED: PR 85 merged into finish-work/slice-02, not main`. The asks citing it are open. The verdict is NOT READY.

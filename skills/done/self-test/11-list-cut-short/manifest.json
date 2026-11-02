@@ -1,6 +1,6 @@
 {
   "fixture_id": "DONE-SELFTEST-11",
-  "situation": "Card 7 in a busy repo: the search for `7` returns an issueCount of 312, so the first 50 hits cannot be the whole list. Every hit that names the card is merged, and main's head is SUCCESS.",
+  "situation": "Card 7 in a busy repo: the paginated search returns three pages, and the third errors. Every hit the first two pages hold that names the card is merged, and main's head is SUCCESS.",
   "expected_decision": [
     "NOT-READY"
   ],
@@ -8,11 +8,12 @@
     "NOT-LANDED",
     "WROTE-NOTHING"
   ],
-  "expected_guard": "LANDED reports the pull request list incomplete and judges nothing from the first 50 hits",
+  "expected_guard": "LANDED reports the pull request list incomplete and judges nothing from the pages that loaded",
   "must_not": [
     "call the work landed from the hits returned",
     "read a truncated list as complete",
     "merge anything"
   ],
-  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: the query read a fixed window and never checked for more, so an open pull request past hit 50 would read as landed."
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: the search now pages to the end, so a long list is no longer a cause; a page that fails is, because an open pull request could sit on it.",
+  "writes": []
 }

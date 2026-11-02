@@ -1,0 +1,23 @@
+{
+  "fixture_id": "DONE-SELFTEST-22",
+  "situation": "The card was closed by hand last week, with no closing comment, and sits in Done. Every ask is done and the work landed.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [],
+  "expected_guard": "the comment posts on the closed issue, the Status write runs, the state read finds it closed, and no close runs",
+  "must_not": [
+    "run `gh issue close -c`, which drops the comment on a closed issue",
+    "reopen the issue",
+    "skip the comment because the issue is closed",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: no fixture covered a card closed before the run, the case where `gh issue close -c` loses the comment silently."
+}

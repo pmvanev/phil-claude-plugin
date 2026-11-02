@@ -1,0 +1,13 @@
+{
+  "fixture": "32-closed-card-renders-finished",
+  "situation": "The feature card is closed, `closedAt` 2026-11-03T01:12:00Z. A `.session-handoff.md` still exists locally with a why, a next action and a two-frame stack, captured before the close.",
+  "invocation": "refresh the board for finish-work",
+  "expected": "the block's position half renders from `phil:nwave-slice-status` as usual; its reasoning half is one line, `Finished 2026-11-03.`, the UTC date of `closedAt`",
+  "must_not": [
+    "render the snapshot's why, next action or stack on the closed card",
+    "render `unknown` for any reasoning section",
+    "take the date from local time or from the snapshot",
+    "detect the finished state from anything but the issue's closed state"
+  ],
+  "why_this_fixture_exists": "finish-work slice 02 (issue 75): a closed card's projected next action and stack mislead, and once the snapshot is deleted a plain refresh renders `Stack: unknown`, a claim about a missing record on finished work."
+}

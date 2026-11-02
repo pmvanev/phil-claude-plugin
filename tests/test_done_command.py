@@ -27,8 +27,8 @@ def test_the_command_declares_its_grant_and_loads_the_skill():
     assert "${CLAUDE_PLUGIN_ROOT}/skills/done/SKILL.md" in body
 
 
-def test_slice_01_grants_no_file_write():
-    """The report writes nothing. Slices 02 and 03 add the writes, and this test with them."""
+def test_no_file_write_is_granted():
+    """Slice 02 writes to the forge only: the comment, the Status and the close. No grant writes a file."""
     front, _ = _parts(COMMAND)
     tools = {t.strip() for t in front["allowed-tools"].split(",")}
     assert not tools & {"Write", "Edit", "NotebookEdit"}, tools
@@ -82,10 +82,10 @@ def test_every_gh_call_names_the_repo():
     assert "on every `gh` call" not in _parts(SKILL)[1]
 
 
-def test_slice_01_writes_nothing():
+def test_reads_go_through_graphql_and_writes_through_named_commands():
     _, body = _parts(SKILL)
-    assert "Write nothing" in body
     assert "Send only `query` documents through `gh api graphql`, never `mutation`" in body
+    assert "Write nothing before the developer's yes" in body
 
 
 def test_a_branch_never_identifies_the_work_by_name_alone():
@@ -121,7 +121,8 @@ def test_every_evidence_kind_has_its_lookup():
 def test_a_truncated_pull_request_list_is_never_judged():
     """skill-reviewer, 2026-11-02: a fixed 50-hit window passed an open pull request at hit 51."""
     _, body = _parts(SKILL)
-    assert "issueCount" in body and "pageInfo{ hasNextPage }" in body
+    assert "gh api graphql --paginate" in body and "$endCursor" in body
+    assert "pageInfo{ hasNextPage endCursor }" in body
     assert "Judge no list the query cut short" in body
 
 
@@ -152,3 +153,142 @@ def test_a_commit_is_looked_up_by_expression():
     _, body = _parts(SKILL)
     assert 'object(expression:"<sha>")' in body
     assert "object(oid:" not in body
+
+
+def test_a_numbered_requirement_list_is_read():
+    """Dogfood, `/phil:done 75` on 1.17.0: the card's six steps sat under *What it does*, outside every
+    source the skill read."""
+    _, body = _parts(SKILL)
+    assert "*What it does*, *Scope*, *Requirements* or *Acceptance criteria*" in body
+
+
+def test_a_card_or_board_edit_is_verified_on_the_card():
+    """Dogfood, `/phil:done 75` on 1.17.0: three of eight asks edited the card or the board, and the
+    evidence table named only a pull request, a commit or a file."""
+    _, body = _parts(SKILL)
+    assert "| The card's body |" in body
+    assert "| The card's board state |" in body
+
+
+def test_a_terse_reply_is_quoted_with_what_it_approved():
+    """Dogfood, `/phil:done 75` on 1.17.0: `"proceed"` alone reads as nothing."""
+    _, body = _parts(SKILL)
+    assert '`"proceed" (commit, push, open the pull request)`' in body
+
+
+def test_the_card_filter_is_given_as_a_pattern_jq_accepts():
+    """Dogfood, `/phil:done 75` on 1.17.0: `jq` has no lookahead, so the prose rule was translated by
+    hand."""
+    _, body = _parts(SKILL)
+    assert 'test("(#|issue )<n>([^0-9]|$)"; "i")' in body
+    assert "?!" not in body
+
+
+def test_the_grant_holds_exactly_the_close_writes():
+    """D5: comment, Status, close. Each write is a named subcommand, never bare `gh` or `Bash`."""
+    front, _ = _parts(COMMAND)
+    tools = {t.strip() for t in front["allowed-tools"].split(",")}
+    for grant in ("Bash(gh issue comment:*)", "Bash(gh project item-edit:*)", "Bash(gh issue close:*)",
+                  "Bash(gh issue edit:*)", "AskUserQuestion"):
+        assert grant in tools, grant
+    assert not {t for t in tools if t in ("Bash(gh:*)", "Bash(gh issue:*)")}
+
+
+def test_the_comment_is_posted_before_done_and_both_read_back():
+    """D5, AC3.1: `gh issue close -c` on a closed issue drops the comment silently, and Done closes the
+    issue here. The order is the rule."""
+    _, body = _parts(SKILL)
+    i_comment = body.index("1. **Post the closing comment**")
+    i_status = body.index("2. **Write Status=Done**")
+    i_close = body.index("3. **Close the issue if it is still open**")
+    assert i_comment < i_status < i_close
+    assert "never `gh issue close -c`" in body
+    assert "Read the card back" in body
+
+
+def test_one_plan_one_yes():
+    """D3: every write is shown and approved once; a stop writes nothing."""
+    _, body = _parts(SKILL)
+    assert "Ask once" in body
+    assert "`stop` writes nothing" in body
+
+
+def test_an_open_ask_is_answered_before_any_plan():
+    """D1: the developer does it, names its evidence, or drops it with a reason the comment keeps."""
+    _, body = _parts(SKILL)
+    assert "drop it with a reason" in body
+    assert "The closing comment quotes every dropped ask with its reason" in body
+
+
+def test_the_generated_block_is_refreshed_by_its_one_writer():
+    """D4: `/phil:done` never edits the block; it asks `phil:nwave-issue-board` to refresh it."""
+    _, body = _parts(SKILL)
+    assert "<!-- nwave:status:begin -->" in body
+    assert "Edit nothing between the markers" in body
+    assert "phil:nwave-issue-board" in body
+
+
+def test_the_finished_state_is_derived_from_the_closed_issue():
+    """D4, AC3.3: deleting the snapshot and regenerating rendered `Stack: unknown` on finished work."""
+    projection = (REPO / "skills" / "nwave-issue-board" / "references" / "projection.md").read_text()
+    flat = " ".join(projection.split())
+    assert "**A closed card renders `Finished <YYYY-MM-DD>.` in place of all three.**" in flat
+    assert "closedAt" in flat
+    skill = " ".join((REPO / "skills" / "nwave-issue-board" / "SKILL.md").read_text().split())
+    assert "On a closed card, render `Finished <YYYY-MM-DD>.` in place of its reasoning sections" in skill
+    assert "or the card is closed, read `references/projection.md` whole" in skill, \
+        "skill-reviewer, 2026-11-02: the load trigger never fired on a closed card with no snapshot"
+    assert "the card closing" in skill
+    assert "Five rules" in flat and "UTC date" in flat
+    assert "deletes the snapshot when it closes" not in flat, "a claim slice 03 has not yet made true"
+    fixture = REPO / "skills" / "nwave-issue-board" / "self-test" / "32-closed-card-renders-finished"
+    assert "`Finished 2026-11-03.`" in (fixture / "expected.md").read_text()
+
+
+def test_the_closing_comment_is_a_board_surface_that_composes_prose():
+    """CLAUDE.md, *Board surfaces that compose prose*: each names rules/writing.md and ships a fixture."""
+    claude = " ".join((REPO / "CLAUDE.md").read_text().split())
+    assert "`/phil:done`'s closing comment" in claude
+    assert "Nine surfaces do" in claude
+
+
+def _section(name):
+    text = " ".join(SKILL.read_text().split())
+    return text.split(f"## {name}", 1)[1].split(" ## ", 1)[0]
+
+
+def test_the_closing_comment_cites_the_writing_standard():
+    """skill-reviewer, 2026-11-02: only REPORT's citation was pinned; PLAN's could go unnoticed, and
+    CLAUDE.md requires a board surface's citation to fail a fixture when removed."""
+    assert "${CLAUDE_PLUGIN_ROOT}/rules/writing.md" in _section("PLAN")
+
+
+def test_close_stops_at_the_first_failed_write():
+    """skill-reviewer, 2026-11-02: with no stop rule, a failed comment followed by Done closed the card
+    with no comment."""
+    close = _section("CLOSE")
+    assert "stop at the first write that fails" in close
+    assert "`CLOSE-FAILED`" in close
+
+
+def test_the_comment_heredoc_quotes_its_delimiter():
+    """skill-reviewer, 2026-11-02: the comment quotes the developer's words, and an unquoted heredoc runs
+    their backticks and `$`."""
+    assert "--body-file - <<'EOF'" in SKILL.read_text()
+
+
+def test_the_status_write_targets_the_boards_own_item():
+    """skill-reviewer and plugin-validator, 2026-11-02: a card on two boards could take the other's item."""
+    assert "take the node whose `project.id` is the board's project id" in _section("CLOSE")
+
+
+def test_close_reads_the_state_before_closing():
+    """skill-reviewer, 2026-11-02: step 3 decided on the state without reading it."""
+    assert "only on `OPEN`" in _section("CLOSE")
+
+
+def test_the_writing_flags_the_grant_allows_are_forbidden():
+    """skill-reviewer, 2026-11-02: the grants admit `--edit-last`, `--delete-last` and `--clear`."""
+    inv = _section("Invariants")
+    for flag in ("--edit-last", "--delete-last", "--clear"):
+        assert flag in inv, flag

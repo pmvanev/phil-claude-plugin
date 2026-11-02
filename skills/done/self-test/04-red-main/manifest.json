@@ -14,5 +14,6 @@
     "merge or revert anything",
     "rerun the pipeline"
   ],
-  "why_this_fixture_exists": "AC2.2. A pull request green on its branch and red on main has not landed; CLAUDE.md's andon rule treats red main as the line stopped."
+  "why_this_fixture_exists": "AC2.2. A pull request green on its branch and red on main has not landed; CLAUDE.md's andon rule treats red main as the line stopped.",
+  "writes": []
 }

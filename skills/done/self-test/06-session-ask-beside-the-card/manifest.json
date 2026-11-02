@@ -2,16 +2,22 @@
   "fixture_id": "DONE-SELFTEST-06",
   "situation": "The card holds two checklist items, both done with merged pull requests. Mid-session the developer asked for the report to quote asks verbatim; that request is not on the card, and a merged pull request carries it. Main's head is SUCCESS.",
   "expected_decision": [
-    "READY"
+    "CLOSED"
   ],
-  "expected_report_lines": [
-    "WROTE-NOTHING"
-  ],
+  "expected_report_lines": [],
   "expected_guard": "the report lists the session's request beside the card's two items, quoted in the developer's words, done with its pull request",
   "must_not": [
     "omit the session request because the card does not hold it",
     "reword the developer's request",
     "merge anything"
   ],
-  "why_this_fixture_exists": "AC1.2. A side request made mid-session lives in no artifact the close reads; listing it is the point of reading the session at all. This fixture also covers READY with no other line firing."
+  "why_this_fixture_exists": "AC1.2. A side request made mid-session lives in no artifact the close reads; listing it is the point of reading the session at all.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ]
 }

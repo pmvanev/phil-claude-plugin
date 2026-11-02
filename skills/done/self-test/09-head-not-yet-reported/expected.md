@@ -6,6 +6,10 @@
 
 Every ask is done and the card's pull request merged into main a minute ago. Main's head commit carries no statusCheckRollup yet; the twenty commits before it each carry SUCCESS.
 
+## Writes, in order
+
+None.
+
 ## What must happen
 
 LANDED reads `NOT LANDED: main's head has not reported yet`. `NO-PIPELINE` does not fire. The verdict is NOT READY.

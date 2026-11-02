@@ -1,0 +1,28 @@
+{
+  "fixture_id": "DONE-SELFTEST-17",
+  "situation": "In an nWave repo the card's body holds `<!-- nwave:status:begin -->`, with a projected why, next action and stack. Every ask is done and the work landed.",
+  "developer_answers": [
+    "yes"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "BLOCK-REFRESHED"
+  ],
+  "expected_guard": "after the close, `phil:nwave-issue-board` refreshes the block, and it renders `Finished <closedAt date>.` in place of the why, the next action and the stack",
+  "must_not": [
+    "edit anything between the markers itself",
+    "refresh the block without the plan having shown it",
+    "leave the projected next action standing on a closed card",
+    "render `Stack: unknown` on the closed card",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "D4 and AC3.3: the block has one writer, and a plain refresh would keep the projected next action and stack on finished work, or render `unknown` once no snapshot remains.",
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "the generated block's refresh"
+  ]
+}

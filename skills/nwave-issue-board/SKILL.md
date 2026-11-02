@@ -331,14 +331,16 @@ is the half no artifact holds — which is exactly why `/phil:handoff` records i
 a reader who is not its author can act on it.
 
 **Whenever the block renders reasoning from `.session-handoff.md` — handed over at a capture or re-read
-on a refresh — read `references/projection.md` whole before rendering it.** It holds the sections' layout, why the projection is write-only, the `⚠ stale` mark, and
+on a refresh — or the card is closed, read `references/projection.md` whole before rendering it.** It holds the sections' layout, why the projection is write-only, the `⚠ stale` mark, and
 whose timestamp the sections carry. Two rules apply on every refresh, whether a snapshot was handed over
 or not:
 
 - **One writer regenerates the whole block from two sources**: position from `phil:nwave-slice-status`,
   reasoning from `.session-handoff.md`. Refresh both or neither — updating one half and preserving the
-  other makes a second writer in one region, and the next full regeneration drops what it wrote. Where a
-  source is absent, render its section `unknown`; never omit it or keep a stale copy.
+  other makes a second writer in one region, and the next full regeneration drops what it wrote. On a closed
+  card, render `Finished <YYYY-MM-DD>.` in place of its reasoning sections, snapshot or none
+  (`references/projection.md`); otherwise, where a source is absent, render its section `unknown`. Never
+  omit a section or keep a stale copy.
 - **Absent renders as `unknown`, never as empty.** A card whose owner never ran `/phil:handoff` has no
   projection: say `Stack: unknown — no snapshot projected`. **Empty asserts there were no diversions**,
   which is a claim about the work; `unknown` is a claim about the record.
@@ -416,7 +418,7 @@ row erases a slice that existed and was set aside (fixture `08`).
 
 ## Refresh at boundaries
 
-Slice start, slice end, wave change, roadmap resequenced. Not every step — a per-step write turns
+Slice start, slice end, wave change, roadmap resequenced, the card closing. Not every step — a per-step write turns
 each TDD cycle into a forge round-trip, and a missed one is invisible. Between refreshes,
 `/phil:nwave-slice-status`
 answers "where are we" locally and writes nothing.

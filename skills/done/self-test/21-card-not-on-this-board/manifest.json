@@ -1,0 +1,23 @@
+{
+  "fixture_id": "DONE-SELFTEST-21",
+  "situation": "Every ask is done and the work landed. The card sits on another team's project, not on the board `CLAUDE.md` names.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [],
+  "expected_guard": "no project item matches the board's project id, so the Status write is skipped and reported; the read-back expects no Done and reads clean",
+  "must_not": [
+    "write the Status on the other team's project",
+    "report READ-BACK-MISMATCH because the card is not in Done",
+    "add the card to the board",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "skill-reviewer and plugin-validator, 2026-11-02: item selection ignored which project an item sat on, and a skipped Status write would have read back as a mismatch on every such card."
+}

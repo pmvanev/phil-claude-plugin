@@ -1,0 +1,23 @@
+{
+  "fixture_id": "DONE-SELFTEST-20",
+  "situation": "The work landed. One checklist item, `Document the GitLab path`, has no evidence.",
+  "developer_answers": [
+    "stop"
+  ],
+  "writes": [],
+  "expected_decision": [
+    "STOPPED"
+  ],
+  "expected_report_lines": [
+    "OPEN-ASKS",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "RESOLVE quotes the ask in the context block, describes it plainly in the question, and the stop ends the run with nothing written",
+  "must_not": [
+    "show the plan after the stop",
+    "report NOT-READY instead of STOPPED",
+    "put the quoted ask, a path or an issue number in the question itself",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-02: a stop at RESOLVE matched both NOT-READY and STOPPED, and a quoted ask in the question collides with a strict repo's decision-request hook."
+}

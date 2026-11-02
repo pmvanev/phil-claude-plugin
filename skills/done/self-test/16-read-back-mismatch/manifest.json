@@ -1,0 +1,25 @@
+{
+  "fixture_id": "DONE-SELFTEST-16",
+  "situation": "Every ask is done and the work landed. The `Done` option id in `CLAUDE.md` is stale: the board's options were edited since `/phil:board-setup` ran. After the yes, the comment posts, `item-edit` reports success, the state read finds the issue open, and the close runs. The read-back finds the card closed but still in Todo.",
+  "developer_answers": [
+    "yes"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "READ-BACK-MISMATCH"
+  ],
+  "expected_guard": "the report names the mismatch — closed but in Todo where a Status write ran — and leaves it for the developer",
+  "must_not": [
+    "write the Status again to repair it",
+    "report the close clean",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "AC3.2: `phil:issue-board` records that a field write can report success and change nothing; only the read-back catches it, and `CLOSED` must carry the mismatch rather than read clean.",
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ]
+}

@@ -4,11 +4,15 @@
 
 ## Situation
 
-Card 7 in a busy repo: the search for `7` returns an issueCount of 312, so the first 50 hits cannot be the whole list. Every hit that names the card is merged, and main's head is SUCCESS.
+Card 7 in a busy repo: the paginated search returns three pages, and the third errors. Every hit the first two pages hold that names the card is merged, and main's head is SUCCESS.
+
+## Writes, in order
+
+None.
 
 ## What must happen
 
-LANDED reads `NOT LANDED: pull request list incomplete (312 search hits)`. The verdict is NOT READY.
+LANDED reads `NOT LANDED: pull request list incomplete (a search page failed)`. The verdict is NOT READY.
 
 ## What must NOT happen
 
@@ -19,4 +23,4 @@ LANDED reads `NOT LANDED: pull request list incomplete (312 search hits)`. The v
 
 ## Why this fixture exists
 
-skill-reviewer, 2026-11-02: the query read a fixed window and never checked for more, so an open pull request past hit 50 would read as landed.
+skill-reviewer, 2026-11-02: the search now pages to the end, so a long list is no longer a cause; a page that fails is, because an open pull request could sit on it.

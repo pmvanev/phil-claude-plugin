@@ -6,6 +6,10 @@
 
 Every checklist item is done, but the only pull request naming the card was closed without merging. Main's head is SUCCESS.
 
+## Writes, in order
+
+None.
+
 ## What must happen
 
 LANDED reads `NOT LANDED: PR 84 closed unmerged; no pull request for the card merged`. The verdict is NOT READY.
