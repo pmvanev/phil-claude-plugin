@@ -1207,3 +1207,43 @@ jobs:
     features: [finish-work]
     # Not a facet of carry-work-across-session-boundaries: that job carries UNFINISHED work across the
     # boundary; this one ends it. The two meet at the snapshot — one writes it, this one retires it.
+
+  - id: pick-up-the-next-card
+    # Registered by DISCUSS wave, feature: start-work (2026-11-02, issue 80)
+    job_story: >
+      When I choose the next card, I want it claimed on the board and the session in a clean worktree,
+      with the card restated and a route recommended — without taking someone else's card or
+      restarting finished work — so the first minute goes to the work, not the ceremony.
+    dimensions:
+      functional: >
+        Resolve a number, title or description to one open card; refuse a closed card and ask about
+        one in Done or assigned to another; set Status to In Progress and assign the signed-in account,
+        reading both back; move the session into a fresh or existing worktree; restate the card and
+        recommend one route, launching nothing unasked.
+      emotional: >
+        Confidence that the session is on the right card, in the right place, working it the way this
+        repo works cards.
+      social: >
+        A board a teammate can trust when it says a card is taken, and by whom.
+    four_forces:
+      push: >
+        Measured 2026-11-02 by starting issue 80 by hand: five forge and git calls before the first line
+        of work — a whole-board read for the item id, a Status mutation carrying three ids copied from
+        CLAUDE.md, an assign, a read-back, a worktree. The route came from CLAUDE.md only because the
+        session read it. /phil:done puts a card down; nothing picks one up.
+      pull: >
+        One command that picks a card up, as /phil:done puts one down, and asks only which route to
+        take.
+      anxiety: >
+        (A) Starting the wrong card when a title matches several. (B) Taking a teammate's card, or
+        restarting a closed one. (C) Cutting a second worktree for a card already underway and losing
+        track of the first. (D) A route launched before the developer agreed to it.
+      habit: >
+        Finding the card by scrolling the board; cutting a branch from whatever main was last pulled;
+        coding inline because the card was open.
+    opportunity_score: not-scored   # single new job; priority by default
+    status: validated
+    personas: [kai-session-relay]
+    features: [start-work]
+    # Not a facet of put-finished-work-down: that job ends the work; this one begins it. The two meet
+    # at the worktree — this one cuts it, that one lists it for removal.
