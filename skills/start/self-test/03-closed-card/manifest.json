@@ -1,0 +1,17 @@
+{
+  "fixture_id": "START-SELFTEST-03",
+  "situation": "`/phil:start 75`. Issue 75 is closed; its Status is Done.",
+  "expected_decision": [
+    "REFUSED-CLOSED"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "reopen the card",
+    "describe or route the card",
+    "ask whether to go on",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "AC1.3, and issue 80's third fixture behaviour: a closed card is never restarted silently."
+}

@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-17",
+  "situation": "`/phil:start 99999`. `gh` exits 1: `Could not resolve to an issue or pull request with the number of 99999` (`NOT_FOUND`).",
+  "expected_decision": [
+    "NO-MATCH"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "report CANNOT-RUN for a NOT_FOUND",
+    "search for 99999 as words",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "plugin-validator, run live 2026-11-03: a number naming nothing errors; it never answers null."
+}

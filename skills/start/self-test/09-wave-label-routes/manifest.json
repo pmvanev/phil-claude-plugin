@@ -1,0 +1,17 @@
+{
+  "fixture_id": "START-SELFTEST-09",
+  "situation": "`/phil:start 12` in a consumer repo whose CLAUDE.md records no build path. The card carries `wave: design`. The developer types `phil:work — the design is settled; this is a rename` under Other.",
+  "expected_decision": [
+    "LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "ROUTE-OVERRIDDEN",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "launch /nw-design over the developer's answer",
+    "drop the developer's reason",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "D9 rule 2, and the learning hypothesis: an override is the evidence that the card and CLAUDE.md did not choose the route."
+}

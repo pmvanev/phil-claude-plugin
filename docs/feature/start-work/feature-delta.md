@@ -301,6 +301,20 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 80's own, as w
   or existing worktree, restates the card and recommends how to work it.
 - **Constraints:** never picks among matches; never removes an assignee; never restarts a closed
   card; never cuts a second worktree; never launches a route unasked.
+- **Settled at slice 01 authoring (2026-11-03):**
+  - One GraphQL query reads the card and `viewer` through `issueOrPullRequest`. A pull request's
+    number, or a number that names nothing (`NOT_FOUND`), is no match.
+  - A search that matches more than 20 open cards asks for narrower words rather than offering part of
+    the list.
+  - Authoring refined D9's rules: a build path is a rule that names a command or skill to run, and a step that has
+    already run gives way to the rule's next step. A `wave:` label routes by `phil:nwave-issue-board`'s
+    table, and a card with no label goes on to rule 3. Inline needs exactly one done-when item the card
+    states and nothing open.
+  - The run prints its outcome, then launches through the `Skill` tool. Inline ends the skill, and the
+    session works the card outside the command's grant. A route the developer names under Other
+    launches with `ROUTE-OVERRIDDEN`, the evidence the learning hypothesis needs.
+  - A run that cannot begin — no forge line, GitLab, a failed read — reports `CANNOT-RUN`.
+  - Slice 01 does not detect a card already underway; slice 03 adds that check (D2).
 - **Settle at slice 03 authoring:** whether a command's `allowed-tools` can grant Claude Code's
   worktree tool, and whether that tool fetches before it branches. If either fails, the slice records
   what it did instead.

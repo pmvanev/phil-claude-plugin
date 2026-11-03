@@ -1,0 +1,19 @@
+{
+  "fixture_id": "START-SELFTEST-01",
+  "situation": "`/phil:start worktree` on this repo. Three open cards match: 89 (the handoff snapshot lands in the shell's worktree), 80 (`/phil:start`) and 76 (`/phil:autopilot`). The developer picks the `/phil:autopilot` card: open, in Todo, unassigned, labelled `enhancement` only, and linking no `docs/feature/` directory. The developer answers **not now** at the route.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "PICKED",
+    "BUILD-PATH",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "pick the closest match itself",
+    "describe or route any card before the developer picks",
+    "drop a match from the list",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "AC1.1, and issue 80's first fixture behaviour: an ambiguous argument lists candidates instead of picking one."
+}

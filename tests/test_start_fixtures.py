@@ -1,0 +1,91 @@
+"""Structural tests for the start self-test fixtures.
+
+The fixtures are **model-driven by design** — judging whether a run rendered the right report is not
+automatable here, and this file does not pretend otherwise. It checks that each fixture is well-formed,
+names outcomes `skills/start/SKILL.md` defines, and that together they cover every outcome. The pattern is
+`tests/test_done_fixtures.py`.
+"""
+import json
+import re
+from pathlib import Path
+
+import pytest
+
+SKILL_DIR = Path(__file__).resolve().parent.parent / "skills" / "start"
+FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
+
+TERMINAL = {"LAUNCHED", "NOT-LAUNCHED", "STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
+REPORT_LINES = {"PICKED", "ANOTHERS-CARD", "OPEN-IN-DONE", "NO-DONE-WHEN", "BUILD-PATH",
+                "ROUTE-OVERRIDDEN", "WROTE-NOTHING"}
+
+
+def test_the_skill_defines_exactly_these_outcomes():
+    """The sets above are the skill's own. If the skill renames one, this fails before the fixtures
+    quietly name an outcome nothing defines."""
+    text = (SKILL_DIR / "SKILL.md").read_text()
+    section = text.split("## Decision outcomes", 1)[1].split("\n## ", 1)[0]
+    named = set(re.findall(r"`([A-Z][A-Z-]+)`", section))
+    assert named == TERMINAL | REPORT_LINES, named
+
+
+def test_slice_01_fixtures_exist():
+    """The slice 01 brief names seven fixtures; issue 80 names the route that launches nothing."""
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("01-several-matches", "02-no-match", "03-closed-card", "04-open-card-in-done",
+                   "05-someone-elses-card", "06-no-done-when", "07-build-path-overrides",
+                   "08-no-yes-no-launch"):
+        assert wanted in names, f"slice 01 names fixture {wanted}"
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_manifest_is_well_formed(manifest):
+    d = json.loads(manifest.read_text())
+    for key in ("fixture_id", "situation", "why_this_fixture_exists"):
+        assert d.get(key), f"{manifest.parent.name} lacks {key}"
+    assert (manifest.parent / "expected.md").exists()
+    assert d.get("must_not"), "a fixture that forbids nothing cannot fail a right-for-the-wrong-reason run"
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_exactly_one_terminal_outcome_and_only_known_report_lines(manifest):
+    d = json.loads(manifest.read_text())
+    assert len(d["expected_decision"]) == 1 and d["expected_decision"][0] in TERMINAL
+    assert set(d.get("expected_report_lines", [])) <= REPORT_LINES
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_every_run_claims_it_wrote_nothing(manifest):
+    """Slice 01 writes nothing. The grant accepts a mutation document, so the run vouches for itself."""
+    assert "WROTE-NOTHING" in json.loads(manifest.read_text())["expected_report_lines"]
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_every_fixture_forbids_a_board_write(manifest):
+    """Slice 01 claims nothing: no Status, no assignee, whatever the run finds."""
+    must_not = " ".join(json.loads(manifest.read_text())["must_not"]).lower()
+    assert "status" in must_not and "assign" in must_not, manifest.parent.name
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_run_without_a_route_question_launches_nothing(manifest):
+    """D9: a run that stopped before the route, or found no card, launched nothing."""
+    d = json.loads(manifest.read_text())
+    if d["expected_decision"][0] in {"STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}:
+        assert "ROUTE-OVERRIDDEN" not in d["expected_report_lines"]
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_an_override_is_a_launch(manifest):
+    d = json.loads(manifest.read_text())
+    if "ROUTE-OVERRIDDEN" in d["expected_report_lines"]:
+        assert d["expected_decision"] == ["LAUNCHED"], d["fixture_id"]
+
+
+def test_every_outcome_has_a_fixture():
+    decisions, lines = set(), set()
+    for m in FIXTURES:
+        d = json.loads(m.read_text())
+        decisions |= set(d["expected_decision"])
+        lines |= set(d["expected_report_lines"])
+    assert TERMINAL - decisions == set(), TERMINAL - decisions
+    assert REPORT_LINES - lines == set(), REPORT_LINES - lines
