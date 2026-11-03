@@ -1,0 +1,27 @@
+{
+  "fixture_id": "DONE-SELFTEST-42",
+  "no_card": true,
+  "situation": "`/phil:done` runs with no argument, on GitHub. This session opened PR 95 (`tidy-readme`, head `b7c8d9e`, the developer's) and merged it into main, which is green. The developer asked for one thing, \"tidy the README\", and PR 95 carries it. In passing the conversation mentioned card 60. The branch exists locally and on the remote, both at `b7c8d9e`, with no worktree; this checkout holds no snapshot.",
+  "developer_answers": [
+    "yes"
+  ],
+  "questions_asked": 1,
+  "writes": [
+    "delete the local branch",
+    "delete the remote branch"
+  ],
+  "expected_decision": [
+    "FINISHED"
+  ],
+  "expected_report_lines": [
+    "CLEARED"
+  ],
+  "expected_guard": "with no argument, the run checks the session's own asks and pull requests and clears their branches, and never touches a card",
+  "must_not": [
+    "ask for an issue number",
+    "infer a card from the branch",
+    "comment on, set Status on or close card 60",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "The developer, 2026-11-03: \"it shouldn't require an issue number. sometimes we do ad-hoc work in a session with no issue.\""
+}

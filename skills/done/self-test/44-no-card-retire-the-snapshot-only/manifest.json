@@ -1,0 +1,26 @@
+{
+  "fixture_id": "DONE-SELFTEST-44",
+  "no_card": true,
+  "situation": "No argument, on GitLab. The session merged !191 and !193, closed card 21 with a note, deleted the merged branches and removed both worktrees, all by hand. Every ask has evidence: both merge requests merged into a green main, and the card reads closed with no status label. Neither branch survives, locally or on the remote. This checkout's `.session-handoff.md` describes that finished work.",
+  "developer_answers": [
+    "retire it"
+  ],
+  "questions_asked": 1,
+  "writes": [
+    "retire the snapshot here"
+  ],
+  "expected_decision": [
+    "FINISHED"
+  ],
+  "expected_report_lines": [
+    "CLEARED"
+  ],
+  "expected_guard": "where the plan holds only the snapshot here, the run asks once, retire it or keep it, and shows the snapshot's next action",
+  "must_not": [
+    "post a second note on card 21",
+    "stop because the forge is GitLab",
+    "read the snapshot's recorded exchanges",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "The run that prompted slice 04: `/phil:done` refused on GitLab, and the developer's last step, retiring the stale snapshot, was the one step left."
+}
