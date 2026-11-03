@@ -74,3 +74,22 @@ put_down_finished_facet:
     - "Delete what merged; ask about everything else"
   vocabulary:
     - put down finished, ask, evidence, landed, the plan, held out, clean finish
+
+# Pick-up facet — added by DISCUSS wave, feature: start-work (2026-11-02, issue 80).
+# Kai at the session boundary at the START of the work. /phil:done puts a card down; nothing picks one
+# up. Morgan was considered and rejected: Morgan inherits work someone else started, and this card is new.
+pick_up_facet:
+  goals:
+    - Start the card I meant, never a closed one or a teammate's
+    - Have the board say the card is mine before I write a line
+    - Work in a clean worktree from a fresh main, or the one I already have
+    - Work the card the way this repo works cards
+  frustrations:
+    - Five calls and three copied ids before the first line of work
+    - The route depends on whether the session happened to read CLAUDE.md
+  mental_model:
+    - "A card started twice is a card nobody can find"
+    - "The repo's recorded build path outranks habit"
+    - "Recommend the route; let me launch it"
+  vocabulary:
+    - pick up, claim, underway, the route, a fresh main

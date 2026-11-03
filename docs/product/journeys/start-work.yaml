@@ -1,0 +1,84 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: start-work (2026-11-02, issue 80)
+
+id: start-work
+name: Pick up the next card
+persona: kai-session-relay
+job: pick-up-the-next-card
+summary: >
+  Kai names a card. /phil:start settles on one open card, refuses finished or someone else's work
+  unasked, claims it and reads the claim back, moves the session into a fresh or existing worktree,
+  restates the card and recommends how to work it.
+
+steps:
+  - id: resolve
+    action: >
+      Resolve the argument to one open card: a number directly, a title or description by search.
+      List several matches for the developer to pick; report none, and offer to file a card.
+    output: "CARD: <n> <title>  |  <k> open cards match — which one?  |  no open card matches"
+    emotion: unsure — is this the card I meant?
+  - id: check
+    action: >
+      Refuse a closed card; ask about an open card in Done; ask before joining a card assigned to
+      another account.
+    output: "CLOSED: <n> — reopen it yourself  |  ASSIGNED: <login> — add you too?"
+    emotion: reassured — it will not trample anything
+  - id: claim
+    action: >
+      Add the card to the board if missing, write Status=In Progress, assign the signed-in account,
+      read both back.
+    output: "CLAIMED: Status In Progress, assigned to <login> — read back"
+    emotion: committed — the board says it is mine
+  - id: land
+    action: >
+      Fetch, then move the session into a new worktree from the default branch, or into the card's
+      existing one. A card underway is handed to /phil:resume.
+    output: "WORKTREE: <path> on <branch> from <sha>  |  UNDERWAY: <worktree> — next: /phil:resume"
+    emotion: settled — I am in the right place
+  - id: orient
+    action: >
+      Restate the card in plain English — asks, done-when, open questions — and recommend one route
+      with its reason and owning command. Launch nothing without a yes.
+    output: "ASKS / DONE WHEN / OPEN, then ROUTE: <route> — <reason>. Run it? yes / no"
+    emotion: ready — the first minute goes to the work
+
+emotional_arc: unsure → reassured → committed → settled → ready  # upward
+
+shared_artifacts:
+  - name: the card
+    source: resolve
+    consumed_by: [check, claim, land, orient]
+  - name: the developer's login
+    source: claim                # viewer { login }, never git user.name
+    consumed_by: [check, claim, land]
+  - name: the card's worktree
+    source: land                 # by name issue-<n>-*, or by the open pull request's head branch
+    consumed_by: [land, orient]
+  - name: the repo's build path
+    source: orient               # the repo's CLAUDE.md
+    consumed_by: [orient]
+
+error_paths:
+  - step: resolve
+    failure: The argument matches several open cards, or none
+    recovery: List the matches and ask; or say none matched and offer to file one, filing only on a yes
+  - step: check
+    failure: The card is closed, or open in Done
+    recovery: Refuse a closed card and name gh issue reopen; report an open card in Done and ask
+  - step: check
+    failure: The card is assigned to another account
+    recovery: Name the login and ask before adding the developer; never remove an assignee
+  - step: claim
+    failure: No signed-in forge account, or one the forge will not assign
+    recovery: Report it and assign nothing
+  - step: claim
+    failure: The repo has no board block
+    recovery: Name phil:board-setup and write no Status
+  - step: claim
+    failure: Read-back disagrees with the write
+    recovery: Report the mismatch; do not paper over it
+  - step: land
+    failure: The card already has a worktree, or several candidates
+    recovery: Enter the one worktree, or list the candidates and ask; never cut a second
+  - step: land
+    failure: The session is already inside another worktree
+    recovery: Report it and move only on a yes
