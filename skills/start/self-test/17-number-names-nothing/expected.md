@@ -14,6 +14,7 @@ The report says no card has that number, and stops.
 
 - Report CANNOT-RUN for a NOT_FOUND.
 - Search for 99999 as words.
+- Offer to file a card.
 - Write a Status or assign anyone.
 
 ## Why this fixture exists

@@ -5,13 +5,14 @@
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
-    "BUILD-PATH",
-    "WROTE-NOTHING"
+    "CLAIMED",
+    "BUILD-PATH"
   ],
   "must_not": [
     "launch nw-discuss on an ambiguous reply",
     "ask a third time",
-    "write a Status or assign anyone"
+    "undo the claim because nothing launched",
+    "remove an assignee"
   ],
   "why_this_fixture_exists": "AC2.1, and issue 80's sixth fixture behaviour: the recommendation names a route and launches none without a yes."
 }

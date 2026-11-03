@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-30",
+  "situation": "`/phil:start 99`. Issue 99 is open and in Blocked on the board's project. The developer answers **stop**.",
+  "expected_decision": [
+    "STOPPED"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "move the card out of Blocked without asking",
+    "treat Blocked as a defect",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-03: a card in Blocked left it silently, hiding the blocker."
+}

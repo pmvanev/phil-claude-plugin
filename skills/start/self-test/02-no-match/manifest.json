@@ -1,6 +1,6 @@
 {
   "fixture_id": "START-SELFTEST-02",
-  "situation": "`/phil:start quantum flux capacitor`. The search for open cards returns `issueCount` 0.",
+  "situation": "`/phil:start quantum flux capacitor`. The search for open cards returns `issueCount` 0. The developer answers **don't file** to the offer.",
   "expected_decision": [
     "NO-MATCH"
   ],
@@ -8,10 +8,10 @@
     "WROTE-NOTHING"
   ],
   "must_not": [
-    "file a card",
+    "file a card without a yes",
     "offer a closed card that matches",
     "route the argument as if it were a card",
     "write a Status or assign anyone"
   ],
-  "why_this_fixture_exists": "AC1.2. Filing arrives with the claim in slice 02; until then, a run with no match files nothing."
+  "why_this_fixture_exists": "AC1.2: filing is offered, and happens only on a yes."
 }

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "START-SELFTEST-19",
+  "situation": "`/phil:start 95`. Issue 95 is open, unassigned, and on no project. The board's add-to-project workflow is enabled. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED"
+  ],
+  "must_not": [
+    "write a Status before the card is on the board",
+    "take item-add's exit code as proof the item landed",
+    "take the item id from item-add's output",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "AC3.1, and `phil:issue-board`: an issue never added has no field to set, and editing it does nothing."
+}

@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The report states the defect — open on the forge, Done on the board — and asks once whether to go on. On stop it ends.
+The report states the defect — open on the forge, Done on the board — and asks once whether to go on, saying going on moves the card to In Progress. On stop it ends.
 
 ## What must NOT happen
 

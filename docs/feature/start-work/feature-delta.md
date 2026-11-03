@@ -315,6 +315,26 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 80's own, as w
     launches with `ROUTE-OVERRIDDEN`, the evidence the learning hypothesis needs.
   - A run that cannot begin — no forge line, GitLab, a failed read — reports `CANNOT-RUN`.
   - Slice 01 does not detect a card already underway; slice 03 adds that check (D2).
+- **Settled at slice 02 authoring (2026-11-03):**
+  - Running `/phil:start` is the developer's yes to the claim; the route asks its own. A go-on answer
+    at CHECK is the yes to moving a card out of Done or adding the developer beside another assignee.
+  - Run live on issue 80, whose claim was already in place: `gh project item-add --format json` prints
+    the item, `item-edit` prints nothing, and an unknown login makes `gh issue edit --add-assignee`
+    exit 1 with `Could not resolve to a user or bot`. The read-back stays the evidence.
+  - A write that would change nothing is skipped, so a card already claimed reports `CLAIMED` and
+    `WROTE-NOTHING` together.
+  - The claim stops at the first failed board write — the item add or the Status — and reads the card
+    back once before reporting it; the run still describes and routes the card. The assign is no board
+    write: one that fails, or exits 0 and does not hold, is `NOT-ASSIGNED`.
+  - The read-back checks only the writes that ran, plus every assignee the card already had, so a
+    removed assignee reads back as `READ-BACK-MISMATCH`.
+  - A card in Blocked asks before the claim moves it, as a card in Done does.
+  - With no signed-in account every read fails, so AC3.3's first half is `CANNOT-RUN`, naming
+    `gh auth login`.
+  - A filed card carries the developer's title and an empty body, so the skill composes no prose on the
+    board; DESCRIBE then reports `NO-DONE-WHEN`. Once a card is filed, no failure reads as `CANNOT-RUN`.
+  - The claim's procedure lives in `skills/start/references/claim.md`, which keeps the skill under
+    3,000 words.
 - **Settle at slice 03 authoring:** whether a command's `allowed-tools` can grant Claude Code's
   worktree tool, and whether that tool fetches before it branches. If either fails, the slice records
   what it did instead.

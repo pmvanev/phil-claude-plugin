@@ -10,6 +10,7 @@
   "must_not": [
     "report CANNOT-RUN for a NOT_FOUND",
     "search for 99999 as words",
+    "offer to file a card",
     "write a Status or assign anyone"
   ],
   "why_this_fixture_exists": "plugin-validator, run live 2026-11-03: a number naming nothing errors; it never answers null."

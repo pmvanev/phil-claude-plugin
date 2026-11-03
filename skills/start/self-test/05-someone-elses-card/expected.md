@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The report names `colleague` in the context block and asks once whether to go on. On stop it ends.
+The report names `colleague` in the context block and asks once whether to go on, saying going on adds the developer beside them. On stop it ends.
 
 ## What must NOT happen
 

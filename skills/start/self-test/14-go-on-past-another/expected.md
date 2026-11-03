@@ -1,21 +1,21 @@
 # Expected — START-SELFTEST-14
 
-`NOT-LAUNCHED` · `ANOTHERS-CARD` · `WROTE-NOTHING`
+`NOT-LAUNCHED` · `ANOTHERS-CARD` · `CLAIMED`
 
 ## Situation
 
-`/phil:start 64`. Issue 64 is assigned to `colleague`; `viewer.login` is `pmvanev`. The developer answers **go on**, then **not now** at the route.
+`/phil:start 64`. Issue 64 is in Todo, assigned to `colleague`; `viewer.login` is `pmvanev`. The developer answers **go on**, then **not now** at the route.
 
 ## What must happen
 
-The report continues on go on and says the assignees stay as they are. It describes the card and recommends a route.
+On go on, CLAIM writes Status In Progress and adds `pmvanev` beside `colleague`, reading both back — `colleague` still among the assignees: `CLAIMED: … assigned to pmvanev beside colleague — read back`.
 
 ## What must NOT happen
 
-- Assign the developer.
 - Remove colleague.
-- Write a Status or assign anyone.
+- Replace colleague with the developer.
+- Assign before the go-on answer.
 
 ## Why this fixture exists
 
-skill-reviewer, 2026-11-03: the go-on path had no fixture, and AC1.4 holds on it too.
+AC1.4 and AC3: another's card answered yes adds the developer beside them, never in their place.

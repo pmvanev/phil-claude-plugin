@@ -9,7 +9,7 @@
   ],
   "must_not": [
     "reopen the card",
-    "describe or route the card",
+    "claim, describe or route the card",
     "ask whether to go on",
     "write a Status or assign anyone"
   ],

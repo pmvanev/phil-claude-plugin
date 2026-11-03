@@ -1,0 +1,17 @@
+{
+  "fixture_id": "START-SELFTEST-20",
+  "situation": "`/phil:start 96`. Every claim write exits 0. The read-back shows Status Todo; a second read still shows Todo. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "READ-BACK-MISMATCH"
+  ],
+  "must_not": [
+    "report CLAIMED on the writes' exit codes",
+    "write the Status again",
+    "re-read more than once",
+    "move the card by any other means"
+  ],
+  "why_this_fixture_exists": "AC3.2: a board write that reports success while the card sits elsewhere is the characteristic failure."
+}
