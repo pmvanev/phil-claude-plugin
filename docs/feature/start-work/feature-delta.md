@@ -4,7 +4,7 @@
 > `## Wave: DISCUSS / [REF|WHY|HOW]` sections. Machine artifacts: `slices/slice-NN-*.md`.
 > SSOT updates: `docs/product/jobs.yaml` (new job), `docs/product/journeys/start-work.yaml` (new
 > journey), `docs/product/personas/kai-session-relay.yaml` (facet added).
-> Board: issue 80, In Progress, `wave: discuss`.
+> Board: issue 80 (slices 01–03, closed); issue 98 (slice 04, GitLab), In Progress.
 > Build path: DISCUSS only — the deliverable is prose (CLAUDE.md, edd-loop DDD8).
 
 ---
@@ -211,7 +211,8 @@ Decision enabled: I start the recommended route here, or resume where I left off
 
 ## Wave: DISCUSS / [REF] Out of scope
 
-- GitLab. `phil:issue-board` covers it, but v1's fixtures and dogfood are GitHub only.
+- GitLab, in slices 01–03. `phil:issue-board` covers it, but v1's fixtures and dogfood are GitHub
+  only. Slice 04 adds it (issue 98).
 - Choosing which card to start. `phil:board-snapshot` and `phil:rank-issues` own the order;
   `/phil:start` takes the card it is given.
 - Changing `/phil:resume`. A card underway is handed to it as it stands.
@@ -356,3 +357,153 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 80's own, as w
     worktree moves nowhere. Any `locked` worktree asks before entering.
   - The worktree procedure lives in `skills/start/references/worktree.md`, read whole at CHECK's step 4,
     and ROUTE's rules moved to `references/route.md`; the skill body is 2,541 words.
+
+---
+
+## Wave: DISCUSS / [REF] Slice 04 — GitLab (issue 98)
+
+### Source
+
+Issue 98 asks for `/phil:start` on GitLab. Today a GitLab forge line ends the run with `CANNOT-RUN`,
+and on 2026-11-03 CLAUDE.md started asking every surface that drives issues, boards, branches or
+worktrees to support both forges. `/phil:done` already does, through `skills/done/references/gitlab.md`.
+
+Four facts shape the slice, read on 2026-11-03 with `glab` 1.112.0 unless the fact names its source:
+
+- **A bare `--assignee` replaces the card's assignees.** `glab issue update --help`: "Prefix with '!'
+  or '-' to remove from existing assignees, or '+' to add new. Otherwise, replace existing assignees".
+  Ported as written, the GitHub assign would remove a teammate and exit 0, breaking D6.
+- **A GitLab column is a label, and its name is its only id.** modive's hand-written block lists
+  `status::to-do / status::in-progress / status::blocked` and says to close a finished issue rather
+  than label it. `phil:board-setup`'s GitLab block records the status family, not which label is
+  which column.
+- **GitLab has no board item to add.** A GitLab board is a view over labels, so the label write alone
+  moves the card into its column (`phil:issue-board`).
+- **Issue and merge-request numbers are separate.** `projects/<p>/issues/99999` answers
+  `404 Not found`, and a number names an issue or nothing, never a merge request. Read live against
+  modive as `pvanevery`: an issue carries `state`, `labels` and `assignees[].username`, and
+  `merge_requests?state=opened&author_username=<login>` lists the developer's open merge requests.
+
+### Locked decisions
+
+The developer answered D12 on 2026-11-03. The others follow from that answer, the facts above and
+`/phil:done`'s GitLab reference.
+
+- **[D12] Match the status label by name; ask when the match is unclear.** *(Developer's answer.)*
+  Within the status family the board block lists, In Progress is the label whose value reads
+  `in-progress`, `in progress` or `doing`. Blocked reads `blocked`, and Done reads `done`. Where none
+  or several labels match In Progress, ask which label to use, and write no status label until the
+  developer answers. Nothing records the answer, so the next run asks again.
+- **[D13] The claim is one label swap.** Add the In Progress label and remove every other status
+  label the card carries, in one `glab issue update --label … --unlabel …`, on every tier: Premium
+  drops a scoped sibling server-side, and Free drops nothing (`phil:issue-board`). The claim runs no
+  `item-add`. A block that lists no status family is `NO-BOARD-BLOCK`; the run still assigns.
+- **[D14] Assign with `--assignee +<login>`, never a bare login.** The read-back checks every login the
+  card already had, so a replaced assignee reads back as `READ-BACK-MISMATCH`.
+- **[D15] On GitLab, Done is the closed list.** A closed card is `REFUSED-CLOSED`, naming
+  `glab issue reopen <n> -R <repo>`. An open card carrying a status label that reads done is
+  `OPEN-IN-DONE`. A family with no done label never fires that check. A label that reads blocked asks,
+  as Blocked does on GitHub.
+- **[D16] Every call names its target, and `glab api` sends GETs only.** Pass
+  `-R https://<host>/<group/project>` to `glab issue` and `--hostname <host>` to `glab api`, and write
+  the project URL-encoded in each path, as `skills/done/references/gitlab.md` does. The developer is
+  `user`'s `username`. With no signed-in account, name `glab auth login --hostname <host>`.
+- **[D17] A number names an issue.** A 404 is `NO-MATCH`. Fixture 10's pull-request case has no
+  GitLab counterpart.
+- **[D18] Underway reads merge requests.** Search the developer's open merge requests for the card
+  pattern `/phil:done` uses, and report each as `!<n>`. Read the remote's head from
+  `projects/<p>/repository/branches/<default>`. The fetch, the cut, the entry and the lock ask stay
+  as they are.
+- **[D19] Filing passes only the developer's title and an empty body**, through `glab issue create`
+  with `-R`, `--title`, `--description ''` and `--yes`. The empty description is unverified; settle
+  it at authoring.
+- **[D20] The GitLab calls live in `skills/start/references/gitlab.md`**, read whole before RESOLVE
+  wherever the forge line names GitLab. `SKILL.md` governs it, and the reference adds no outcome
+  token. `commands/start.md` adds `glab api`, `jq`, `glab issue create` and `glab issue update` to its
+  grant, and limits `glab issue update` to the status labels and `--assignee +<login>`.
+- **[D21] The report keeps its lines and names labels in place of Status.** For example:
+  `CLAIMED: status::in-progress set, status::to-do removed, assigned to pvanevery — read back`.
+
+### Story 5 — Start a card on GitLab *(slice 04)*
+`job_id: pick-up-the-next-card`
+
+As **Kai** on a GitLab repo, I want `/phil:start` to claim the card, land me in its worktree and
+recommend a route, so the first minute goes to the work on either forge.
+
+### Elevator Pitch
+Before: on modive, `/phil:start 58` stops with `CANNOT-RUN`, and I swap labels, assign the card and cut a worktree by hand.
+After: run `/phil:start 58` in modive → sees `CLAIMED: status::in-progress set, status::to-do removed, assigned to pvanevery — read back`, then the WORKTREE, ASKS, DONE WHEN, OPEN and ROUTE lines.
+Decision enabled: I take the recommended route, pick another, or fix a card that says too little, as on GitHub.
+
+**Acceptance criteria**
+- AC5.1 — Given a GitLab forge line and an open card in `status::to-do`, then the run swaps the card to
+  `status::in-progress`, assigns the developer, reads both back, cuts a worktree and recommends a
+  route, ending in a terminal the GitHub skill defines.
+- AC5.2 — Given a card assigned to another account and a go-on answer, then the developer is added
+  with `+<login>`, and the read-back finds both logins.
+- AC5.3 — Given a status family where no label, or several labels, read in-progress, then the run asks
+  which label to use before the claim, and writes no status label without an answer.
+- AC5.4 — Given a closed card, then the run refuses it and names `glab issue reopen`. Given a blocked
+  label, then it asks before the claim. Given an open card with a done label, then it reports
+  `OPEN-IN-DONE` and asks.
+- AC5.5 — Given the developer's open merge request naming the card, then the run ends `UNDERWAY`,
+  names `!<n>` and cuts nothing.
+- AC5.6 — Given a block that lists no status family, then the run reports `NO-BOARD-BLOCK`, writes no
+  label and still assigns.
+- AC5.7 — Given no match and a yes to filing, then the run files the card with the developer's title
+  and an empty body, and claims it.
+- AC5.8 — Given any GitLab path, then no run ends `CANNOT-RUN` because the forge is GitLab.
+- AC5.9 — Given any GitLab fixture, then it forbids a bare `-R <group/project>`, a field or method on
+  `glab api`, a bare `--assignee` and a board list.
+
+**Fixtures** (`skills/start/self-test/`): 48 `gitlab-claim-cut-fresh` (AC5.1) · 49
+`gitlab-another-assignee-kept` (AC5.2) · 50 `gitlab-no-in-progress-label` (AC5.3) · 51
+`gitlab-closed-card` (AC5.4) · 52 `gitlab-blocked-label` (AC5.4) · 53
+`gitlab-merge-request-underway` (AC5.5) · 54 `gitlab-no-status-family` (AC5.6) · 55
+`gitlab-filed-on-a-yes` (AC5.7). Each forbids AC5.9's four.
+
+### Outcome KPIs
+
+| KPI | Target | Measurement |
+|---|---|---|
+| GitLab is no reason to stop | 0 GitLab runs end `CANNOT-RUN` because of the forge | fixtures 48–55 |
+| Another's card stays theirs on GitLab | 0 assignees replaced by a bare `--assignee` | fixture 49; dogfood read-back |
+| No guessed column | 0 status labels written when none or several match | fixture 50 |
+| Same report on both forges | 0 outcome tokens added by `references/gitlab.md` | review of the diff |
+| One command to the first line of work | modive's top to-do card starts with one question: the route | dogfood transcript |
+
+### Scope assessment
+
+**PASS (right-sized).** One story and one slice. The slice adds one reference file and eight fixtures,
+and changes the command's grant and the skill's two GitLab lines. It adds no script and changes no other
+skill.
+
+### Definition of Done (slice 04)
+
+1. `skills/start/references/gitlab.md` exists, written after reading `plugin-dev:skill-development`
+   and `plugin-dev:command-development`; `SKILL.md` and `commands/start.md` name it.
+2. Fixtures 48–55 exist, and `tests/test_start_fixtures.py` passes over them.
+3. `python3 -m pytest -q` and `scripts/check-invariants.py` pass.
+4. `/phil:harden-instructions` over the command, the skill and the new reference; `phil:eos` over this
+   section and the slice brief; `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator` over the
+   command and the skill. Then run the tests again.
+5. Dogfood on modive, naming the plugin version it ran against.
+6. Bump the plugin version.
+
+### Definition of Ready — validation
+
+| # | DoR item | Status | Evidence |
+|---|---|---|---|
+| 1 | Job traceable | ✅ | Story 5 carries `pick-up-the-next-card`; the job is unchanged |
+| 2 | Persona defined | ✅ | `kai-session-relay`, pick-up facet |
+| 3 | Journey mapped | ✅ | `journeys/start-work.yaml`; slice 04 adds a GitLab error path to `claim` |
+| 4 | Elevator pitch | ✅ | Story 5: `/phil:start 58` in modive, the claim line |
+| 5 | ACs testable | ✅ | AC5.1–AC5.9, each pinned by a fixture or the suite |
+| 6 | Slice ≤1 day with a learning hypothesis | ✅ | `slices/slice-04-gitlab.md` |
+| 7 | Walking skeleton | ✅ | slices 01–03 shipped; slice 04 extends a running command |
+| 8 | Outcome KPIs with targets | ✅ | table above |
+| 9 | Scope right-sized | ✅ | Scope assessment above |
+
+Requirements completeness: each of issue 98's five *What changes* items and three *Done when* items
+maps to a decision and an AC. Resolve maps to D16, D17 and D19; Check to D15 and D18; Claim to D12,
+D13 and D14; Worktree to D18; the fixtures to AC5.9.

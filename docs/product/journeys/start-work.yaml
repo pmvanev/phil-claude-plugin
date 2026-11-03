@@ -76,6 +76,14 @@ error_paths:
   - step: claim
     failure: Read-back disagrees with the write
     recovery: Report the mismatch; do not paper over it
+  - step: claim
+    # Added by DISCUSS wave, feature: start-work, slice 04 (2026-11-03, issue 98)
+    failure: >
+      On GitLab, no status label or several read in-progress, or a bare --assignee would replace the
+      card's assignees
+    recovery: >
+      Ask which label to use and write none until answered; assign with --assignee +<login>, and read
+      every earlier assignee back
   - step: land
     failure: The card already has a worktree, or several candidates
     recovery: Enter the one worktree, or list the candidates and ask; never cut a second
