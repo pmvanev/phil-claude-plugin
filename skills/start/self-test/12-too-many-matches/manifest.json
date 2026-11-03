@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-12",
+  "situation": "`/phil:start board`. The search returns `issueCount` 34. The developer gives no narrower words.",
+  "expected_decision": [
+    "STOPPED"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "offer any of the 34 as a pick",
+    "pick the first hit",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "D4: a list the query cut short is never offered as the whole."
+}

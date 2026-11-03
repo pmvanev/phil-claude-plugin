@@ -1,0 +1,18 @@
+{
+  "fixture_id": "START-SELFTEST-05",
+  "situation": "`/phil:start 64`. Issue 64 is assigned to `colleague`; `viewer.login` is `pmvanev`. The developer answers **stop**.",
+  "expected_decision": [
+    "STOPPED"
+  ],
+  "expected_report_lines": [
+    "ANOTHERS-CARD",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "remove colleague as assignee",
+    "assign the developer beside colleague",
+    "skip the question because the card is open",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "AC1.4, and issue 80's second fixture behaviour: a card assigned to someone else stays theirs unless the developer says otherwise."
+}

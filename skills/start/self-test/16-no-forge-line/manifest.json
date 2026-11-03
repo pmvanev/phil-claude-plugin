@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-16",
+  "situation": "`/phil:start 12` in a repo whose CLAUDE.md has no forge line.",
+  "expected_decision": [
+    "CANNOT-RUN"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "infer the repo from the git remote",
+    "read the card anyway",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "plugin-validator, 2026-11-03: an early stop matched no terminal outcome."
+}

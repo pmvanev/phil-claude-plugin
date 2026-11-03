@@ -1,0 +1,19 @@
+{
+  "fixture_id": "START-SELFTEST-06",
+  "situation": "`/phil:start 91`. The card asks to move the decision-request hook's word counter into a shared module. Its body has no checklist, no *Done when* and no *Acceptance criteria* heading, and no *Open questions*. Nothing a user sees changes. The repo is a consumer's whose CLAUDE.md records no build path; the card is open, in Todo, assigned to the developer, with no `wave:` label. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "NO-DONE-WHEN",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "write a done-when criterion of its own",
+    "infer one from the title",
+    "route inline",
+    "edit the card",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "AC2.3. A start report that supplies the missing criterion hides the gap the card's author must fill."
+}

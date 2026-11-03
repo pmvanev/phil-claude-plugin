@@ -1,0 +1,18 @@
+{
+  "fixture_id": "START-SELFTEST-04",
+  "situation": "`/phil:start 22`. Issue 22 is open, and its Status on the board's project is Done. The developer answers **stop**.",
+  "expected_decision": [
+    "STOPPED"
+  ],
+  "expected_report_lines": [
+    "OPEN-IN-DONE",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "treat the card as an ordinary open card",
+    "move the card out of Done",
+    "close the card to match the board",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "AC1.3. CLAUDE.md names an open issue in Done as a defect; starting it silently would hide that."
+}

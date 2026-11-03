@@ -1,0 +1,18 @@
+{
+  "fixture_id": "START-SELFTEST-15",
+  "situation": "`/phil:start /phil:autopilot` on this repo. The search, with the argument as given, returns `issueCount` 1: card 76. The developer answers **start it**.",
+  "expected_decision": [
+    "LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "BUILD-PATH",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "report NO-MATCH",
+    "strip `/phil:autopilot` as if it were a search qualifier",
+    "report outcomes after the launch",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "The slice brief's dogfood moment. Run live 2026-11-03: the search reads the colon in `/phil:autopilot` as text, not as a qualifier."
+}

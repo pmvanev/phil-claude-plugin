@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-11",
+  "situation": "`/phil:start 93` in a consumer repo whose CLAUDE.md records no build path. The card asks to fix one broken link in the README, lists it under *Done when*, and leaves nothing open. The developer answers **start it**.",
+  "expected_decision": [
+    "LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "route a one-line fix through phil:edd",
+    "invoke a skill for an inline route",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "D9 rule 4: a card that fits one sitting goes inline, overriding rule 3."
+}

@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-10",
+  "situation": "`/phil:start 87`. `issueOrPullRequest` answers with `__typename` `PullRequest`.",
+  "expected_decision": [
+    "NO-MATCH"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "describe the pull request as a card",
+    "search for an issue the pull request mentions and start it",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "A number names an issue or a pull request on GitHub; a pull request is no card."
+}

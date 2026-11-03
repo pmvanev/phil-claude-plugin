@@ -1,0 +1,17 @@
+{
+  "fixture_id": "START-SELFTEST-13",
+  "situation": "`/phil:start 22`. Issue 22 is open, and its Status on the board's project is Done. The developer answers **go on**, then **not now** at the route.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "OPEN-IN-DONE",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "move the card out of Done",
+    "tell the developer that going on moves the card",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-03: the go-on path, where a later-claim promise tempted a write, had no fixture."
+}
