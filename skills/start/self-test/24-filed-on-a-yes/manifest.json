@@ -1,0 +1,19 @@
+{
+  "fixture_id": "START-SELFTEST-24",
+  "situation": "`/phil:start retry flaky uploads`. The search returns `issueCount` 0. The developer answers **file it**, then **not now** at the route.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "FILED",
+    "CLAIMED",
+    "NO-DONE-WHEN"
+  ],
+  "must_not": [
+    "compose a body or a done-when for the card",
+    "reword the developer's title",
+    "file the card without adding it to the board",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "AC3.5: a card filed on a yes is claimed, and carries only the developer's words."
+}

@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-29",
+  "situation": "`/phil:start 98`. The Status write and the assign both exit 0. The read-back fails: `HTTP 502`, and so does its re-read. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "READ-BACK-MISMATCH"
+  ],
+  "must_not": [
+    "report CLAIMED on the writes' exit codes",
+    "report CANNOT-RUN after a write",
+    "write the Status again"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-03: a read that failed after the first write had no outcome."
+}

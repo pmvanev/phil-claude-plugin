@@ -1,21 +1,21 @@
 # Expected — START-SELFTEST-13
 
-`NOT-LAUNCHED` · `OPEN-IN-DONE` · `WROTE-NOTHING`
+`NOT-LAUNCHED` · `OPEN-IN-DONE` · `CLAIMED`
 
 ## Situation
 
-`/phil:start 22`. Issue 22 is open, and its Status on the board's project is Done. The developer answers **go on**, then **not now** at the route.
+`/phil:start 22`. Issue 22 is open, unassigned, and its Status on the board's project is Done. The developer answers **go on**, then **not now** at the route.
 
 ## What must happen
 
-The report states the defect, continues on go on, and says the card stays in Done. It describes the card and recommends a route.
+The report states the defect and, on go on, CLAIM moves the card from Done to In Progress and assigns the developer, reading both back: `CLAIMED`. It describes the card and recommends a route.
 
 ## What must NOT happen
 
-- Move the card out of Done.
-- Tell the developer that going on moves the card.
-- Write a Status or assign anyone.
+- Close the card to match the board.
+- Move the card without the go-on answer.
+- Remove an assignee.
 
 ## Why this fixture exists
 
-skill-reviewer, 2026-11-03: the go-on path, where a later-claim promise tempted a write, had no fixture.
+skill-reviewer, 2026-11-03: the go-on path had no fixture. Going on is the developer's yes to moving the card out of Done.

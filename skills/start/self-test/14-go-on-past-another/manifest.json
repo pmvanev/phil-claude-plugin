@@ -1,17 +1,17 @@
 {
   "fixture_id": "START-SELFTEST-14",
-  "situation": "`/phil:start 64`. Issue 64 is assigned to `colleague`; `viewer.login` is `pmvanev`. The developer answers **go on**, then **not now** at the route.",
+  "situation": "`/phil:start 64`. Issue 64 is in Todo, assigned to `colleague`; `viewer.login` is `pmvanev`. The developer answers **go on**, then **not now** at the route.",
   "expected_decision": [
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
     "ANOTHERS-CARD",
-    "WROTE-NOTHING"
+    "CLAIMED"
   ],
   "must_not": [
-    "assign the developer",
     "remove colleague",
-    "write a Status or assign anyone"
+    "replace colleague with the developer",
+    "assign before the go-on answer"
   ],
-  "why_this_fixture_exists": "skill-reviewer, 2026-11-03: the go-on path had no fixture, and AC1.4 holds on it too."
+  "why_this_fixture_exists": "AC1.4 and AC3: another's card answered yes adds the developer beside them, never in their place."
 }

@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-01
 
-`NOT-LAUNCHED` · `PICKED` · `BUILD-PATH` · `WROTE-NOTHING`
+`NOT-LAUNCHED` · `PICKED` · `CLAIMED` · `BUILD-PATH`
 
 ## Situation
 
@@ -8,14 +8,14 @@
 
 ## What must happen
 
-The report lists all three by number and title above one question and waits. After the pick it runs CHECK on 76, describes it, and routes it to `nw-discuss`, quoting CLAUDE.md's build path.
+The report lists all three by number and title above one question and waits. After the pick it runs CHECK on 76, claims it, describes it, and routes it to `nw-discuss`, quoting CLAUDE.md's build path.
 
 ## What must NOT happen
 
 - Pick the closest match itself.
-- Describe or route any card before the developer picks.
+- Claim, describe or route any card before the developer picks.
 - Drop a match from the list.
-- Write a Status or assign anyone.
+- Remove an assignee.
 
 ## Why this fixture exists
 

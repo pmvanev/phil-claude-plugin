@@ -4,35 +4,45 @@ description: >-
   This skill should be used when the user asks to "start card N", "start issue N", "work on #N", "pick
   up the card about X", "what does this card ask and how should I work it", or runs /phil:start. It
   resolves the argument to one open GitHub card, refuses a closed one, asks before one in Done or someone
-  else's, restates what it asks and when it is done, and recommends one route, launched only on a yes.
-  Writes nothing before the launch. Not for choosing which card to start; for a card underway, use
-  /phil:resume.
+  else's, claims it on the board, restates what it asks and when it is done, and recommends one route,
+  launched only on a yes. Not for choosing which card to
+  start; for a card underway, use /phil:resume.
 ---
 
 # Start — pick a card up
 
 `/phil:done` puts a card down finished. This skill picks one up: it settles on exactly one open card,
-refuses finished work and asks before someone else's, restates the card in plain English, and recommends
-how to work it — the way the repo records, not by habit.
+refuses finished work and asks before someone else's, claims the card on the board, restates it in plain
+English, and recommends how to work it — the way the repo records, not by habit.
 
-**This version writes nothing before the launch.** It claims no card, assigns no one and cuts no
-worktree. It does not yet check whether a card is already underway; for one that is, the developer runs
-`/phil:resume`.
+**Running `/phil:start` is the developer's yes to the claim; the route needs its own.** This version
+cuts no worktree, and does not yet check whether a card is already underway; for one that is, the
+developer runs `/phil:resume`.
 
 ## Inputs
 
 - **The argument** — a number, an issue URL, a title, or a few words of description. With none, ask
   which card to start; never infer it from the branch. No answer is `CANNOT-RUN`.
 - **The repo** — the forge line in the working tree's `CLAUDE.md`; `git rev-parse --show-toplevel` finds
-  the root. Pass the owner and repo as variables to every `gh api graphql` query, which takes no `-R`: an
-  inferred remote reads the wrong repo's issues successfully (`phil:issue-board`). With no forge line,
-  name `/phil:board-setup`: `CANNOT-RUN`. On a GitLab forge line, say this skill covers GitHub only:
-  `CANNOT-RUN`.
-- **The board** — the project id from the same `CLAUDE.md` block, to read the card's Status on this
-  board. With none, read Status from every project the card is on, and say no board block was found.
+  the root. Pass `-R <owner/repo>` on every `gh issue` call, and pass the owner and repo as variables to
+  every `gh api graphql` query, which takes no `-R`: an inferred remote reads the wrong repo's issues
+  successfully (`phil:issue-board`). With no forge line, name `/phil:board-setup`: `CANNOT-RUN`. On a
+  GitLab forge line, say this skill covers GitHub only: `CANNOT-RUN`.
+- **The board constants** — from the board lines `/phil:board-setup` writes into `CLAUDE.md`, its
+  `Board:` and `Columns:` lines: the project's id and number, its owner from the board URL, the `Status`
+  field id and the `In Progress` option id. Read them; never probe for them. With no board lines, or
+  lines missing any of these, read Status from every project the card is on, and say no board block was
+  found.
+- **The developer** — the signed-in account, `viewer.login`, never git's `user.name`: a display name no
+  forge resolves to a login. With no signed-in account, name `gh auth login`: `CANNOT-RUN`.
 
 Run `git` only for `rev-parse --show-toplevel`. A `gh` call that fails for any reason but `NOT_FOUND` —
-auth, network, rate limit — is `CANNOT-RUN`, quoting the error.
+auth, network, rate limit — before CLAIM and before any filing is `CANNOT-RUN`, quoting the error. Where
+any `gh` error names a missing `project` scope, name `gh auth refresh -s project`.
+
+**This skill composes no prose on the board.** A filed card's title is the developer's words and its body
+is empty; the claim writes a board item, a Status and an assignee, and no comment. It applies no writing
+standard on the board for that reason.
 
 ## Asking
 
@@ -54,7 +64,7 @@ query($o:String!,$r:String!,$n:Int!){
     issueOrPullRequest(number:$n){ __typename
       ... on Issue{ number title body state url
         assignees(first:10){ nodes{ login } } labels(first:20){ nodes{ name } }
-        projectItems(first:10){ nodes{ project{ id title } fieldValueByName(name:"Status"){
+        projectItems(first:10){ nodes{ id project{ id title } fieldValueByName(name:"Status"){
           ... on ProjectV2ItemFieldSingleSelectValue{ name } } } } } } } }' \
   -f o=<owner> -f r=<repo> -F n=<n>
 ```
@@ -80,7 +90,13 @@ query($q:String!){ search(query:$q, type:ISSUE, first:20){ issueCount
   matches**, not even the closest. Offer up to four as options, each described in plain words; the
   developer types any other number under Other. Read a pick with the number query and run CHECK on it.
   A pick reports `PICKED`; no pick is `STOPPED`.
-- **No match** — say so, quoting the argument: `NO-MATCH`. File nothing: this version cannot file a card.
+- **No match** — say so, quoting the argument, and offer to file a card titled in the developer's words:
+  the argument as typed, or the words typed under Other. File only on the developer's yes; no yes is
+  `NO-MATCH`. With no board block, the offer and the report say the card will land on no board. File it
+  as `${CLAUDE_PLUGIN_ROOT}/skills/start/references/claim.md` directs — `gh issue create`, then CLAIM
+  adds it to the board in the same breath — and report `FILED`.
+
+Offer filing only after a search: a number or URL that names no card is `NO-MATCH`, with no offer.
 
 ## CHECK — finished work and someone else's
 
@@ -91,17 +107,22 @@ Check in this order, and stop at the first stop.
    though it were open.
 2. **An open card in `Done` is a defect**: the board says finished and the forge says open. Read Status
    from the board's project item where the board block names a project; otherwise Done on any project
-   counts, and the report names that project. State the defect and ask whether to go on — **go on**
-   continues the report and leaves the card in Done; **stop** is `STOPPED`. Report `OPEN-IN-DONE` either
-   way.
+   counts, and the report names that project. State the defect and ask whether to go on — **go on** moves
+   the card to In Progress at CLAIM, or, with no board block, leaves it in Done and says so; **stop** is
+   `STOPPED`, with nothing written. Report `OPEN-IN-DONE` either way. A card in `Blocked` is no defect,
+   but moving it hides the blocker: name it and ask the same way, with no outcome token of its own.
 3. **Someone else's card stays theirs.** Where the card has assignees and `viewer.login` is not among
-   them, name every assignee's login and ask whether to go on — **go on** continues the report and leaves
-   the assignees as they are; **stop** is `STOPPED`. Report `ANOTHERS-CARD` either way. **Never remove an
-   assignee.** A card assigned to the developer, or to no one, needs no ask.
+   them, name every assignee's login and ask whether to go on — **go on** adds the developer beside them
+   at CLAIM; **stop** is `STOPPED`, with nothing written. Report `ANOTHERS-CARD` either way. **Never
+   remove an assignee.** A card assigned to the developer, or to no one, needs no ask.
 
-The developer is the signed-in account, `viewer.login` — never git's `user.name`, a display name no
-forge resolves to a login. Where `viewer` cannot be read, say so, name `gh auth status`, and treat every
-assignee as someone else.
+## CLAIM — In Progress, assigned, read back
+
+**Read `${CLAUDE_PLUGIN_ROOT}/skills/start/references/claim.md` whole before the first claim write.** It
+holds the writes, the read-back and the claim line. In outline: add the card to the board where it is
+missing, write Status = In Progress, assign `viewer.login`, then read back every write that ran — and
+every assignee the card already had. It skips a write that would change nothing, stops at the first
+board write that fails, and repairs nothing it reads back wrong.
 
 ## DESCRIBE — what the card asks, in plain English
 
@@ -150,8 +171,8 @@ Rules 1 and 2 decide wherever they apply, in that order. Otherwise rule 3 picks 
 overrides it for a card that fits one sitting.
 
 Name one route, its reason in one clause, and the command or skill that owns it. Then ask once: **start
-it** runs the route now, and it writes what that route writes; **not now** ends the run with nothing
-written. **Launch nothing without the developer's yes.**
+it** runs the route now, and it writes what that route writes; **not now** ends the run, leaving the
+claim as the report states it. **Launch nothing without the developer's yes.**
 
 - **Yes** — `LAUNCHED`.
 - **Other naming a route** — a skill or a command — launch that route instead: `LAUNCHED` with
@@ -170,14 +191,17 @@ Print the report before the route question:
 
 ```
 CARD 76 · New command: /phil:autopilot — carry a card through its repo's build path, and stop only for a blocker that needs the developer · open · Todo · unassigned
+CLAIMED: Status In Progress, assigned to pmvanev — read back
 ASKS: a command that carries a card through its repo's build path, stopping only for a blocker the developer must clear.
 DONE WHEN: 6 items — the command and its skill exist, through nw-discuss and plugin-dev; fixtures pin that a taken recommendation is recorded on the card, a developer's decision stops the run, a blocker leaves a comment and a snapshot, a declared build path beats nWave directories, and a missing credential declaration blocks.
 OPEN: 4 questions — what counts as a blocker, what marks a declared build path, where test credentials live, which recorded rules it cannot override.
 ROUTE: nw-discuss — CLAUDE.md: "Run `nw-discuss` before authoring a new feature, skill or command."
 ```
 
-The CARD line carries the title as the forge holds it, and `on no board` where the card is on none. The
-ROUTE line takes one of these shapes:
+The CARD line carries the title as the forge holds it and the state RESOLVE read, with `on no board`
+where the card is on none. The claim line takes a shape `references/claim.md` lists.
+
+The ROUTE line takes one of these shapes:
 
 ```
 ROUTE: nw-discuss — CLAUDE.md: "Run `nw-discuss` before authoring a new feature, skill or command."
@@ -195,26 +219,39 @@ Report exactly one terminal outcome, every run: `LAUNCHED` · `NOT-LAUNCHED` · 
 - **`LAUNCHED`** — the developer said yes, or named another route, and the route was launched.
 - **`NOT-LAUNCHED`** — the report and its route printed; the developer said not now, or gave no clear
   answer.
-- **`STOPPED`** — the developer stopped before the route: picked no card, gave no narrower words, or
+- **`STOPPED`** — the developer stopped before the claim: picked no card, gave no narrower words, or
   declined a card in Done or someone else's.
-- **`NO-MATCH`** — the argument named no open card in this repo, or named a pull request.
+- **`NO-MATCH`** — the argument named no open card in this repo, or named a pull request, and nothing
+  was filed.
 - **`REFUSED-CLOSED`** — the card is closed.
-- **`CANNOT-RUN`** — the run could not begin: no argument and no answer, no forge line, a GitLab forge, or
-  a failed read.
+- **`CANNOT-RUN`** — the run could not begin: no argument and no answer, no forge line, a GitLab forge, no
+  signed-in account, a failed read before CLAIM, or a filing that failed and filed nothing.
 
 Report these alongside, each only when it fires: `PICKED` (several matched and the developer picked) ·
-`ANOTHERS-CARD` (assigned to someone else) · `OPEN-IN-DONE` (open, but in Done) · `NO-DONE-WHEN` (the card
-says no way to tell when it is done) · `BUILD-PATH` (the repo's recorded build path chose the route) ·
-`ROUTE-OVERRIDDEN` (the developer launched another route).
+`FILED` (a card was filed in the developer's words) · `ANOTHERS-CARD` (assigned to someone else) ·
+`OPEN-IN-DONE` (open, but in Done) · `CLAIMED` (read back In Progress and assigned to the developer) ·
+`NO-BOARD-BLOCK` (no Status written) · `NOT-ASSIGNED` (the assign failed or did not hold) ·
+`CLAIM-FAILED` (a board write failed, or a read failed after filing, and the claim stopped) ·
+`READ-BACK-MISMATCH` (the claim did not read back as written, or could not be read) ·
+`NO-DONE-WHEN` (the card says no way to tell when it is done) · `BUILD-PATH` (the repo's recorded build
+path chose the route) · `ROUTE-OVERRIDDEN` (the developer launched another route).
 
-Report `WROTE-NOTHING` on every run. It asserts that every call this run made before the launch was a
-read: the `gh api graphql` grant accepts a mutation document, and only the invariants below forbid one.
+Report `WROTE-NOTHING` on every run that made no write call before the launch: a stop before CLAIM, or a
+claim that found every write already made. A failed write is still a write call. It asserts that every
+call the run made was a read: the `gh api graphql` grant accepts a mutation document, and only the
+invariants below forbid one.
 
 ## Invariants
 
-- **Write nothing before the launch.** No Status, assignee, label, comment, branch, worktree or file. A
-  launched route, inline included, writes under its own rules.
-- **Send only `query` documents through `gh api graphql`, never `mutation`.** No tool boundary backs this.
+- **Write only the claim before the launch**: a filed card, its board item, the Status and an assignee.
+  No label, comment, branch, worktree or file. A launched route, inline included, writes under its own
+  rules.
+- **Send only `query` documents through `gh api graphql`, never `mutation`.** Writes go through
+  `gh issue create`, `gh project item-add`, `gh project item-edit` and `gh issue edit`.
+- **Use `gh issue create` only with `-R`, `--title` and `--body ''`.**
+- **Use `gh issue edit` only with `--add-assignee`, and `gh project item-edit` only to set the Status
+  option.** Pass none of `--remove-assignee`, `--clear` or any flag the steps above do not name. No tool
+  boundary backs this.
 - **Let the developer pick among several matches.**
 - **Leave a closed card for the developer to reopen, and every assignee in place.**
 - **Launch nothing without the developer's yes.**

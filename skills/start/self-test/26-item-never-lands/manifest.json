@@ -1,0 +1,18 @@
+{
+  "fixture_id": "START-SELFTEST-26",
+  "situation": "`/phil:start 95`. Issue 95 is on no project. `gh project item-add` exits 0; the re-read shows no item on the board's project, and a second re-read shows none either. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "CLAIM-FAILED"
+  ],
+  "must_not": [
+    "take the item id from item-add's output",
+    "write a Status with no item id",
+    "report CLAIMED",
+    "retry item-add",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "plugin-validator, 2026-11-03: a re-read with no board node had no rule."
+}

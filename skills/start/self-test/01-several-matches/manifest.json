@@ -6,14 +6,14 @@
   ],
   "expected_report_lines": [
     "PICKED",
-    "BUILD-PATH",
-    "WROTE-NOTHING"
+    "CLAIMED",
+    "BUILD-PATH"
   ],
   "must_not": [
     "pick the closest match itself",
-    "describe or route any card before the developer picks",
+    "claim, describe or route any card before the developer picks",
     "drop a match from the list",
-    "write a Status or assign anyone"
+    "remove an assignee"
   ],
   "why_this_fixture_exists": "AC1.1, and issue 80's first fixture behaviour: an ambiguous argument lists candidates instead of picking one."
 }

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "START-SELFTEST-27",
+  "situation": "`/phil:start 12` in a consumer repo whose CLAUDE.md holds a forge line and no board lines. Issue 12 is open, unassigned, and Done on the one project it is on. The developer answers **go on**, then **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "OPEN-IN-DONE",
+    "NO-BOARD-BLOCK"
+  ],
+  "must_not": [
+    "promise that going on moves the card",
+    "write a Status on the card's project",
+    "probe the forge for a board"
+  ],
+  "why_this_fixture_exists": "skill-reviewer and plugin-validator, 2026-11-03: go on promised a move that CLAIM without a block never makes."
+}

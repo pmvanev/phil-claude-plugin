@@ -86,8 +86,9 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
 - Apply the standard only to words the surface composed; leave a human's words untouched. At `groom-ask`,
   decide per field by its provenance label: a suggestion or an `I rephrased your answer` rewrite is
   composed, a `you wrote` field is the human's.
-- `groom-issues` composes nothing, and `groom-fix` writes a chain's edge but never its clause; each says
-  in its own text that it applies no standard.
+- `groom-issues` composes nothing, `groom-fix` writes a chain's edge but never its clause, and
+  `/phil:start` writes a claim and the developer's own title for a filed card; each says in its own
+  text that it applies no standard on the board.
 - A fixture supplies no candidate prose and asserts no word count. Wound: slice 01's candidates turned a
   composition test into "publish the shorter string". `tests/test_issue_board_fixtures.py` enforces both,
   for `issue-board` only. `tests/test_board_snapshot_fixtures.py` enforces word ceilings on purpose,

@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-23",
+  "situation": "`/phil:start 12` in a consumer repo whose CLAUDE.md holds a forge line and no board block. The card is open and unassigned. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "NO-BOARD-BLOCK"
+  ],
+  "must_not": [
+    "probe the forge for a project or Status field",
+    "write a Status",
+    "report CLAIMED"
+  ],
+  "why_this_fixture_exists": "D8, AC3.4, and the learning hypothesis: the board block, not a probe, supplies the Status ids."
+}

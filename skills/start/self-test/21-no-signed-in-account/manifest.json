@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-21",
+  "situation": "`/phil:start 80`. `gh` is not signed in, so the first query fails.",
+  "expected_decision": [
+    "CANNOT-RUN"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "assign git's user.name",
+    "guess a login",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "D5, AC3.3, and issue 80's fourth fixture behaviour: an account the run cannot name is reported, never guessed."
+}

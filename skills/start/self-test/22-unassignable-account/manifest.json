@@ -1,0 +1,18 @@
+{
+  "fixture_id": "START-SELFTEST-22",
+  "situation": "`/phil:start 97`. The Status write succeeds. `gh issue edit --add-assignee pmvanev` exits 1 with a permission error: the account cannot be assigned in this repo. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "NOT-ASSIGNED"
+  ],
+  "must_not": [
+    "assign another login instead",
+    "retry under a different name",
+    "report CLAIM-FAILED",
+    "report CLAIMED",
+    "undo the Status write"
+  ],
+  "why_this_fixture_exists": "D5, AC3.3: an account the forge will not assign is reported, and nothing is assigned in its place."
+}

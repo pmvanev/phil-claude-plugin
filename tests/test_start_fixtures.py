@@ -16,7 +16,8 @@ FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
 TERMINAL = {"LAUNCHED", "NOT-LAUNCHED", "STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
 REPORT_LINES = {"PICKED", "ANOTHERS-CARD", "OPEN-IN-DONE", "NO-DONE-WHEN", "BUILD-PATH",
-                "ROUTE-OVERRIDDEN", "WROTE-NOTHING"}
+                "ROUTE-OVERRIDDEN", "FILED", "CLAIMED", "NO-BOARD-BLOCK", "NOT-ASSIGNED", "CLAIM-FAILED",
+                "READ-BACK-MISMATCH", "WROTE-NOTHING"}
 
 
 def test_the_skill_defines_exactly_these_outcomes():
@@ -26,6 +27,16 @@ def test_the_skill_defines_exactly_these_outcomes():
     section = text.split("## Decision outcomes", 1)[1].split("\n## ", 1)[0]
     named = set(re.findall(r"`([A-Z][A-Z-]+)`", section))
     assert named == TERMINAL | REPORT_LINES, named
+
+
+def test_slice_02_fixtures_exist():
+    """The slice 02 brief names seven fixtures; another's card answered yes is 14."""
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("14-go-on-past-another", "19-card-not-on-the-board", "20-read-back-mismatch",
+                   "21-no-signed-in-account", "22-unassignable-account", "23-no-board-block",
+                   "24-filed-on-a-yes", "26-item-never-lands", "27-done-with-no-board-block",
+                   "28-assign-silently-dropped", "29-read-fails-mid-claim", "30-blocked-card"):
+        assert wanted in names, f"slice 02 names fixture {wanted}"
 
 
 def test_slice_01_fixtures_exist():
@@ -54,16 +65,26 @@ def test_exactly_one_terminal_outcome_and_only_known_report_lines(manifest):
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
-def test_every_run_claims_it_wrote_nothing(manifest):
-    """Slice 01 writes nothing. The grant accepts a mutation document, so the run vouches for itself."""
-    assert "WROTE-NOTHING" in json.loads(manifest.read_text())["expected_report_lines"]
+def test_a_run_that_stops_before_the_claim_wrote_nothing(manifest):
+    """Only a run that reaches CLAIM writes. Before it, the grant accepts a mutation document, so the
+    run vouches for itself."""
+    d = json.loads(manifest.read_text())
+    if d["expected_decision"][0] in {"STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}:
+        assert "WROTE-NOTHING" in d["expected_report_lines"], d["fixture_id"]
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_filed_card_is_a_write(manifest):
+    d = json.loads(manifest.read_text())
+    if "FILED" in d["expected_report_lines"]:
+        assert "WROTE-NOTHING" not in d["expected_report_lines"], d["fixture_id"]
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
 def test_every_fixture_forbids_a_board_write(manifest):
-    """Slice 01 claims nothing: no Status, no assignee, whatever the run finds."""
+    """Each fixture names a Status or assignee write the run must not make."""
     must_not = " ".join(json.loads(manifest.read_text())["must_not"]).lower()
-    assert "status" in must_not and "assign" in must_not, manifest.parent.name
+    assert "status" in must_not or "assign" in must_not, manifest.parent.name
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
@@ -89,3 +110,11 @@ def test_every_outcome_has_a_fixture():
         lines |= set(d["expected_report_lines"])
     assert TERMINAL - decisions == set(), TERMINAL - decisions
     assert REPORT_LINES - lines == set(), REPORT_LINES - lines
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_claim_that_made_a_write_call_never_wrote_nothing(manifest):
+    """A failed write is still a write call (plugin-validator, 2026-11-03)."""
+    lines = set(json.loads(manifest.read_text())["expected_report_lines"])
+    if lines & {"CLAIM-FAILED", "NOT-ASSIGNED", "READ-BACK-MISMATCH", "FILED"}:
+        assert "WROTE-NOTHING" not in lines, manifest.parent.name

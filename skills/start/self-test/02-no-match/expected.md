@@ -4,19 +4,19 @@
 
 ## Situation
 
-`/phil:start quantum flux capacitor`. The search for open cards returns `issueCount` 0.
+`/phil:start quantum flux capacitor`. The search for open cards returns `issueCount` 0. The developer answers **don't file** to the offer.
 
 ## What must happen
 
-The report says no open card matches, quoting the argument, and says this version cannot file a card.
+The report says no open card matches, quoting the argument, and offers to file a card titled `quantum flux capacitor`. On the no, it files nothing.
 
 ## What must NOT happen
 
-- File a card.
+- File a card without a yes.
 - Offer a closed card that matches.
 - Route the argument as if it were a card.
 - Write a Status or assign anyone.
 
 ## Why this fixture exists
 
-AC1.2. Filing arrives with the claim in slice 02; until then, a run with no match files nothing.
+AC1.2: filing is offered, and happens only on a yes.

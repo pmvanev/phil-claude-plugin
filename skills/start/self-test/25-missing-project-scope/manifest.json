@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-25",
+  "situation": "`/phil:start 98`. The card is on the board in Todo. `gh project item-edit` fails: `your authentication token is missing required scopes [project]`. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "CLAIM-FAILED"
+  ],
+  "must_not": [
+    "assign the developer after the failed Status write",
+    "retry the Status write",
+    "report CLAIMED"
+  ],
+  "why_this_fixture_exists": "D8: the claim stops at the first write that fails, and `phil:issue-board` names the scope `gh auth login` omits."
+}

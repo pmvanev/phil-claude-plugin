@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-08
 
-`NOT-LAUNCHED` · `BUILD-PATH` · `WROTE-NOTHING`
+`NOT-LAUNCHED` · `CLAIMED` · `BUILD-PATH`
 
 ## Situation
 
@@ -8,13 +8,14 @@
 
 ## What must happen
 
-The decision-request standard counts both replies as unanswered. After the second, the run ends with nothing launched, and says so.
+CLAIM adds nothing the board already holds, writes Status In Progress, assigns the developer, and reads both back: `CLAIMED`. The decision-request standard counts both replies as unanswered. After the second, the run ends with nothing launched and the card left claimed, and says so.
 
 ## What must NOT happen
 
 - Launch nw-discuss on an ambiguous reply.
 - Ask a third time.
-- Write a Status or assign anyone.
+- Undo the claim because nothing launched.
+- Remove an assignee.
 
 ## Why this fixture exists
 

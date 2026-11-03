@@ -1,17 +1,18 @@
 {
   "fixture_id": "START-SELFTEST-18",
-  "situation": "`/phil:start 80` on this repo, after DISCUSS merged. The card links `docs/feature/start-work/`, which holds `feature-delta.md`. CLAUDE.md's build path reads `Run nw-discuss before authoring a new feature, skill or command`, then `Read plugin-dev:skill-development, command-development, agent-development or plugin-structure before writing the file`. The developer answers **not now**.",
+  "situation": "`/phil:start 80` on this repo, after DISCUSS merged. The card is In Progress and assigned to `pmvanev`, and links `docs/feature/start-work/`, which holds `feature-delta.md`. CLAUDE.md's build path reads `Run nw-discuss before authoring a new feature, skill or command`, then `Read plugin-dev:skill-development, command-development, agent-development or plugin-structure before writing the file`. The developer answers **not now**.",
   "expected_decision": [
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
+    "CLAIMED",
     "BUILD-PATH",
     "WROTE-NOTHING"
   ],
   "must_not": [
     "recommend nw-discuss again",
-    "fall through to phil:edd while the build path names a next step",
-    "write a Status or assign anyone"
+    "write a Status the card already holds",
+    "assign the developer a second time"
   ],
-  "why_this_fixture_exists": "skill-reviewer, 2026-11-03: the build path sent card 80 back through a wave that had run."
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-03: the build path sent card 80 back through a wave that had run. Run live 2026-11-03, it also pins a claim that changes nothing."
 }

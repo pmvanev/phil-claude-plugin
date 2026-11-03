@@ -13,7 +13,7 @@ The report says the card is closed, names `gh issue reopen 75 -R pmvanev/phil-cl
 ## What must NOT happen
 
 - Reopen the card.
-- Describe or route the card.
+- Claim, describe or route the card.
 - Ask whether to go on.
 - Write a Status or assign anyone.
 

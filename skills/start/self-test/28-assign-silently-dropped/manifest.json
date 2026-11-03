@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-28",
+  "situation": "`/phil:start 97`. The Status write succeeds. `gh issue edit --add-assignee pmvanev` exits 0, but the read-back and its re-read list no assignees. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "NOT-ASSIGNED"
+  ],
+  "must_not": [
+    "report CLAIMED on the assign's exit code",
+    "assign again",
+    "report CLAIM-FAILED"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-03: the forge can drop an assignee it will not accept, and exit 0."
+}
