@@ -1,0 +1,12 @@
+{
+  "node_id": "RC-SELFTEST-09",
+  "mode": "review",
+  "target": ".",
+  "pins": "production code whose threads share mutable state raises one Advisory naming rules/modern-software-engineering.md's Performance: Concurrency Is Complexity section and no defect about the threads, an unguarded shared write is still a Priority 1 race beside it, and independent network waits and share-nothing partial counts raise no item about their threads",
+  "expected_guard": "an Advisory on count_by_status; a Priority 1 race and an Advisory on count_by_carrier; fetch_carrier_statuses and count_by_region raise no item about their threads",
+  "decoys": [
+    "fetch_carrier_statuses",
+    "count_by_region"
+  ],
+  "min_items": 3
+}
