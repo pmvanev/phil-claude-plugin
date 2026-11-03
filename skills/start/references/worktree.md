@@ -81,7 +81,7 @@ overwrite each other's work. A no leaves the session where it is.
 first with `ExitWorktree` and `action: "keep"`. That tool acts only on a worktree this session entered
 with `EnterWorktree`; afterwards read `git rev-parse --show-toplevel`, and where it is not the main
 checkout, cut nothing and report `WORKTREE-FAILED`. Use `ExitWorktree` only with `keep`: a worktree
-holds work, and `/phil:done` lists worktrees for the developer to remove.
+holds work, and removing one is `/phil:done`'s call once the card is finished.
 
 ## When the tool refuses
 

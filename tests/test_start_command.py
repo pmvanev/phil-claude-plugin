@@ -470,7 +470,8 @@ def test_a_session_in_another_worktree_moves_only_on_a_yes():
 
 
 def test_a_worktree_is_never_removed():
-    """Out of scope, and `/phil:done` lists worktrees and never removes one."""
+    """Out of scope: removing a worktree is `/phil:done`'s call, which since 1.25.0 removes one its own
+    session made once it reads clean at the merged tip."""
     wt = _worktree()
     assert "`ExitWorktree` only with `keep`" in wt
     assert "ExitWorktree` only with `keep`" in _section("Invariants")

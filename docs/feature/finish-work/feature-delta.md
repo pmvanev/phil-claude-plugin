@@ -368,4 +368,37 @@ DISCOVER and DIVERGE never ran; the changed assumptions are the session-handoff 
     flags come from `glab --help`. The note and the block refresh pass their body through
     `$(cat <<'EOF' …)`, and the command grants no `cat`, so either may stop for a permission prompt
     after the yes. Dogfood on the next GitLab finish.
+- **Slice 05: a worktree this session made is removed (the developer's answer, 2026-11-03).** This
+  partly reverses "worktrees are listed, never removed" (2026-11-02). The first run without a card,
+  on 1.22.0, finished clean and left this session's own worktree and its branch standing, and the
+  developer asked why. The slice 04 request had said "clean up sessions branches/worktrees", and the
+  run had marked that ask done on its branch half alone.
+  - **`scripts/worktree-state.py` reads the adversarial run's losses as `HIDDEN`**: a repository nested
+    in an ignored folder, an `--assume-unchanged` or `--skip-worktree` edit, a submodule, and a commit
+    only the worktree's own history holds. Each has a test that builds the case in a scratch
+    repository. Ignored caches alone still read `CLEAN`.
+  - **A worktree goes only where all three hold**: the conversation shows this session creating it,
+    `worktree-state.py` reads it `CLEAN`, and its `HEAD` is the merged tip. Every other worktree is
+    still listed with its commands. Another worktree goes through `git worktree remove`, never with
+    `--force`. The one the session runs in goes last, through Claude Code's `ExitWorktree`, because git
+    cannot remove a session's working directory.
+  - **Run live, 2026-11-03:** `ExitWorktree` refused this session's merged worktree over "1 commit",
+    PR 93's head, already in main, because it compares against the branch the session started from.
+    The skill passes `discard_changes: true` only where the worktree read `CLEAN` at the merged tip.
+  - A session worktree that holds the snapshot here goes only on the third answer, because removing
+    the worktree deletes the snapshot.
+  - **Reviews (2026-11-03).** The plugin validator found that a commit made in the worktree after the
+    plan still read `CLEAN`, because its branch reaches it, and `discard_changes: true` would delete
+    it. `worktree-state.py --expect-head <sha>` now reads `MOVED` for it, and both removal steps
+    re-read with the merged tip just before acting. The skill's list of allowed git verbs also gained
+    `worktree remove`. The skill reviewer found more:
+    - `ls-files` without `-z` quoted a non-ASCII folder name and missed the repository nested inside.
+    - `--all` counted the worktree's own `refs/worktree/*`, which the removal deletes.
+    - A snapshot was retired before a removal that could still be refused.
+    - An ignored `.env` went with the worktree unannounced.
+    - A `HIDDEN` worktree was listed with the very command that deletes its findings.
+    - A worktree another session holds, recreated at the same path, could be removed.
+
+    Each is fixed with a test or fixture. A worktree `git worktree list` marks `locked` is held, except
+    the one Claude Code locks for this session.
 - **Upstream changes:** see Changed Assumptions.
