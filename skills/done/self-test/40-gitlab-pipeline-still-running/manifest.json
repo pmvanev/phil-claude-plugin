@@ -1,0 +1,20 @@
+{
+  "fixture_id": "DONE-SELFTEST-40",
+  "situation": "GitLab, as fixture 39. !193 merged into main, every ask is done, and main's head `071dc6b8` has a newest pipeline of `running`; earlier pipelines on main exist.",
+  "writes": [],
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "NOT-LANDED",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "only `success` is green; a running head pipeline holds the close",
+  "must_not": [
+    "call main green",
+    "report `no pipeline`",
+    "post a note or close the card",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "GitLab names a pipeline's state with its own words; a run that maps only GitHub's `SUCCESS` and `FAILURE` would read `running` as neither, or as no pipeline."
+}

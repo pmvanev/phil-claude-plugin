@@ -211,7 +211,7 @@ Decision enabled: I approve the plan once, and choose separately what happens to
 ## Wave: DISCUSS / [REF] Out of scope
 
 - Merging, opening a pull request, or choosing between them (D2).
-- GitLab. `phil:issue-board` covers it, but v1's fixtures and dogfood are GitHub only.
+- ~~GitLab.~~ Brought in by slice 04 (2026-11-03); see *Decisions summary*.
 - Retiring a snapshot on `/phil:resume` — the journey's unimplemented "marked consumed" step. This
   feature retires it at finish instead; resume is unchanged.
 - Issue 76's autopilot, which will call `/phil:done`; its open questions stay on its card.
@@ -338,4 +338,34 @@ DISCOVER and DIVERGE never ran; the changed assumptions are the session-handoff 
   leased on the tip shown. It offers only a branch that still descends from the pull request's head and
   whose lost commits the developer wrote; past 50 commits it offers nothing. Worktrees stay listed,
   never removed, with a dirty one's changes shown.
+- **Slice 04: GitLab, and a run with no card (the developer's request, 2026-11-03).** `/phil:done 21`
+  on modive, a GitLab repo, stopped at the forge check; the developer had closed the card, deleted the
+  branches and removed the worktrees by hand, and only the stale snapshot remained. The developer
+  asked for GitLab support, and for a run with no card that still checks every session task and
+  clears the session's merged branches.
+  - **GitLab runs the same steps through `glab`**, in `skills/done/references/gitlab.md`, and every
+    rule stands. Every read ran against modive on 2026-11-03. The closing-link and search reads
+    named the same 79 merge requests that `related_merge_requests` returns. `glab api` reads take no
+    field, because a field turns the GET into a POST. A board column is a `status::` label, and the
+    closed list is Done, so the Status write removes the card's status labels. Ownership compares
+    commit emails, because GitLab's compare names no account.
+  - **No argument runs without a card**, in `skills/done/references/no-card.md`. It closes no card,
+    and never infers one. The work is the pull requests and branches the conversation shows this
+    session opening, pushing or merging, and D8 carries over: a branch the conversation never names is
+    no candidate. Every session ask counts. The plan holds only CLEAR's lines. It asks once, asks
+    *retire it or keep it* where only the snapshot here remains, and asks nothing where nothing
+    remains. The new terminal outcome is `FINISHED`.
+  - **Reviews (2026-11-03).** The plugin validator found that a bare `-R <group/project>` sends a
+    `glab issue` write to gitlab.com outside a checkout of the host, so every `glab issue` call now
+    takes the full URL. It also found that `-X` went unbanned, and that the GitLab label default
+    contradicted the skill's skip rule. The skill reviewer found that a reused branch name matched an
+    old merged pull request, so a head-branch hit now counts only at the branch's tip (fixture 46). It
+    also found that a no-card run needed its own query, and that the GitLab read-back could miss the
+    note behind system notes. Its claim that GitLab's search misses one- and two-digit card numbers
+    failed live: for cards 1, 7, 9, 18, 21 and 38, the search returned what a filter over every merge
+    request returned. That run also showed `glab api --paginate` printing one array per page.
+  - **Not yet run:** the three GitLab writes (note, unlabel, close), and a run without a card. Their
+    flags come from `glab --help`. The note and the block refresh pass their body through
+    `$(cat <<'EOF' …)`, and the command grants no `cat`, so either may stop for a permission prompt
+    after the yes. Dogfood on the next GitLab finish.
 - **Upstream changes:** see Changed Assumptions.

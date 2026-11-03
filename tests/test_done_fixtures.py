@@ -17,7 +17,7 @@ import pytest
 SKILL_DIR = Path(__file__).resolve().parent.parent / "skills" / "done"
 FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
-TERMINAL = {"NOT-READY", "STOPPED", "CLOSED", "CLOSE-FAILED"}
+TERMINAL = {"NOT-READY", "STOPPED", "CLOSED", "CLOSE-FAILED", "FINISHED"}
 REPORT_LINES = {"OPEN-ASKS", "NOT-LANDED", "NO-PIPELINE", "ASK-DROPPED", "READ-BACK-MISMATCH",
                 "BLOCK-REFRESHED", "CLEARED", "LEFT", "WROTE-NOTHING"}
 
@@ -71,6 +71,8 @@ def test_a_run_past_the_report_states_the_developers_answers(manifest):
     d = json.loads(manifest.read_text())
     if d["expected_decision"][0] in ("STOPPED", "CLOSED", "CLOSE-FAILED"):
         assert d.get("developer_answers"), d["fixture_id"]
+    if d["expected_decision"][0] == "FINISHED" and d["writes"]:
+        assert d.get("developer_answers"), f"{d['fixture_id']}: a write runs only on an answer"
 
 
 def test_slice_02_fixtures_exist():
@@ -139,3 +141,40 @@ def test_no_fixture_expects_a_force(manifest):
             f"{d['fixture_id']}: `-D` runs only on the developer's own answer for that branch"
     assert not any("remove the worktree" in w for w in d.get("writes", [])), \
         f"{d['fixture_id']}: the developer removes worktrees, never the run"
+
+
+def test_slice_04_fixtures_exist():
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("39-gitlab-card-closes", "40-gitlab-pipeline-still-running",
+                   "41-gitlab-fork-merge-request-held", "42-no-card-clean-finish",
+                   "43-no-card-open-session-task", "44-no-card-retire-the-snapshot-only",
+                   "45-no-card-branch-the-session-never-named", "46-no-card-reused-branch-name"):
+        assert wanted in names, f"slice 04 brief names fixture {wanted}"
+
+
+CARD_WRITES = ("comment", "note", "status", "close")
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_run_without_a_card_writes_nothing_to_a_card(manifest):
+    """Slice 04: with no argument the run closes no card, whatever the session mentioned."""
+    d = json.loads(manifest.read_text())
+    if not d.get("no_card"):
+        return
+    assert d["expected_decision"][0] in ("FINISHED", "NOT-READY", "STOPPED"), d["fixture_id"]
+    touched = [w for w in d["writes"] if any(k in w.lower() for k in CARD_WRITES)]
+    assert not touched, f"{d['fixture_id']}: {touched}"
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_finished_belongs_to_a_run_without_a_card(manifest):
+    d = json.loads(manifest.read_text())
+    assert (d["expected_decision"][0] == "FINISHED") <= bool(d.get("no_card")), d["fixture_id"]
+    if d.get("no_card"):
+        assert d["expected_decision"][0] not in ("CLOSED", "CLOSE-FAILED"), d["fixture_id"]
+
+
+def test_a_no_card_finish_holding_only_the_snapshot_asks_once():
+    d = json.loads((SKILL_DIR / "self-test" / "44-no-card-retire-the-snapshot-only" /
+                    "manifest.json").read_text())
+    assert d["questions_asked"] == 1, "one question, about the snapshot alone"

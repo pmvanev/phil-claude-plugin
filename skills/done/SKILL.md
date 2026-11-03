@@ -2,10 +2,12 @@
 name: done
 description: >-
   This skill should be used when the user asks "is this card done", "can I close this issue", "close
-  out card N", "mark this card done", "did everything I asked for land", or runs /phil:done. It lists
+  out card N", "mark this card done", "did everything I asked for land", "wrap up this session",
+  "clean up my merged branches", or runs /phil:done. It lists
   every ask with verified evidence, checks every pull request merged into a green default branch, then,
   on one yes, comments, sets Status to Done, closes the issue, retires its snapshots, deletes its
-  branches and lists its worktrees. GitHub only; never merges or forces. For unfinished work, use
+  branches and lists its worktrees. With no card, it checks the session's own asks and pull requests
+  and clears what they left. GitHub or GitLab; never merges or forces. For unfinished work, use
   /phil:handoff.
 ---
 
@@ -15,20 +17,22 @@ description: >-
 putting one down **finished**: did every ask land, and did the work reach the default branch? Then, on
 the developer's one yes, it closes the card comment-first, reads it back, and clears what the work left
 behind: it retires the handoff snapshots, deletes the branches, and lists the worktrees for the developer
-to remove.
+to remove. With no card, it asks the same of the session's own work and closes nothing.
 
 ## Inputs
 
-- **The card** — the issue number from the argument. With none, ask for it; never infer it from the
-  branch name.
+- **The card** — the issue number from the argument. With none, run without a card, and never infer
+  one from the branch. Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/no-card.md` whole before FIND:
+  it checks the session's own asks and pull requests and closes no card.
 - **The repo** — the forge line in the working tree's `CLAUDE.md`; `git rev-parse --show-toplevel` finds
   the root. Pass `-R <owner/repo>` on every `gh issue` call, and the owner and repo as variables to every
   `gh api graphql` query, which takes no `-R`: an inferred remote reads the wrong repo's issues
-  successfully (`phil:issue-board`). With no forge line, stop and name `/phil:board-setup`. On a GitLab
-  forge line, stop and say this skill covers GitHub only.
+  successfully (`phil:issue-board`). With no forge line, stop and name `/phil:board-setup`.
+- **GitLab** — Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/gitlab.md` whole before FIND where
+  the forge line names GitLab. It gives each call below its `glab` form; every rule here stands.
 - **The board constants** — the project id, the `Status` field id and the `Done` option id, from the
-  same `CLAUDE.md` block. Read them; never probe for them. With none, skip the Status write, report the
-  skip, and name `/phil:board-setup`.
+  same `CLAUDE.md` block; on GitLab, the status label family. Read them; never probe for them. With
+  none, skip the Status write, report the skip, and name `/phil:board-setup`.
 
 Run `git` only for `rev-parse`, the `log` reads of the block refresh and of FORCE, and CLEAR's
 `worktree list`, `remote get-url`, `merge-base --is-ancestor`, `branch -d`, `branch -D` and
@@ -250,7 +254,8 @@ CLOSE FAILED: comment posted; Status write failed: <error> — nothing else ran
 
 ## Decision outcomes
 
-Report exactly one terminal outcome, every run: `NOT-READY` · `STOPPED` · `CLOSED` · `CLOSE-FAILED`.
+Report exactly one terminal outcome, every run: `NOT-READY` · `STOPPED` · `CLOSED` · `CLOSE-FAILED` ·
+`FINISHED`.
 
 - **`NOT-READY`** — an ask stayed open or the work had not landed. Name every cause; never only the
   first.
@@ -258,6 +263,9 @@ Report exactly one terminal outcome, every run: `NOT-READY` · `STOPPED` · `CLO
 - **`CLOSED`** — the comment posted, the Status write ran or was reported skipped, the issue reads
   closed — by this run or a workflow — and the card was read back.
 - **`CLOSE-FAILED`** — a write failed and the run stopped there.
+- **`FINISHED`** — a run without a card: every session ask done or dropped, the session's pull requests
+  landed or none named, and the plan ran, held nothing to run, or kept the snapshot at the developer's
+  answer.
 
 Report these alongside, each only when it fires: `OPEN-ASKS` (any ask open after ACCOUNT) ·
 `NOT-LANDED` (a pull request open, missing or merged elsewhere, or a head rollup of anything but success
@@ -284,6 +292,9 @@ read: the grant accepts writes, and only the invariants below forbid them before
   `gh issue comment`, `gh project item-edit`, `gh issue close` and, for the refresh alone,
   `gh issue edit --body-file`. Use none of `gh issue comment --edit-last` or `--delete-last`,
   `gh project item-edit --clear`, or any other `gh issue edit` flag. No tool boundary backs this.
+- **On GitLab, send `glab api` only GETs.** Writes go through `glab issue note`, `glab issue close` and
+  `glab issue update` with `--unlabel` for the status labels or, for the refresh alone,
+  `--description`. Pipe `jq` only from `glab api`.
 - **Leave every merge and every new pull request to the developer.**
 - **Count only verified evidence.** An unverified ask is open.
 - **Find the work by the forge's link or the card's number in a title or body, never by a branch name.**

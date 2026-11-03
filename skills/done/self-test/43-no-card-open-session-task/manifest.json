@@ -1,0 +1,23 @@
+{
+  "fixture_id": "DONE-SELFTEST-43",
+  "no_card": true,
+  "situation": "No argument. The session took on three tasks; PR 96 merged into a green main and carries two of them. The third, \"update the changelog\", has no evidence: no pull request carries it, and the changelog at main's head lacks the entry.",
+  "developer_answers": [
+    "do it"
+  ],
+  "writes": [],
+  "expected_decision": [
+    "NOT-READY"
+  ],
+  "expected_report_lines": [
+    "OPEN-ASKS",
+    "WROTE-NOTHING"
+  ],
+  "expected_guard": "a session task with no verified evidence holds the finish as an open ask holds a close",
+  "must_not": [
+    "mark the task done because the session said it would do it",
+    "delete PR 96's branch",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "The developer asked that a run with no card \"still check that all session tasks are complete\"."
+}
