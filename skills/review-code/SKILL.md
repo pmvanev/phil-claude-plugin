@@ -22,8 +22,19 @@ Use `${CLAUDE_PLUGIN_ROOT}/rules/refactoring-catalog.md` as your dictionary of n
 `${CLAUDE_PLUGIN_ROOT}/rules/best-simple-system-for-now.md` and
 `${CLAUDE_PLUGIN_ROOT}/rules/modern-software-engineering.md`. Both are written to complement the four
 above rather than restate them — BSSN owns the four-word breakdown and the economic case, Farley owns
-the empirical spine and the two measures. Read them when a finding needs that vocabulary, not on every
-run.
+the empirical spine, the two measures and concurrency as complexity. Read them when a finding needs that
+vocabulary, not on every run.
+
+**Where production code under review runs threads that share mutable state**, read the Farley rule's
+*Performance: Concurrency Is Complexity* section, then:
+
+- File one Advisory item per site where the threads meet that state, as **Security** defines one, and
+  name that section in its Rationale. A file shows the thread but never the measurement that justified
+  it, so the item asks the author for the measurement.
+- File a write the threads race on with no guard as a Priority 1 race, beside the Advisory.
+- Treat those two as the only items the threads raise.
+- Leave out of the backlog threads that overlap independent network waits, and threads that share
+  nothing until one merge at the end.
 
 **Where a finding is about discipline rather than about code**, also read
 `${CLAUDE_PLUGIN_ROOT}/rules/clean-craftsmanship.md`. It owns Martin's standards and ethics, not his
@@ -89,6 +100,7 @@ For each file, check against the coding guide. Look for these categories of viol
 - Missing error handling at system boundaries
 - Null/undefined hazards
 - Resource leaks (missing cleanup, unclosed connections)
+- Races: threads that write shared state with no lock or atomic guarding the write
 - Security defects — see **Security** below
 
 #### Security
@@ -249,7 +261,7 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 - **Smell**: {smell name from catalog; for a security item, its CWE id, e.g. `CWE-78`; for a load-time item, its `LWS-n` id; `Advisory` for a question}
 - **Refactoring**: {named refactoring from catalog; for a security or load-time item, the row's Preferred form verbatim, then ` — here: ` and this code's one change}
 - **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route; a Priority 7 item routes to `/phil:refactor` in production code and `report only` in a test file}
-- **Rationale**: {why this matters — which coding standard is violated; for a security or load-time item, the rule (`security.md` or `lambda-web-app-speed.md`) and the row's Cite column}
+- **Rationale**: {why this matters — which coding standard is violated; for a security or load-time item, the rule (`security.md` or `lambda-web-app-speed.md`) and the row's Cite column; for a concurrency Advisory, `modern-software-engineering.md` and its *Performance: Concurrency Is Complexity* section}
 - **Status**: pending
 ```
 

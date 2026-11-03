@@ -7,7 +7,7 @@ paths:
 
 Guidelines extracted from Dave Farley's *Modern Software Engineering: Doing What Works to Build Better Software Faster*.
 
-This rule owns Farley's **spine** — engineering as an empirical discipline, the two problems all software work reduces to, and the two measures that tell you whether you are improving. The details live in the rules that already own them: empirical design in `architecture.md`, the four testability properties in `testing.md`, pipeline and release mechanics in `continuous-delivery.md`, evolutionary coding practices in `coding.md`. Complement those — do not restate them.
+This rule owns Farley's **spine** — engineering as an empirical discipline, the two problems all software work reduces to, the two measures that tell you whether you are improving, and — from his interviews rather than the book — his claim that concurrency is complexity and clear code is usually fast code. The details live in the rules that already own them: empirical design in `architecture.md`, the four testability properties in `testing.md`, pipeline and release mechanics in `continuous-delivery.md`, evolutionary coding practices in `coding.md`, test-suite speed in `test-architecture.md`, a Lambda web app's load time in `lambda-web-app-speed.md`. Complement those — do not restate them.
 
 ---
 
@@ -115,6 +115,26 @@ Small steps are how every idea above is actually implemented.
 
 ---
 
+### Performance: Concurrency Is Complexity
+
+Farley treats speed as a product of good design, not a trade against it. The claims below come from his interviews and his LMAX blog post, not from the book's text. Its table of contents shows the book taking up the subject under Empiricism (ch. 7), Cohesion (ch. 10) and Managing Coupling (ch. 13); cite none of those chapters for a claim here.
+
+This section governs threads that share mutable state in production code. Threads that share nothing until one merge at the end, and threads that overlap independent network waits, need no measurement and raise no item; in a Lambda web app, `lambda-web-app-speed.md`'s LWS-3 flags network waits left serial. A slow test suite belongs to `test-architecture.md`.
+
+- **Concurrency and coupling are the hardest problems in software.** Threads that share state bring both. Add them only when a measurement shows that nothing simpler meets the need.
+- **Shared state costs more than threads save.** In Farley's example, the cheapest safe way for several threads to update one counter ran about 300 times slower than one thread doing all the work. Split work across threads only where the parts share nothing until the end.
+- **Keep shared state out of the business logic.** LMAX's exchange gave each core one job — network intake, journaling to disk, business logic — shared nothing between them, and fed data to a single-threaded business core. The domain code stayed sequential and testable, and coordination lived at the edges, where ports and adapters (`architecture.md`) put it.
+- **Clear code is usually the fast code.** LMAX found that simple code leaves waste fewer places to hide and that compilers optimize it better — the reason `coding.md` lists premature optimization as a smell. Write clear code first.
+- **Know the machine at the hot path.** Farley defines high performance as the most effect for the fewest instructions. When a measurement names a hot path, fix it with knowledge of the hardware — allocation, cache lines, false sharing — before adding threads. Martin Thompson, Farley's colleague at LMAX, calls that knowledge mechanical sympathy.
+
+**A file shows the thread but never the measurement.** In a review, ask the author for the measurement; never flag the thread itself as a defect. A write the threads race on with no guard is a defect all the same.
+
+The throughput in *Measure Two Things* measures delivery, not runtime; never read it as requests per second.
+
+*Sources: Tech Lead Journal episode 100 (Farley, on the book); Thoughtworks Technology Podcast, "Software engineering with Dave Farley"; Farley's blog post on the LMAX Disruptor; the book's table of contents.*
+
+---
+
 ### Engineering Checklist
 
 - [ ] Does this change make the code easier or harder to test?
@@ -124,6 +144,7 @@ Small steps are how every idea above is actually implemented.
 - [ ] Is this decision grounded in an observation, or in a prediction?
 - [ ] Which of the two problems does this practice serve — learning, or complexity?
 - [ ] If this is an experiment, which variables did I control?
+- [ ] If this adds threads that share state, which measurement showed that nothing simpler would do, and does the business logic stay free of that state?
 
 ---
 
@@ -138,6 +159,7 @@ Small steps are how every idea above is actually implemented.
 | **Big-batch delivery** — long-lived branches, large releases, staged integration | Smaller batches, integrated continuously |
 | **Argument over evidence** — deciding by seniority or confidence | Form a falsifiable claim and test it |
 | **Craft as an excuse** — treating design quality as taste beyond measurement | Route it through testability and deployability, which are measurable |
+| **Threads as a default speed-up** — parallelizing production code before measuring | Measure first; keep shared mutable state out of the business logic, and push coordination to the edges |
 
 ---
 
