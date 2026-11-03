@@ -106,6 +106,10 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
 - Read `plugin-dev:skill-development`, `command-development`, `agent-development` or `plugin-structure`
   before writing the file. Take the schema from plugin-dev, not from a sibling file — a copied shape
   carries the sibling's defects unchecked.
+- Support GitHub and GitLab in every skill or command that drives issues, boards, branches, worktrees,
+  commits, pull requests or merge requests; take both forges' mechanics from `phil:issue-board`. A
+  surface that covers only one forge says so in its own text, stops on the other with a named outcome, and
+  has a card for the missing forge, as `/phil:start` does (decided 2026-11-03). No check enforces this.
 - Once the content is settled, and before calling a task or issue done, run these passes unasked over
   every file it touched:
   - `/phil:harden-instructions` over a skill, its references, a command, an agent or a hook prompt; it
