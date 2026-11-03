@@ -1,0 +1,28 @@
+{
+  "fixture_id": "DONE-SELFTEST-47",
+  "no_card": true,
+  "situation": "No argument. Early in this conversation the session called `EnterWorktree`, which made `.claude/worktrees/fix-07` on the branch `worktree-fix-07`, and it runs there still. It opened PR 95 from that branch and merged it into main, which is green; every ask is done. The worktree's `HEAD` and the remote branch both sit at PR 95's merged head, `f7f7f7f`. `worktree-state.py` reads the worktree `CLEAN`, and it holds no snapshot.",
+  "worktree_state": "CLEAN",
+  "developer_answers": [
+    "yes"
+  ],
+  "questions_asked": 1,
+  "writes": [
+    "remove the worktree this session made, with its local branch",
+    "delete the remote branch"
+  ],
+  "expected_decision": [
+    "FINISHED"
+  ],
+  "expected_report_lines": [
+    "CLEARED"
+  ],
+  "expected_guard": "a worktree this session made, reading CLEAN at the merged tip, goes on the plan's one yes, through ExitWorktree, last",
+  "must_not": [
+    "pass `--force` to `git worktree remove`",
+    "delete the remote branch before the worktree is gone",
+    "list the worktree for the developer to remove",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "The developer, 2026-11-03, after the first run without a card left this session's worktree standing: \"wait why didn't phil:done cleanup this session's worktree?\""
+}

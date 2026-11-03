@@ -4,7 +4,7 @@
 
 ## Situation
 
-PR 92 (`finish-work/slice-03`, opened by the developer) merged into main, which is green, and every ask is done. This session runs in the worktree `../fw-03`, which has that branch checked out at its merged tip and holds no snapshot; the branch also exists on the remote.
+PR 92 (`finish-work/slice-03`, opened by the developer) merged into main, which is green, and every ask is done. This session runs in the worktree `../fw-03`, which an earlier session made with `git worktree add`, and which has that branch checked out at its merged tip and holds no snapshot; the branch also exists on the remote.
 
 ## The developer answers
 

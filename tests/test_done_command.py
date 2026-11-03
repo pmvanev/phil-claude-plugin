@@ -313,10 +313,11 @@ def test_the_cleanup_grants_are_narrow():
     tools = {t.strip() for t in front["allowed-tools"].split(",")}
     for grant in ("Bash(git worktree list:*)", "Bash(git branch -d:*)", "Bash(git branch -D:*)",
                   "Bash(git merge-base:*)", "Bash(git push --delete:*)",
-                  "Bash(python3:*)", "Bash(git remote get-url:*)"):
+                  "Bash(python3:*)", "Bash(git remote get-url:*)", "Bash(git worktree remove:*)",
+                  "ExitWorktree"):
         assert grant in tools, grant
     for broad in ("Bash(rm:*)", "Bash(git branch:*)", "Bash(git -C:*)", "Bash(git push:*)", "Bash(git:*)",
-                  "Bash(git worktree remove:*)"):
+                  "Bash(git worktree:*)"):
         assert broad not in tools, broad
 
 
@@ -333,15 +334,30 @@ def test_nothing_is_forced_but_a_branch_the_developer_chose():
     assert "report the refusal and leave the item" in clear
 
 
-def test_worktrees_are_listed_and_never_removed():
-    """The developer's answer, 2026-11-02, after an adversarial run showed a clean-looking worktree can
-    hold a nested repository, hidden edits, submodules or commits only its own history remembers."""
+def test_only_a_worktree_this_session_made_is_removed():
+    """The developer's answer, 2026-11-03, reversing 2026-11-02's "never remove a worktree" for one case:
+    a worktree this session made, reading `CLEAN`, at the merged tip. `worktree-state.py` now reads the
+    adversarial run's losses as `HIDDEN`; every other worktree is still listed with its commands."""
     clear = _clear()
-    assert "Never remove a worktree" in clear
+    assert "Never remove a worktree" not in clear
+    assert "Remove a worktree only where all three hold" in clear
+    assert "the conversation shows this session creating it" in clear
+    assert "`worktree-state.py` reads it `CLEAN`" in clear
+    assert "Never pass `--force` to `git worktree remove`" in clear
+    assert "List every other worktree with the commands to remove it" in clear
     assert "session-exchanges.py retire" in clear and "session-exchanges.py head" in clear
-    assert clear.index("1. **Snapshots**") < clear.index("2. **Local branches**") \
-        < clear.index("3. **Remote branches**")
-    assert "the developer runs them" in clear
+    assert clear.index("1. **Snapshots**") < clear.index("2. **Worktrees this session made**") \
+        < clear.index("3. **Local branches**") < clear.index("4. **Remote branches**") \
+        < clear.index("6. **The worktree this session runs in**")
+
+
+def test_the_worktree_the_session_runs_in_leaves_through_claude_codes_tool():
+    """Run live 2026-11-03: `ExitWorktree` refused "1 commit" that was PR 93's merged head, because it
+    compares against the branch the session started from, not the default branch."""
+    clear = _clear()
+    assert "`ExitWorktree` with `action: \"remove\"`" in clear
+    assert "Pass `discard_changes: true` only where" in clear
+    assert "remove it only on the third answer" in clear, "removing it deletes the snapshot inside"
 
 
 def test_branches_come_from_the_cards_pull_requests():
@@ -400,7 +416,7 @@ def test_a_dirty_worktree_is_held_before_the_plan():
     """skill-reviewer, 2026-11-02: the snapshot was retired before git refused the worktree."""
     clear = _clear()
     assert "scripts/worktree-state.py" in clear
-    assert "In a worktree that reads `DIRTY` or `UNREADABLE`, keep the snapshot" in clear
+    assert "In a worktree that reads `DIRTY`, `HIDDEN` or `UNREADABLE`, keep the snapshot" in clear
 
 
 def test_the_remote_is_the_forges():
@@ -657,3 +673,30 @@ def test_review_findings_on_slice_04_stay_fixed():
     assert "the snapshot is `LEFT`" in nc
     assert "viewer{ login }" in nc, "FIND's query needs `$n`; a run with no card has none"
     assert "-X" in _parts(COMMAND)[1]
+
+
+def test_slice_05_validator_findings_stay_fixed():
+    """plugin-validator, 2026-11-03."""
+    clear, skill, command = _clear(), _parts(SKILL)[1], _parts(COMMAND)[1]
+    assert "`worktree remove`" in skill.split("Run `git` only for", 1)[1].split(".", 1)[0], \
+        "SKILL.md's verb list refused the removal its own CLEAR orders"
+    assert clear.count("worktree-state.py --expect-head <headRefOid>") >= 2, \
+        "a commit made after the plan read CLEAN, and discard_changes deleted it"
+    assert "Pass `discard_changes: true` to `ExitWorktree` only" in command
+    assert "only for a worktree `EnterWorktree` made" in command
+    assert "only on the third answer" in command
+
+
+def test_slice_05_skill_reviewer_findings_stay_fixed():
+    """skill-reviewer, 2026-11-03."""
+    clear = _clear()
+    assert "a successful `EnterWorktree` or `git worktree add`" in clear, \
+        "a failed add at an existing path stood in for ownership"
+    assert "Hold a worktree `git worktree list --porcelain` marks `locked`" in clear, \
+        "a parallel session's worktree, recreated at the same path, was removed"
+    assert "retire its snapshot only after that read comes back `CLEAN`" in clear, \
+        "the snapshot was retired before a removal that came back `MOVED`"
+    assert "show the `ignored:` entries" in clear, "an ignored .env went with the worktree unannounced"
+    assert "List a `HIDDEN` worktree with its findings and no remove command" in clear, \
+        "the developer was handed the command that deletes the nested repository"
+    assert "the pull request's own ref" in clear, "a squash merge leaves the branch's commits out of <default>"

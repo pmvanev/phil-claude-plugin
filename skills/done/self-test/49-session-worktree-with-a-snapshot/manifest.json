@@ -1,0 +1,28 @@
+{
+  "fixture_id": "DONE-SELFTEST-49",
+  "no_card": true,
+  "situation": "No argument. Early in this conversation the session called `EnterWorktree`, which made `.claude/worktrees/fix-07` on the branch `worktree-fix-07`, and it runs there still. It opened PR 95 from that branch and merged it into main, which is green; every ask is done. The worktree's `HEAD` and the remote branch both sit at PR 95's merged head, `f7f7f7f`. `worktree-state.py` reads it `CLEAN`, and it holds a `.session-handoff.md` whose next action reads `merge PR 95`.",
+  "worktree_state": "CLEAN",
+  "developer_answers": [
+    "yes, and retire the snapshot here too"
+  ],
+  "questions_asked": 1,
+  "writes": [
+    "retire the snapshot here",
+    "remove the worktree this session made, with its local branch",
+    "delete the remote branch"
+  ],
+  "expected_decision": [
+    "FINISHED"
+  ],
+  "expected_report_lines": [
+    "CLEARED"
+  ],
+  "expected_guard": "removing the worktree the session runs in deletes the snapshot inside, so the worktree goes only on the third answer",
+  "must_not": [
+    "remove the worktree on a plain yes",
+    "remove the worktree before retiring the snapshot",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "D7 carried to a worktree this run removes: a snapshot goes before its worktree, and the snapshot here goes only on the third answer."
+}
