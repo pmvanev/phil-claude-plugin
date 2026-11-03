@@ -139,8 +139,19 @@ def test_no_fixture_expects_a_force(manifest):
     if any(" -D" in w for w in d.get("writes", [])):
         assert any(a.startswith("force-delete") for a in d.get("developer_answers", [])), \
             f"{d['fixture_id']}: `-D` runs only on the developer's own answer for that branch"
-    assert not any("remove the worktree" in w for w in d.get("writes", [])), \
-        f"{d['fixture_id']}: the developer removes worktrees, never the run"
+    removals = [w for w in d.get("writes", []) if "remove the worktree" in w]
+    assert all(w.startswith("remove the worktree this session made") for w in removals), \
+        f"{d['fixture_id']}: the run removes only a worktree this session made (2026-11-03)"
+    if removals:
+        assert d.get("worktree_state") == "CLEAN", \
+            f"{d['fixture_id']}: a worktree goes only where worktree-state.py reads it CLEAN"
+
+
+def test_slice_05_fixtures_exist():
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("47-session-worktree-removed", "48-hidden-work-holds-the-worktree",
+                   "49-session-worktree-with-a-snapshot"):
+        assert wanted in names, f"slice 05 names fixture {wanted}"
 
 
 def test_slice_04_fixtures_exist():

@@ -33,7 +33,7 @@ the fixtures are model-driven, and that read is by hand.
 | `20-stop-at-resolve` | `STOPPED` | `OPEN-ASKS` `WROTE-NOTHING` | A stop at RESOLVE; the quoted ask stays out of the question |
 | `21-card-not-on-this-board` | `CLOSED` | — | A card on another board gets no Status write and no false mismatch |
 | `22-card-already-closed` | `CLOSED` | — | A closed card gets its comment, never `close -c` |
-| `23-worktree-listed-never-removed` | `CLOSED` | `CLEARED` | Worktrees are listed with their commands, never removed |
+| `23-worktree-listed-never-removed` | `CLOSED` | `CLEARED` | A worktree an earlier session made is listed with its commands, never removed |
 | `24-unmerged-branch-survives` | `CLOSED` | `CLEARED` `LEFT` | A branch a worktree holds is never offered for force-delete |
 | `25-dirty-worktree-survives` | `CLOSED` | `LEFT` | A dirty worktree keeps its snapshot |
 | `26-name-only-branch-is-no-candidate` | `CLOSED` | `CLEARED` | A branch that only looks like the card's is never touched |
@@ -57,5 +57,8 @@ the fixtures are model-driven, and that read is by hand.
 | `44-no-card-retire-the-snapshot-only` | `FINISHED` | `CLEARED` | A plan holding only the snapshot here asks once: retire it or keep it |
 | `45-no-card-branch-the-session-never-named` | `FINISHED` | `CLEARED` | A branch the conversation never names is no candidate |
 | `46-no-card-reused-branch-name` | `NOT-READY` | `OPEN-ASKS` `NOT-LANDED` `WROTE-NOTHING` | An old pull request under a reused branch name is not the session's work |
+| `47-session-worktree-removed` | `FINISHED` | `CLEARED` | A worktree this session made, clean at the merged tip, goes on the one yes |
+| `48-hidden-work-holds-the-worktree` | `FINISHED` | `LEFT` `WROTE-NOTHING` | Work `git worktree remove` would delete silently holds the worktree |
+| `49-session-worktree-with-a-snapshot` | `FINISHED` | `CLEARED` | The worktree holding the snapshot here goes only on the third answer |
 
 `WROTE-NOTHING` is expected on every fixture that writes nothing.
