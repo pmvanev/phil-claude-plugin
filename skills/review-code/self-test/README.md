@@ -20,6 +20,7 @@ flags. Format mirrors `skills/redesign-tests/self-test/`.
 | `06-security-agent-grant/` | a subagent narrowed by `Bash(git log:*)` beside a read-only one | the CWE-250 agent row: a command pattern grants the whole shell | one CWE-250 item on the history reader; the read-only drafter left alone |
 | `07-load-time-findings-cite-an-lws-row/` | fourteen load-time defects in a Lambda web app beside six look-alikes | `rules/lambda-web-app-speed.md` Always-flag rows; its Do-not-flag list | fourteen load-time items, each with its row's `LWS-n` id and Preferred form; no look-alike flagged |
 | `08-load-time-rows-seen-nowhere-else/` | the six load-time defects fixture 07 plants nothing for, in a GovCloud stack, beside two look-alikes | `rules/lambda-web-app-speed.md` LWS-5, LWS-7 to LWS-10 and LWS-13; its Do-not-flag list | six load-time items, each with its row's `LWS-n` id and Preferred form; GovCloud's function-served assets and a tiny reply unflagged |
+| `09-shared-state-threads-are-advisory/` | four thread-based functions: one shares a dict through a lock, one shares it with no lock | `rules/modern-software-engineering.md` *Performance: Concurrency Is Complexity*; review-code's shared-state paragraph and race bullet | an Advisory on each shared dict and a Priority 1 race on the unlocked one; the network waits and the share-nothing counts raise no item about their threads |
 
 ## Layout
 
