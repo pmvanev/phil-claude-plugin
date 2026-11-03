@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-19
 
-`NOT-LAUNCHED` · `CLAIMED`
+`NOT-LAUNCHED` · `CLAIMED` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-CLAIM runs `gh project item-add` first, ignores its exit code, re-reads `projectItems` for the item id, then writes Status In Progress, assigns the developer and reads both back: `CLAIMED: added to the board, Status In Progress, assigned to pmvanev — read back`.
+CLAIM runs `gh project item-add` first, ignores its exit code, re-reads `projectItems` for the item id, then writes Status In Progress, assigns the developer and reads both back: `CLAIMED: added to the board, Status In Progress, assigned to pmvanev — read back`. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

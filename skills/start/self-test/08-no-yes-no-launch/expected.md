@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-08
 
-`NOT-LAUNCHED` · `CLAIMED` · `BUILD-PATH`
+`NOT-LAUNCHED` · `CLAIMED` · `BUILD-PATH` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-CLAIM adds nothing the board already holds, writes Status In Progress, assigns the developer, and reads both back: `CLAIMED`. The decision-request standard counts both replies as unanswered. After the second, the run ends with nothing launched and the card left claimed, and says so.
+CLAIM writes Status In Progress and assigns the developer, adding the card to the board where it is missing, and reads both back: `CLAIMED`. The decision-request standard counts both replies as unanswered. After the second, the run ends with nothing launched and the card left claimed, and says so. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

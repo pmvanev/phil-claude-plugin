@@ -14,10 +14,11 @@ import pytest
 SKILL_DIR = Path(__file__).resolve().parent.parent / "skills" / "start"
 FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
-TERMINAL = {"LAUNCHED", "NOT-LAUNCHED", "STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
+TERMINAL = {"LAUNCHED", "NOT-LAUNCHED", "UNDERWAY", "STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
 REPORT_LINES = {"PICKED", "ANOTHERS-CARD", "OPEN-IN-DONE", "NO-DONE-WHEN", "BUILD-PATH",
                 "ROUTE-OVERRIDDEN", "FILED", "CLAIMED", "NO-BOARD-BLOCK", "NOT-ASSIGNED", "CLAIM-FAILED",
-                "READ-BACK-MISMATCH", "WROTE-NOTHING"}
+                "READ-BACK-MISMATCH", "WORKTREE-CUT", "WORKTREE-ENTERED", "WORKTREE-FAILED",
+                "WROTE-NOTHING"}
 
 
 def test_the_skill_defines_exactly_these_outcomes():
@@ -27,6 +28,14 @@ def test_the_skill_defines_exactly_these_outcomes():
     section = text.split("## Decision outcomes", 1)[1].split("\n## ", 1)[0]
     named = set(re.findall(r"`([A-Z][A-Z-]+)`", section))
     assert named == TERMINAL | REPORT_LINES, named
+
+
+def test_slice_03_fixtures_exist():
+    """The slice 03 brief names five fixtures."""
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("31-no-worktree-cut-fresh", "32-worktree-entered", "33-two-candidate-worktrees",
+                   "34-snapshot-in-the-worktree", "35-session-in-another-worktree"):
+        assert wanted in names, f"slice 03 names fixture {wanted}"
 
 
 def test_slice_02_fixtures_exist():
@@ -118,3 +127,19 @@ def test_a_claim_that_made_a_write_call_never_wrote_nothing(manifest):
     lines = set(json.loads(manifest.read_text())["expected_report_lines"])
     if lines & {"CLAIM-FAILED", "NOT-ASSIGNED", "READ-BACK-MISMATCH", "FILED"}:
         assert "WROTE-NOTHING" not in lines, manifest.parent.name
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_cut_worktree_is_a_write(manifest):
+    lines = set(json.loads(manifest.read_text())["expected_report_lines"])
+    if "WORKTREE-CUT" in lines:
+        assert "WROTE-NOTHING" not in lines, manifest.parent.name
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_card_underway_routes_nowhere_and_cuts_nothing(manifest):
+    """D2, AC4.3: a card underway names /phil:resume, recommends no route, and gets no second worktree."""
+    d = json.loads(manifest.read_text())
+    if d["expected_decision"] == ["UNDERWAY"]:
+        lines = set(d["expected_report_lines"])
+        assert not lines & {"ROUTE-OVERRIDDEN", "BUILD-PATH", "WORKTREE-CUT"}, d["fixture_id"]

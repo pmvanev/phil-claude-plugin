@@ -1,0 +1,18 @@
+{
+  "fixture_id": "START-SELFTEST-43",
+  "situation": "`/phil:start 95` from the main checkout. Card 95 is in Todo and unassigned, and `.claude/worktrees/issue-95-retry-flaky-uploads` exists.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-ENTERED"
+  ],
+  "must_not": [
+    "skip the claim because the card is underway",
+    "cut a second worktree",
+    "recommend a route",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "D2, plugin-validator, 2026-11-03: a card underway is still claimed."
+}

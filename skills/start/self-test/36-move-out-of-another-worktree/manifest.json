@@ -1,0 +1,17 @@
+{
+  "fixture_id": "START-SELFTEST-36",
+  "situation": "`/phil:start 95` from a session inside `.claude/worktrees/done-gitlab-no-card`, which it entered with EnterWorktree. The developer answers **move**, then **not now** at the route.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT"
+  ],
+  "must_not": [
+    "call ExitWorktree with remove",
+    "discard the other worktree's changes",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "AC4.4, and the tool's rule that a worktree cannot be created from inside another worktree session."
+}

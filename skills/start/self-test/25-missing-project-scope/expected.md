@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-25
 
-`NOT-LAUNCHED` · `CLAIM-FAILED`
+`NOT-LAUNCHED` · `CLAIM-FAILED` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The run reads the card back once — Todo, unassigned — and reports `CLAIM FAILED: the Status write failed: … — read back: Todo, unassigned`. It names `gh auth refresh -s project` and goes on to describe and route the card.
+The run reads the card back once — Todo, unassigned — and reports `CLAIM FAILED: the Status write failed: … — read back: Todo, unassigned`. It names `gh auth refresh -s project` and goes on to describe and route the card. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

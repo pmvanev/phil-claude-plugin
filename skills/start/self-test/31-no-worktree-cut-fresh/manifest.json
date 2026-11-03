@@ -1,0 +1,19 @@
+{
+  "fixture_id": "START-SELFTEST-31",
+  "situation": "`/phil:start 95` from the main checkout. The card has no worktree, no open pull request and no surviving branch. The clone fetched an hour ago, and the remote's `main` has gained a commit since. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT"
+  ],
+  "must_not": [
+    "skip the fetch because the tool fetches",
+    "run git worktree add",
+    "branch from the clone's stale origin/main",
+    "compare the base only against the local origin/main",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "D1, AC4.1. Read from Claude Code 2.1.317's source on 2026-11-03: the tool fetches only when the last fetch is a day old, so a repo fetched today branches from a stale ref unless the run fetches."
+}

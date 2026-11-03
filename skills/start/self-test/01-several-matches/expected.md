@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-01
 
-`NOT-LAUNCHED` · `PICKED` · `CLAIMED` · `BUILD-PATH`
+`NOT-LAUNCHED` · `PICKED` · `CLAIMED` · `BUILD-PATH` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The report lists all three by number and title above one question and waits. After the pick it runs CHECK on 76, claims it, describes it, and routes it to `nw-discuss`, quoting CLAUDE.md's build path.
+The report lists all three by number and title above one question and waits. After the pick it runs CHECK on 76, claims it, describes it, and routes it to `nw-discuss`, quoting CLAUDE.md's build path. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

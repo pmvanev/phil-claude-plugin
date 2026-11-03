@@ -6,13 +6,15 @@
   ],
   "expected_report_lines": [
     "CLAIMED",
-    "BUILD-PATH"
+    "BUILD-PATH",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "report NO-MATCH",
     "strip `/phil:autopilot` as if it were a search qualifier",
     "report outcomes after the launch",
-    "remove an assignee"
+    "remove an assignee",
+    "launch the route, or begin an inline fix, before the session is in the new worktree"
   ],
   "why_this_fixture_exists": "The slice brief's dogfood moment. Run live 2026-11-03: the search reads the colon in `/phil:autopilot` as text, not as a qualifier."
 }

@@ -5,7 +5,8 @@
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
-    "NOT-ASSIGNED"
+    "NOT-ASSIGNED",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "assign another login instead",

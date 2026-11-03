@@ -52,7 +52,7 @@ report names the filed card's number.
 **Stop the claim at the first board write that fails** — the item add or the Status. The assign is not a
 board write. After a failed board write, read the card back once and report what it shows, because a
 write that timed out may have landed; quote the error, repair nothing, and report `CLAIM-FAILED`. Where
-the error names a missing `project` scope, name `gh auth refresh -s project`. Then go on to DESCRIBE:
+the error names a missing `project` scope, name `gh auth refresh -s project`. Then go on to WORKTREE:
 whether to work a card the claim left unclaimed is the developer's call at the route.
 
 **An assign that fails, for any reason, is `NOT-ASSIGNED`, never `CLAIM-FAILED`.** Quote the error and

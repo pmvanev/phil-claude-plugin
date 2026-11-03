@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-07
 
-`LAUNCHED` · `CLAIMED` · `BUILD-PATH`
+`LAUNCHED` · `CLAIMED` · `BUILD-PATH` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-CLAIM adds nothing the board already holds, writes Status In Progress, assigns the developer, and reads both back: `CLAIMED`. ROUTE reads `nw-discuss`, quoting the CLAUDE.md rule and naming the file. On the yes, the run prints its outcome tokens, then invokes `nw-discuss` through the Skill tool.
+CLAIM writes Status In Progress and assigns the developer, adding the card to the board where it is missing, and reads both back: `CLAIMED`. ROUTE reads `nw-discuss`, quoting the CLAUDE.md rule and naming the file. On the yes, the run prints its outcome tokens, then invokes `nw-discuss` through the Skill tool. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 
@@ -16,6 +16,7 @@ CLAIM adds nothing the board already holds, writes Status In Progress, assigns t
 - Name the route without citing the rule.
 - Launch before the yes.
 - Remove an assignee.
+- Launch the route, or begin an inline fix, before the session is in the new worktree.
 
 ## Why this fixture exists
 

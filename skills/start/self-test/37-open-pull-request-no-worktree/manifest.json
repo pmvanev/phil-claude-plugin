@@ -1,0 +1,18 @@
+{
+  "fixture_id": "START-SELFTEST-37",
+  "situation": "`/phil:start 80` on a second machine, with card 80 already In Progress and assigned to `pmvanev`. The developer's PR 94 is open, names issue 80, and is on `worktree-issue-80-phil-start`; this clone has no worktree for the card.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "cut a fresh worktree from the default branch",
+    "recommend a route",
+    "remove an assignee",
+    "write a Status the card already holds"
+  ],
+  "why_this_fixture_exists": "D2: an open pull request means the work is underway, and a fresh worktree would restart it."
+}

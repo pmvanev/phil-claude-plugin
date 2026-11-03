@@ -6,7 +6,8 @@
   ],
   "expected_report_lines": [
     "ANOTHERS-CARD",
-    "CLAIMED"
+    "CLAIMED",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "remove colleague",

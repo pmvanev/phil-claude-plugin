@@ -6,13 +6,15 @@
   ],
   "expected_report_lines": [
     "CLAIMED",
-    "BUILD-PATH"
+    "BUILD-PATH",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "recommend phil:edd",
     "name the route without citing the rule",
     "launch before the yes",
-    "remove an assignee"
+    "remove an assignee",
+    "launch the route, or begin an inline fix, before the session is in the new worktree"
   ],
   "why_this_fixture_exists": "AC2.2. The repo's recorded build path comes before any default; this is the dogfood card the slice brief names."
 }

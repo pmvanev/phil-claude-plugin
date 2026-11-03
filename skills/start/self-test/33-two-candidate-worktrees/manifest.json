@@ -1,0 +1,20 @@
+{
+  "fixture_id": "START-SELFTEST-33",
+  "situation": "`/phil:start 80`, with card 80 already In Progress and assigned to `pmvanev`. Two worktrees are the card's: `issue-80-phil-start` on `worktree-issue-80-phil-start`, and `issue-80-retry` on `worktree-issue-80-retry`. The developer picks the second.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-ENTERED",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "pick a worktree itself",
+    "cut a third worktree",
+    "recommend a route",
+    "remove an assignee",
+    "write a Status the card already holds"
+  ],
+  "why_this_fixture_exists": "D3: several candidates are the developer's pick."
+}

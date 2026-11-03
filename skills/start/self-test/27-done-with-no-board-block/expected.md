@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-27
 
-`NOT-LAUNCHED` · `OPEN-IN-DONE` · `NO-BOARD-BLOCK`
+`NOT-LAUNCHED` · `OPEN-IN-DONE` · `NO-BOARD-BLOCK` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The ask says going on leaves the card in Done, because no board block names a project. CLAIM writes no Status, assigns the developer and reads the assignee back; the report names `/phil:board-setup` and says the card is still in Done.
+The ask says going on leaves the card in Done, because no board block names a project. CLAIM writes no Status, assigns the developer and reads the assignee back; the report names `/phil:board-setup` and says the card is still in Done. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "START-SELFTEST-40",
+  "situation": "`/phil:start 95` in a repo whose `.claude/settings.json` sets `worktree.baseRef: head`. The new worktree's HEAD is `a448a36`; the remote's head, read from GitHub, is `55640cd`. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT"
+  ],
+  "must_not": [
+    "report the base as origin/main",
+    "rebase the new branch",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "D1: the report names the base commit the developer actually got."
+}

@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-35",
+  "situation": "`/phil:start 95` from a session inside `.claude/worktrees/done-gitlab-no-card`, which is not card 95's. The developer answers **stop**.",
+  "expected_decision": [
+    "STOPPED"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "move the session without a yes",
+    "exit the current worktree",
+    "write a Status or assign anyone"
+  ],
+  "why_this_fixture_exists": "AC4.4: a session already in another worktree is moved only on a yes."
+}

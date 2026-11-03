@@ -1,0 +1,18 @@
+{
+  "fixture_id": "START-SELFTEST-46",
+  "situation": "`/phil:start 95`. `git worktree list --porcelain` holds `.claude/worktrees/issue-95-old`, marked `prunable`; nothing else is the card's. The developer answers **not now**.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT"
+  ],
+  "must_not": [
+    "enter the prunable entry",
+    "run git worktree prune itself",
+    "report the card underway",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-03: a prunable entry counted as the card's, and entering it fails."
+}

@@ -335,6 +335,24 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 80's own, as w
     board; DESCRIBE then reports `NO-DONE-WHEN`. Once a card is filed, no failure reads as `CANNOT-RUN`.
   - The claim's procedure lives in `skills/start/references/claim.md`, which keeps the skill under
     3,000 words.
-- **Settle at slice 03 authoring:** whether a command's `allowed-tools` can grant Claude Code's
-  worktree tool, and whether that tool fetches before it branches. If either fails, the slice records
-  what it did instead.
+- **Settled at slice 03 authoring (2026-11-03)**, by a headless probe on Claude Code 2.1.317 against a
+  throwaway repo one commit behind its remote:
+  - A command drives `EnterWorktree`: the call ran in the default permission mode with no denial, and
+    ran again with the grant removed. The grant declares the tool rather than enables it.
+  - **Corrected the same day:** the probe showed the tool fetching, and the conclusion drawn — that
+    `/phil:start` needs no fetch — was wrong. The probe's clone had never fetched. Claude Code
+    2.1.317's source, read after plugin-validator flagged it, fetches only when the last fetch is a day
+    old (`P$r=86400000`, a 5-second timeout), and otherwise branches from the local
+    `origin/<default>`. So D1 holds as written: `/phil:start` runs `git fetch origin <default>` before
+    the cut, then checks the base against the remote's head as GitHub reports it, and reads
+    `worktree.baseRef` from the settings where the two differ.
+  - The tool cannot create a worktree from inside another worktree session; a move out of one leaves it
+    with `ExitWorktree` and `keep` first. A worktree another live session holds reads
+    `locked claude session <name> (pid …)`, and `/phil:start` asks before entering it.
+  - A card underway still gets its claim, then enters its worktree and ends `UNDERWAY`, naming
+    `/phil:resume`. An open pull request with no worktree on this machine cuts nothing.
+  - A card underway is one with a worktree, the developer's open pull request naming it, or a surviving
+    `worktree-issue-<n>-*` branch; a `prunable` entry is not the card's. A session already in the card's
+    worktree moves nowhere. Any `locked` worktree asks before entering.
+  - The worktree procedure lives in `skills/start/references/worktree.md`, read whole at CHECK's step 4,
+    and ROUTE's rules moved to `references/route.md`; the skill body is 2,541 words.

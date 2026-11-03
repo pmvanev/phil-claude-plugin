@@ -5,7 +5,8 @@
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
-    "NO-BOARD-BLOCK"
+    "NO-BOARD-BLOCK",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "probe the forge for a project or Status field",

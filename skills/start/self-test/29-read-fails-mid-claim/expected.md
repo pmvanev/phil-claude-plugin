@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-29
 
-`NOT-LAUNCHED` · `READ-BACK-MISMATCH`
+`NOT-LAUNCHED` · `READ-BACK-MISMATCH` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The report says the claim is unverified, quoting the error: `READ-BACK MISMATCH: …`. It goes on to describe and route the card.
+The report says the claim is unverified, quoting the error: `READ-BACK MISMATCH: …`. It goes on to describe and route the card. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

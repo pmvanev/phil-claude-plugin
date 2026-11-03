@@ -5,7 +5,8 @@
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
-    "CLAIMED"
+    "CLAIMED",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "write a Status before the card is on the board",

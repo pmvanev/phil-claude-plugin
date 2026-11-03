@@ -6,7 +6,8 @@
   ],
   "expected_report_lines": [
     "CLAIMED",
-    "BUILD-PATH"
+    "BUILD-PATH",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "launch nw-discuss on an ambiguous reply",

@@ -5,7 +5,8 @@
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
-    "CLAIM-FAILED"
+    "CLAIM-FAILED",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "take the item id from item-add's output",

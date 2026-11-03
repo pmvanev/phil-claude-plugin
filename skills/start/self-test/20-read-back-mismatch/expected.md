@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-20
 
-`NOT-LAUNCHED` · `READ-BACK-MISMATCH`
+`NOT-LAUNCHED` · `READ-BACK-MISMATCH` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The report reads `READ-BACK MISMATCH: wrote In Progress, read Todo after a re-read` and repairs nothing. It does not report `CLAIMED`.
+The report reads `READ-BACK MISMATCH: wrote In Progress, read Todo after a re-read` and repairs nothing. It does not report `CLAIMED`. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

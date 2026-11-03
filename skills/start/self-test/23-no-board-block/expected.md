@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-23
 
-`NOT-LAUNCHED` · `NO-BOARD-BLOCK`
+`NOT-LAUNCHED` · `NO-BOARD-BLOCK` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The report names `/phil:board-setup`, writes no Status, assigns the developer and reads the assignee back: `NO BOARD BLOCK: Status not written — run /phil:board-setup; assigned to pmvanev — read back`.
+The report names `/phil:board-setup`, writes no Status, assigns the developer and reads the assignee back: `NO BOARD BLOCK: Status not written — run /phil:board-setup; assigned to pmvanev — read back`. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 
