@@ -1,0 +1,30 @@
+{
+  "fixture_id": "DONE-SELFTEST-39",
+  "situation": "The forge line reads `GitLab at gitlab.example.dev — use glab -R team/app`. Card 21 carries `status::in-progress` and `wave::deliver`. !193 (`finalize-21`, `sha` `42b67c71`, the developer's, same project) merged into main and names the card; main's head `071dc6b8` has a newest pipeline of `success`. Every ask is done. GitLab deleted the source branch on merge, so the branch read answers 404; the local branch sits at `42b67c71` with no worktree.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing note",
+    "remove the status label status::in-progress",
+    "the close",
+    "delete the local branch"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED"
+  ],
+  "expected_guard": "the run reads and writes GitLab through glab, and the card leaves the board's status columns for its closed list",
+  "must_not": [
+    "stop because the forge is GitLab",
+    "pass a field, `--input`, `-X` or `--method` to `glab api`",
+    "pass a bare `-R team/app`, which outside a checkout of the host reaches gitlab.com",
+    "use `:id` or `:fullpath` in a `glab api` path",
+    "add a label or create a board list",
+    "remove `wave::deliver`",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "Dogfood, `/phil:done 21` on modive (GitLab, 2026-11-03): the skill refused at its forge check, and the developer closed the card and cleared its branches by hand."
+}

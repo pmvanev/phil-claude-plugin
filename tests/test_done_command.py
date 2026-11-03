@@ -499,3 +499,161 @@ def test_the_remote_copy_goes_only_after_the_local_one():
     """Adversarial run, 2026-11-02: a worktree mid-rebase hides its branch from `git worktree list`, git
     refused the local `-D`, and the remote delete still ran."""
     assert "Force-delete the remote copy only after the local delete succeeded" in _clear()
+
+
+# --- Slice 04: GitLab, and a run with no card -------------------------------------------------------
+#
+# Dogfood, `/phil:done 21` on modive (GitLab, 2026-11-03): the skill stopped at its forge check, and the
+# developer closed the card, deleted the branches and removed the worktrees by hand. The same developer
+# asked that a session with no card still have its asks checked and its merged branches cleared.
+
+GITLAB = REPO / "skills" / "done" / "references" / "gitlab.md"
+NO_CARD = REPO / "skills" / "done" / "references" / "no-card.md"
+
+
+def _flat(path):
+    return " ".join(path.read_text().split())
+
+
+def _tools():
+    front, _ = _parts(COMMAND)
+    return {t.strip() for t in front["allowed-tools"].split(",")}
+
+
+def test_gitlab_is_supported_not_refused():
+    front, body = _parts(SKILL)
+    assert "covers GitHub only" not in body
+    assert "GitHub only" not in front["description"]
+    assert "GitLab" in front["description"]
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/gitlab.md` whole before FIND" in body
+
+
+def test_the_gitlab_grant_names_each_subcommand():
+    tools = _tools()
+    for grant in ("Bash(glab api:*)", "Bash(glab issue note:*)", "Bash(glab issue update:*)",
+                  "Bash(glab issue close:*)", "Bash(jq:*)"):
+        assert grant in tools, grant
+    assert not tools & {"Bash(glab:*)", "Bash(glab issue:*)"}
+
+
+def test_every_glab_call_names_the_project_and_host():
+    """`phil:issue-board`: an inferred remote reads the wrong project successfully. glab fills `:id` and
+    `:fullpath` from the working directory's remote, so a path placeholder is an inferred remote."""
+    gl = _flat(GITLAB)
+    assert ("Pass `-R https://<host>/<group/project>` on every `glab issue` call and `--hostname <host>` on "
+            "every `glab api` call") in gl
+    assert "never `:id` or `:fullpath`" in gl
+    assert "Pass `-R https://<host>/<group/project>` on every `glab issue` call" in _parts(COMMAND)[1]
+    assert "<n> -R <repo>" in gl and "<n> -R <group/project>" not in gl, \
+        "glab 1.112.0 sends a bare -R to gitlab.com outside a checkout"
+
+
+def test_a_glab_read_never_sends_a_field():
+    """`glab api --help`, 1.112.0: "The default HTTP request method is GET when no parameters are added,
+    and POST otherwise." A read that passes a field writes."""
+    gl = _flat(GITLAB)
+    assert "Never pass `-f`, `-F`, `--field`, `--raw-field`, `--input`, `--form`, `-X` or `--method`" in gl
+    assert "Send `glab api` only GETs" in _parts(COMMAND)[1]
+
+
+def test_gitlab_finds_the_cards_merge_requests_as_github_does():
+    """Run live against modive issue 21, 2026-11-03: `closed_by` named 2 merge requests; the search,
+    filtered by the card pattern, named the same 79 that `related_merge_requests` returns."""
+    gl = _flat(GITLAB)
+    assert "issues/<n>/closed_by" in gl
+    assert "merge_requests?state=all&search=<n>&in=title,description" in gl
+    assert 'test("(#|issue )<n>([^0-9]|$)"; "i")' in gl
+    for field in ("`target_branch`", "`source_branch`", "`sha`", "`source_project_id`",
+                  "`target_project_id`", "`author.username`"):
+        assert field in gl, field
+
+
+def test_gitlab_judges_the_default_branch_by_its_pipeline():
+    gl = _flat(GITLAB)
+    assert "pipelines?ref=<default>&sha=<head>" in gl
+    assert "Only `success` is green" in gl
+    assert "`no pipeline`, never green" in gl
+
+
+def test_gitlab_done_is_the_closed_list_and_no_status_label():
+    """modive's CLAUDE.md: "Close a finished issue rather than labelling it". A GitLab board column is a
+    label and its closed list is Done; a closed card still labelled in progress reads two ways."""
+    gl = _flat(GITLAB)
+    assert "--unlabel" in gl
+    assert "Never add a label, and never create a board list" in gl
+    i_note = gl.index("1. **Post the closing note**")
+    i_label = gl.index("2. **Remove the status labels**")
+    i_close = gl.index("3. **Close the issue if it is still open**")
+    assert i_note < i_label < i_close
+    assert "-m \"$(cat <<'EOF'" in gl, "the note quotes the developer's words; an unquoted heredoc runs them"
+
+
+def test_gitlab_ownership_and_ancestry_have_their_calls():
+    """GitLab's compare names a commit's author by email, not by account (modive, 2026-11-03)."""
+    gl = _flat(GITLAB)
+    assert "user/emails" in gl
+    assert "repository/compare?from=<default>&to=<branch>" in gl
+    assert "repository/compare?from=<branch>&to=<sha>" in gl
+    assert "read the tip again" in gl
+    assert "`protected`" in gl
+    assert "names `<group/project>` on `<host>`" in gl
+
+
+def test_no_argument_runs_without_a_card():
+    """The developer, 2026-11-03: "it shouldn't require an issue number"."""
+    front, body = _parts(COMMAND)
+    assert front["argument-hint"] == "[issue-number]"
+    assert "ask for the issue number" not in body
+    assert "With no argument, run without a card" in body
+    assert "never infer a card from the branch" in body
+    skill = _parts(SKILL)[1]
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/no-card.md` whole before FIND" in skill
+    assert "never infer one from the branch" in skill
+
+
+def test_without_a_card_nothing_touches_a_card():
+    nc = _flat(NO_CARD)
+    assert "It closes no card" in nc
+    assert "no closing comment, no Status write, no close and no block refresh" in nc
+
+
+def test_without_a_card_the_work_is_what_the_session_shows():
+    """D8 carried over: a branch matched only by its name is never the session's."""
+    nc = _flat(NO_CARD)
+    assert "Each pull request the conversation shows this session opening, pushing to or merging" in nc
+    assert "keep only one whose `headRefOid` is that tip" in nc, \
+        "skill-reviewer, 2026-11-03: a reused branch name matched a pull request merged months before"
+    assert "A branch the conversation never names is never a candidate" in nc
+    assert "`viewer.login`" in nc
+
+
+def test_without_a_card_every_session_ask_counts():
+    nc = _flat(NO_CARD)
+    assert "every request the developer made in this conversation" in nc
+    assert "`NOTHING TO LAND: the session names no pull request`" in nc
+
+
+def test_without_a_card_a_finish_with_nothing_to_write_asks_nothing():
+    nc = _flat(NO_CARD)
+    assert "Where the plan holds nothing, ask nothing" in nc
+    assert "**retire it** or **keep it**" in nc
+
+
+def test_finished_is_the_outcome_without_a_card():
+    _, body = _parts(SKILL)
+    section = body.split("## Decision outcomes", 1)[1]
+    assert "**`FINISHED`**" in section
+
+
+def test_review_findings_on_slice_04_stay_fixed():
+    """skill-reviewer and plugin-validator, 2026-11-03."""
+    gl, nc = _flat(GITLAB), _flat(NO_CARD)
+    assert "never count it with `length`" in gl, "a paginated glab list prints one array per page"
+    assert "projects/<p>/issues/<n>/notes/<id>" in gl, "system notes pushed the closing note off a page"
+    assert "`status::` where it names none" not in gl, "the default contradicted SKILL.md's skip rule"
+    assert "skip the label write, report the skip and name `/phil:board-setup`" in gl
+    assert "A question the session answered in the conversation is no ask" in nc
+    assert "**a commit pushed straight to `<default>`**" in nc
+    assert "the snapshot is `LEFT`" in nc
+    assert "viewer{ login }" in nc, "FIND's query needs `$n`; a run with no card has none"
+    assert "-X" in _parts(COMMAND)[1]

@@ -1,0 +1,27 @@
+{
+  "fixture_id": "DONE-SELFTEST-41",
+  "situation": "GitLab. Two of the developer's merge requests name the card and merged into main, which is green: !87 (`cache-fix`, same project, `sha` `a1a1a1a`) and !88 (`fix-cache`, `source_project_id` 210 against the project's 74 — the developer's fork). This project's remote also holds a branch `fix-cache`, at `c3c3c3c`, which a colleague pushed. The remote branch `cache-fix` sits at `a1a1a1a`. Every ask is done.",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing note",
+    "remove the status label",
+    "the close",
+    "delete the remote branch cache-fix"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED",
+    "LEFT"
+  ],
+  "expected_guard": "a merge request whose `source_project_id` differs from its `target_project_id` gives no candidate, and a branch matching its name is not its branch",
+  "must_not": [
+    "delete or offer to force-delete `fix-cache` on this project's remote",
+    "read !88's `source_branch` as a branch of this project",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "GitHub's `isCrossRepository` has no GitLab field of that name; without the project-id comparison, a fork's branch name points at whatever this project holds under it."
+}

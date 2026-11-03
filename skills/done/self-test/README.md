@@ -1,7 +1,7 @@
 # Self-test — done
 
-The acceptance and regression gate for `../SKILL.md`. Run it whenever that file or `commands/done.md`
-changes.
+The acceptance and regression gate for `../SKILL.md`. Run it whenever that file, a file in
+`../references/` or `commands/done.md` changes.
 
 **Driven by `tests/test_done_fixtures.py`, in the repo suite.** The driver checks structure: each
 fixture is well-formed, names outcomes the skill defines, forbids a merge, lists the writes it expects and claims
@@ -49,5 +49,13 @@ the fixtures are model-driven, and that read is by hand.
 | `36-force-delete-an-unmerged-branch` | `CLOSED` | `CLEARED` | An unmerged branch goes only on its own answer, its commits shown |
 | `37-colleague-reused-the-name` | `CLOSED` | `LEFT` | A branch under an old name is not the developer's to force-delete |
 | `38-too-many-commits-to-show` | `CLOSED` | `LEFT` | Past 50 commits the tip goes unshown, so nothing is offered |
+| `39-gitlab-card-closes` | `CLOSED` | `CLEARED` | GitLab closes the card through `glab`: note, status label off, close |
+| `40-gitlab-pipeline-still-running` | `NOT-READY` | `NOT-LANDED` `WROTE-NOTHING` | Only a `success` pipeline is green |
+| `41-gitlab-fork-merge-request-held` | `CLOSED` | `CLEARED` `LEFT` | A fork's merge request gives no candidate, whatever its branch is named |
+| `42-no-card-clean-finish` | `FINISHED` | `CLEARED` | No argument checks the session's work and touches no card |
+| `43-no-card-open-session-task` | `NOT-READY` | `OPEN-ASKS` `WROTE-NOTHING` | A session task with no evidence holds the finish |
+| `44-no-card-retire-the-snapshot-only` | `FINISHED` | `CLEARED` | A plan holding only the snapshot here asks once: retire it or keep it |
+| `45-no-card-branch-the-session-never-named` | `FINISHED` | `CLEARED` | A branch the conversation never names is no candidate |
+| `46-no-card-reused-branch-name` | `NOT-READY` | `OPEN-ASKS` `NOT-LANDED` `WROTE-NOTHING` | An old pull request under a reused branch name is not the session's work |
 
 `WROTE-NOTHING` is expected on every fixture that writes nothing.
