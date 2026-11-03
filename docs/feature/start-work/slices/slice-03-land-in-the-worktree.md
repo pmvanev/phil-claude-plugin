@@ -20,7 +20,8 @@ Story 4 · Decisions D1, D2, D3.
   card's worktree; a session already in another worktree.
 
 ## OUT of scope
-- Removing a worktree. `/phil:done` lists worktrees and never removes one.
+- Removing a worktree. `/phil:done` lists worktrees and never removes one. (Since `/phil:done` 1.25.0,
+  2026-11-03, it removes a worktree its own session made once it reads clean; removal stays its call.)
 
 ## Learning hypothesis
 - **Disproves** "a command can drive Claude Code's worktree tool" if the tool cannot be granted to a

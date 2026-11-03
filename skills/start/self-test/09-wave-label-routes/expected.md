@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-09
 
-`LAUNCHED` · `CLAIMED` · `ROUTE-OVERRIDDEN`
+`LAUNCHED` · `CLAIMED` · `ROUTE-OVERRIDDEN` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,13 +8,14 @@
 
 ## What must happen
 
-CLAIM adds nothing the board already holds, writes Status In Progress, assigns the developer, and reads both back: `CLAIMED`. ROUTE reads `/nw-design`, taken from `phil:nwave-issue-board`'s table. The run launches `phil:work` instead and quotes the developer's reason.
+CLAIM writes Status In Progress and assigns the developer, adding the card to the board where it is missing, and reads both back: `CLAIMED`. ROUTE reads `/nw-design`, taken from `phil:nwave-issue-board`'s table. The run launches `phil:work` instead and quotes the developer's reason. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 
 - Launch /nw-design over the developer's answer.
 - Drop the developer's reason.
 - Remove an assignee.
+- Launch the route, or begin an inline fix, before the session is in the new worktree.
 
 ## Why this fixture exists
 

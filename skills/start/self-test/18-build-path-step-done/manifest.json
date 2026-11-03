@@ -1,13 +1,13 @@
 {
   "fixture_id": "START-SELFTEST-18",
-  "situation": "`/phil:start 80` on this repo, after DISCUSS merged. The card is In Progress and assigned to `pmvanev`, and links `docs/feature/start-work/`, which holds `feature-delta.md`. CLAUDE.md's build path reads `Run nw-discuss before authoring a new feature, skill or command`, then `Read plugin-dev:skill-development, command-development, agent-development or plugin-structure before writing the file`. The developer answers **not now**.",
+  "situation": "`/phil:start 80` on this repo, after DISCUSS merged and its worktree and branch were removed; no pull request is open. The card is In Progress and assigned to `pmvanev`, and links `docs/feature/start-work/`, which holds `feature-delta.md`. CLAUDE.md's build path reads `Run nw-discuss before authoring a new feature, skill or command`, then `Read plugin-dev:skill-development, command-development, agent-development or plugin-structure before writing the file`. The developer answers **not now**.",
   "expected_decision": [
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
     "CLAIMED",
-    "BUILD-PATH",
-    "WROTE-NOTHING"
+    "WORKTREE-CUT",
+    "BUILD-PATH"
   ],
   "must_not": [
     "recommend nw-discuss again",

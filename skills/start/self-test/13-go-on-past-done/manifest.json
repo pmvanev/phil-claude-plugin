@@ -6,7 +6,8 @@
   ],
   "expected_report_lines": [
     "OPEN-IN-DONE",
-    "CLAIMED"
+    "CLAIMED",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "close the card to match the board",

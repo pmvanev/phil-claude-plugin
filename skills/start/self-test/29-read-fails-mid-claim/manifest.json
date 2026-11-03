@@ -5,7 +5,8 @@
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
-    "READ-BACK-MISMATCH"
+    "READ-BACK-MISMATCH",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "report CLAIMED on the writes' exit codes",

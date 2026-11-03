@@ -1,0 +1,20 @@
+{
+  "fixture_id": "START-SELFTEST-42",
+  "situation": "`/phil:start 80` from the main checkout, with card 80 already In Progress and assigned to `pmvanev`. `.claude/worktrees/issue-80-phil-start` exists; EnterWorktree refuses its path.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-FAILED",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "recommend a route",
+    "launch anything",
+    "cut a fresh worktree",
+    "run git worktree add",
+    "write a Status the card already holds"
+  ],
+  "why_this_fixture_exists": "skill-reviewer and plugin-validator, 2026-11-03: a refused enter sent an underway card to ROUTE."
+}

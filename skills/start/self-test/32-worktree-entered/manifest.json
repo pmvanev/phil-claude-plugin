@@ -1,0 +1,19 @@
+{
+  "fixture_id": "START-SELFTEST-32",
+  "situation": "`/phil:start 80` from the main checkout. Card 80 is In Progress and assigned to `pmvanev`; `.claude/worktrees/issue-80-phil-start` exists, unlocked, holding no snapshot; no pull request is open.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-ENTERED",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "cut a second worktree",
+    "recommend a route",
+    "launch anything",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "D2, D3, AC4.2, and issue 80's fifth fixture behaviour: a card that already has a worktree reuses it."
+}

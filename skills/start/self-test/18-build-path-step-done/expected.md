@@ -1,14 +1,14 @@
 # Expected — START-SELFTEST-18
 
-`NOT-LAUNCHED` · `CLAIMED` · `BUILD-PATH` · `WROTE-NOTHING`
+`NOT-LAUNCHED` · `CLAIMED` · `WORKTREE-CUT` · `BUILD-PATH`
 
 ## Situation
 
-`/phil:start 80` on this repo, after DISCUSS merged. The card is In Progress and assigned to `pmvanev`, and links `docs/feature/start-work/`, which holds `feature-delta.md`. CLAUDE.md's build path reads `Run nw-discuss before authoring a new feature, skill or command`, then `Read plugin-dev:skill-development, command-development, agent-development or plugin-structure before writing the file`. The developer answers **not now**.
+`/phil:start 80` on this repo, after DISCUSS merged and its worktree and branch were removed; no pull request is open. The card is In Progress and assigned to `pmvanev`, and links `docs/feature/start-work/`, which holds `feature-delta.md`. CLAUDE.md's build path reads `Run nw-discuss before authoring a new feature, skill or command`, then `Read plugin-dev:skill-development, command-development, agent-development or plugin-structure before writing the file`. The developer answers **not now**.
 
 ## What must happen
 
-CLAIM finds every write made and writes nothing: `CLAIMED: already In Progress and assigned to pmvanev — nothing written`. ROUTE names the build path's next step — read plugin-dev's command and skill guidance, then author — quoting CLAUDE.md, and never `nw-discuss`.
+CLAIM finds every write made and writes nothing: `CLAIMED: already In Progress and assigned to pmvanev — nothing written`. WORKTREE cuts `issue-80-…`: `WORKTREE-CUT`. ROUTE names the build path's next step — read plugin-dev's command and skill guidance, then author — quoting CLAUDE.md, and never `nw-discuss`.
 
 ## What must NOT happen
 

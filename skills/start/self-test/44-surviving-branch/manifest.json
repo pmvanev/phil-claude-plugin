@@ -1,0 +1,16 @@
+{
+  "fixture_id": "START-SELFTEST-44",
+  "situation": "`/phil:start 95`. Card 95 has no worktree and no open pull request, but `git rev-parse --symbolic --branches='worktree-issue-95-*'` prints `worktree-issue-95-retry-flaky-uploads`.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED"
+  ],
+  "must_not": [
+    "cut a worktree whose branch would collide",
+    "reset or delete the branch",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-03: a branch left after its worktree was removed collides with the cut."
+}

@@ -4,20 +4,18 @@ description: >-
   This skill should be used when the user asks to "start card N", "start issue N", "work on #N", "pick
   up the card about X", "what does this card ask and how should I work it", or runs /phil:start. It
   resolves the argument to one open GitHub card, refuses a closed one, asks before one in Done or someone
-  else's, claims it on the board, restates what it asks and when it is done, and recommends one route,
-  launched only on a yes. Not for choosing which card to
-  start; for a card underway, use /phil:resume.
+  else's, claims it, moves the session into its worktree, restates it, and recommends one route,
+  launched only on a yes. A card underway goes to /phil:resume. Not for choosing which card to start.
 ---
 
 # Start — pick a card up
 
 `/phil:done` puts a card down finished. This skill picks one up: it settles on exactly one open card,
-refuses finished work and asks before someone else's, claims the card on the board, restates it in plain
-English, and recommends how to work it — the way the repo records, not by habit.
+refuses finished work and asks before someone else's, claims the card on the board, moves the session into
+the card's worktree, restates it in plain English, and recommends how to work it — the way the repo
+records, not by habit. A card already underway goes to `/phil:resume` instead of a route.
 
-**Running `/phil:start` is the developer's yes to the claim; the route needs its own.** This version
-cuts no worktree, and does not yet check whether a card is already underway; for one that is, the
-developer runs `/phil:resume`.
+**Running `/phil:start` is the developer's yes to the claim and the worktree; the route needs its own.**
 
 ## Inputs
 
@@ -36,7 +34,7 @@ developer runs `/phil:resume`.
 - **The developer** — the signed-in account, `viewer.login`, never git's `user.name`: a display name no
   forge resolves to a login. With no signed-in account, name `gh auth login`: `CANNOT-RUN`.
 
-Run `git` only for `rev-parse --show-toplevel`. A `gh` call that fails for any reason but `NOT_FOUND` —
+Run `git` only for `rev-parse`, `worktree list --porcelain` and `fetch origin <default>`. A `gh` call that fails for any reason but `NOT_FOUND` —
 auth, network, rate limit — before CLAIM and before any filing is `CANNOT-RUN`, quoting the error. Where
 any `gh` error names a missing `project` scope, name `gh auth refresh -s project`.
 
@@ -115,6 +113,13 @@ Check in this order, and stop at the first stop.
    them, name every assignee's login and ask whether to go on — **go on** adds the developer beside them
    at CLAIM; **stop** is `STOPPED`, with nothing written. Report `ANOTHERS-CARD` either way. **Never
    remove an assignee.** A card assigned to the developer, or to no one, needs no ask.
+4. **A session in another worktree stays there unless the developer says otherwise.** Read
+   `${CLAUDE_PLUGIN_ROOT}/skills/start/references/worktree.md` whole first, and find the card's worktrees
+   as its *Find the card's worktrees* directs; a failed read there is `CANNOT-RUN`. Where
+   `git rev-parse --show-toplevel` is neither the main checkout — the first entry of
+   `git worktree list --porcelain` — nor one of the card's worktrees, name where the session is and ask
+   whether to move it; move the session only on the developer's yes. **stop** is `STOPPED`, with nothing
+   written.
 
 ## CLAIM — In Progress, assigned, read back
 
@@ -123,6 +128,14 @@ holds the writes, the read-back and the claim line. In outline: add the card to 
 missing, write Status = In Progress, assign `viewer.login`, then read back every write that ran — and
 every assignee the card already had. It skips a write that would change nothing, stops at the first
 board write that fails, and repairs nothing it reads back wrong.
+
+## WORKTREE — the card's worktree, or a card underway
+
+Follow `${CLAUDE_PLUGIN_ROOT}/skills/start/references/worktree.md`, read whole at CHECK's step 4. It
+enters the card's worktree or cuts a fresh one with Claude Code's worktree tool, and names
+`/phil:resume` for a card already underway. In outline: a card with a worktree, the developer's open pull
+request or a surviving branch is underway and gets no second worktree; any other card gets the default
+branch fetched, a worktree cut from it, and the session moved in.
 
 ## DESCRIBE — what the card asks, in plain English
 
@@ -148,42 +161,14 @@ describes progress, not the ask.
 
 ## ROUTE — one route, its reason and its owner
 
-1. **The repo's recorded build path.** Read the root's `CLAUDE.md` and `AGENTS.md`, where present, for a
-   rule that names a command or skill to run for a kind of work — this plugin's own reads `Run nw-discuss
-   before authoring a new feature, skill or command`. A principle that names no command, such as "test
-   first", is no build path. Where the card's work is that kind, the rule decides: quote the rule and
-   name its file, and report `BUILD-PATH`. Where the step the rule names has already run — for
-   `nw-discuss`, a `feature-delta.md` in the `docs/feature/<feature>/` directory the card links — name
-   the rule's next step instead; where it names none, go on to rule 2.
-2. **The card's wave.** A `wave: <name>` label routes to that wave's command in the *Work this with*
-   table of `${CLAUDE_PLUGIN_ROOT}/skills/nwave-issue-board/SKILL.md`; read the table there, and never
-   restate it. Where a row names a wave command and a step command, route to the wave command and name
-   the step command in the reason. A label the table has no row for goes on to rule 3, and the report
-   says the table does not cover it.
-3. **Who would see the change.** A change a user would see — a command, an output, a page, a behaviour
-   — routes to `phil:edd`. A change nobody would see — a refactor, a migration, a cleanup, performance or
-   a dependency — routes to `phil:work`.
-4. **Whether it fits one sitting.** A card whose DONE WHEN holds exactly one item the card states, and
-   whose OPEN names nothing, goes inline instead of rule 3's route: the session works it directly, under
-   the repo's own rules. A `NO-DONE-WHEN` card never goes inline: nothing says when the work would stop.
+A card underway takes no route: the report names `/phil:resume` and the run ends `UNDERWAY`, launching
+nothing.
 
-Rules 1 and 2 decide wherever they apply, in that order. Otherwise rule 3 picks the route, and rule 4
-overrides it for a card that fits one sitting.
-
-Name one route, its reason in one clause, and the command or skill that owns it. Then ask once: **start
-it** runs the route now, and it writes what that route writes; **not now** ends the run, leaving the
-claim as the report states it. **Launch nothing without the developer's yes.**
-
-- **Yes** — `LAUNCHED`.
-- **Other naming a route** — a skill or a command — launch that route instead: `LAUNCHED` with
-  `ROUTE-OVERRIDDEN`. Quote the developer's reason where they gave one: an override is the evidence that
-  the card and `CLAUDE.md` did not choose the route. Other naming no route is unanswered.
-- **Not now, or no clear answer after a second ask** — `NOT-LAUNCHED`.
-
-**Print the outcome tokens, then launch.** A launched route runs on past this skill, so nothing is
-reported after it. Invoke a skill or command route through the `Skill` tool, by its name without the
-leading slash (`nw-design`). An inline route has no skill: this skill ends, and the session works the
-card under the repo's own rules, outside this command's grant, so its writes ask permission.
+**Read `${CLAUDE_PLUGIN_ROOT}/skills/start/references/route.md` whole before naming a route.** It holds
+the four rules, the question and the launch. In outline: the repo's recorded build path decides first,
+then the card's `wave:` label, then whether a user would see the change — `phil:edd` or `phil:work` — and
+a card that fits one sitting goes inline. Name one route, its reason and its owner, ask once, print the
+outcome tokens, and launch only then. **Launch nothing without the developer's yes.**
 
 ## REPORT
 
@@ -192,6 +177,7 @@ Print the report before the route question:
 ```
 CARD 76 · New command: /phil:autopilot — carry a card through its repo's build path, and stop only for a blocker that needs the developer · open · Todo · unassigned
 CLAIMED: Status In Progress, assigned to pmvanev — read back
+WORKTREE: .claude/worktrees/issue-76-new-command-phil-autopilot-carry-a-card on worktree-issue-76-new-command-phil-autopilot-carry-a-card, from 8562216 = origin/main — session moved in
 ASKS: a command that carries a card through its repo's build path, stopping only for a blocker the developer must clear.
 DONE WHEN: 6 items — the command and its skill exist, through nw-discuss and plugin-dev; fixtures pin that a taken recommendation is recorded on the card, a developer's decision stops the run, a blocker leaves a comment and a snapshot, a declared build path beats nWave directories, and a missing credential declaration blocks.
 OPEN: 4 questions — what counts as a blocker, what marks a declared build path, where test credentials live, which recorded rules it cannot override.
@@ -199,28 +185,22 @@ ROUTE: nw-discuss — CLAUDE.md: "Run `nw-discuss` before authoring a new featur
 ```
 
 The CARD line carries the title as the forge holds it and the state RESOLVE read, with `on no board`
-where the card is on none. The claim line takes a shape `references/claim.md` lists.
-
-The ROUTE line takes one of these shapes:
-
-```
-ROUTE: nw-discuss — CLAUDE.md: "Run `nw-discuss` before authoring a new feature, skill or command."
-ROUTE: /nw-design — the card carries `wave: design`
-ROUTE: phil:edd — a user would see the change: a new flag on /phil:done
-ROUTE: phil:work — nobody would see the change: the hook moves to a shared module
-ROUTE: inline — one done-when item, nothing open: fix a broken link in the README
-```
+where the card is on none. The claim line, then the worktree line, follow it, in shapes
+`references/claim.md` and `references/worktree.md` list; the ROUTE line, a shape `references/route.md`
+lists.
 
 ## Decision outcomes
 
-Report exactly one terminal outcome, every run: `LAUNCHED` · `NOT-LAUNCHED` · `STOPPED` · `NO-MATCH` ·
-`REFUSED-CLOSED` · `CANNOT-RUN`.
+Report exactly one terminal outcome, every run: `LAUNCHED` · `NOT-LAUNCHED` · `UNDERWAY` · `STOPPED` ·
+`NO-MATCH` · `REFUSED-CLOSED` · `CANNOT-RUN`.
 
 - **`LAUNCHED`** — the developer said yes, or named another route, and the route was launched.
 - **`NOT-LAUNCHED`** — the report and its route printed; the developer said not now, or gave no clear
   answer.
+- **`UNDERWAY`** — the card already had a worktree or the developer's open pull request; the report
+  names `/phil:resume`, and no route was recommended.
 - **`STOPPED`** — the developer stopped before the claim: picked no card, gave no narrower words, or
-  declined a card in Done or someone else's.
+  declined a card in Done or Blocked, someone else's, or a move out of another worktree.
 - **`NO-MATCH`** — the argument named no open card in this repo, or named a pull request, and nothing
   was filed.
 - **`REFUSED-CLOSED`** — the card is closed.
@@ -232,20 +212,24 @@ Report these alongside, each only when it fires: `PICKED` (several matched and t
 `OPEN-IN-DONE` (open, but in Done) · `CLAIMED` (read back In Progress and assigned to the developer) ·
 `NO-BOARD-BLOCK` (no Status written) · `NOT-ASSIGNED` (the assign failed or did not hold) ·
 `CLAIM-FAILED` (a board write failed, or a read failed after filing, and the claim stopped) ·
-`READ-BACK-MISMATCH` (the claim did not read back as written, or could not be read) ·
+`READ-BACK-MISMATCH` (the claim did not read back as written, or could not be read) · `WORKTREE-CUT` (a
+new worktree, the session moved in) · `WORKTREE-ENTERED` (the card's existing worktree) ·
+`WORKTREE-FAILED` (the tool refused; the session stayed) ·
 `NO-DONE-WHEN` (the card says no way to tell when it is done) · `BUILD-PATH` (the repo's recorded build
 path chose the route) · `ROUTE-OVERRIDDEN` (the developer launched another route).
 
 Report `WROTE-NOTHING` on every run that made no write call before the launch: a stop before CLAIM, or a
-claim that found every write already made. A failed write is still a write call. It asserts that every
-call the run made was a read: the `gh api graphql` grant accepts a mutation document, and only the
+claim that found every write already made, for a card that needed no worktree cut. A failed write is still
+a write call, and a fetch or a cut worktree is a write. It asserts that every forge and git call the run
+made was a read: the `gh api graphql` grant accepts a mutation document, and only the
 invariants below forbid one.
 
 ## Invariants
 
-- **Write only the claim before the launch**: a filed card, its board item, the Status and an assignee.
-  No label, comment, branch, worktree or file. A launched route, inline included, writes under its own
-  rules.
+- **Write only the claim and the worktree before the launch**: a filed card, its board item, the Status,
+  an assignee, a fetch of the default branch, and a worktree the tool cuts. No label, comment or file. A launched route, inline
+  included, writes under its own rules.
+- **Use `ExitWorktree` only with `keep`, and never cut a second worktree for a card that has one.**
 - **Send only `query` documents through `gh api graphql`, never `mutation`.** Writes go through
   `gh issue create`, `gh project item-add`, `gh project item-edit` and `gh issue edit`.
 - **Use `gh issue create` only with `-R`, `--title` and `--body ''`.**

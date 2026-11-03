@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-11
 
-`LAUNCHED` · `CLAIMED`
+`LAUNCHED` · `CLAIMED` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,13 +8,14 @@
 
 ## What must happen
 
-CLAIM adds nothing the board already holds, writes Status In Progress, assigns the developer, and reads both back: `CLAIMED`. ROUTE reads `inline` — one done-when item, nothing open. On the yes, the run prints its outcome tokens and ends; the session begins the fix, and no skill is invoked.
+CLAIM writes Status In Progress and assigns the developer, adding the card to the board where it is missing, and reads both back: `CLAIMED`. ROUTE reads `inline` — one done-when item, nothing open. On the yes, the run prints its outcome tokens and ends; the session begins the fix, and no skill is invoked. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 
 - Route a one-line fix through phil:edd.
 - Invoke a skill for an inline route.
 - Remove an assignee.
+- Launch the route, or begin an inline fix, before the session is in the new worktree.
 
 ## Why this fixture exists
 

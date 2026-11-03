@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-22
 
-`NOT-LAUNCHED` · `NOT-ASSIGNED`
+`NOT-LAUNCHED` · `NOT-ASSIGNED` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The read-back still runs, checking the Status only. The report reads `NOT ASSIGNED: Status In Progress — read back; assigning pmvanev failed: …`, quoting the error.
+The read-back still runs, checking the Status only. The report reads `NOT ASSIGNED: Status In Progress — read back; assigning pmvanev failed: …`, quoting the error. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

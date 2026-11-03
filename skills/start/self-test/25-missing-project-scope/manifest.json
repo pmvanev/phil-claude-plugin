@@ -5,7 +5,8 @@
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
-    "CLAIM-FAILED"
+    "CLAIM-FAILED",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "assign the developer after the failed Status write",

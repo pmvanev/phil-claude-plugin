@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-06
 
-`NOT-LAUNCHED` · `CLAIMED` · `NO-DONE-WHEN`
+`NOT-LAUNCHED` · `CLAIMED` · `NO-DONE-WHEN` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-CLAIM writes Status In Progress and skips the assign, because the developer is already assigned; it reads both back: `CLAIMED`. DONE WHEN reads `the card does not say` and names `/phil:groom-ask`. ROUTE reads `phil:work` — nobody would see the change.
+CLAIM writes Status In Progress and skips the assign, because the developer is already assigned; it reads both back: `CLAIMED`. DONE WHEN reads `the card does not say` and names `/phil:groom-ask`. ROUTE reads `phil:work` — nobody would see the change. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

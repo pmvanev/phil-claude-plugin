@@ -1,0 +1,17 @@
+{
+  "fixture_id": "START-SELFTEST-45",
+  "situation": "`/phil:start 95`. No folder under `.claude/worktrees/` starts `issue-95-`, but `.claude/worktrees/uploads-retry` is checked out on `fix/uploads-retry`, the head branch of the developer's open PR whose body names issue 95.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-ENTERED"
+  ],
+  "must_not": [
+    "miss the worktree because its folder name differs",
+    "cut a second worktree",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "D3's second rule: a worktree is the card's when it holds the branch of the developer's open pull request."
+}

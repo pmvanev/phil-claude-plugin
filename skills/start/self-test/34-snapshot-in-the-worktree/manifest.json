@@ -1,0 +1,20 @@
+{
+  "fixture_id": "START-SELFTEST-34",
+  "situation": "`/phil:start 80`, with card 80 already In Progress and assigned to `pmvanev`. The card's worktree `issue-80-phil-start` holds a `.session-handoff.md`.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-ENTERED",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "read the snapshot's exchanges",
+    "recommend a route",
+    "cut a second worktree",
+    "remove an assignee",
+    "write a Status the card already holds"
+  ],
+  "why_this_fixture_exists": "D2, AC4.3: a card with a snapshot is resumed, not started."
+}

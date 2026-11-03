@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-28
 
-`NOT-LAUNCHED` · `NOT-ASSIGNED`
+`NOT-LAUNCHED` · `NOT-ASSIGNED` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The report reads `NOT ASSIGNED: Status In Progress — read back; the assign exited 0 and pmvanev is not among the assignees`.
+The report reads `NOT ASSIGNED: Status In Progress — read back; the assign exited 0 and pmvanev is not among the assignees`. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-24
 
-`NOT-LAUNCHED` · `FILED` · `CLAIMED` · `NO-DONE-WHEN`
+`NOT-LAUNCHED` · `FILED` · `CLAIMED` · `NO-DONE-WHEN` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-CLAIM adds nothing the board already holds, writes Status In Progress, assigns the developer, and reads both back: `CLAIMED`. The run files `retry flaky uploads` with `gh issue create`, its title as typed and its body empty. CLAIM's first step adds it to the board in the same breath; the claim then writes Status, assigns the developer and reads both back. DESCRIBE reports `NO-DONE-WHEN` and names `/phil:groom-ask`.
+The run files `retry flaky uploads` with `gh issue create`, its title as typed and its body empty. CLAIM's first step adds it to the board in the same breath; the claim then writes Status, assigns the developer and reads both back. DESCRIBE reports `NO-DONE-WHEN` and names `/phil:groom-ask`. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-14
 
-`NOT-LAUNCHED` · `ANOTHERS-CARD` · `CLAIMED`
+`NOT-LAUNCHED` · `ANOTHERS-CARD` · `CLAIMED` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-On go on, CLAIM writes Status In Progress and adds `pmvanev` beside `colleague`, reading both back — `colleague` still among the assignees: `CLAIMED: … assigned to pmvanev beside colleague — read back`.
+On go on, CLAIM writes Status In Progress and adds `pmvanev` beside `colleague`, reading both back — `colleague` still among the assignees: `CLAIMED: … assigned to pmvanev beside colleague — read back`. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-26
 
-`NOT-LAUNCHED` · `CLAIM-FAILED`
+`NOT-LAUNCHED` · `CLAIM-FAILED` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The report reads `CLAIM FAILED: item-add exited 0 and the card is on no board item`. No Status write runs.
+The report reads `CLAIM FAILED: item-add exited 0 and the card is on no board item`. No Status write runs. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

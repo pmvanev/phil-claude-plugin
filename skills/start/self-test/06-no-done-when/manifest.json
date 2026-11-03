@@ -6,7 +6,8 @@
   ],
   "expected_report_lines": [
     "CLAIMED",
-    "NO-DONE-WHEN"
+    "NO-DONE-WHEN",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "write a done-when criterion of its own",

@@ -1,9 +1,10 @@
 """`commands/start.md` loads `skills/start/SKILL.md`; together they carry start-work's slice 01 and 02
-decisions.
+decisions, and slice 03's.
 
 Slice 01 is the start report: it resolves the argument to one open card, applies the refusals, describes
 the card and recommends a route. Slice 02 claims the card before the description: In Progress, assigned
-to the signed-in account, both read back. Each test pins one decision from
+to the signed-in account, both read back. Slice 03 moves the session into the card's worktree, or hands
+a card already underway to `/phil:resume`. Each test pins one decision from
 `docs/feature/start-work/feature-delta.md` as a string the prose must keep. A test cannot prove a run
 obeys the sentence; it proves the sentence is still there to obey, and it fails when someone deletes it.
 """
@@ -130,7 +131,7 @@ def test_the_description_invents_nothing():
 def test_the_route_rules_apply_in_order():
     """D9, AC2.2: the repo's recorded build path comes first, then the wave label and nWave artifacts,
     then visible versus invisible, then size."""
-    _, body = _parts(SKILL)
+    body = _route()
     order = ["The repo's recorded build path", "The card's wave", "Who would see the change",
              "Whether it fits one sitting"]
     found = [body.find(rule) for rule in order]
@@ -141,7 +142,7 @@ def test_the_route_rules_apply_in_order():
 
 def test_the_wave_table_is_read_never_restated():
     """`phil:nwave-issue-board` owns the wave to command table."""
-    _, body = _parts(SKILL)
+    body = _route()
     assert "${CLAUDE_PLUGIN_ROOT}/skills/nwave-issue-board/SKILL.md" in body
     named = set(re.findall(r"/nw-[a-z]+", body))
     assert len(named) <= 1, f"{named}: the table is restated; read it from its owner"
@@ -158,7 +159,7 @@ def test_only_the_claim_is_written_before_the_launch():
     """skill-reviewer and plugin-validator, 2026-11-03: an unscoped "Write nothing" contradicted the
     inline route, which edits files once the developer says yes. Slice 02 adds the claim."""
     for path in (SKILL, COMMAND):
-        assert "Write only the claim before the launch" in _parts(path)[1], path.name
+        assert "Write only the claim and the worktree before the launch" in _parts(path)[1], path.name
     _, body = _parts(SKILL)
     assert "Send only `query` documents through `gh api graphql`, never `mutation`" in body
 
@@ -167,7 +168,7 @@ def test_every_bash_grant_is_used():
     """plugin-validator, 2026-11-03: `Bash(gh issue view:*)` was copied from `/phil:done` and never
     called."""
     front, _ = _parts(COMMAND)
-    body = _parts(SKILL)[1] + " " + _claim()
+    body = " ".join([_parts(SKILL)[1], _claim(), _worktree(), _route()])
     for grant in re.findall(r"Bash\(([^:)]+):\*\)", front["allowed-tools"]):
         assert grant in body, f"granted and never used: {grant}"
 
@@ -197,7 +198,7 @@ def test_every_early_stop_has_an_outcome():
 def test_inline_needs_a_stated_done_when():
     """skill-reviewer, 2026-11-03: rule 4 keyed on the run's own one-sentence ASKS, so nearly every card
     went inline and fixture 06 contradicted the rules."""
-    _, body = _parts(SKILL)
+    body = _route()
     assert "DONE WHEN holds exactly one item the card states" in body
     assert "A `NO-DONE-WHEN` card never goes inline" in body
 
@@ -205,7 +206,7 @@ def test_inline_needs_a_stated_done_when():
 def test_a_build_path_names_a_command_and_skips_a_step_already_run():
     """skill-reviewer, 2026-11-03: "test first" read as a build path, and card 80 was sent back to
     nw-discuss after DISCUSS had run."""
-    _, body = _parts(SKILL)
+    body = _route()
     assert "A principle that names no command, such as \"test first\", is no build path" in body
     assert "name the rule's next step instead" in body
 
@@ -213,7 +214,7 @@ def test_a_build_path_names_a_command_and_skips_a_step_already_run():
 def test_no_skill_runs_before_the_yes():
     """skill-reviewer and plugin-validator, 2026-11-03: rule 2's fallback invoked nwave-slice-status
     before the yes, which runs git verbs this command does not grant and returns no wave."""
-    _, body = _parts(SKILL)
+    body = _route()
     assert "nwave-slice-status" not in body
     assert "A label the table has no row for goes on to rule 3" in body
 
@@ -221,13 +222,13 @@ def test_no_skill_runs_before_the_yes():
 def test_outcomes_print_before_the_launch():
     """skill-reviewer, 2026-11-03: a launched route runs on past the skill, so outcomes reported "when
     the run ends" never printed."""
-    _, body = _parts(SKILL)
+    body = _route()
     assert "Print the outcome tokens, then launch" in body
 
 
 def test_other_launches_only_a_named_route():
     """skill-reviewer, 2026-11-03: any text under Other launched something."""
-    _, body = _parts(SKILL)
+    body = _route()
     assert "Other naming no route is unanswered" in body
 
 
@@ -405,3 +406,159 @@ def test_wrote_nothing_counts_write_calls():
     """plugin-validator and skill-reviewer, 2026-11-03: fixture 25 wrote nothing but made a write call."""
     _, body = _parts(SKILL)
     assert "A failed write is still a write call" in body
+
+
+WORKTREE_REF = REPO / "skills" / "start" / "references" / "worktree.md"
+ROUTE_REF = REPO / "skills" / "start" / "references" / "route.md"
+
+
+def _route():
+    """ROUTE's rules live in their reference; the skill keeps the outline. Read both, so a rule that
+    drifts back into the skill still counts."""
+    return _parts(SKILL)[1] + " " + " ".join(ROUTE_REF.read_text().split())
+
+
+def test_the_skill_reads_its_route_reference_whole():
+    _, body = _parts(SKILL)
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/skills/start/references/route.md` whole before naming a route" in body
+
+
+def _worktree():
+    return " ".join(WORKTREE_REF.read_text().split())
+
+
+def test_the_grant_holds_the_worktree_tools_and_only_a_fetch_of_git_writes():
+    """D1: Claude Code's worktree tool cuts the worktree; git lists them and fetches the default branch.
+    Probed 2026-11-03: the tool runs with no grant in the default mode, so the grant declares it."""
+    front, _ = _parts(COMMAND)
+    tools = {t.strip() for t in front["allowed-tools"].split(",")}
+    for grant in ("EnterWorktree", "ExitWorktree", "Bash(git worktree list:*)", "Bash(git fetch:*)"):
+        assert grant in tools, grant
+    for broad in ("Bash(git worktree:*)", "Bash(git worktree add:*)", "Bash(git worktree remove:*)",
+                  "Bash(git:*)", "Bash(git push:*)", "Bash(git branch:*)"):
+        assert broad not in tools, broad
+
+
+def test_the_skill_reads_its_worktree_reference_whole():
+    _, body = _parts(SKILL)
+    assert "${CLAUDE_PLUGIN_ROOT}/skills/start/references/worktree.md` whole" in body
+
+
+def test_a_card_never_gets_a_second_worktree():
+    """D2, D3, AC4.2."""
+    wt = _worktree()
+    assert "Never cut a second worktree for a card that has one" in wt
+    assert "a name starting `issue-<n>-`" in wt
+    assert "the head branch of the developer's open pull request naming the card" in wt
+
+
+def test_several_candidate_worktrees_are_the_developers_pick():
+    """D3."""
+    assert "list each with its branch and its lock, and ask which to enter" in _worktree()
+
+
+def test_a_card_underway_goes_to_resume_and_no_other_route():
+    """D2, AC4.3."""
+    wt = _worktree()
+    assert "`UNDERWAY`" in wt and "name `/phil:resume` as the next step" in wt
+    assert "recommend no other route" in wt
+
+
+def test_a_session_in_another_worktree_moves_only_on_a_yes():
+    """AC4.4."""
+    assert "move the session only on the developer's yes" in _section("CHECK")
+
+
+def test_a_worktree_is_never_removed():
+    """Out of scope: removing a worktree is `/phil:done`'s call, which since 1.25.0 removes one its own
+    session made once it reads clean at the merged tip."""
+    wt = _worktree()
+    assert "`ExitWorktree` only with `keep`" in wt
+    assert "ExitWorktree` only with `keep`" in _section("Invariants")
+
+
+def test_the_run_fetches_because_the_tool_may_not():
+    """plugin-validator, 2026-11-03, read from Claude Code 2.1.317's source: the tool fetches only when
+    the last fetch is a day old (`P$r=86400000`). The first probe ran on a clone that had never fetched,
+    so it always fetched there; a repo fetched today branched from a stale ref."""
+    wt = _worktree()
+    assert "`git fetch origin <default>`" in wt
+    assert "The tool fetches only when the last fetch is a day old" in wt
+    assert "The tool fetches before it branches" not in wt
+
+
+def test_the_base_is_checked_against_the_remotes_head():
+    """plugin-validator and skill-reviewer, 2026-11-03: comparing against the same stale local ref could
+    never see a stale base, and inferring `worktree.baseRef: head` blamed the wrong cause."""
+    wt = _worktree()
+    assert "Name the path, the branch and the base commit" in wt
+    assert "defaultBranchRef{ name target{ oid } }" in wt
+    assert "read `worktree.baseRef` from" in wt
+
+
+def test_a_worktree_another_session_holds_asks_first():
+    """Seen 2026-11-03: a worktree in use carries `locked claude session <name> (pid …)`."""
+    assert "`claude session <name> (pid <pid> …)` may be another live session" in _worktree()
+
+
+def test_a_refused_worktree_is_reported_never_worked_around():
+    wt = _worktree()
+    assert "`WORKTREE-FAILED`" in wt and "quote the refusal" in wt
+
+
+def test_a_session_already_in_the_cards_worktree_moves_nowhere():
+    """skill-reviewer and plugin-validator, 2026-11-03: the second run, the brief's dogfood moment, asked
+    about its own session's lock and reported a move that never happened."""
+    assert "Call no tool and skip the lock ask, because the lock is this session's" in _worktree()
+
+
+def test_a_refused_enter_still_ends_underway():
+    """skill-reviewer and plugin-validator, 2026-11-03: a refusal sent an underway card to ROUTE."""
+    assert "A card underway still ends `UNDERWAY`" in _worktree()
+
+
+def test_any_locked_worktree_asks_first():
+    """skill-reviewer, 2026-11-03: only a `claude session` lock asked, and the rule sat after the bullet
+    that enters."""
+    wt = _worktree()
+    i = wt.find("Ask before entering any candidate whose entry has a `locked` line")
+    assert -1 < i < wt.find("**One worktree**")
+
+
+def test_a_surviving_branch_or_prunable_entry_is_handled():
+    """skill-reviewer, 2026-11-03: a leftover `worktree-issue-<n>-*` branch collided with the cut, and a
+    `prunable` entry counted as the card's."""
+    wt = _worktree()
+    assert "git rev-parse --symbolic --branches='worktree-issue-<n>-*'" in wt
+    assert "An entry marked `prunable` has lost its folder: it is not the card's" in wt
+
+
+def test_the_pull_request_search_reads_every_page():
+    """skill-reviewer, 2026-11-03: the first 20 hits could hide the card's pull request."""
+    assert "gh api graphql --paginate" in _worktree()
+
+
+def test_leaving_a_worktree_is_checked_before_a_cut():
+    """plugin-validator and skill-reviewer, 2026-11-03: ExitWorktree does nothing outside a session the
+    tool entered itself."""
+    assert "where it is not the main checkout, cut nothing and report `WORKTREE-FAILED`" in _worktree()
+
+
+def test_check_reads_the_worktree_reference_before_step_4():
+    """plugin-validator and skill-reviewer, 2026-11-03: step 4 used "the card's worktrees" before the
+    reference that defines them was read."""
+    check = _section("CHECK")
+    assert "Read `${CLAUDE_PLUGIN_ROOT}/skills/start/references/worktree.md` whole first" in check
+
+
+def test_a_failed_claim_goes_on_to_the_worktree():
+    """skill-reviewer, 2026-11-03: claim.md sent a failed claim straight to DESCRIBE, skipping WORKTREE,
+    so a route could launch in the main checkout."""
+    claim = _claim()
+    assert "Then go on to WORKTREE" in claim
+    assert "Then go on to DESCRIBE" not in claim
+
+
+def test_an_empty_slug_still_names_the_worktree():
+    """plugin-validator, 2026-11-03."""
+    assert "An empty slug names the worktree `issue-<n>`" in _worktree()

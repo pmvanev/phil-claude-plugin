@@ -6,7 +6,8 @@
   ],
   "expected_report_lines": [
     "OPEN-IN-DONE",
-    "NO-BOARD-BLOCK"
+    "NO-BOARD-BLOCK",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "promise that going on moves the card",

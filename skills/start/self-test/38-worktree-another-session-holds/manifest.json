@@ -1,0 +1,19 @@
+{
+  "fixture_id": "START-SELFTEST-38",
+  "situation": "`/phil:start 80`, with card 80 already In Progress and assigned to `pmvanev`. The card's worktree `issue-80-phil-start` reads `locked claude session issue-80-phil-start (pid 486892 …)`. The developer answers **don't enter**.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "enter the locked worktree without asking",
+    "cut a second worktree",
+    "unlock the worktree",
+    "remove an assignee",
+    "write a Status the card already holds"
+  ],
+  "why_this_fixture_exists": "Seen 2026-11-03 on this repo: a worktree another live session holds carries its lock reason."
+}

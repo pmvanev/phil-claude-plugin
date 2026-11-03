@@ -1,6 +1,6 @@
 # Expected — START-SELFTEST-13
 
-`NOT-LAUNCHED` · `OPEN-IN-DONE` · `CLAIMED`
+`NOT-LAUNCHED` · `OPEN-IN-DONE` · `CLAIMED` · `WORKTREE-CUT`
 
 ## Situation
 
@@ -8,7 +8,7 @@
 
 ## What must happen
 
-The report states the defect and, on go on, CLAIM moves the card from Done to In Progress and assigns the developer, reading both back: `CLAIMED`. It describes the card and recommends a route.
+The report states the defect and, on go on, CLAIM moves the card from Done to In Progress and assigns the developer, reading both back: `CLAIMED`. It describes the card and recommends a route. After CLAIM and before DESCRIBE, WORKTREE fetches the default branch, cuts `issue-<n>-<slug>` with EnterWorktree, moves the session in, and names its path, branch and base commit: `WORKTREE-CUT`.
 
 ## What must NOT happen
 

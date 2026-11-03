@@ -1,0 +1,20 @@
+{
+  "fixture_id": "START-SELFTEST-41",
+  "situation": "`/phil:start 80`, run from inside `.claude/worktrees/issue-80-phil-start`, with card 80 already In Progress and assigned to `pmvanev`. The worktree reads `locked claude session issue-80-phil-start (pid …)`: this session's own lock.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-ENTERED",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "ask whether to enter a worktree another session holds",
+    "call EnterWorktree",
+    "report that the session moved in",
+    "recommend a route",
+    "write a Status the card already holds"
+  ],
+  "why_this_fixture_exists": "skill-reviewer and plugin-validator, 2026-11-03: the second run, the slice brief's dogfood moment, had no rule."
+}

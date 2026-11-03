@@ -5,12 +5,14 @@
     "LAUNCHED"
   ],
   "expected_report_lines": [
-    "CLAIMED"
+    "CLAIMED",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "route a one-line fix through phil:edd",
     "invoke a skill for an inline route",
-    "remove an assignee"
+    "remove an assignee",
+    "launch the route, or begin an inline fix, before the session is in the new worktree"
   ],
   "why_this_fixture_exists": "D9 rule 4: a card that fits one sitting goes inline, overriding rule 3."
 }

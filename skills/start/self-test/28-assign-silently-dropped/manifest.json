@@ -5,7 +5,8 @@
     "NOT-LAUNCHED"
   ],
   "expected_report_lines": [
-    "NOT-ASSIGNED"
+    "NOT-ASSIGNED",
+    "WORKTREE-CUT"
   ],
   "must_not": [
     "report CLAIMED on the assign's exit code",
