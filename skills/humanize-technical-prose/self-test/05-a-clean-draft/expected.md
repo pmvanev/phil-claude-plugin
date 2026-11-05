@@ -1,6 +1,6 @@
 # Expected — HTP-SELFTEST-05
 
-`NOTHING-CHANGED`
+`NOTHING-CHANGED` · `VOICE-SKIPPED`
 
 ## What must happen
 

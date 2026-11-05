@@ -1,10 +1,10 @@
 # Expected — HTP-SELFTEST-09
 
-`PROFILE-NOT-BUILT` · `TRANSCRIPT-REFUSED`
+`PROFILE-NOT-BUILT` · `SAMPLE-REFUSED`
 
 ## What must happen
 
-The script refuses the run. `TRANSCRIPT-REFUSED` lists `session.jsonl`, and the report says no
+The script refuses the run. `SAMPLE-REFUSED` lists `session.jsonl` as a transcript, and the report says no
 profile was built, so the author can name the samples again without the transcript.
 
 ## What must NOT happen

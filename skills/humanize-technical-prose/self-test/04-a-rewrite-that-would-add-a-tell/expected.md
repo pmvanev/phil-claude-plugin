@@ -1,6 +1,6 @@
 # Expected — HTP-SELFTEST-04
 
-`WROTE` · `TELLS-LEFT`
+`WROTE` · `VOICE-SKIPPED` · `TELLS-LEFT`
 
 ## What must happen
 

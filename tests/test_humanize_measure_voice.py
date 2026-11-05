@@ -273,6 +273,84 @@ def test_allocate_reads_the_named_profile(tmp_path):
     assert code == 0 and len(json.loads(out)["slips"]) == 2
 
 
+def test_sample_paths_are_stored_resolved_so_a_rebuild_works_from_anywhere(tmp_path, monkeypatch):
+    """Found by plugin-dev:plugin-validator, 2026-11-05: a relative path stored in a profile under ~/.claude
+    cannot be found again when the rebuild runs from another directory."""
+    _write(tmp_path, "a.md", FILLER * 30)
+    monkeypatch.chdir(tmp_path)
+    m = mv.build_measures(["a.md"])
+    assert m["samples"][0]["path"] == str(tmp_path / "a.md")
+
+
+def test_a_path_named_twice_counts_once(tmp_path, monkeypatch):
+    _write(tmp_path, "a.md", FILLER * 30)
+    monkeypatch.chdir(tmp_path)
+    m = mv.build_measures(["a.md", "./a.md", str(tmp_path / "a.md")])
+    assert len(m["samples"]) == 1
+
+
+def test_a_sentence_initial_name_is_kept_out_of_phrases(tmp_path):
+    """Found by plugin-dev:plugin-validator, 2026-11-05: 'Acme ships' survived because Acme opened the sentence."""
+    text = FILLER * 30 + "Acme ships on Fridays. Acme ships on Mondays. We met Acme early. " * 3
+    a = _write(tmp_path, "a.md", text)
+    b = _write(tmp_path, "b.md", text)
+    assert not any("acme" in p["phrase"] for p in mv.build_measures([a, b])["phrases"])
+
+
+def test_an_upper_case_transcript_extension_is_still_a_transcript(tmp_path):
+    t = _write(tmp_path, "SESSION.JSONL", '{"type": "user"}\n')
+    assert "transcript" in mv.refusal(t)
+
+
+@pytest.mark.parametrize("bad", [[], 3, "x", {"misspelling": [], "grammar": {}, "on_name_or_term": 0},
+                                 {"misspelling": {}, "grammar": {"omission": []}, "on_name_or_term": 0}])
+def test_a_tally_of_the_wrong_shape_is_refused_not_crashed(bad):
+    with pytest.raises(ValueError):
+        mv.check_tally(bad)
+
+
+def test_a_count_in_another_script_is_not_a_number(tmp_path):
+    env = _profile(tmp_path, "paper", TALLY)
+    code, _, _ = _run("--allocate", "paper", "²", env=env)
+    assert code == 2
+
+
+def test_an_unrecorded_mechanism_is_not_listed_as_held():
+    """Found by plugin-dev:skill-reviewer, 2026-11-05: `held` named 'misspelling: other', a kind no run can add."""
+    out = mv.allocate({"misspelling": {"other": 4}, "grammar": {}, "on_name_or_term": 0}, 2, True)
+    assert out["held"] == []
+
+
+def test_a_directory_sample_skips_hidden_directories_and_transcripts(tmp_path):
+    """Found by plugin-dev:skill-reviewer, 2026-11-05: naming ~ as a sample would pull in ~/.claude's notes."""
+    root = tmp_path / "home"
+    (root / ".claude" / "projects" / "p" / "memory").mkdir(parents=True)
+    _write(root / ".claude" / "projects" / "p" / "memory", "note.md", FILLER * 30)
+    _write(root, "essay.md", FILLER * 30)
+    assert [f.name for f in mv.files_of(root)] == ["essay.md"]
+
+
+def test_draft_mode_takes_one_file_and_nothing_else(tmp_path):
+    d = _write(tmp_path, "draft.md", FILLER)
+    code, _, _ = _run("--draft", d, "extra.md")
+    assert code == 2
+
+
+def test_list_names_the_directory_and_each_profile_with_its_samples(tmp_path):
+    env = _profile(tmp_path, "paper", TALLY)
+    (tmp_path / "profiles" / "paper.json").write_text(json.dumps(
+        {"name": "paper", "samples": [{"path": "/x/a.md", "words": 900}], "slips": TALLY}))
+    code, out, _ = _run("--list", env=env)
+    listing = json.loads(out)
+    assert code == 0 and listing["dir"] == str(tmp_path / "profiles")
+    assert listing["profiles"] == {"paper": {"samples": ["/x/a.md"]}}
+
+
+def test_list_with_no_profiles_says_so(tmp_path):
+    code, out, _ = _run("--list", env={"HTP_PROFILE_DIR": str(tmp_path / "none"), "PATH": "/usr/bin:/bin"})
+    assert code == 0 and json.loads(out)["profiles"] == {}
+
+
 def test_allocate_refuses_a_missing_profile_and_lists_the_ones_that_exist(tmp_path):
     env = _profile(tmp_path, "paper", TALLY)
     code, out, _ = _run("--allocate", "memo", "2", env=env)

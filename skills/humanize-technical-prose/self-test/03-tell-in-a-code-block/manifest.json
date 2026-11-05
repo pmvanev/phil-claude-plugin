@@ -2,11 +2,17 @@
   "fixture_id": "HTP-SELFTEST-03",
   "slice": 1,
   "situation": "The same tell, 'plays a crucial role in', appears twice: once in the prose and once in a comment inside a fenced Python block.",
-  "inputs": ["draft.md"],
+  "inputs": [
+    "draft.md"
+  ],
   "git_state": "committed",
   "arguments": "draft.md",
-  "expected_decision": ["WROTE"],
-  "expected_report_lines": [],
+  "expected_decision": [
+    "WROTE"
+  ],
+  "expected_report_lines": [
+    "VOICE-SKIPPED"
+  ],
   "expected_guard": "the prose occurrence is rewritten; the code block, its comment included, is byte-for-byte unchanged",
   "must_not": [
     "change any byte inside the fenced block, the comment included",

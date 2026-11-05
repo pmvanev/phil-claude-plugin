@@ -12,9 +12,11 @@ Usage:
   measure_voice.py --draft <file>                                   measure one draft: no floor, no phrases
   measure_voice.py --build <name> --slips <tally.json | -> <sample paths…>   write the profile
   measure_voice.py --allocate <name> <N> [--misspellings]          divide N slips among the profile's kinds
+  measure_voice.py --list                                          the profile directory and each profile's samples
 
-The profile lands in $HTP_PROFILE_DIR, or ~/.claude/humanize-technical-prose/profiles/ by default.
-Exit 0 on success, 2 on a refusal (a transcript, a bad name, a bad tally), printed as JSON.
+Profiles live in ~/.claude/humanize-technical-prose/profiles/; $HTP_PROFILE_DIR overrides it, for tests.
+Exit 0 on success. Exit 2 on a refusal (a transcript, a missing sample, a bad name, a bad tally), printed
+to standard output as JSON, or on a usage error, printed to standard error as this text.
 """
 import collections
 import datetime
@@ -181,6 +183,7 @@ def measure_text(prose):
 
 def _ngrams(sents):
     counts = collections.Counter()
+    names = {t.lower() for s in sents for t in words(s)[1:] if t[0].isupper()}
     for s in sents:
         toks = words(s)
         for n in (2, 3, 4):
@@ -189,7 +192,7 @@ def _ngrams(sents):
                 low = [t.lower() for t in gram]
                 if any(t in PLACEHOLDERS or re.search(r"\d", t) for t in gram):
                     continue
-                if any(t[0].isupper() and (i + j) > 0 for j, t in enumerate(gram)):
+                if any(t[0].isupper() and (i + j) > 0 for j, t in enumerate(gram)) or any(t in names for t in low):
                     continue
                 if all(t in STOP for t in low) or low[0] in EDGE_STOP or low[-1] in EDGE_STOP:
                     continue
@@ -214,8 +217,10 @@ def _phrases(per_sample):
 # --- samples -------------------------------------------------------------------------------------
 
 def refusal(path):
+    """Why a named sample cannot be read, or None. Any `.claude/projects/` directory counts, not only the
+    home one, on purpose: refusing a stray copy of a transcript costs less than reading one."""
     p = Path(path)
-    if p.suffix == ".jsonl" or ".claude/projects" in p.resolve().as_posix():
+    if p.suffix.lower() == ".jsonl" or "/.claude/projects/" in p.resolve().as_posix() + "/":
         return "a Claude Code transcript; the profile reads only documents the author names"
     if p.is_file() and p.suffix.lower() not in EXTENSIONS:
         return f"not Markdown, plain text or LaTeX ({p.suffix or 'no extension'})"
@@ -228,13 +233,16 @@ def files_of(path):
     """A named file, or every prose file under a named directory: either way, one sample."""
     path = Path(path)
     if path.is_dir():
-        return sorted(f for f in path.rglob("*") if f.suffix.lower() in EXTENSIONS and f.is_file())
+        return sorted(f for f in path.rglob("*")
+                      if f.is_file() and f.suffix.lower() in EXTENSIONS and refusal(f) is None
+                      and not any(part.startswith(".") for part in f.relative_to(path).parts))
     return [path]
 
 
 def build_measures(paths, floor=MIN_WORDS, phrases=True):
+    """Measure each named sample once, by its resolved path, so a profile under ~/.claude can find it again."""
     samples, thin, prose_all, per_sample = [], [], [], []
-    for sample in paths:
+    for sample in dict.fromkeys(str(Path(p).resolve()) for p in paths):
         prose = "\n\n".join(own_prose(f.read_text(errors="replace"), EXTENSIONS[f.suffix.lower()])
                             for f in files_of(sample))
         m = measure_text(prose)
@@ -259,8 +267,17 @@ def check_tally(tally):
         if not isinstance(v, int) or isinstance(v, bool) or v < 0:
             raise ValueError(f"{where} must be a whole number of zero or more")
 
+    def mapping(v, where):
+        if not isinstance(v, dict):
+            raise ValueError(f"{where} must be an object")
+
+    mapping(tally, "the tally")
     if set(tally) != {"misspelling", "grammar", "on_name_or_term"}:
         raise ValueError("a tally holds misspelling, grammar and on_name_or_term, and nothing else")
+    mapping(tally["misspelling"], "misspelling")
+    mapping(tally["grammar"], "grammar")
+    for cause, kinds in tally["grammar"].items():
+        mapping(kinds, f"grammar/{cause}")
     for k, v in tally["misspelling"].items():
         if k not in MISSPELLING_MECHANISMS:
             raise ValueError(f"unknown misspelling mechanism {k!r}")
@@ -305,7 +322,7 @@ def allocate(slips, n, misspellings):
         per_kind = _largest_remainder(groups[g], per_group[g])
         for k in sorted(per_kind, key=lambda k: (-groups[g][k], k)):
             drawn.extend({"class": g, "kind": k} for _ in range(per_kind[k]))
-    held = [f"misspelling: {k}" for k, c in slips.get("misspelling", {}).items() if c]
+    held = [f"misspelling: {k}" for k, c in slips.get("misspelling", {}).items() if c and k != "other"]
     held += [f"{cause}: {k}" for cause, kinds in slips.get("grammar", {}).items() for k, c in kinds.items() if c]
     total = sum(slips.get("misspelling", {}).values()) + sum(
         c for kinds in slips.get("grammar", {}).values() for c in kinds.values())
@@ -326,11 +343,26 @@ def _refuse(items):
     return 2
 
 
+def list_profiles(env):
+    d = profile_dir(env)
+    profiles = {}
+    for p in sorted(d.glob("*.json")) if d.is_dir() else []:
+        try:
+            samples = [s["path"] for s in json.loads(p.read_text()).get("samples", [])]
+        except (ValueError, KeyError, TypeError):
+            samples = None
+        profiles[p.stem] = {"samples": samples}
+    return {"dir": str(d), "profiles": profiles}
+
+
 def main(argv):
+    if argv == ["--list"]:
+        print(json.dumps(list_profiles(os.environ), indent=2))
+        return 0
     if len(argv) in (3, 4) and argv[0] == "--allocate":
         name, count = argv[1], argv[2]
         flags = argv[3:]
-        if not NAME.match(name) or not count.isdigit() or flags not in ([], ["--misspellings"]):
+        if not NAME.match(name) or not (count.isascii() and count.isdigit()) or flags not in ([], ["--misspellings"]):
             print(__doc__, file=sys.stderr)
             return 2
         path = profile_dir(os.environ) / f"{name}.json"
@@ -342,7 +374,7 @@ def main(argv):
         slips = json.loads(path.read_text())["slips"]
         print(json.dumps(allocate(slips, int(count), flags == ["--misspellings"]), indent=2))
         return 0
-    if len(argv) >= 2 and argv[0] == "--draft":
+    if len(argv) == 2 and argv[0] == "--draft":
         why = refusal(argv[1])
         if why:
             return _refuse([{"path": argv[1], "why": why}])

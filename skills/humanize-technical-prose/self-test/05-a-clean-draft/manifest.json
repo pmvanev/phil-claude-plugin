@@ -2,11 +2,17 @@
   "fixture_id": "HTP-SELFTEST-05",
   "slice": 1,
   "situation": "A committed three-sentence note with no tell and no whiff cluster. No profile and no slip count are given.",
-  "inputs": ["draft.md"],
+  "inputs": [
+    "draft.md"
+  ],
   "git_state": "committed",
   "arguments": "draft.md",
-  "expected_decision": ["NOTHING-CHANGED"],
-  "expected_report_lines": [],
+  "expected_decision": [
+    "NOTHING-CHANGED"
+  ],
+  "expected_report_lines": [
+    "VOICE-SKIPPED"
+  ],
   "expected_guard": "the report says no tell was found and the draft is unchanged",
   "must_not": [
     "edit the draft",

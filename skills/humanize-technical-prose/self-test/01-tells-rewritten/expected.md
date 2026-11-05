@@ -1,6 +1,6 @@
 # Expected — HTP-SELFTEST-01
 
-`WROTE`
+`WROTE` · `VOICE-SKIPPED`
 
 ## What must happen
 

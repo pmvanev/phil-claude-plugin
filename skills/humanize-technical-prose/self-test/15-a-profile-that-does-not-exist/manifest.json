@@ -2,12 +2,21 @@
   "fixture_id": "HTP-SELFTEST-15",
   "slice": 3,
   "situation": "The run names `--profile memo --slips 2` on fixture 01's draft, but only formal and essay exist in the profiles directory.",
-  "inputs": ["../01-tells-rewritten/draft.md", "../11-voice-toward-formal/profile-formal.json", "../11-voice-toward-formal/profile-essay.json"],
+  "inputs": [
+    "../01-tells-rewritten/draft.md",
+    "../11-voice-toward-formal/profile-formal.json",
+    "../11-voice-toward-formal/profile-essay.json"
+  ],
   "git_state": "committed",
   "arguments": "draft.md --profile memo --slips 2",
-  "expected_decision": ["WROTE"],
-  "expected_report_lines": ["VOICE-SKIPPED"],
-  "expected_guard": "the tells pass runs and rewrites as in fixture 01; the voice and slip passes are skipped; VOICE-SKIPPED says no profile named memo exists and lists formal and essay",
+  "expected_decision": [
+    "WROTE"
+  ],
+  "expected_report_lines": [
+    "VOICE-SKIPPED",
+    "SLIPS-SKIPPED"
+  ],
+  "expected_guard": "the tells pass runs and rewrites as in fixture 01; the voice and slip passes are skipped; VOICE-SKIPPED says no profile named memo exists and lists formal and essay; SLIPS-SKIPPED says 2 slips were asked for with no profile to draw from",
   "must_not": [
     "fall back to formal, essay or any other profile",
     "add slips without a profile to draw their kinds from",

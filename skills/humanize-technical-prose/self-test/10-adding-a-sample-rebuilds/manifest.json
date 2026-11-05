@@ -1,11 +1,17 @@
 {
   "fixture_id": "HTP-SELFTEST-10",
   "slice": 2,
-  "situation": "A profile named plain already exists, built from sample a alone (existing-profile.json stands in for ~/.claude/humanize-technical-prose/profiles/plain.json). The author runs `--build-profile plain ../07-profile-from-two-samples/b.md`, naming only the new sample.",
-  "inputs": ["existing-profile.json", "../07-profile-from-two-samples/a.md", "../07-profile-from-two-samples/b.md"],
+  "situation": "A profile named plain already exists, built from sample a alone (existing-profile.json stands in for ~/.claude/humanize-technical-prose/profiles/plain.json). The author runs `--build-profile plain ../07-profile-from-two-samples/b.md`, naming only the new sample. The stand-in stores its sample relative to this fixture; a real profile stores the resolved, absolute path, so a rebuild finds it from any directory.",
+  "inputs": [
+    "existing-profile.json",
+    "../07-profile-from-two-samples/a.md",
+    "../07-profile-from-two-samples/b.md"
+  ],
   "git_state": "not applicable: build mode edits no draft",
   "arguments": "--build-profile plain ../07-profile-from-two-samples/b.md",
-  "expected_decision": ["PROFILE-BUILT"],
+  "expected_decision": [
+    "PROFILE-BUILT"
+  ],
   "expected_report_lines": [],
   "expected_guard": "the profile is rebuilt from a and b together: both are measured, both are read for slips, and the report gives 2 samples",
   "must_not": [

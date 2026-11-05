@@ -115,7 +115,7 @@ _spec.loader.exec_module(measure_voice)
 def test_the_profile_reads_only_named_samples_and_never_a_transcript():
     build = _section("Step B: Build a Profile")
     assert "Never read a transcript" in build
-    assert "`TRANSCRIPT-REFUSED`" in build
+    assert "`SAMPLE-REFUSED`" in build
 
 
 def test_the_build_runs_the_measuring_script_by_plugin_root():
