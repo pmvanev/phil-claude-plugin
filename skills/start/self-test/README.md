@@ -12,6 +12,10 @@ Unless a fixture says otherwise, the repo is this one, its CLAUDE.md holds the b
 runs from the main checkout, and the card is open, on the board in Todo, and unassigned, with no
 worktree, no open pull request and no surviving branch.
 
+The `gitlab-` fixtures, 48–59, replace the repo with a GitLab one, `team/app` on `gitlab.example.dev`;
+each states its forge line and status family, and each forbids AC5.9's four traps and a stop for the
+forge.
+
 | Fixture | Terminal | Alongside | Pins |
 |---|---|---|---|
 | `01-several-matches` | `NOT-LAUNCHED` | `PICKED`, `CLAIMED`, `BUILD-PATH`, `WORKTREE-CUT` | AC1.1, and issue 80's first fixture behaviour: an ambiguous argument lists candidates instead of picking one |
@@ -61,3 +65,15 @@ worktree, no open pull request and no surviving branch.
 | `45-worktree-by-pr-branch` | `UNDERWAY` | `CLAIMED`, `WORKTREE-ENTERED` | D3's second rule: a worktree is the card's when it holds the branch of the developer's open pull request |
 | `46-prunable-entry` | `NOT-LAUNCHED` | `CLAIMED`, `WORKTREE-CUT` | skill-reviewer, 2026-11-03: a prunable entry counted as the card's, and entering it fails |
 | `47-exit-does-nothing` | `NOT-LAUNCHED` | `CLAIMED`, `WORKTREE-FAILED` | plugin-validator and skill-reviewer, 2026-11-03: ExitWorktree acts only on a worktree this session entered |
+| `48-gitlab-claim-cut-fresh` | `NOT-LAUNCHED` | `CLAIMED`, `WORKTREE-CUT` | AC5.1, and slice 04's learning hypothesis: the GitHub steps translate call for call, and only the claim changes shape |
+| `49-gitlab-another-assignee-kept` | `NOT-LAUNCHED` | `ANOTHERS-CARD`, `CLAIMED`, `WORKTREE-CUT` | D14, AC5.2: a login without `+` replaces every assignee and exits 0 |
+| `50-gitlab-no-in-progress-label` | `NOT-LAUNCHED` | `CLAIMED`, `WORKTREE-CUT` | D12, AC5.3: no label reads in progress, so the developer names it before any label is written |
+| `51-gitlab-closed-card` | `REFUSED-CLOSED` | `WROTE-NOTHING` | D15, AC5.4: the closed list is GitLab's Done |
+| `52-gitlab-blocked-label` | `STOPPED` | `WROTE-NOTHING` | D15, AC5.4: a blocked label asks, as Blocked does on GitHub |
+| `53-gitlab-merge-request-underway` | `UNDERWAY` | `CLAIMED`, `WROTE-NOTHING` | D18, AC5.5: the developer's open merge request means the work is underway |
+| `54-gitlab-no-status-family` | `NOT-LAUNCHED` | `NO-BOARD-BLOCK`, `WORKTREE-CUT` | D13, AC5.6: no status family writes no label and still assigns |
+| `55-gitlab-filed-on-a-yes` | `NOT-LAUNCHED` | `FILED`, `CLAIMED`, `NO-DONE-WHEN`, `WORKTREE-CUT` | D19, AC5.7: a card filed through `glab` carries only the developer's title |
+| `56-gitlab-open-with-a-done-label` | `STOPPED` | `OPEN-IN-DONE`, `WROTE-NOTHING` | AC5.4's third clause: an open card with a done label is a defect, asked |
+| `57-gitlab-free-another-assignee` | `NOT-LAUNCHED` | `ANOTHERS-CARD`, `NOT-ASSIGNED`, `WORKTREE-CUT` | skill-reviewer and plugin-validator, 2026-11-05: GitLab Free holds one assignee per issue |
+| `58-gitlab-label-not-on-the-project` | `NOT-LAUNCHED` | `CLAIM-FAILED`, `WORKTREE-CUT` | skill-reviewer and plugin-validator, 2026-11-05: `--label` with a missing name creates it and reads back as set |
+| `59-gitlab-several-in-progress-labels` | `STOPPED` | `WROTE-NOTHING` | D12, AC5.3's second clause: several matches are the developer's pick |

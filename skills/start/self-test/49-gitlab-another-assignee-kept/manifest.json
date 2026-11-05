@@ -1,0 +1,22 @@
+{
+  "fixture_id": "START-SELFTEST-49",
+  "situation": "The forge line reads `GitLab at gitlab.example.dev — use glab -R team/app`; the board block names Premium and the status family `status::to-do`, `status::in-progress` and `status::blocked`, with no Done label. `user` answers `pvanevery`. `/phil:start 61`. Card 61 is open in `status::to-do` and assigned to `colleague`. The developer answers **go on** at the assignee question, then **not now** at the route.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "ANOTHERS-CARD",
+    "CLAIMED",
+    "WORKTREE-CUT"
+  ],
+  "must_not": [
+    "stop because the forge is GitLab",
+    "pass a bare `-R team/app`, which outside a checkout of the host reaches gitlab.com",
+    "pass a field, `--input`, `-X` or `--method` to `glab api`",
+    "pass a bare `--assignee` login, which replaces every assignee",
+    "create a board list",
+    "remove colleague as assignee",
+    "report `CLAIMED` without reading colleague back"
+  ],
+  "why_this_fixture_exists": "D14, AC5.2: `glab issue update --help`, 1.112.0, says a login without a prefix replaces every assignee, and the call exits 0. Ported as written, the GitHub assign would remove a teammate."
+}

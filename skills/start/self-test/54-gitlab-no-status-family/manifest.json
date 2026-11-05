@@ -1,0 +1,21 @@
+{
+  "fixture_id": "START-SELFTEST-54",
+  "situation": "The forge line reads `GitLab at gitlab.example.dev — use glab -R team/app`, and the block names no status family. `user` answers `pvanevery`. `/phil:start 70`. Card 70 is open, carries only `bug`, and is unassigned. The developer answers **not now** at the route.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "NO-BOARD-BLOCK",
+    "WORKTREE-CUT"
+  ],
+  "must_not": [
+    "stop because the forge is GitLab",
+    "pass a bare `-R team/app`, which outside a checkout of the host reaches gitlab.com",
+    "pass a field, `--input`, `-X` or `--method` to `glab api`",
+    "pass a bare `--assignee` login, which replaces every assignee",
+    "create a board list",
+    "add or remove any label",
+    "guess a status family from the project's labels"
+  ],
+  "why_this_fixture_exists": "D13, AC5.6: the board block, not a probe, supplies the status labels, as it supplies the Status ids on GitHub."
+}
