@@ -7,13 +7,9 @@ card, and stops on a question of D1's three kinds.
 Story 2 · Decisions D1, D6, D9, D12.
 
 ## Pre-slice spike (D12) — done 2026-11-05
-`spike-d12/README.md` holds it. A `PreToolUse` hook on `AskUserQuestion` denies each ask during an
-autopilot run, giving a reason that carries D1's three kinds and the recommended option. The skill
-repeats the instruction for headless runs. Never pre-fill `answers`.
-
-The hook knows a run is active from hook events alone (spike row 8). `UserPromptSubmit` marks the
-session when the prompt starts with `/phil:autopilot`, keyed by `session_id`. The ask hook denies only
-in a marked session, and `Stop` clears the mark when the run's turn ends.
+`spike-d12/README.md` holds it. The skill carries the developer's standing prompt (D12), and ships no
+hook: the instruction alone took the recommendation in both headless and interactive sessions. Never
+pre-fill `answers`.
 
 ## IN scope
 - Answering by rule — the repo's `CLAUDE.md` and `AGENTS.md`, and the developer's saved preferences —

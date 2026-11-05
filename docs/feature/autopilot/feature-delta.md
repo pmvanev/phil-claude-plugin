@@ -121,15 +121,25 @@ plugin's existing rules.
 - **[D11] `commands/autopilot.md` declares `mutates: true`** — it writes to the forge and git
   (`scripts/check-readonly-commands.py`).
 
-- **[D12] A hook answers a launched route's questions by refusing them.** *(Settled by spike,
-  2026-11-05; see `spike-d12/README.md`.)* During an autopilot run, a `PreToolUse` hook on
-  `AskUserQuestion` denies every ask, giving a reason that names D1's three blocker kinds and the
-  recommended option. The run then stops on a blocker, or takes the recommendation and records it as
-  the hook's (D6). The hook never pre-fills `answers`: on Claude Code 2.1.318 that reads as "User
-  answered", a false record. The skill states the same instruction, because headless `claude -p` has
-  no question tool, so no hook fires there. The run is marked by hook events, not by a file the model
-  writes. `UserPromptSubmit` marks the session when the prompt starts with `/phil:autopilot`; `Stop`
-  clears the mark when the turn ends.
+- **[D12] The skill's own prompt answers a launched route's questions; no hook.** *(Developer's call,
+  2026-11-05, after the spike in `spike-d12/README.md`.)* The skill carries the developer's standing
+  prompt, quoted below. A route's question takes the recommendation, recorded on the card as the run's
+  (D6), unless it is one of D1's kinds. The instruction alone did this in a headless session and in an
+  interactive one with the question tool present (spike rows 2 and 9). A run that loses the instruction
+  leaves the question waiting for the developer, which costs time but makes no false record. The spike
+  also showed that a `PreToolUse` hook that denies the ask works, and keeps it on file in case runs show
+  the instruction failing. A hook that pre-fills `answers` must never ship: it reads as "User answered".
+
+  The developer's standing prompt, verbatim:
+
+  > proceed as independently as possible (through each wave if using nwave). keep the issue updated as
+  > you go. only stop if a blocker absolutely requires me, in which case do a phil:handoff after
+  > describing the blocker. clean up worktrees and branches as we finish with them. go with our
+  > recommendations to questions/options that arise unless you feel I really need to weight in. use
+  > chrome tools and known test credentials where possible to do your own walks/tests/checks.
+
+  Its "clean up worktrees and branches as we finish with them" predates D13. Under D13 the cleanup
+  is `/phil:done`'s, run by the developer after inspecting.
 
 - **[D13] Done is the developer's.** *(Developer's answer, 2026-11-05.)* The developer inspects and
   approves the work before anything calls it done, so autopilot never runs `/phil:done` and never closes

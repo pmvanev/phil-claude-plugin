@@ -21,17 +21,21 @@ denies or pre-fills the ask by `SPIKE_MODE`.
 Each interactive row is one run, with one model. Rows 6 and 7 show that the deny reason can carry the
 classification; they do not measure how reliable it is.
 
+| 9 | interactive | the orchestrator's instructions only, no hook, question tool present | It took `Blue (Recommended)`, called no question tool, logged the decision, and reported "Decided by me. The developer is away." |
+
 ## Conclusion
 
-Answer a launched route's questions with a `PreToolUse` hook on `AskUserQuestion` that **denies** each
-ask during an autopilot run. Its reason names D1's three blocker kinds and the recommended option.
-Never pre-fill `answers`: the answer would read as the developer's. Keep the same instruction in the
-skill, because a headless run has no question tool and so no hook fires.
+**Bake the instruction into the skill; ship no hook** (the developer's call, 2026-11-05, after row 9).
+The instructions alone handled a launched skill's ask in both kinds of session: headless (row 2) and
+interactive with the tool present (row 9). The developer's standing prompt already says it: "go with
+our recommendations to questions/options that arise unless you feel I really need to weigh in". If a
+long run loses the instruction, the question waits for the developer, which costs time but makes no
+false record.
 
-Gate the hook on hook events, not on a file the model writes. `UserPromptSubmit` marks the session
-when its prompt starts with `/phil:autopilot`. The ask hook denies only in a marked session. `Stop`
-clears the mark when the run's turn ends (row 8). The mark is keyed by `session_id`, so a crashed run
-cannot silence asks in another session.
+What rows 3–8 established stays on file in case runs show the instruction failing. A `PreToolUse`
+hook that **denies** the ask, naming the recommendation and D1's kinds, works; one that pre-fills
+`answers` reads as "User answered" and must never ship. Hook events alone can gate such a hook to the
+run's own turn: `UserPromptSubmit` marks the session and `Stop` clears it.
 
 ## Rerun
 
@@ -43,6 +47,7 @@ python3 tmux_run.py i2-answer answer "/spikeap:auto"
 python3 tmux_run.py i3-blocker deny-classify "/spikeap:auto-blocker"
 python3 show.py i3-blocker
 python3 tmux_gate.py                                            # row 8: the session gate
+python3 tmux_run.py i5-instructed off "/spikeap:auto-instructed"  # row 9: instructions, interactive
 ```
 
 Each run writes to `runs/<name>/`. The interactive driver accepts the folder-trust dialog, which
