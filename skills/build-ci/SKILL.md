@@ -3,6 +3,8 @@ name: build-ci
 description: This skill should be used when the user asks to "set up CI", "set up GitLab CI", "set up GitHub Actions CI", "write our .gitlab-ci.yml", "only run pipelines for MRs", "make the pipeline match our CI policy", "tell the team when main breaks", "notify us when the main pipeline fails", "tell the author when their pipeline fails", "comment on the MR when CI fails", "add a deploy job", "deploy to staging and production", "promote to production", "roll back a deploy", "speed up the pipeline", "why is CI slow", "find what CI builds twice", or runs /phil:build-ci. It declares the CI policy, builds the pipeline to it, lints it, wires a red-main alert, names whoever started a failed pipeline, deploys, by digest, the one image built after its gates pass, and asks before changing a forge setting; --speed ranks speed-ups on the measured critical path, and --rework finds artifacts built twice.
 ---
 
+<!-- glab-host-exempt: every call runs inside the project's own checkout, where glab takes the host and :id from the remote -->
+
 # Build CI
 
 Build a project's pipeline to a declared policy, then prove it with the trigger matrix. Read

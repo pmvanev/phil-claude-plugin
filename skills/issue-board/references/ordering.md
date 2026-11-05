@@ -19,7 +19,7 @@ followed.
 
 | | Position is | Set with | Read back with |
 |---|---|---|---|
-| GitLab board | the issue's `relative_position` | `PUT …/issues/:iid/reorder` (REST), per *GitLab reorders over REST* | `glab issue list --order relative_position --sort asc --label <column>` |
+| GitLab board | the issue's `relative_position` | `PUT projects/<id>/issues/<iid>/reorder` (REST), per *GitLab reorders over REST* | `glab issue list -R https://<host>/<group/project> --order relative_position --sort asc --label <column>` |
 | GitHub Projects v2 | the item's position in the project | `updateProjectV2ItemPosition` (GraphQL) | `gh api graphql`, per *Verify the end state* in `SKILL.md` |
 | A plain issue list, either forge | nothing | — | — |
 
@@ -41,7 +41,7 @@ gh api graphql -f query='mutation($p:ID!,$i:ID!,$a:ID){
 **Use this, not GraphQL.** Exercised 2026-08-12 against a self-hosted 18.x Premium instance:
 
 ```sh
-glab api --method PUT "projects/<id>/issues/<iid>/reorder" -f move_after_id=<issue id>
+glab api --hostname <host> --method PUT "projects/<id>/issues/<iid>/reorder" -f move_after_id=<issue id>
 # or -f move_before_id=<issue id>
 ```
 
@@ -102,7 +102,7 @@ schema*. Exercise status, as of 2026-08-12:
 | `updateProjectV2ItemPosition`, `afterId` omitted → top | **yes** — `gh` 2.97.0 |
 | `updateProjectV2ItemPosition`, `afterId` → a specific sibling | **yes** |
 | `reprioritizeSubIssue`, `beforeId` and `afterId` | **yes**, both forms |
-| GitLab REST `PUT …/issues/:iid/reorder` | **yes** — 18.x Premium, both directions, repeatable |
+| GitLab REST `PUT projects/<id>/issues/<iid>/reorder` | **yes** — 18.x Premium, both directions, repeatable |
 | GitLab GraphQL `issueMoveList` | **no** — still schema-only, and superseded by the REST call above |
 
 Every form above landed correctly on the first attempt. Read that introspection section before running

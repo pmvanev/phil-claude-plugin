@@ -22,13 +22,17 @@ releases. An upstream release tarball drops a single binary into `~/.local/bin` 
 ## Always name the target repository
 
 ```sh
-glab issue update 12 -R group/project --label 'status::in-progress' --unlabel 'status::to-do'
+glab issue update 12 -R https://gitlab.example.com/group/project --label 'status::in-progress' --unlabel 'status::to-do'
 gh issue edit 12 -R owner/repo --add-label needs-review
 ```
 
 Both tools infer the project from the current directory's git remote. Issue #12 exists in every
 project, so running from the wrong directory mutates a different project's issue — successfully,
-with no error. Pass `-R` on every invocation.
+with no error. Pass `-R` on every invocation that takes it.
+
+On GitLab, a bare `-R group/project` names the project and not the host: from a directory with no
+checkout, `glab` 1.112.0 sent it to gitlab.com (2026-11-05). Pass the project's full URL to `-R`, or
+positionally to `glab repo view`, and `--hostname <host>` to every `glab api` call.
 
 ## Find the tier before choosing a convention
 
@@ -36,7 +40,7 @@ Two of GitLab's board mechanisms are gated behind Premium, and both fail silentl
 than erroring. Establish the tier first.
 
 ```sh
-glab api "groups/<group>/epics"   # 200 → Premium+ · 403 → Free · 404 → path wrong OR invisible to the token · 401 → not authenticated
+glab api --hostname <host> "groups/<url-encoded-group>/epics"   # 200 → Premium+ · 403 → Free · 404 → path wrong OR invisible to the token · 401 → not authenticated
 ```
 
 Only the 200 case is observed (against an 18.9.1-ee instance); the rest are inferred from GitLab's
@@ -172,8 +176,9 @@ This matters only for one-time seeding. Day-to-day work touches one issue at a t
 
 **Before asking any `glab` command for JSON, reporting a `glab` error, reading a GitLab schema, or
 connecting to a self-hosted instance — and on any certificate error from either CLI — read
-`references/gitlab-cli.md` whole.** Its JSON flag differs per subcommand, introspection returns the whole
-schema, and a certificate failure has two causes with different fixes.
+`references/gitlab-cli.md` whole.** A bare project path goes to gitlab.com, the JSON flag differs per
+subcommand, introspection returns the whole schema, and a certificate failure has two causes with
+different fixes.
 
 ## A status write can close the issue underneath you
 
@@ -263,7 +268,8 @@ cannot be discovered:
 ```markdown
 ## Issue board
 
-- Forge: GitLab at <host> (or GitHub) — use `glab -R <group/project>` (or `gh -R <owner/repo>`)
+- Forge: GitLab at <host> — use `-R https://<host>/<group/project>` on every `glab` call that takes
+  `-R`, and `--hostname <host>` on every `glab api` call | GitHub — use `gh -R <owner/repo>`
 - Project ID <id>, board ID <id>
 - Tier: Premium (scoped labels swap server-side; real `blocks` links) | Free (swap manually with
   `--unlabel`; `relates_to` only)
@@ -278,7 +284,7 @@ cannot be discovered:
   every nWave repo.
 - (Projects v2) Built-in workflows enabled: <none | auto-close on Done | auto-Done on close> —
   a status write is also an issue write when one is on; comment before setting Status
-- Docs root for links: `https://<host>/<project>/-/blob/<default-branch>/docs/` — `ADR-016` → `<docs root>adr/ADR-016.md`
+- Docs root for links: `https://<host>/<group/project>/-/blob/<default-branch>/docs/` — `ADR-016` → `<docs root>adr/ADR-016.md`
 - (nWave) see `phil:nwave-issue-board` for the artifact → issue mapping
 - (optional) <local task system> owns in-flight work; issues own the outward-facing tier
 ```

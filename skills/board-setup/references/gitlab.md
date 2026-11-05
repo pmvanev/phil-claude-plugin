@@ -6,10 +6,11 @@ detail and the fold-back, because one of the constants involved was wrong in thi
 ## The JSON flag differs per subcommand
 
 `phil:issue-board` once recorded a blanket rule — *"glab's JSON flag is `-O`; `-F` fails silently"* —
-which held for exactly one of the three calls this adapter makes. It now carries the per-subcommand
-table below.
+which held for exactly one of the three subcommands below. It now carries the per-subcommand table.
+The adapter calls `glab api` and `glab issue list`; `glab api --hostname <host> projects/<p>` returns what
+`glab repo view` would.
 
-Discovered 2026-08-17 when `glab api projects/… -O json` failed with
+Discovered 2026-08-17 when a `glab api` call given `-O json` failed with
 `Unknown shorthand flag: 'O' in -O`, then confirmed against `glab --help`:
 
 | Call | JSON flag | What the other flag means there |
@@ -26,6 +27,14 @@ It surfaced only because a refusal message was improved. The first version of `r
 `failed: ERROR` — `glab` prints a bare `ERROR` banner before the real message, and taking the first
 line of stderr got the banner. Once the extraction skipped non-informative lines, the real cause
 appeared immediately. **A refusal whose reason is uninformative hides the defect that caused it.**
+
+## Every call names the host
+
+Observed 2026-11-05 with `glab` 1.112.0, from a directory with no checkout, against a self-hosted
+project: the adapter's bare `-R <group/project>` and its `glab api` without `--hostname` went to
+gitlab.com and answered `404 Not Found` and `404 Project Not Found`. The adapter now passes
+`--hostname <host>` to `glab api` and `-R https://<host>/<group/project>` to `glab issue list`, and the
+forge line tells every later call to do the same.
 
 ## Unread is not empty, and on GitLab it matters more
 
@@ -49,12 +58,13 @@ either launders a failed read into content.
 Scoped labels and real `blocks` links are Premium. Writing a scoped-label convention on a Free
 instance documents a workflow the reader cannot perform, so the tier fact carries the *consequence*
 rather than the tier alone: on Free, board state is a `status::` label swapped by hand with
-`glab issue update --unlabel old --label new`.
+`glab issue update -R https://<host>/<group/project> --unlabel old --label new`.
 
 ## What remains unverified
 
-- **AC1/AC2 end-to-end** — a real GitLab region diffed against a real GitHub one. Blocked by the 401
-  on labels; the *shape* equality is verified mechanically (identical `template_field` sets) but the
-  rendered-region diff has not been run.
+- **AC1/AC2 end-to-end** — a real GitLab region diffed against a real GitHub one. The probe read a
+  self-hosted GitLab 18 project end to end on 2026-11-05, labels included; the *shape* equality is
+  verified mechanically (identical `template_field` sets), but the rendered-region diff has not been
+  run.
 - **AC5** — a real self-hosted connection failure. The retry logic is unit-tested, including that a
   401 is **not** retried, but no unreachable instance was available.

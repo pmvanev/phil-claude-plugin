@@ -1,5 +1,7 @@
 # The Andon and the Author Tier — Wiring
 
+<!-- glab-host-exempt: every call runs inside the project's own checkout, where glab takes the host and :id from the remote -->
+
 Two alerts carry out two policy fields. The **andon** tells the whole team when a default-branch pipeline
 fails (PIPE-25). **Tell-author** names whoever started a failed pipeline, and `inform` names them when a
 check meant only to inform fails (PIPE-26). Copy these forms, then fit job names, `needs:` lists and

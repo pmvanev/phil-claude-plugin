@@ -110,6 +110,9 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
   commits, pull requests or merge requests; take both forges' mechanics from `phil:issue-board`. A
   surface that covers only one forge says so in its own text, stops on the other with a named outcome, and
   has a card for the missing forge, as `/phil:start` does (decided 2026-11-03). No check enforces this.
+- Name the host on every `glab` call a surface teaches: `-R https://<host>/<group/project>`, and
+  `--hostname <host>` on `glab api`. `scripts/check-glab-host.py` enforces it outside `self-test/`.
+  Wound: from a directory with no checkout, a bare call went to gitlab.com (2026-11-05).
 - Once the content is settled, and before calling a task or issue done, run these passes unasked over
   every file it touched:
   - `/phil:harden-instructions` over a skill, its references, a command, an agent or a hook prompt; it
