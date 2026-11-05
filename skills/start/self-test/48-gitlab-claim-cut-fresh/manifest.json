@@ -1,0 +1,20 @@
+{
+  "fixture_id": "START-SELFTEST-48",
+  "situation": "The forge line reads `GitLab at gitlab.example.dev — use glab -R team/app`; the board block names Premium and the status family `status::to-do`, `status::in-progress` and `status::blocked`, with no Done label. `user` answers `pvanevery`. `/phil:start 58` from the main checkout. Card 58 is open, carries `status::to-do` and is unassigned, with no worktree, no open merge request and no surviving branch. The developer answers **not now** at the route.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT"
+  ],
+  "must_not": [
+    "stop because the forge is GitLab",
+    "pass a bare `-R team/app`, which outside a checkout of the host reaches gitlab.com",
+    "pass a field, `--input`, `-X` or `--method` to `glab api`",
+    "pass a bare `--assignee` login, which replaces every assignee",
+    "create a board list",
+    "run `gh project item-add` or any `gh` call"
+  ],
+  "why_this_fixture_exists": "AC5.1, and the slice's learning hypothesis: the GitHub steps translate call for call, and only the claim changes shape."
+}

@@ -60,8 +60,8 @@ assign no one else. An assign that exits 0 but reads back without `viewer.login`
 the forge may drop an assignee it will not accept without an error.
 
 With no board block, or a block missing any constant `../SKILL.md` lists, name `/phil:board-setup` and
-write no Status: skip steps 1 and 2, report `NO-BOARD-BLOCK`, and still assign. Never choose a Status
-option by its name: the block's option id is the only one the claim writes.
+write no Status: skip steps 1 and 2, report `NO-BOARD-BLOCK`, and still assign. On GitHub, never choose
+a Status option by its name: the block's option id is the only one the claim writes.
 
 ## The read-back
 

@@ -1,0 +1,21 @@
+{
+  "fixture_id": "START-SELFTEST-56",
+  "situation": "The forge line reads `GitLab at gitlab.example.dev — use glab -R team/app`; the board block names Premium and the status family `status::to-do`, `status::in-progress` and `status::done`. `user` answers `pvanevery`. `/phil:start 33`. Card 33's `state` reads `opened`, and it carries `status::done`. The developer answers **stop**.",
+  "expected_decision": [
+    "STOPPED"
+  ],
+  "expected_report_lines": [
+    "OPEN-IN-DONE",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "stop because the forge is GitLab",
+    "pass a bare `-R team/app`, which outside a checkout of the host reaches gitlab.com",
+    "pass a field, `--input`, `-X` or `--method` to `glab api`",
+    "pass a bare `--assignee` login, which replaces every assignee",
+    "create a board list",
+    "close or reopen the card",
+    "write a status label or assign anyone"
+  ],
+  "why_this_fixture_exists": "AC5.4's third clause, which skill-reviewer found unpinned on 2026-11-05: an open card with a done label reads two ways, as an open card in Done does on GitHub."
+}

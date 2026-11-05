@@ -415,14 +415,28 @@ The developer answered D12 on 2026-11-03. The others follow from that answer, th
   `projects/<p>/repository/branches/<default>`. The fetch, the cut, the entry and the lock ask stay
   as they are.
 - **[D19] Filing passes only the developer's title and an empty body**, through `glab issue create`
-  with `-R`, `--title`, `--description ''` and `--yes`. The empty description is unverified; settle
-  it at authoring.
+  with `-R`, `--title`, `--description ''` and `--yes`. Settled 2026-11-05 with `glab` 1.112.0
+  outside a terminal: `--description ''` gets past the non-interactive check and opens no editor;
+  without it `glab` refuses with `'--title' and '--description' (or '--template') required for
+  non-interactive mode`.
 - **[D20] The GitLab calls live in `skills/start/references/gitlab.md`**, read whole before RESOLVE
   wherever the forge line names GitLab. `SKILL.md` governs it, and the reference adds no outcome
   token. `commands/start.md` adds `glab api`, `jq`, `glab issue create` and `glab issue update` to its
   grant, and limits `glab issue update` to the status labels and `--assignee +<login>`.
 - **[D21] The report keeps its lines and names labels in place of Status.** For example:
   `CLAIMED: status::in-progress set, status::to-do removed, assigned to pvanevery — read back`.
+- **[D22] The search reads a single page of 21 results.** *(Settled at authoring, 2026-11-05.)* A
+  paginated `glab api` prints one array per page, so `length` counts each page alone. RESOLVE asks only
+  whether more than 20 matched, and a 21st entry on one page answers it. A live read against modive
+  showed GitLab's `search` matching every word, in any order.
+- **[D23] Review at authoring changed five calls.** *(skill-reviewer and plugin-validator,
+  2026-11-05.)* The claim reads the In Progress label with a GET before the swap, because `--label`
+  with a missing name creates it and still reads back as set; a `404 Label Not Found` is
+  `CLAIM-FAILED`. On Free, which holds one assignee per issue, another's card keeps its assignee and the
+  run reports `NOT-ASSIGNED`. The run reads `projects/<p>` first, so `404 Project Not Found` is
+  `CANNOT-RUN` and not a missing card. The merge-request read drops `search=`, so the `jq` pattern
+  alone finds the card. ROUTE reads `wave::<name>` as `wave: <name>`. The reference governs where it and
+  the GitHub files differ.
 
 ### Story 5 — Start a card on GitLab *(slice 04)*
 `job_id: pick-up-the-next-card`
@@ -460,7 +474,9 @@ Decision enabled: I take the recommended route, pick another, or fix a card that
 `gitlab-another-assignee-kept` (AC5.2) · 50 `gitlab-no-in-progress-label` (AC5.3) · 51
 `gitlab-closed-card` (AC5.4) · 52 `gitlab-blocked-label` (AC5.4) · 53
 `gitlab-merge-request-underway` (AC5.5) · 54 `gitlab-no-status-family` (AC5.6) · 55
-`gitlab-filed-on-a-yes` (AC5.7). Each forbids AC5.9's four.
+`gitlab-filed-on-a-yes` (AC5.7). Added at review (D23): 56 `gitlab-open-with-a-done-label`
+(AC5.4) · 57 `gitlab-free-another-assignee` · 58 `gitlab-label-not-on-the-project` · 59
+`gitlab-several-in-progress-labels` (AC5.3). Each forbids AC5.9's four.
 
 ### Outcome KPIs
 
