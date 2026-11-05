@@ -1247,3 +1247,58 @@ jobs:
     features: [start-work]
     # Not a facet of put-finished-work-down: that job ends the work; this one begins it. The two meet
     # at the worktree — this one cuts it, that one lists it for removal.
+
+  - id: ship-a-document-in-my-own-voice
+    # Registered by DISCUSS wave, feature: humanize-technical-prose (2026-11-05, issue 88)
+    job_story: >
+      When a technical document Claude helped draft is about to go out under my name, I want it to
+      read as I write — without the model's tells, in my word choice and rhythm for that register,
+      and with the slips a careful writer still makes — so the document is mine, not the model's.
+    dimensions:
+      functional: >
+        Strip the tells phil:ai-eos reports; reword the draft toward a profile built from documents I
+        wrote, chosen by register; add an exact number of slips of the kinds my own documents carry;
+        leave code, commands, identifiers, links, numbers, quotations and names untouched; report every
+        change and where it went.
+      emotional: >
+        Confidence that the document sounds like me and still says what the draft said; no worry
+        that a rewrite put a claim, a metaphor or a slip somewhere it does not belong.
+      social: >
+        A document colleagues read as mine; being the author in fact, not only by byline.
+    four_forces:
+      push: >
+        Measured 2026-11-05. The plugin finds tells (phil:ai-eos) and offers to fix them
+        (phil:red-team-prose), but a fixed draft still reads in Claude's voice. The obvious voice
+        sample is the developer's typed prompts: 2,950 of them across 30 projects, 56,230 words, with
+        a 13-word median, 86% starting lowercase and 41% ending with a stop. That is how the developer
+        gives instructions, not how they write. Documents written before AI assistance do carry the
+        voice. Two are the developer's alone: a 4,920-word essay (2017) and an 8,522-word thesis. They
+        agree on rhythm, with sentences
+        at a 17–19-word median, and split on register: the thesis has 0 contractions and 0 questions,
+        the essay 16 and 4. They also split on slips: the essay holds 29 misspellings and 4 grammar
+        slips, the thesis 5 and 24, probably because one was spell-checked and one was not. A
+        co-written 2014 paper of 2,730 words runs longer (a 22-word median), has no contractions or
+        questions, and holds 14 misspellings and 7 grammar slips.
+      pull: >
+        One command that takes a draft to the developer's own voice for the register in hand, using
+        samples the developer names, and reports exactly what it changed.
+      anxiety: >
+        (A) The rewrite puts words in my mouth: a claim, a metaphor or a joke the draft never held.
+        (B) A slip lands in code, a command, an identifier, a link, a number, a quotation or a name.
+        (C) The profile keeps a secret or a client detail from a sample.
+        (D) The voice pass reintroduces a tell the first pass removed.
+        (E) A later phil:eos or phil:red-team-prose run silently fixes the slips.
+      habit: >
+        Hand-editing the draft until it sounds right, or shipping it as drafted.
+    opportunity_score: not-scored   # single new job; priority by default
+    status: validated
+    personas: [blair-named-author]
+    features: [humanize-technical-prose]
+    # Not a facet of any existing job. phil:ai-eos and phil:red-team-prose serve a reviewer judging
+    # prose; this job serves the author shipping it. Load-bearing constraints (DISCUSS, 2026-11-05):
+    #   C1 The profile reads only samples the developer names, never transcripts.
+    #   C2 The profile stores counts and short favoured phrases, never a sentence or a slipped word.
+    #   C3 The voice pass rewords; it adds no claim, figure of speech, hook or analogy.
+    #   C4 Slips: zero unless counted, the kinds, mechanisms and causes the samples show, grammar
+    #      kinds unless misspellings are asked for, never in a protected span, each reported by
+    #      location, and any the protected spans forbid counted in the report.
