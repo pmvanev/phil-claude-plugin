@@ -1,0 +1,23 @@
+{
+  "name": "spelling",
+  "built": "2026-11-05",
+  "samples": [{"path": "notes/", "words": 900}],
+  "thin": [],
+  "measures": {
+    "words": 900,
+    "sentences": 52,
+    "sentence_length": {"median": 16, "mean": 17.3, "p10": 8, "p90": 29},
+    "short_sentences_per_100": 5.0,
+    "questions_per_100": 0.0,
+    "contractions_per_1000": 2.0,
+    "first_person_per_1000": 4.0,
+    "openers": {"the": 20.0, "it": 9.0},
+    "connectives": {"but": 3.0, "so": 2.0},
+    "phrases": []
+  },
+  "slips": {
+    "misspelling": {"dropped letter": 3, "wrong vowel": 4},
+    "grammar": {},
+    "on_name_or_term": 0
+  }
+}

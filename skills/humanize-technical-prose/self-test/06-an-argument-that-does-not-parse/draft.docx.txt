@@ -1,0 +1,2 @@
+Placeholder standing in for a Word document: the run is given `draft.docx`, an extension it does not
+edit, together with `--slips two`, a count that is not a whole number.

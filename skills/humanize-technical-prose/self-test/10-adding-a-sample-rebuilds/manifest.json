@@ -1,0 +1,24 @@
+{
+  "fixture_id": "HTP-SELFTEST-10",
+  "slice": 2,
+  "situation": "A profile named plain already exists, built from sample a alone (existing-profile.json stands in for ~/.claude/humanize-technical-prose/profiles/plain.json). The author runs `--build-profile plain ../07-profile-from-two-samples/b.md`, naming only the new sample. The stand-in stores its sample relative to this fixture; a real profile stores the resolved, absolute path, so a rebuild finds it from any directory.",
+  "inputs": [
+    "existing-profile.json",
+    "../07-profile-from-two-samples/a.md",
+    "../07-profile-from-two-samples/b.md"
+  ],
+  "git_state": "not applicable: build mode edits no draft",
+  "arguments": "--build-profile plain ../07-profile-from-two-samples/b.md",
+  "expected_decision": [
+    "PROFILE-BUILT"
+  ],
+  "expected_report_lines": [],
+  "expected_guard": "the profile is rebuilt from a and b together: both are measured, both are read for slips, and the report gives 2 samples",
+  "must_not": [
+    "replace the profile with one built from b alone",
+    "add b's counts to the old totals without re-measuring a",
+    "carry over a's old slip tally instead of reading a again",
+    "count a twice"
+  ],
+  "why_this_fixture_exists": "Adding a sample is the common case once a profile exists. Overwriting would silently lose the first sample, and summing old and new totals would double-count phrases that recur across them."
+}

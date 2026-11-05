@@ -1,0 +1,27 @@
+{
+  "name": "paper",
+  "built": "2026-11-05",
+  "samples": [{"path": "stopping-power-force-convergence/", "words": 2730}],
+  "thin": [],
+  "measures": {
+    "words": 2730,
+    "sentences": 126,
+    "sentence_length": {"median": 22, "mean": 22.7, "p10": 10, "p90": 37},
+    "short_sentences_per_100": 0.79,
+    "questions_per_100": 0.0,
+    "contractions_per_1000": 0.0,
+    "first_person_per_1000": 5.86,
+    "openers": {"the": 18.25, "in": 11.9, "a": 6.35, "as": 5.56, "this": 4.76, "it": 3.97, "with": 3.97},
+    "connectives": {"however": 0.79, "thus": 0.79},
+    "phrases": []
+  },
+  "slips": {
+    "misspelling": {"dropped letter": 6, "added letter": 4, "swapped letters": 2, "wrong vowel": 1, "wrong doubling": 1, "other": 0},
+    "grammar": {
+      "revision residue": {"doubled word": 1, "stray word": 1, "words out of order": 1},
+      "omission": {"dropped article": 1, "dropped word": 1},
+      "substitution": {"wrong word": 1, "wrong article": 1}
+    },
+    "on_name_or_term": 6
+  }
+}

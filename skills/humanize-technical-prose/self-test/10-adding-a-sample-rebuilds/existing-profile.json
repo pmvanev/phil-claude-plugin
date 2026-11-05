@@ -1,0 +1,14 @@
+{
+  "name": "plain",
+  "built": "2026-11-01",
+  "samples": [
+    {"path": "../07-profile-from-two-samples/a.md", "words": 640}
+  ],
+  "thin": [],
+  "measures": {"words": 640, "sentences": 38},
+  "slips": {
+    "misspelling": {"swapped letters": 1},
+    "grammar": {"revision residue": {"doubled word": 1}},
+    "on_name_or_term": 0
+  }
+}

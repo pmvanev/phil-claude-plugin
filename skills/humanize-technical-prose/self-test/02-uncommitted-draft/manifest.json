@@ -1,0 +1,18 @@
+{
+  "fixture_id": "HTP-SELFTEST-02",
+  "slice": 1,
+  "situation": "The draft is tracked, but its working copy differs from the last commit: the author edited it and has not committed. It holds one tell.",
+  "inputs": ["draft.md"],
+  "git_state": "modified since the last commit",
+  "arguments": "draft.md",
+  "expected_decision": ["REFUSED-UNCOMMITTED"],
+  "expected_report_lines": [],
+  "expected_guard": "the run names the file, says it has uncommitted changes, and writes nothing",
+  "must_not": [
+    "edit the draft, even to fix the tell",
+    "commit, stash or otherwise change the git state",
+    "offer to proceed without a commit",
+    "report the tell as if a run had happened"
+  ],
+  "why_this_fixture_exists": "The command edits in place, and the committed version is the only undo. Editing an uncommitted draft would mix the author's unsaved work with the run's changes, and `git checkout` would then throw away both."
+}

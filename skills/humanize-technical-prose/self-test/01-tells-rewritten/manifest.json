@@ -1,0 +1,25 @@
+{
+  "fixture_id": "HTP-SELFTEST-01",
+  "slice": 1,
+  "situation": "A committed design note holds six tells across four paragraphs: unearned significance, participle padding, promotional register, copulative avoidance, negative parallelism and a formulaic closer. It also holds an inline identifier, an environment variable, a dead-letter queue name, a number with its unit and a shell block.",
+  "inputs": [
+    "draft.md"
+  ],
+  "git_state": "committed",
+  "arguments": "draft.md",
+  "expected_decision": [
+    "WROTE"
+  ],
+  "expected_report_lines": [
+    "VOICE-SKIPPED"
+  ],
+  "expected_guard": "every tell is rewritten with the fix ai-eos's catalogue names, the re-check finds none, and the report lists each by line with its before and after",
+  "must_not": [
+    "change `MAX_RETRIES`, `INGEST_RETRY_BUDGET`, `ingest.deadletter`, the number 120 or anything in the shell block",
+    "add a fact the draft does not hold, such as a latency figure or who the downstream consumers are",
+    "keep the closing paragraph's vague optimism in another form",
+    "rewrite a sentence that holds no tell",
+    "claim anything about who wrote the draft"
+  ],
+  "why_this_fixture_exists": "The walking skeleton's happy path: the command's first pass on a real-shaped draft, with protected spans placed beside the tells so a careless rewrite would touch them."
+}

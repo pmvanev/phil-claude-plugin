@@ -1,0 +1,21 @@
+{
+  "fixture_id": "HTP-SELFTEST-07",
+  "slice": 2,
+  "situation": "Two samples of over 500 words each, written for this fixture in a plain first-person register. Sample a holds a client's name once ('The Halvorsen retainer'), a quotation from a colleague, and three seeded slips: 'recieve' (swapped letters), 'the the' (doubled word, revision residue) and nothing else. Sample b holds a fenced Python block and one seeded slip: 'it happen' (wrong form). Both use contractions nowhere and ask no question.",
+  "inputs": ["a.md", "b.md"],
+  "git_state": "not applicable: build mode edits no draft",
+  "arguments": "--build-profile plain a.md b.md",
+  "expected_decision": ["PROFILE-BUILT"],
+  "expected_report_lines": [],
+  "expected_guard": "the profile is written under ~/.claude/humanize-technical-prose/profiles/plain.json; its slip tally counts one swapped letters, one doubled word and one wrong form, with on_name_or_term at zero; the report gives both samples' word counts and the profile's path",
+  "must_not": [
+    "store 'halvorsen', 'retainer' or any phrase holding them",
+    "store any word of the colleague's quotation",
+    "store any word of the code block, or count it toward the sentence lengths",
+    "write 'recieve', 'the the' or 'happen' anywhere: not in the profile, the tally or the report",
+    "count 'travelling'-style spellings or the document's own comma style as slips",
+    "read any file the arguments did not name",
+    "write the profile inside the repository"
+  ],
+  "why_this_fixture_exists": "The build's whole contract in one run: measure only the author's own prose, keep a phrase only when it recurs and holds no name, and tally slips as counts. Each seeded detail is one the profile must not leak."
+}

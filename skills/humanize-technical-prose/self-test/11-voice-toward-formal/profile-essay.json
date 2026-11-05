@@ -1,0 +1,27 @@
+{
+  "name": "essay",
+  "built": "2026-11-05",
+  "samples": [{"path": "essay/", "words": 5682}],
+  "thin": [],
+  "measures": {
+    "words": 5682,
+    "sentences": 307,
+    "sentence_length": {"median": 17, "mean": 18.5, "p10": 8, "p90": 32},
+    "short_sentences_per_100": 5.21,
+    "questions_per_100": 1.3,
+    "contractions_per_1000": 3.17,
+    "first_person_per_1000": 1.76,
+    "openers": {"it": 9.12, "this": 5.21, "while": 2.28, "by": 1.95, "finally": 1.63, "these": 1.63, "unfortunately": 1.3},
+    "connectives": {"finally": 1.63, "unfortunately": 1.3, "however": 0.98, "perhaps": 0.98, "as a result": 0.98, "instead": 0.65, "fortunately": 0.65},
+    "phrases": [{"phrase": "could have", "count": 7, "samples": 1}, {"phrase": "points out", "count": 6, "samples": 1}]
+  },
+  "slips": {
+    "misspelling": {"dropped letter": 5, "added letter": 6, "swapped letters": 2, "wrong vowel": 9, "wrong doubling": 2, "other": 5},
+    "grammar": {
+      "revision residue": {"doubled word": 1, "stray word": 0, "words out of order": 1},
+      "omission": {"dropped article": 0, "dropped word": 1},
+      "substitution": {"wrong word": 0, "wrong form": 1, "number agreement": 0, "wrong article": 0, "punctuation or case": 0}
+    },
+    "on_name_or_term": 4
+  }
+}

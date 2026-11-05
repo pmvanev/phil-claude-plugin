@@ -1,0 +1,17 @@
+{
+  "fixture_id": "HTP-SELFTEST-06",
+  "slice": 1,
+  "situation": "The run is given a Word document and a slip count spelled as a word: `draft.docx --slips two`.",
+  "inputs": ["draft.docx.txt"],
+  "git_state": "committed",
+  "arguments": "draft.docx --slips two",
+  "expected_decision": ["REFUSED-ARGUMENT"],
+  "expected_report_lines": [],
+  "expected_guard": "the run names both problems, prints the usage line, and writes nothing",
+  "must_not": [
+    "convert the document or read it as text",
+    "read 'two' as 2",
+    "name only the first problem it finds"
+  ],
+  "why_this_fixture_exists": "The command edits files in place, so a guess about what an argument meant is an edit the author did not ask for."
+}

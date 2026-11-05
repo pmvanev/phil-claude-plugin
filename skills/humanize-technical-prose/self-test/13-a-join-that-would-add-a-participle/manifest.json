@@ -1,0 +1,18 @@
+{
+  "fixture_id": "HTP-SELFTEST-13",
+  "slice": 3,
+  "situation": "A tell-free paragraph of nine short sentences (a median near 6), reworded toward the formal profile's median of 17. Joining them is the only allowed move, and the easiest join adds a trailing participle: 'The job reads a failed call from the queue, waiting for the backoff to expire before retrying it.'",
+  "inputs": ["draft.md", "../11-voice-toward-formal/profile-formal.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile formal",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": [],
+  "expected_guard": "sentences are joined with 'and', 'then', 'so' or a subordinate clause, never with a trailing participle; where a join trips the detector at Step 5, the sentence goes back to its Step 3 form",
+  "must_not": [
+    "leave any trailing -ing clause bolted to a joined sentence",
+    "keep a participle join because the formal profile's samples contain participles",
+    "change 'ten minutes', 'six failures', 'dead-letter table' or 'each morning'",
+    "join sentences whose subjects differ in a way that changes which one acts"
+  ],
+  "why_this_fixture_exists": "The essay's own abstract carries a trailing participle, so a voice pass imitating the writer can bring back what the tells pass removed. Step 5 is what stops it, and this draft makes the participle the path of least resistance."
+}
