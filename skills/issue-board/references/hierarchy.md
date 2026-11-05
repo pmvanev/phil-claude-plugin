@@ -6,7 +6,7 @@ Part of the `issue-board` skill. Read it before writing or reading a blocking li
 
 - **GitLab Premium and above**: real link types — `blocks`, `is_blocked_by` — enforced by GitLab
   and rendered with backlinks on both sides. Prefer these. Created via
-  `glab api --method POST "projects/<id>/issues/<iid>/links" -f target_project_id=<id> -f target_issue_iid=<iid> -f link_type=blocks`
+  `glab api --hostname <host> --method POST "projects/<id>/issues/<iid>/links" -f target_project_id=<id> -f target_issue_iid=<iid> -f link_type=blocks`
   *(command form unverified — check whether your `glab` exposes a subcommand for this).*
 - **GitLab Free**: only `relates_to` is available; `blocks` and `is_blocked_by` are Premium and
   above. Use `relates_to` and carry the direction in a `Blocked by #N` line in the description.
@@ -97,7 +97,7 @@ on either to be the one displayed.
 REST payload — which makes it the one to reach for:
 
 ```sh
-glab api "projects/<id>/issues/<iid>" | jq .task_completion_status   # {"count":6,"completed_count":1}
+glab api --hostname <host> "projects/<id>/issues/<iid>" | jq .task_completion_status   # {"count":6,"completed_count":1}
 ```
 
 Verified against an 18.9.1-ee instance by parsing checkboxes out of raw descriptions and comparing:

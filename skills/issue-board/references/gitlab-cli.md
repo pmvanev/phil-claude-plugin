@@ -19,6 +19,19 @@ version), it is temporary, and it must be stated out loud in the transcript ever
 
 An expired certificate is a defect to fix, not a setting to work around.
 
+## Name the host on every call
+
+**Pass the project as its full URL, `https://<host>/<group/project>` — to `-R`, or positionally to
+`glab repo view` — and `--hostname <host>` to every `glab api` call.** Observed 2026-11-05 with
+`glab` 1.112.0, from a directory with no checkout, against a self-hosted project: the bare
+`repo view` and `issue list` went to gitlab.com and answered `404 Not Found`, and `glab api` without
+`--hostname` answered `404 Project Not Found`; the URL and `--hostname` forms read the project.
+
+In a `glab api` path, write a project or group as its numeric id or its URL-encoded path, every `/`
+as `%2F`. Never write
+`:id` or `:fullpath` outside a checkout of the host: `glab` fills them from the working directory's
+remote.
+
 ## `glab`'s JSON flag differs per subcommand — check before you type it
 
 **There is no blanket rule; check each subcommand.**
@@ -30,10 +43,10 @@ An expired certificate is a defect to fix, not a setting to work around.
 | `glab api` | **none** — prints JSON natively | `-O` is **rejected**: `Unknown shorthand flag: 'O' in -O` |
 
 ```sh
-glab issue list -R <group/project> --output json --per-page 100   # correct
-glab issue list -R <group/project> -F json                       # silently returns a table
-glab repo view <group/project> -F json                           # correct — -O is not a flag here
-glab api projects/<url-encoded-path>                             # correct — no output flag at all
+glab issue list -R https://<host>/<group/project> --output json --per-page 100   # correct
+glab issue list -R https://<host>/<group/project> -F json                       # silently returns a table
+glab repo view https://<host>/<group/project> -F json                           # correct — -O is not a flag here
+glab api --hostname <host> projects/<url-encoded-path>                          # correct — no output flag at all
 ```
 
 **On `issue list`, `-F json` does not error**: it returns the human-readable table. A caller that

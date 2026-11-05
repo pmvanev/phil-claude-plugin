@@ -22,7 +22,7 @@ steps:
     action: >
       Derive the forge and the repo from the git remote and CONFIRM with Robin rather than infer.
       Multiple remotes, a fork, or no forge remote at all produce a question or a stop, never a guess.
-    output: A named target — `gh -R <owner>/<repo>` or `glab -R <group>/<project>`
+    output: A named target — `gh -R <owner>/<repo>` or `glab -R https://<host>/<group>/<project>`
     emotion: >
       relief — issue #12 exists in every repo, so the one hazard that mutates a stranger's board
       successfully is closed before the first call

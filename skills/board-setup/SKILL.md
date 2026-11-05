@@ -419,7 +419,7 @@ Every step of *The flow* is built, on GitHub and GitLab. What remains open is ve
 | Open | Why | Recorded in |
 |---|---|---|
 | AC3's `ambiguous`-path asking (slice 01) | skipped by explicit decision; needs a session rooted in a two-remote checkout | slice 01 brief |
-| A real GitLab region diffed against a real GitHub one (slice 06 AC1–AC2) | `projects/X` reads unauthenticated but `projects/X/labels` returns 401, and on GitLab the label set *is* the board | slice 06 brief |
+| A real GitLab region diffed against a real GitHub one (slice 06 AC1–AC2) | the probe read a self-hosted project end to end on 2026-11-05, but no rendered GitLab region has been diffed against a GitHub one | slice 06 brief |
 | A real self-hosted connection failure (slice 06 AC5) | the retry is unit-tested; no unreachable instance was available | slice 06 brief |
 
 ## Acceptance
