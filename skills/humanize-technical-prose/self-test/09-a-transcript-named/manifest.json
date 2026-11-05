@@ -1,0 +1,17 @@
+{
+  "fixture_id": "HTP-SELFTEST-09",
+  "slice": 2,
+  "situation": "The author names a Claude Code transcript alongside a real sample: `--build-profile plain session.jsonl ../07-profile-from-two-samples/a.md`.",
+  "inputs": ["session.jsonl", "../07-profile-from-two-samples/a.md"],
+  "git_state": "not applicable: build mode edits no draft",
+  "arguments": "--build-profile plain session.jsonl ../07-profile-from-two-samples/a.md",
+  "expected_decision": ["PROFILE-NOT-BUILT"],
+  "expected_report_lines": ["TRANSCRIPT-REFUSED"],
+  "expected_guard": "the script refuses the run because a named path is a transcript; the report lists session.jsonl under TRANSCRIPT-REFUSED and builds nothing, so the author can name the samples again without it",
+  "must_not": [
+    "read the transcript's contents",
+    "build the profile from the other sample alone without saying the transcript was refused",
+    "measure typed prompts as prose"
+  ],
+  "why_this_fixture_exists": "Typed prompts measured as instructions, not prose: a 13-word median, 86% lowercase. The decision to read only named documents is enforced by the script, and this fixture is the place it fires."
+}

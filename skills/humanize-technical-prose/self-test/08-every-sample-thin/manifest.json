@@ -1,0 +1,18 @@
+{
+  "fixture_id": "HTP-SELFTEST-08",
+  "slice": 2,
+  "situation": "The only sample named is a release note of about forty words of own prose, far under the 500-word floor.",
+  "inputs": ["short.md"],
+  "git_state": "not applicable: build mode edits no draft",
+  "arguments": "--build-profile notes short.md",
+  "expected_decision": ["PROFILE-NOT-BUILT"],
+  "expected_report_lines": ["SAMPLE-THIN"],
+  "expected_guard": "the report names short.md with its word count under SAMPLE-THIN, says no profile was built, and nothing is written",
+  "must_not": [
+    "write a profile from a sample under the floor",
+    "lower the floor to fit the sample",
+    "read other files nearby to make up the words",
+    "tally slips from a sample that was not measured"
+  ],
+  "why_this_fixture_exists": "A profile from forty words would steer the voice pass with a median taken over three sentences. The floor exists so that a profile always rests on enough prose to mean something."
+}

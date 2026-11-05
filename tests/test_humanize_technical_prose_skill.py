@@ -100,3 +100,58 @@ def test_the_report_claims_nothing_about_authorship():
 
 def test_the_report_names_the_undo():
     assert "git checkout -- {file}" in _section("Step 7: Report")
+
+
+# --- slice 02: build a named profile from the author's own documents ---
+
+import importlib.util
+
+_spec = importlib.util.spec_from_file_location(
+    "measure_voice", REPO / "skills" / "humanize-technical-prose" / "scripts" / "measure_voice.py")
+measure_voice = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(measure_voice)
+
+
+def test_the_profile_reads_only_named_samples_and_never_a_transcript():
+    build = _section("Step B: Build a Profile")
+    assert "Never read a transcript" in build
+    assert "`TRANSCRIPT-REFUSED`" in build
+
+
+def test_the_build_runs_the_measuring_script_by_plugin_root():
+    build = _section("Step B: Build a Profile")
+    assert "python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --measure" in build
+    assert "--build {name} --slips -" in build
+
+
+def test_a_thin_sample_is_named_and_left_out():
+    assert "`SAMPLE-THIN`" in _section("Step B: Build a Profile")
+
+
+def test_adding_samples_rebuilds_from_all_of_them():
+    assert "rebuild it from every sample, old and new" in _section("Step B: Build a Profile")
+
+
+def test_the_slip_vocabulary_in_the_skill_is_the_one_the_script_accepts():
+    """The skill classifies and the script stores; a kind the one names and the other refuses is a run
+    that fails at the last step, after every sample was read."""
+    build = SKILL.read_text().split("## Step B: Build a Profile", 1)[1].split("\n## ", 1)[0]
+    mechanisms = set(re.findall(r"^\| misspelling \| ([a-z ]+) \|", build, flags=re.M))
+    assert mechanisms == measure_voice.MISSPELLING_MECHANISMS
+    for cause, kinds in measure_voice.GRAMMAR_CAUSES.items():
+        found = set(re.findall(r"^\| " + cause + r" \| ([a-z ]+) \|", build, flags=re.M))
+        assert found == kinds, f"{cause}: skill names {found}, script accepts {kinds}"
+
+
+def test_no_slipped_word_is_written_anywhere():
+    build = _section("Step B: Build a Profile")
+    assert "never write a slipped word" in build
+    assert "not in the profile, the tally or the report" in build
+
+
+def test_a_slip_on_a_name_or_technical_term_is_counted():
+    assert "`on_name_or_term`" in _section("Step B: Build a Profile")
+
+
+def test_when_unsure_a_word_is_not_a_slip():
+    assert "When unsure, it is not a slip" in _section("Step B: Build a Profile")

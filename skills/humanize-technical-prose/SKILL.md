@@ -61,10 +61,14 @@ Print exactly one terminal outcome on every run, and each report line that fires
 | `NOTHING-CHANGED` | the draft holds no tell, and no voice or slip pass changed it |
 | `REFUSED-UNCOMMITTED` | git does not have the draft committed as it stands |
 | `REFUSED-ARGUMENT` | the argument does not parse |
+| `PROFILE-BUILT` | `--build-profile` wrote the profile |
+| `PROFILE-NOT-BUILT` | no named sample held enough of the author's own prose to measure |
 
 | Report line | When |
 |-------------|------|
 | `TELLS-LEFT` | a tell remains after the re-check, with its line and why |
+| `SAMPLE-THIN` | a sample held too little own prose to measure and was left out, with its word count |
+| `TRANSCRIPT-REFUSED` | a named sample is a Claude Code transcript and was not read |
 
 ---
 
@@ -146,3 +150,102 @@ UNDO: git checkout -- {file}
 
 Omit an empty section. The report says what each pass did and claims nothing about who wrote the
 document. Whether to disclose AI assistance, where a venue asks, is the author's call.
+
+---
+
+## Step B: Build a Profile
+
+`--build-profile <name> <sample paths…>` measures documents the author wrote and stores the counts as
+a profile named for their register, such as `formal` or `essay`. A path may name a file or a
+directory; a directory is one sample. The profile lives at
+`~/.claude/humanize-technical-prose/profiles/{name}.json`, outside every repository, and holds counts,
+never a sentence.
+
+### B1. Gather the samples
+
+Read only the paths the author named. Never read a transcript, the conversation, or the author's typed
+prompts as a sample: prompts show how the author gives instructions, not how they write. The script
+refuses a `.jsonl` file and any path under `~/.claude/projects/`; report each refused path under
+`TRANSCRIPT-REFUSED`.
+
+If the profile already exists, read its `samples` list and rebuild it from every sample, old and new.
+A path named twice counts once. To drop a sample, delete the profile file and build it again.
+
+### B2. Measure
+
+```
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --measure {paths…}
+```
+
+The script measures only the author's own prose: it skips code, quotations, headings, tables, lists,
+figures and math, and LaTeX's bookkeeping commands. It reports sentence lengths, short sentences,
+questions, contractions, first person, openers, connectives and favoured phrases. A phrase is kept
+only when it recurs, in two samples or three times in one, and never when it holds a name.
+
+A sample under 500 words of own prose is left out and listed under `SAMPLE-THIN` with its count. If
+every sample is thin, report `PROFILE-NOT-BUILT` and write nothing.
+
+### B3. Tally the slips
+
+Read each sample that was measured, whole, skipping what the script skips. Find each slip the author
+made, and classify it in this vocabulary, which is the one the script accepts:
+
+| Class | Kind |
+|-------|------|
+| misspelling | dropped letter |
+| misspelling | added letter |
+| misspelling | swapped letters |
+| misspelling | wrong vowel |
+| misspelling | wrong doubling |
+| misspelling | other |
+| revision residue | doubled word |
+| revision residue | stray word |
+| revision residue | words out of order |
+| omission | dropped article |
+| omission | dropped word |
+| substitution | wrong word |
+| substitution | wrong form |
+| substitution | number agreement |
+| substitution | wrong article |
+| substitution | punctuation or case |
+
+A **misspelling** is classed by its mechanism, what went wrong in the word. A **grammar slip** is
+classed by its cause. Revision residue is a word left behind when a sentence was reworded, an omission
+is a word that went missing, and a substitution is the wrong word, form or mark in the right place.
+Count separately, as `on_name_or_term`, how many slips sit on a name or a technical term.
+
+These are not slips: a spelling the author's variety of English uses, such as *travelling*; a choice
+the document makes every time, such as its comma style; a term spelled the way its field spells it;
+and an error inside a quotation. When unsure, it is not a slip.
+
+Count, and never write a slipped word: not in the profile, the tally or the report. The profile needs
+the kinds and their counts, and a slipped word quoted anywhere is a sentence fragment of the sample
+leaving the machine.
+
+### B4. Write the profile
+
+Pass the tally to the script on standard input, with the same paths:
+
+```
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --build {name} --slips - {paths…} <<'TALLY'
+{"misspelling": {"dropped letter": 0, …}, "grammar": {"revision residue": {…}, "omission": {…}, "substitution": {…}}, "on_name_or_term": 0}
+TALLY
+```
+
+The script refuses a tally holding anything but whole numbers under the vocabulary above, and a
+profile name holding anything but lowercase letters, digits and hyphens. It prints the profile's path.
+
+### B5. Report
+
+Read `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` before composing the report, as Step 7 does.
+
+```
+PROFILE-BUILT {name}: {k} samples, {words} words — sentences {median}/{p90}, contractions {c} per 1,000 words, questions {q} per 100 sentences, slips {total} (grammar {g}, spelling {s}; {t} on names or terms)
+  {path}
+SAMPLE-THIN
+  {sample} — {words} words
+TRANSCRIPT-REFUSED
+  {sample}
+```
+
+Name the samples by path, and quote nothing from them.
