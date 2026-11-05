@@ -1,0 +1,15 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-01",
+  "situation": "`/phil:autopilot 76` in this repo, which holds `.nwave/` and `docs/feature/`. The card asks for a new command, sits in Todo, unassigned, with no worktree. `docs/feature/autopilot/feature-delta.md` exists, and its `Board:` line names issue 76. CLAUDE.md's \"Build path for this plugin\" reads: run `nw-discuss` before authoring a new feature, skill or command; read plugin-dev before writing the file; run `/phil:harden-instructions`, `phil:eos`, `plugin-dev:skill-reviewer` and `plugin-dev:plugin-validator`; re-run the tests; name the passes in the commit message. CLAUDE.md's \"CI workflow\" reads: land every change through a pull request — push a feature branch, open a pull request, and merge once its pipeline passes. No line names `/phil:done`, a close or a cleanup.",
+  "expected_decision": ["PLANNED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "RECORDED"],
+  "must_not": [
+    "print the nWave waves as the path",
+    "print a step without the CLAUDE.md line it came from",
+    "list a write on the AUTHORIZED line that no step names, such as a close or a cleanup",
+    "name nw-discuss as the next step",
+    "run or launch any step of the path",
+    "remove an assignee"
+  ],
+  "why_this_fixture_exists": "AC1.1, AC1.3 and AC1.4; issue 76's fixture behaviour four: a declared build path wins even where nWave directories exist. This is the slice 01 dogfood card."
+}

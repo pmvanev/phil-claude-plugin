@@ -347,3 +347,22 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 76's own, as w
   work through `/phil:done`.
 - **Constraints:** never a write the path does not name; never merge red; never search for or invent a
   credential; never an unrecorded decision; never follow detection over a declared path.
+- **Settled at slice 01 authoring (2026-11-05)**, after `plugin-dev:skill-reviewer` and
+  `plugin-dev:plugin-validator`:
+  - The nWave fallback needs a `wave:` label, as `/phil:start`'s route rule 2 and
+    `phil:nwave-issue-board` say. An unlabelled card falls to rule 3 (fixture 10).
+  - A step has run where the repo holds its output for the card: for `nw-discuss`, a feature delta
+    whose `Board:` line names the card. The path marks it `done` and names the next step, which gives
+    slice 03 its resume point.
+  - The path comment starts with the fixed line `**Autopilot · build path**`. A rerun compares only the
+    quoted lines, the `done` marks and the authorized step numbers, because the labels the run composes
+    differ run to run (fixture 04).
+  - Wherever `/phil:start`'s text ends the run `UNDERWAY` or names `/phil:resume`, DESCRIBE or ROUTE as
+    next, autopilot goes on to PATH. A card underway with no worktree here cuts nothing and says so
+    (fixture 11).
+  - Loaded from a question rather than the command, the skill prints the path and writes nothing.
+  - **This repo's own path names no `/phil:done`.** No line in `CLAUDE.md` names a close or a cleanup,
+    so D4 authorizes neither here, and slice 04 will stop at the close as a write the path does not name
+    — unless `CLAUDE.md` gains a line naming `/phil:done`.
+  - The command covers GitHub only (D10). CLAUDE.md asks for a card for the missing forge; it is slice
+    06 of this feature, and where it goes on the board is the developer's call.

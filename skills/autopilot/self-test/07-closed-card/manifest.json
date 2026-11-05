@@ -1,0 +1,13 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-07",
+  "situation": "`/phil:autopilot 75`. The card is closed and in Done.",
+  "expected_decision": ["REFUSED-CLOSED"],
+  "expected_report_lines": ["WROTE-NOTHING"],
+  "must_not": [
+    "reopen the card",
+    "write the Status or an assignee",
+    "print or record a path",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "Finished work is never restarted silently: `/phil:start`'s CHECK refuses a closed card, and autopilot inherits the refusal."
+}

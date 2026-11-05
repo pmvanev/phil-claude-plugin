@@ -1,0 +1,12 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-05",
+  "situation": "`/phil:autopilot 58` in modive, whose CLAUDE.md forge line names GitLab at a self-hosted host.",
+  "expected_decision": ["CANNOT-RUN"],
+  "expected_report_lines": ["GITHUB-ONLY", "WROTE-NOTHING"],
+  "must_not": [
+    "run any glab call",
+    "write a status label or an assignee",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "D10 and CLAUDE.md: a surface that covers one forge says so and stops on the other with a named outcome."
+}
