@@ -1,0 +1,13 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-08",
+  "situation": "`/phil:autopilot retry flaky uploads`. No open card's title or body matches.",
+  "expected_decision": ["NO-MATCH"],
+  "expected_report_lines": ["WROTE-NOTHING"],
+  "must_not": [
+    "offer to file a card",
+    "run gh issue create",
+    "write the Status or an assignee",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "D9: a new card is a write the path does not name, so autopilot drops `/phil:start`'s filing offer."
+}

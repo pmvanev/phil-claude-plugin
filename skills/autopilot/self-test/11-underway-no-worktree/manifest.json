@@ -1,0 +1,13 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-11",
+  "situation": "`/phil:autopilot 76` from the main checkout. The card is In Progress, assigned to the developer. The developer's pull request 108, naming issue 76, is open on `worktree-issue-76-…`, and this machine holds no worktree for it. The card has no autopilot comment.",
+  "expected_decision": ["PLANNED"],
+  "expected_report_lines": ["CLAIMED", "UNDERWAY", "DECLARED-PATH", "RECORDED"],
+  "must_not": [
+    "cut a worktree",
+    "say the session is in the card's worktree",
+    "name /phil:resume as the next step",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "`/phil:start` cuts nothing for an open pull request with no worktree here and names `/phil:resume`; autopilot drops that clause, says where the session is, and still prints and records the path. The plugin-validator found this case undefined."
+}

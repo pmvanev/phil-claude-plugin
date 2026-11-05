@@ -29,3 +29,24 @@ vocabulary:
   - adversarial review, independent critic, falsify done, hard-checkable vs soft,
     span-and-evidence, advisory not self-adjudicating, correlated blind spot,
     soft-critic theatre, oracle, ranked findings, separation of powers
+
+# Hands-off facet — added by DISCUSS wave, feature: autopilot (2026-11-05, issue 76).
+# Rowan delegating a whole card rather than one task, and checking the calls afterwards rather than
+# before trusting them. Kai was considered and rejected: Kai owns the session boundary, and this facet
+# spans every boundary in one run. Ari was rejected too: Ari is the position autopilot spares the
+# developer from occupying.
+hands_off_facet:
+  goals:
+    - Hand a card over and come back to it landed and waiting for my inspection, or to a blocker
+    - Call a card done myself, after I have looked at it
+    - See every call made for me, and the rule behind it, on the card
+    - Be stopped only where my answer would change the outcome
+  frustrations:
+    - Every gate waits on me, and I take the recommendation nine times in ten
+    - A delegated run follows whatever path it detects, not the one my repo records
+  mental_model:
+    - "Ask me what only I can answer; record the rest"
+    - "A call I cannot see is a call I cannot overturn"
+    - "My repo's recorded path outranks the directories it happens to hold"
+  vocabulary:
+    - hands-off, blocker, recorded call, build path, authorized writes, land

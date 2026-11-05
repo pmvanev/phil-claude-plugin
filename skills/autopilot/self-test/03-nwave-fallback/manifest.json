@@ -1,0 +1,12 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-03",
+  "situation": "`/phil:autopilot 41` in a GitHub repo holding `docs/feature/`, whose CLAUDE.md records no build path. The card carries `wave: design`. No worktree, Todo, unassigned.",
+  "expected_decision": ["PLANNED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "FALLBACK-PATH", "RECORDED"],
+  "must_not": [
+    "start the path at DISCUSS when the card carries wave: design",
+    "restate the Work this with table instead of reading it",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "D2's nWave fallback: with no declared path, an nWave repo takes the waves from the card's wave label onward."
+}

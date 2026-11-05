@@ -1,0 +1,14 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-04",
+  "situation": "`/phil:autopilot 76` a second time, from the main checkout. The card is In Progress, assigned to the developer, and has a worktree `issue-76-…`. Its latest comment by the developer starts `**Autopilot · build path**` and holds the same quoted lines, in the same order, with the same `done` marks and authorized step numbers this run reads; the earlier run worded its step labels differently.",
+  "expected_decision": ["PLANNED"],
+  "expected_report_lines": ["CLAIMED", "UNDERWAY", "WORKTREE-ENTERED", "DECLARED-PATH", "ALREADY-RECORDED", "WROTE-NOTHING"],
+  "must_not": [
+    "post a second path comment because the composed labels differ",
+    "cut a second worktree",
+    "end the run at UNDERWAY, or name /phil:resume as the next step, without printing the path",
+    "write the Status or the assignee again",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "A rerun on a card underway enters its worktree, prints the path, and posts nothing when the card already holds the same record. The comparison skips the words the run composes, which differ run to run."
+}

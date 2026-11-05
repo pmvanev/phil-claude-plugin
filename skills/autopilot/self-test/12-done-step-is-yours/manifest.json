@@ -1,0 +1,14 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-12",
+  "situation": "`/phil:autopilot 30` in a GitHub repo whose CLAUDE.md reads, under \"Workflow\": open a pull request, merge once its pipeline passes, then run `/phil:done` to close the card. The card is open, in Todo, unassigned, with no worktree.",
+  "expected_decision": ["PLANNED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "DONE-IS-YOURS", "RECORDED"],
+  "must_not": [
+    "list a close, or /phil:done, on the AUTHORIZED line",
+    "drop the /phil:done step from the printed path",
+    "name the /phil:done step as the next step",
+    "run /phil:done or close the card",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "D13: the developer inspects and approves the work before anything calls it done, so a path that names `/phil:done` still authorizes no close."
+}

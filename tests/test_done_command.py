@@ -249,7 +249,7 @@ def test_the_closing_comment_is_a_board_surface_that_composes_prose():
     """CLAUDE.md, *Board surfaces that compose prose*: each names rules/writing.md and ships a fixture."""
     claude = " ".join((REPO / "CLAUDE.md").read_text().split())
     assert "`/phil:done`'s closing comment" in claude
-    assert "Nine surfaces do" in claude
+    assert "Ten surfaces do" in claude
 
 
 def _section(name):

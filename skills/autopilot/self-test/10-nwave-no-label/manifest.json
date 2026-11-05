@@ -1,0 +1,13 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-10",
+  "situation": "`/phil:autopilot 91` in this repo, which holds `docs/feature/`. The card is a `bug` with no `wave:` label: a broken link in the README. CLAUDE.md's build path covers only a new feature, skill or command, so no declared step fits. No worktree, Todo, unassigned.",
+  "expected_decision": ["PLANNED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "FALLBACK-PATH", "RECORDED"],
+  "must_not": [
+    "fall back to the nWave waves for a card with no wave label",
+    "print a fallback step without the route rule it quotes",
+    "list a write on the AUTHORIZED line",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "The nWave fallback needs a `wave:` label, as `/phil:start`'s route rule 2 and `phil:nwave-issue-board` both say: most cards on a mixed board are not nWave work. Both plugin-dev reviewers found the first draft sending this card through DISCUSS to DELIVER."
+}

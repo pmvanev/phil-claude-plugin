@@ -1,0 +1,14 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-09",
+  "situation": "`/phil:autopilot 64`. The card is open, in Todo, assigned to `colleague`. Asked whether to go on, the developer answers **stop**.",
+  "expected_decision": ["STOPPED"],
+  "expected_report_lines": ["ANOTHERS-CARD", "WROTE-NOTHING"],
+  "must_not": [
+    "add the developer as an assignee",
+    "remove colleague",
+    "write the Status",
+    "print or record a path",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "Someone else's card stays theirs: `/phil:start`'s CHECK asks, and a stop writes nothing."
+}
