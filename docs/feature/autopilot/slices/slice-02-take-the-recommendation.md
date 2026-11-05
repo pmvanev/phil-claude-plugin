@@ -6,11 +6,14 @@ card, and stops on a question of D1's three kinds.
 
 Story 2 · Decisions D1, D6, D9, D12.
 
-## Pre-slice spike (D12)
-Settle how the run answers a launched route's questions itself. Probe, on a throwaway repo, whether the
-answer can come from the run's own instructions, from the decision-request `PreToolUse` hook, or only by
-launching the route with an instruction to take recommendations. Timebox: two hours. Record the probe's
-Claude Code version.
+## Pre-slice spike (D12) — done 2026-11-05
+`spike-d12/README.md` holds it. A `PreToolUse` hook on `AskUserQuestion` denies each ask during an
+autopilot run, giving a reason that carries D1's three kinds and the recommended option. The skill
+repeats the instruction for headless runs. Never pre-fill `answers`.
+
+Open for authoring: how the hook knows a run is active. A marker holding the session id, as hook input
+carries `session_id`, limits the denial to that session, and a crashed run cannot silence asks in the
+next one.
 
 ## IN scope
 - Answering by rule — the repo's `CLAUDE.md` and `AGENTS.md`, and the developer's saved preferences —

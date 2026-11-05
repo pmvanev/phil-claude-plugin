@@ -121,10 +121,13 @@ plugin's existing rules.
 - **[D11] `commands/autopilot.md` declares `mutates: true`** — it writes to the forge and git
   (`scripts/check-readonly-commands.py`).
 
-- **[D12] Open for slice 02: how the run answers a launched route's questions.** Every route the path
-  names asks through the question tool. A pre-slice spike settles how the run answers those asks itself
-  and stops on a blocker. One fact bears on it: the decision-request `PreToolUse` hook already receives
-  every ask's question and options before the call runs.
+- **[D12] A hook answers a launched route's questions by refusing them.** *(Settled by spike,
+  2026-11-05; see `spike-d12/README.md`.)* During an autopilot run, a `PreToolUse` hook on
+  `AskUserQuestion` denies every ask, giving a reason that names D1's three blocker kinds and the
+  recommended option. The run then stops on a blocker, or takes the recommendation and records it as
+  the hook's (D6). The hook never pre-fills `answers`: on Claude Code 2.1.318 that reads as "User
+  answered", a false record. The skill states the same instruction, because headless `claude -p` has
+  no question tool, so no hook fires there.
 
 - **[D13] Done is the developer's.** *(Developer's answer, 2026-11-05.)* The developer inspects and
   approves the work before anything calls it done, so autopilot never runs `/phil:done` and never closes

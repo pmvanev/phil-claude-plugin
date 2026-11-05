@@ -1,0 +1,16 @@
+{
+  "description": "Probe: answer or refuse AskUserQuestion by SPIKE_MODE.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/auto.py\""
+          }
+        ]
+      }
+    ]
+  }
+}
