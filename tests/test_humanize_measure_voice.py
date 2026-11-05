@@ -210,3 +210,9 @@ def test_a_draft_is_measured_without_the_thin_floor_or_phrases(tmp_path):
     code, out, _ = _run("--draft", d)
     m = json.loads(out)
     assert code == 0 and m["words"] > 0 and "phrases" not in m
+
+
+def test_additionally_counts_as_a_connective():
+    """Found measuring fixture 11, 2026-11-05: the commonest connective in Claude's drafts went uncounted."""
+    m = mv.measure_text("Additionally, the close path releases the lock. The open path takes it first. " * 3)
+    assert "additionally" in m["connectives"]

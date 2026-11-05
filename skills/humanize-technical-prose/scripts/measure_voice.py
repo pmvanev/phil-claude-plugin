@@ -32,7 +32,8 @@ PLACEHOLDERS = {"CODE", "QUOTE", "N", "URL"}
 CONNECTIVES = [
     "on the other hand", "as a result", "in addition", "for example", "for instance", "in fact",
     "of course", "that said", "in other words", "however", "thus", "therefore", "hence", "so", "but",
-    "and", "also", "still", "yet", "then", "instead", "moreover", "furthermore", "consequently",
+    "and", "also", "additionally", "still", "yet", "then", "instead", "moreover", "furthermore",
+    "consequently",
     "finally", "first", "second", "fortunately", "unfortunately", "ultimately", "perhaps", "now",
 ]
 CONTRACTED_S = {"it's", "that's", "there's", "here's", "what's", "who's", "let's", "he's", "she's",

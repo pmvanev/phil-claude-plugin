@@ -67,6 +67,7 @@ Print exactly one terminal outcome on every run, and each report line that fires
 | Report line | When |
 |-------------|------|
 | `TELLS-LEFT` | a tell remains after the re-check, with its line and why |
+| `VOICE-SKIPPED` | no profile was named, or the named one does not exist; lists the profiles that do |
 | `SAMPLE-THIN` | a sample held too little own prose to measure and was left out, with its word count |
 | `TRANSCRIPT-REFUSED` | a named sample is a Claude Code transcript and was not read |
 
@@ -133,6 +134,61 @@ list it under `TELLS-LEFT`.
 
 ---
 
+## Step 4: Reword Toward the Profile
+
+Run this step only when `--profile {name}` names a profile that exists at
+`~/.claude/humanize-technical-prose/profiles/{name}.json`. Otherwise report `VOICE-SKIPPED`, list the
+profiles that exist in that directory (or say there are none, and name `--build-profile`), and skip
+Steps 4 to 6: the slips draw on a profile too.
+
+### 4a. Measure
+
+Measure the draft as Step 3 left it, with the script that built the profile:
+
+```
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --draft {file}
+```
+
+Compare each feature with the profile's `measures`: the sentence median and 90th percentile, short
+sentences, contractions, questions, openers and connectives. A feature is close enough when the
+median is within two words of the profile's, or a rate is within a quarter of the profile's rate.
+Leave a feature that is close enough alone.
+
+### 4b. Reword
+
+Move each remaining feature toward the profile's value, and stop there rather than overshoot. These
+moves are allowed, and only these:
+
+- split a long sentence where a clause ends, or join two short ones that share a subject;
+- swap a connective for one the profile uses, where it means the same, such as *Also* for
+  *Additionally*;
+- contract or expand a verb, *do not* to *don't* or back, toward the profile's rate;
+- replace a phrase with one of the profile's favoured phrases that means the same;
+- reorder clauses within a sentence.
+
+Never add a claim, a fact, a figure of speech, a hook, an analogy, a joke or a question the draft did
+not hold, even where the author's samples are full of them. A question may become a statement, never
+the reverse. Never change who acts, so leave first person as the draft has it. Never change a
+sentence's modality: *must*, *should* and *may* keep their strength. Never touch a protected span
+(Step 2).
+
+### 4c. Check the direction
+
+Measure the draft again. Where a feature is now farther from the profile than before, undo the
+rewordings that moved it until it is not. Every feature the report names must end closer to the
+profile, or unchanged.
+
+---
+
+## Step 5: Check the Tells Again
+
+Re-run `ai-eos`'s hunt over every sentence the voice pass changed. Where a rewording brought in a
+tell, restore the sentence as Step 3 left it. The detector wins over the profile, even where the
+author's samples hold that construction: a writer's own pre-AI prose can carry a trailing participle,
+and the profile cannot tell the difference.
+
+---
+
 ## Step 7: Report
 
 Read `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` before composing the report. The standard applies to the
@@ -145,6 +201,9 @@ TELLS: {n} found, {r} rewritten; re-check: {k} left
   L{line}  {mechanism}: "{before}" → "{after}"
 TELLS-LEFT
   L{line}  {mechanism}: "{span}" — {why: needs a fact the draft does not hold | formatting | rewrite still trips the detector}
+VOICE {profile}: median sentence {before} → {after} (profile {target}); {feature} {before} → {after} (profile {target}); {n} rewordings; tells after: {k}
+  L{line}  "{before}" → "{after}"
+VOICE-SKIPPED: {no profile named | no profile named {name}}; profiles: {names | none — build one with --build-profile}
 UNDO: git checkout -- {file}
 ```
 

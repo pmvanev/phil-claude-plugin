@@ -155,3 +155,45 @@ def test_a_slip_on_a_name_or_technical_term_is_counted():
 
 def test_when_unsure_a_word_is_not_a_slip():
     assert "When unsure, it is not a slip" in _section("Step B: Build a Profile")
+
+
+# --- slice 03: the voice pass, and the tells check after it ---
+
+def test_the_voice_pass_runs_only_with_a_profile_that_exists():
+    voice = _section("Step 4: Reword Toward the Profile")
+    assert "`VOICE-SKIPPED`" in voice
+    assert "list the profiles that exist" in voice
+
+
+def test_the_voice_pass_measures_the_draft_with_the_same_script():
+    voice = _section("Step 4: Reword Toward the Profile")
+    assert "python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --draft" in voice
+
+
+def test_the_voice_pass_rewords_and_adds_nothing():
+    voice = _section("Step 4: Reword Toward the Profile")
+    for banned in ("a claim", "a fact", "a figure of speech", "a hook", "an analogy", "a joke", "a question"):
+        assert banned in voice, f"the ban on adding {banned} is missing"
+    assert "Never add" in voice
+
+
+def test_the_voice_pass_never_changes_who_acts_or_how_sure_a_sentence_is():
+    voice = _section("Step 4: Reword Toward the Profile")
+    assert "first person" in voice and "modality" in voice
+
+
+def test_a_feature_that_moved_away_from_the_profile_is_undone():
+    voice = _section("Step 4: Reword Toward the Profile")
+    assert "farther from the profile than before" in voice
+    assert "undo" in voice
+
+
+def test_the_detector_wins_over_the_profile():
+    again = _section("Step 5: Check the Tells Again")
+    assert "every sentence the voice pass changed" in again
+    assert "restore the sentence as Step 3 left it" in again
+    assert "even where the author's samples hold that construction" in again
+
+
+def test_the_report_shows_each_feature_before_and_after_against_the_profile():
+    assert "VOICE {profile}: median sentence {before} → {after} (profile {target})" in _section("Step 7: Report")
