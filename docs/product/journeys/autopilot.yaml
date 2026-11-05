@@ -8,7 +8,7 @@ summary: >
   Rowan hands a card over. /phil:autopilot claims it, reads the repo's build path and shows it beside
   its sources, runs each step through the command that owns it, answers each question by rule or by
   its own recommendation and records the answer on the card, stops only for three kinds of question,
-  and lands the work through /phil:done.
+  lands the work, and hands it back through /phil:handoff for Rowan to inspect and call done.
 
 steps:
   - id: claim
@@ -28,9 +28,11 @@ steps:
     output: "DECISIONS (<step>): <question> — took \"<option>\": <reason> · …"
     emotion: trusting — every call is on the card
   - id: land
-    action: Push, open the pull request, merge on green, close through /phil:done.
-    output: "LANDED: pull request <n> merged on a green pipeline; card closed — <k> decisions, 0 stops"
-    emotion: relieved — finished without me
+    action: >
+      Push, open the pull request, merge on green, then run /phil:handoff and name /phil:done for the
+      developer. Never /phil:done, never a close.
+    output: "LANDED: pull request <n> merged on a green pipeline — <k> decisions, 0 stops; next: inspect, then /phil:done <n>"
+    emotion: relieved — landed without me, and mine to call done
 
 emotional_arc: hopeful → checking → trusting → relieved  # upward
 
@@ -63,6 +65,6 @@ error_paths:
   - step: land
     failure: The pipeline is red
     recovery: Fix within the allowed attempts, or stop on a blocker; never merge red
-  - step: claim
-    failure: The forge is GitLab, before slice 06
-    recovery: Say the command covers GitHub only and stop with a named outcome
+  - step: land
+    failure: The path names /phil:done or a close
+    recovery: Print that step as the developer's, authorize no close, and end with /phil:handoff

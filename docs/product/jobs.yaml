@@ -1315,7 +1315,8 @@ jobs:
         Read the repo's build path and show it beside its sources; run each step through the command
         that owns it; answer each question by a recorded rule or the agent's own recommendation, and
         record the answer on the card; stop for an unnamed outward write, an input only the developer
-        holds, or a check that keeps failing; land the work through the close.
+        holds, or a check that keeps failing; land the work and hand it back for me to inspect and call
+        done.
       emotional: >
         Confidence that a card finished while I was away was built the way this repo builds cards, and
         that nothing I would have stopped went through unseen.
@@ -1328,15 +1329,15 @@ jobs:
         overrides were the same call, extend the card rather than file a new one, which a saved
         preference already records. The other two turned on the developer's own material.
       pull: >
-        One command that carries a card from start to close, as /phil:start picks one up and /phil:done
-        puts one down, and stops only for the developer.
+        One command that carries a card from /phil:start to a merged change awaiting my inspection, and
+        stops only for the developer.
       anxiety: >
         (A) A misread build path, followed confidently. (B) A call I would have overturned, made and
         never shown. (C) An outward write I never authorized: a merge, a new card, a public quote.
-        (D) A guessed or searched-for credential.
+        (D) A guessed or searched-for credential. (E) Work called done before I inspected it.
       habit: >
-        Answering every gate by taking the recommendation; driving each wave by hand; pushing, merging
-        and closing by hand once the work is done.
+        Answering every gate by taking the recommendation; driving each wave by hand; pushing and
+        merging by hand once the work is done.
     opportunity_score: not-scored   # single new job; priority by default
     status: validated
     personas: [rowan-skeptical-delegator]

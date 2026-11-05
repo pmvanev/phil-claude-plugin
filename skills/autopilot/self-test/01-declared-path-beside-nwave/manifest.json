@@ -8,6 +8,7 @@
     "print a step without the CLAUDE.md line it came from",
     "list a write on the AUTHORIZED line that no step names, such as a close or a cleanup",
     "name nw-discuss as the next step",
+    "report DONE-IS-YOURS for CLAUDE.md's \"before calling a task or issue done\", a condition and no step",
     "run or launch any step of the path",
     "remove an assignee"
   ],

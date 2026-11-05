@@ -41,10 +41,11 @@ def test_no_file_write_and_no_bare_bash_is_granted():
 
 
 def test_slice_01_grants_the_comment_and_no_filing_or_launch():
-    """D6 records on the card; slice 01 files no card (D9) and launches no step (slice 02 adds Skill)."""
+    """D6 records on the card, on both forges; slice 01 files no card (D9) and launches no step (slice
+    02 adds Skill)."""
     tools = _tools()
-    assert "Bash(gh issue comment:*)" in tools
-    assert "Bash(gh issue create:*)" not in tools
+    assert {"Bash(gh issue comment:*)", "Bash(glab issue note:*)"} <= tools
+    assert not tools & {"Bash(gh issue create:*)", "Bash(glab issue create:*)"}
     assert "Skill" not in tools
 
 
@@ -117,12 +118,26 @@ def test_slice_01_runs_no_step():
     assert "Stop before the first step of the path" in body
 
 
-def test_gitlab_stops_with_a_named_outcome():
-    """D10 and CLAUDE.md: a surface that covers one forge says so and stops on the other."""
+def test_gitlab_ships_with_github():
+    """D10 and CLAUDE.md (2026-11-05): a surface never ships covering one forge."""
+    _, body = _parts(SKILL)
+    assert "${CLAUDE_PLUGIN_ROOT}/skills/start/references/gitlab.md" in body
+    assert "glab issue note <n> -R <repo> --message" in body
+    assert "--hostname <host>" in body
     for path in (SKILL, COMMAND):
-        _, body = _parts(path)
-        assert "GITHUB-ONLY" in body, path.name
-    assert "covers GitHub only" in _parts(SKILL)[1]
+        text = path.read_text()
+        assert "GITHUB-ONLY" not in text and "GitHub only" not in text, path.name
+    assert {"Bash(glab api:*)", "Bash(jq:*)", "Bash(glab issue update:*)"} <= _tools()
+
+
+def test_done_is_the_developers():
+    """D13: the developer inspects and approves before anything calls the work done."""
+    _, skill = _parts(SKILL)
+    _, command = _parts(COMMAND)
+    assert "**Leave done to the developer**" in skill
+    assert "run no `/phil:done`, close no card, authorize no close" in skill
+    assert "run no `/phil:done`, and close no card" in command
+    assert "a close never is" in skill
 
 
 def test_no_match_offers_no_filing():
@@ -179,6 +194,26 @@ def test_the_example_authorizes_no_close():
     _, body = _parts(SKILL)
     example = body.split("Starting the run authorizes:", 1)[1].split("```", 1)[0]
     assert "close" not in example and "cleanup" not in example, example
+
+
+def test_a_close_by_side_effect_is_the_developers_too():
+    """D13: a Done Status, a done label, or a closing keyword closes the card as surely as /phil:done
+    (fixture 14)."""
+    _, body = _parts(SKILL)
+    assert "a Done Status, or a done label" in body
+    assert "never after a closing keyword such as `Closes`, `Fixes` or `Resolves`" in body
+    assert "Next: yours — step <k>" in body
+
+
+def test_no_note_line_starts_a_gitlab_quick_action():
+    """GitLab runs a note line that starts with `/close` with the poster's rights."""
+    _, body = _parts(SKILL)
+    assert "never with `/`: GitLab runs a note line that starts with a quick action" in body
+
+
+def test_a_failed_glab_read_is_judged_by_glab_not_jq():
+    _, body = _parts(SKILL)
+    assert "judge the read by `glab`'s own output" in body
 
 
 def test_claude_md_lists_the_path_comment_among_board_surfaces():

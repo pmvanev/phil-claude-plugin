@@ -12,7 +12,9 @@ Story 1 · Decisions D2, D4, D5, D11.
 - Reading the path from `CLAUDE.md` and `AGENTS.md`; the fallback by `/phil:start`'s route rules 2–3,
   named when taken.
 - The PATH and AUTHORIZED lines, and one card comment holding both; the skill names `rules/writing.md`.
-- On GitLab: say the command covers GitHub only and stop with a named outcome (D10).
+- GitLab as well as GitHub (D10): the claim and worktree through `/phil:start`'s GitLab reference, the
+  record as a `glab issue note`, read back through the notes API.
+- No close on the AUTHORIZED line, even where the path names `/phil:done` (D13).
 - Fixtures: a declared path beside nWave directories (AC1.1); no declared path (AC1.2); a missing
   `rules/writing.md` citation fails a test (AC2.4).
 

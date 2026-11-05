@@ -37,7 +37,8 @@ vocabulary:
 # developer from occupying.
 hands_off_facet:
   goals:
-    - Hand a card over and come back to it finished, or to a blocker that needs me
+    - Hand a card over and come back to it landed and waiting for my inspection, or to a blocker
+    - Call a card done myself, after I have looked at it
     - See every call made for me, and the rule behind it, on the card
     - Be stopped only where my answer would change the outcome
   frustrations:

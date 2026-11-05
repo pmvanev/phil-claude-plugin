@@ -107,10 +107,11 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
 - Read `plugin-dev:skill-development`, `command-development`, `agent-development` or `plugin-structure`
   before writing the file. Take the schema from plugin-dev, not from a sibling file — a copied shape
   carries the sibling's defects unchecked.
-- Support GitHub and GitLab in every skill or command that drives issues, boards, branches, worktrees,
-  commits, pull requests or merge requests; take both forges' mechanics from `phil:issue-board`. A
-  surface that covers only one forge says so in its own text, stops on the other with a named outcome, and
-  has a card for the missing forge, as `/phil:start` does (decided 2026-11-03). No check enforces this.
+- Ship GitHub and GitLab together in every skill or command that drives issues, boards, branches,
+  worktrees, commits, pull requests or merge requests, taking both forges' mechanics from
+  `phil:issue-board`; a surface never ships covering one forge (decided 2026-11-05, replacing the
+  2026-11-03 allowance for a one-forge surface with a card for the other). No check enforces this. Two
+  shipped surfaces still cover GitHub only: `board-snapshot` and `/phil:resume`'s board read.
 - Name the host on every `glab` call a surface teaches: `-R https://<host>/<group/project>`, and
   `--hostname <host>` on `glab api`. `scripts/check-glab-host.py` enforces it outside `self-test/`.
   Wound: from a directory with no checkout, a bare call went to gitlab.com (2026-11-05).

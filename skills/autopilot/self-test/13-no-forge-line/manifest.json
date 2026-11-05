@@ -1,0 +1,13 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-13",
+  "situation": "`/phil:autopilot 4` in a repo whose CLAUDE.md holds no forge line and no board block.",
+  "expected_decision": ["CANNOT-RUN"],
+  "expected_report_lines": ["WROTE-NOTHING"],
+  "must_not": [
+    "infer the forge or the repo from the git remote",
+    "write a Status, a status label or an assignee",
+    "print or record a path",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "An inferred remote reads or writes the wrong repo successfully (`phil:issue-board`); with no forge line the run names `/phil:board-setup` and stops."
+}

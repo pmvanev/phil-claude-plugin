@@ -35,8 +35,8 @@ Three facts, read the same day from the repos on this machine, shape the design:
   through the Cognito admin API; submission-tracker has none and renders markup instead; beatrix says
   "The agent types no credential".
 - **Claude Code asks before an outward or hard-to-reverse action** "unless durably authorized or
-  explicitly told to proceed without asking". This repo's path ends in a push, a pull request, a
-  merge on a green pipeline and `/phil:done`.
+  explicitly told to proceed without asking". This repo's path ends in a push, a pull request and a
+  merge on a green pipeline.
 
 ## Wave: DISCUSS / [REF] Persona & Job
 
@@ -54,8 +54,8 @@ Three facts, read the same day from the repos on this machine, shape the design:
 - **Feature type:** developer tool, user-facing — the developer invokes `/phil:autopilot` and reads
   the card and the report it leaves.
 - **New command** in a brownfield plugin: `commands/autopilot.md` and `skills/autopilot/`. It composes
-  `/phil:start` at the front, the routes the build path names in the middle, and `/phil:done` at the
-  end; it stops through `/phil:handoff`.
+  `/phil:start` at the front and the routes the build path names in the middle, and ends through
+  `/phil:handoff`, leaving `/phil:done` to the developer.
 - **Research depth:** lightweight — happy path plus the error paths in the journey. JTBD on. The
   developer answered D1–D4; the session settled the routine settings without an ask.
 
@@ -88,16 +88,16 @@ plugin's existing rules.
   does, makes that check a blocker of D1's second kind. A missing declaration is a blocker only when
   the work needs the running product. The run never searches for a credential and never invents one.
 
-- **[D4] Starting the run authorizes every write the build path names.** *(Developer's answer.)* That
-  covers commits, the push, the pull request, the merge on a green pipeline and `/phil:done`'s close
-  and cleanup. The yes is implied, so the run records it: its first comment on the card lists the writes
+- **[D4] Starting the run authorizes every write the build path names, except done (D13).**
+  *(Developer's answer.)* That covers commits, the push, the pull request and the merge on a green
+  pipeline. The yes is implied, so the run records it: its first comment on the card lists the writes
   the path authorizes. A write the path does not name is a blocker (D1). A recorded rule still binds the
   run — here, a merge needs a passing pipeline, and a red main stops the line.
 
 - **[D5] Autopilot composes the commands that already own each step.** `/phil:start` claims the card
-  and cuts the worktree; each step of the path launches the command or skill that owns it; `/phil:done`
-  closes the card. A card already underway resumes from its snapshot, as `/phil:resume` reads it, and
-  continues at the next step.
+  and cuts the worktree; each step of the path launches the command or skill that owns it;
+  `/phil:handoff` puts the run down (D13). A card already underway resumes from its snapshot, as
+  `/phil:resume` reads it, and continues at the next step.
 
 - **[D6] Every taken recommendation is recorded on the card.** One comment per step of the path lists
   that step's decisions: the question, the option taken and the reason. This is a board surface that
@@ -114,9 +114,9 @@ plugin's existing rules.
   card's checklist; filing a new card is a write the path does not name, so it is a blocker (D1). This
   rule alone would have answered four of the six measured overrides.
 
-- **[D10] GitHub and GitLab.** Slices 01–05 cover GitHub; slice 06 adds GitLab, taking the mechanics
-  from `phil:issue-board`. Until slice 06 lands, the command says it covers GitHub only and stops on
-  GitLab with a named outcome (CLAUDE.md, decided 2026-11-03).
+- **[D10] Every slice ships GitHub and GitLab together.** *(Developer's answer, 2026-11-05.)* Each slice
+  takes both forges' mechanics from `phil:issue-board` and `/phil:start`'s GitLab reference. CLAUDE.md
+  changed the same day: a surface never ships covering one forge. The separate GitLab slice is gone.
 
 - **[D11] `commands/autopilot.md` declares `mutates: true`** — it writes to the forge and git
   (`scripts/check-readonly-commands.py`).
@@ -125,6 +125,12 @@ plugin's existing rules.
   names asks through the question tool. A pre-slice spike settles how the run answers those asks itself
   and stops on a blocker. One fact bears on it: the decision-request `PreToolUse` hook already receives
   every ask's question and options before the call runs.
+
+- **[D13] Done is the developer's.** *(Developer's answer, 2026-11-05.)* The developer inspects and
+  approves the work before anything calls it done, so autopilot never runs `/phil:done` and never closes
+  the card, even where the path names that step: it prints the step as the developer's and authorizes
+  no close. When the run believes the work is finished, it runs `/phil:handoff` and ends, naming
+  `/phil:done` for the developer to run after inspecting. A blocker ends the same way (D8).
 
 ## Wave: DISCUSS / [REF] User stories
 
@@ -136,7 +142,7 @@ before it does anything, so I can catch a misreading of prose no check can verif
 
 ### Elevator Pitch
 Before: nothing says which build path an agent will follow; it follows the nWave waves because the directories exist, or whatever it remembers.
-After: run `/phil:autopilot 76` → sees `PATH (CLAUDE.md, "Build path for this plugin"): 1 nw-discuss — "Run nw-discuss before authoring…" · 2 author after plugin-dev · … · 9 /phil:done`, then `AUTHORIZED: push, pull request, merge on green, close`.
+After: run `/phil:autopilot 76` → sees `PATH: 1 nw-discuss (done) — CLAUDE.md, Build path for this plugin: "Run nw-discuss before authoring…" · 2 author after plugin-dev · … · 7 merge once its pipeline passes — CLAUDE.md, CI workflow`, then `AUTHORIZED: commit (step 5), push (step 6), pull request (step 6), merge once its pipeline passes (step 7)`.
 Decision enabled: I let the run go on, or stop it because it read my path wrong.
 
 **Acceptance criteria**
@@ -146,7 +152,9 @@ Decision enabled: I let the run go on, or stop it because it read my path wrong.
   and the rule that chose it.
 - AC1.3 — Given any path, then each step is printed beside the line it came from, quoted in its own
   words.
-- AC1.4 — Given any path, then the run lists the writes the path authorizes before the first step.
+- AC1.4 — Given any path, then the run lists the writes the path authorizes before the first step,
+  and never a close (D13).
+- AC1.5 — Given a GitLab forge line, then the run claims, prints and records as on GitHub (D10).
 
 ### Story 2 — Take the recommendation and record it *(slice 02)*
 `job_id: carry-a-card-hands-off`
@@ -187,17 +195,17 @@ Decision enabled: I clear the blocker, then restart the run from where it stoppe
 - AC3.3 — Given a write the path does not name, including filing a new card, then the run stops
   before making it.
 
-### Story 4 — Land the work *(slice 04)*
+### Story 4 — Land the work and hand it back for inspection *(slice 04)*
 `job_id: carry-a-card-hands-off`
 
-As **Rowan**, I want the run to push, open the pull request, merge once the pipeline passes and close
-the card through `/phil:done`, keeping the card current at each step, so a card finishes without me
-when nothing needs me.
+As **Rowan**, I want the run to push, open the pull request and merge once the pipeline passes,
+keeping the card current at each step, then put the session down for me to inspect, so the work lands
+without me and nothing calls it done until I have looked.
 
 ### Elevator Pitch
-Before: the work is done, and I still push, open, wait, merge, and close by hand.
-After: run `/phil:autopilot 76` → sees `LANDED: pull request 112 merged on a green pipeline; card closed by /phil:done — 9 steps, 14 decisions recorded, 0 stops`.
-Decision enabled: I read the recorded decisions and overturn any I disagree with.
+Before: the work is done, and I still push, open, wait and merge by hand.
+After: run `/phil:autopilot 76` → sees `LANDED: pull request 112 merged on a green pipeline — 7 steps, 14 decisions recorded, 0 stops; snapshot written; next: inspect, then /phil:done 76`.
+Decision enabled: I inspect the work and the recorded decisions, then call it done or send it back.
 
 **Acceptance criteria**
 - AC4.1 — Given a path naming push, pull request and merge, then the run makes each write without an
@@ -206,6 +214,8 @@ Decision enabled: I read the recorded decisions and overturn any I disagree with
   is a blocker.
 - AC4.3 — Given each step boundary, then the card's `wave:` label, generated block and Status match the
   step (D7).
+- AC4.4 — Given the run believes the work is finished, then it runs `/phil:handoff`, names
+  `/phil:done` for the developer, and never runs `/phil:done` or closes the card itself (D13).
 
 ### Story 5 — Check the running product with declared sign-in *(slice 05)*
 `job_id: carry-a-card-hands-off`
@@ -226,20 +236,9 @@ Decision enabled: I trust the check, or open the evidence it left.
 - AC5.3 — Given a declaration that a person signs in, then that check is a blocker.
 - AC5.4 — Given any run, then it never searches for a credential or invents one.
 
-### Story 6 — Carry a card on GitLab *(slice 06)*
-`job_id: carry-a-card-hands-off`
-
-As **Rowan** on a GitLab repo, I want the same run, so the forge is no reason to drive a card by hand.
-
-### Elevator Pitch
-Before: on modive, `/phil:autopilot 58` stops at once, because the command covers GitHub only.
-After: run `/phil:autopilot 58` in modive → sees the same PATH, DECISIONS and LANDED lines, the merge request in place of the pull request.
-Decision enabled: I hand a GitLab card over as I would a GitHub one.
-
-**Acceptance criteria**
-- AC6.1 — Given a GitLab forge line, then no run stops because the forge is GitLab.
-- AC6.2 — Given any GitLab call, then it follows `phil:issue-board`'s GitLab mechanics, as
-  `/phil:start`'s and `/phil:done`'s GitLab references do.
+GitLab is no story of its own: every story above ships on both forges (D10), and each slice's
+acceptance criteria hold on GitLab with a merge request in place of a pull request and a note in place
+of a comment.
 
 ## Wave: DISCUSS / [REF] Outcome KPIs
 
@@ -251,7 +250,9 @@ Decision enabled: I hand a GitLab card over as I would a GitHub one.
 | Declared path wins | 0 runs that follow nWave detection over a declared path | fixture (AC1.1) |
 | No guessed credential | 0 credentials searched for or invented | fixture (AC5.4) |
 | No unnamed write | 0 writes the path does not name | fixture (AC3.3) |
-| Hands-off | a card on this repo runs from `/phil:autopilot` to `/phil:done` with no question that is not a blocker | dogfood transcript |
+| Hands-off | a card on this repo runs from `/phil:autopilot` to a merged change and a handoff with no question that is not a blocker | dogfood transcript |
+| Done is yours | 0 runs of `/phil:done`, and 0 cards closed, by autopilot | fixture (AC4.4) |
+| Both forges | 0 runs that stop because the forge is GitLab | fixture (AC1.5) |
 | Applied, not cited | removing the `rules/writing.md` citation fails a test | pytest, watched red first |
 
 ## Wave: DISCUSS / [REF] Out of scope
@@ -264,11 +265,12 @@ Decision enabled: I hand a GitLab card over as I would a GitHub one.
 ## Wave: DISCUSS / [REF] Driving ports & prerequisites
 
 - **Driving port:** `/phil:autopilot <card>`.
-- **Driven ports:** `/phil:start`, `/phil:done`, `/phil:handoff`, `/phil:resume`; the routes the path
-  names; `gh` (comments, labels, Status, pull requests, pipeline status); `git`; Chrome DevTools or
-  Playwright for in-browser checks; the repo's `CLAUDE.md` and `AGENTS.md`; the developer's saved
-  preferences.
-- **Prerequisites:** `/phil:start` and `/phil:done` (both shipped); D12's spike before slice 02.
+- **Driven ports:** `/phil:start`, `/phil:handoff`, `/phil:resume`; the routes the path names; `gh`
+  and `glab` (comments or notes, labels, Status, pull or merge requests, pipeline status); `git`;
+  Chrome DevTools or Playwright for in-browser checks; the repo's `CLAUDE.md` and `AGENTS.md`; the
+  developer's saved preferences.
+- **Prerequisites:** `/phil:start` and `/phil:handoff` (both shipped, both forges); D12's spike before
+  slice 02.
 
 ## Wave: DISCUSS / [REF] Walking-skeleton strategy
 
@@ -278,8 +280,9 @@ first step. Slices 02–05 add the steps behind it.
 
 ## Wave: DISCUSS / [REF] Scope Assessment
 
-**PASS (right-sized).** Six stories across six slices; one new command and skill; no change to an
-existing command's behaviour. The largest risk, D12, gets a spike before slice 02.
+**PASS (right-sized).** Five stories across five slices, each on both forges; one new command and
+skill; no change to an existing command's behaviour. The largest risk, D12, gets a spike before slice
+02.
 
 ## Wave: DISCUSS / [REF] Definition of Done
 
@@ -296,20 +299,20 @@ existing command's behaviour. The largest risk, D12, gets a spike before slice 0
 7. `/phil:harden-instructions` over the command, the skill and its references; `phil:eos` over this
    file, its slice briefs and the SSOT entries; `plugin-dev:skill-reviewer` and
    `plugin-dev:plugin-validator` over the command and skill — then the tests again.
-8. Dogfood: `/phil:autopilot` carries the next card on this board to `/phil:done`, naming the plugin
-   version it ran against.
+8. Dogfood: `/phil:autopilot` carries the next card on this board to a merged change and a handoff,
+   and a modive card likewise on GitLab, each naming the plugin version it ran against.
 9. The plugin version is bumped.
 
 ## Wave: DISCUSS / [REF] Definition of Ready — validation
 
 | # | DoR item | Status | Evidence |
 |---|---|---|---|
-| 1 | Job traceable | ✅ | `carry-a-card-hands-off` in `jobs.yaml`; all 6 stories carry it |
+| 1 | Job traceable | ✅ | `carry-a-card-hands-off` in `jobs.yaml`; all 5 stories carry it |
 | 2 | Persona defined | ✅ | `personas/rowan-skeptical-delegator.yaml`, hands-off facet |
 | 3 | Journey mapped | ✅ | `journeys/autopilot.yaml`, with error paths |
-| 4 | Elevator pitches | ✅ | all 6 stories, `/phil:autopilot` entry point, observable output |
+| 4 | Elevator pitches | ✅ | all 5 stories, `/phil:autopilot` entry point, observable output |
 | 5 | ACs testable | ✅ | Given-then, fixture- or pytest-checkable |
-| 6 | Slices ≤1 day with a learning hypothesis | ✅ | `slices/slice-01` … `slice-06` |
+| 6 | Slices ≤1 day with a learning hypothesis | ✅ | `slices/slice-01` … `slice-05` |
 | 7 | Walking skeleton | ✅ | slice 01 |
 | 8 | Outcome KPIs with targets | ✅ | table above |
 | 9 | Scope right-sized | ✅ | Scope Assessment above |
@@ -334,17 +337,24 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 76's own, as w
   all six measured overrides: the preferences answer four, and the developer's own material stops the
   other two.
 
+- What it does, item 6: "Cleans up each worktree and branch once its work merges, through `/phil:done`
+  (#75)."
+
+  **New:** autopilot never runs `/phil:done` (D13). **Why:** the developer inspects and approves the
+  work before anything calls it done; the run ends with a handoff that names `/phil:done` for them.
+
 ## Wave: DISCUSS / [REF] Decisions summary (for authoring)
 
 - **Key decisions:** D1 three kinds of blocker · D2 path read from prose, shown beside its sources ·
   D3 declared sign-in source · D4 starting authorizes the path's writes, recorded on the card · D5
   compose the commands that own each step · D6 each decision recorded on the card · D7 card current at
-  each boundary · D8 blocker: comment, then handoff · D9 saved preferences are rules · D10 GitHub, then
-  GitLab · D11 `mutates: true` · D12 answering a route's questions, settled by spike.
+  each boundary · D8 blocker: comment, then handoff · D9 saved preferences are rules · D10 both forges
+  in every slice · D11 `mutates: true` · D12 answering a route's questions, settled by spike · D13
+  done is the developer's.
 - **Requirements summary:** `/phil:autopilot` claims a card, reads the repo's build path and shows it,
   runs each step through the command that owns it, answers each question by rule or by its own
-  recommendation and records the answer on the card, stops for three kinds of question, and lands the
-  work through `/phil:done`.
+  recommendation and records the answer on the card, stops for three kinds of question, lands the
+  work, and hands it back through `/phil:handoff` for the developer to inspect and call done.
 - **Constraints:** never a write the path does not name; never merge red; never search for or invent a
   credential; never an unrecorded decision; never follow detection over a declared path.
 - **Settled at slice 01 authoring (2026-11-05)**, after `plugin-dev:skill-reviewer` and
@@ -361,8 +371,8 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 76's own, as w
     next, autopilot goes on to PATH. A card underway with no worktree here cuts nothing and says so
     (fixture 11).
   - Loaded from a question rather than the command, the skill prints the path and writes nothing.
-  - **This repo's own path names no `/phil:done`.** No line in `CLAUDE.md` names a close or a cleanup,
-    so D4 authorizes neither here, and slice 04 will stop at the close as a write the path does not name
-    — unless `CLAUDE.md` gains a line naming `/phil:done`.
-  - The command covers GitHub only (D10). CLAUDE.md asks for a card for the missing forge; it is slice
-    06 of this feature, and where it goes on the board is the developer's call.
+  - This repo's own path names no `/phil:done`. Raised with the developer, it led to D13: autopilot
+    never calls a card done, whatever the path names.
+  - The first cut covered GitHub only. The developer answered that every surface ships both forges, so
+    slice 01 ships GitLab too, through `/phil:start`'s GitLab reference and `glab issue note` (D10), and
+    CLAUDE.md changed the same day.

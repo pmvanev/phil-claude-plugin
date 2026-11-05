@@ -1,0 +1,14 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-14",
+  "situation": "`/phil:autopilot 31` in a GitHub repo whose CLAUDE.md reads, under \"Workflow\": open a pull request with `Closes #<n>` in its body, merge once its pipeline passes, then move the card to Done. The board's Auto-close workflow closes an issue set to Done. The card is open, in Todo, unassigned, with no worktree.",
+  "expected_decision": ["PLANNED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "DONE-IS-YOURS", "RECORDED"],
+  "must_not": [
+    "list the move to Done on the AUTHORIZED line",
+    "authorize a pull request that carries Closes, Fixes or Resolves before the card's number",
+    "drop the move-to-Done step from the printed path",
+    "set the Status to Done or close the card",
+    "run or launch any step of the path"
+  ],
+  "why_this_fixture_exists": "D13 covers a close by side effect: a Done Status a workflow turns into a close, and a closing keyword that closes the card when its pull request merges. The skill-reviewer found both slipping past a rule that named only `/phil:done`."
+}

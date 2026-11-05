@@ -15,7 +15,7 @@ FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
 TERMINAL = {"PLANNED", "STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
 OWN_LINES = {"DECLARED-PATH", "FALLBACK-PATH", "RECORDED", "ALREADY-RECORDED", "RECORD-FAILED",
-             "GITHUB-ONLY", "UNDERWAY", "WROTE-NOTHING"}
+             "DONE-IS-YOURS", "UNDERWAY", "WROTE-NOTHING"}
 FROM_START = {"PICKED", "ANOTHERS-CARD", "OPEN-IN-DONE", "CLAIMED", "NO-BOARD-BLOCK", "NOT-ASSIGNED",
               "CLAIM-FAILED", "READ-BACK-MISMATCH", "WORKTREE-CUT", "WORKTREE-ENTERED", "WORKTREE-FAILED"}
 STOPS_BEFORE_CLAIM = {"STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
@@ -32,7 +32,9 @@ def test_slice_01_fixtures_exist():
     """The slice 01 brief names AC1.1 and AC1.2; the rest cover the outcomes."""
     names = {m.parent.name for m in FIXTURES}
     for wanted in ("01-declared-path-beside-nwave", "02-no-declared-path", "03-nwave-fallback",
-                   "04-already-recorded", "05-gitlab", "10-nwave-no-label", "11-underway-no-worktree"):
+                   "04-already-recorded", "05-gitlab-path-recorded", "10-nwave-no-label",
+                   "11-underway-no-worktree", "12-done-step-is-yours", "14-move-to-done-is-yours",
+                   "15-gitlab-already-recorded"):
         assert wanted in names, f"slice 01 names fixture {wanted}"
 
 
@@ -73,6 +75,16 @@ def test_every_fixture_forbids_running_a_step(manifest):
     """Slice 01 stops before the first step of the path."""
     must_not = " ".join(json.loads(manifest.read_text())["must_not"]).lower()
     assert "step" in must_not, manifest.parent.name
+
+
+def test_the_register_lists_every_token_each_manifest_expects():
+    """Both reviewers found the register's Outcome column dropping tokens the manifests expect."""
+    register = (SKILL_DIR / "self-test" / "README.md").read_text()
+    for m in FIXTURES:
+        d = json.loads(m.read_text())
+        row = next(line for line in register.splitlines() if f"`{m.parent.name[3:]}`" in line)
+        cells = set(re.findall(r"`([A-Z][A-Z-]+)`", row))
+        assert cells == set(d["expected_decision"]) | set(d["expected_report_lines"]), m.parent.name
 
 
 def test_every_outcome_autopilot_adds_has_a_fixture():
