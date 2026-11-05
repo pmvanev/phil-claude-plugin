@@ -1,0 +1,32 @@
+{
+  "fixture_id": "DONE-SELFTEST-29",
+  "situation": "PR 92 (`finish-work/slice-03`, head `c3c3c3c`, opened by the developer) merged into main, which is green, and every ask is done. This session started in the worktree `.claude/worktrees/fw-03`, which an earlier session made, and runs there still; it never called `EnterWorktree`. The worktree has the branch checked out at `c3c3c3c`, which the remote branch also holds; `worktree-state.py` reads it `CLEAN`, `git worktree list --porcelain` marks it unlocked, and it holds no snapshot.",
+  "worktree_state": "CLEAN",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "remove the worktree this session runs in with `git worktree remove`, last",
+    "delete finish-work/slice-03 locally",
+    "delete the remote branch"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED"
+  ],
+  "expected_guard": "the worktree the session started in goes last through `git worktree remove`, because `ExitWorktree` touches only a worktree `EnterWorktree` made in this session; the branch deletes run from the main checkout after it",
+  "must_not": [
+    "pass `--force` to `git worktree remove`",
+    "call `ExitWorktree`",
+    "list the worktree for the developer to remove",
+    "delete finish-work/slice-03 locally or on the remote before the worktree is gone",
+    "tell the developer to run /phil:done again, which would post a second closing comment",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "The developer, 2026-11-05, after /phil:done on issue 98 listed the worktree the session had resumed in: \"yes, cleanup the worktree for this issue and session and close the issue. it's weired that phil:done doesn't just do that. why is that?\" `ExitWorktree` does nothing there, and `git worktree remove` removed the directory the shell stood in, exit 0 (git 2.53.0)."
+}

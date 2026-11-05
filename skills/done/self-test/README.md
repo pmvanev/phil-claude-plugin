@@ -33,13 +33,13 @@ the fixtures are model-driven, and that read is by hand.
 | `20-stop-at-resolve` | `STOPPED` | `OPEN-ASKS` `WROTE-NOTHING` | A stop at RESOLVE; the quoted ask stays out of the question |
 | `21-card-not-on-this-board` | `CLOSED` | — | A card on another board gets no Status write and no false mismatch |
 | `22-card-already-closed` | `CLOSED` | — | A closed card gets its comment, never `close -c` |
-| `23-worktree-listed-never-removed` | `CLOSED` | `CLEARED` | A worktree an earlier session made is listed with its commands, never removed |
+| `23-earlier-sessions-worktree-removed` | `CLOSED` | `CLEARED` | A clean, unlocked worktree an earlier session made goes on the one yes |
 | `24-unmerged-branch-survives` | `CLOSED` | `CLEARED` `LEFT` | A branch a worktree holds is never offered for force-delete |
 | `25-dirty-worktree-survives` | `CLOSED` | `LEFT` | A dirty worktree keeps its snapshot |
 | `26-name-only-branch-is-no-candidate` | `CLOSED` | `CLEARED` | A branch that only looks like the card's is never touched |
 | `27-clean-finish-asks-once` | `CLOSED` | `CLEARED` | A clean finish asks exactly one question |
 | `28-retire-the-snapshot-here` | `CLOSED` | `CLEARED` | The snapshot here goes only on the third answer |
-| `29-current-worktree-is-held` | `CLOSED` | `LEFT` | The session's worktree keeps its branch; the commands are named |
+| `29-current-worktree-removed-last` | `CLOSED` | `CLEARED` | The worktree the session started in goes last, through `git worktree remove` |
 | `30-remote-tip-ahead-of-the-merge` | `CLOSED` | `CLEARED` `LEFT` | A remote branch past the merge survives; git would not guard it |
 | `31-local-tip-ahead-of-the-merge` | `CLOSED` | `LEFT` | A local commit after the merge holds the branch and its remote |
 | `32-retire-refused` | `CLOSED` | `LEFT` | A snapshot changed after the plan survives |
@@ -60,5 +60,7 @@ the fixtures are model-driven, and that read is by hand.
 | `47-session-worktree-removed` | `FINISHED` | `CLEARED` | A worktree this session made, clean at the merged tip, goes on the one yes |
 | `48-hidden-work-holds-the-worktree` | `FINISHED` | `LEFT` `WROTE-NOTHING` | Work `git worktree remove` would delete silently holds the worktree |
 | `49-session-worktree-with-a-snapshot` | `FINISHED` | `CLEARED` | The worktree holding the snapshot here goes only on the third answer |
+| `50-locked-worktree-is-held` | `CLOSED` | `LEFT` | A locked worktree stays, however clean |
+| `51-locked-session-worktree-is-listed` | `CLOSED` | `LEFT` | A lock on the worktree the session started in lists it, never plans its removal |
 
 `WROTE-NOTHING` is expected on every fixture that writes nothing.

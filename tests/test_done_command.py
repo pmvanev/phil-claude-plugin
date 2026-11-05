@@ -334,19 +334,21 @@ def test_nothing_is_forced_but_a_branch_the_developer_chose():
     assert "report the refusal and leave the item" in clear
 
 
-def test_only_a_worktree_this_session_made_is_removed():
-    """The developer's answer, 2026-11-03, reversing 2026-11-02's "never remove a worktree" for one case:
-    a worktree this session made, reading `CLEAN`, at the merged tip. `worktree-state.py` now reads the
-    adversarial run's losses as `HIDDEN`; every other worktree is still listed with its commands."""
+def test_a_clean_worktree_on_the_cards_merged_branch_is_removed():
+    """The developer's answer, 2026-11-05, widening 2026-11-03's "a worktree this session made": a
+    session that resumes in a worktree an earlier one cut owns the same work. A worktree goes where it
+    sits on a candidate branch at the merged tip, reads `CLEAN` and carries no lock; who made it does
+    not matter. Every other worktree is still listed with its commands."""
     clear = _clear()
     assert "Never remove a worktree" not in clear
     assert "Remove a worktree only where all three hold" in clear
-    assert "the conversation shows this session creating it" in clear
+    assert "Who made it does not matter" in clear
+    assert "the conversation shows this session creating it" not in clear
     assert "`worktree-state.py` reads it `CLEAN`" in clear
     assert "Never pass `--force` to `git worktree remove`" in clear
     assert "List every other worktree with the commands to remove it" in clear
     assert "session-exchanges.py retire" in clear and "session-exchanges.py head" in clear
-    assert clear.index("1. **Snapshots**") < clear.index("2. **Worktrees this session made**") \
+    assert clear.index("1. **Snapshots**") < clear.index("2. **Other worktrees the run removes**") \
         < clear.index("3. **Local branches**") < clear.index("4. **Remote branches**") \
         < clear.index("6. **The worktree this session runs in**")
 
@@ -357,6 +359,12 @@ def test_the_worktree_the_session_runs_in_leaves_through_claude_codes_tool():
     clear = _clear()
     assert "`ExitWorktree` with `action: \"remove\"`" in clear
     assert "Pass `discard_changes: true` only where" in clear
+    assert "Where `EnterWorktree` did not make it in this session" in clear, \
+        "ExitWorktree does nothing for a worktree the session started in (run live 2026-11-05)"
+    assert "list it for the developer instead" not in clear
+    assert "On the third answer, retire its snapshot as step 1 does" in clear, \
+        "step 6 removed the session's worktree with its snapshot unretired (skill-reviewer, 2026-11-05)"
+    assert "A lock on it at plan time puts it under FOR YOU TO RUN" in clear
     assert "remove it only on the third answer" in clear, "removing it deletes the snapshot inside"
 
 
@@ -683,16 +691,16 @@ def test_slice_05_validator_findings_stay_fixed():
     assert clear.count("worktree-state.py --expect-head <headRefOid>") >= 2, \
         "a commit made after the plan read CLEAN, and discard_changes deleted it"
     assert "Pass `discard_changes: true` to `ExitWorktree` only" in command
-    assert "only for a worktree `EnterWorktree` made" in command
+    assert "through `ExitWorktree` where `EnterWorktree` made it in this session" in command
+    assert "otherwise through `git worktree remove`" in command
     assert "only on the third answer" in command
 
 
 def test_slice_05_skill_reviewer_findings_stay_fixed():
     """skill-reviewer, 2026-11-03."""
     clear = _clear()
-    assert "a successful `EnterWorktree` or `git worktree add`" in clear, \
-        "a failed add at an existing path stood in for ownership"
-    assert "Hold a worktree `git worktree list --porcelain` marks `locked`" in clear, \
+    assert "unless the lock is the one Claude Code holds for this session on a worktree `EnterWorktree` " \
+        "made in this session" in clear, \
         "a parallel session's worktree, recreated at the same path, was removed"
     assert "retire its snapshot only after that read comes back `CLEAN`" in clear, \
         "the snapshot was retired before a removal that came back `MOVED`"

@@ -4,7 +4,7 @@
 
 ## Situation
 
-No argument. Early in this conversation the session called `EnterWorktree`, which made `.claude/worktrees/fix-07` on the branch `worktree-fix-07`, and it runs there still. It opened PR 95 from that branch and merged it into main, which is green; every ask is done. The worktree's `HEAD` and the remote branch both sit at PR 95's merged head, `f7f7f7f`. `worktree-state.py` reads it `CLEAN`, and it holds a `.session-handoff.md` whose next action reads `merge PR 95`.
+No argument. Early in this conversation the session called `EnterWorktree`, which made `.claude/worktrees/fix-07` on the branch `worktree-fix-07`, and it runs there still. It opened PR 95 from that branch and merged it into main, which is green; every ask is done. The worktree's `HEAD` and the remote branch both sit at PR 95's merged head, `f7f7f7f`. `git worktree list --porcelain` marks it `locked claude session fix-07 (pid 3131)`, Claude Code's lock for this session. `worktree-state.py` reads it `CLEAN`, and it holds a `.session-handoff.md` whose next action reads `merge PR 95`.
 
 ## The developer answers
 
