@@ -1,0 +1,29 @@
+# Persona (SSOT) — bootstrapped by DISCUSS wave, feature: humanize-technical-prose (2026-11-05, issue 88)
+
+id: blair-named-author
+name: Blair
+role: >
+  Developer whose name goes on a technical document that Claude helped draft: a design note, a
+  proposal section, a paper, a README. Blair owns every sentence once it ships, and wants those
+  sentences to read as Blair's own, not as the model's. The distinguishing stance: "I wrote long
+  before any model did, and I want my documents to sound like I still do." Blair is not Robin curating a
+  board or Kai crossing a session boundary. The position is authorship: the document leaves the repo
+  under one person's name, and that person answers for its voice.
+goals:
+  - Ship a document that reads as mine, in the register the document calls for
+  - Lose the tells that mark a draft as machine-written, without losing what the draft says
+  - Keep code, commands, identifiers, numbers, quotations and names exactly as written
+  - Know what every pass changed, and where
+frustrations:
+  - phil:ai-eos and phil:red-team-prose find the tells, but fixing them leaves Claude's voice, not mine
+  - My typed prompts are terse instructions, so they are no sample of how I write a document
+  - A cleanup pass run afterward undoes any deliberate imperfection without saying so
+  - A rewrite that adds a claim, a metaphor or a joke I never wrote puts words in my mouth
+mental_model:
+  - "My voice lives in documents I wrote before I had help, not in how I give orders"
+  - "I write differently in a thesis and in an essay; one profile cannot be both"
+  - "A careful writer still slips, but a spell-checker decides which slips survive"
+  - "Rewording is fine; inventing is not"
+vocabulary:
+  - draft, voice, register, sample, profile, tell, slip, house style, spell-check, quotation,
+    named profile, formal, essay

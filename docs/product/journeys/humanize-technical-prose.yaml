@@ -1,0 +1,87 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: humanize-technical-prose (2026-11-05, issue 88)
+
+id: humanize-technical-prose
+name: Ship a document in my own voice
+persona: blair-named-author
+job: ship-a-document-in-my-own-voice
+summary: >
+  Blair names documents they wrote as the samples for a profile, once per register. Before shipping
+  a draft, Blair runs the command with a profile and, optionally, a slip count. It strips the tells,
+  rewords toward the profile, adds exactly the slips asked for, and reports every change by location.
+
+steps:
+  - id: profile
+    action: >
+      Name sample documents and a profile name. Measure each sample's own prose (sentence lengths,
+      openers, connectives, contractions, questions, favoured short phrases, slips by kind,
+      mechanism and cause) and store the counts, never a slipped word, in a machine-local file
+      outside every repo.
+    output: "PROFILE formal: 1 sample, 8,522 words — rhythm 17/31, contractions 0, slips 29 (grammar 24, spelling 5)"
+    emotion: curious — is that really how I write?
+  - id: tells
+    action: >
+      Run phil:ai-eos over the draft and rewrite each finding in the plain form it names.
+    output: "TELLS: 9 found, 9 rewritten"
+    emotion: relieved — the draft stops sounding like a model
+  - id: voice
+    action: >
+      Reword the draft toward the chosen profile: word choice, rhythm, openers, contractions. Add
+      nothing new. Leave code, commands, identifiers, links, numbers, quotations, names and technical
+      terms alone. Re-run phil:ai-eos, and undo any rewording that brought a tell back.
+    output: "VOICE formal: median sentence 24 → 18 (profile 17); contractions 3 → 0; tells after: 0"
+    emotion: recognition — that sounds like me
+  - id: slips
+    action: >
+      With a count, add exactly that many slips of the kinds, mechanisms and causes the profile
+      carries, grammar kinds unless misspellings were asked for, never in a protected span. A
+      revision-residue slip goes in a sentence the voice pass reworded.
+    output: "SLIPS 2: L14 dropped article · L37 doubled word"
+    emotion: in control — I know exactly what is wrong and where
+  - id: report
+    action: >
+      Print what each pass changed, by line, and warn that a later phil:eos or phil:red-team-prose
+      run will fix the slips.
+    output: "WROTE draft.md — 9 tells, 31 rewordings, 2 slips; run no cleanup pass after this one"
+    emotion: confident — ready to put my name on it
+
+emotional_arc: curious → relieved → recognition → in control → confident  # upward
+
+shared_artifacts:
+  - name: the named profile
+    source: profile          # counts only, machine-local, outside every repo
+    consumed_by: [voice, slips, report]
+  - name: protected spans
+    source: tells            # code, commands, identifiers, links, numbers, quotations, names, technical terms
+    consumed_by: [voice, slips]
+  - name: the tells phil:ai-eos found
+    source: tells
+    consumed_by: [voice, report]   # the voice pass may not bring one back
+  - name: change list by line
+    source: [tells, voice, slips]
+    consumed_by: [report]
+
+error_paths:
+  - step: profile
+    failure: A sample holds too little of the writer's own prose to measure
+    recovery: Name the sample and its word count; build no profile from it
+  - step: profile
+    failure: A favoured phrase occurs in only one sample, so it could be a secret or a client detail
+    recovery: Keep only phrases that occur in two or more samples, or several times in one
+  - step: tells
+    failure: The draft has uncommitted changes
+    recovery: Refuse, and name the file; a committed draft makes the diff the undo
+  - step: voice
+    failure: No profile named, or the named profile does not exist
+    recovery: Skip the voice pass, say so, and list the profiles that exist
+  - step: voice
+    failure: A rewording brings back a tell the first pass removed
+    recovery: Keep the plain form; the detector wins over the profile
+  - step: slips
+    failure: The profile carries none of the asked-for kinds
+    recovery: Add no slips and say which kinds the samples hold
+  - step: slips
+    failure: The draft has fewer unprotected positions than the count asks for
+    recovery: Add as many as fit, and report the shortfall
+  - step: slips
+    failure: The samples put slips on names or technical terms, which the run may not touch
+    recovery: Place none there, and report how many of the profile's slips could not be mirrored
