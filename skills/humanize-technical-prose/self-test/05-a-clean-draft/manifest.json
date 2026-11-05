@@ -1,0 +1,17 @@
+{
+  "fixture_id": "HTP-SELFTEST-05",
+  "slice": 1,
+  "situation": "A committed three-sentence note with no tell and no whiff cluster. No profile and no slip count are given.",
+  "inputs": ["draft.md"],
+  "git_state": "committed",
+  "arguments": "draft.md",
+  "expected_decision": ["NOTHING-CHANGED"],
+  "expected_report_lines": [],
+  "expected_guard": "the report says no tell was found and the draft is unchanged",
+  "must_not": [
+    "edit the draft",
+    "manufacture a finding to justify the run",
+    "tighten a sentence for clarity, which is phil:eos's work, not this command's"
+  ],
+  "why_this_fixture_exists": "A rewriting command is tempted to rewrite something. ai-eos says a clean verdict is the answer, and this command inherits that."
+}

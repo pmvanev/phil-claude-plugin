@@ -1,0 +1,18 @@
+{
+  "fixture_id": "HTP-SELFTEST-03",
+  "slice": 1,
+  "situation": "The same tell, 'plays a crucial role in', appears twice: once in the prose and once in a comment inside a fenced Python block.",
+  "inputs": ["draft.md"],
+  "git_state": "committed",
+  "arguments": "draft.md",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": [],
+  "expected_guard": "the prose occurrence is rewritten; the code block, its comment included, is byte-for-byte unchanged",
+  "must_not": [
+    "change any byte inside the fenced block, the comment included",
+    "change `X-Request-Id`, `handle`, `route` or `request_id`",
+    "report the occurrence inside the code block as a tell found",
+    "count it as left over after the re-check"
+  ],
+  "why_this_fixture_exists": "ai-eos skips code blocks when it reports; an editor that finds the phrase by text search would rewrite both occurrences. A comment is still code: the author may have pasted it from a file that must match."
+}

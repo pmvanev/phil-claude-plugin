@@ -173,7 +173,8 @@ Decision enabled: I ship the draft, or go on to the voice pass.
 
 **Acceptance criteria**
 - AC1.1 — Given a committed draft with tells, then each tell `phil:ai-eos` reports is gone after the
-  run, and a re-run of `phil:ai-eos` reports none of them.
+  run, and a re-run of `phil:ai-eos` reports none of them. A tell whose fix needs a fact the draft
+  does not hold, such as phantom attribution, stays as written and the report lists it.
 - AC1.2 — Given a draft with uncommitted changes, then the run refuses, names the file and writes
   nothing.
 - AC1.3 — Given any run, then no protected span (D11) differs from the draft.

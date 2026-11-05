@@ -1,0 +1,19 @@
+{
+  "fixture_id": "HTP-SELFTEST-04",
+  "slice": 1,
+  "situation": "The first sentence holds two tells: copulative avoidance ('maintains') and participle padding ('reflecting the team's commitment to correctness'). Fixing only the verb, or promoting the participle to its own sentence ('This reflects the team's commitment to correctness'), leaves or creates a tell the re-check catches. The third paragraph is a phantom attribution whose fix needs a source the draft does not name.",
+  "inputs": ["draft.md"],
+  "git_state": "committed",
+  "arguments": "draft.md",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": ["TELLS-LEFT"],
+  "expected_guard": "the first sentence ends as a plain statement with no tell, and the phantom attribution is left as written and listed under TELLS-LEFT as needing a fact the draft does not hold",
+  "must_not": [
+    "leave the first sentence with any tell after the re-check",
+    "promote the participle into a new sentence that is itself a tell",
+    "name an expert, a paper or a study for the attribution",
+    "cut the attribution's claim to make the tell disappear",
+    "change 'two seconds', 'primary' or 'replica'"
+  ],
+  "why_this_fixture_exists": "Two failure modes in one draft. The re-check is what stops a fix from swapping one tell for another, and the needs-a-fact rule is what stops the run from inventing a citation to clear a tell."
+}
