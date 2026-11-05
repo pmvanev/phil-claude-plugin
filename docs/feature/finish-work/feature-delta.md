@@ -401,4 +401,26 @@ DISCOVER and DIVERGE never ran; the changed assumptions are the session-handoff 
 
     Each is fixed with a test or fixture. A worktree `git worktree list` marks `locked` is held, except
     the one Claude Code locks for this session.
+- **A clean worktree goes whoever made it (the developer's answer, 2026-11-05).** This widens slice
+  05's "a worktree this session made". `/phil:done 98` listed the worktree its own session ran in,
+  because an earlier session had cut it and this one resumed there, as `/phil:start` then
+  `/phil:resume` does. The developer asked why it did not just remove it.
+  - **A worktree goes where all three hold**: it has a candidate's branch checked out at the merged
+    tip, `worktree-state.py` reads it `CLEAN`, and `git worktree list` marks it unlocked. Who made it
+    no longer counts. The one lock that is no bar is the one Claude Code holds on a worktree
+    `EnterWorktree` made in this session, because `ExitWorktree` releases it. Any other lock holds the
+    worktree and its snapshot (fixtures 50 and 51), since git refuses a locked worktree without
+    `--force`. A session that started in a worktree saw no lock on it: card 98's read unlocked, live.
+  - **The worktree the session runs in** goes last: through `ExitWorktree` where `EnterWorktree` made
+    it in this session, otherwise through `git worktree remove`. Run live 2026-11-05 with git
+    2.53.0, git removed the directory the shell stood in, exit 0, and the next call ran from the main
+    checkout; `ExitWorktree` does nothing for a worktree it did not make.
+  - **What stays unchecked**: what no check reads, such as an editor's unsaved buffer or a terminal
+    open in the directory. The plan names each worktree it removes, so the developer's one yes
+    covers it. Fixtures 23 and 29 now expect the removal they once forbade.
+  - **Reviews (2026-11-05).** The plugin validator found the command and `SKILL.md` saying "unlocked"
+    while Claude Code locks the worktree `EnterWorktree` makes, a locked worktree's snapshot still
+    retired, and a fixture guard that checked nothing. The skill reviewer found that step 6 removed the
+    session's worktree with its snapshot unretired, and that step 2 retired a snapshot before checking
+    for a new lock. Each is fixed, with a test or a fixture.
 - **Upstream changes:** see Changed Assumptions.

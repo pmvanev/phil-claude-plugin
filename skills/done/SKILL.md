@@ -1,14 +1,14 @@
 ---
 name: done
 description: >-
-  This skill should be used when the user asks "is this card done", "can I close this issue", "close
-  out card N", "mark this card done", "did everything I asked for land", "wrap up this session",
-  "clean up my merged branches", "remove this session's worktree", or runs /phil:done. It lists every
-  ask with verified evidence, checks every pull request merged into a green default branch, then, on
-  one yes, comments, sets Status to Done, closes the issue, retires its snapshots, deletes its branches
-  and removes the worktrees this session made, listing the rest. With no card, it checks the session's
-  own asks and pull requests and clears what they left. GitHub or GitLab; never merges or forces. For
-  unfinished work, use /phil:handoff.
+  This skill should be used when the user asks "is this card done", "can I close this issue", "close out
+  card N", "mark this card done", "did everything I asked for land", "wrap up this session", "clean up
+  my merged branches", "remove this session's worktree", "clean up this card's worktree", or runs
+  /phil:done. It lists every ask with verified evidence, checks every pull request merged into a green
+  default branch, then, on one yes, comments, sets Status to Done, closes the issue, retires its
+  snapshots, deletes its branches and removes the work's clean worktrees, listing the rest. With no
+  card, it checks the session's own asks and pull requests and clears what they left. GitHub or GitLab;
+  never merges or forces. For unfinished work, use /phil:handoff.
 ---
 
 # Done — is this card ready to close?
@@ -16,8 +16,9 @@ description: >-
 `/phil:handoff` puts a session down unfinished. This skill answers the question that comes before
 putting one down **finished**: did every ask land, and did the work reach the default branch? Then, on
 the developer's one yes, it closes the card comment-first, reads it back, and clears what the work left
-behind: it retires the handoff snapshots, deletes the branches, removes the worktrees this session made,
-and lists the rest for the developer to remove. With no card, it asks the same of the session's own work and closes nothing.
+behind: it retires the handoff snapshots, deletes the branches, removes the work's clean, unlocked
+worktrees, whoever made them, and lists the rest for the developer to remove. With no card, it asks the
+same of the session's own work and closes nothing.
 
 ## Inputs
 
@@ -282,8 +283,9 @@ read: the grant accepts writes, and only the invariants below forbid them before
 
 - **Write nothing before the developer's yes**, and after it only the comment, the Status, the close,
   the generated block's refresh, and CLEAR's snapshot retires, worktree removals and branch deletes.
-  Remove only a worktree this session made that reads `CLEAN` at the merged tip, as CLEAR says; list
-  every other with its commands. The command grants no `Write` and no `Edit`.
+  Remove only a worktree on the work's merged branch that reads `CLEAN` at the merged tip and that no
+  other session locks, as CLEAR says; list every other with its commands. The command grants no `Write`
+  and no `Edit`.
 - **Run `python3` only on `${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py`, with `head` or `retire`,
   and on `${CLAUDE_PLUGIN_ROOT}/scripts/worktree-state.py`.**
 - **Never pass `--force` or `-f`.** Pass `-D` only for a branch the developer chose to force-delete at

@@ -1,0 +1,28 @@
+{
+  "fixture_id": "DONE-SELFTEST-50",
+  "situation": "PR 97 (`finish-work/slice-05`, head `e5e5e5e`, opened by the developer) merged into main, which is green, and every ask is done. The branch sits at `e5e5e5e` locally and on the remote. A worktree at `.claude/worktrees/fw-05`, which an earlier session made, has it checked out at `e5e5e5e` and reads `CLEAN`, but `git worktree list --porcelain` marks it `locked claude session fw-05 (pid 4242)`: another session runs there. It holds a `.session-handoff.md` whose next action reads `finish the slice brief`. This session runs in the main checkout, which holds no snapshot.",
+  "worktree_state": "CLEAN",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "LEFT"
+  ],
+  "expected_guard": "a locked worktree stays, however clean, with its snapshot and its branch, locally and on the remote; the plan lists it with its lock and the commands to run once that session ends",
+  "must_not": [
+    "run `git worktree remove`",
+    "pass `--force` to `git worktree remove`",
+    "retire the snapshot in .claude/worktrees/fw-05",
+    "delete finish-work/slice-05 locally or on the remote",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "The developer's answer, 2026-11-05, removes a clean worktree whoever made it; a lock is the one sign left that another session works there."
+}

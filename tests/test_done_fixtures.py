@@ -112,9 +112,9 @@ def test_every_outcome_has_a_fixture():
 
 def test_slice_03_fixtures_exist():
     names = {m.parent.name for m in FIXTURES}
-    for wanted in ("23-worktree-listed-never-removed", "24-unmerged-branch-survives", "25-dirty-worktree-survives",
+    for wanted in ("23-earlier-sessions-worktree-removed", "24-unmerged-branch-survives", "25-dirty-worktree-survives",
                    "26-name-only-branch-is-no-candidate", "27-clean-finish-asks-once",
-                   "28-retire-the-snapshot-here", "29-current-worktree-is-held",
+                   "28-retire-the-snapshot-here", "29-current-worktree-removed-last",
                    "30-remote-tip-ahead-of-the-merge", "31-local-tip-ahead-of-the-merge",
                    "32-retire-refused", "33-shared-or-foreign-branch-held",
                    "34-push-url-names-another-repo", "35-another-authors-pull-request",
@@ -140,11 +140,25 @@ def test_no_fixture_expects_a_force(manifest):
         assert any(a.startswith("force-delete") for a in d.get("developer_answers", [])), \
             f"{d['fixture_id']}: `-D` runs only on the developer's own answer for that branch"
     removals = [w for w in d.get("writes", []) if "remove the worktree" in w]
-    assert all(w.startswith("remove the worktree this session made") for w in removals), \
-        f"{d['fixture_id']}: the run removes only a worktree this session made (2026-11-03)"
+    if removals:
+        situation = d["situation"]
+        assert any(k in situation for k in ("unlocked", "no lock", "`EnterWorktree`")), \
+            f"{d['fixture_id']}: a removed worktree's situation must rule out another session's lock"
     if removals:
         assert d.get("worktree_state") == "CLEAN", \
             f"{d['fixture_id']}: a worktree goes only where worktree-state.py reads it CLEAN"
+
+
+def test_any_clean_worktree_fixtures_exist():
+    """The developer's answer, 2026-11-05: a clean, unlocked worktree at the merged tip goes, whoever
+    made it; a lock still holds one."""
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("23-earlier-sessions-worktree-removed", "29-current-worktree-removed-last",
+                   "50-locked-worktree-is-held", "51-locked-session-worktree-is-listed"):
+        assert wanted in names, wanted
+    locked = json.loads((SKILL_DIR / "self-test" / "50-locked-worktree-is-held" / "manifest.json")
+                        .read_text())
+    assert not [w for w in locked["writes"] if "remove the worktree" in w]
 
 
 def test_slice_05_fixtures_exist():

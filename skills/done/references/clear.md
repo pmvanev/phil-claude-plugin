@@ -10,17 +10,23 @@ for a branch the developer chose to force-delete at its own question (FORCE, bel
 for everything else. The one force-family flag allowed is `--force-with-lease=<ref>:<oid>` on a remote
 delete, which makes the delete refuse a tip that moved.
 
-**Remove a worktree only where all three hold:** the conversation shows this session creating it — with
-a successful `EnterWorktree` or `git worktree add`; `worktree-state.py` reads it `CLEAN`; and its `HEAD`
-is the merged `headRefOid` of a candidate. A clean-looking worktree can hold work nothing else has — a
-repository nested in an ignored folder, edits git was told to ignore, submodules, commits only its own
-history remembers — and `git worktree remove` deletes them without objecting (adversarial run,
-2026-11-02); `worktree-state.py` reads each of those `HIDDEN`. Hold a worktree `git worktree list
---porcelain` marks `locked`, except the one this session runs in, which Claude Code locks for the
-session: a lock means another session may work there. Never pass `--force` to `git worktree remove`.
-List every other worktree with the commands to remove it and its branch; the developer runs them. List
-a `HIDDEN` worktree with its findings and no remove command: that command deletes what the findings
-name.
+**Remove a worktree only where all three hold:** it has a candidate's `headRefName` checked out at that
+candidate's merged `headRefOid`; `worktree-state.py` reads it `CLEAN`; and `git worktree list
+--porcelain` does not mark it `locked`, unless the lock is the one Claude Code holds for this session on
+a worktree `EnterWorktree` made in this session. A lock means another session may work there, and git
+refuses to remove a locked worktree without `--force`. **Who made it does not matter**: a session that
+resumes in a worktree an earlier one cut, as `/phil:start` then `/phil:resume` does, holds the same work
+(the developer's answer, 2026-11-05).
+
+A clean-looking worktree can hold work nothing else has — a repository nested in an ignored folder,
+edits git was told to ignore, submodules, commits only its own history remembers — and `git worktree
+remove` deletes them without objecting (adversarial run, 2026-11-02); `worktree-state.py` reads each of
+those `HIDDEN`. What no check reads, such as an editor's unsaved buffer, goes unseen; the plan names
+each worktree it removes, so the developer's yes covers it.
+
+Never pass `--force` to `git worktree remove`. List every other worktree with the commands to remove it
+and its branch; the developer runs them. List a `HIDDEN` worktree with its findings and no remove
+command: that command deletes what the findings name.
 
 ## Find the candidates
 
@@ -44,7 +50,7 @@ Delete a branch only when its tip is the `headRefOid` of a pull request merged i
   On the plan's line for a worktree the run removes, show the `ignored:` entries `CLEAN` printed: the
   removal deletes them.
 - **Snapshot** — `<worktree>/.session-handoff.md` in each worktree on a candidate branch whose `HEAD` is
-  the merged tip and which reads `CLEAN`, read with
+  the merged tip, which reads `CLEAN` and which no other session locks, read with
   `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py head --file <path>`: it prints the file
   above the recorded exchanges and `SHA <h>` on stderr, so the exchanges never enter the context. Keep
   `<h>`; the plan shows the snapshot's next action and stack.
@@ -66,6 +72,7 @@ reaches FORCE; never offer the rest for deletion:
 - A branch, local or remote, whose tip is not the merged `headRefOid` — it holds commits the merge did
   not.
 - A worktree whose branch is held, and the snapshot inside it.
+- In a worktree another session locks, keep the snapshot: that session may still need it.
 - In a worktree that reads `DIRTY`, `HIDDEN` or `UNREADABLE`, keep the snapshot: it describes unfinished
   work.
 - A branch any worktree has checked out, locally and on the remote, until that worktree is removed — by
@@ -120,13 +127,14 @@ Add to the plan, after the close's writes:
 ```
 CLEAR
   retire snapshot  ../fw-02/.session-handoff.md — next: "verify the wave table"; stack: 2 frames
-  remove worktree  .claude/worktrees/fix-07 — this session made it; clean, at PR 95's merged tip;
+  remove worktree  .claude/worktrees/fix-07 — clean, at PR 95's merged tip, locked only by this session;
                    deletes ignored: .venv, tests/__pycache__
   delete branch    finish-work/slice-01 (local and remote)
   FORCE-DELETE     finish-work/spike (local and remote) — 2 unmerged commits, at your answer
-FOR YOU TO RUN — a worktree this session did not make, or one that is not clean
-  git worktree remove ../fw-02 && git branch -d finish-work/slice-02 &&
-    git push --delete origin refs/heads/finish-work/slice-02
+FOR YOU TO RUN — a worktree that is locked, not clean, or off the merged tip
+  ../fw-04 is locked: claude session fw-04 (pid 4242) — once that session ends:
+  git worktree remove ../fw-04 && git branch -d finish-work/slice-04 &&
+    git push --delete origin refs/heads/finish-work/slice-04
   ../fw-03 has uncommitted changes:  M src/a.py  ?? notes.md
 SURVIVES
   finish-work/spike and ../fw-spike — PR 86 closed unmerged
@@ -141,26 +149,40 @@ checkout this session runs in holds one — and **stop**.
 1. **Snapshots** in worktrees the run keeps —
    `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py retire --file <path> --expect-sha <h>`,
    with the hash `head` printed. Anything but `RETIRED` keeps the snapshot.
-2. **Worktrees this session made**, but not the one it runs in, each in turn: run
-   `worktree-state.py --expect-head <headRefOid> <path>` again; retire its snapshot only after that read
-   comes back `CLEAN`, as step 1 does; then, on `RETIRED` or where it holds none, run
-   `git worktree remove <path>`. Anything else — `MOVED` included, a commit made after the plan — keeps
-   the worktree, its snapshot and its branch, locally and on the remote.
-3. **Local branches** — `git branch -d <branch>`. A squash or rebase merge leaves the branch unmerged in
-   git's eyes, so git refuses it; that is a `LEFT`, not an error to work around.
+2. **Other worktrees the run removes**, but not the one it runs in, each in turn: run `worktree-state.py
+   --expect-head <headRefOid> <path>` again, and read the path's entry in `git worktree list
+   --porcelain` for a lock; retire its snapshot only after that read comes back `CLEAN` and the entry
+   shows no lock, as step 1 does; then, on `RETIRED` or where it holds none, run `git worktree remove
+   <path>`. Anything else — `MOVED` or a new lock included — keeps the worktree, its snapshot and its
+   branch, locally and on the remote.
+3. **Local branches** — `git branch -d <branch>`, skipping the branch step 6's worktree holds: step 6
+   deletes it. A squash or rebase merge leaves the branch unmerged in git's eyes, so git refuses it; that
+   is a `LEFT`, not an error to work around.
 4. **Remote branches** — `git push --delete --force-with-lease=refs/heads/<branch>:<headRefOid> <remote>
-   refs/heads/<branch>`. The lease refuses the delete if the tip moved after the check; the qualified ref
-   keeps a tag of the same name from matching.
+   refs/heads/<branch>`, skipping the branch step 6's worktree holds. The lease refuses the delete if the
+   tip moved after the check; the qualified ref keeps a tag of the same name from matching.
 5. **Force-deletes** — the developer's chosen branches, as FORCE gives them.
-6. **The worktree this session runs in**, last, and only where `EnterWorktree` made it: git cannot remove
-   the directory a session works in. Run `worktree-state.py --expect-head <headRefOid> <path>` again,
-   and on `CLEAN` call `ExitWorktree` with `action: "remove"`, which removes the worktree and its local
-   branch and returns the session to the checkout it started from. It counts as unmerged any commit
-   missing from that checkout's branch, not from `<default>`, so it may refuse a merged tip. Pass
-   `discard_changes: true` only where `worktree-state.py` read `CLEAN` and `HEAD` is the merged
-   `headRefOid`: then no file is uncommitted, and every commit it names is in `<default>` or, after a
-   squash or rebase merge, in the pull request's own ref on the forge. Then delete the branch's remote
-   copy as step 4 does. Where `git worktree add` made it, list it for the developer instead.
+6. **The worktree this session runs in**, last, where it is a linked worktree; `<path>` is `git
+   rev-parse --show-toplevel`. Run `worktree-state.py --expect-head <headRefOid> <path>` again, and act
+   only on `CLEAN`. On the third answer, retire its snapshot as step 1 does, and go on only on
+   `RETIRED`; a plain yes keeps a worktree that holds one.
+
+   Where `EnterWorktree` made it in this session, call `ExitWorktree` with `action: "remove"`, which
+   removes the worktree and its local branch and returns the session to the checkout it started from. It
+   counts as unmerged any commit missing from that checkout's branch, not from `<default>`, so it may
+   refuse a merged tip. Pass `discard_changes: true` only where `worktree-state.py` read `CLEAN` and
+   `HEAD` is the merged `headRefOid`: then no file is uncommitted, and every commit it names is in
+   `<default>` or, after a squash or rebase merge, in the pull request's own ref on the forge. Then
+   delete the branch's remote copy as step 4 does.
+
+   Where `EnterWorktree` did not make it in this session, `ExitWorktree` does nothing, so run
+   `git worktree remove <path>`, never with `--force`. For a session that started in the worktree, git
+   removed the directory the shell stood in, exited 0, and the next call ran from the main checkout
+   (observed 2026-11-05, git 2.53.0); a worktree entered by `path` was not tried. Then delete the local
+   branch as step 3 does, and its remote copy as step 4 does. A refusal, or a read other than `CLEAN`,
+   keeps the worktree and its branch, locally and on the remote: report it `LEFT`, with its commands. A
+   lock on it at plan time puts it under FOR YOU TO RUN, never in the plan's removals: git refuses a
+   locked worktree without `--force`.
 
 Any refusal or error in CLEAR leaves that item and goes on with the rest: report the refusal and leave
 the item.
