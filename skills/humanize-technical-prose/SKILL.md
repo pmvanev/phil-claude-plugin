@@ -40,9 +40,10 @@ Read `$ARGUMENTS` as one of two forms:
 | `--build-profile <name> <sample paths…>` | Build a profile (Step B) |
 | `<file> [--profile <name>] [--slips N] [--misspellings]` | Edit the draft (Steps 1–7) |
 
-Check every condition below, then report `REFUSED-ARGUMENT`, name each one that fails, print the usage
-line `<file> [--profile <name>] [--slips N] [--misspellings] | --build-profile <name> <sample paths…>`,
-and write nothing:
+Every condition below must hold. When any fails, report `REFUSED-ARGUMENT`, name each one that fails,
+print the usage line
+`<file> [--profile <name>] [--slips N] [--misspellings] | --build-profile <name> <sample paths…>`, and
+write nothing:
 
 - edit mode names exactly one file, ending `.md`, `.markdown`, `.txt` or `.tex`;
 - `N` is a whole number of zero or more, written in digits;

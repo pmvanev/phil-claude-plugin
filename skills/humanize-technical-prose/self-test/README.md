@@ -1,12 +1,12 @@
 # Self-test — humanize-technical-prose
 
-The acceptance and regression gate for `../SKILL.md`, driven structurally by
-`tests/test_humanize_technical_prose_fixtures.py`. The counting script has its own unit tests in
-`tests/test_humanize_measure_voice.py`.
+These fixtures are the acceptance and regression gate for `../SKILL.md`, and
+`tests/test_humanize_technical_prose_fixtures.py` drives them structurally. The counting script has
+its own unit tests in `tests/test_humanize_measure_voice.py`.
 
 **What the driver can and cannot check.** Whether a rewrite reads as its author's is not automatable,
 so the fixtures are model-driven: a run follows the skill on each fixture's inputs and is judged
-against its `expected.md` and `must_not`. The driver checks what can be checked mechanically:
+against its `expected.md` and `must_not`. The driver checks what a machine can:
 
 - each manifest is well formed, and its inputs exist;
 - it names outcomes the skill defines, which the driver reads from the skill's `## Outcomes` tables;
