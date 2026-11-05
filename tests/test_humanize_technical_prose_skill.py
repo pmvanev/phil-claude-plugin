@@ -27,6 +27,16 @@ def _frontmatter(path):
     return yaml.safe_load(path.read_text().split("---", 2)[1])
 
 
+BUILD = REPO / "skills" / "humanize-technical-prose" / "references" / "build-profile.md"
+
+
+def _build():
+    """Step B's procedure, which lives in a reference so an edit run does not load it."""
+    assert "${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/references/build-profile.md" in \
+        _section("Step B: Build a Profile"), "Step B must point at its reference"
+    return _flat(BUILD)
+
+
 # --- slice 01: the command, the committed-file gate, protected spans, the tells pass, the report ---
 
 def test_the_command_loads_the_skill_and_declares_that_it_mutates():
@@ -113,29 +123,29 @@ _spec.loader.exec_module(measure_voice)
 
 
 def test_the_profile_reads_only_named_samples_and_never_a_transcript():
-    build = _section("Step B: Build a Profile")
+    build = _build()
     assert "Never read a transcript" in build
     assert "`SAMPLE-REFUSED`" in build
 
 
 def test_the_build_runs_the_measuring_script_by_plugin_root():
-    build = _section("Step B: Build a Profile")
+    build = _build()
     assert "python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --measure" in build
     assert "--build {name} --slips -" in build
 
 
 def test_a_thin_sample_is_named_and_left_out():
-    assert "`SAMPLE-THIN`" in _section("Step B: Build a Profile")
+    assert "`SAMPLE-THIN`" in _build()
 
 
 def test_adding_samples_rebuilds_from_all_of_them():
-    assert "rebuild it from every sample, old and new" in _section("Step B: Build a Profile")
+    assert "rebuild it from every sample, old and new" in _build()
 
 
 def test_the_slip_vocabulary_in_the_skill_is_the_one_the_script_accepts():
     """The skill classifies and the script stores; a kind the one names and the other refuses is a run
     that fails at the last step, after every sample was read."""
-    build = SKILL.read_text().split("## Step B: Build a Profile", 1)[1].split("\n## ", 1)[0]
+    build = SKILL.read_text().split("## Slip Vocabulary", 1)[1].split("\n## ", 1)[0]
     mechanisms = set(re.findall(r"^\| misspelling \| ([a-z ]+) \|", build, flags=re.M))
     assert mechanisms == measure_voice.MISSPELLING_MECHANISMS
     for cause, kinds in measure_voice.GRAMMAR_CAUSES.items():
@@ -144,17 +154,17 @@ def test_the_slip_vocabulary_in_the_skill_is_the_one_the_script_accepts():
 
 
 def test_no_slipped_word_is_written_anywhere():
-    build = _section("Step B: Build a Profile")
+    build = _build()
     assert "never write a slipped word" in build
     assert "not in the profile, the tally or the report" in build
 
 
 def test_a_slip_on_a_name_or_technical_term_is_counted():
-    assert "`on_name_or_term`" in _section("Step B: Build a Profile")
+    assert "`on_name_or_term`" in _section("Slip Vocabulary")
 
 
 def test_when_unsure_a_word_is_not_a_slip():
-    assert "When unsure, it is not a slip" in _section("Step B: Build a Profile")
+    assert "When unsure, it is not a slip" in _build()
 
 
 # --- slice 03: the voice pass, and the tells check after it ---
