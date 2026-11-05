@@ -1,5 +1,5 @@
 {
-  "description": "Probe: answer or refuse AskUserQuestion by SPIKE_MODE.",
+  "description": "Probe: answer or refuse AskUserQuestion by SPIKE_MODE; or gate by session marks when SPIKE_MODE=gate.",
   "hooks": {
     "PreToolUse": [
       {
@@ -7,7 +7,27 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/auto.py\""
+            "command": "if [ \"$SPIKE_MODE\" = gate ]; then python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/gate.py\"; else python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/auto.py\"; fi"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ \"$SPIKE_MODE\" = gate ]; then python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/gate.py\"; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ \"$SPIKE_MODE\" = gate ]; then python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/gate.py\"; fi"
           }
         ]
       }

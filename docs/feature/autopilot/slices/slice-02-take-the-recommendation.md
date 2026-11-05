@@ -11,9 +11,9 @@ Story 2 · Decisions D1, D6, D9, D12.
 autopilot run, giving a reason that carries D1's three kinds and the recommended option. The skill
 repeats the instruction for headless runs. Never pre-fill `answers`.
 
-Open for authoring: how the hook knows a run is active. A marker holding the session id, as hook input
-carries `session_id`, limits the denial to that session, and a crashed run cannot silence asks in the
-next one.
+The hook knows a run is active from hook events alone (spike row 8). `UserPromptSubmit` marks the
+session when the prompt starts with `/phil:autopilot`, keyed by `session_id`. The ask hook denies only
+in a marked session, and `Stop` clears the mark when the run's turn ends.
 
 ## IN scope
 - Answering by rule — the repo's `CLAUDE.md` and `AGENTS.md`, and the developer's saved preferences —

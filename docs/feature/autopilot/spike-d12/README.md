@@ -16,6 +16,7 @@ denies or pre-fills the ask by `SPIKE_MODE`.
 | 5 | interactive | hook **allows** with `updatedInput.answers` pre-filled | The transcript reads "User answered Claude's questions"; the model cannot tell the hook from the developer. A record built on this would be false. |
 | 6 | interactive | hook denies with a reason carrying D1's three blocker kinds | A question about the developer's own unpublished essays stopped: `BLOCKED: … — an input only the developer holds`. |
 | 7 | interactive | the same reason, on the colour question | It judged "Not a blocker", took the recommendation, and named the hook. |
+| 8 | interactive, one session, two prompts | the gate in `plugin/hooks/gate.py`: `UserPromptSubmit` marks a session whose prompt starts with the command, the ask hook denies only in a marked session, and `Stop` clears the mark | `UserPromptSubmit` saw the slash command as typed. The run's ask was denied and the recommendation taken; `Stop` cleared the mark; a plain ask in the next turn of the same session reached the human. |
 
 Each interactive row is one run, with one model. Rows 6 and 7 show that the deny reason can carry the
 classification; they do not measure how reliable it is.
@@ -27,6 +28,11 @@ ask during an autopilot run. Its reason names D1's three blocker kinds and the r
 Never pre-fill `answers`: the answer would read as the developer's. Keep the same instruction in the
 skill, because a headless run has no question tool and so no hook fires.
 
+Gate the hook on hook events, not on a file the model writes. `UserPromptSubmit` marks the session
+when its prompt starts with `/phil:autopilot`. The ask hook denies only in a marked session. `Stop`
+clears the mark when the run's turn ends (row 8). The mark is keyed by `session_id`, so a crashed run
+cannot silence asks in another session.
+
 ## Rerun
 
 ```bash
@@ -36,6 +42,7 @@ python3 tmux_run.py i1-deny deny "/spikeap:auto"               # rows 3 to 7: in
 python3 tmux_run.py i2-answer answer "/spikeap:auto"
 python3 tmux_run.py i3-blocker deny-classify "/spikeap:auto-blocker"
 python3 show.py i3-blocker
+python3 tmux_gate.py                                            # row 8: the session gate
 ```
 
 Each run writes to `runs/<name>/`. The interactive driver accepts the folder-trust dialog, which

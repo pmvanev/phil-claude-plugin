@@ -127,7 +127,9 @@ plugin's existing rules.
   recommended option. The run then stops on a blocker, or takes the recommendation and records it as
   the hook's (D6). The hook never pre-fills `answers`: on Claude Code 2.1.318 that reads as "User
   answered", a false record. The skill states the same instruction, because headless `claude -p` has
-  no question tool, so no hook fires there.
+  no question tool, so no hook fires there. The run is marked by hook events, not by a file the model
+  writes. `UserPromptSubmit` marks the session when the prompt starts with `/phil:autopilot`; `Stop`
+  clears the mark when the turn ends.
 
 - **[D13] Done is the developer's.** *(Developer's answer, 2026-11-05.)* The developer inspects and
   approves the work before anything calls it done, so autopilot never runs `/phil:done` and never closes
