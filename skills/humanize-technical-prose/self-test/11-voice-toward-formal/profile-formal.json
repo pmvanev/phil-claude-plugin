@@ -1,0 +1,27 @@
+{
+  "name": "formal",
+  "built": "2026-11-05",
+  "samples": [{"path": "thesis/", "words": 10338}],
+  "thin": [],
+  "measures": {
+    "words": 10338,
+    "sentences": 582,
+    "sentence_length": {"median": 17, "mean": 17.8, "p10": 9, "p90": 28},
+    "short_sentences_per_100": 3.09,
+    "questions_per_100": 0.0,
+    "contractions_per_1000": 0.0,
+    "first_person_per_1000": 3.1,
+    "openers": {"when": 3.78, "if": 3.61, "however": 2.58, "because": 2.41, "therefore": 2.23, "for": 2.06, "thus": 1.55, "each": 0.86},
+    "connectives": {"however": 2.58, "therefore": 2.23, "thus": 1.55, "for instance": 1.03, "for example": 0.69, "finally": 0.52, "fortunately": 0.52},
+    "phrases": [{"phrase": "access to", "count": 25, "samples": 3}, {"phrase": "must be", "count": 21, "samples": 4}, {"phrase": "attempt to", "count": 12, "samples": 3}]
+  },
+  "slips": {
+    "misspelling": {"dropped letter": 2, "added letter": 3, "swapped letters": 0, "wrong vowel": 0, "wrong doubling": 0, "other": 0},
+    "grammar": {
+      "revision residue": {"doubled word": 3, "stray word": 2, "words out of order": 0},
+      "omission": {"dropped article": 4, "dropped word": 1},
+      "substitution": {"wrong word": 2, "wrong form": 0, "number agreement": 6, "wrong article": 1, "punctuation or case": 5}
+    },
+    "on_name_or_term": 1
+  }
+}

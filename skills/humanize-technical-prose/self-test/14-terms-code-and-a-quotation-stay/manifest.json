@@ -1,0 +1,19 @@
+{
+  "fixture_id": "HTP-SELFTEST-14",
+  "slice": 3,
+  "situation": "Two very long sentences, reworded toward the formal profile, that hold an inline command, a quotation from the runbook, and five technical terms: error rate, alert threshold, readiness probe, canary weight, error budget. The splits the profile calls for fall right beside each of them.",
+  "inputs": ["draft.md", "../11-voice-toward-formal/profile-formal.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile formal",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": [],
+  "expected_guard": "the sentences are split, and the command, the quotation and every technical term are byte-for-byte as before",
+  "must_not": [
+    "change `kubectl rollout undo deployment/api` by a byte",
+    "change a word or mark inside \"roll back first, debug second\"",
+    "replace 'error budget', 'canary weight' or 'readiness probe' with a plainer word",
+    "change 'needs' to 'should have' or weaken the approval requirement",
+    "change 'you' in 'assume you follow it' to another person"
+  ],
+  "why_this_fixture_exists": "A voice pass works on word choice, and technical terms, code and quotations look like word choice. The card's fixture behaviour is that the voice pass leaves them untouched."
+}

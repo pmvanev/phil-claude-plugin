@@ -1,0 +1,17 @@
+{
+  "fixture_id": "HTP-SELFTEST-20",
+  "slice": 4,
+  "situation": "Fixture 11's draft with a profile whose only slips are revision residue (doubled word and stray word) and `--slips 1`. The voice pass splits and rewords several sentences and leaves at least one untouched; the script allocates one doubled word.",
+  "inputs": ["../11-voice-toward-formal/draft.md", "profile-residue.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile residue --slips 1",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": ["SLIPS-WARNING"],
+  "expected_guard": "one doubled word, in a sentence the voice pass reworded; the SLIPS line names its line and kind",
+  "must_not": [
+    "put the residue slip in a sentence the voice pass left as Step 3 had it",
+    "double a content word or a technical term; residue repeats a short function word",
+    "print SLIPS-UNMIRRORED, since this profile has no slips on names or terms"
+  ],
+  "why_this_fixture_exists": "Revision residue is what a writer leaves behind when rewording, so it is plausible only where the text was reworded. The run knows which sentences it reworded, and this fixture checks it uses that."
+}

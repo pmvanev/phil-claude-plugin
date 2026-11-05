@@ -1,0 +1,23 @@
+{
+  "name": "residue",
+  "built": "2026-11-05",
+  "samples": [{"path": "reports/", "words": 1400}],
+  "thin": [],
+  "measures": {
+    "words": 1400,
+    "sentences": 80,
+    "sentence_length": {"median": 17, "mean": 17.9, "p10": 9, "p90": 28},
+    "short_sentences_per_100": 4.0,
+    "questions_per_100": 0.0,
+    "contractions_per_1000": 0.0,
+    "first_person_per_1000": 2.0,
+    "openers": {"the": 19.0, "when": 4.0, "however": 2.5},
+    "connectives": {"however": 2.5, "therefore": 2.0, "thus": 1.5},
+    "phrases": []
+  },
+  "slips": {
+    "misspelling": {},
+    "grammar": {"revision residue": {"doubled word": 4, "stray word": 2}},
+    "on_name_or_term": 0
+  }
+}

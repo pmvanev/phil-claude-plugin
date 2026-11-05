@@ -1,0 +1,19 @@
+{
+  "fixture_id": "HTP-SELFTEST-12",
+  "slice": 3,
+  "situation": "The same draft as fixture 11, reworded toward the essay profile instead: median 17, p90 32, about three contractions per thousand words, connectives finally, unfortunately, however and perhaps.",
+  "inputs": ["../11-voice-toward-formal/draft.md", "../11-voice-toward-formal/profile-essay.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile essay",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": [],
+  "expected_guard": "the long sentences are split as in fixture 11, but the contractions stay, and the connectives become ones the essay profile uses where the meaning fits; the output differs from fixture 11's where the two profiles differ, and only there",
+  "must_not": [
+    "expand the contractions: the essay profile has them",
+    "use 'therefore' or 'thus', which the essay profile barely uses, where 'however' or nothing fits",
+    "add 'perhaps' or 'unfortunately' where the draft expressed no doubt or regret: that adds a claim",
+    "add a question because the essay profile asks some",
+    "change any technical term or modal"
+  ],
+  "why_this_fixture_exists": "A profile only means something if a different profile gives different output on the same draft. The pair, 11 and 12, shows the run follows the profile, and the 'perhaps' trap shows that following it never licenses adding an attitude the draft did not hold."
+}

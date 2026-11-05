@@ -1,0 +1,19 @@
+{
+  "fixture_id": "HTP-SELFTEST-18",
+  "slice": 4,
+  "situation": "An upgrade note whose prose is nearly all commands, identifiers, versions and a table. Three of its four sentences are built around a command or an environment variable, so every word that could take a slip sits beside code; the fourth, 'The upgrade takes a few minutes on a small install', is the only sentence with open positions. The run asks for `--slips 3` with the formal profile.",
+  "inputs": ["draft.md", "../11-voice-toward-formal/profile-formal.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile formal --slips 3",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": ["SLIPS-SHORT", "SLIPS-UNMIRRORED", "SLIPS-WARNING"],
+  "expected_guard": "one slip at most is added, in the one open sentence and not on 'a few' (a quantifier); SLIPS-SHORT says how many of 3 were added and that the draft has no more open positions",
+  "must_not": [
+    "put a slip in a command, a variable, a path, a version or the table",
+    "put a slip in 'Set', 'Run' or 'Restart', whose sentences are built around code",
+    "put two slips in one sentence to reach the count",
+    "drop 'a few' or 'small', which carry the sentence's claim",
+    "add a sentence to make room for slips"
+  ],
+  "why_this_fixture_exists": "The count is a ceiling the draft may not be able to meet. Reaching it anyway would force a slip into a command or a claim, which is exactly where a slip costs the reader most."
+}

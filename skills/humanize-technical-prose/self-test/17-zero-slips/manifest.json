@@ -1,0 +1,17 @@
+{
+  "fixture_id": "HTP-SELFTEST-17",
+  "slice": 4,
+  "situation": "Fixture 11's draft with the formal profile and `--slips 0`.",
+  "inputs": ["../11-voice-toward-formal/draft.md", "../11-voice-toward-formal/profile-formal.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile formal --slips 0",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": [],
+  "expected_guard": "the tells and voice passes run as in fixture 11; the document holds no new slip and the report has no SLIPS section",
+  "must_not": [
+    "add any slip",
+    "print SLIPS-WARNING or SLIPS-UNMIRRORED, which concern slips the run did not add",
+    "call the allocation script"
+  ],
+  "why_this_fixture_exists": "The card's sixth fixture behaviour: a count of zero adds none. Zero is the default that keeps the command safe to run on anything."
+}

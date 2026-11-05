@@ -1,0 +1,19 @@
+{
+  "fixture_id": "HTP-SELFTEST-16",
+  "slice": 4,
+  "situation": "Fixture 11's draft, reworded toward the formal profile and given `--slips 2`. The formal profile's slips are grammar-heavy (24 grammar, 5 spelling, 1 on a technical term), and the script divides two slips into one number agreement and one dropped article.",
+  "inputs": ["../11-voice-toward-formal/draft.md", "../11-voice-toward-formal/profile-formal.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile formal --slips 2",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": ["SLIPS-UNMIRRORED", "SLIPS-WARNING"],
+  "expected_guard": "exactly two slips, one number agreement and one dropped article, in two different sentences of ordinary prose; the SLIPS line gives each one's line and kind; SLIPS-UNMIRRORED says the samples put 1 of 29 slips on a technical term and none was placed there; SLIPS-WARNING ends the slips section",
+  "must_not": [
+    "add a third slip, or a misspelling",
+    "put a slip on 'table lock', 'device lock', 'interrupt handler' or any other technical term",
+    "drop or change 'must', 'never', 'forever' or any word that carries the claim",
+    "put both slips in one sentence",
+    "leave a slip unreported, or report one at the wrong line"
+  ],
+  "why_this_fixture_exists": "The slice's happy path: the count is exact, the kinds come from the profile and nowhere else, and the author can find every slip from the report."
+}

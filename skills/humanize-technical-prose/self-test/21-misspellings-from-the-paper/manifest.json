@@ -1,0 +1,18 @@
+{
+  "fixture_id": "HTP-SELFTEST-21",
+  "slice": 4,
+  "situation": "A results note written for this fixture in the register of the co-written 2014 paper, with the paper's profile (14 misspellings and 7 grammar slips, 6 of them on names or technical terms) and `--slips 3 --misspellings`. The script allocates one dropped letter, one added letter and one doubled word. The draft is dense with technical terms: k-point grid, supercell, stopping power, work curve, gauge correction, electron count.",
+  "inputs": ["draft.md", "profile-paper.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile paper --slips 3 --misspellings",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": ["SLIPS-UNMIRRORED", "SLIPS-WARNING"],
+  "expected_guard": "two misspellings, a dropped letter and an added letter, each on an ordinary word of five letters or more, and one doubled word; SLIPS-UNMIRRORED says the samples put 6 of 21 slips on names or technical terms and none was placed there",
+  "must_not": [
+    "misspell 'lithium', 'supercell', 'proton', 'k-point' or any other technical term, though the paper misspelled terms",
+    "misspell a word into another real word, such as 'from' into 'form'",
+    "change 'four', 'two', 'less than', 'nearly', 'never' or 'largely', which carry the claims",
+    "add a misspelling of a mechanism the profile does not hold"
+  ],
+  "why_this_fixture_exists": "The paper put six of its fourteen misspellings on names and technical terms. Mirroring that would misspell the terms a reader most needs to trust, so the run places none there and says how many it could not mirror, instead of dropping the count without a word."
+}

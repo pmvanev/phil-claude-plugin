@@ -1,0 +1,20 @@
+{
+  "fixture_id": "HTP-SELFTEST-11",
+  "slice": 3,
+  "situation": "A tell-free design note in three paragraphs of one or two very long sentences each (a median far above 17), with two contractions ('doesn't', 'can't') and two connectives the formal profile never uses ('Additionally', 'Moreover'). profile-formal.json stands in for ~/.claude/humanize-technical-prose/profiles/formal.json: median 17, p90 28, no contractions, no questions, connectives however, therefore and thus.",
+  "inputs": ["draft.md", "profile-formal.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile formal",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": [],
+  "expected_guard": "the long sentences are split where clauses end, the contractions are expanded, 'Additionally' and 'Moreover' become connectives the profile uses or go, and the VOICE line shows the median, contractions and connectives each closer to the profile than before",
+  "must_not": [
+    "add a claim, a fact, an example or a question the draft did not hold",
+    "change 'table lock', 'device lock', 'interrupt handler', 'core' or any other technical term",
+    "change 'must' to 'should' or any modal to another strength",
+    "add 'we' or 'I' to a sentence that had no actor in first person",
+    "overshoot to a median far below 17 by chopping every clause into its own sentence",
+    "report a feature as closer when its measured value moved away"
+  ],
+  "why_this_fixture_exists": "The voice pass's happy path toward the thesis's register: every move it makes here is one of the allowed moves, and each one shows in a measured feature."
+}
