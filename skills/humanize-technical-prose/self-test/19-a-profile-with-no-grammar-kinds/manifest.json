@@ -1,0 +1,17 @@
+{
+  "fixture_id": "HTP-SELFTEST-19",
+  "slice": 4,
+  "situation": "Fixture 01's draft with a profile whose samples hold only misspellings (dropped letter and wrong vowel) and `--slips 2` with no `--misspellings`.",
+  "inputs": ["../01-tells-rewritten/draft.md", "profile-spelling.json"],
+  "git_state": "committed",
+  "arguments": "draft.md --profile spelling --slips 2",
+  "expected_decision": ["WROTE"],
+  "expected_report_lines": ["SLIPS-NONE-OF-KIND"],
+  "expected_guard": "the tells and voice passes run; no slip is added; SLIPS-NONE-OF-KIND says the profile holds only dropped-letter and wrong-vowel misspellings, and that none may be added without --misspellings",
+  "must_not": [
+    "add a misspelling without --misspellings",
+    "invent a grammar kind the profile does not hold",
+    "print SLIPS-WARNING, since no slip was added"
+  ],
+  "why_this_fixture_exists": "Grammar kinds are the default because a spell-checker leaves them; a profile with none of them gives the run nothing it may add. Falling back to misspellings, or to a built-in list, would break both the default and the rule that slips come from the samples."
+}

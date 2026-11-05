@@ -49,7 +49,11 @@ def test_the_outcome_tables_parse():
 
 
 def test_fixtures_exist():
-    assert len(FIXTURES) >= 4, f"expected slice 01's four fixtures, found {len(FIXTURES)}"
+    assert len(FIXTURES) >= 21, f"expected the twenty-one fixtures of slices 01-04, found {len(FIXTURES)}"
+
+
+def test_every_slice_has_fixtures():
+    assert {_m(m)["slice"] for m in FIXTURES} == SLICES
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
@@ -118,3 +122,48 @@ def test_the_uncommitted_fixture_declares_its_git_state():
 def test_the_needs_a_fact_fixture_holds_a_phantom_attribution():
     draft = (_fixture("04-a-rewrite-that-would-add-a-tell") / "draft.md").read_text()
     assert "Experts argue that" in draft
+
+
+# --- slice 04: the kinds each slips fixture expects are the ones the script draws ---
+
+import importlib.util
+
+_spec = importlib.util.spec_from_file_location("measure_voice", SKILL_DIR / "scripts" / "measure_voice.py")
+measure_voice = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(measure_voice)
+
+ALLOCATIONS = [
+    ("16-two-slips", "11-voice-toward-formal/profile-formal.json", 2, False,
+     [("substitution", "number agreement"), ("omission", "dropped article")]),
+    ("18-too-few-open-positions", "11-voice-toward-formal/profile-formal.json", 3, False,
+     [("substitution", "number agreement"), ("substitution", "punctuation or case"), ("omission", "dropped article")]),
+    ("19-a-profile-with-no-grammar-kinds", "19-a-profile-with-no-grammar-kinds/profile-spelling.json", 2, False, []),
+    ("20-residue-in-a-reworded-sentence", "20-residue-in-a-reworded-sentence/profile-residue.json", 1, False,
+     [("revision residue", "doubled word")]),
+    ("21-misspellings-from-the-paper", "21-misspellings-from-the-paper/profile-paper.json", 3, True,
+     [("misspelling", "dropped letter"), ("misspelling", "added letter"), ("revision residue", "doubled word")]),
+]
+
+
+def test_the_allocation_cases_cover_every_slips_fixture_that_draws():
+    drawing = {m.parent.name for m in FIXTURES
+               if _m(m)["slice"] == 4 and "--slips 0" not in _m(m)["arguments"]}
+    assert drawing == {name for name, *_ in ALLOCATIONS}
+
+
+@pytest.mark.parametrize("name,profile,n,misspellings,expected", ALLOCATIONS, ids=[a[0] for a in ALLOCATIONS])
+def test_a_slips_fixture_expects_what_the_script_draws(name, profile, n, misspellings, expected):
+    """A change to the allocation that redraws a fixture's kinds would leave its expected file wrong."""
+    slips = json.loads((SKILL_DIR / "self-test" / profile).read_text())["slips"]
+    drawn = measure_voice.allocate(slips, n, misspellings)["slips"]
+    assert [(s["class"], s["kind"]) for s in drawn] == expected
+    arguments = _m(SKILL_DIR / "self-test" / name / "manifest.json")["arguments"]
+    assert f"--slips {n}" in arguments
+    assert ("--misspellings" in arguments) == misspellings
+
+
+def test_every_profile_a_fixture_ships_passes_the_tally_check():
+    profiles = list((SKILL_DIR / "self-test").glob("*/profile-*.json"))
+    assert len(profiles) >= 5
+    for path in profiles:
+        measure_voice.check_tally(json.loads(path.read_text())["slips"])

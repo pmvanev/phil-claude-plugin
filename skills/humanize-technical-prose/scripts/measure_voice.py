@@ -11,6 +11,7 @@ Usage:
   measure_voice.py --measure <sample paths…>                        print the measures as JSON
   measure_voice.py --draft <file>                                   measure one draft: no floor, no phrases
   measure_voice.py --build <name> --slips <tally.json | -> <sample paths…>   write the profile
+  measure_voice.py --allocate <name> <N> [--misspellings]          divide N slips among the profile's kinds
 
 The profile lands in $HTP_PROFILE_DIR, or ~/.claude/humanize-technical-prose/profiles/ by default.
 Exit 0 on success, 2 on a refusal (a transcript, a bad name, a bad tally), printed as JSON.
@@ -275,6 +276,43 @@ def check_tally(tally):
     return tally
 
 
+def _largest_remainder(weights, n):
+    """Split n among weights in proportion, giving leftovers to the largest fractions."""
+    total = sum(weights.values())
+    if not total or not n:
+        return {k: 0 for k in weights}
+    quotas = {k: n * w / total for k, w in weights.items()}
+    shares = {k: int(q) for k, q in quotas.items()}
+    order = sorted(weights, key=lambda k: (-(quotas[k] - shares[k]), -weights[k], k))
+    for k in order[: n - sum(shares.values())]:
+        shares[k] += 1
+    return shares
+
+
+def allocate(slips, n, misspellings):
+    """Divide n slips among the profile's kinds: first among classes, then among kinds within each.
+
+    Grammar slips are always eligible; misspellings only when asked for. A misspelling whose mechanism
+    went unrecorded ("other") cannot be reproduced, so it is never drawn.
+    """
+    groups = {cause: {k: c for k, c in kinds.items() if c} for cause, kinds in slips.get("grammar", {}).items()}
+    if misspellings:
+        groups["misspelling"] = {k: c for k, c in slips.get("misspelling", {}).items() if c and k != "other"}
+    groups = {g: kinds for g, kinds in groups.items() if kinds}
+    per_group = _largest_remainder({g: sum(k.values()) for g, k in groups.items()}, n)
+    drawn = []
+    for g in sorted(groups, key=lambda g: (-per_group[g], -sum(groups[g].values()), g)):
+        per_kind = _largest_remainder(groups[g], per_group[g])
+        for k in sorted(per_kind, key=lambda k: (-groups[g][k], k)):
+            drawn.extend({"class": g, "kind": k} for _ in range(per_kind[k]))
+    held = [f"misspelling: {k}" for k, c in slips.get("misspelling", {}).items() if c]
+    held += [f"{cause}: {k}" for cause, kinds in slips.get("grammar", {}).items() for k, c in kinds.items() if c]
+    total = sum(slips.get("misspelling", {}).values()) + sum(
+        c for kinds in slips.get("grammar", {}).values() for c in kinds.values())
+    return {"slips": drawn, "none_of_kind": bool(n) and not drawn, "held": held,
+            "unmirrored": slips.get("on_name_or_term", 0), "profile_total": total}
+
+
 def profile_dir(env):
     if env.get("HTP_PROFILE_DIR"):
         return Path(env["HTP_PROFILE_DIR"])
@@ -289,6 +327,21 @@ def _refuse(items):
 
 
 def main(argv):
+    if len(argv) in (3, 4) and argv[0] == "--allocate":
+        name, count = argv[1], argv[2]
+        flags = argv[3:]
+        if not NAME.match(name) or not count.isdigit() or flags not in ([], ["--misspellings"]):
+            print(__doc__, file=sys.stderr)
+            return 2
+        path = profile_dir(os.environ) / f"{name}.json"
+        if not path.exists():
+            existing = sorted(p.stem for p in profile_dir(os.environ).glob("*.json"))
+            print(json.dumps({"refused": [{"path": str(path), "why": "no such profile"}],
+                              "profiles": existing}, indent=2))
+            return 2
+        slips = json.loads(path.read_text())["slips"]
+        print(json.dumps(allocate(slips, int(count), flags == ["--misspellings"]), indent=2))
+        return 0
     if len(argv) >= 2 and argv[0] == "--draft":
         why = refusal(argv[1])
         if why:

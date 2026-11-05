@@ -4,6 +4,7 @@ The script counts; the skill judges. What counts as a slip, and its mechanism or
 skill and handed over as a tally. The script's part is to measure only the author's own prose, to keep a
 phrase only when it recurs (D3), to store no sentence and no slipped word, and to refuse a transcript (D2).
 """
+import collections
 import importlib.util
 import json
 import subprocess
@@ -216,3 +217,63 @@ def test_additionally_counts_as_a_connective():
     """Found measuring fixture 11, 2026-11-05: the commonest connective in Claude's drafts went uncounted."""
     m = mv.measure_text("Additionally, the close path releases the lock. The open path takes it first. " * 3)
     assert "additionally" in m["connectives"]
+
+
+# --- slice 04: dividing N slips among the profile's kinds ---
+
+def _profile(tmp_path, name, slips):
+    d = tmp_path / "profiles"
+    d.mkdir(exist_ok=True)
+    (d / f"{name}.json").write_text(json.dumps({"name": name, "slips": slips}))
+    return {"HTP_PROFILE_DIR": str(d), "PATH": "/usr/bin:/bin"}
+
+
+def test_n_slips_are_exactly_n():
+    for n in (1, 2, 5, 9):
+        assert len(mv.allocate(TALLY, n, False)["slips"]) == n
+
+
+def test_zero_slips_are_none():
+    assert mv.allocate(TALLY, 0, False)["slips"] == []
+
+
+def test_without_misspellings_every_slip_is_a_grammar_kind():
+    assert all(s["class"] != "misspelling" for s in mv.allocate(TALLY, 5, False)["slips"])
+
+
+def test_with_misspellings_the_draw_follows_the_proportions():
+    """The paper's tally: 14 misspellings against 7 grammar slips, so three slips are two and one."""
+    out = mv.allocate(TALLY, 3, True)
+    classes = collections.Counter(s["class"] == "misspelling" for s in out["slips"])
+    assert classes[True] == 2 and classes[False] == 1
+    assert out["slips"][0]["kind"] == "dropped letter", "the largest share comes first"
+
+
+def test_an_unrecorded_mechanism_is_never_drawn():
+    slips = {"misspelling": {"other": 9}, "grammar": {}, "on_name_or_term": 0}
+    out = mv.allocate(slips, 2, True)
+    assert out["slips"] == [] and out["none_of_kind"] is True
+
+
+def test_a_profile_with_none_of_the_asked_for_kinds_draws_none_and_names_what_it_holds():
+    slips = {"misspelling": {"wrong vowel": 9}, "grammar": {}, "on_name_or_term": 0}
+    out = mv.allocate(slips, 2, False)
+    assert out["slips"] == [] and out["none_of_kind"] is True
+    assert out["held"] == ["misspelling: wrong vowel"]
+
+
+def test_slips_on_names_or_terms_are_reported_as_unmirrored():
+    out = mv.allocate(TALLY, 2, False)
+    assert out["unmirrored"] == 6 and out["profile_total"] == 21
+
+
+def test_allocate_reads_the_named_profile(tmp_path):
+    env = _profile(tmp_path, "paper", TALLY)
+    code, out, _ = _run("--allocate", "paper", "2", env=env)
+    assert code == 0 and len(json.loads(out)["slips"]) == 2
+
+
+def test_allocate_refuses_a_missing_profile_and_lists_the_ones_that_exist(tmp_path):
+    env = _profile(tmp_path, "paper", TALLY)
+    code, out, _ = _run("--allocate", "memo", "2", env=env)
+    assert code == 2 and json.loads(out)["profiles"] == ["paper"]

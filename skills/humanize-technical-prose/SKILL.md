@@ -68,6 +68,10 @@ Print exactly one terminal outcome on every run, and each report line that fires
 |-------------|------|
 | `TELLS-LEFT` | a tell remains after the re-check, with its line and why |
 | `VOICE-SKIPPED` | no profile was named, or the named one does not exist; lists the profiles that do |
+| `SLIPS-NONE-OF-KIND` | the profile holds none of the kinds the run may add; names the kinds it holds |
+| `SLIPS-SHORT` | the draft had fewer open positions than the count; says how many were added |
+| `SLIPS-UNMIRRORED` | the samples put slips on names or technical terms, where the run places none |
+| `SLIPS-WARNING` | on every run that adds a slip: a later cleanup pass will fix them |
 | `SAMPLE-THIN` | a sample held too little own prose to measure and was left out, with its word count |
 | `TRANSCRIPT-REFUSED` | a named sample is a Claude Code transcript and was not read |
 
@@ -189,6 +193,57 @@ and the profile cannot tell the difference.
 
 ---
 
+## Step 6: Add the Slips
+
+Run this step only with `--slips N` above zero and a profile Step 4 found. `--slips 0`, or no
+`--slips`, adds none. The slips come last, so no later pass of this run fixes them.
+
+### 6a. Draw the kinds
+
+```
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --allocate {name} {N} [--misspellings]
+```
+
+The script divides N among the kinds the profile's samples hold, in their proportions: grammar kinds
+always, misspellings only with `--misspellings`. Add exactly the slips it returns, no more and no
+other kinds. When it returns `none_of_kind`, add none and report `SLIPS-NONE-OF-KIND` with the kinds
+the profile holds, from `held`.
+
+### 6b. Place each slip
+
+Place each slip in ordinary prose, outside every protected span, and never on a name or a technical
+term. One sentence takes one slip at most, and the slips spread through the document rather than
+cluster. A revision-residue slip goes only in a sentence the voice pass reworded, which is where a
+writer leaves one; when no voice pass ran, any open sentence will do.
+
+A slip must never change what a sentence claims. Leave alone a negation, a number, a unit, a
+quantifier, a comparative and a modal, and any word whose loss or change would reverse or weaken the
+sentence. A misspelling goes on an ordinary word of five letters or more, and must not spell another
+real word.
+
+Make each slip the way its kind describes, as the author's own samples show it:
+
+| Kind | Made by |
+|------|---------|
+| doubled word | repeating a short function word, *the the* |
+| stray word | leaving a word an earlier wording needed, *is as it did* |
+| words out of order | swapping two short neighbouring words, *all the of* |
+| dropped article | dropping *a*, *an* or *the* |
+| dropped word | dropping a short function word, never a content word |
+| wrong word | a near-homophone a careful writer types, *affects* for *effects* |
+| wrong form | the wrong verb form, *it happen* |
+| number agreement | a noun or verb in the wrong number, *one processes is* |
+| wrong article | *a* for *an*, or the reverse |
+| punctuation or case | a mark or capital the document's own style would not have |
+| dropped letter, added letter, swapped letters, wrong vowel, wrong doubling | that change to one letter, or one adjacent pair |
+
+When the draft has fewer open positions than the count, add as many as fit and report `SLIPS-SHORT`
+with the number added. When the profile's `unmirrored` count is above zero, report `SLIPS-UNMIRRORED`:
+the samples put that many of their slips on names or technical terms, and the run placed none there.
+On every run that adds a slip, report `SLIPS-WARNING`.
+
+---
+
 ## Step 7: Report
 
 Read `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` before composing the report. The standard applies to the
@@ -204,6 +259,11 @@ TELLS-LEFT
 VOICE {profile}: median sentence {before} → {after} (profile {target}); {feature} {before} → {after} (profile {target}); {n} rewordings; tells after: {k}
   L{line}  "{before}" → "{after}"
 VOICE-SKIPPED: {no profile named | no profile named {name}}; profiles: {names | none — build one with --build-profile}
+SLIPS {n}: L{line} {kind} ({class}) · L{line} {kind} ({class})
+SLIPS-NONE-OF-KIND: profile {name} holds {held}; none may be added {without --misspellings}
+SLIPS-SHORT: {added} of {N} added; the draft has no more open positions
+SLIPS-UNMIRRORED: the samples put {t} of {total} slips on names or technical terms; none placed there
+SLIPS-WARNING: a later phil:eos, phil:red-team-prose or spell-check pass will fix these slips; run this command last
 UNDO: git checkout -- {file}
 ```
 

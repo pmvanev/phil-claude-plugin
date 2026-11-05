@@ -197,3 +197,47 @@ def test_the_detector_wins_over_the_profile():
 
 def test_the_report_shows_each_feature_before_and_after_against_the_profile():
     assert "VOICE {profile}: median sentence {before} → {after} (profile {target})" in _section("Step 7: Report")
+
+
+# --- slice 04: exactly the slips asked for ---
+
+def test_no_slips_unless_counted():
+    slips = _section("Step 6: Add the Slips")
+    assert "`--slips 0`, or no `--slips`, adds none" in slips
+
+
+def test_the_script_divides_the_count_among_the_profile_kinds():
+    slips = _section("Step 6: Add the Slips")
+    assert "python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --allocate {name} {N}" in slips
+    assert "Add exactly the slips it returns" in slips
+
+
+def test_grammar_kinds_by_default_and_misspellings_only_when_asked():
+    assert "misspellings only with `--misspellings`" in _section("Step 6: Add the Slips")
+
+
+def test_no_slip_lands_in_a_protected_span_or_on_a_name_or_term():
+    slips = _section("Step 6: Add the Slips")
+    assert "outside every protected span" in slips
+    assert "never on a name or a technical term" in slips
+
+
+def test_a_slip_never_changes_what_a_sentence_claims():
+    slips = _section("Step 6: Add the Slips")
+    for guarded in ("a negation", "a number", "a unit", "a quantifier", "a comparative", "a modal"):
+        assert guarded in slips, f"a slip may touch {guarded}"
+
+
+def test_a_residue_slip_lands_where_the_voice_pass_reworded():
+    assert "only in a sentence the voice pass reworded" in _section("Step 6: Add the Slips")
+
+
+def test_shortfall_none_of_kind_and_unmirrored_are_each_reported():
+    slips = _section("Step 6: Add the Slips")
+    for line in ("`SLIPS-SHORT`", "`SLIPS-NONE-OF-KIND`", "`SLIPS-UNMIRRORED`", "`SLIPS-WARNING`"):
+        assert line in slips
+
+
+def test_the_slips_run_last_and_the_report_warns_a_cleanup_will_fix_them():
+    report = _section("Step 7: Report")
+    assert "SLIPS-WARNING: a later phil:eos, phil:red-team-prose or spell-check pass will fix these slips" in report
