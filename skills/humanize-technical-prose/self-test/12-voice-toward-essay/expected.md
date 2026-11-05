@@ -5,14 +5,15 @@
 ## What must happen
 
 - The long sentences are split, as in fixture 11.
-- *doesn't* and *can't* stay, because the essay profile has contractions.
+- One of *doesn't* and *can't* is expanded and the other stays. Two in about 160 words is four times
+  the essay's rate, and one is the nearest the draft can come to it.
 - *Additionally* and *Moreover* become connectives the essay profile uses where the meaning fits, or
   are dropped.
 - The `VOICE essay` line shows each named feature closer to the essay profile.
 
 ## What must NOT happen
 
-- No contraction is expanded.
+- One contraction stays: the essay profile has them.
 - *Perhaps* and *Unfortunately* do not appear. The essay uses them, but here they would add doubt or
   regret the draft never expressed.
 - No question is added.

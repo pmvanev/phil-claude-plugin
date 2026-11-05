@@ -1,7 +1,7 @@
 {
   "fixture_id": "HTP-SELFTEST-11",
   "slice": 3,
-  "situation": "A tell-free design note in three paragraphs of one or two very long sentences each (a median far above 17), with two contractions ('doesn't', 'can't') and two connectives the formal profile never uses ('Additionally', 'Moreover'). profile-formal.json stands in for ~/.claude/humanize-technical-prose/profiles/formal.json: median 17, p90 28, no contractions, no questions, connectives however, therefore and thus.",
+  "situation": "A tell-free design note in three paragraphs of one or two very long sentences each (a median far above 17), with two contractions ('doesn't', 'can't') and two connectives the formal profile never uses ('Additionally', 'Moreover'). profile-formal.json stands in for ~/.claude/humanize-technical-prose/profiles/formal.json: median 17, p90 28, no contractions, no questions, connectives however, therefore, thus, for instance, for example, finally and fortunately.",
   "inputs": ["draft.md", "profile-formal.json"],
   "git_state": "committed",
   "arguments": "draft.md --profile formal",

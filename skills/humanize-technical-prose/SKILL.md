@@ -1,6 +1,6 @@
 ---
 name: humanize-technical-prose
-description: Skill bundle for phil:humanize-technical-prose command — edits a committed draft in place so it reads as its author's, by stripping the AI tells phil:ai-eos finds, rewording toward a voice profile built from documents the author wrote, and adding an exact number of slips, each reported by line; or builds that named profile. Use only when the author asks for a draft to be edited in place to sound like them; for a review that edits nothing, use phil:red-team-prose.
+description: Skill bundle for phil:humanize-technical-prose command — edits a committed draft in place so it reads as its author's, by stripping the AI tells phil:ai-eos finds, rewording toward a voice profile built from documents the author wrote, and adding an exact number of slips, each reported by line; or, with --build-profile, builds a named voice profile from documents the author wrote. Use only when the author asks to humanize a draft in place, make it sound like them, or build a voice profile; for a review that edits nothing, use phil:red-team-prose.
 ---
 
 # Humanize Technical Prose
@@ -27,7 +27,8 @@ Three rules hold in every pass:
 - **Protected spans stay byte-for-byte** (Step 2).
 
 The script `${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py` does every
-count, and owns where profiles live. Ask it with `--list`; never build a profile path by hand.
+measurement, and owns where profiles live. Ask it with `--list`, which prints each profile's path, and
+use that path rather than building one by hand.
 
 ---
 
@@ -40,9 +41,10 @@ Read `$ARGUMENTS` as one of two forms:
 | `--build-profile <name> <sample paths…>` | Build a profile (Step B) |
 | `<file> [--profile <name>] [--slips N] [--misspellings]` | Edit the draft (Steps 1–7) |
 
-Check every condition below, then report `REFUSED-ARGUMENT`, name each one that fails, print the usage
-line `<file> [--profile <name>] [--slips N] [--misspellings] | --build-profile <name> <sample paths…>`,
-and write nothing:
+Every condition below must hold. When any fails, report `REFUSED-ARGUMENT`, name each one that fails,
+print the usage line
+`<file> [--profile <name>] [--slips N] [--misspellings] | --build-profile <name> <sample paths…>`,
+write nothing, and stop:
 
 - edit mode names exactly one file, ending `.md`, `.markdown`, `.txt` or `.tex`;
 - `N` is a whole number of zero or more, written in digits;
@@ -63,13 +65,13 @@ Print exactly one terminal outcome on every run, and each report line that fires
 | `REFUSED-UNCOMMITTED` | git does not have the draft committed as it stands |
 | `REFUSED-ARGUMENT` | the argument does not parse |
 | `PROFILE-BUILT` | `--build-profile` wrote the profile |
-| `PROFILE-NOT-BUILT` | no profile was written: every sample was thin, or the script refused a named path |
+| `PROFILE-NOT-BUILT` | no profile was written: every sample was thin, or the script refused a named path or the slip tally |
 
 | Report line | When |
 |-------------|------|
 | `TELLS-LEFT` | a tell remains after the re-check, with its line and why |
 | `VOICE-SKIPPED` | no profile was named, or the named one does not exist; lists the profiles that do |
-| `SLIPS-SKIPPED` | slips were asked for with no profile to draw from, or `--misspellings` came without `--slips` |
+| `SLIPS-SKIPPED` | slips were asked for with no profile to draw from, or `--misspellings` came with no `--slips` or `--slips 0` |
 | `SLIPS-NONE-OF-KIND` | the profile holds none of the kinds the run may add; names the kinds it holds |
 | `SLIPS-SHORT` | the draft had fewer open positions than the count; says how many were added |
 | `SLIPS-UNMIRRORED` | slips were added, and the samples put some of theirs on names or technical terms, where the run places none |
@@ -93,7 +95,8 @@ git status --porcelain -- {file}
 
 The first fails for a file git does not track, or one outside the current repository; the second
 prints a line for a file with uncommitted changes. On either, report `REFUSED-UNCOMMITTED`, name the
-file and the reason, and write nothing. Pass neither `--output` nor `--ext-diff` to git: the first
+file and the reason, write nothing, and stop: the report holds no undo line, because `git checkout`
+would throw away the author's uncommitted edits. Pass neither `--output` nor `--ext-diff` to git: the first
 writes to any path and the second runs a diff driver the repository configures.
 
 ---
@@ -143,13 +146,16 @@ Then re-run the hunt over every sentence this pass changed. Where a rewrite brou
 rewrite it again in plain form; if that still trips the detector, restore the original sentence and
 list it under `TELLS-LEFT`.
 
+Make every pass's edits in the file itself, with Edit, before the next step: Step 4 measures what is
+on disk.
+
 ---
 
 ## Step 4: Reword Toward the Profile
 
 Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --list`.
-It prints the profile directory and each profile's name. Run this step only when `--profile {name}`
-names one of them, and read the profile at `{dir}/{name}.json`. Otherwise report `VOICE-SKIPPED`, list
+It prints the profile directory and each profile's name and path. Run this step only when
+`--profile {name}` names one of them, and read the profile at the path it gives. Otherwise report `VOICE-SKIPPED`, list
 the profiles that exist (or say there are none, and name `--build-profile`), and leave the draft as
 Step 3 left it.
 
@@ -168,7 +174,8 @@ Compare each feature with the profile's `measures`, and leave alone each one ins
 | sentence median | within 2 words of the profile's |
 | sentence 90th percentile | within 3 words of the profile's |
 | short sentences, contractions, questions | within a quarter of the profile's rate; exactly 0 where the profile's is 0 |
-| each opener and each connective, entry by entry | within a quarter of the profile's rate; exactly 0 where the profile has none |
+| each opener the profile lists | within a quarter of the profile's rate; an opener it does not list is left alone, because the profile keeps only its ten commonest |
+| each connective, entry by entry | within a quarter of the profile's rate; exactly 0 where the profile has none |
 
 ### 4b. Reword
 
@@ -180,7 +187,8 @@ allowed, and only these:
 - swap a connective for one the profile uses, where it means the same, such as *Also* for
   *Additionally*;
 - contract or expand a verb, *do not* to *don't* or back, toward the profile's rate;
-- replace a phrase with one of the profile's favoured phrases that means the same;
+- replace a phrase with one of the profile's favoured phrases that means the same; this serves word
+  choice, which no band measures, so 4c does not check it;
 - reorder clauses within a sentence.
 
 Never add a claim, a fact, a figure of speech, a hook, an analogy, a joke or a question the draft did
@@ -198,7 +206,8 @@ rewordings that moved it until it is not.
 ## Step 5: Check the Tells Again
 
 Re-run `ai-eos`'s hunt over every sentence the voice pass changed. Where a rewording brought in a
-tell, restore the sentence as Step 3 left it. The detector wins over the profile, even where the
+tell, restore the sentence as Step 3 left it: every sentence a split or join touched goes back to its
+Step 3 form. The detector wins over the profile, even where the
 author's samples hold that construction: a writer's own pre-AI prose can carry a trailing participle,
 and the profile cannot tell the difference.
 
@@ -210,7 +219,8 @@ feature the report names must end closer to the profile than it began, or unchan
 ## Step 6: Add the Slips
 
 `--slips 0`, or no `--slips`, adds none. With `--slips N` above zero and no profile from Step 4, add
-none and report `SLIPS-SKIPPED`; do the same for `--misspellings` without `--slips`. The slips come
+none and report `SLIPS-SKIPPED`; do the same for `--misspellings` with no `--slips` or with
+`--slips 0`. The slips come
 last, so no later pass of this run fixes them.
 
 ### 6a. Draw the kinds
@@ -221,8 +231,8 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_vo
 
 The script divides N among the kinds the profile's samples hold, in their proportions: grammar kinds
 always, misspellings only with `--misspellings`. It never draws a misspelling whose mechanism the
-samples left unrecorded. Add exactly the slips it returns, no more and no other kinds. When it returns
-`none_of_kind`, add none and report `SLIPS-NONE-OF-KIND` with the kinds from `held`.
+samples left unrecorded. Add exactly the slips it returns, no more and no other kinds. When
+`none_of_kind` is true, add none and report `SLIPS-NONE-OF-KIND` with the kinds from `held`.
 
 ### 6b. Place each slip
 
@@ -239,8 +249,10 @@ real word.
 Make each slip the way its kind's row in the Slip Vocabulary describes, as the author's own samples
 show it.
 
-When the draft has fewer open positions than the count, add as many as fit and report `SLIPS-SHORT`
-with the number added. When the run added a slip and the script's `unmirrored` count is above zero,
+An **open position** is a word in ordinary prose that no rule above protects. A sentence whose prose
+only frames a command, a path or an identifier has none. When the draft has fewer open positions than
+the count, take the script's slips in order, skip any kind with no open position, add as many as fit,
+and report `SLIPS-SHORT` with the number added. When the run added a slip and the script's `unmirrored` count is above zero,
 report `SLIPS-UNMIRRORED`: the samples put that many of their slips on names or technical terms, and
 the run placed none there. On every run that adds a slip, report `SLIPS-WARNING`.
 
@@ -260,9 +272,9 @@ TELLS-LEFT
   L{line}  {mechanism}: "{span}" — {needs a fact the draft does not hold | would remove or rename a protected span | formatting | rewrite still trips the detector}
 VOICE {profile}: median sentence {before} → {after} (profile {target}); {feature} {before} → {after} (profile {target}); {n} rewordings; tells after: {k}
   L{line}  "{before}" → "{after}"
-VOICE-SKIPPED: {no profile named | no profile named {name}}; profiles: {names | none — build one with --build-profile}
+VOICE-SKIPPED: {--profile not given | no profile named {name}}; profiles: {names | none — build one with --build-profile}
 SLIPS {n}: L{line} {kind} ({class}) · L{line} {kind} ({class})
-SLIPS-SKIPPED: {N slips asked for, with no profile to draw from | --misspellings without --slips adds nothing}
+SLIPS-SKIPPED: {N slips asked for, with no profile to draw from | --misspellings with no slips asked for adds nothing}
 SLIPS-NONE-OF-KIND: profile {name} holds {held | no kind the run can draw}; none may be added{ without --misspellings}
 SLIPS-SHORT: {added} of {N} added; the draft has no more open positions
 SLIPS-UNMIRRORED: the samples put {unmirrored} of {profile_total} slips on names or technical terms; none placed there
@@ -270,7 +282,9 @@ SLIPS-WARNING: a later phil:eos, phil:red-team-prose or spell-check pass will fi
 UNDO: git checkout -- {file}
 ```
 
-Omit an empty section. The report says what each pass did and claims nothing about who wrote the
+`{k}` on the `TELLS:` line is the number of `TELLS-LEFT` entries. Each `L{line}` counts lines in the
+file as the run left it. Print `UNDO` only with `WROTE`. Omit an empty section. The report says what
+each pass did and claims nothing about who wrote the
 document. Whether to disclose AI assistance, where a venue asks, is the author's call.
 
 ---

@@ -1,7 +1,7 @@
 {
   "fixture_id": "HTP-SELFTEST-07",
   "slice": 2,
-  "situation": "Two samples of over 500 words each, written for this fixture in a plain first-person register. Sample a holds a client's name once ('The Halvorsen retainer'), a quotation from a colleague, and three seeded slips: 'recieve' (swapped letters), 'the the' (doubled word, revision residue) and nothing else. Sample b holds a fenced Python block and one seeded slip: 'it happen' (wrong form). Both use contractions nowhere and ask no question.",
+  "situation": "Two samples of over 500 words each, written for this fixture in a plain first-person register. Sample a holds a client's name once ('The Halvorsen retainer'), a quotation from a colleague, and two seeded slips: 'recieve' (swapped letters) and 'the the' (doubled word, revision residue). Sample b holds a fenced Python block and one seeded slip: 'it happen' (wrong form). Both use contractions nowhere and ask no question.",
   "inputs": ["a.md", "b.md"],
   "git_state": "not applicable: build mode edits no draft",
   "arguments": "--build-profile plain a.md b.md",
@@ -13,7 +13,6 @@
     "store any word of the colleague's quotation",
     "store any word of the code block, or count it toward the sentence lengths",
     "write 'recieve', 'the the' or 'happen' anywhere: not in the profile, the tally or the report",
-    "count 'travelling'-style spellings or the document's own comma style as slips",
     "read any file the arguments did not name",
     "write the profile inside the repository"
   ],

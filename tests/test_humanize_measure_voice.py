@@ -336,6 +336,37 @@ def test_draft_mode_takes_one_file_and_nothing_else(tmp_path):
     assert code == 2
 
 
+def test_i_and_the_are_stored_as_openers_though_they_appear_capitalised_mid_sentence():
+    """Found by plugin-dev:skill-reviewer, 2026-11-05: the name filter dropped every word ever seen
+    capitalised mid-sentence, so 'I' could never be an opener, nor 'The' after a colon."""
+    text = ("I checked the queue. The queue was empty: The worker had stopped. I restarted it. "
+            "The worker came back. Then Linux paged us. ") * 5
+    openers = mv.measure_text(text)["openers"]
+    assert "i" in openers and "the" in openers
+
+
+def test_a_broken_profile_is_refused_not_crashed(tmp_path):
+    """Found by plugin-dev:plugin-validator, 2026-11-05: --allocate raised a traceback on a broken file."""
+    d = tmp_path / "profiles"
+    d.mkdir()
+    (d / "broken.json").write_text("{not json")
+    code, out, _ = _run("--allocate", "broken", "2", env={"HTP_PROFILE_DIR": str(d), "PATH": "/usr/bin:/bin"})
+    assert code == 2 and "refused" in json.loads(out)
+
+
+def test_a_missing_tally_file_is_refused_not_crashed(tmp_path):
+    a = _write(tmp_path, "a.md", FILLER * 30)
+    code, out, _ = _run("--build", "plain", "--slips", tmp_path / "no-tally.json", a,
+                        env={"HTP_PROFILE_DIR": str(tmp_path / "p"), "PATH": "/usr/bin:/bin"})
+    assert code == 2 and "slip tally" in json.loads(out)["refused"][0]["why"]
+
+
+def test_list_gives_each_profile_its_path(tmp_path):
+    env = _profile(tmp_path, "paper", TALLY)
+    listing = json.loads(_run("--list", env=env)[1])
+    assert listing["profiles"]["paper"]["path"] == str(tmp_path / "profiles" / "paper.json")
+
+
 def test_list_names_the_directory_and_each_profile_with_its_samples(tmp_path):
     env = _profile(tmp_path, "paper", TALLY)
     (tmp_path / "profiles" / "paper.json").write_text(json.dumps(
@@ -343,7 +374,7 @@ def test_list_names_the_directory_and_each_profile_with_its_samples(tmp_path):
     code, out, _ = _run("--list", env=env)
     listing = json.loads(out)
     assert code == 0 and listing["dir"] == str(tmp_path / "profiles")
-    assert listing["profiles"] == {"paper": {"samples": ["/x/a.md"]}}
+    assert listing["profiles"]["paper"]["samples"] == ["/x/a.md"]
 
 
 def test_list_with_no_profiles_says_so(tmp_path):

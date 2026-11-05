@@ -112,6 +112,28 @@ def test_the_report_names_the_undo():
     assert "git checkout -- {file}" in _section("Step 7: Report")
 
 
+def test_a_refused_run_stops_and_never_offers_the_undo():
+    """Found by plugin-dev:skill-reviewer, 2026-11-05: a refused run fell through to Step 7, whose undo
+    line would have discarded the author's uncommitted edits."""
+    assert "write nothing, and stop" in _section("Step 1: Check the Draft Is Committed")
+    assert "write nothing, and stop" in _section("Parse the Argument")
+    assert "Print `UNDO` only with `WROTE`" in _section("Step 7: Report")
+
+
+def test_an_opener_the_profile_does_not_list_is_left_alone():
+    """Found by plugin-dev:skill-reviewer, 2026-11-05: the profile keeps ten openers, and treating every
+    other opener as absent drove a draft's 'The' sentences to zero."""
+    voice = _section("Step 4: Reword Toward the Profile")
+    assert "an opener it does not list is left alone" in voice
+    assert "each opener and each connective" not in voice
+
+
+def test_an_open_position_is_defined():
+    slips = _section("Step 6: Add the Slips")
+    assert "An **open position** is a word in ordinary prose that no rule above protects" in slips
+    assert "take the script's slips in order" in slips
+
+
 # --- slice 02: build a named profile from the author's own documents ---
 
 import importlib.util

@@ -5,7 +5,8 @@
 ## What must happen
 
 - Sentences are joined toward the profile's median with *and*, *then*, *so* or a subordinate clause,
-  such as *After the backoff expires, the job retries the call.*
+  such as *It waits for the backoff to expire, then retries the call*, where both halves share a
+  subject.
 - Step 5 re-runs the hunt over every joined sentence. Any join that trips the detector goes back to
   its Step 3 form.
 - The report's voice line ends `tells after: 0`.

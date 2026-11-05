@@ -5,7 +5,7 @@ defined in that file's `## Outcomes` tables, and it classifies slips in that fil
 
 ## B1. Gather the samples
 
-Read only the paths the author named. Never read a transcript, the conversation, or the author's typed
+Read only the paths the author named, now or in an earlier build of this profile. Never read a transcript, the conversation, or the author's typed
 prompts as a sample: prompts show how the author gives instructions, not how they write. The script
 refuses the whole run when a named path is a transcript (a `.jsonl` file, or anything under a
 `.claude/projects/` directory), is missing, or is not Markdown, plain text or LaTeX. Report each under
@@ -15,7 +15,13 @@ samples again.
 Run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/humanize-technical-prose/scripts/measure_voice.py --list`.
 If the profile already exists, rebuild it from every sample, old and new: name its
 listed `samples` together with the new paths. The script stores each sample by its resolved path and
-measures a path named twice once. To drop a sample, delete the profile file and build it again.
+measures a path named twice once, and `--build` overwrites the profile.
+
+- A listed sample that no longer exists is left out of the rebuild and reported under
+  `SAMPLE-REFUSED`, so one moved file cannot block every later build.
+- A profile whose `samples` `--list` shows as `null` is broken: build it from the named paths alone,
+  and say so.
+- To drop a sample, build again from only the samples to keep, without carrying the old list over.
 
 ## B2. Measure
 
@@ -56,6 +62,8 @@ TALLY
 
 The script refuses a tally holding anything but whole numbers under the Slip Vocabulary, and a
 profile name holding anything but lowercase letters, digits and hyphens. It prints the profile's path.
+On a tally refusal, correct the tally against the Slip Vocabulary and run B4 again; never write the
+profile by hand. If the script refuses it again, report `PROFILE-NOT-BUILT` with its `why`.
 
 ## B5. Report
 
@@ -65,7 +73,7 @@ measures from B2's output and the path from B4's.
 ```
 PROFILE-BUILT {name}: {k} samples, {words} words — sentences {median}/{p90}, contractions {c} per 1,000 words, questions {q} per 100 sentences, slips {total} (grammar {g}, spelling {s}; {t} on names or terms)
   profile: {profile path}
-PROFILE-NOT-BUILT {name}: {every sample was thin | the script refused a named sample}
+PROFILE-NOT-BUILT {name}: {every sample was thin | the script refused a named sample | the script refused the slip tally — {why}}
 SAMPLE-THIN
   {sample} — {words} words
 SAMPLE-REFUSED

@@ -57,6 +57,10 @@ minimums. A misspelling's *mechanism* is what went wrong in the word. A grammar 
 The essay's *other* is one dropped silent *e* and four misspelled names whose mechanism went
 unrecorded.
 
+The slips quoted in this file, and the three examples in the skill's slip vocabulary, are the
+developer's own, from all three samples, the private thesis and paper included. The developer
+approved them being public in this repository on 2026-11-05.
+
 Five facts shape the design:
 
 - **Rhythm holds across the developer's own documents; register does not.** One profile cannot be
