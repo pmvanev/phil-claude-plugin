@@ -51,3 +51,33 @@ extracted text. Their published counts are in `feature-delta.md` under *Source*.
 The same day, build `formal` from the thesis and `essay` from the essay, and compare the report with
 the table in `feature-delta.md`. Then build `formal` again with the paper added, and decide whether a
 co-written sample belongs in it: the paper's 22-word median sits five words above the thesis's.
+
+## Dogfood result
+The released plugin, phil 1.29.1, built four profiles on 2026-11-05:
+
+| | `formal` | `essay` | `paper` | `all` |
+|---|---|---|---|---|
+| Samples measured (words) | 4 (10,338) | 6 (5,466) | 1 (2,664) | 11 (18,468) |
+| Sentence length, median / 90th percentile | 17 / 28 | 17 / 32 | 22 / 36 | 17 / 30 |
+| Contractions per 1,000 words | 0 | 3.3 | 0 | 1.0 |
+| Questions per 100 sentences | 0 | 1.4 | 0 | 0.4 |
+| *Therefore* / *Unfortunately* per 100 sentences | 2.2 / 0 | 0 / 1.4 | 0 / 0 | 1.3 / 0.4 |
+| Misspellings / grammar slips | 5 / 24 | 26 / 9 | 14 / 9 | 45 / 42 |
+
+- **The hypothesis holds.** The thesis's halves agree: Multicore_XINU has a median of 16 words and
+  the other three parts 18, and neither half uses a contraction. `formal` and `essay` still differ
+  on contractions, questions and connectives.
+- **The build reads the essay differently from *Source*.** The script skips lists, quotations and
+  the essay's 195-word abstract, all of which DISCUSS counted. So the essay's 29 misspellings become
+  26, and its 19-word median becomes 17. A second reading of the paper found 9 grammar slips, not 7.
+- **The paper gets its own profile, `paper`, and stays out of `formal`:** it is co-written, and its
+  22-word median sits five words above the thesis's.
+- **At the developer's request, `all` sets aside D4.** It mixes three registers, and the thesis,
+  with 56% of the words, sets its rhythm. A voice pass with `all` would add the odd contraction to a
+  draft that has none.
+- **A PDF's extracted text needs cutting before it serves as a sample.** Measured raw, the paper's
+  text gave 4,764 words, and the names in its running heads ranked among the commonest openers.
+  `paper` measures `force-convergence-in-stopping-power-body.txt`: the abstract and section prose
+  alone, every word as printed. The skill gives no warning of this.
+- **Favoured phrases are mostly the subject's terms:** *stopping power*, *critical section*, *ready
+  queue*. The voice pass swaps a phrase only for one that means the same, so they rarely apply.
