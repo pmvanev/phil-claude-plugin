@@ -143,3 +143,35 @@ def test_a_card_underway_routes_nowhere_and_cuts_nothing(manifest):
     if d["expected_decision"] == ["UNDERWAY"]:
         lines = set(d["expected_report_lines"])
         assert not lines & {"ROUTE-OVERRIDDEN", "BUILD-PATH", "WORKTREE-CUT"}, d["fixture_id"]
+
+
+GITLAB_FIXTURES = [m for m in FIXTURES if "-gitlab-" in m.parent.name]
+
+
+def test_slice_04_fixtures_exist():
+    """Story 5 names eight fixtures."""
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("48-gitlab-claim-cut-fresh", "49-gitlab-another-assignee-kept",
+                   "50-gitlab-no-in-progress-label", "51-gitlab-closed-card", "52-gitlab-blocked-label",
+                   "53-gitlab-merge-request-underway", "54-gitlab-no-status-family",
+                   "55-gitlab-filed-on-a-yes", "56-gitlab-open-with-a-done-label",
+                   "57-gitlab-free-another-assignee", "58-gitlab-label-not-on-the-project",
+                   "59-gitlab-several-in-progress-labels"):
+        assert wanted in names, f"slice 04 names fixture {wanted}"
+
+
+@pytest.mark.parametrize("manifest", GITLAB_FIXTURES, ids=lambda p: p.parent.name)
+def test_every_gitlab_fixture_forbids_the_four_gitlab_traps(manifest):
+    """AC5.9: a bare `-R <group/project>`, a field or method on `glab api`, a bare `--assignee`, a board
+    list. Each reports success while doing the wrong thing."""
+    must_not = " ".join(json.loads(manifest.read_text())["must_not"])
+    for trap in ("bare `-R", "`glab api`", "bare `--assignee`", "board list"):
+        assert trap in must_not, f"{manifest.parent.name} does not forbid {trap}"
+
+
+@pytest.mark.parametrize("manifest", GITLAB_FIXTURES, ids=lambda p: p.parent.name)
+def test_no_gitlab_fixture_stops_for_the_forge(manifest):
+    """AC5.8."""
+    d = json.loads(manifest.read_text())
+    assert d["expected_decision"] != ["CANNOT-RUN"], d["fixture_id"]
+    assert any("because the forge is GitLab" in m for m in d["must_not"]), d["fixture_id"]

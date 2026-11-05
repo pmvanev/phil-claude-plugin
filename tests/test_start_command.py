@@ -168,7 +168,7 @@ def test_every_bash_grant_is_used():
     """plugin-validator, 2026-11-03: `Bash(gh issue view:*)` was copied from `/phil:done` and never
     called."""
     front, _ = _parts(COMMAND)
-    body = " ".join([_parts(SKILL)[1], _claim(), _worktree(), _route()])
+    body = " ".join([_parts(SKILL)[1], _claim(), _worktree(), _route(), _gitlab()])
     for grant in re.findall(r"Bash\(([^:)]+):\*\)", front["allowed-tools"]):
         assert grant in body, f"granted and never used: {grant}"
 
@@ -399,7 +399,7 @@ def test_filing_uses_only_the_developers_title():
 
 def test_no_status_option_is_chosen_by_name():
     """skill-reviewer, 2026-11-03: a block missing the In Progress id left a run matching by name."""
-    assert "Never choose a Status option by its name" in _claim()
+    assert "On GitHub, never choose a Status option by its name" in _claim()
 
 
 def test_wrote_nothing_counts_write_calls():
@@ -562,3 +562,181 @@ def test_a_failed_claim_goes_on_to_the_worktree():
 def test_an_empty_slug_still_names_the_worktree():
     """plugin-validator, 2026-11-03."""
     assert "An empty slug names the worktree `issue-<n>`" in _worktree()
+
+
+# --- Slice 04: GitLab --------------------------------------------------------------------------------
+#
+# Issue 98: on a GitLab forge line the run stopped with `CANNOT-RUN`, and CLAUDE.md asks every surface
+# that drives issues, boards, branches or worktrees to support both forges. Decisions D12-D21 in
+# `docs/feature/start-work/feature-delta.md`; the pattern is `skills/done/references/gitlab.md`.
+
+GITLAB_REF = REPO / "skills" / "start" / "references" / "gitlab.md"
+
+
+def _gitlab():
+    return " ".join(GITLAB_REF.read_text().split())
+
+
+def test_gitlab_is_supported_not_refused():
+    """AC5.8: no run ends `CANNOT-RUN` because the forge is GitLab."""
+    front, body = _parts(SKILL)
+    assert "covers GitHub only" not in body
+    assert "a GitLab forge" not in _section("Decision outcomes")
+    assert "GitLab" in front["description"]
+    assert "GitLab" in _parts(COMMAND)[0]["description"]
+    assert ("Read `${CLAUDE_PLUGIN_ROOT}/skills/start/references/gitlab.md` whole before RESOLVE"
+            in body)
+
+
+def test_the_gitlab_grant_names_each_subcommand():
+    """D20: each GitLab write is a named subcommand, never bare `glab`."""
+    front, _ = _parts(COMMAND)
+    tools = {t.strip() for t in front["allowed-tools"].split(",")}
+    for grant in ("Bash(glab api:*)", "Bash(jq:*)", "Bash(glab issue create:*)",
+                  "Bash(glab issue update:*)"):
+        assert grant in tools, grant
+    assert not tools & {"Bash(glab:*)", "Bash(glab issue:*)"}
+
+
+def test_every_glab_call_names_the_project_and_host():
+    """D16, AC5.9: glab 1.112.0 sends a bare `-R <group/project>` to gitlab.com outside a checkout of the
+    host, and fills `:id` and `:fullpath` from the working directory's remote."""
+    gl = _gitlab()
+    assert ("Pass `-R https://<host>/<group/project>` on every `glab issue` call and `--hostname <host>` on "
+            "every `glab api` call") in gl
+    assert "never `:id` or `:fullpath`" in gl
+    assert "-R <group/project>" not in gl.replace("a bare `-R <group/project>`", "")
+    assert "pass `-R https://<host>/<group/project>` on every `glab issue` call" in _parts(COMMAND)[1]
+
+
+def test_a_glab_read_never_sends_a_field():
+    """D16, AC5.9: `glab api` sends a POST once a field is added, so a read that passes one writes."""
+    gl = _gitlab()
+    assert "Never pass `-f`, `-F`, `--field`, `--raw-field`, `--input`, `--form`, `-X` or `--method`" in gl
+    assert "Send `glab api` only GETs" in _parts(COMMAND)[1]
+    assert "On GitLab, send `glab api` only GETs" in _section("Invariants")
+
+
+def test_the_gitlab_assign_adds_and_never_replaces():
+    """D14, AC5.2: `glab issue update --help`, 1.112.0: a login without a prefix replaces every
+    assignee, and exits 0."""
+    gl = _gitlab()
+    assert "--assignee +<login>" in gl
+    assert not re.search(r"--assignee [<'\"]?[a-z<]", gl.replace("--assignee +<login>", "")), \
+        "a bare --assignee replaces every assignee"
+    assert "--assignee +<login>" in _section("Invariants")
+    assert "--assignee +<login>" in _parts(COMMAND)[1]
+
+
+def test_the_gitlab_claim_is_one_label_swap():
+    """D13, AC5.9: a GitLab column is a label; a board list moves nothing and adds a column."""
+    gl = _gitlab()
+    assert "--label '<in-progress>' --unlabel '<others>'" in gl
+    assert "Never create a board list" in gl
+    assert "runs no `item-add`" in gl
+
+
+def test_the_in_progress_label_is_matched_by_name_and_asked_when_unclear():
+    """D12, AC5.3: the developer's answer. Nothing records which label is which column."""
+    gl = _gitlab()
+    assert "`in-progress`, `in progress` or `doing`" in gl
+    assert "Where none or several labels match In Progress, ask which label to use" in gl
+    assert "write no status label until the developer answers" in gl
+
+
+def test_gitlab_done_is_the_closed_list():
+    """D15, AC5.4: modive's block says to close a finished issue rather than label it."""
+    gl = _gitlab()
+    assert "glab issue reopen <n> -R <repo>" in gl
+    assert "A family with no done label never fires that check" in gl
+
+
+def test_gitlab_filing_passes_only_the_title_and_an_empty_description():
+    """D19, AC5.7. Settled 2026-11-05 with glab 1.112.0 outside a terminal: `--description ''` gets past
+    the non-interactive check and opens no editor; without it glab refuses."""
+    gl = _gitlab()
+    assert "glab issue create -R <repo> --title '<the words>' --description '' --yes" in gl
+    assert "Use `glab issue create` only with `-R`, `--title`, `--description ''` and `--yes`" in gl
+
+
+def test_the_gitlab_search_reads_one_page_of_21():
+    """Settled 2026-11-05: a paginated `glab api` prints one array per page, so `length` counts each page
+    alone. RESOLVE needs only whether more than 20 matched."""
+    gl = _gitlab()
+    assert "per_page=21" in gl
+    assert "the one list read without `--paginate`" in gl
+
+
+def test_gitlab_underway_reads_the_developers_merge_requests():
+    """D18, AC5.5."""
+    gl = _gitlab()
+    assert "merge_requests?state=opened&author_username=<login>" in gl
+    assert 'test("(#|issue )<n>([^0-9]|$)"; "i")' in gl
+    assert "repository/branches/<default>" in gl
+    assert "`!<n>`" in gl
+
+
+def test_gitlab_no_signed_in_account_names_the_login():
+    """D16."""
+    assert "glab auth login --hostname <host>" in _gitlab()
+
+
+def test_the_gitlab_reference_adds_no_outcome_token():
+    """D20, and the slice's learning hypothesis: the reference confirms "call for call" only if it adds no
+    outcome."""
+    from test_start_fixtures import REPORT_LINES, TERMINAL
+    named = set(re.findall(r"`([A-Z][A-Z-]{3,})`", GITLAB_REF.read_text()))
+    assert named <= TERMINAL | REPORT_LINES, named - (TERMINAL | REPORT_LINES)
+
+
+# skill-reviewer and plugin-validator, 2026-11-05, over slice 04's first draft.
+
+def test_gitlab_governs_where_it_differs():
+    """Both reviewers: the reference said every GitHub rule stands, and four contradicted it."""
+    assert "Where this file and those differ, this file governs on GitLab" in _gitlab()
+    assert "On GitHub, never choose a Status option by its name" in _claim()
+    inv = _section("Invariants")
+    assert "No label but GitLab's status labels" in inv
+
+
+def test_the_in_progress_label_must_exist_before_the_swap():
+    """Both reviewers: `--label` with an unknown name creates the label, exits 0, and reads back as set.
+    Read live 2026-11-05: a missing label answers `404 Label Not Found`."""
+    gl = _gitlab()
+    assert "projects/<p>/labels/<encoded label>" in gl
+    assert "`404 Label Not Found`" in gl
+    assert "Accept only an answer the family lists" in gl
+
+
+def test_gitlab_free_holds_one_assignee():
+    """Both reviewers: GitLab Free keeps one assignee per issue, so "beside them" cannot hold there."""
+    gl = _gitlab()
+    assert "GitLab Free holds one assignee per issue" in gl
+    assert "a block that names no tier counts as Free" in gl
+
+
+def test_a_project_404_is_not_a_missing_card():
+    """Both reviewers, read live 2026-11-05: a mistyped or hidden project answers `404 Project Not Found`."""
+    gl = _gitlab()
+    assert "`404 Project Not Found`" in gl
+    i_project, i_card = gl.find("Read `projects/<p>` first"), gl.find("projects/<p>/issues/<n>")
+    assert -1 < i_project < i_card
+
+
+def test_the_merge_request_read_filters_in_jq_alone():
+    """skill-reviewer: GitLab's search may drop short words; the author and state already narrow it."""
+    gl = _gitlab()
+    assert "merge_requests?state=opened&author_username=<login>&per_page=100" in gl
+    assert "&search=<n>" not in gl
+
+
+def test_a_scoped_wave_label_routes():
+    """skill-reviewer: `phil:nwave-issue-board` writes `wave::<name>` where scoped labels exist."""
+    gl = _gitlab()
+    assert "Read `wave::<name>` as `wave: <name>`" in gl
+    assert "A `wave::` label is never a status label" in gl
+
+
+def test_more_than_20_matches_says_so_without_a_count():
+    """skill-reviewer: one page of 21 holds no total."""
+    assert "say more than 20 matched" in _gitlab()

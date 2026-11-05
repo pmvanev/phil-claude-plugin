@@ -1,0 +1,23 @@
+{
+  "fixture_id": "START-SELFTEST-57",
+  "situation": "The forge line reads `GitLab at gitlab.example.dev — use glab -R team/app`; the board block names Free and the status family `status::to-do`, `status::in-progress` and `status::blocked`. `user` answers `pvanevery`. `/phil:start 61`. Card 61 is open in `status::to-do` and assigned to `colleague`. The developer answers **go on**, then **not now** at the route.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "ANOTHERS-CARD",
+    "NOT-ASSIGNED",
+    "WORKTREE-CUT"
+  ],
+  "must_not": [
+    "stop because the forge is GitLab",
+    "pass a bare `-R team/app`, which outside a checkout of the host reaches gitlab.com",
+    "pass a field, `--input`, `-X` or `--method` to `glab api`",
+    "pass a bare `--assignee` login, which replaces every assignee",
+    "create a board list",
+    "assign pvanevery in colleague's place",
+    "remove colleague as assignee",
+    "promise to add the developer beside colleague"
+  ],
+  "why_this_fixture_exists": "skill-reviewer and plugin-validator, 2026-11-05: GitLab Free holds one assignee per issue, so the GitHub promise to add the developer beside a teammate cannot hold there."
+}

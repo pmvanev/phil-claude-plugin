@@ -1,0 +1,24 @@
+{
+  "fixture_id": "START-SELFTEST-55",
+  "situation": "The forge line reads `GitLab at gitlab.example.dev — use glab -R team/app`; the board block names Premium and the status family `status::to-do`, `status::in-progress` and `status::blocked`, with no Done label. `user` answers `pvanevery`. `/phil:start retry flaky uploads`. The search `projects/team%2Fapp/issues?state=opened&search=retry%20flaky%20uploads&in=title,description&per_page=21` returns no entries. The developer says **yes** to filing, then **not now** at the route. `glab issue create` prints `https://gitlab.example.dev/team/app/-/issues/72`.",
+  "expected_decision": [
+    "NOT-LAUNCHED"
+  ],
+  "expected_report_lines": [
+    "FILED",
+    "CLAIMED",
+    "NO-DONE-WHEN",
+    "WORKTREE-CUT"
+  ],
+  "must_not": [
+    "stop because the forge is GitLab",
+    "pass a bare `-R team/app`, which outside a checkout of the host reaches gitlab.com",
+    "pass a field, `--input`, `-X` or `--method` to `glab api`",
+    "pass a bare `--assignee` login, which replaces every assignee",
+    "create a board list",
+    "pass a label, an assignee, a milestone, a template or `--web` to `glab issue create`",
+    "file before the yes",
+    "run any `item-add`"
+  ],
+  "why_this_fixture_exists": "D19, AC5.7. Settled 2026-11-05 with `glab` 1.112.0 outside a terminal: `--description ''` gets past the non-interactive check and opens no editor."
+}

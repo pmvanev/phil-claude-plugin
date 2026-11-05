@@ -46,6 +46,8 @@ Slices 01–03, shipped in 1.26.0.
 file and three fixtures.
 
 ## Settle at authoring
+Both settled on 2026-11-05: D19 and D22 in `feature-delta.md` record the answers.
+
 - Whether `glab issue create --description '' --yes` files with an empty body and opens no editor. Run
   `glab issue create --help`, and record the answer in `feature-delta.md`.
 - How the search counts matches across pages. A paginated `glab api` prints one array per page, so

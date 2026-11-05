@@ -3,7 +3,7 @@ name: start
 description: >-
   This skill should be used when the user asks to "start card N", "start issue N", "work on #N", "pick
   up the card about X", "what does this card ask and how should I work it", or runs /phil:start. It
-  resolves the argument to one open GitHub card, refuses a closed one, asks before one in Done or someone
+  resolves the argument to one open card on GitHub or GitLab, refuses a closed one, asks before one in Done or someone
   else's, claims it, moves the session into its worktree, restates it, and recommends one route,
   launched only on a yes. A card underway goes to /phil:resume. Not for choosing which card to start.
 ---
@@ -24,23 +24,27 @@ records, not by habit. A card already underway goes to `/phil:resume` instead of
 - **The repo** — the forge line in the working tree's `CLAUDE.md`; `git rev-parse --show-toplevel` finds
   the root. Pass `-R <owner/repo>` on every `gh issue` call, and pass the owner and repo as variables to
   every `gh api graphql` query, which takes no `-R`: an inferred remote reads the wrong repo's issues
-  successfully (`phil:issue-board`). With no forge line, name `/phil:board-setup`: `CANNOT-RUN`. On a
-  GitLab forge line, say this skill covers GitHub only: `CANNOT-RUN`.
+  successfully (`phil:issue-board`). With no forge line, name `/phil:board-setup`: `CANNOT-RUN`.
+- **GitLab** — Read `${CLAUDE_PLUGIN_ROOT}/skills/start/references/gitlab.md` whole before RESOLVE where
+  the forge line names GitLab. It gives each `gh` call below, and in this skill's references, its `glab`
+  form; every rule, report line and outcome here stands.
 - **The board constants** — from the board lines `/phil:board-setup` writes into `CLAUDE.md`, its
   `Board:` and `Columns:` lines: the project's id and number, its owner from the board URL, the `Status`
-  field id and the `In Progress` option id. Read them; never probe for them. With no board lines, or
+  field id and the `In Progress` option id; on GitLab, the status label family. Read them; never probe
+  for them. With no board lines, or
   lines missing any of these, read Status from every project the card is on, and say no board block was
   found.
 - **The developer** — the signed-in account, `viewer.login`, never git's `user.name`: a display name no
-  forge resolves to a login. With no signed-in account, name `gh auth login`: `CANNOT-RUN`.
+  forge resolves to a login. With no signed-in account, name `gh auth login`: `CANNOT-RUN`. On GitLab
+  the developer is `user`'s `username`, and the login to name is `glab auth login --hostname <host>`.
 
 Run `git` only for `rev-parse`, `worktree list --porcelain` and `fetch origin <default>`. A `gh` call that fails for any reason but `NOT_FOUND` —
 auth, network, rate limit — before CLAIM and before any filing is `CANNOT-RUN`, quoting the error. Where
 any `gh` error names a missing `project` scope, name `gh auth refresh -s project`.
 
 **This skill composes no prose on the board.** A filed card's title is the developer's words and its body
-is empty; the claim writes a board item, a Status and an assignee, and no comment. It applies no writing
-standard on the board for that reason.
+is empty; the claim writes a board item and a Status, or on GitLab a status label, and an assignee,
+and no comment. It applies no writing standard on the board for that reason.
 
 ## Asking
 
@@ -200,12 +204,13 @@ Report exactly one terminal outcome, every run: `LAUNCHED` · `NOT-LAUNCHED` · 
 - **`UNDERWAY`** — the card already had a worktree or the developer's open pull request; the report
   names `/phil:resume`, and no route was recommended.
 - **`STOPPED`** — the developer stopped before the claim: picked no card, gave no narrower words, or
-  declined a card in Done or Blocked, someone else's, or a move out of another worktree.
+  declined a card in Done or Blocked, someone else's, or a move out of another worktree, or gave no
+  In Progress label on GitLab.
 - **`NO-MATCH`** — the argument named no open card in this repo, or named a pull request, and nothing
   was filed.
 - **`REFUSED-CLOSED`** — the card is closed.
-- **`CANNOT-RUN`** — the run could not begin: no argument and no answer, no forge line, a GitLab forge, no
-  signed-in account, a failed read before CLAIM, or a filing that failed and filed nothing.
+- **`CANNOT-RUN`** — the run could not begin: no argument and no answer, no forge line, no signed-in
+  account, a failed read before CLAIM, or a filing that failed and filed nothing.
 
 Report these alongside, each only when it fires: `PICKED` (several matched and the developer picked) ·
 `FILED` (a card was filed in the developer's words) · `ANOTHERS-CARD` (assigned to someone else) ·
@@ -221,18 +226,22 @@ path chose the route) · `ROUTE-OVERRIDDEN` (the developer launched another rout
 Report `WROTE-NOTHING` on every run that made no write call before the launch: a stop before CLAIM, or a
 claim that found every write already made, for a card that needed no worktree cut. A failed write is still
 a write call, and a fetch or a cut worktree is a write. It asserts that every forge and git call the run
-made was a read: the `gh api graphql` grant accepts a mutation document, and only the
+made was a read: the `gh api graphql` grant accepts a mutation document and `glab api` a POST, and only the
 invariants below forbid one.
 
 ## Invariants
 
 - **Write only the claim and the worktree before the launch**: a filed card, its board item, the Status,
-  an assignee, a fetch of the default branch, and a worktree the tool cuts. No label, comment or file. A launched route, inline
-  included, writes under its own rules.
+  an assignee, a fetch of the default branch, and a worktree the tool cuts. No label but GitLab's status
+  labels, no comment and no file. A launched route, inline included, writes under its own rules.
 - **Use `ExitWorktree` only with `keep`, and never cut a second worktree for a card that has one.**
 - **Send only `query` documents through `gh api graphql`, never `mutation`.** Writes go through
   `gh issue create`, `gh project item-add`, `gh project item-edit` and `gh issue edit`.
 - **Use `gh issue create` only with `-R`, `--title` and `--body ''`.**
+- **On GitLab, send `glab api` only GETs**, and pipe `jq` only from it. Writes go through
+  `glab issue create`, only with `-R`, `--title`, `--description ''` and `--yes`, and `glab issue update`,
+  only with `--label` and `--unlabel` for the status labels or `--assignee +<login>`. A login without
+  the `+` replaces every assignee and exits 0. No tool boundary backs this.
 - **Use `gh issue edit` only with `--add-assignee`, and `gh project item-edit` only to set the Status
   option.** Pass none of `--remove-assignee`, `--clear` or any flag the steps above do not name. No tool
   boundary backs this.

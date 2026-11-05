@@ -1,0 +1,21 @@
+{
+  "fixture_id": "START-SELFTEST-51",
+  "situation": "The forge line reads `GitLab at gitlab.example.dev — use glab -R team/app`; the board block names Premium and the status family `status::to-do`, `status::in-progress` and `status::blocked`, with no Done label. `user` answers `pvanevery`. `/phil:start 40`. Card 40's `state` reads `closed`.",
+  "expected_decision": [
+    "REFUSED-CLOSED"
+  ],
+  "expected_report_lines": [
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "stop because the forge is GitLab",
+    "pass a bare `-R team/app`, which outside a checkout of the host reaches gitlab.com",
+    "pass a field, `--input`, `-X` or `--method` to `glab api`",
+    "pass a bare `--assignee` login, which replaces every assignee",
+    "create a board list",
+    "reopen the card",
+    "write a status label or assign anyone",
+    "describe or route the card"
+  ],
+  "why_this_fixture_exists": "D15, AC5.4: on GitLab the board's closed list is its Done, so a closed card is finished work."
+}

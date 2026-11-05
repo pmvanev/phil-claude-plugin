@@ -1,0 +1,22 @@
+{
+  "fixture_id": "START-SELFTEST-53",
+  "situation": "The forge line reads `GitLab at gitlab.example.dev — use glab -R team/app`; the board block names Premium and the status family `status::to-do`, `status::in-progress` and `status::blocked`, with no Done label. `user` answers `pvanevery`. `/phil:start 58`. Card 58 already carries `status::in-progress` and is assigned to `pvanevery`. The developer's open merge request !12, on `worktree-issue-58-show-who-owns-an-item`, says `issue 58` in its description. No worktree here holds that branch.",
+  "expected_decision": [
+    "UNDERWAY"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WROTE-NOTHING"
+  ],
+  "must_not": [
+    "stop because the forge is GitLab",
+    "pass a bare `-R team/app`, which outside a checkout of the host reaches gitlab.com",
+    "pass a field, `--input`, `-X` or `--method` to `glab api`",
+    "pass a bare `--assignee` login, which replaces every assignee",
+    "create a board list",
+    "cut a worktree",
+    "recommend a route",
+    "count the merge requests with `length` over a paginated read"
+  ],
+  "why_this_fixture_exists": "D18, AC5.5: an open merge request means the work is underway, and a fresh worktree would start it again from the default branch."
+}
