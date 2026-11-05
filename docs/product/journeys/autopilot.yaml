@@ -1,0 +1,68 @@
+# Journey (SSOT) — bootstrapped by DISCUSS wave, feature: autopilot (2026-11-05, issue 76)
+
+id: autopilot
+name: Carry a card hands-off
+persona: rowan-skeptical-delegator
+job: carry-a-card-hands-off
+summary: >
+  Rowan hands a card over. /phil:autopilot claims it, reads the repo's build path and shows it beside
+  its sources, runs each step through the command that owns it, answers each question by rule or by
+  its own recommendation and records the answer on the card, stops only for three kinds of question,
+  and lands the work through /phil:done.
+
+steps:
+  - id: claim
+    action: Claim the card and land in its worktree through /phil:start; a card underway resumes.
+    output: "CLAIMED … WORKTREE …  |  resuming at step <k>"
+    emotion: hopeful — will it work the card the way I would?
+  - id: plan
+    action: >
+      Read the build path from CLAUDE.md and AGENTS.md, or fall back and say so; print each step beside
+      its source line and the writes the path authorizes; record both on the card.
+    output: "PATH (<source>): 1 <step> — \"<line>\" · … then AUTHORIZED: <writes>"
+    emotion: checking — did it read my path right?
+  - id: work
+    action: >
+      Run each step through its owning command; answer each question by a recorded rule or the
+      recommendation; record each step's decisions on the card; keep label, block and Status current.
+    output: "DECISIONS (<step>): <question> — took \"<option>\": <reason> · …"
+    emotion: trusting — every call is on the card
+  - id: land
+    action: Push, open the pull request, merge on green, close through /phil:done.
+    output: "LANDED: pull request <n> merged on a green pipeline; card closed — <k> decisions, 0 stops"
+    emotion: relieved — finished without me
+
+emotional_arc: hopeful → checking → trusting → relieved  # upward
+
+shared_artifacts:
+  - name: the card
+    source: claim
+    consumed_by: [plan, work, land]
+  - name: the build path
+    source: plan                 # the repo's CLAUDE.md and AGENTS.md prose, or the fallback
+    consumed_by: [work, land]
+  - name: the authorized writes
+    source: plan                 # the writes the path names; starting the run authorizes them
+    consumed_by: [work, land]
+  - name: the recorded decisions
+    source: work                 # card comments, one per step
+    consumed_by: [land]
+
+error_paths:
+  - step: plan
+    failure: The repo declares no build path
+    recovery: Fall back to the nWave waves, or phil:edd or phil:work, and say which and why
+  - step: work
+    failure: >
+      A question of D1's kinds — an unnamed outward write, an input only the developer holds, or a
+      check that keeps failing
+    recovery: Describe the blocker on the card, run /phil:handoff, end blocked; the next run resumes there
+  - step: work
+    failure: The work needs the running product and the repo declares no sign-in source
+    recovery: Stop on a blocker; never search for or invent a credential
+  - step: land
+    failure: The pipeline is red
+    recovery: Fix within the allowed attempts, or stop on a blocker; never merge red
+  - step: claim
+    failure: The forge is GitLab, before slice 06
+    recovery: Say the command covers GitHub only and stop with a named outcome

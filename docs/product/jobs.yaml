@@ -1302,3 +1302,44 @@ jobs:
     #   C4 Slips: zero unless counted, the kinds, mechanisms and causes the samples show, grammar
     #      kinds unless misspellings are asked for, never in a protected span, each reported by
     #      location, and any the protected spans forbid counted in the report.
+
+  - id: carry-a-card-hands-off
+    # Registered by DISCUSS wave, feature: autopilot (2026-11-05, issue 76)
+    job_story: >
+      When I hand a card to the agent in a repo that records how its work gets built, I want it carried
+      through every step without me at each gate — stopped only where my answer would change the
+      outcome, and every call it made recorded on the card — so my attention goes to the decisions that
+      need me.
+    dimensions:
+      functional: >
+        Read the repo's build path and show it beside its sources; run each step through the command
+        that owns it; answer each question by a recorded rule or the agent's own recommendation, and
+        record the answer on the card; stop for an unnamed outward write, an input only the developer
+        holds, or a check that keeps failing; land the work through the close.
+      emotional: >
+        Confidence that a card finished while I was away was built the way this repo builds cards, and
+        that nothing I would have stopped went through unseen.
+      social: >
+        A card a teammate can read afterwards and see every call made on it, and by what rule.
+    four_forces:
+      push: >
+        Measured 2026-11-05 over this repo's transcripts, 2026-10-13 to 2026-11-05: 70 questions carried
+        a recommended option, and the developer took it unchanged 64 times (91%). Four of the six
+        overrides were the same call, extend the card rather than file a new one, which a saved
+        preference already records. The other two turned on the developer's own material.
+      pull: >
+        One command that carries a card from start to close, as /phil:start picks one up and /phil:done
+        puts one down, and stops only for the developer.
+      anxiety: >
+        (A) A misread build path, followed confidently. (B) A call I would have overturned, made and
+        never shown. (C) An outward write I never authorized: a merge, a new card, a public quote.
+        (D) A guessed or searched-for credential.
+      habit: >
+        Answering every gate by taking the recommendation; driving each wave by hand; pushing, merging
+        and closing by hand once the work is done.
+    opportunity_score: not-scored   # single new job; priority by default
+    status: validated
+    personas: [rowan-skeptical-delegator]
+    features: [autopilot]
+    # Not a facet of pick-up-the-next-card or put-finished-work-down: those begin and end the work;
+    # this one carries it between them, composing both.
