@@ -4,8 +4,9 @@
 
 ## What must happen
 
-- At most one slip is added, in *The upgrade takes a few minutes on a small install*, and it touches
-  neither *a few* nor *small*.
+- Exactly one slip is added, in *The upgrade takes a few minutes on a small install*, and it touches
+  neither *a few* nor *small*. The script's slips are taken in order, and the first, a number
+  agreement, fits there.
 - `SLIPS-SHORT` says how many of 3 were added, and that the draft has no more open positions.
 
 ## What must NOT happen

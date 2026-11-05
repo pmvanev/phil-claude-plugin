@@ -7,7 +7,7 @@
   "arguments": "draft.md --profile formal --slips 3",
   "expected_decision": ["WROTE"],
   "expected_report_lines": ["SLIPS-SHORT", "SLIPS-UNMIRRORED", "SLIPS-WARNING"],
-  "expected_guard": "one slip at most is added, in the one open sentence and not on 'a few' (a quantifier); SLIPS-SHORT says how many of 3 were added and that the draft has no more open positions",
+  "expected_guard": "exactly one slip is added, in the one open sentence and not on 'a few' (a quantifier): the script's first slip, a number agreement, fits there; SLIPS-SHORT says how many of 3 were added and that the draft has no more open positions",
   "must_not": [
     "put a slip in a command, a variable, a path, a version or the table",
     "put a slip in 'Set', 'Run' or 'Restart', whose sentences are built around code",

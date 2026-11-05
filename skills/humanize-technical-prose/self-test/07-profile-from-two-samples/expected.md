@@ -14,7 +14,7 @@
 
 ## What must NOT happen
 
-- No phrase holding *Halvorsen* is stored, though the sentence recurs nowhere and names a client.
+- No phrase holding *Halvorsen* is stored, because the sentence names a client.
 - No word of the colleague's quotation is measured or stored.
 - The code block adds nothing to the counts.
 - The slipped words appear nowhere: not in the profile, the tally or the report.

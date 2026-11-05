@@ -142,6 +142,15 @@ def _rate(n, d, per):
     return round(n / d * per, 2) if d else 0.0
 
 
+def _names(sents):
+    """Words that look like names: capitalised past a sentence's start, and never written lowercase.
+    'I' is never a name, and 'The' after a colon is not one either, because it appears lowercase too."""
+    toks = [t for s in sents for t in words(s)]
+    lowercase = {t for t in toks if t[0].islower()}
+    capitalised = {t.lower() for s in sents for t in words(s)[1:] if t[0].isupper()}
+    return {w for w in capitalised if w not in lowercase and w != "i"}
+
+
 def measure_text(prose):
     sents = []
     for para in prose.split("\n\n"):
@@ -151,7 +160,7 @@ def measure_text(prose):
     lower = [w.lower().replace("’", "'") for w in words(prose)]
     contractions = sum(1 for w in lower if re.search(r"n't$|'re$|'ve$|'ll$|'d$|'m$", w) or w in CONTRACTED_S)
     first_person = sum(1 for w in words(prose) if w == "I" or w.lower() in {"me", "my", "mine", "we", "us", "our", "ours"})
-    names = {t.lower() for s in sents for t in words(s)[1:] if t[0].isupper()}
+    names = _names(sents)
     openers = collections.Counter(w for w in (words(s)[0].lower() for s in sents if words(s))
                                   if w not in names and w.upper() not in PLACEHOLDERS)
     conn = collections.Counter()
@@ -183,7 +192,7 @@ def measure_text(prose):
 
 def _ngrams(sents):
     counts = collections.Counter()
-    names = {t.lower() for s in sents for t in words(s)[1:] if t[0].isupper()}
+    names = _names(sents)
     for s in sents:
         toks = words(s)
         for n in (2, 3, 4):
@@ -351,7 +360,7 @@ def list_profiles(env):
             samples = [s["path"] for s in json.loads(p.read_text()).get("samples", [])]
         except (ValueError, KeyError, TypeError):
             samples = None
-        profiles[p.stem] = {"samples": samples}
+        profiles[p.stem] = {"path": str(p), "samples": samples}
     return {"dir": str(d), "profiles": profiles}
 
 
@@ -371,7 +380,10 @@ def main(argv):
             print(json.dumps({"refused": [{"path": str(path), "why": "no such profile"}],
                               "profiles": existing}, indent=2))
             return 2
-        slips = json.loads(path.read_text())["slips"]
+        try:
+            slips = check_tally(json.loads(path.read_text())["slips"])
+        except (ValueError, KeyError, TypeError) as e:
+            return _refuse([{"path": str(path), "why": f"the profile is broken ({e}); build it again"}])
         print(json.dumps(allocate(slips, int(count), flags == ["--misspellings"]), indent=2))
         return 0
     if len(argv) == 2 and argv[0] == "--draft":
@@ -402,7 +414,7 @@ def main(argv):
     try:
         raw = sys.stdin.read() if tally_src == "-" else Path(tally_src).read_text()
         tally = check_tally(json.loads(raw))
-    except (ValueError, json.JSONDecodeError) as e:
+    except (ValueError, OSError) as e:
         return _refuse([{"path": tally_src, "why": f"slip tally: {e}"}])
     out_dir = profile_dir(os.environ)
     out_dir.mkdir(parents=True, exist_ok=True)

@@ -14,12 +14,13 @@ against its `expected.md` and `must_not`. The driver checks what a machine can:
 - no fixture hands the run its own rewrite;
 - every slips fixture expects the kinds the allocation script actually draws.
 
-**Manifest scheme:** `fixture_id`, `slice`, `inputs`, `git_state`, `arguments`, `expected_decision`
+**Manifest scheme:** `fixture_id`, `slice`, `situation`, `inputs`, `git_state`, `arguments`, `expected_decision`
 (one terminal outcome), `expected_report_lines`, `expected_guard`, `must_not`,
 `why_this_fixture_exists`.
 
-**No sample text.** Every draft and sample here was written for the fixture. The profiles carry real
-counts measured from the developer's thesis, essay and co-written paper. Counts are not passages, so
+**No sample text.** Every draft and sample here was written for the fixture. The formal, essay and paper
+profiles carry real counts measured from the developer's thesis, essay and co-written paper; the
+spelling and residue profiles are synthetic. Counts are not passages, so
 the developer had no passage to approve one by one.
 
 | Fixture | Slice | Terminal | Alongside | Pins |
