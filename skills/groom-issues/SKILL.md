@@ -150,7 +150,7 @@ item in the scan is judging, which the first bullet forbids.
 
 ```sh
 gh issue list -R <owner/repo> --state open --json number,title,body,labels,milestone --limit 200
-glab issue list -R <group/project> --output json --per-page 100
+glab issue list -R https://<host>/<group/project> --output json --per-page 100
 ```
 
 On `glab issue list` the JSON flag is `-O`/`--output`, **not `-F`** — `phil:issue-board` owns the

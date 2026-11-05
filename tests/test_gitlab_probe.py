@@ -34,7 +34,7 @@ pb = load()
 # --- the call spellings, where a wrong flag fails SILENTLY ---------------------------------
 
 def test_the_json_flag_is_correct_per_subcommand_not_blanket():
-    """`phil:issue-board` records a blanket rule — *"glab's JSON flag is `-O`; `-F` fails silently"*
+    """`phil:issue-board` once recorded a blanket rule — *"glab's JSON flag is `-O`; `-F` fails silently"*
     — and the binary refutes it. Discovered 2026-08-17 when `glab api … -O json` failed with
     `Unknown shorthand flag: 'O' in -O`, then confirmed against `glab --help`:
 
@@ -47,19 +47,72 @@ def test_the_json_flag_is_correct_per_subcommand_not_blanket():
     whole feature exists to prevent, found inside this plugin's own skill.
     """
     calls = {c.split()[1] + (" " + c.split()[2] if c.split()[1] in ("repo", "issue") else ""): c
-             for c in pb.gitlab_calls("group/proj")}
+             for c in pb.gitlab_calls("gitlab.com", "group/proj")}
 
-    api = [c for c in pb.gitlab_calls("group/proj") if c.startswith("glab api")]
+    api = [c for c in pb.gitlab_calls("gitlab.com", "group/proj") if c.startswith("glab api")]
     assert api, "the adapter must call the REST API"
     for c in api:
         assert " -O" not in c and " -F" not in c, f"`glab api` takes no output flag: {c}"
 
-    view = next(c for c in pb.gitlab_calls("group/proj") if c.startswith("glab repo view"))
-    assert " -F json" in view, f"`glab repo view` uses -F: {view}"
-
-    issues = next(c for c in pb.gitlab_calls("group/proj") if c.startswith("glab issue list"))
+    issues = next(c for c in pb.gitlab_calls("gitlab.com", "group/proj") if c.startswith("glab issue list"))
     assert " -O json" in issues, f"`glab issue list` uses -O: {issues}"
     assert " -F " not in issues, "on `issue list`, -F is --output-format and takes details/ids/urls"
+
+
+def test_every_call_names_the_host():
+    """From a directory with no checkout, `glab` 1.112.0 sent a bare `-R <group/project>` and a
+    `glab api` without `--hostname` to gitlab.com. Observed 2026-11-05 against a self-hosted
+    project: the bare `repo view` and `issue list` answered `404 Not Found`, `glab api` answered
+    `404 Project Not Found`, and the URL and `--hostname` forms read the project."""
+    host = "gitlab.example.internal"
+    calls = pb.gitlab_calls(host, "group/proj")
+    for c in calls:
+        if c.startswith("glab api"):
+            assert f" --hostname {host} " in c, f"`glab api` must name the host: {c}"
+        else:
+            assert f" https://{host}/group/proj " in c, f"`glab` must take the project URL: {c}"
+
+
+def test_the_forge_line_names_the_host_on_every_call():
+    """The forge line reaches a consumer's CLAUDE.md, and every surface that reads it copies its
+    `glab` form. A bare `glab -R <group/project>` there sends each copied call to gitlab.com."""
+    host = "gitlab.example.internal"
+    facts = {f["field"]: f for f in pb.gitlab_facts(
+        host=host, slug="g/p", default_branch="main", tier="Free", labels=[], project_id=1)}
+    line = facts["forge-and-repo"]["value"]
+    assert f"`-R https://{host}/g/p`" in line, line
+    assert f"`--hostname {host}`" in line, line
+    assert "`glab -R g/p`" not in line, line
+
+
+def test_the_probe_runs_exactly_the_calls_it_names(monkeypatch):
+    """The region names each fact's query: a call the probe runs must be named, and a named call
+    must run, or a fact reads `probed` by a query that never produced it. Wound: `forge-and-repo`
+    and `docs-root` cited a `glab repo view` the probe never ran (plugin-validator, 2026-11-05)."""
+    host = "gitlab.example.internal"
+    ran = []
+
+    def fake_run(argv):
+        ran.append(" ".join(argv))
+        if argv[:2] == ["glab", "api"] and argv[-1].endswith("/labels"):
+            return json.dumps([{"name": "status::to-do"}])
+        if argv[:2] == ["glab", "api"]:
+            return json.dumps({"id": 1, "default_branch": "main"})
+        return json.dumps([])
+
+    monkeypatch.setattr(pb, "run", fake_run)
+    monkeypatch.setattr(pb.shutil, "which", lambda _: "/usr/bin/glab")
+    pb.probe_gitlab(host, "group/proj")
+    named = set(pb.gitlab_calls(host, "group/proj"))
+    assert ran, "the probe made no call"
+    for c in ran:
+        assert c in named, f"ran a call the region does not name: {c}"
+    for c in named:
+        assert c in ran, f"named a call the probe never runs: {c}"
+    cited = {f["query"] for f in pb.gitlab_facts(host=host, slug="group/proj",
+             default_branch="main", tier="Free", labels=[], project_id=1)
+             if f["query"].startswith("glab ")}
+    assert cited <= set(ran), f"a fact cites a call the probe never runs: {cited - set(ran)}"
 
 
 def test_the_docs_root_uses_gitlabs_dash_blob_form():

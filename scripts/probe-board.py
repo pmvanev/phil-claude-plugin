@@ -276,7 +276,7 @@ def gitlab_docs_root(host_url: str, slug: str, default_branch: str) -> str:
     return f"{host_url.rstrip('/')}/{slug}/-/blob/{default_branch}/"
 
 
-def gitlab_calls(slug: str) -> list[str]:
+def gitlab_calls(host: str, slug: str) -> list[str]:
     """The calls this adapter makes, as strings, so the region can name each one.
 
     **The JSON flag differs per subcommand, and the blanket rule is wrong.** Verified 2026-08-17
@@ -285,19 +285,23 @@ def gitlab_calls(slug: str) -> list[str]:
 
     - `glab api` — takes **no** output flag. It prints JSON natively.
     - `glab repo view` — the flag is **`-F`/`--output`** (`text`, `json`). `-O` does not exist here.
+      The adapter does not call it: `glab api projects/<p>` returns the same project payload.
     - `glab issue list` — the flag is **`-O`/`--output`**. `-F` here is `--output-format`, a
       different flag taking `details`/`ids`/`urls`.
 
-    `phil:issue-board` records "glab's JSON flag is `-O`; `-F` fails silently" as a blanket rule.
+    `phil:issue-board` once recorded "glab's JSON flag is `-O`; `-F` fails silently" as a blanket rule.
     That holds for `issue list` and is wrong for the other two — exactly the remembered-constant
     failure this whole feature exists to prevent, sitting inside this plugin's own skill.
+
+    **Every call names the host.** From a directory with no checkout, `glab` 1.112.0 sent a bare
+    `<group/project>` and a `glab api` without `--hostname` to gitlab.com (observed 2026-11-05).
     """
     encoded = slug.replace("/", "%2F")
+    url = f"https://{host}/{slug}"
     return [
-        f"glab repo view {slug} -F json",
-        f"glab api projects/{encoded}",
-        f"glab api projects/{encoded}/labels",
-        f"glab issue list -R {slug} --all -O json",
+        f"glab api --hostname {host} projects/{encoded}",
+        f"glab api --hostname {host} projects/{encoded}/labels",
+        f"glab issue list -R {url} --all -O json",
     ]
 
 
@@ -315,7 +319,7 @@ def gitlab_facts(host: str, slug: str, default_branch: str, tier: str,
       cannot perform.
     """
     host_url = f"https://{host}"
-    repo_q, proj_q, labels_q, _issues_q = gitlab_calls(slug)
+    proj_q, labels_q, _issues_q = gitlab_calls(host, slug)
 
     # `labels=None` means UNREAD, and it is not the same as `labels=[]`. On GitLab the label set *is*
     # the board, so rendering an unread set as `count: 0` states that the project has no columns —
@@ -327,17 +331,22 @@ def gitlab_facts(host: str, slug: str, default_branch: str, tier: str,
 
     tier_value = (
         f"{tier} — scoped labels and real `blocks` links are Premium features. Board state is a "
-        f"`status::` label, swapped by hand: `glab issue update --unlabel old --label new`."
+        f"`status::` label, swapped by hand: `glab issue update -R {host_url}/{slug} --unlabel old "
+        f"--label new`."
         if tier == "Free" else
         f"{tier} — scoped labels enforce single-valuedness natively and real `blocks` links are "
         f"available."
     )
 
     return [
-        fact("forge-and-repo", f"GitLab at {host} — use `glab -R {slug}` on every call", repo_q,
-             note="`glab`'s JSON flag differs per subcommand: `glab api` takes none, `glab repo "
-                  "view` uses `-F json`, `glab issue list` uses `-O json`. On `issue list`, `-F` is "
-                  "`--output-format` and silently returns a table",
+        fact("forge-and-repo",
+             f"GitLab at {host} — use `-R {host_url}/{slug}` on every `glab` call that takes `-R`, "
+             f"and `--hostname {host}` on every `glab api` call", proj_q,
+             note="from a directory with no checkout, a bare `-R <group/project>` and a "
+                  "`glab api` without `--hostname` go to gitlab.com. `glab`'s JSON flag differs "
+                  "per subcommand: `glab api` takes none, `glab repo view` uses `-F json`, "
+                  "`glab issue list` uses `-O json`. On `issue list`, `-F` is `--output-format` "
+                  "and silently returns a table",
              template_field="forge-and-repo"),
         fact("project-and-board-ids", {"id": project_id, "slug": slug,
                                        "url": f"{host_url}/{slug}"}, proj_q,
@@ -366,7 +375,7 @@ def gitlab_facts(host: str, slug: str, default_branch: str, tier: str,
                   "from `issues_enabled` and `iterations_access_level`. Confirm it against the "
                   "instance's plan before relying on a Premium-only convention",
              template_field="tier"),
-        fact("docs-root", gitlab_docs_root(host_url, slug, default_branch), repo_q,
+        fact("docs-root", gitlab_docs_root(host_url, slug, default_branch), proj_q,
              note="GitLab blob paths carry a `/-/` segment; GitHub's do not",
              template_field="docs-root"),
         fact("nwave-mapping", "see `phil:nwave-issue-board` for the artifact to issue mapping",
@@ -378,11 +387,10 @@ def gitlab_facts(host: str, slug: str, default_branch: str, tier: str,
 def probe_gitlab(host: str, slug: str) -> dict:
     """Probe a GitLab project. Same region shape as GitHub, different calls.
 
-    **The live path is unexercised.** `glab auth status` returned 401 in the environment where this
-    was authored and no GitLab project was available, so `gitlab_facts` and every refusal are unit
-    tested against faked output while the end-to-end run is not. Slice 06's brief records which of
-    its acceptance criteria remain open, and this docstring says so here because a reader of the code
-    should not have to find the brief to learn it.
+    **The live path ran once.** It was authored against a 401 `glab auth`, so `gitlab_facts` and
+    every refusal are unit tested against faked output. On 2026-11-05 it read a self-hosted GitLab 18
+    project end to end with `glab` 1.112.0, from outside a checkout. No GitLab region has been diffed
+    against a GitHub one; slice 06's brief records which acceptance criteria remain open.
 
     A GitLab repo is refused rather than half-served, per the slice boundary: a partial block reads
     exactly like a complete one.
@@ -391,12 +399,12 @@ def probe_gitlab(host: str, slug: str) -> dict:
         raise Refusal("`glab` is not installed or not on PATH",
                       fix="install glab, or pass a GitHub target instead")
 
-    repo_q, proj_q, labels_q, issues_q = gitlab_calls(slug)
+    proj_q, labels_q, issues_q = gitlab_calls(host, slug)
 
     def api(path: str) -> dict:
         # `glab api` takes NO output flag — it prints JSON natively, and `-O json` is rejected with
         # `Unknown shorthand flag: 'O' in -O`.
-        out = with_retry(lambda: run(["glab", "api", path]))
+        out = with_retry(lambda: run(["glab", "api", "--hostname", host, path]))
         try:
             return json.loads(out)
         except json.JSONDecodeError:
@@ -423,7 +431,7 @@ def probe_gitlab(host: str, slug: str) -> dict:
     # `-O json` here, and NOT `-F`: on `issue list`, `-F` is `--output-format` taking
     # details/ids/urls, so `-F json` would be a different flag with an invalid value.
     issues_raw = with_retry(lambda: run(
-        ["glab", "issue", "list", "-R", slug, "--all", "-O", "json"]))
+        ["glab", "issue", "list", "-R", f"https://{host}/{slug}", "--all", "-O", "json"]))
     try:
         issues = [{"number": i.get("iid"), "labels": i.get("labels", [])}
                   for i in json.loads(issues_raw)]
@@ -443,8 +451,6 @@ def probe_gitlab(host: str, slug: str) -> dict:
         "host": host,
         "repo": slug,
         "status": "ok",
-        "live_path_unexercised": ("authored against a 401 `glab auth`; gitlab_facts and the refusals "
-                                 "are unit tested, the end-to-end run is not"),
         "elicitation_evidence": evidence,
         "facts": facts,
         "half_probed": [],

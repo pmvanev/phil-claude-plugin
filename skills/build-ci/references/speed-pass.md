@@ -1,5 +1,7 @@
 # The Speed Pass (`/phil:build-ci --speed`)
 
+<!-- glab-host-exempt: every call runs inside the project's own checkout, where glab takes the host and :id from the remote -->
+
 Speed is a measured trade: shorten the pipeline's constraint and nothing else, and stop where the next
 change buys too little. Read the Speed principle in `${CLAUDE_PLUGIN_ROOT}/rules/ci-pipelines.md`, and
 "The Speed Budget" and "Getting Back Under Budget" in `${CLAUDE_PLUGIN_ROOT}/rules/test-architecture.md`,
