@@ -60,6 +60,29 @@ def test_a_glab_api_call_without_hostname_fails():
     assert "commands/c.md:2" in r.stdout
 
 
+def test_a_continued_glab_api_call_without_hostname_fails():
+    """A `\\`-continued call reads as one: the plugin-validator dropped `--hostname` from autopilot's
+    two-line notes read and the line-by-line check passed it (2026-11-05)."""
+    r = _run({"skills/x/SKILL.md": (
+        "```bash\n"
+        "glab api --paginate \\\n"
+        "  \"projects/<p>/issues/<n>/notes?sort=desc\" |\n"
+        "  jq -c '.[]'\n"
+        "```\n")})
+    assert r.returncode == 1, r.stdout
+    assert "skills/x/SKILL.md:2" in r.stdout
+
+
+def test_a_continued_glab_api_call_with_hostname_passes():
+    r = _run({"skills/x/SKILL.md": (
+        "```bash\n"
+        "glab api --hostname <host> --paginate \\\n"
+        "  \"projects/<p>/issues/<n>/notes?sort=desc\" |\n"
+        "  jq -c '.[]'\n"
+        "```\n")})
+    assert r.returncode == 0, r.stdout
+
+
 def test_the_host_forms_pass():
     r = _run({"skills/x/SKILL.md": (
         "```sh\n"

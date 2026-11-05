@@ -8,7 +8,8 @@ without `--hostname` to gitlab.com, and a self-hosted project answered `404 Not 
 ## What counts
 
 Every fenced block and inline code span in `skills/`, `commands/`, `agents/` and `rules/`, outside
-`self-test/` and frontmatter. In each:
+`self-test/` and frontmatter. A fence line ending in a backslash joins the next, so a continued call reads as
+one. In each:
 
 - a `glab api` call — one naming a `projects/` or `groups/` path, `user`, `:id`, `:fullpath`, or
   `graphql` with arguments — must carry `--hostname`;
@@ -57,8 +58,15 @@ def segments(text: str):
     text = FRONTMATTER.sub(_blank, text)
     for m in FENCE.finditer(text):
         first = text[:m.start(1)].count("\n") + 1
-        for i, line in enumerate(m.group(1).split("\n")):
-            yield first + i, line
+        lines = m.group(1).split("\n")
+        i = 0
+        while i < len(lines):
+            start, joined = i, lines[i]
+            while joined.rstrip().endswith("\\") and i + 1 < len(lines):
+                i += 1
+                joined = joined.rstrip()[:-1] + " " + lines[i].strip()
+            yield first + start, joined
+            i += 1
     for n, line in enumerate(FENCE.sub(_blank, text).split("\n"), start=1):
         for s in SPAN.finditer(line):
             yield n, s.group(1)
