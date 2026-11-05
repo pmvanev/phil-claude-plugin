@@ -1,0 +1,29 @@
+{
+  "fixture_id": "DONE-SELFTEST-51",
+  "situation": "PR 98 (`finish-work/slice-06`, head `d6d6d6d`, opened by the developer) merged into main, which is green, and every ask is done. This session started in the worktree `.claude/worktrees/fw-06`, which an earlier session made, and never called `EnterWorktree`. The worktree has the branch checked out at `d6d6d6d`, which the remote branch also holds, and `worktree-state.py` reads it `CLEAN`, but `git worktree list --porcelain` marks it `locked claude session fw-06 (pid 5151)`. It holds no snapshot.",
+  "worktree_state": "CLEAN",
+  "developer_answers": [
+    "yes"
+  ],
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "LEFT"
+  ],
+  "expected_guard": "a lock on a worktree `EnterWorktree` did not make in this session holds it at plan time: the plan lists it under FOR YOU TO RUN with its lock, and the branch stays locally and on the remote",
+  "must_not": [
+    "run `git worktree remove`",
+    "pass `--force` to `git worktree remove`",
+    "call `ExitWorktree`",
+    "put the worktree in the plan's removals",
+    "delete finish-work/slice-06 locally or on the remote",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "skill-reviewer, 2026-11-05: git refuses a locked worktree without `--force`, so a plan promising its removal would end `LEFT`. Only `EnterWorktree`'s own lock is no bar, because `ExitWorktree` releases it."
+}

@@ -1,5 +1,5 @@
 ---
-description: "Check that a card's every ask landed and its pull requests merged into a green default branch, then, on one yes, comment, set Status to Done, close it, retire its snapshots, delete its branches and remove the worktrees this session made. With no card, check the session's own work and clear what it left. GitHub or GitLab. Never merges or forces. For unfinished work, use /phil:handoff."
+description: "Check that a card's every ask landed and its pull requests merged into a green default branch, then, on one yes, comment, set Status to Done, close it, retire its snapshots, delete its branches and remove its clean, unlocked worktrees, whoever made them. With no card, check the session's own work and clear what it left. GitHub or GitLab. Never merges or forces. For unfinished work, use /phil:handoff."
 argument-hint: "[issue-number]"
 mutates: true
 allowed-tools: Read, Glob, Grep, AskUserQuestion, Skill, Bash(git rev-parse:*), Bash(git log:*), Bash(ls:*), Bash(gh issue view:*), Bash(gh api graphql:*), Bash(gh issue comment:*), Bash(gh project item-edit:*), Bash(gh issue close:*), Bash(gh issue edit:*), Bash(glab api:*), Bash(jq:*), Bash(glab issue note:*), Bash(glab issue update:*), Bash(glab issue close:*), Bash(git worktree list:*), Bash(git worktree remove:*), ExitWorktree, Bash(git branch -d:*), Bash(git branch -D:*), Bash(git merge-base:*), Bash(git push --delete:*), Bash(git remote get-url:*), Bash(python3:*)
@@ -26,10 +26,12 @@ first close write that fails; a refusal during the cleanup leaves that item and 
 - Use `glab issue update` only with `--unlabel` for the status labels, or with `--description`.
 - Use `gh issue edit --body-file` and `glab issue update --description` only inside the block refresh.
 - Use `git log` and `ls` only for the refresh's reads and FORCE's list of the commits a delete would lose.
-- Remove only a worktree this session made that `worktree-state.py --expect-head` reads `CLEAN` at the
-  merged tip, never with `--force`; list every other worktree with its commands. Remove the one this
-  session runs in last, through `ExitWorktree`, only for a worktree `EnterWorktree` made, and, where it
-  holds a snapshot, only on the third answer.
+- Remove only a worktree on the work's own merged branch that `worktree-state.py --expect-head` reads
+  `CLEAN` at the merged tip, whoever made it, never with `--force`, and never one another session locks:
+  only `EnterWorktree`'s lock on this session's worktree is no bar. List every other worktree with its
+  commands. Remove the one this session runs in last:
+  through `ExitWorktree` where `EnterWorktree` made it in this session, otherwise through
+  `git worktree remove`, and, where it holds a snapshot, only on the third answer.
 - Pass `discard_changes: true` to `ExitWorktree` only where that read came back `CLEAN`, just before
   the call.
 - Never pass `--force` or `-f`. Pass `-D` only for a branch the developer chose to force-delete at its own
