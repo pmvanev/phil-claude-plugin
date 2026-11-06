@@ -110,8 +110,7 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
 - Ship GitHub and GitLab together in every skill or command that drives issues, boards, branches,
   worktrees, commits, pull requests or merge requests, taking both forges' mechanics from
   `phil:issue-board`; a surface never ships covering one forge (decided 2026-11-05, replacing the
-  2026-11-03 allowance for a one-forge surface with a card for the other). No check enforces this. Two
-  shipped surfaces still cover GitHub only: `board-snapshot` and `/phil:resume`'s board read.
+  2026-11-03 allowance for a one-forge surface with a card for the other). No check enforces this.
 - Name the host on every `glab` call a surface teaches: `-R https://<host>/<group/project>`, and
   `--hostname <host>` on `glab api`. `scripts/check-glab-host.py` enforces it outside `self-test/`.
   Wound: from a directory with no checkout, a bare call went to gitlab.com (2026-11-05).

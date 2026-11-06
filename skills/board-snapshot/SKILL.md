@@ -3,7 +3,8 @@ name: board-snapshot
 description: >-
   Use when asked where an issue board stands right now rather than what is wrong with it —
   "summarise my board", "what's on the board", "where does the board stand", "what's blocked",
-  "what's in flight", "what should I pick up next on the board" — on a GitHub Projects v2 board.
+  "what's in flight", "what should I pick up next on the board" — on a GitHub Projects v2 or a GitLab
+  board.
   Two modes: a standing check inside a 200-word ceiling, and an orientation read giving every open
   card a number, a title and a composed description of 100 words or fewer. Consumes board position,
   never computes it. Reports drift and never fixes it. For what is WRONG with the cards, use
@@ -16,12 +17,15 @@ description: >-
 A board in perfect shape still costs a full read. Every other command over a board answers a different
 question and answers it at length. This one answers *where does it stand*, and stops.
 
-**GitHub Projects v2 only.** GitLab is not implemented and is not stubbed: its boards express a column as
-a scoped label rather than a project field, so the items query below has no counterpart there. Say so and
-stop rather than approximating.
+**GitHub and GitLab.** The reads below are GitHub's: a Projects v2 board keeps a column in a project
+field. A GitLab board keeps it in a label, so where the forge line names GitLab, read
+`${CLAUDE_PLUGIN_ROOT}/skills/board-snapshot/references/gitlab.md` whole and take its reads in place of
+these — the project-items query, the reconciliation call and the per-card `gh issue view`. Both modes
+and every other rule below stand; where that file and this one differ, that file governs on GitLab.
 
 **REQUIRED BACKGROUND: `phil:issue-board`.** Every forge mechanic — `-R` targeting, Status as a project
-field, GraphQL over `item-list`, the board constants in a project's `CLAUDE.md` — lives there. Do not
+field, GraphQL over `item-list`, a GitLab board's label columns, the board constants in a project's
+`CLAUDE.md` — lives there. Do not
 guess any of it here.
 
 ## The routing this skill exists to win
@@ -243,8 +247,8 @@ Report exactly one terminal outcome, every run:
 `SNAPSHOT-RENDERED` · `SNAPSHOT-CLIPPED` · `SNAPSHOT-PARTIAL`
 
 **`READ-ONLY` is reported on every run** and counts against the ceiling. It asserts that every forge call
-this run made was a read — the `gh api graphql` grant accepts a mutation document and only the Invariants
-list forbids one, so this is a claim the run makes about itself.
+this run made was a read — the `gh api graphql` grant accepts a mutation document and the `glab api`
+grant a POST, and only the Invariants list forbids either, so this is a claim the run makes about itself.
 
 These are reported **alongside** the terminal outcome, each only when it fires: `DRIFT` · `UNCOLUMNED` ·
 `OFF-BOARD` · `INFLATION`.
@@ -259,7 +263,8 @@ These are reported **alongside** the terminal outcome, each only when it fires: 
 
 - **Write nothing.** No issue edits, labels, comments or Status writes; the skill holds no `Write` and no
   `Edit`.
-- **Send only `query` documents through `gh api graphql`, never `mutation`.** No tool boundary backs this.
+- **Send only `query` documents through `gh api graphql`, never `mutation`, and only GETs through
+  `glab api`.** No tool boundary backs this.
 - **Consume board position; compute no order.**
 - **Read the board constants from `CLAUDE.md`, which `phil:board-setup` owns; never probe for them.**
   This skill is triggerable with no command in play, so the rule belongs here.
@@ -281,6 +286,7 @@ These are reported **alongside** the terminal outcome, each only when it fires: 
 ## Acceptance
 
 `self-test/` holds the fixtures, driven by `tests/test_board_snapshot_fixtures.py`. Run them whenever this
-file, the command loader, or `phil:issue-board`'s items-query sections change.
+file, its references, the command loader, `phil:issue-board`'s items-query sections, or its *Read a
+GitLab board's columns* section change.
 
 Rationale, measurements and the decisions behind these rules: `references/why-these-rules.md`.

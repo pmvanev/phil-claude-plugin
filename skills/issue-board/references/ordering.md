@@ -19,7 +19,7 @@ followed.
 
 | | Position is | Set with | Read back with |
 |---|---|---|---|
-| GitLab board | the issue's `relative_position` | `PUT projects/<id>/issues/<iid>/reorder` (REST), per *GitLab reorders over REST* | `glab issue list -R https://<host>/<group/project> --order relative_position --sort asc --label <column>` |
+| GitLab board | the issue's `relative_position` | `PUT projects/<id>/issues/<iid>/reorder` (REST), per *GitLab reorders over REST* | *Read a GitLab board's columns*, in `SKILL.md` |
 | GitHub Projects v2 | the item's position in the project | `updateProjectV2ItemPosition` (GraphQL) | `gh api graphql`, per *Verify the end state* in `SKILL.md` |
 | A plain issue list, either forge | nothing | — | — |
 
