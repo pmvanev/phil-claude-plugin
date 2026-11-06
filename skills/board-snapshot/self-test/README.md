@@ -39,6 +39,8 @@ which is what fixture 01's prose got wrong before it was corrected.
 | `12-handles-in-a-description` | `SNAPSHOT-RENDERED` | — | Handles stripped; card numbers kept, and never laundered |
 | `13-mandatory-sections-exceed-the-ceiling` | `SNAPSHOT-CLIPPED` | — | The tiebreak: the ceiling yields, never a blocked card |
 | `14-open-issue-off-the-board` | `SNAPSHOT-RENDERED` | `OFF-BOARD` | Issues never added to the project are named, never rendered |
+| `15-gitlab-board` | `SNAPSHOT-RENDERED` | `UNCOLUMNED` | GitLab's label columns in board order; no off-board line |
+| `16-gitlab-no-to-do-label` | `SNAPSHOT-RENDERED` | `DRIFT` | With no to-do label the Open list is the queue; a done label on an open issue is drift |
 
 `READ-ONLY` is expected on every fixture, because it is a claim about every run.
 

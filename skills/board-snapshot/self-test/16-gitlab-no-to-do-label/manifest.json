@@ -1,0 +1,27 @@
+{
+  "fixture_id": "BSNAP-SELFTEST-16",
+  "mode": "standing",
+  "situation": "A GitLab Free project whose board block names only `status::in-progress`, `status::blocked` and `status::done`. One card is in progress, none is blocked, eight open issues carry no status label, and one open issue still carries `status::done`.",
+  "board": {
+    "blocked": 0,
+    "in_flight": 1,
+    "queued": 8,
+    "n_requested": 5,
+    "uncolumned": 0
+  },
+  "expected_decision": [
+    "SNAPSHOT-RENDERED"
+  ],
+  "expected_report_lines": [
+    "DRIFT",
+    "READ-ONLY"
+  ],
+  "expected_guard": "with no to-do label, the Open list is the queue, in board order, and no card is reported uncolumned; one drift line names the open issue carrying `status::done` and `phil:groom-issues` as what acts on it",
+  "must_not": [
+    "report the eight Open-list cards as uncolumned while they are the queue",
+    "say the queued section is empty",
+    "remove `status::done` or close the issue",
+    "send `glab api` anything but a GET"
+  ],
+  "why_this_fixture_exists": "A GitLab board's Open list is its backlog where the family names no to-do label; reading it as uncolumned would report the whole queue as a defect. A done label on an open issue is GitLab's form of an open card in Done."
+}

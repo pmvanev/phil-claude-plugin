@@ -71,6 +71,51 @@ across major releases.
 A label swap moves the card between columns and says nothing about where it lands inside one. See
 *A column is a queue, so its order is a claim*, in `references/ordering.md`, for the position, which is a separate write.
 
+## Read a GitLab board's columns
+
+**Read a column as the open issues carrying its label, in board order:**
+
+```sh
+glab api --hostname <host> --paginate \
+  "projects/<p>/issues?state=opened&labels=<label>&order_by=relative_position&sort=asc&per_page=100" |
+  jq -c '.[] | {iid, title, labels, description, web_url}'
+```
+
+- `<p>` is the project's path with every `/` written `%2F`. Percent-encode the label too, its `::`
+  included, and wrap the URL in double quotes.
+- `relative_position` is the order the board list shows. The field itself reads `null` in every REST
+  response (`references/ordering.md`), so take the order from the list, never from the field.
+- `--paginate` prints one JSON array per page: read every page with `jq '.[] | …'`. A page that errors
+  makes the read partial.
+- Read with GETs only: every parameter in the URL's query string. A field flag turns the call into a
+  POST; never pass `-f`, `-F`, `--field`, `--raw-field`, `--input`, `--form`, `-X` or `--method`.
+- **Confirm each status label exists before trusting an empty column**, with one GET of
+  `projects/<p>/labels/<label>`. A filter naming a label the project lacks answers `200 []`, which reads
+  as an empty column; the label GET answers `404 Label Not Found`. A missing label makes the read
+  partial, naming the label and `/phil:board-setup`.
+
+**Read the Open list** with the same call and no `labels=` parameter, keeping the issues that carry no
+label in the status family.
+
+**The status family is the set of labels the `CLAUDE.md` board block names as its status mechanism.**
+Find each column by name, ignoring case, reading the part after `::` where there is one: In Progress reads `in-progress`,
+`in progress` or `doing`; Blocked reads `blocked`; To Do reads `to-do`, `to do` or `todo`; Done reads
+`done`. A family with no done label uses the board's Closed list as its Done. Where several family
+labels match one name, a read names them and reports the board unreadable, choosing none.
+
+- **An open issue with no status label sits in the board's Open list**: it is on the board, in no
+  status column.
+- **An issue carrying two status labels sits in both columns.** On Free, a missed `--unlabel` causes
+  it; Premium drops a scoped sibling server-side.
+- **A board is a view over the project's issues, so every open issue is on the board.** No issue waits
+  to be added, as one does on a Projects v2 board.
+- A closed issue sits in the Closed list, whatever labels it still carries.
+
+Verified 2026-11-06 against a GitLab 18 Premium project with `glab` 1.112.0: each status column came
+back in its board order; three open issues with no status label were the board's Open list; and a
+filter on a missing label answered `200 []`. The Open list's order was read by `relative_position` and
+not compared with the board view.
+
 ## GitHub does not work the same way
 
 GitHub has **no scoped labels and no label-based mutual exclusion**. Do not port the `status::`

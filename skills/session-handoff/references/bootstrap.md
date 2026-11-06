@@ -69,6 +69,14 @@ Four rules govern the comparison:
 delegate rather than inlining, because an under-reporting read is a *missed divergence*, the one failure
 this check cannot notice about itself. The repository's `CLAUDE.md` supplies the constants.
 
+**On GitLab**, the forge line names the host and the project, and the board block names the status
+family. Read the columns as *Read a GitLab board's columns*, in
+`${CLAUDE_PLUGIN_ROOT}/skills/issue-board/SKILL.md`, says, the Open list included. The board's
+in-flight claim is the card carrying the In Progress label where any card does, the top card of the To
+Do label's column otherwise — the Open list's top card where the family names no To Do label. A board
+block with no status family, a missing status label, or several labels matching one name is
+`BOARD-UNREADABLE`, naming the labels and `/phil:board-setup`.
+
 Worked output for all three branches, the #24 incident, and why each rule is drawn where it is:
 **`references/board-divergence.md`**.
 

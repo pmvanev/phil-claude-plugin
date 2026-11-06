@@ -334,8 +334,8 @@ skill; no change to an existing command's behaviour. The largest risk, D12, gets
 7. `/phil:harden-instructions` over the command, the skill and its references; `phil:eos` over this
    file, its slice briefs and the SSOT entries; `plugin-dev:skill-reviewer` and
    `plugin-dev:plugin-validator` over the command and skill — then the tests again.
-8. Dogfood: `/phil:autopilot` carries the next card on this board to a merged change and a handoff,
-   and a modive card likewise on GitLab, each naming the plugin version it ran against.
+8. ~~Dogfood runs on this board and on modive.~~ Dropped 2026-11-06 by the developer: "we don't need
+   dogfood runs".
 9. The plugin version is bumped.
 
 ## Wave: DISCUSS / [REF] Definition of Ready — validation

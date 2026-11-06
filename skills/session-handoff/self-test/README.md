@@ -62,6 +62,7 @@ them.
 | `37-compacted-exchanges-are-recorded/` | an exchange this session holds only as a summary | *The last exchanges* | the transcript still holds it, so it is copied word for word; the summary never | `CAPTURE` |
 | `38-exchanges-are-never-typed/` | long replies, and a previous region on disk | *The last exchanges*, *Writing the snapshot* | no prompt or reply passes through the session's output or its reads — the 0.97.0 refusal | `CAPTURE` |
 | `39-show-by-name/` | fixture `18`'s snapshot, read by `/phil:stack show` | the `show` heading in `references/stack.md` | `show` by name is the bare verb: the same render, nothing written | `SHOWN` |
+| `40-gitlab-board-diverges/` | a GitLab board's In Progress label holds other work than the recorded next action | card 76's checklist | the board check reads GitLab's label columns and names both sides | `RESUME-CURRENT + BOARD-DIVERGES` |
 
 ## The two sharpest fixtures
 
@@ -129,6 +130,7 @@ reaches against `expected.md`.
 | `32`–`37` | the last exchanges, 2026-09-24; copied by a script since 2026-09-28 — **must pass** |
 | `38` | the exchanges never pass through the session, 2026-09-28 — **must pass** |
 | `39` | `show` by name, 2026-10-22 — **must pass** |
+| `40` | the board check on GitLab, 2026-11-06 — **must pass** |
 
 A failure in `09`–`10` is genuine RED (the behaviour is unimplemented and will stay so), not BROKEN
 (the harness is faulty) — the fixtures are prose inputs with no imports to resolve. Do not "fix" them
