@@ -17,9 +17,9 @@ the owner and repo as variables to `gh api graphql`, which takes no `-R`. On Git
 every `glab api` call.
 
 The grant covers autopilot's own calls: the claim, the worktree, the comments on the card, the landing
-— push, request, wait, merge — and launching each step's command or skill and `/phil:handoff`. The work a step does — editing, testing, committing,
-launching an agent — runs under the session's own permissions, and a call the session denies is a
-blocker.
+— push, request, wait, merge — and launching each step's command or skill and `/phil:handoff`. The work
+a step does — editing, testing, committing, launching an agent, walking a change in a browser — runs
+under the session's own permissions, and a call the session denies is a blocker.
 
 - Send only `query` documents through `gh api graphql`.
 - Send `glab api` only GETs: never `-f`, `-F`, `--field`, `--raw-field`, `--input`, `--form`, `-X` or

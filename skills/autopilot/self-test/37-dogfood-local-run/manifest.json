@@ -1,0 +1,22 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-37",
+  "situation": "`/phil:autopilot 64` in a repo whose card changes a page. The repo documents no test account and no dogfood command, but its README's \"Local development\" section starts the app on localhost with a minted test token in place of a password. The path stops at a `(yours)` review step before landing.",
+  "expected_decision": [
+    "CARRIED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT",
+    "DECLARED-PATH",
+    "RECORDED",
+    "HANDED-OFF"
+  ],
+  "must_not": [
+    "stop on a blocker because the repo documents no test account",
+    "use a credential the README does not name",
+    "post a step comment that names no way taken",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "AC5.2: with no test account, the product run locally the way the repo runs it is the next way."
+}
