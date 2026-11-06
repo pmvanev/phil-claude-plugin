@@ -25,7 +25,8 @@ for what the last run left.
 A step is done when the disk shows its output (PATH), or when a step comment by the developer's account
 reads `— done` for it **and** quotes the same source line the path gives that step now. A step comment
 that quotes a different line means the path changed since: treat that step as not done, and say so. A
-step comment that reads `— work done, landing left` marks the step's work done and its landing not.
+step comment that reads `— work done, landing left` or `— work done, walk left` marks the step's work
+done and its landing or walk not.
 
 Start at the first step neither the disk nor a step comment marks done. Where step comments moved that
 point past what the disk alone shows, report `RESUMED`.
@@ -62,14 +63,51 @@ Take the steps in order. After each one, post its step comment.
 - **The work itself** — authoring, implementing, writing what the card asks. Do it under the repo's own
   rules, toward the card's done-when items, reading first any standard the path names. Commit the work
   in the card's worktree as the repo's rules say, naming the card as `issue <n>`, never after a closing
-  keyword.
+  keyword. Where it changes a running product, walk it as *Dogfooding a running product* says.
 
 The steps' work runs under the session's own permissions; the command's grant covers only autopilot's
 own calls. A tool call the session denies is a blocker: a permission only the developer can grant.
 
-**An in-browser check** of the running product signs in only from a source the repo declares, through
-Chrome DevTools or Playwright. With none declared, that check needs an input only the developer holds.
-Never search for a credential, and never invent one.
+## Dogfooding a running product
+
+Whichever step made a change a person sees in a running product — a page, a screen, an extension —
+walk it in a browser before the next landing step, `(yours)` step or the path's end, as the standing
+prompt asks. A step that already walked the change, such as `phil:edd`'s evidence, is the walk. Work
+that changes no running product needs no walk.
+
+**Find out how the repo dogfoods itself, and follow it.** Read what the repo says before inventing a
+way: `CLAUDE.md` and `AGENTS.md`, the README's dogfood or local-development sections, the docs beside
+any test-user setup, its dogfood and dev scripts, and the browser tests beside them. A repo's rule
+about checks or credentials binds what its heading and words govern — a rule for one browser binds
+that browser — and narrows the walk, never the accounts below.
+
+Take the first way that works — one that reaches the changed page:
+
+1. **The repo's own dogfood steps and test accounts.** Run the dogfood command the repo documents, or
+   sign in as a test account it documents, fetching the credential exactly as its docs say; search
+   the machine for none they do not name.
+2. **The product run locally**, the way the repo's dogfood guides or dev scripts run it — over
+   recorded fixtures, a local sign-in, or a minted test token.
+3. **Any other way the run can find** that shows the change: the page rendered directly, a route that
+   needs no sign-in, the repo's own browser tests run against the change.
+
+Drive the browser through Chrome DevTools or Playwright, whichever the repo uses or the session has,
+in a fresh profile or context, never one already signed in as a person. With neither tool, no way
+works. A failure on the changed page is the change's: fix it within the card's scope, as a circuit
+breaker, `k = 2` — a walk still failing after two fixes is a blocker. Record the walk in the step's
+comment: the way taken, the line that named it and any rule that bound it, the pages walked, and what
+failed. Stop every server or browser the walk started before the run lands or hands off, and name
+each in the step comment.
+
+**Sign in only with a credential the repo documents or provisions for testing**, never a person's own
+account and never an invented credential. In a comment, a commit or the report, name where a
+credential came from, never the credential.
+
+**Where no way works, stop on a blocker** — an input only the developer holds. Post the step comment
+`— work done, walk left`, then the blocker comment: what the run tried, why each way failed, and a
+suggestion to document an automatic way forward — a test account, or a local dogfood command — so the
+next run is not stopped the same way. Leave the suggestion in the blocker comment; filing it as a card
+is a write the path does not name.
 
 ## Questions
 
@@ -81,8 +119,9 @@ an agent, a step or the work raises a question — through the tool or in prose 
 2. **One of the three kinds stops the run** — the developer must weigh in on:
    - an outward or irreversible write the path does not name: filing a card, publishing, deleting,
      force-pushing, discarding work, closing;
-   - an input only the developer holds: their own material, an account, a secret, a permission, a
-     judgement the card reserves for them, or an approval a launched route reserves for them — as
+   - an input only the developer holds: their own material, a sign-in the repo offers no test way
+     around (*Dogfooding a running product*), an account, a secret, a permission, a judgement the card
+     reserves for them, or an approval a launched route reserves for them — as
      `phil:edd`'s verdicts and `phil:work`'s approve-or-reject are;
    - a check that still fails after two fixes.
 3. **Otherwise take the recommendation** — the option marked recommended, or, with none marked, the

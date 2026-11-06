@@ -408,3 +408,39 @@ def test_claude_md_lists_the_path_comment_among_board_surfaces():
     text = " ".join((REPO / "CLAUDE.md").read_text().split())
     section = text.split("## Board surfaces that compose prose", 1)[1].split(" ## ", 1)[0]
     assert "`/phil:autopilot`'s path, step and blocker comments" in section
+
+
+def test_a_running_product_is_walked_the_first_way_that_works():
+    """D3 as revised 2026-11-06, AC5.1-AC5.2: the repo's own way, then a local run, then any other."""
+    text = _flat(RUN)
+    assert "Find out how the repo dogfoods itself, and follow it." in text
+    order = [text.index(s) for s in ("1. **The repo's own dogfood steps and test accounts.**",
+                                     "2. **The product run locally**",
+                                     "3. **Any other way the run can find**")]
+    assert order == sorted(order), order
+    assert "Work that changes no running product needs no walk." in text
+    assert "Whichever step made a change a person sees in a running product" in text
+    assert "narrows the walk, never the accounts below" in text
+
+
+def test_no_credential_is_invented_or_written_down():
+    """AC5.4: test accounts only, never a person's own, and never a secret on the card."""
+    text = _flat(RUN)
+    assert "**Sign in only with a credential the repo documents or provisions for testing**, never a person's own account and never an invented credential" in text
+    assert "in a fresh profile or context, never one already signed in as a person" in text
+    assert "In a comment, a commit or the report, name where a credential came from, never the credential." in text
+    assert "search the machine for none they do not name" in text
+
+
+def test_no_way_found_is_a_blocker_that_suggests_one():
+    """AC5.3: the blocker comment suggests documenting an automatic way, and files nothing."""
+    text = _flat(RUN)
+    assert "**Where no way works, stop on a blocker**" in text
+    assert "a suggestion to document an automatic way forward" in text
+    assert "`— work done, walk left`" in text and "`— work done, walk left`" in _flat(RECORD)
+    assert "Leave the suggestion in the blocker comment; filing it as a card is a write the path does not name" in text
+
+
+def test_the_walk_cleans_up_what_it_started():
+    """Plugin-validator, 2026-11-06: a dogfood server the walk starts outlives the run unless stopped."""
+    assert "Stop every server or browser the walk started before the run lands or hands off" in _flat(RUN)

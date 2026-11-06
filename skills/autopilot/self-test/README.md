@@ -42,3 +42,9 @@ expects.
 | 32 | `closing-reference-blocks` | D13 | `BLOCKED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
 | 33 | `gitlab-no-pipeline` | D10, AC4.2 | `BLOCKED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
 | 34 | `default-branch-red-before-merge` | AC4.2 | `BLOCKED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 35 | `dogfood-from-repo-guide` | AC5.1, D3, D10 | `CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `LANDED` · `HANDED-OFF` |
+| 36 | `dogfood-test-account` | AC5.1, AC5.4 | `CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 37 | `dogfood-local-run` | AC5.2 | `CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 38 | `dogfood-no-way-blocks` | AC5.3 | `BLOCKED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 39 | `no-running-product-no-walk` | AC5.2 | `CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `LANDED` · `HANDED-OFF` |
+| 40 | `repo-rule-binds-the-walk` | D3 | `CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |

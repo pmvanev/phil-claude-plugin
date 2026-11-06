@@ -9,7 +9,7 @@ every quoted line of the card, `CLAUDE.md` or `AGENTS.md` keeps its own words.
 | Comment | First line, exactly | Posted |
 |---|---|---|
 | The path | `**Autopilot · build path**` | before the first step, unless the card holds it already |
-| A step | `**Autopilot · step <k> of <m>**`, then on the same line `— <the step> — done`, or `— work done, landing left` | after each step the run finishes |
+| A step | `**Autopilot · step <k> of <m>**`, then on the same line `— <the step> — done`, `— work done, landing left`, or `— work done, walk left` | after each step the run finishes |
 | A blocker | `**Autopilot · blocked at step <k> of <m>**` | when a blocker stops the run |
 
 Start every line with the header, a step number, `-`, `Next:` or `Starting the run`, never with `/`:

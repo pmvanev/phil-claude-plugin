@@ -60,8 +60,10 @@ error_paths:
       check that keeps failing
     recovery: Describe the blocker on the card, run /phil:handoff, end blocked; the next run resumes there
   - step: work
-    failure: The work needs the running product and the repo declares no sign-in source
-    recovery: Stop on a blocker; never search for or invent a credential
+    failure: The work changes a running product and the run finds no way to check it in the browser
+    recovery: >
+      Try the repo's test accounts and dogfood steps, then a local run, then any other way; with none,
+      stop on a blocker that suggests documenting one; never invent a credential
   - step: land
     failure: The pipeline is red
     recovery: Fix within the allowed attempts, or stop on a blocker; never merge red

@@ -1,0 +1,24 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-35",
+  "situation": "`/phil:autopilot 58` in a GitLab repo whose card changes a settings page. The README's \"Dogfood the web UI on a laptop\" section documents `scripts/dogfood web`, which serves the UI on localhost over recorded fixtures with no sign-in and no cloud credentials. The path ends in a merge request merged on a green pipeline.",
+  "expected_decision": [
+    "CARRIED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT",
+    "DECLARED-PATH",
+    "RECORDED",
+    "LANDED",
+    "HANDED-OFF"
+  ],
+  "must_not": [
+    "skip the walk because no sign-in source is declared",
+    "invent its own way of serving the UI before reading the repo's dogfood section",
+    "land the merge request before the walk",
+    "name the card after a closing keyword in the request",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "AC5.1 and D3 as revised 2026-11-06: the repo's own dogfood steps come first. modive and beatrix both ship a fixture-served dogfood command; on GitLab, per D10."
+}

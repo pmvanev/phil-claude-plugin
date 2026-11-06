@@ -33,7 +33,10 @@ Three facts, read the same day from the repos on this machine, shape the design:
   `/phil:start`'s route rule reads that prose.
 - **Test sign-in differs in every repo that runs a product.** modive declares a test tenant created
   through the Cognito admin API; submission-tracker has none and renders markup instead; beatrix says
-  "The agent types no credential".
+  "The agent types no credential". *Corrected 2026-11-06:* beatrix's line governs only the
+  operator-assisted extension browser. beatrix keeps dev test accounts, and both beatrix and modive
+  serve their web UI locally over recorded fixtures with no sign-in, through a documented dogfood
+  command.
 - **Claude Code asks before an outward or hard-to-reverse action** "unless durably authorized or
   explicitly told to proceed without asking". This repo's path ends in a push, a pull request and a
   merge on a green pipeline.
@@ -83,10 +86,21 @@ plugin's existing rules.
   falls back to the nWave waves in an nWave repo, and to `phil:edd` or `phil:work` elsewhere, by
   `/phil:start`'s route rules 2 and 3, and says it fell back.
 
-- **[D3] Test sign-in comes from a source the repo declares.** *(Developer's answer.)* The repo names
-  where test sign-in comes from, never the secret. A declaration that a person signs in, as beatrix's
-  does, makes that check a blocker of D1's second kind. A missing declaration is a blocker only when
-  the work needs the running product. The run never searches for a credential and never invents one.
+- **[D3] The run works out for itself how to dogfood a running product.** *(Developer's answer,
+  2026-11-06; it replaces the 2026-11-05 answer, under which only a declared sign-in source let the run
+  sign in.)* Where the work changes a running product, the run reads the repo for how it is dogfooded —
+  `CLAUDE.md`, `AGENTS.md`, test-account documentation, dogfood guides and scripts — and follows the
+  repo's own instructions. It takes the first way that works:
+  1. the repo's test accounts and dogfood instructions;
+  2. the product run locally, the way the repo's own dogfood guides run it;
+  3. any other way the run can find.
+
+  Where none works, the check is a blocker of D1's second kind: the blocker comment suggests
+  documenting an automatic way forward, so the next run is not stopped the same way, and the run hands
+  off. Work that changes no running product needs no check. The skill's prose does all of this; no
+  hook and no script (the developer: "I don't know that we need hooks or crazy custom code"). The run
+  signs in only with a credential the repo documents or provisions for testing, never invents one, and
+  writes none onto the card.
 
 - **[D4] Starting the run authorizes every write the build path names, except done (D13).**
   *(Developer's answer.)* That covers commits, the push, the pull request and the merge on a green
@@ -199,7 +213,7 @@ answer it when I'm back and the next run picks up where this one stopped.
 
 ### Elevator Pitch
 Before: a run that hits a question waits in a terminal nobody is watching, and its reasoning dies with the session.
-After: run `/phil:autopilot 76` → sees `BLOCKED: the in-browser check needs a person to sign in (CLAUDE.md: "The agent types no credential") — described on the card; snapshot written; next: /phil:autopilot 76`.
+After: run `/phil:autopilot 76` → sees `BLOCKED: no test account and no local way to run the page — described on the card, with a suggestion to document one; snapshot written; next: /phil:autopilot 76`.
 Decision enabled: I clear the blocker, then restart the run from where it stopped.
 
 **Acceptance criteria**
@@ -232,24 +246,29 @@ Decision enabled: I inspect the work and the recorded decisions, then call it do
 - AC4.4 — Given the run believes the work is finished, then it runs `/phil:handoff`, names
   `/phil:done` for the developer, and never runs `/phil:done` or closes the card itself (D13).
 
-### Story 5 — Check the running product with declared sign-in *(slice 05)*
+### Story 5 — Dogfood the running product without me *(slice 05)*
 `job_id: carry-a-card-hands-off`
 
-As **Rowan**, I want the run to check a change to a running product in the browser, signing in as the
-repo declares, so a product change is verified without me unless only I can sign in.
+As **Rowan**, I want the run to work out from the repo how to check a change to a running product in
+the browser, and check it, so a product change is checked without me, and a repo that leaves the run
+no way gets a suggestion for one.
 
 ### Elevator Pitch
-Before: an in-browser check waits for me to sign in, or an agent goes looking for a password.
-After: run `/phil:autopilot 58` in modive → sees `CHECKED in the browser as the test-tenant user (CLAUDE.md: "Test users live in a dedicated test tenant…") — 3 pages, 0 failures`.
+Before: an in-browser check waits for me to sign in, or nobody walks the page at all.
+After: run `/phil:autopilot 58` in modive → sees on the card's step comment `walked 3 pages in the browser as the repo's test account (from its dogfood guide), 0 failures`.
 Decision enabled: I trust the check, or open the evidence it left.
 
 **Acceptance criteria**
-- AC5.1 — Given work that changes a running product and a declared sign-in source, then the run checks
-  it in the browser using that source and records the evidence.
-- AC5.2 — Given work that needs the running product and no declaration, then the run stops on a
-  blocker; given work that does not, then no declaration is needed.
-- AC5.3 — Given a declaration that a person signs in, then that check is a blocker.
-- AC5.4 — Given any run, then it never searches for a credential or invents one.
+- AC5.1 — Given work that changes a running product and a repo that documents test accounts or
+  dogfood steps, then the run follows them, checks the change in the browser, and records the evidence
+  on the card, naming where the sign-in came from and never the secret.
+- AC5.2 — Given no test account the run can use, then it runs the product locally as the repo's own
+  dogfood guides do and checks it there; given work that changes no running product, then no check
+  runs.
+- AC5.3 — Given no way the run can find to check the change, then the check is a blocker whose
+  comment suggests documenting an automatic way forward, and the run hands off.
+- AC5.4 — Given any run, then it signs in only with a credential the repo documents or provisions for
+  testing, never invents one, and writes none onto the card.
 
 GitLab is no story of its own: every story above ships on both forges (D10), and each slice's
 acceptance criteria hold on GitLab with a merge request in place of a pull request and a note in place
@@ -263,7 +282,7 @@ of a comment.
 | Nothing unseen | every taken recommendation is on the card | dogfood: card comments against the transcript's asks |
 | Few calls overturned | ≤ 6 in 70 recorded calls overturned — today's override rate | developer's review of the card after dogfood |
 | Declared path wins | 0 runs that follow nWave detection over a declared path | fixture (AC1.1) |
-| No guessed credential | 0 credentials searched for or invented | fixture (AC5.4) |
+| No guessed credential | 0 credentials invented, taken from outside what the repo provides for testing, or written onto the card | fixture (AC5.4) |
 | No unnamed write | 0 writes the path does not name | fixture (AC3.3) |
 | Hands-off | a card on this repo runs from `/phil:autopilot` to a merged change and a handoff with no question that is not a blocker | dogfood transcript |
 | Done is yours | 0 runs of `/phil:done`, and 0 cards closed, by autopilot | fixture (AC4.4) |
@@ -307,8 +326,9 @@ skill; no change to an existing command's behaviour. The largest risk, D12, gets
 3. Every story has an Elevator Pitch with a real entry point and observable output.
 4. Fixtures pin issue 76's five behaviours: a taken recommendation is recorded on the card (AC2.2); a
    decision the developer must make stops the run (AC2.3); a blocker yields a card comment and a
-   snapshot (AC3.1); a declared build path wins over nWave directories (AC1.1); a missing credential
-   declaration blocks only when the work needs the running product (AC5.2).
+   snapshot (AC3.1); a declared build path wins over nWave directories (AC1.1); a change to a running
+   product is checked in the browser by the first way that works, and blocks only when none does
+   (AC5.1–AC5.3).
 5. Every new citation and gate has a test, watched red first.
 6. `python3 -m pytest -q` and `scripts/check-invariants.py` pass.
 7. `/phil:harden-instructions` over the command, the skill and its references; `phil:eos` over this
@@ -361,7 +381,7 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 76's own, as w
 ## Wave: DISCUSS / [REF] Decisions summary (for authoring)
 
 - **Key decisions:** D1 three kinds of blocker · D2 path read from prose, shown beside its sources ·
-  D3 declared sign-in source · D4 starting authorizes the path's writes, recorded on the card · D5
+  D3 the run works out how to dogfood a running product · D4 starting authorizes the path's writes, recorded on the card · D5
   compose the commands that own each step · D6 each decision recorded on the card · D7 card current at
   each boundary · D8 blocker: comment, then handoff · D9 saved preferences are rules · D10 both forges
   in every slice · D11 `mutates: true` · D12 answering a route's questions, settled by spike · D13
@@ -370,8 +390,8 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 76's own, as w
   runs each step through the command that owns it, answers each question by rule or by its own
   recommendation and records the answer on the card, stops for three kinds of question, lands the
   work, and hands it back through `/phil:handoff` for the developer to inspect and call done.
-- **Constraints:** never a write the path does not name; never merge red; never search for or invent a
-  credential; never an unrecorded decision; never follow detection over a declared path.
+- **Constraints:** never a write the path does not name; never merge red; never invent a credential or
+  write one onto the card; never an unrecorded decision; never follow detection over a declared path.
 - **Settled at slice 01 authoring (2026-11-05)**, after `plugin-dev:skill-reviewer` and
   `plugin-dev:plugin-validator`:
   - The nWave fallback needs a `wave:` label, as `/phil:start`'s route rule 2 and

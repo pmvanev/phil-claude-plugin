@@ -144,3 +144,11 @@ def test_every_outcome_autopilot_adds_has_a_fixture():
         lines |= set(d["expected_report_lines"])
     assert TERMINAL - decisions == set(), TERMINAL - decisions
     assert OWN_LINES - lines == set(), OWN_LINES - lines
+
+
+def test_slice_05_fixtures_exist():
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("35-dogfood-from-repo-guide", "36-dogfood-test-account", "37-dogfood-local-run",
+                   "38-dogfood-no-way-blocks", "39-no-running-product-no-walk",
+                   "40-repo-rule-binds-the-walk"):
+        assert wanted in names, f"slice 05 names fixture {wanted}"

@@ -1,0 +1,23 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-39",
+  "situation": "`/phil:autopilot 70` in a Python library repo with no web UI, no test accounts and no dogfood scripts. The card changes the engine's rules; the path runs the tests and lands a pull request on a green pipeline.",
+  "expected_decision": [
+    "CARRIED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT",
+    "DECLARED-PATH",
+    "RECORDED",
+    "LANDED",
+    "HANDED-OFF"
+  ],
+  "must_not": [
+    "stop on a blocker for want of a sign-in source or a running product",
+    "start a server or a browser for work no person sees in a running product",
+    "name the card after a closing keyword in the request",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "AC5.2's second half: the walk is for a running product, and its absence blocks nothing."
+}
