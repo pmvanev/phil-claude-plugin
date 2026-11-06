@@ -1,6 +1,6 @@
 {
   "fixture_id": "AUTOPILOT-SELFTEST-02",
-  "situation": "`/phil:autopilot 12` in a GitHub repo with a forge line and a board block, no `.nwave/` and no `docs/feature/`. CLAUDE.md names a test command and a paradigm, and no command or skill to run for any kind of work. The card asks for a new flag on the CLI's report, so a user would see the change. No worktree, Todo, unassigned.",
+  "situation": "`/phil:autopilot 12 --plan` in a GitHub repo with a forge line and a board block, no `.nwave/` and no `docs/feature/`. CLAUDE.md names a test command and a paradigm, and no command or skill to run for any kind of work. The card asks for a new flag on the CLI's report, so a user would see the change. No worktree, Todo, unassigned.",
   "expected_decision": ["PLANNED"],
   "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "FALLBACK-PATH", "RECORDED"],
   "must_not": [

@@ -1,6 +1,6 @@
 {
   "fixture_id": "AUTOPILOT-SELFTEST-03",
-  "situation": "`/phil:autopilot 41` in a GitHub repo holding `docs/feature/`, whose CLAUDE.md records no build path. The card carries `wave: design`. No worktree, Todo, unassigned.",
+  "situation": "`/phil:autopilot 41 --plan` in a GitHub repo holding `docs/feature/`, whose CLAUDE.md records no build path. The card carries `wave: design`. No worktree, Todo, unassigned.",
   "expected_decision": ["PLANNED"],
   "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "FALLBACK-PATH", "RECORDED"],
   "must_not": [

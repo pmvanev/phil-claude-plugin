@@ -4,7 +4,7 @@
 
 ## Situation
 
-`/phil:autopilot 58` in modive, whose CLAUDE.md forge line names GitLab at a self-hosted host and whose board block lists the `status::` family. Card 58 reports a fault that slice 06's first deploy exposed; it carries `status::to-do` and no `wave::` label, is unassigned, and has no worktree and no notes. Modive's CLAUDE.md reads: "Fix a fault that a slice's own first deploy exposes in one merge request holding the fix and a regression test, with no `/nw-bugfix` wave and no finalize merge request".
+`/phil:autopilot 58 --plan` in modive, whose CLAUDE.md forge line names GitLab at a self-hosted host and whose board block lists the `status::` family. Card 58 reports a fault that slice 06's first deploy exposed; it carries `status::to-do` and no `wave::` label, is unassigned, and has no worktree and no notes. Modive's CLAUDE.md reads: "Fix a fault that a slice's own first deploy exposes in one merge request holding the fix and a regression test, with no `/nw-bugfix` wave and no finalize merge request".
 
 ## What must happen
 

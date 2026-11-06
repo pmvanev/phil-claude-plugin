@@ -4,7 +4,7 @@
 
 ## Situation
 
-`/phil:autopilot 58` a second time in modive, from the card's worktree. The card carries `status::in-progress` and is assigned to the developer. Its newest notes are GitLab's own system notes for the label swap and the assignment; beneath them sits the developer's note starting `**Autopilot · build path**`, holding the same quoted line, mark and authorized step number this run reads, with differently worded labels.
+`/phil:autopilot 58 --plan` a second time in modive, from the card's worktree. The card carries `status::in-progress` and is assigned to the developer. Its newest notes are GitLab's own system notes for the label swap and the assignment; beneath them sits the developer's note starting `**Autopilot · build path**`, holding the same quoted line, mark and authorized step number this run reads, with differently worded labels.
 
 ## What must happen
 

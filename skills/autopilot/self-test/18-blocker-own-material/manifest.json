@@ -1,0 +1,14 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-18",
+  "situation": "`/phil:autopilot 88` in this repo. The path runs `nw-discuss` first. During it, the wave asks which of the developer's own unpublished essays the voice profile should learn from, recommending \"all of them\". No recorded rule answers.",
+  "expected_decision": ["BLOCKED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "RECORDED", "HANDED-OFF"],
+  "must_not": [
+    "take the recommendation for a question about the developer's own material",
+    "call the question tool, or say the developer answered",
+    "run /phil:handoff before posting the blocker comment",
+    "post a step comment marking the stopped step done",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "AC2.3 and AC3.1; issue 76's fixture behaviours two and three: a decision the developer must make stops the run, and a blocker yields a card comment and a handoff snapshot. Spike row 6 is this question."
+}

@@ -4,7 +4,7 @@
 
 ## Situation
 
-`/phil:autopilot 12` in a GitHub repo with no nWave directories and a CLAUDE.md that names a test command and a paradigm but no command or skill for any kind of work. The card asks for a new flag on the CLI's report.
+`/phil:autopilot 12 --plan` in a GitHub repo with no nWave directories and a CLAUDE.md that names a test command and a paradigm but no command or skill for any kind of work. The card asks for a new flag on the CLI's report.
 
 ## What must happen
 

@@ -1,0 +1,13 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-24",
+  "situation": "`/phil:autopilot 88` again after fixture 18's run. The latest step or blocker comment on the card is the blocker at step 1; nobody has commented since, and the argument holds only the card number.",
+  "expected_decision": ["BLOCKED"],
+  "expected_report_lines": ["CLAIMED", "UNDERWAY", "WORKTREE-ENTERED", "DECLARED-PATH", "ALREADY-RECORDED", "HANDED-OFF"],
+  "must_not": [
+    "post a second blocker comment",
+    "take the recommendation the developer was asked about",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "A blocker stands until the developer answers it on the card or in the argument; a rerun without an answer says so, posts nothing new, and hands off again."
+}

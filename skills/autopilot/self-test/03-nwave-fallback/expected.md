@@ -4,7 +4,7 @@
 
 ## Situation
 
-`/phil:autopilot 41` in a GitHub repo holding `docs/feature/`, whose CLAUDE.md records no build path. The card carries `wave: design`.
+`/phil:autopilot 41 --plan` in a GitHub repo holding `docs/feature/`, whose CLAUDE.md records no build path. The card carries `wave: design`.
 
 ## What must happen
 

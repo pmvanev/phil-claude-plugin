@@ -1,0 +1,22 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-16",
+  "situation": "`/phil:autopilot 92` in this repo. Card 92 asks for a new flag on an existing command, Todo, unassigned, no worktree. Its feature delta exists and its `Board:` line names issue 92, so `nw-discuss` is done. The path, from CLAUDE.md: 1 nw-discuss; 2 author after plugin-dev; 3 the four review passes; 4 re-run the tests; 5 commit naming the passes; 6 push and open a pull request; 7 merge once its pipeline passes. The work raises one question, whether to put the flag's detail in a reference file, with a recommended option. Every check passes on the first run.",
+  "expected_decision": [
+    "CARRIED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT",
+    "DECLARED-PATH",
+    "RECORDED",
+    "HANDED-OFF"
+  ],
+  "must_not": [
+    "call the question tool, or say the developer answered",
+    "push, open a pull request, or merge",
+    "run /phil:done or close the card",
+    "post a step comment for a step the run did not finish",
+    "name the card after a closing keyword in the commit"
+  ],
+  "why_this_fixture_exists": "AC2.2 and the slice 02 dogfood: the run carries a card through every step before landing, takes the recommendation, records each step's decisions on the card, and stops before the first landing step."
+}

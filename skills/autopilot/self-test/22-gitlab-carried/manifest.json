@@ -1,0 +1,23 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-22",
+  "situation": "`/phil:autopilot 58` in modive, the GitLab repo of fixture 05. The one declared step for card 58's fault is: fix it in one merge request holding the fix and a regression test. The fix and the test pass on the first run.",
+  "expected_decision": [
+    "CARRIED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT",
+    "DECLARED-PATH",
+    "RECORDED",
+    "HANDED-OFF"
+  ],
+  "must_not": [
+    "push or open the merge request",
+    "mark the step done when its landing is left",
+    "post a note with a line starting /",
+    "run a glab call without -R https://<host>/<group/project> or --hostname <host>",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "D10: the run carries a card on GitLab as on GitHub. The step mixes the work with a landing write; the run does the work and stops before the landing."
+}

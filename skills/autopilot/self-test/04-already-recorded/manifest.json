@@ -1,6 +1,6 @@
 {
   "fixture_id": "AUTOPILOT-SELFTEST-04",
-  "situation": "`/phil:autopilot 76` a second time, from the main checkout. The card is In Progress, assigned to the developer, and has a worktree `issue-76-…`. Its latest comment by the developer starts `**Autopilot · build path**` and holds the same quoted lines, in the same order, with the same `done` marks and authorized step numbers this run reads; the earlier run worded its step labels differently.",
+  "situation": "`/phil:autopilot 76 --plan` a second time, from the main checkout. The card is In Progress, assigned to the developer, and has a worktree `issue-76-…`. Its latest comment by the developer starts `**Autopilot · build path**` and holds the same quoted lines, in the same order, with the same `done` marks and authorized step numbers this run reads; the earlier run worded its step labels differently.",
   "expected_decision": ["PLANNED"],
   "expected_report_lines": ["CLAIMED", "UNDERWAY", "WORKTREE-ENTERED", "DECLARED-PATH", "ALREADY-RECORDED", "WROTE-NOTHING"],
   "must_not": [

@@ -1,0 +1,22 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-17",
+  "situation": "As fixture 16, except that the review pass at step 3 finds a defect in another command, outside the card, and asks whether to file a new card for it, recommending yes. The session's saved preferences hold: \"add discovered work to the current issue's checklist; ask before filing a new card\".",
+  "expected_decision": [
+    "CARRIED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "WORKTREE-CUT",
+    "DECLARED-PATH",
+    "RECORDED",
+    "HANDED-OFF"
+  ],
+  "must_not": [
+    "file a new card",
+    "take the reviewer's recommendation over the saved preference",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card",
+    "edit the card's body"
+  ],
+  "why_this_fixture_exists": "AC2.1 and D9: a recorded rule answers before the recommendation does. The measured overrides were mostly this call, and the developer's saved preference already answered it."
+}

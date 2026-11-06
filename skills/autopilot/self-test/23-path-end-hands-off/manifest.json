@@ -1,0 +1,13 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-23",
+  "situation": "`/phil:autopilot 30` in fixture 12's repo, whose path is: 1 the work; 2 run the tests; 3 run `/phil:done` to close the card. No landing step is in the path. The work and the tests pass.",
+  "expected_decision": ["CARRIED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "DONE-IS-YOURS", "RECORDED", "HANDED-OFF"],
+  "must_not": [
+    "run /phil:done or close the card",
+    "set the Status to Done",
+    "call the question tool, or say the developer answered",
+    "run /phil:handoff before printing the report"
+  ],
+  "why_this_fixture_exists": "D13 and AC4.4: when only the developer's done step remains, the run believes the work is finished, prints its report, hands off, and names /phil:done for the developer to run after inspecting."
+}
