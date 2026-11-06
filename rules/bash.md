@@ -23,11 +23,13 @@ Bash; `#!/bin/sh` is POSIX `sh`, and a row written for Bash never reaches it. A 
 judged by its `# shellcheck shell=` directive, and failing that, as Bash where it ends in `.bash`.
 The `paths:` frontmatter cannot express a shebang, so a consumer who copies this rule into
 `.claude/rules/` loads it for the extensions alone. A sourced file runs under its caller's options: read the `set` line of the script that sources it
-before judging SH-1, SH-2 or SH-12 there.
+before judging SH-1, SH-2 or SH-11 there.
 
 **The two halves divide on checkability.** The reviewer half — Always-flag, Advisory and Do not flag —
-names the defects a script shows, each by its `SH-n` id. A row marked **hazard** changes what the
-script does when it fires, so a review files it at Priority 1; every other row is a Priority 7 idiom.
+names the defects a script shows, each by its `SH-n` id. A row is a hazard when a miss changes what
+the script does when it runs, and a review files it at Priority 1. A row with no hazard is an idiom: a
+cited source names its preferred form, and a review files it at Priority 7. A defect no source names
+stays Advisory.
 Each row names the ShellCheck check that catches it, where one exists; the review reads and never runs
 one. The Principles half is design and yields no finding on its own.
 
@@ -47,8 +49,8 @@ and a command substitution. A script fails this principle when a failure goes un
 ### 2. Write for the shell the shebang names
 
 Bash and POSIX `sh` are different languages. `[[ ]]`, `local`, arrays and the `function` keyword are
-Bash; POSIX leaves `[[` and `local` unspecified, and `dash` — `/bin/sh` on Debian and Ubuntu — rejects
-some of them. `pipefail` entered POSIX in 2024, yet dash and macOS's `sh` adopted it late, so a portable
+Bash. POSIX leaves `[[` and `local` unspecified, and dash — `/bin/sh` on Debian and Ubuntu — rejects
+`[[ ]]`, arrays and `function`, though it runs `local`. `pipefail` entered POSIX in 2024, yet dash and macOS's `sh` adopted it late, so a portable
 script does without it. Choose the shebang first, then write to it.
 
 ### 3. Quote every expansion unless splitting is the point
@@ -80,17 +82,16 @@ injection path is `security.md`'s CWE-78 alone.
 | Id | Violation | Preferred form | Hazard | Linter | Cite |
 |----|-----------|----------------|--------|--------|------|
 | SH-1 | A Bash script without `errexit` in which a command whose failure the next step depends on goes unchecked | `set -euo pipefail` after the shebang, or `\|\| exit` on that command | hazard | none | Bash manual § 4.3.1; Google, "Return values"; BashFAQ/105 |
-| SH-2 | A pipeline in a Bash script with neither `pipefail` nor a `PIPESTATUS` check, which loses the status of every command but the last, where an earlier command can fail (`curl … \| jq …`) | `set -o pipefail`; where an earlier command exits non-zero by design (`grep` matching nothing), test `"${PIPESTATUS[@]}"` on the next line instead | hazard | none | Bash manual § 4.3.1; POSIX.1-2024 `set -o pipefail`; Google, "Pipes"; BashFAQ/105 |
+| SH-2 | A pipeline in a Bash script with neither `pipefail` nor a `PIPESTATUS` check, which loses the status of every command but the last, where an earlier command can fail (`curl … \| jq …`) | `set -o pipefail`; where an earlier command exits non-zero by design (`grep` matching nothing), test `"${PIPESTATUS[@]}"` on the next line instead | hazard | none | Bash manual § 4.3.1; POSIX.1-2024 `set -o pipefail`; Google, "Checking Return Values"; BashFAQ/105 |
 | SH-3 | `local`, `export`, `declare` or `readonly` and a command substitution in one statement: the keyword's status replaces the command's | Declare on one line, assign on the next | hazard | SC2155 | Google, "Use Local Variables"; BashPitfalls, "local var=$(cmd)"; ShellCheck SC2155 |
-| SH-4 | A parameter expansion or command substitution left unquoted in a command's arguments, a `[ ]` test or a `for` list | Double-quote it; use `"$@"`; in Bash, build a command line in an array | hazard | SC2086, SC2046, SC2206 | Google, "Quoting"; BashPitfalls, `[ $foo = "bar" ]`; ShellCheck SC2086 |
+| SH-4 | A parameter expansion or command substitution left unquoted in a command's arguments, an array assignment, a `[ ]` test or a `for` list | Double-quote it; use `"$@"`; in Bash, build a command line in an array | hazard | SC2086, SC2046, SC2206 | Google, "Quoting"; BashPitfalls, `[ $foo = "bar" ]`; ShellCheck SC2086 |
 | SH-5 | `cd` unchecked in a script without `errexit` | `cd dir \|\| exit` | hazard | SC2164 | BashPitfalls, "cd /foo; bar"; ShellCheck SC2164 |
-| SH-6 | `[ … ]` or `test` in a Bash script | `[[ … ]]` | — | require-double-brackets (optional) | Google, "Test, `[ … ]`, and `[[ … ]]`" |
+| SH-6 | `[ … ]` or `test` in a Bash script | `[[ … ]]` | — | SC2292 (optional) | Google, "Test, `[ … ]`, and `[[ … ]]`" |
 | SH-7 | A variable assigned inside a Bash function without `local`, and read only inside it | `local name` | — | none | Google, "Use Local Variables" |
-| SH-8 | A temp file, temp directory, lock or background process created with no `trap … EXIT` that removes it | `tmp=$(mktemp)`, then `trap 'rm -f "$tmp"' EXIT`; in a sourced file, remove it on every return path, since an EXIT trap there replaces the caller's | — | none | Dong et al. 2023, "resource management" |
-| SH-9 | An executable file with no shebang, or a `.sh` file with neither a shebang nor a `# shellcheck shell=` directive | A shebang naming the shell; in a sourced library, the directive | — | SC2148 | Google, "File Extensions"; ShellCheck SC2148 and manual |
-| SH-10 | A `#!/bin/sh` script that uses a Bash feature: `[[ ]]`, `local`, an array, `function`, or `set -o pipefail` | Write it in POSIX `sh`, or change the shebang to Bash | hazard | SC3010, SC3043, SC3040 | POSIX.1-2024 § 2.4; ShellCheck SC3010, SC3043; ShellCheck issue 2555 |
-| SH-11 | A loop over the output of `ls`, or over an unquoted `$(find …)` | A glob (`for f in ./*.log`), or `find … -print0 \| while IFS= read -r -d '' f` | hazard | SC2045 | BashPitfalls, `for f in $(ls *.mp3)`; ShellCheck SC2045 |
-| SH-12 | In a script with `errexit`, a command or function whose non-zero status reports a result rather than a failure — a check that returns 1 — called as a bare command, so the first negative result ends the script | Call it in a condition: `if ! check; then …`, or `check \|\| failed=1` | hazard | none | Bash manual § 4.3.1; BashFAQ/105 |
+| SH-8 | An executable file with no shebang, so the shell that invokes it decides how it runs | A shebang naming the shell | hazard | SC2148 | Google, "File Extensions"; ShellCheck SC2148 |
+| SH-9 | A `#!/bin/sh` script that uses a Bash feature dash rejects: `[[ ]]`, an array, `function`, or `set -o pipefail` where `/bin/sh` may be an older dash or macOS's `sh` | Write it in POSIX `sh`, or change the shebang to Bash | hazard | SC3010, SC3040 (`pipefail`, through ShellCheck 0.11.0) | POSIX.1-2024 § 2.4; ShellCheck SC3010; ShellCheck issue 2555 |
+| SH-10 | A loop over the output of `ls`, or over an unquoted `$(find …)` | A glob (`for f in ./*.log`), or `find … -print0 \| while IFS= read -r -d '' f` | hazard | SC2045, SC2044 | BashPitfalls, `for f in $(ls *.mp3)`; ShellCheck SC2045, SC2044 |
+| SH-11 | In a script with `errexit`, a command or function whose non-zero status reports a result rather than a failure — a check that returns 1 — called as a bare command, so the first negative result ends the script | Call it in a condition: `if ! check; then …`, or `check \|\| failed=1` | hazard | none | Bash manual § 4.3.1; BashFAQ/105 |
 
 ---
 
@@ -104,6 +105,15 @@ A reviewer raises these; the author decides.
   it a program: branching state, arrays of records, JSON or CSV parsed in shell, functions that pass
   results through return codes. A long, linear list of commands is the weak case; say so. Length is
   never a defect on its own line.
+- **A temp file, temp directory, lock or background process with no `trap … EXIT` to remove it.**
+  The usual form is `tmp=$(mktemp)`, then `trap 'rm -f "$tmp"' EXIT`; in a sourced file, remove it on
+  every return path instead, since an EXIT trap there replaces the caller's. Dong et al. name resource
+  management a common problem, but no source names this form; ask.
+- **A `.sh` library with neither a shebang nor a `# shellcheck shell=` directive.** Google gives a
+  library no shebang; the directive tells ShellCheck and a reader which shell it is written for
+  (SC2148).
+- **`local` in a `#!/bin/sh` script** (SC3043): POSIX leaves it unspecified, though dash, BusyBox ash
+  and ksh run it. Ask whether the script must run on a shell without it.
 - **`trap` with a double-quoted command** (SC2064): its expansions run when the trap is set, not when
   it fires. Sometimes intended; ask.
 - **A command substitution used as an argument whose failure matters**, `cmd "$(fetch)"`: the outer

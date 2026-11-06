@@ -27,6 +27,12 @@ of the four measured `count = length(…)` sites, or flags any of the 78 toggles
 ## Acceptance criteria
 See US-04 in `feature-delta.md`.
 
+## Before this slice
+Run the evidence check in `feature-delta.md` § Handoff over the Terraform section: the research
+reviewer, a fresh fetch of every source a row rests on, and a pass on which TFLint rules the
+`recommended` preset enables. Fold the corrections into the research document before writing
+`terraform.md`.
+
 ## Dependencies
 - Slice 03 (`iac.md`). Research precursor, Terraform section.
 

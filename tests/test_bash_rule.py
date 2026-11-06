@@ -69,6 +69,29 @@ def test_the_rule_matches_shell_files_and_cites_its_research():
     assert RESEARCH in RULE.read_text()
 
 
+def test_the_rule_states_its_hazard_and_tier_tests():
+    """Addendum 2026-11-06: the research marked hazards by no stated test, and filed preferences as defects."""
+    text = _flat(RULE.read_text())
+    assert "A row is a hazard when a miss changes what the script does when it runs" in text
+    assert "A row with no hazard is an idiom: a cited source names its preferred form" in text
+
+
+def test_the_ids_run_without_a_gap():
+    """Unpublished ids are renumbered, not retired, so a reader never hunts for a missing row."""
+    ids = [int(_plain(r["Id"]).split("-")[1]) for r in _rows()]
+    assert ids == list(range(1, len(ids) + 1)), ids
+
+
+def test_the_citations_the_check_corrected_stay_corrected():
+    """Addendum 2026-11-06: Google has no "Pipes" section; `find` loops are SC2044; the bracket check is SC2292."""
+    text = RULE.read_text()
+    assert 'Google, "Pipes"' not in text
+    linters = " ".join(r["Linter"] for r in _rows())
+    for code in ("SC2044", "SC2292", "SC2206"):
+        assert code in linters, code
+    assert not any("trap" in r["Violation"] for r in _rows()), "no source names the trap row's defect"
+
+
 def test_the_table_is_not_empty_and_every_row_is_whole():
     """A table that parses to nothing passes every test below silently."""
     rows = _rows()
@@ -116,14 +139,18 @@ def test_bash_only_rows_never_reach_a_posix_script():
             assert "Bash script" in violation or "Bash function" in violation, row["Id"]
     posix = [r for r in _rows() if "#!/bin/sh" in r["Violation"]]
     assert len(posix) == 1 and _plain(posix[0]["Hazard"]) == "hazard"
+    assert "`local`" not in posix[0]["Violation"], "dash, BusyBox ash and ksh run `local` (SC3043)"
+    assert "SC3043" in _section("Advisory")
     assert "`#!/bin/sh` script" in _flat(_section("Do not flag"))
 
 
 def test_a_sourced_library_is_not_a_missing_shebang():
     """D8 as refined: Google says a library has a `.sh` extension and no shebang."""
     shebang = [r for r in _rows() if "SC2148" in r["Linter"]]
-    assert len(shebang) == 1 and "shellcheck shell=" in shebang[0]["Violation"]
+    assert len(shebang) == 1 and _flat(shebang[0]["Violation"]).startswith("An executable file with no shebang")
+    assert ".sh" not in shebang[0]["Violation"], "Google gives a library no shebang (Addendum, research SH-12)"
     assert "shellcheck shell=" in _section("Do not flag")
+    assert "shellcheck shell=" in _section("Advisory")
 
 
 def test_rewriting_in_another_language_is_advisory_with_googles_threshold():
@@ -163,7 +190,7 @@ def test_bash_only_fixes_say_so():
     """Dogfood 2026-11-06: an array is no fix in a POSIX script, nor an EXIT trap in a sourced one."""
     forms = {_plain(r["Id"]): _flat(r["Preferred form"]) for r in _rows()}
     assert "in Bash, build a command line in an array" in forms["SH-4"]
-    assert "in a sourced file, remove it on every return path" in forms["SH-8"]
+    assert "in a sourced file, remove it on every return path" in _flat(_section("Advisory"))
     assert "grep" in forms["SH-2"]
 
 

@@ -11,7 +11,7 @@ A release script and its helpers:
   down;
 - `bin/healthcheck`, an extensionless POSIX script that uses `[[ ]]`.
 
-It holds eleven defects, each on a line an Always-flag row of `rules/bash.md` describes, beside four
+It holds nine defects, each on a line an Always-flag row of `rules/bash.md` describes, beside four
 decoys that the rule's Do-not-flag list clears. `test_scripts.py` is green: every script parses under the
 shell its shebang names.
 
@@ -28,7 +28,7 @@ them.
 **How to drive it:** drive this working tree's `skills/review-code/SKILL.md` by hand over this
 directory (`/phil:review-code` runs the released copy).
 
-**Expected:** a `.refactoring-backlog.md` holding the eleven items in `expected-backlog.md`. An item
+**Expected:** a `.refactoring-backlog.md` holding the nine items in `expected-backlog.md`. An item
 matches on the Smell and on a Refactoring that is the row's Preferred form verbatim, alone or followed by
 ` — here: ` and this code's one change. Order is not checked.
 
@@ -39,13 +39,11 @@ matches on the Smell and on a Refactoring that is the row's Preferred form verba
 3. **SH-3** (Priority 1) — `local version=$(aws …)` returns `local`'s status, not the call's.
 4. **SH-4** (Priority 1) — `cp $built` splits and globs the path.
 5. **SH-5** (Priority 1) — `build` runs `tar` wherever `cd "$BUILD_DIR"` left it.
-6. **SH-10** (Priority 1) — `bin/healthcheck` is `#!/bin/sh` and uses `[[ ]]`, which dash rejects.
-7. **SH-12** (Priority 1) — `check-services.sh` calls `check` as a bare command under `errexit`, so
+6. **SH-9** (Priority 1) — `bin/healthcheck` is `#!/bin/sh` and uses `[[ ]]`, which dash rejects.
+7. **SH-11** (Priority 1) — `check-services.sh` calls `check` as a bare command under `errexit`, so
     the first service that is down ends the run and the rest go unchecked.
 8. **SH-6** (Priority 7) — `deploy.sh` tests `[ -z "$bucket" ]` in a Bash script.
 9. **SH-7** (Priority 7) — `build` assigns `artifact` without `local` and reads it only inside.
-10. **SH-8** (Priority 7) — `mktemp -d` with no `trap … EXIT` to remove it.
-11. **SH-9** (Priority 7) — `lib/paths.sh` has neither a shebang nor a `# shellcheck shell=` directive.
 
 **Hard assertions (any failure blocks the skill change):**
 
@@ -66,11 +64,13 @@ matches on the Smell and on a Refactoring that is the row's Preferred form verba
 
 **Not a failure:**
 
-- an Advisory question, where a file shows its subject;
+- an Advisory question, where a file shows its subject — the `mktemp -d` with no `trap`, and
+  `lib/paths.sh` with neither a shebang nor a directive, are both Advisory now;
 - line numbers within ±2, and SH-1's Lines given as a list.
 
 **Driven 2026-11-06** against this working tree's `SKILL.md`, by a fresh agent that read only the
-fixture's scripts and test, the rules and the skill, before SH-12 and `check-services.sh` existed. It
+fixture's scripts and test, the rules and the skill, before SH-11 (then SH-12) and `check-services.sh` existed, and before the evidence check moved the
+temp-file row and the library clause to Advisory. It
 filed all ten items the fixture then held, with the expected rows, priorities and fixes, and no decoy.
 Its extras:
 

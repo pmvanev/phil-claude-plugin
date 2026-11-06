@@ -3,12 +3,12 @@
   "mode": "review",
   "target": ".",
   "pins": "a shell-script defect is named by the SH id of its rules/bash.md row, takes that row's Preferred form as its fix, and is filed at Priority 1 where the row is a hazard and Priority 7 otherwise; a POSIX sh script, an explicitly checked script and a sourced library are not flagged",
-  "expected_guard": "eleven SH-named items across a Bash deploy script, a Bash service check, a sourced library and an extensionless POSIX script; four decoys unflagged",
+  "expected_guard": "nine SH-named items across a Bash deploy script, a Bash service check, a sourced library and an extensionless POSIX script; four decoys unflagged",
   "decoys": [
     "git ls-files | wc -l",
     "gzip --",
     "head -n 1",
     "lib/log.sh"
   ],
-  "min_items": 11
+  "min_items": 9
 }

@@ -30,6 +30,11 @@ recorded, and it puts the rule's Always-flag tier in question.
 ## Acceptance criteria
 See US-02 in `feature-delta.md`.
 
+## Before this slice
+Run the evidence check in `feature-delta.md` § Handoff over the YAML section. The 2026-11-06 run
+covers it, including which YAML each consumer parses. Fold its corrections into the research document
+before writing `yaml.md`.
+
 ## Dependencies
 - Research precursor, YAML section. Slice 01's hazard promotion in `review-code`.
 

@@ -12,6 +12,9 @@
 > `rules/continuous-delivery.md` § *Infrastructure as Code* (four bullets). Rows that touch those rules
 > point to them rather than restate them (D12).
 
+**Read the Addendum (2026-11-06) at the end first.** An independent review and a live re-check of every
+row-bearing quote corrected this document; where the two disagree, the Addendum wins.
+
 ## Executive Summary
 
 **Bash.** The GNU manual and POSIX.1-2024 define `errexit` and `pipefail`; the Google Shell Style Guide
@@ -1157,3 +1160,136 @@ Confidence: High ≈ 60% of row-bearing claims, Medium ≈ 30%, Low ≈ 10% (boo
 smell names) | Tool failures: gnu.org `shopt` page HTTP 429; Dong et al. TOSEM PDF 404; thesis PDF
 read to its abstract only; spinellis.gr Puppet-smells path 404; WebFetch could not render SC3010's title |
 Output: `docs/research/iac/iac-terraform-bash-yaml-canonical-sources.md`
+
+## Addendum 2026-11-06: independent check
+
+The developer asked for this check after `rules/bash.md` shipped on the body above. Where the Addendum
+and the body disagree, the Addendum wins. The research's row ids (SH-1 to SH-14) differ from the
+shipped rule's: research SH-12, SH-13 and SH-14 are `bash.md`'s SH-8, SH-9 and SH-10 after this
+Addendum's revision.
+
+### How it was checked
+
+- **Reasoning.** A research-reviewer agent, which cannot fetch pages, judged each candidate row against
+  the Evidence it cites. Verdict: 17 of the 42 Always-flag rows over-reach their sources. The Hazard
+  marks follow no stated test, and several absence claims outrun the searches behind them.
+- **Quotes.** Two agents fetched the live sources and marked each row-bearing quote and linter id:
+
+  | Section | Claims | Verified | Paraphrased | Not found | Contradicted |
+  |---|---|---|---|---|---|
+  | Bash | 70 | 63 | 3 | 3 | 1 |
+  | YAML | 42 | 40 | 2 | 0 | 0 |
+  | IaC | 62 | 58 | 1 | 0 | 2 |
+  | Terraform | 60 | 58 | 1 | 0 | 0 (1 left unchecked, already marked unverified) |
+  | Decisions table | 15 | 14 | 1 | 0 | 0 |
+
+- **Parsers.** A fourth agent read each YAML consumer's parser in its source and parsed the disputed
+  scalars on this machine (PyYAML 6.0.3, ruamel.yaml 0.18.10, Psych 5.1.2).
+
+The full tables stay outside the repository; this Addendum carries every correction they make.
+
+### The tests a row now meets
+
+- **Hazard**: a miss changes what a run, an apply or a parse produces.
+- **Always-flag**: a cited source states the defect, or, for an idiom row filed at Priority 7, names the
+  preferred form. A row whose only support is this document's interpretation is Advisory.
+
+### Bash
+
+- Google has no section "Pipes"; its `PIPESTATUS` text sits under "Checking Return Values".
+- POSIX.1-2024 treats `[[` in § 2.4 and `local` in § 2.9.1.4.
+- SC3040 no longer flags `set -o pipefail` in `sh` on ShellCheck's main branch: the change merged
+  2025-09-25, after release 0.11.0 (2025-08-04). Released ShellCheck still flags it.
+- `require-double-brackets` is SC2292. A loop over `$(find …)` is SC2044; SC2045 covers `ls` alone.
+  SC2206 covers an unquoted expansion in an array assignment.
+- The guide's "revision 2.02" appears nowhere on its page.
+- `local` works in dash, BusyBox ash and ksh (SC3043). Research SH-13's "fails under dash" holds for
+  `[[ ]]`, arrays, `function`, and `set -o pipefail` before dash adopted it, not for `local`.
+- Research SH-2 omitted Conflict B-1's carve-out for a pipeline that ends in `head`.
+- Research SH-8 (a temp file with no `trap … EXIT`): no source names the defect or the form. Advisory.
+- Research SH-12 (no shebang): Google requires a shebang of an executable and gives a library none, so
+  the clause flagging a `.sh` library without a directive contradicts the source. Advisory.
+- Research SH-6 and SH-7: Google states preferences. They are idiom rows, not defects.
+- Research SH-14's `$(find …)` half rests on ShellCheck SC2044 and BashPitfalls alone.
+- "No ShellCheck check flags a missing `set -e` or `pipefail`" means none among the checks read: the
+  eleven optional checks, about eight default codes, and an issue search with no recorded terms.
+- D10: Google says "should", not "must".
+
+### YAML
+
+- yamllint's `truthy` cannot flag `y` or `n`, and PyYAML reads both as strings.
+- YAML 1.1 base 60 needs a first digit of 1 to 9 and later parts matching `[0-5]?[0-9]`, so `08:30`
+  stays a string. Research YAML-4's `digits:digits` is broader than the hazard.
+- YAML 1.2.2 § 3.2.1.3 says a processor should "flag the duplicate key as an error".
+- The "intended default behavior" comment in yamllint issue 666 came from a contributor, not the
+  maintainer.
+- yamllint's default config disables both `octal-values` and `float-values`.
+- Research YAML-6 turns on what the author meant and on a merge key only YAML 1.1 defines; research
+  YAML-7 rests on an option that is off by default. Both are Advisory candidates.
+- "Rare per file", and recurrence claimed from search snippets, are unmeasured.
+
+**Which YAML each consumer reads** (source code, vendor docs and local parses; GitHub's server-side
+parser is not public, so its row rests on the runner):
+
+| Consumer | Library | YAML | `no` → false | `0755` → 493 | `1:20` base 60 | `3.10` → 3.1 |
+|---|---|---|---|---|---|---|
+| GitHub Actions | YamlDotNet 5.3.0, typed by the runner's `YamlObjectReader` | 1.2 core | No | No (755) | No | Yes |
+| GitLab CI | Psych (`YAML.safe_load`) | 1.1 | Yes | Yes | Yes, as 4800 not 80 | Yes |
+| Compose v2 | compose-go v2.16.2 on go.yaml.in/yaml/v4 | 1.2 core | Only in a bool field, with a warning | Yes | No | Yes |
+| Kubernetes, Helm values | sigs.k8s.io/yaml v1.6.0 on yaml.v2 | 1.1 | Yes | Yes | No | Yes |
+| PyYAML (Ansible) | PyYAML | 1.1 | Yes (not `y`/`n`) | Yes | Yes | Yes |
+| ruamel.yaml | default mode | 1.2 | No | No (755) | No | Yes |
+| Go yaml.v3, v4 | — | 1.2 with 1.1 bools | Only into a typed `bool` | Yes | No | Yes |
+
+So `3.10` becomes 3.1 for every consumer, and a version-number row holds everywhere. An unquoted `no`
+is false for GitLab CI, Kubernetes, Helm values, PyYAML and yaml.v2, and a string for GitHub Actions.
+Feature D5 ("every YAML file") must scope its boolean and octal rows by the consumer that reads the
+file. Evidence: `actions/runner` `YamlObjectReader.cs`; `actions/setup-python` issue 249; GitLab
+`lib/gitlab/config/loader/yaml.rb` and its CI variables docs; `compose-spec/compose-go` v2.16.2
+`loader/`; `kubernetes-sigs/yaml` `yaml.go`; `helm/helm` `pkg/chart/common/values.go`; the PyYAML
+documentation; `go-yaml/yaml` v2 and v3 `resolve.go` and the v3 README.
+
+### Infrastructure as Code
+
+- Research IAC-4 asks for an upper bound on "tool or provider" versions. The sources bound providers
+  only, as research TF-6 and the Do-not-flag list already say. Drop "tool or".
+- The `terraform plan` page does use "drift", once, in its `-target` warning.
+- Research IAC-3, IAC-6, IAC-8 and IAC-9 rest on Google's page alone. IAC-1's remote-state half cites a
+  benefit, not a defect. IAC-7 cites pages that say nothing of reviewing a plan.
+- The Gang of Eight replication (I4) studied Pulumi and CDK repositories, not declarative tools.
+- **Sharma et al.'s smell names**, from the authors' InfoQ article (2016) and their tool's README, not
+  the paper:
+  - implementation smells: Missing Default Case, Inconsistent Naming Convention, Complex Expression,
+    Duplicate Entity, Misplaced Attribute, Improper Alignment, Invalid Property Value, Incomplete
+    Tasks, Deprecated Statement Usage, Improper Quote Usage, Long Statement, Incomplete Conditional,
+    Unguarded Variable;
+  - design smells: Multifaceted Abstraction, Unnecessary Abstraction, Imperative Abstraction, Missing
+    Abstraction, Insufficient Modularization, Duplicate Block, Broken Hierarchy, Unstructured Module,
+    Dense Structure, Deficient Encapsulation, Weakened Modularity.
+- Morris's third edition: O'Reilly's page refused the fetch (HTTP 403). A library catalogue and
+  retailers list it. The book remains unread.
+
+### Terraform
+
+- All twenty TFLint rules exist. The `recommended` preset holds thirteen, matching the index and
+  `preset.go`. No rule examines `count`.
+- The `terraform_required_version` page never calls `>= 1.0` compliant, and the output printed beneath
+  that example warns. The style guide, the Version Constraints page and AWS carry the point without it.
+- Research TF-1's hazard rests on Brikman alone; HashiCorp's pages state no removal hazard.
+- Research TF-13's hazard is provisional: Terraform's behaviour on a duplicate map key is unverified.
+- Research TF-7 rests on "we also recommend", and TF-12 is formatting. Both are Advisory candidates.
+- Research TF-15's secret `.tfvars` clause belongs to `security.md`.
+
+### Counts and metadata
+
+- The feature delta's measured counts (45, 56 of 63) came from a scratchpad script this document does
+  not record. Rerun them before a rule cites them.
+- Research Metadata lists five Crossref papers, not six, and the reputation tally recounts to 29 High,
+  15 Medium-High and 3 Medium.
+
+### What changed downstream
+
+- `rules/bash.md`: citations corrected; research SH-8 and SH-12's library clause moved to Advisory;
+  `local` in `sh` moved to Advisory; the Linter cells completed; the hazard test stated.
+- Slice 02 scopes its boolean and octal rows by consumer (D5). Slices 03 and 04 start from this
+  Addendum's IaC and Terraform corrections.

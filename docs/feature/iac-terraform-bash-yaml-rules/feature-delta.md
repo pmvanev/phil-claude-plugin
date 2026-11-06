@@ -90,10 +90,10 @@ not an attacker's foothold. A row that is also a security defect stays in `secur
 | D2 | **One card, four slices, one per rule.** | User decision, 2026-11-06. The card asked to split by language once sized. Sizing fired two oversized signals (four technologies; four independently shippable outcomes), and slicing answers both without new cards. |
 | D3 | **Each rule splits on checkability**: Principles, then Always-flag, Advisory and Do not flag. Rows carry the rule's own stable ids — `IAC-n`, `TF-n`, `SH-n`, `YAML-n` — with the linter rule or source section beside them as the citation (`SC2086`, `terraform_deprecated_index`, `yamllint truthy`). A retired id is never reused. | `security.md` D3 and `ci-pipelines.md` D4. The card asks for an Always-flag table "as `ci-pipelines.md` has", and a fixture must cite a row, which needs an id that names one fix. |
 | D4 | **`review-code` files these at Priority 7 by row id, and promotes a row the rule marks *hazard* to Priority 1.** The fix is the row's Preferred form verbatim, then ` — here: ` and this file's one change, as **Security** and **Load time** do. A hazard is a row whose miss changes behaviour: an unquoted expansion, a lost pipe failure, a YAML scalar typed as something its author did not write. | Priority 7 is where idiom lives today; the existing promotion rule ("genuine correctness hazards … to Priority 1") already covers a mutable default argument. The verbatim-prefix form made security fixtures gradeable (security-standards-rule, 1.2.5). |
-| D5 | **The YAML rule checks the language in every YAML file**: CI, compose, Helm values and config included. It checks implicit typing, anchors and merge keys, duplicate keys, schema and the linter. **Ownership:** `ci-pipelines.md` keeps what a pipeline does, `iac.md` and `terraform.md` what infrastructure does, `security.md` unsafe loading (CWE-502). The review files a defect that two rules describe once, under the most specific owner. | User decision, 2026-11-06. A value YAML turns into `true`, `false` or a number is a language defect wherever it sits, and the pipeline rule checks no typing. |
+| D5 | **The YAML rule checks the language in every YAML file**: CI, compose, Helm values and config included. It checks implicit typing, anchors and merge keys, duplicate keys, schema and the linter. **Ownership:** `ci-pipelines.md` keeps what a pipeline does, `iac.md` and `terraform.md` what infrastructure does, `security.md` unsafe loading (CWE-502). The review files a defect that two rules describe once, under the most specific owner. | User decision, 2026-11-06. A value YAML turns into `true`, `false` or a number is a language defect wherever it sits, and the pipeline rule checks no typing. **Scope revised by the evidence check:** `3.10` becomes 3.1 for every consumer, but an unquoted `no` is false only for GitLab CI, Kubernetes, Helm values, PyYAML and Go yaml.v2, and a string for GitHub Actions. Slice 02 scopes its boolean and octal rows by the consumer that reads the file (research Addendum). |
 | D6 | **A Helm template is not YAML.** `templates/*.yaml` under a chart is a Go template, outside every row here. | No YAML parser reads it before rendering, so no YAML row can judge it. |
 | D7 | **A key the consuming tool documents is Do not flag**: GitHub Actions' `on:` is the one with evidence. Any other needs its tool's own source before the rule names it. | Measured at `.github/workflows/ci.yml:8`. yamllint flags it by default, and its maintainer calls that intended. Flagging it would teach the reader to skip the YAML tier. *Narrowed by research.* |
-| D8 | **The Bash rule judges a script by its shebang.** `#!/bin/sh` is POSIX: no demand for `pipefail`, `[[ ]]` or `local`. An executable file with no shebang is a finding, and so is a `.sh` file with neither a shebang nor a `# shellcheck shell=` directive; a sourced library with the directive is not. | `scripts/ci/run.sh` is deliberate POSIX `sh` with `set -eu`; a Bash-only row there would be a false alarm on this repo's own entry point. `pipefail` entered POSIX in 2024, but dash and macOS `sh` lagged, so the `pipefail` half rests on portability. Google: a library "must have a `.sh` extension and should not be executable". *Refined by research.* |
+| D8 | **The Bash rule judges a script by its shebang.** `#!/bin/sh` is POSIX: no demand for `pipefail`, `[[ ]]` or `local`. An executable file with no shebang is a finding. A `.sh` library with neither a shebang nor a `# shellcheck shell=` directive is Advisory, and one with the directive is not flagged. | `scripts/ci/run.sh` is deliberate POSIX `sh` with `set -eu`; a Bash-only row there would be a false alarm on this repo's own entry point. `pipefail` entered POSIX in 2024, but dash and macOS `sh` lagged, so the `pipefail` half rests on portability. Google: a library "must have a `.sh` extension and should not be executable". *Refined by research; the library clause made Advisory by the evidence check.* |
 | D9 | **`bash.md` matches `.sh` and `.bash`, and an extensionless file whose first line names `sh` or `bash`.** | Google: "Executables should have a `.sh` extension or no extension." ShellCheck judges the dialect by directive, then shebang, then extension, and `.sh` is not among its extensions, so the shebang decides. *Rationale corrected by research.* |
 | D10 | **"Rewrite it in Python" is Advisory, never Always-flag.** The rule states Google's threshold, verified: "more than 100 lines long, or that uses non-straightforward control flow logic". Arrays of records and parsing JSON are this feature's signals, not Google's. | Scripts of 934, 1,090 and 1,958 lines exist and work. Length is a judgement the author makes, not a defect on a line. |
 | D11 | **`count` over a collection whose body indexes it by `count.index` is Always-flag; `count = cond ? N : 0` and `count = N` over identical instances are Do not flag.** | Measured: four `count = length(…)` sites, 78 toggles. Removing an element from the middle of a list destroys and recreates every resource after it (Brikman; HashiCorp). No tflint rule covers it. *Trigger sharpened by research.* |
@@ -284,12 +284,30 @@ Order: the research precursor, then slices 01 to 04.
 
 This answers the card's open questions: D5 settles where YAML stops, and D2 keeps one card.
 
+**Before each slice, check its evidence** (developer's decision, 2026-11-06, after slice 01 shipped on
+research one agent wrote and nobody checked). Before writing a rule:
+
+1. Have the research-reviewer agent judge the slice's research section: does each candidate row's cited
+   Evidence support it, and which rows rest on one source or on interpretation.
+2. Have a web-capable agent fetch each source a row rests on, and mark each quote and linter id
+   verified, paraphrased, not found or contradicted. The research reviewer cannot fetch pages.
+3. Settle the slice's open gaps that decide a tier, each in a short pass of its own:
+   - YAML: which YAML each consumer parses, and how often the defect occurs.
+   - IaC: Morris's *Infrastructure as Code*, and the names in Sharma's configuration-smell catalogue.
+   - Terraform: which TFLint rules the `recommended` preset enables.
+4. Fold every correction into the research document, dated, before the rule cites it.
+
+The 2026-11-06 run covered the whole document and serves slice 02. Slices 03 and 04 rerun steps 1 to 3
+over their own sections. Slice 01 shipped before this step existed; the same run checks its sources
+after the fact.
+
 ## Wave: DISCUSS / [REF] Slice 01 delivered (2026-11-06)
 
-**What landed.** `rules/bash.md`: five Principles; twelve Always-flag rows (SH-1 to SH-12), seven of
-them hazards; seven Advisory bullets; a Do-not-flag list. `review-code` matches `.sh`, `.bash` and sh or
+**What landed.** `rules/bash.md`: five Principles; eleven Always-flag rows (SH-1 to SH-11), nine of
+them hazards; eleven Advisory bullets; a Do-not-flag list. These are the counts after the evidence check
+below. `review-code` matches `.sh`, `.bash` and sh or
 bash shebangs, and files a row that has an id at Priority 7, or at Priority 1 where its Hazard column
-reads `hazard`. That paragraph serves any language rule with row ids, so slices 02 to 04 reuse it. Fixture 10 seeds eleven defects and four decoys. Version 1.34.0.
+reads `hazard`. That paragraph serves any language rule with row ids, so slices 02 to 04 reuse it. Fixture 10 seeds nine defects and four decoys. Version 1.34.0.
 
 **Fixture run.** A fresh agent drove this working tree's `SKILL.md` by hand over fixture 10, before
 SH-12 was seeded. It filed all ten items then expected, with the right rows, priorities and fixes, and
@@ -319,3 +337,17 @@ both are fixed.
   signal that makes a script a program; the run found it weak on five linear scripts.
 
 The full record stays outside the repo, because it names lines in private projects.
+
+**Evidence check (2026-11-06, after the commit).** The developer asked for an independent check of the
+research. A reviewer found 17 of its 42 candidate rows over-reaching, and live fetches confirmed 63 of
+70 Bash claims. It changed the shipped rule:
+
+- The temp-file trap row and the no-directive library clause moved to Advisory: no source names either
+  as a defect.
+- `local` in `sh` moved to Advisory: dash, BusyBox ash and ksh run it.
+- Two citations were wrong (Google has no "Pipes" section; POSIX puts `local` in § 2.9.1.4).
+- Linter cells gained SC2044, SC2206 and SC2292.
+- The rule now states its hazard and idiom tests, and the ids were renumbered to run without a gap,
+  since none has shipped.
+
+Fixture 10 now expects nine items; the two former rows may come back as Advisory questions.

@@ -29,6 +29,11 @@ shrinks to Principles plus the rows that survive.
 ## Acceptance criteria
 See US-03 in `feature-delta.md`.
 
+## Before this slice
+Run the evidence check in `feature-delta.md` § Handoff over the IaC section: the research reviewer, a
+fresh fetch of every source a row rests on, and a pass on Morris's book and Sharma's smell names. Fold
+the corrections into the research document before writing `iac.md`.
+
 ## Dependencies
 - Research precursor, IaC section.
 
