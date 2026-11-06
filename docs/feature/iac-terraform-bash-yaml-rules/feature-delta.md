@@ -98,7 +98,7 @@ not an attacker's foothold. A row that is also a security defect stays in `secur
 | D10 | **"Rewrite it in Python" is Advisory, never Always-flag.** The rule states Google's threshold, verified: "more than 100 lines long, or that uses non-straightforward control flow logic". Arrays of records and parsing JSON are this feature's signals, not Google's. | Scripts of 934, 1,090 and 1,958 lines exist and work. Length is a judgement the author makes, not a defect on a line. |
 | D11 | **`count` over a collection whose body indexes it by `count.index` is Always-flag; `count = cond ? N : 0` and `count = N` over identical instances are Do not flag.** | Measured: four `count = length(…)` sites, 78 toggles. Removing an element from the middle of a list destroys and recreates every resource after it (Brikman; HashiCorp). No tflint rule covers it. *Trigger sharpened by research.* |
 | D12 | **Complement, do not restate.** `iac.md` states the tool-agnostic form once; `terraform.md` gives the Terraform form and points to it. `continuous-delivery.md` keeps its four bullets and points to `iac.md`. `security.md` keeps secrets in code and state (CWE-798, CWE-312) and shell injection (CWE-78). `ci-runners.md` and `lambda-web-app-speed.md` keep their Terraform reads. | `security.md` D8; the ownership-paragraph pattern every newer rule follows. |
-| D13 | **Each row cites the linter that catches it, and the rule never requires running one.** The review reads; where the project's linter config enables *that row's* rule and its CI runs the linter, the row is Do not flag. Defaults differ: yamllint disables `octal-values`, and ShellCheck's `require-double-brackets` is opt-in. *Condition added by research.* A project that lints none of these files gets one Advisory per language. | `review-code` judges by reading. A repo whose CI runs ShellCheck gains nothing from a review that restates it. |
+| D13 | **Each row cites the linter that catches it, and the rule never requires running one.** The review reads; where the project's linter config enables *that row's* rule at a severity its CI reports, the row is Do not flag. Defaults differ: yamllint disables `octal-values`, and ShellCheck's `require-double-brackets` is opt-in. *Condition added by research; severity added by slice 01's dogfood.* A project that lints none of these files gets one Advisory per language. | `review-code` judges by reading. A repo whose CI runs ShellCheck gains nothing from a review that restates it. |
 | D14 | **`paths:` frontmatter mirrors each rule's globs.** | `security.md` D12. Takes effect only for a consumer who copies the rule. |
 
 ## Wave: DISCUSS / [REF] Driving ports
@@ -283,3 +283,39 @@ Order: the research precursor, then slices 01 to 04.
 - **IaC precedes Terraform**, because `terraform.md` points to it.
 
 This answers the card's open questions: D5 settles where YAML stops, and D2 keeps one card.
+
+## Wave: DISCUSS / [REF] Slice 01 delivered (2026-11-06)
+
+**What landed.** `rules/bash.md`: five Principles; twelve Always-flag rows (SH-1 to SH-12), seven of
+them hazards; seven Advisory bullets; a Do-not-flag list. `review-code` matches `.sh`, `.bash` and sh or
+bash shebangs, and files a row that has an id at Priority 7, or at Priority 1 where its Hazard column
+reads `hazard`. That paragraph serves any language rule with row ids, so slices 02 to 04 reuse it. Fixture 10 seeds eleven defects and four decoys. Version 1.34.0.
+
+**Fixture run.** A fresh agent drove this working tree's `SKILL.md` by hand over fixture 10, before
+SH-12 was seeded. It filed all ten items then expected, with the right rows, priorities and fixes, and
+no decoy. It also found a Priority 6 item in the fixture's own test and a bug in its CI entry point;
+both are fixed.
+
+**Dogfood.** The same prose, driven by hand over 15 scripts in five sibling repos, with ShellCheck
+0.11.0 at `-S warning` beside it:
+
+- 42 findings, 30 of which ShellCheck missed. The rows whose Linter cell reads none produced 14 of
+  those. The learning hypothesis held: the rule adds defects a linter misses.
+- Five false positives: two unquoted constants, one deliberate `$(seq …)` split, and two temp files the
+  code already handled.
+- One defect no row covered: under `errexit`, a health check that returned 1 ended the script at the
+  first failing service. ShellCheck stayed silent.
+
+**What the dogfood changed in the rule:**
+
+- SH-12 is new: under `errexit`, a check that reports a result through its status must be called in a
+  condition.
+- A sourced file is judged under its caller's options.
+- A linter stands a row down only at the severity CI reports. SC2086 is `info`, so
+  `shellcheck -S warning` never reports it.
+- The Preferred forms of SH-2, SH-4 and SH-8 now say where they misfire: `grep` matching nothing, an
+  array in POSIX `sh`, an EXIT trap in a sourced file.
+- Four Do-not-flag cases and two Advisory bullets are added. The length Advisory now leads with the
+  signal that makes a script a program; the run found it weak on five linear scripts.
+
+The full record stays outside the repo, because it names lines in private projects.
