@@ -50,3 +50,13 @@ vocabulary:
 #   vocabulary: cold start, INIT, REPORT line, first invoke, TTFB, LCP, provisioned concurrency,
 #     SnapStart, heartbeat, bytecode, immutable, ETag, code splitting, bundle budget,
 #     stale-while-revalidate
+
+# Infrastructure-and-scripts facet (DISCUSS, feature iac-terraform-bash-yaml-rules, 2026-11-06):
+# Quinn reviews the Terraform, deploy scripts and YAML that ship beside the code. Job:
+# catch-infrastructure-and-script-defects-in-review.
+#   goal: a review that names each Terraform, shell or YAML defect by row and fix, and leaves the
+#     deliberate POSIX script, the 0/1 count toggle and the parser-defined key alone
+#   frustration: review-code checks idiom in four languages; these get only security rows, so a silent
+#     pipe failure or a position-indexed resource passes without a word
+#   vocabulary: state, lock, drift, plan, for_each, count, required_version, tflint, strict mode,
+#     pipefail, quoting, trap, ShellCheck, POSIX sh, implicit typing, anchor, merge key, yamllint

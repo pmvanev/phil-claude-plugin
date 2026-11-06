@@ -1344,3 +1344,46 @@ jobs:
     features: [autopilot]
     # Not a facet of pick-up-the-next-card or put-finished-work-down: those begin and end the work;
     # this one carries it between them, composing both.
+
+  - id: catch-infrastructure-and-script-defects-in-review
+    # Registered by DISCUSS wave, feature: iac-terraform-bash-yaml-rules (2026-11-06, issue 79)
+    job_story: >
+      When I review a change to Terraform, a shell script or a YAML file, I want its defects named by
+      row and fix, as a Python or TypeScript change already gets, so the review, not a failed apply,
+      a silent pipe failure or a `no` read as `false`, is where I learn of them.
+    dimensions:
+      functional: >
+        Name each infrastructure, shell or YAML defect in a diff by its rule's row id with the preferred
+        form; promote a defect that changes behaviour to Priority 1; leave a deliberate POSIX script,
+        a 0/1 `count` toggle or a parser-defined key alone; raise "this script should be Python" as a
+        question, not a defect.
+      emotional: >
+        Confidence that a deploy script or a module passed review because it was read against a
+        standard, not because nobody had one.
+      social: >
+        Infrastructure teammates can change without reading every line twice; not being the reviewer
+        whose approval let a silent pipe failure reach production.
+    four_forces:
+      push: >
+        Measured 2026-11-06: review-code checks idiom in C++, Python, TypeScript and React only. Of 238
+        sibling-repo shell scripts, 107 never set -e and 82 never set pipefail, which ShellCheck does not
+        flag; four Terraform sites index resources by position with count = length(...); every one of
+        45 required_version constraints bounds the CLI only from below.
+      pull: >
+        The same row-by-row help security.md and ci-pipelines.md give, for the languages infrastructure
+        and scripts are written in.
+      anxiety: >
+        (A) A rule that restates a linter the project already runs. (B) Bash rows that false-flag a
+        deliberate POSIX script. (C) A YAML tier that flags GitHub's on: key and trains the reader to
+        skip it. (D) Two rules filing one defect twice.
+      habit: >
+        Trusting ShellCheck or terraform validate as the whole review; learning a script's failure mode
+        from a broken deploy.
+    opportunity_score: >
+      high importance, near-zero satisfaction — no rule a reviewer can check covers these languages.
+    status: validated
+    personas: [quinn-codebase-steward]
+    features: [iac-terraform-bash-yaml-rules]
+    # Not a facet of catch-security-defects-in-review: a miss costs a broken deploy or a wrong value,
+    # not an attacker's foothold; a row that is also a security defect stays in security.md.
+    # See docs/feature/iac-terraform-bash-yaml-rules/feature-delta.md.
