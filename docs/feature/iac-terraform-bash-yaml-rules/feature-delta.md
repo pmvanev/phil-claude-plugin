@@ -33,14 +33,15 @@ Measured 2026-11-06 against `main` at `8436226`, and over the sibling repos in `
   - This repo's 19 scripts are ShellCheck-clean. `scripts/ci/run.sh` is deliberate POSIX `sh` with
     `set -eu`, a case a Bash rule must not flag.
 - **Terraform.**
-  - Of 63 directories holding `*.tf`, 56 hold a `.terraform.lock.hcl`. Only a root module needs one,
-    and nobody has yet sorted the other seven into root and child modules.
+  - Of 63 directories holding `*.tf`, 56 hold a `.terraform.lock.hcl`. Only a root module needs one;
+    in a child module it is harmless and unread, so only a root without one is a finding (research §4.3).
   - `count = length(…)` indexes resources by position at four sites:
     - `modive/infra/bootstrap/main.tf:131` and `:149`
     - `beatrix/infra/terraform/modules/vpc/main.tf:74` and `:98`
   - `count = var.x ? 1 : 0`, the accepted toggle, appears at 78 sites.
-  - All 45 `required_version` constraints bound the CLI only from below (`>= 1.0` to `>= 1.11`). The
-    sampled root modules pin providers with `~>`.
+  - All 45 `required_version` constraints bound the CLI only from below (`>= 1.0` to `>= 1.11`), which
+    is HashiCorp's documented practice, not a defect (research §4.2). The sampled root modules pin
+    providers with `~>`.
 - **YAML.** A scan for unquoted `yes`, `no`, `on`, `off`, leading-zero octals and bare `X.Y` versions
   found no defect in the sibling repos. Its one hit is GitHub Actions' `on:` key at
   `.github/workflows/ci.yml:8`, which YAML 1.1 reads as `true` and GitHub's parser reads as a key. The
@@ -48,9 +49,9 @@ Measured 2026-11-06 against `main` at `8436226`, and over the sibling repos in `
 
 ## Wave: DISCUSS / [REF] Pre-requisites
 
-- **Research precursor (D1), not done.** One document,
-  `docs/research/iac/iac-terraform-bash-yaml-canonical-sources.md`, with a section per rule. It lands as
-  a precursor commit before slice 01, `@infrastructure`.
+- **Research precursor (D1), done 2026-11-06.** One document,
+  `docs/research/iac/iac-terraform-bash-yaml-canonical-sources.md`, 47 sources, with a section per rule.
+  It refined D7 to D11 and D13; each row below names what changed.
 - **Production data, on this machine:**
   - shell: the 238 sibling scripts, plus this repo's 19;
   - Terraform: `modive/infra`, `infrastructure/demo-platform`, `beatrix/infra/terraform` and
@@ -91,13 +92,13 @@ not an attacker's foothold. A row that is also a security defect stays in `secur
 | D4 | **`review-code` files these at Priority 7 by row id, and promotes a row the rule marks *hazard* to Priority 1.** The fix is the row's Preferred form verbatim, then ` — here: ` and this file's one change, as **Security** and **Load time** do. A hazard is a row whose miss changes behaviour: an unquoted expansion, a lost pipe failure, a YAML scalar typed as something its author did not write. | Priority 7 is where idiom lives today; the existing promotion rule ("genuine correctness hazards … to Priority 1") already covers a mutable default argument. The verbatim-prefix form made security fixtures gradeable (security-standards-rule, 1.2.5). |
 | D5 | **The YAML rule checks the language in every YAML file**: CI, compose, Helm values and config included. It checks implicit typing, anchors and merge keys, duplicate keys, schema and the linter. **Ownership:** `ci-pipelines.md` keeps what a pipeline does, `iac.md` and `terraform.md` what infrastructure does, `security.md` unsafe loading (CWE-502). The review files a defect that two rules describe once, under the most specific owner. | User decision, 2026-11-06. A value YAML turns into `true`, `false` or a number is a language defect wherever it sits, and the pipeline rule checks no typing. |
 | D6 | **A Helm template is not YAML.** `templates/*.yaml` under a chart is a Go template, outside every row here. | No YAML parser reads it before rendering, so no YAML row can judge it. |
-| D7 | **A parser that defines its own reading is Do not flag**: GitHub Actions' `on:` key, and any key the consuming tool documents as a string. | Measured at `.github/workflows/ci.yml:8`. Flagging it would teach the reader to skip the YAML tier. |
-| D8 | **The Bash rule judges a script by its shebang.** `#!/bin/sh` is POSIX: no demand for `pipefail`, `[[ ]]` or `local`. A `.sh` file with no shebang is a finding of its own. | `scripts/ci/run.sh` is deliberate POSIX `sh` with `set -eu`; a Bash-only row there would be a false alarm on this repo's own entry point. |
-| D9 | **`bash.md` matches `.sh` and `.bash`, and an extensionless file whose first line names `sh` or `bash`.** | ShellCheck's own detection. Many entry scripts carry no extension. |
-| D10 | **"Rewrite it in Python" is Advisory, never Always-flag.** The rule states the threshold its research settles on (the Google guide's 100 lines, unverified) and the signals: arrays of records, parsing JSON, non-trivial control flow. | Scripts of 934, 1,090 and 1,958 lines exist and work. Length is a judgement the author makes, not a defect on a line. |
-| D11 | **`count` over a collection is Always-flag; `count` as a 0/1 toggle is Do not flag.** | Measured: four `count = length(…)` sites, 78 toggles. Removing an element from the middle of a list destroys and recreates every resource after it. |
+| D7 | **A key the consuming tool documents is Do not flag**: GitHub Actions' `on:` is the one with evidence. Any other needs its tool's own source before the rule names it. | Measured at `.github/workflows/ci.yml:8`. yamllint flags it by default, and its maintainer calls that intended. Flagging it would teach the reader to skip the YAML tier. *Narrowed by research.* |
+| D8 | **The Bash rule judges a script by its shebang.** `#!/bin/sh` is POSIX: no demand for `pipefail`, `[[ ]]` or `local`. An executable file with no shebang is a finding, and so is a `.sh` file with neither a shebang nor a `# shellcheck shell=` directive; a sourced library with the directive is not. | `scripts/ci/run.sh` is deliberate POSIX `sh` with `set -eu`; a Bash-only row there would be a false alarm on this repo's own entry point. `pipefail` entered POSIX in 2024, but dash and macOS `sh` lagged, so the `pipefail` half rests on portability. Google: a library "must have a `.sh` extension and should not be executable". *Refined by research.* |
+| D9 | **`bash.md` matches `.sh` and `.bash`, and an extensionless file whose first line names `sh` or `bash`.** | Google: "Executables should have a `.sh` extension or no extension." ShellCheck judges the dialect by directive, then shebang, then extension, and `.sh` is not among its extensions, so the shebang decides. *Rationale corrected by research.* |
+| D10 | **"Rewrite it in Python" is Advisory, never Always-flag.** The rule states Google's threshold, verified: "more than 100 lines long, or that uses non-straightforward control flow logic". Arrays of records and parsing JSON are this feature's signals, not Google's. | Scripts of 934, 1,090 and 1,958 lines exist and work. Length is a judgement the author makes, not a defect on a line. |
+| D11 | **`count` over a collection whose body indexes it by `count.index` is Always-flag; `count = cond ? N : 0` and `count = N` over identical instances are Do not flag.** | Measured: four `count = length(…)` sites, 78 toggles. Removing an element from the middle of a list destroys and recreates every resource after it (Brikman; HashiCorp). No tflint rule covers it. *Trigger sharpened by research.* |
 | D12 | **Complement, do not restate.** `iac.md` states the tool-agnostic form once; `terraform.md` gives the Terraform form and points to it. `continuous-delivery.md` keeps its four bullets and points to `iac.md`. `security.md` keeps secrets in code and state (CWE-798, CWE-312) and shell injection (CWE-78). `ci-runners.md` and `lambda-web-app-speed.md` keep their Terraform reads. | `security.md` D8; the ownership-paragraph pattern every newer rule follows. |
-| D13 | **Each row cites the linter that catches it, and the rule never requires running one.** The review reads; where the project's CI already runs the linter, the rule says so in its Do not flag. A project that lints none of these files gets one Advisory per language. | `review-code` judges by reading. A repo whose CI runs ShellCheck gains nothing from a review that restates it. |
+| D13 | **Each row cites the linter that catches it, and the rule never requires running one.** The review reads; where the project's linter config enables *that row's* rule and its CI runs the linter, the row is Do not flag. Defaults differ: yamllint disables `octal-values`, and ShellCheck's `require-double-brackets` is opt-in. *Condition added by research.* A project that lints none of these files gets one Advisory per language. | `review-code` judges by reading. A repo whose CI runs ShellCheck gains nothing from a review that restates it. |
 | D14 | **`paths:` frontmatter mirrors each rule's globs.** | `security.md` D12. Takes effect only for a consumer who copies the rule. |
 
 ## Wave: DISCUSS / [REF] Driving ports
@@ -136,8 +137,9 @@ After: run `/phil:review-code scripts/` → sees `Priority 1 — SH-n: pipeline 
 Decision enabled: which script defects to fix before the change merges, and which scripts should stop being shell.
 
 #### Acceptance Criteria
-- [ ] `rules/bash.md` holds an Always-flag table covering at least strict mode, quoting, `[[ ]]`,
-      `local`, `trap` cleanup and the masked exit status. Each row carries an `SH-n` id, a Preferred
+- [ ] `rules/bash.md` holds an Always-flag table covering at least an unchecked failure, a pipeline
+      that loses its left-hand status, quoting, `[[ ]]`, `local`, `trap` cleanup and the masked exit
+      status. A script is never flagged merely for lacking `set -e` (research, Conflict B-1). Each row carries an `SH-n` id, a Preferred
       form and its ShellCheck code where one exists.
 - [ ] Its Do not flag list holds at least a POSIX `sh` script's omissions (D8) and a variable ShellCheck
       calls unused that a sourcing script reads.
@@ -208,7 +210,8 @@ Decision enabled: whether to migrate the resource to `for_each` (with `moved` bl
 #### Acceptance Criteria
 - [ ] `rules/terraform.md` holds Always-flag rows for the card's *Covers* list. Each row carries a `TF-n`
       id and its `tflint` rule where one exists.
-- [ ] Do not flag holds the 0/1 `count` toggle (D11) and a lockfile's absence in a non-root module.
+- [ ] Do not flag holds the 0/1 `count` toggle (D11), a lockfile's absence in a non-root module, and a
+      lower-bound-only `required_version`.
 - [ ] A fixture seeds at least four violations and two decoys.
 - [ ] A dogfood run over `modive/infra` and `beatrix/infra/terraform` is recorded, and it names the
       four measured `count = length(…)` sites.

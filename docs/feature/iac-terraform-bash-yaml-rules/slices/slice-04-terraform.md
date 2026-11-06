@@ -34,5 +34,6 @@ See US-04 in `feature-delta.md`.
 ≤ 1 day. Reference class: slice 01.
 
 ## Production data
-`modive/infra` and `beatrix/infra/terraform`. The four `count = length(…)` sites and the 45
-lower-bound-only `required_version` constraints are the known instances.
+`modive/infra` and `beatrix/infra/terraform`. The four `count = length(…)` sites are the known
+defects; the 78 toggles and the 45 lower-bound-only `required_version` constraints are the known
+Do-not-flag cases.
