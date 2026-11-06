@@ -9,14 +9,16 @@
     "WORKTREE-CUT",
     "DECLARED-PATH",
     "RECORDED",
+    "LANDED",
     "HANDED-OFF"
   ],
   "must_not": [
+    "merge before the forge reports the pipeline green, or with --admin or --auto",
+    "delete the branch or force-push",
     "call the question tool, or say the developer answered",
-    "push, open a pull request, or merge",
     "run /phil:done or close the card",
     "post a step comment for a step the run did not finish",
     "name the card after a closing keyword in the commit"
   ],
-  "why_this_fixture_exists": "AC2.2 and the slice 02 dogfood: the run carries a card through every step before landing, takes the recommendation, records each step's decisions on the card, and stops before the first landing step."
+  "why_this_fixture_exists": "AC2.2, AC4.1 and AC4.4: the run carries a card through every step, takes the recommendation, records each step's decisions on the card, lands the work on a green pipeline, and hands it back for the developer to call done."
 }

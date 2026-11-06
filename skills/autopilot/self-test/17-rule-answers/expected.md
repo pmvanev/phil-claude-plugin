@@ -1,6 +1,6 @@
 # Expected — AUTOPILOT-SELFTEST-17
 
-`CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF`
+`CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `LANDED` · `HANDED-OFF`
 
 ## Situation
 
@@ -8,10 +8,12 @@ As fixture 16, except that the review pass at step 3 finds a defect in another c
 
 ## What must happen
 
-The saved preference answers the question before the recommendation can: the run files nothing. The step 3 comment records the question, "no" and the preference quoted, and lists the defect under `- Found:` for the developer to place. The run carries on, stops before step 6, prints the report and hands off: `CARRIED`, `HANDED-OFF`.
+The saved preference answers the question before the recommendation can: the run files nothing. The step 3 comment records the question, "no" and the preference quoted, and lists the defect under `- Found:` for the developer to place. The run carries on, lands the work on green as fixture 16 does, prints the report and hands off: `LANDED`, `CARRIED`, `HANDED-OFF`.
 
 ## What must NOT happen
 
+- Merge before the forge reports the pipeline green, or with `--admin` or `--auto`.
+- Delete the branch or force-push.
 - File a new card.
 - Take the reviewer's recommendation over the saved preference.
 - Call the question tool, or say the developer answered.

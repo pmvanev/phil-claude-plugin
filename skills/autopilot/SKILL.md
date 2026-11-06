@@ -3,18 +3,18 @@ name: autopilot
 description: >-
   This skill should be used when the user runs /phil:autopilot, or asks to "carry card N hands-off",
   "run card N on autopilot", "autopilot card N" or "take this card through the build path", on GitHub
-  or GitLab. It claims the card, reads and records the repo's build path, and runs each step up to the
-  first push, pull or merge request, or merge, deciding questions by rule or recommendation and
-  stopping only for a blocker, which it hands off. --plan stops before the first step. Not for choosing
-  a card, and never for calling one done.
+  or GitLab. It claims the card, reads and records the repo's build path, runs each step, and lands the
+  work — push, pull or merge request, merge on a green pipeline — deciding questions by rule or
+  recommendation and stopping only for a blocker, which it hands off. --plan stops before the first
+  step. Not for choosing a card, and never for calling one done.
 ---
 
 # Autopilot — carry a card through its repo's build path
 
 `/phil:start` picks a card up and `/phil:done` puts one down. Autopilot carries a card between them
 without the developer at every gate. It claims the card, reads the build path the repo records, prints
-and records the reading, and runs the steps, stopping for a blocker the developer must clear. This
-release lands nothing: it stops before the first push, pull or merge request, or merge.
+and records the reading, runs the steps and lands the work on a green pipeline, stopping for a blocker
+the developer must clear. It never calls the work done: the developer inspects it and runs `/phil:done`.
 
 **Running `/phil:autopilot` is the developer's yes to the claim, the worktree, the comments on the card
 and the steps the path names.** Loaded any other way — from a question about which path autopilot
@@ -133,6 +133,7 @@ next step. Print it before the handoff, which is the run's last act. Record line
 RECORDED: the path comment on the card — read back
 ALREADY-RECORDED: the card's latest path comment holds this path — nothing posted
 RECORD-FAILED: <the error> — nothing posted  |  <the error> — posted once, not found on read-back
+LANDED: pull request 112 merged on a green pipeline; main green on 9e1f910
 ```
 
 A fallback names its rule on the PATH line:
@@ -151,8 +152,7 @@ Report exactly one terminal outcome, every run: `PLANNED` · `CARRIED` · `BLOCK
 
 - **`PLANNED`** — the run printed and recorded the path and ran no step: `--plan`, a failed claim or
   worktree, or a card underway with no worktree here.
-- **`CARRIED`** — the run stopped at a landing step, a `(yours)` step or the path's end, whether or not
-  it ran a step.
+- **`CARRIED`** — the run stopped at a `(yours)` step or the path's end, whether or not it ran a step.
 - **`BLOCKED`** — a question, a check or a permission needs the developer; the run posted the blocker
   comment, or says the post failed.
 - **`STOPPED`** — the developer stopped at one of `/phil:start`'s asks.
@@ -168,7 +168,8 @@ Report these alongside, each only when it fires:
   nothing posted) · `RECORD-FAILED` · `DONE-IS-YOURS` (a step closes the card or calls it done; printed
   as the developer's, authorized for no one) · `UNDERWAY` (the card had a worktree, an open pull or
   merge request, or a surviving branch) · `RESUMED` (step comments moved the start past what the disk
-  shows) · `HANDED-OFF` (`/phil:handoff` wrote its snapshot) · `WROTE-NOTHING` (no write call, as
+  shows) · `LANDED` (the request merged on a green pipeline, and the default branch read green after) ·
+  `HANDED-OFF` (`/phil:handoff` wrote its snapshot) · `WROTE-NOTHING` (no write call, as
   `/phil:start` counts them: a claim write, a fetch, a cut worktree, a comment or note, or any write a
   step made is a write; entering a worktree is not).
 - Carried from `/phil:start`: `PICKED` · `ANOTHERS-CARD` · `OPEN-IN-DONE` · `CLAIMED` · `NO-BOARD-BLOCK`
@@ -177,11 +178,12 @@ Report these alongside, each only when it fires:
 
 ## Invariants
 
-- **Stop before the first landing step**: this release pushes nothing, opens no pull or merge request,
-  and merges nothing.
-- **Write on the forge, in autopilot's own calls, only the claim and the comments**: `/phil:start`'s
-  writes, and `gh issue comment` or `glab issue note`. File no card, and edit no card's body. A launched
-  skill, agent or `/phil:handoff` writes under its own rules.
+- **Land only on green**: push without force, name the card in the request without a closing keyword,
+  merge only on a pipeline the forge reports green, with the head commit matched, and delete no branch.
+- **Write on the forge, in autopilot's own calls, only the claim, the comments and the landing**:
+  `/phil:start`'s writes, `gh issue comment` or `glab issue note`, and the push, the request and the
+  merge. File no card, and edit no card's body. A launched skill, agent or `/phil:handoff` writes under
+  its own rules.
 - **Leave done to the developer**: run no `/phil:done`, close no card, authorize no close.
 - **Send only `query` documents through `gh api graphql`, and only GETs through `glab api`.**
 - **Answer no question as the developer**: the run calls no question tool once RUN begins, and records

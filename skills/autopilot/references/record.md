@@ -35,7 +35,8 @@ Starting the run authorizes: push (step 6), pull request (step 6), merge once it
 
 **A step comment** quotes the step's source line on its second line, so a later run can tell the step
 is the same one. Then it lists the step's decisions, one line each — the question, the option taken,
-and its source — and any work found beyond the card. A step that raised no question says so.
+and its source — and any work found beyond the card. A step that raised no question says so. A
+landing step's comment also names the pull or merge request and its pipeline's result, fixes included.
 
 ```
 **Autopilot · step 2 of 7** — author after plugin-dev — done

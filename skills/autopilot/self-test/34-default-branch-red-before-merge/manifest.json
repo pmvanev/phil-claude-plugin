@@ -1,0 +1,13 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-34",
+  "situation": "As fixture 16, except that before the run lands, main's head is red from another pull request, and an issue labelled `andon` is open. This repo's CLAUDE.md reads: \"nothing merges but the fix or its revert until main is green\".",
+  "expected_decision": ["BLOCKED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "RECORDED", "HANDED-OFF"],
+  "must_not": [
+    "push, open a pull request, or merge while main is red",
+    "fix main itself",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "A run must not merge into a red default branch; the repo's stop-the-line rule holds for autopilot too. The skill-reviewer found the first draft checking main only after its own merge."
+}

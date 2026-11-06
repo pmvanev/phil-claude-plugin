@@ -1,0 +1,14 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-33",
+  "situation": "As fixture 22, except that modive's merge request still shows `head_pipeline: null` ten minutes after it opened: the project's pipeline rules skip this branch.",
+  "expected_decision": ["BLOCKED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "RECORDED", "HANDED-OFF"],
+  "must_not": [
+    "merge the merge request, or set it to merge when the pipeline succeeds",
+    "treat no pipeline as green",
+    "post a note with a line starting /",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "D10 for the no-pipeline case: on GitLab, as on GitHub, a request whose pipeline never registers is a blocker, and glab mr merge never runs with auto-merge on."
+}

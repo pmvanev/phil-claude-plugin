@@ -1,0 +1,13 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-31",
+  "situation": "As fixture 30, on a board whose Auto-close workflow closes a card set to Done. After `/nw-deliver`, the feature's single slice is finished, so `nwave-slice-status`'s fold reads `done`.",
+  "expected_decision": ["CARRIED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "FALLBACK-PATH", "RECORDED", "HANDED-OFF"],
+  "must_not": [
+    "let phil:nwave-issue-board move the card's column, or set the Status to Done",
+    "close the card",
+    "run /phil:done",
+    "call the question tool, or say the developer answered"
+  ],
+  "why_this_fixture_exists": "AC4.3 against D13: the run launches phil:nwave-issue-board for the label and the block only, and reads the Status back as In Progress. Both plugin-dev reviewers found the first draft letting the last wave's fold set Done, which this board turns into a close."
+}

@@ -396,8 +396,7 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 76's own, as w
     the handoff on a blocker, and a skill that kept only half of it would mislead.
   - A plain run carries the card. `--plan` keeps slice 01's behaviour: print and record the path, run
     nothing.
-  - The run stops before the first landing step, since slice 04 owns the push, the pull or merge
-    request, and the merge. Steps before it run under the session's own permissions; the command's
+  - The run stopped before the first landing step until slice 04 (superseded below). Steps run under the session's own permissions; the command's
     grant holds only autopilot's own calls, as `/phil:start`'s inline route does.
   - A question is decided by a recorded rule, then D1's three kinds, then the recommendation. The run
     never calls the question tool, and never writes that the developer answered.
@@ -425,3 +424,31 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 76's own, as w
   - A step comment quotes its source line, and marks its step done only while the path gives that step
     the same line. The path comment's comparison ignores `done` marks, because progress lives in the
     step comments.
+- **Settled at slice 04 authoring (2026-11-05)**, from `gh` 2.97.0's and `glab` 1.112.0's help, and
+  both plugin-dev reviews. The landing lives in `references/land.md`.
+  - D7 refined against D13: after each wave, `phil:nwave-issue-board` moves the label and the block
+    only, never the column, and the run reads the Status back. Otherwise the fold after the last wave
+    sets Done, and this board's Auto-close closes the card (fixture 31).
+  - `glab mr merge` sets auto-merge by default, so the run always passes `--auto-merge=false`.
+  - A pipeline judges a commit only where its commit is the request's head and local `HEAD`. GitLab's
+    `head_pipeline` lags a push.
+  - Before merging, the run reads the default branch's head (red blocks, fixture 34) and the request's
+    closing references, commits, title and body (a reference that would close the card blocks,
+    fixture 32).
+  - The wait is bounded: `timeout: 600000` per call, absent after 10 minutes, stuck after 60.
+  - The default branch is judged on the merge commit itself, never the request's pipeline. A default
+    branch that runs no pipeline lands on the request's green.
+  - Landing is autopilot's own call, in five moves: push, open the request (or reuse the open one),
+    wait for its pipeline, merge on green, watch the default branch. It lands only the writes the path
+    names, so a fallback path lands nothing.
+  - Green is read from the forge — GitHub's `statusCheckRollup`, GitLab's `head_pipeline.status` —
+    never from a wait command's exit code. The merge names the head commit the run judged
+    (`--match-head-commit`, `--sha`).
+  - A request with no pipeline is a blocker, because "merge once its pipeline passes" cannot be met. A
+    red pipeline is a check, circuit breaker `k = 2`. A red default branch after the merge is a
+    blocker, citing the repo's stop-the-line rule where it has one.
+  - No `--force`, `--admin` or `--auto`, and no `--delete-branch` or `--remove-source-branch`. The first
+    three skip or hand off the check the merge waits for; the last two take `/phil:done`'s cleanup.
+  - D7 runs through its owner: after each nWave wave, the run launches `phil:nwave-issue-board` to move
+    the `wave:` label and regenerate the block. The Status stays In Progress.
+  - `LANDED` reports a merge read back merged with the default branch read green.

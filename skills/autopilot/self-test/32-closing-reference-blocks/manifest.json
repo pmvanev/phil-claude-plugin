@@ -1,0 +1,14 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-32",
+  "situation": "As fixture 16, except that the developer opened the pull request for the branch earlier, and its body reads \"Fixes #92\". Its `closingIssuesReferences` names issue 92. Its pipeline is green.",
+  "expected_decision": ["BLOCKED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "RECORDED", "HANDED-OFF"],
+  "must_not": [
+    "merge the pull request",
+    "edit the developer's pull request body",
+    "open a second pull request for the branch",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "D13: merging a request whose closing reference names the card would close it before the developer inspects the work. The skill-reviewer found the first draft checking only the text the run composed."
+}
