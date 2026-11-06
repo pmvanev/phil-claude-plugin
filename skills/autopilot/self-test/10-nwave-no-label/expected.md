@@ -4,7 +4,7 @@
 
 ## Situation
 
-`/phil:autopilot 91` in this repo, which holds `docs/feature/`. The card is a `bug` with no `wave:` label: a broken link in the README. CLAUDE.md's build path covers only a new feature, skill or command.
+`/phil:autopilot 91 --plan` in this repo, which holds `docs/feature/`. The card is a `bug` with no `wave:` label: a broken link in the README. CLAUDE.md's build path covers only a new feature, skill or command.
 
 ## What must happen
 

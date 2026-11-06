@@ -4,7 +4,7 @@
 
 ## Situation
 
-`/phil:autopilot 76`. The claim and the worktree succeed. `gh issue comment` exits 1 with `HTTP 502: Bad Gateway`, and the read-back finds no autopilot comment.
+`/phil:autopilot 76 --plan`. The claim and the worktree succeed. `gh issue comment` exits 1 with `HTTP 502: Bad Gateway`, and the read-back finds no autopilot comment.
 
 ## What must happen
 

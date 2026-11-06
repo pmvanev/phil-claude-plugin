@@ -4,7 +4,7 @@
 
 ## Situation
 
-`/phil:autopilot 31` in a GitHub repo whose CLAUDE.md reads, under "Workflow": open a pull request with `Closes #<n>` in its body, merge once its pipeline passes, then move the card to Done. The board's Auto-close workflow closes an issue set to Done. The card is open, in Todo, unassigned, with no worktree.
+`/phil:autopilot 31 --plan` in a GitHub repo whose CLAUDE.md reads, under "Workflow": open a pull request with `Closes #<n>` in its body, merge once its pipeline passes, then move the card to Done. The board's Auto-close workflow closes an issue set to Done. The card is open, in Todo, unassigned, with no worktree.
 
 ## What must happen
 

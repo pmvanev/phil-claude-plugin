@@ -96,8 +96,8 @@ plugin's existing rules.
 
 - **[D5] Autopilot composes the commands that already own each step.** `/phil:start` claims the card
   and cuts the worktree; each step of the path launches the command or skill that owns it;
-  `/phil:handoff` puts the run down (D13). A card already underway resumes from its snapshot, as
-  `/phil:resume` reads it, and continues at the next step.
+  `/phil:handoff` puts the run down (D13). A card already underway resumes at the first step neither
+  the disk nor a step comment marks done, reading the snapshot for context (refined at slices 02–03).
 
 - **[D6] Every taken recommendation is recorded on the card.** One comment per step of the path lists
   that step's decisions: the question, the option taken and the reason. This is a board surface that
@@ -391,3 +391,37 @@ DISCOVER and DIVERGE never ran; the changed assumptions are issue 76's own, as w
   - The first cut covered GitHub only. The developer answered that every surface ships both forges, so
     slice 01 ships GitLab too, through `/phil:start`'s GitLab reference and `glab issue note` (D10), and
     CLAUDE.md changed the same day.
+- **Settled at slices 02 and 03 authoring (2026-11-05)**:
+  - Slices 02 and 03 ship together. The developer's standing prompt, carried verbatim (D12), names
+    the handoff on a blocker, and a skill that kept only half of it would mislead.
+  - A plain run carries the card. `--plan` keeps slice 01's behaviour: print and record the path, run
+    nothing.
+  - The run stops before the first landing step, since slice 04 owns the push, the pull or merge
+    request, and the merge. Steps before it run under the session's own permissions; the command's
+    grant holds only autopilot's own calls, as `/phil:start`'s inline route does.
+  - A question is decided by a recorded rule, then D1's three kinds, then the recommendation. The run
+    never calls the question tool, and never writes that the developer answered.
+  - A check is a circuit breaker, `k = 2`: two fixes that leave it failing make a blocker.
+  - A step comment marks its step done, and the next run starts at the first step neither the disk nor
+    a comment marks done. A blocker stands until a later comment, or words after the card in the
+    argument, answer it.
+  - D9 refined: the run cannot edit the card's body, so work it finds beyond the card goes in the step
+    comment under `- Found:`, for the developer to place.
+  - D13 holds: a run that reaches the path's end, or only `(yours)` steps, hands off and names
+    `/phil:done` for the developer.
+  - The skill's run and record detail moved to `references/run.md` and `references/record.md`,
+    keeping the body under 2,000 words.
+  - **D1 widened, after `plugin-dev:skill-reviewer`:** an approval a launched route reserves for the
+    developer, such as `phil:edd`'s verdicts and `phil:work`'s approve-or-reject, counts as an input
+    only the developer holds, and so does a permission the session denies. Otherwise a fallback run
+    would adjudicate its own evidence (fixture 25).
+  - Every run that reaches RUN prints its report, then hands off as its last act, since
+    `/phil:handoff`'s recorded exchange ends the turn.
+  - Agents named by a path, such as this repo's review passes, launch through the Agent tool.
+  - A step that mixes work and landing does the work, commits it, and leaves the landing; its step
+    comment reads `— work done, landing left`, and a later run lands it.
+  - The AUTHORIZED line lists only the writes that leave the machine. Commits in the card's worktree
+    belong to the work.
+  - A step comment quotes its source line, and marks its step done only while the path gives that step
+    the same line. The path comment's comparison ignores `done` marks, because progress lives in the
+    step comments.

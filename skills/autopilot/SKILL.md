@@ -3,41 +3,45 @@ name: autopilot
 description: >-
   This skill should be used when the user runs /phil:autopilot, or asks to "carry card N hands-off",
   "run card N on autopilot", "autopilot card N" or "take this card through the build path", on GitHub
-  or GitLab. It claims the card through /phil:start's steps, reads the repo's build path from CLAUDE.md
-  and AGENTS.md, prints each step beside its source line with the writes the path authorizes, records
-  both on the card, and stops before the first step. Not for choosing which card to carry, and never
-  for calling one done.
+  or GitLab. It claims the card, reads and records the repo's build path, and runs each step up to the
+  first push, pull or merge request, or merge, deciding questions by rule or recommendation and
+  stopping only for a blocker, which it hands off. --plan stops before the first step. Not for choosing
+  a card, and never for calling one done.
 ---
 
 # Autopilot — carry a card through its repo's build path
 
-`/phil:start` picks a card up and `/phil:done` puts one down. Autopilot will carry a card between them
-without the developer at every gate. This release claims the card, reads the build path the repo
-records, prints the reading, records it on the card, and stops. **Stop before the first step of the
-path.**
+`/phil:start` picks a card up and `/phil:done` puts one down. Autopilot carries a card between them
+without the developer at every gate. It claims the card, reads the build path the repo records, prints
+and records the reading, and runs the steps, stopping for a blocker the developer must clear. This
+release lands nothing: it stops before the first push, pull or merge request, or merge.
 
-**Running `/phil:autopilot` is the developer's yes to the claim, the worktree and the path comment.**
-Loaded any other way — from a question about which path autopilot would follow — print the path and
-write nothing.
+**Running `/phil:autopilot` is the developer's yes to the claim, the worktree, the comments on the card
+and the steps the path names.** Loaded any other way — from a question about which path autopilot
+would follow — print the path and write nothing.
 
 ## Inputs
 
-- **The argument** — a number, an issue URL, a title or a few words. With none, ask which card to carry;
-  never infer it from the branch. No answer is `CANNOT-RUN`.
+- **The argument** — a number, an issue URL, a title or a few words, then optionally `--plan`. Words
+  after a card number or URL answer a standing blocker; with no blocker standing, the run says it
+  ignored them. With no card, ask which to carry; never infer it from the branch. No answer is
+  `CANNOT-RUN`.
 - **The repo, the board constants and the developer** — as `/phil:start`'s *Inputs* section reads them.
   Pass `-R <owner/repo>` on every `gh issue` call, and pass the owner and repo as variables to every
   `gh api graphql` query, which takes no `-R`. With no forge line, name `/phil:board-setup`:
   `CANNOT-RUN`.
 - **GitLab** — start's *Inputs* send the claim and the worktree through
-  `${CLAUDE_PLUGIN_ROOT}/skills/start/references/gitlab.md`; RECORD's GitLab calls are below.
+  `${CLAUDE_PLUGIN_ROOT}/skills/start/references/gitlab.md`; the record's GitLab calls are in
+  `references/record.md`.
 
 ## Asking
 
 **Every ask this skill puts follows `${CLAUDE_PLUGIN_ROOT}/skills/shared/decision-request.md`.** Load it
-before the first ask. The asks are the no-argument ask above and every ask `/phil:start`'s steps put:
-which of several cards, narrower words, going on past a card in Done or Blocked, someone else's card or a
-session in another worktree, which of several worktrees, entering a locked one, and, on GitLab, which
-label is In Progress.
+before the first ask. The asks come before the run: the no-argument ask above and every ask
+`/phil:start`'s steps put — which of several cards, narrower words, going on past a card in Done or
+Blocked, someone else's card or a session in another worktree, which of several worktrees, entering a
+locked one, and, on GitLab, which label is In Progress. Once RUN begins, nothing asks: RUN's rules
+decide each question.
 
 ## CLAIM — through `/phil:start`'s steps
 
@@ -55,8 +59,9 @@ Three changes:
 - **A card underway** — report `UNDERWAY` and print start's worktree line without its `next:` clause.
   Where start entered the card's worktree, the session is there; where it cut nothing — an open pull
   or merge request, or a surviving branch, with no worktree here — say the session is not in the
-  card's worktree. Then go on to PATH.
-- **A failed claim or worktree** — after `CLAIM-FAILED` or `WORKTREE-FAILED`, go on to PATH and RECORD.
+  card's worktree, and run no step: `PLANNED`.
+- **A failed claim or worktree** — after `CLAIM-FAILED` or `WORKTREE-FAILED`, go on to PATH and RECORD,
+  and run no step: `PLANNED`.
 
 ## PATH — the steps the repo records
 
@@ -64,8 +69,7 @@ Read `CLAUDE.md` and `AGENTS.md` at the root of the session's working tree after
 either names with an `@` import. Find the steps the repo takes for the card's kind of work: each command
 or skill to run, check to pass, and write to make, in the order the prose gives them. A principle that
 names no action, such as "test first", is no step, and neither is a condition, such as "before calling
-it done". Read the card's title and body to know its kind of
-work.
+it done". Read the card's title and body to know its kind of work.
 
 **A declared path beats detection.** Where the prose records steps for this kind of work, use them, even
 where the repo holds `.nwave/` or `docs/feature/`, and report `DECLARED-PATH`. A path may draw on several
@@ -89,96 +93,41 @@ misreading: leave it out.
 
 **Mark the steps already run.** A step has run where the repo holds its output for this card — for
 `nw-discuss`, a `feature-delta.md` under `docs/feature/` whose `Board:` line names the card, or that the
-card links. Mark it `done`, keep it in the list, and name the first step not done as the next.
+card links — or where a step comment marks it done (`references/run.md`). Mark it `done`, keep it in
+the list, and name the first step not done as the next.
 
 **Leave done to the developer.** The developer inspects the work and calls it done. A step that closes
 the card or calls it done prints marked `(yours)` and authorizes nothing: one naming `/phil:done` or a
 close, a Done Status, or a done label, which a board workflow may turn into a close. The next step skips
 it, and a step after it waits for it. Where only `(yours)` steps remain, print `Next: yours — step <k>`.
 
-**List the authorized writes.** Starting the run authorizes only the writes the path names, each beside
-the number of the step that names it: a commit, a push, a pull or merge request, a merge once its
-pipeline passes, a version bump. A write no step names is not authorized, however usual, and a close
-never is. An authorized pull or merge request names the card as `issue <n>`, never after a closing
+**List the authorized writes.** Starting the run authorizes only the writes the path names that leave
+the machine, each beside the number of the step that names it: a push, a pull or merge request, a merge
+once its pipeline passes. Commits in the card's worktree belong to the work. A write no step names is
+not authorized, however usual, and a close never is. An authorized pull or merge request names the card as `issue <n>`, never after a closing
 keyword such as `Closes`, `Fixes` or `Resolves`, which would close the card when it merges. A fallback
 path names none: print `AUTHORIZED: none — the fallback path names no write`.
 
-## RECORD — one comment on the card
+## RECORD — the path on the card
 
-Read `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` before composing the comment and the report, and apply it
-to every word this run composes. Leave every quoted line of the card, `CLAUDE.md` or `AGENTS.md` in its
-own words.
+Read `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` before composing any comment or the report, and apply it
+to every word this run composes. Read `${CLAUDE_PLUGIN_ROOT}/skills/autopilot/references/record.md`
+whole, then post the path comment as it says, unless the card holds it already.
 
-The comment's first line is exactly `**Autopilot · build path**`. Then come the steps, one line each with
-its quote inline, the next step and the authorized writes. Start every line with the header, a step
-number, `Next:` or `Starting the run`, never with `/`: GitLab runs a note line that starts with a quick
-action such as `/close`. This repo's path reads:
+## RUN — the steps
 
-```
-**Autopilot · build path**
-
-1. nw-discuss (done) — CLAUDE.md, Build path for this plugin: "Run `nw-discuss` before authoring a new feature, skill or command."
-2. author after plugin-dev — CLAUDE.md, Build path for this plugin: "Read `plugin-dev:skill-development`, `command-development`, `agent-development` or `plugin-structure` before writing the file."
-3. …
-6. push and open a pull request — CLAUDE.md, CI workflow: "Land every change on `main` through a pull request: push a feature branch, open a pull request, and merge once its pipeline passes."
-7. merge once its pipeline passes — CLAUDE.md, CI workflow: (the same line)
-
-Next: step 2.
-Starting the run authorizes: commit (step 5), push (step 6), pull request (step 6), merge once its pipeline passes (step 7).
-```
-
-Before posting, read the card's comments:
-
-```bash
-gh api graphql -f query='
-query($o:String!,$r:String!,$n:Int!){ repository(owner:$o,name:$r){ issue(number:$n){
-  comments(last:50){ nodes{ body author{ login } } } } } }' \
-  -f o=<owner> -f r=<repo> -F n=<n>
-```
-
-A read that fails posts nothing: `RECORD-FAILED`, quoting the error. Otherwise take the latest comment by
-`viewer.login` whose first line is `**Autopilot · build path**`. Where it holds the same quoted lines,
-in the same order, with the same `done` marks and the same step numbers on its authorized writes, post
-nothing: `ALREADY-RECORDED`. The words this run composed may differ; they are not compared. Otherwise
-post the comment:
-
-```bash
-gh issue comment <n> -R <owner/repo> --body-file - <<'EOF'
-<the comment>
-EOF
-```
-
-Use `gh issue comment` only with `-R` and `--body-file -`; never `--edit-last` or `--delete-last`. Read
-the comments back once: where the latest autopilot comment by the developer now holds this path, by the
-comparison above, it is `RECORDED`. A post that fails, or does not read back, is `RECORD-FAILED`,
-quoting the error. Post once only, and repair nothing: a timed-out post may have landed.
-
-**On GitLab** a comment is a note, read and posted with `<p>` and `<repo>` as start's GitLab reference
-writes them. Read the card's notes, newest first, skipping the system notes GitLab writes itself:
-
-```bash
-glab api --hostname <host> --paginate \
-  "projects/<p>/issues/<n>/notes?sort=desc&order_by=created_at&per_page=100" |
-  jq -c '.[] | select(.system | not) | {body, author: .author.username}'
-```
-
-The developer is `user`'s `username`, and the first matching note is the latest. The pipe's exit code
-is `jq`'s, so judge the read by `glab`'s own output: any `glab` error, on any page, fails the read,
-whatever `jq` printed. Post the note with the whole comment in `--message`, writing each `'` in it as
-`'\''`:
-
-```bash
-glab issue note <n> -R <repo> --message '<the comment>'
-```
-
-Use `glab issue note` only with `-R` and `--message`: without `--message` it opens an editor. The rules
-above — compare, post once, read back — stand. These two calls follow `glab` 1.112.0's
-`issue note --help` and GitLab's notes API; no run has exercised them yet.
+With `--plan`, stop before the first step of the path: `PLANNED`. Otherwise read
+`${CLAUDE_PLUGIN_ROOT}/skills/autopilot/references/run.md` whole and run the path as it says: from the
+first step not done, each through the command, skill or agent that owns it, every question decided by a
+recorded rule, a blocker or the recommendation, each step's decisions posted on the card. A blocker is
+described on the card. Every run that reaches RUN prints its report, then hands off through
+`/phil:handoff`.
 
 ## REPORT
 
-Print `/phil:start`'s CARD, claim and worktree lines, then the PATH lines as the comment holds them, the
-next step, the AUTHORIZED line and one record line:
+Print `/phil:start`'s CARD, claim and worktree lines; the PATH lines as the comment holds them; the
+AUTHORIZED line; one line per step run, with its decisions counted; then where the run stopped and the
+next step. Print it before the handoff, which is the run's last act. Record lines:
 
 ```
 RECORDED: the path comment on the card — read back
@@ -186,16 +135,26 @@ ALREADY-RECORDED: the card's latest path comment holds this path — nothing pos
 RECORD-FAILED: <the error> — nothing posted  |  <the error> — posted once, not found on read-back
 ```
 
-A fallback names its rule on the PATH line: `PATH (fallback — no build path in CLAUDE.md or AGENTS.md;
-route rule 3):` then `1. phil:edd — route.md, rule 3: "A change a user would see — a command, an output,
-a page, a behaviour — routes to `phil:edd`."`. End with the outcome tokens.
+A fallback names its rule on the PATH line:
+
+```
+PATH (fallback — no build path in CLAUDE.md or AGENTS.md; route rule 3):
+  1. phil:edd — route.md, rule 3: "A change a user would see — a command, an output, a page, a behaviour — routes to `phil:edd`."
+```
+
+End with the outcome tokens.
 
 ## Decision outcomes
 
-Report exactly one terminal outcome, every run: `PLANNED` · `STOPPED` · `NO-MATCH` · `REFUSED-CLOSED` ·
-`CANNOT-RUN`.
+Report exactly one terminal outcome, every run: `PLANNED` · `CARRIED` · `BLOCKED` · `STOPPED` ·
+`NO-MATCH` · `REFUSED-CLOSED` · `CANNOT-RUN`.
 
-- **`PLANNED`** — the run printed the path and the authorized writes, and stopped before the first step.
+- **`PLANNED`** — the run printed and recorded the path and ran no step: `--plan`, a failed claim or
+  worktree, or a card underway with no worktree here.
+- **`CARRIED`** — the run stopped at a landing step, a `(yours)` step or the path's end, whether or not
+  it ran a step.
+- **`BLOCKED`** — a question, a check or a permission needs the developer; the run posted the blocker
+  comment, or says the post failed.
 - **`STOPPED`** — the developer stopped at one of `/phil:start`'s asks.
 - **`NO-MATCH`** — the argument named no open card in this repo; nothing was filed.
 - **`REFUSED-CLOSED`** — the card is closed.
@@ -205,23 +164,28 @@ Report exactly one terminal outcome, every run: `PLANNED` · `STOPPED` · `NO-MA
 Report these alongside, each only when it fires:
 
 - Autopilot's own: `DECLARED-PATH` (read from the repo's prose) · `FALLBACK-PATH` (none declared) ·
-  `RECORDED` (the comment posted and read back) · `ALREADY-RECORDED` (the same path was there; nothing
-  posted) · `RECORD-FAILED` · `DONE-IS-YOURS` (a step closes the card or calls it done; printed as the
-  developer's, authorized for no one) · `UNDERWAY` (the card had a worktree, an open pull or merge
-  request, or a surviving branch) · `WROTE-NOTHING` (no write call, as `/phil:start` counts
-  them: a claim write, a fetch, a cut worktree, or a comment or note is a write; entering a worktree is
-  not).
+  `RECORDED` (the path comment posted and read back) · `ALREADY-RECORDED` (the same path was there;
+  nothing posted) · `RECORD-FAILED` · `DONE-IS-YOURS` (a step closes the card or calls it done; printed
+  as the developer's, authorized for no one) · `UNDERWAY` (the card had a worktree, an open pull or
+  merge request, or a surviving branch) · `RESUMED` (step comments moved the start past what the disk
+  shows) · `HANDED-OFF` (`/phil:handoff` wrote its snapshot) · `WROTE-NOTHING` (no write call, as
+  `/phil:start` counts them: a claim write, a fetch, a cut worktree, a comment or note, or any write a
+  step made is a write; entering a worktree is not).
 - Carried from `/phil:start`: `PICKED` · `ANOTHERS-CARD` · `OPEN-IN-DONE` · `CLAIMED` · `NO-BOARD-BLOCK`
   · `NOT-ASSIGNED` · `CLAIM-FAILED` · `READ-BACK-MISMATCH` · `WORKTREE-CUT` · `WORKTREE-ENTERED` ·
   `WORKTREE-FAILED`.
 
 ## Invariants
 
-- **Stop before the first step of the path**, launching no skill or command it names.
-- **Write only the claim, the worktree and one path comment**: `/phil:start`'s writes, and one
-  `gh issue comment` or `glab issue note`. File no card.
+- **Stop before the first landing step**: this release pushes nothing, opens no pull or merge request,
+  and merges nothing.
+- **Write on the forge, in autopilot's own calls, only the claim and the comments**: `/phil:start`'s
+  writes, and `gh issue comment` or `glab issue note`. File no card, and edit no card's body. A launched
+  skill, agent or `/phil:handoff` writes under its own rules.
 - **Leave done to the developer**: run no `/phil:done`, close no card, authorize no close.
 - **Send only `query` documents through `gh api graphql`, and only GETs through `glab api`.**
+- **Answer no question as the developer**: the run calls no question tool once RUN begins, and records
+  as the developer's only their own answer to a blocker, quoted.
 - **Quote the repo's lines in their own words**, and print no step without its line.
 - **Authorize only what a step names.**
 - **Leave a closed card for the developer to reopen, and every assignee in place.**

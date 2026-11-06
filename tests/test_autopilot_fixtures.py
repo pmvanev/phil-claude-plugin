@@ -13,9 +13,10 @@ import pytest
 SKILL_DIR = Path(__file__).resolve().parent.parent / "skills" / "autopilot"
 FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
-TERMINAL = {"PLANNED", "STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
+TERMINAL = {"PLANNED", "CARRIED", "BLOCKED", "STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
 OWN_LINES = {"DECLARED-PATH", "FALLBACK-PATH", "RECORDED", "ALREADY-RECORDED", "RECORD-FAILED",
-             "DONE-IS-YOURS", "UNDERWAY", "WROTE-NOTHING"}
+             "DONE-IS-YOURS", "UNDERWAY", "RESUMED", "HANDED-OFF", "WROTE-NOTHING"}
+RUNS_STEPS = {"CARRIED", "BLOCKED"}
 FROM_START = {"PICKED", "ANOTHERS-CARD", "OPEN-IN-DONE", "CLAIMED", "NO-BOARD-BLOCK", "NOT-ASSIGNED",
               "CLAIM-FAILED", "READ-BACK-MISMATCH", "WORKTREE-CUT", "WORKTREE-ENTERED", "WORKTREE-FAILED"}
 STOPS_BEFORE_CLAIM = {"STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
@@ -71,10 +72,39 @@ def test_a_planned_run_read_a_path(manifest):
 
 
 @pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
-def test_every_fixture_forbids_running_a_step(manifest):
-    """Slice 01 stops before the first step of the path."""
-    must_not = " ".join(json.loads(manifest.read_text())["must_not"]).lower()
-    assert "step" in must_not, manifest.parent.name
+def test_a_run_that_runs_no_step_forbids_running_one(manifest):
+    """`--plan` and every stop before the path stop before its first step."""
+    d = json.loads(manifest.read_text())
+    if d["expected_decision"][0] not in RUNS_STEPS:
+        assert "step" in " ".join(d["must_not"]).lower(), d["fixture_id"]
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_run_that_runs_steps_forbids_answering_as_the_developer(manifest):
+    """Spike row 5: an answer the run took never reads as the developer's."""
+    d = json.loads(manifest.read_text())
+    if d["expected_decision"][0] in RUNS_STEPS:
+        must_not = " ".join(d["must_not"]).lower()
+        assert "developer answered" in must_not, d["fixture_id"]
+        assert "/phil:done" in must_not, d["fixture_id"]
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_run_that_runs_steps_is_handed_off(manifest):
+    """D8, D13: every run that reaches RUN ends with /phil:handoff, unless its fixture is about the
+    handoff failing."""
+    d = json.loads(manifest.read_text())
+    if d["expected_decision"][0] in RUNS_STEPS and "handoff fails" not in d["situation"]:
+        assert "HANDED-OFF" in d["expected_report_lines"], d["fixture_id"]
+
+
+def test_slice_02_and_03_fixtures_exist():
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("16-carried-to-landing", "17-rule-answers", "18-blocker-own-material",
+                   "19-check-keeps-failing", "20-resumed", "21-unnamed-write-stops",
+                   "22-gitlab-carried", "23-path-end-hands-off", "24-blocker-still-stands",
+                   "25-route-verdict-is-yours"):
+        assert wanted in names, f"slices 02 and 03 name fixture {wanted}"
 
 
 def test_the_register_lists_every_token_each_manifest_expects():

@@ -4,7 +4,7 @@
 
 ## Situation
 
-`/phil:autopilot 76` a second time, from the main checkout. The card is In Progress, assigned to the developer, with a worktree `issue-76-…`. Its latest autopilot comment holds the same quoted lines, in the same order, with the same `done` marks and authorized step numbers; the earlier run worded its step labels differently.
+`/phil:autopilot 76 --plan` a second time, from the main checkout. The card is In Progress, assigned to the developer, with a worktree `issue-76-…`. Its latest autopilot comment holds the same quoted lines, in the same order, with the same `done` marks and authorized step numbers; the earlier run worded its step labels differently.
 
 ## What must happen
 

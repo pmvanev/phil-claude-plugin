@@ -23,3 +23,13 @@ expects.
 | 13 | `no-forge-line` | inherited | `CANNOT-RUN` · `WROTE-NOTHING` |
 | 14 | `move-to-done-is-yours` | D13 | `PLANNED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `DONE-IS-YOURS` · `RECORDED` |
 | 15 | `gitlab-already-recorded` | D10, D5 | `PLANNED` · `CLAIMED` · `UNDERWAY` · `DECLARED-PATH` · `ALREADY-RECORDED` · `WROTE-NOTHING` |
+| 16 | `carried-to-landing` | AC2.2 | `CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 17 | `rule-answers` | AC2.1, D9 | `CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 18 | `blocker-own-material` | AC2.3, AC3.1 | `BLOCKED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 19 | `check-keeps-failing` | D1 | `BLOCKED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 20 | `resumed` | AC3.2 | `CARRIED` · `CLAIMED` · `UNDERWAY` · `WORKTREE-ENTERED` · `DECLARED-PATH` · `ALREADY-RECORDED` · `RESUMED` · `HANDED-OFF` |
+| 21 | `unnamed-write-stops` | AC3.3 | `BLOCKED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 22 | `gitlab-carried` | D10 | `CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `RECORDED` · `HANDED-OFF` |
+| 23 | `path-end-hands-off` | D13, AC4.4 | `CARRIED` · `CLAIMED` · `WORKTREE-CUT` · `DECLARED-PATH` · `DONE-IS-YOURS` · `RECORDED` · `HANDED-OFF` |
+| 24 | `blocker-still-stands` | AC3.2 | `BLOCKED` · `CLAIMED` · `UNDERWAY` · `WORKTREE-ENTERED` · `DECLARED-PATH` · `ALREADY-RECORDED` · `HANDED-OFF` |
+| 25 | `route-verdict-is-yours` | D1 | `BLOCKED` · `CLAIMED` · `WORKTREE-CUT` · `FALLBACK-PATH` · `RECORDED` · `HANDED-OFF` |

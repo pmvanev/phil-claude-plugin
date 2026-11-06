@@ -1,0 +1,24 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-20",
+  "situation": "`/phil:autopilot 92` again, after fixture 19's run, from the main checkout. The card's worktree holds the snapshot. The card carries the path comment, step comments for steps 2 and 3, and the blocker comment at step 4; beneath the blocker the developer commented: \"the fixture was stale — regenerate it and go on\". The path is unchanged.",
+  "expected_decision": [
+    "CARRIED"
+  ],
+  "expected_report_lines": [
+    "CLAIMED",
+    "UNDERWAY",
+    "WORKTREE-ENTERED",
+    "DECLARED-PATH",
+    "ALREADY-RECORDED",
+    "RESUMED",
+    "HANDED-OFF"
+  ],
+  "must_not": [
+    "rerun steps 2 or 3",
+    "post a second path comment",
+    "ask the blocker's question again",
+    "call the question tool, or say the developer answered a question the run decided",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "AC3.2: the next run resumes at the step that stopped, taking the developer's answer from the card, not at the first."
+}

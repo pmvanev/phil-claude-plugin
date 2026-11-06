@@ -4,7 +4,7 @@
 
 ## Situation
 
-`/phil:autopilot 30` in a GitHub repo whose CLAUDE.md reads, under "Workflow": open a pull request, merge once its pipeline passes, then run `/phil:done` to close the card. The card is open, in Todo, unassigned, with no worktree.
+`/phil:autopilot 30 --plan` in a GitHub repo whose CLAUDE.md reads, under "Workflow": open a pull request, merge once its pipeline passes, then run `/phil:done` to close the card. The card is open, in Todo, unassigned, with no worktree.
 
 ## What must happen
 

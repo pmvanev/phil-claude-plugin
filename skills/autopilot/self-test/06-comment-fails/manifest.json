@@ -1,6 +1,6 @@
 {
   "fixture_id": "AUTOPILOT-SELFTEST-06",
-  "situation": "`/phil:autopilot 76`. The claim and the worktree succeed. `gh issue comment` exits 1 with `HTTP 502: Bad Gateway`; the read-back finds no autopilot comment.",
+  "situation": "`/phil:autopilot 76 --plan`. The claim and the worktree succeed. `gh issue comment` exits 1 with `HTTP 502: Bad Gateway`; the read-back finds no autopilot comment.",
   "expected_decision": ["PLANNED"],
   "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "RECORD-FAILED"],
   "must_not": [

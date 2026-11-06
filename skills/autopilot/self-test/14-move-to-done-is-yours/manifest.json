@@ -1,6 +1,6 @@
 {
   "fixture_id": "AUTOPILOT-SELFTEST-14",
-  "situation": "`/phil:autopilot 31` in a GitHub repo whose CLAUDE.md reads, under \"Workflow\": open a pull request with `Closes #<n>` in its body, merge once its pipeline passes, then move the card to Done. The board's Auto-close workflow closes an issue set to Done. The card is open, in Todo, unassigned, with no worktree.",
+  "situation": "`/phil:autopilot 31 --plan` in a GitHub repo whose CLAUDE.md reads, under \"Workflow\": open a pull request with `Closes #<n>` in its body, merge once its pipeline passes, then move the card to Done. The board's Auto-close workflow closes an issue set to Done. The card is open, in Todo, unassigned, with no worktree.",
   "expected_decision": ["PLANNED"],
   "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "DONE-IS-YOURS", "RECORDED"],
   "must_not": [

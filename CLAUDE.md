@@ -83,7 +83,7 @@ is not docs-only: `scripts/check-product-ssot.py` reads it.
   descriptions and clauses, the projected why/next/stack, a `## Chain` line's clause, the ranking basis,
   the `assumed`-line rationale strings in `probe-board.py` (at build time; a run composes none),
   `board-snapshot`'s descriptions and report lines, `nwave-wave-summary`, `/phil:done`'s closing comment,
-  and `/phil:autopilot`'s path comment.
+  and `/phil:autopilot`'s path, step and blocker comments.
 - Apply the standard only to words the surface composed; leave a human's words untouched. At `groom-ask`,
   decide per field by its provenance label: a suggestion or an `I rephrased your answer` rewrite is
   composed, a `you wrote` field is the human's.
