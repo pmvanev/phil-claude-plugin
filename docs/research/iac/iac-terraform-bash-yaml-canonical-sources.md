@@ -1293,3 +1293,32 @@ documentation; `go-yaml/yaml` v2 and v3 `resolve.go` and the v3 README.
   `local` in `sh` moved to Advisory; the Linter cells completed; the hazard test stated.
 - Slice 02 scopes its boolean and octal rows by consumer (D5). Slices 03 and 04 start from this
   Addendum's IaC and Terraform corrections.
+
+### Slice 02 additions (2026-11-06)
+
+Local parses under PyYAML 6.0.3, ruamel.yaml 0.18.10 and Psych 5.1.2, a fetch of the Kubernetes API
+reference, and a scan of every local repository, made while writing `rules/yaml.md`:
+
+- **Psych reads `08:30` as 30600.** Its regex, `^[-+]?[0-9][0-9_]*(:[0-5]?[0-9]){1,2}$`, admits a
+  leading zero, so the YAML bullet above that `08:30` "stays a string" holds for PyYAML alone.
+- **A duplicate key**: PyYAML and Psych keep the last value without an error; ruamel.yaml refuses the
+  file with `DuplicateKeyError`.
+- **Two `<<` keys in one mapping**: PyYAML and Psych merge both and let the later win, the reverse of
+  `<<: [*a, *b]`, where the earlier wins; ruamel.yaml refuses the file. A second `<<` is therefore a
+  duplicate key under research YAML-5, and research YAML-6 keeps only the own-key override, as
+  Advisory.
+- **Kubernetes documents octal mode bits in YAML.** `defaultMode`: "Must be an octal value between
+  0000 and 0777 or a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON
+  requires decimal values for mode bits." (API reference, ConfigMapVolumeSource.) Research YAML-3 does
+  not reach it.
+- **Incidence, measured (Gap 7).** The scan composed each file with PyYAML, matched every plain scalar
+  and key against the YAML 1.1 boolean, leading-zero, base-60 and trailing-zero patterns, and compared
+  each mapping's keys. Of 400 files — this repository's 50, the sibling repositories' 339 and the
+  developer's other repositories' 11 — 391 parsed; the other nine are nWave documents and cloud-init
+  templates. It found no instance of research YAML-1 to YAML-5. Its hits were 16 `on:` keys in GitHub
+  workflows, which D7 clears, and 333 trailing-zero numbers, each meant as a number (`min`, `max`,
+  `cpus: 2.0`, a weight of `1.0`) or, once, an AWS Image Builder `schemaVersion: 1.0`. Every Python
+  version in a CI file was already quoted. The rule's tier rests on its sources, and the null result
+  is recorded in the feature delta.
+- **`rules/yaml.md`** takes research YAML-1 to YAML-5 as YAML-1 to YAML-5, scoped by the consumer
+  table; research YAML-6 and YAML-7 and the merge-key and schema candidates are Advisory.

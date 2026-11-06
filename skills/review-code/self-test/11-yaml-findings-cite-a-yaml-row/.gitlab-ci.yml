@@ -1,0 +1,22 @@
+stages:
+  - test
+  - deploy
+
+variables:
+  PYTHON_VERSION: 3.10
+  ARCHIVE_PREFIX: 007
+  MAINTENANCE_WINDOW: 2:30
+  REGISTRY_PASSWORD: 0451207
+  NODE_MAJOR: 20
+
+test:
+  stage: test
+  script:
+    - python3 -m pytest -q
+
+deploy:
+  stage: deploy
+  script:
+    - echo "release ${ARCHIVE_PREFIX}-${CI_COMMIT_SHORT_SHA} in window $MAINTENANCE_WINDOW"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

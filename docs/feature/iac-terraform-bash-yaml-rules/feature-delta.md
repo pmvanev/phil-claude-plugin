@@ -351,3 +351,51 @@ research. A reviewer found 17 of its 42 candidate rows over-reaching, and live f
   since none has shipped.
 
 Fixture 10 now expects nine items; the two former rows may come back as Advisory questions.
+
+## Wave: DISCUSS / [REF] Slice 02 delivered (2026-11-06)
+
+**What landed.** `rules/yaml.md`:
+
+- a consumer table naming what six readers make of `no`, `0755`, `1:20` and `3.10`;
+- four Principles;
+- five Always-flag rows (YAML-1 to YAML-5), all hazards;
+- eight Advisory bullets and a Do-not-flag list.
+
+`review-code` gathers every `.yml` and `.yaml` file outside a Helm chart's `templates/`, checks it
+against `yaml.md`, and files a row through the language-rows paragraph slice 01 wrote. `ci-pipelines.md`
+now points to `yaml.md` and `bash.md`. Fixture 11 seeds five YAML defects, a password `security.md`
+owns, and four decoys. Version 1.35.0.
+
+**How the rows follow the evidence check:**
+
+- YAML-1 and YAML-4 apply only where the consumer reads YAML 1.1. Both are Do not flag in a GitHub
+  Actions file (D5 as revised).
+- A second `<<` key is a duplicate under YAML-5. PyYAML and Psych merge two `<<` keys in the reverse of
+  a list's order, and ruamel.yaml refuses them.
+- A mapping's own key overriding a merged one turns on intent, so it is Advisory. US-02's "a merge key
+  that silently overrides" lands in YAML-5 and in that Advisory bullet.
+- Psych reads `08:30` as base 60, which corrects the research Addendum.
+- Kubernetes documents an octal `defaultMode`, which is now Do not flag.
+
+**Dogfood: no instance.** The scan covered 400 YAML files: this repo, the sibling repos and the
+developer's other repos. It matched every plain scalar and key against each row's pattern and compared
+each mapping's keys. It found no instance of any row. Its hits were 16 GitHub `on:` keys and 333
+trailing-zero numbers meant as numbers, and the Do-not-flag list now clears both. A row fires only on
+a pattern the scan matched, so the scan bounds what a hand-driven review could file.
+
+So the learning hypothesis failed for these repos: YAML's typing defects do not occur in them. The
+rows stay Always-flag:
+
+- the card asks for an Always-flag table;
+- the tier test is a source that states the defect, and GitLab's docs, Helm's docs and setup-python's
+  maintainers each do;
+- a row that never fires costs a review nothing, and the scan found no false positive the Do-not-flag
+  list leaves standing.
+
+The scan and its per-line output stay outside the repo, because they name lines in private projects.
+
+**Fixture run.** A fresh agent drove this working tree's `SKILL.md` by hand over fixture 11. It filed
+all six expected items with the right rows, fixes and priorities, filed the password once as CWE-798,
+and flagged no decoy. It added two Advisory questions the fixture allows: no yamllint in CI, and a
+workflow nothing validates. Its notes changed one thing: the rule now says a review may read a Helm
+template to learn how a value is used, and files nothing in it.
