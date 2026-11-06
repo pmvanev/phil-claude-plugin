@@ -30,8 +30,9 @@ step comment that reads `— work done, landing left` marks the step's work done
 Start at the first step neither the disk nor a step comment marks done. Where step comments moved that
 point past what the disk alone shows, report `RESUMED`.
 
-**A standing blocker.** Where the latest step or blocker comment is a blocker comment, read what it
-asked. A later comment on the card by the developer answers it, and so do words after a card number or
+**A standing blocker.** A blocker comment stands until the developer answers it, whatever step comments
+follow it. Read what the latest blocker comment asked. A later comment on the card by the developer
+answers it, and so do words after a card number or
 URL in the argument. Take the answer, quote it in the step's comment as the developer's, and go on.
 With no answer, the blocker stands: say so, post nothing new, and end as **A blocker** below says.
 
@@ -40,14 +41,18 @@ With no answer, the blocker stands: say so, post nothing new, and end as **A blo
 Take the steps in order. After each one, post its step comment.
 
 - **A step marked `(yours)`** — stop before it (see *When the run ends*).
-- **A landing step** — a push, a pull or merge request, a merge. Stop before the first landing step:
-  this release lands nothing. A landing is done where the card's branch has a merged pull or merge
-  request.
+- **A landing step** — a push, a pull or merge request, a merge. Read
+  `${CLAUDE_PLUGIN_ROOT}/skills/autopilot/references/land.md` whole before the first, and land as it
+  says.
 - **A step that mixes work and landing**, such as "fix it in one merge request" — do the work, commit
-  it, and stop before its landing write. Its step comment reads `— work done, landing left`.
+  it, then land it. Where the landing stops on a blocker, its step comment reads
+  `— work done, landing left`, posted before the blocker comment.
 - **A step naming a command or skill** — launch it through the Skill tool, by name without the leading
   slash, passing the card's number or its feature where it takes one, and follow it to its end. In an
-  nWave repo, run each wave this way, one after another.
+  nWave repo, run each wave this way, one after another. After each wave, launch
+  `phil:nwave-issue-board` to move the card's `wave:` label and regenerate its block — the label and
+  the block only, never the column. Then read the card's Status back: a Status other than In Progress
+  is a blocker, since Done is the developer's and a board workflow may close a card in Done.
 - **A step naming an agent**, such as `plugin-dev:skill-reviewer` — launch it through the Agent tool by
   its type, giving it the files the card's work touched. Fold its findings into the work, or record why
   a finding was left.
@@ -102,8 +107,6 @@ outcome. The snapshot carries what a fresh session needs; the step comments carr
 handoff that fails or writes nothing leaves `HANDED-OFF` out, and the report says why.
 
 - **A blocker** — `BLOCKED`. `Next: answer on the card, then /phil:autopilot <n>`.
-- **A landing step** — `CARRIED`, whether or not this run ran a step. `Next: <the landing step>, for the
-  developer to take`.
 - **A `(yours)` step with steps after it** — `CARRIED`. `Next: yours — step <k>`.
 - **The path's end, or only `(yours)` steps left** — the run believes the work is finished: `CARRIED`.
   `Next: inspect the work, then /phil:done <n>`.

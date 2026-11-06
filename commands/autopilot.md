@@ -1,8 +1,8 @@
 ---
-description: "Carry a card through its repo's build path, on GitHub or GitLab: claim it through /phil:start's steps, read and record the build path, then run each step through the command that owns it — answering questions by recorded rule or recommendation, recording each step's decisions on the card, and stopping only for a blocker, described on the card and handed off. --plan stops before the first step. Lands nothing yet, and never calls a card done."
+description: "Carry a card through its repo's build path, on GitHub or GitLab: claim it, read and record the build path, run each step through the command that owns it, and land the work on a green pipeline — deciding questions by rule or recommendation, recording each step's decisions on the card, and stopping only for a blocker, described and handed off. --plan stops before the first step. Never calls a card done."
 argument-hint: "<issue number, URL, title or description> [--plan] [answer to a standing blocker]"
 mutates: true
-allowed-tools: Read, Glob, Grep, AskUserQuestion, Skill, Bash(git rev-parse:*), Bash(git worktree list:*), Bash(git fetch:*), Bash(gh api graphql:*), Bash(gh project item-add:*), Bash(gh project item-edit:*), Bash(gh issue edit:*), Bash(gh issue comment:*), Bash(glab api:*), Bash(jq:*), Bash(glab issue update:*), Bash(glab issue note:*), EnterWorktree, ExitWorktree
+allowed-tools: Read, Glob, Grep, AskUserQuestion, Skill, Bash(git rev-parse:*), Bash(git worktree list:*), Bash(git fetch:*), Bash(gh api graphql:*), Bash(gh project item-add:*), Bash(gh project item-edit:*), Bash(gh issue edit:*), Bash(gh issue comment:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr checks:*), Bash(gh pr merge:*), Bash(gh run list:*), Bash(gh run watch:*), Bash(glab api:*), Bash(jq:*), Bash(glab issue update:*), Bash(glab issue note:*), Bash(glab mr create:*), Bash(glab mr merge:*), Bash(glab ci status:*), EnterWorktree, ExitWorktree
 ---
 
 Load the `autopilot` skill at `${CLAUDE_PLUGIN_ROOT}/skills/autopilot/SKILL.md` and run its CLAIM, PATH,
@@ -12,12 +12,12 @@ never infer it from the branch.
 Read the repo and the board constants from the working tree's `CLAUDE.md`. With no forge line, name
 `/phil:board-setup` and report `CANNOT-RUN`. Pass `-R <owner/repo>` on every `gh issue` call, and pass
 the owner and repo as variables to `gh api graphql`, which takes no `-R`. On GitLab, follow
-`/phil:start`'s `references/gitlab.md` and the skill's `references/record.md`: pass
-`-R https://<host>/<group/project>` on every `glab issue` call and `--hostname <host>` on every
-`glab api` call.
+`/phil:start`'s `references/gitlab.md` and the skill's references: pass
+`-R https://<host>/<group/project>` on every `glab` call that takes a repo and `--hostname <host>` on
+every `glab api` call.
 
-The grant covers autopilot's own calls: the claim, the worktree, the comments on the card, and launching
-each step's command or skill and `/phil:handoff`. The work a step does — editing, testing, committing,
+The grant covers autopilot's own calls: the claim, the worktree, the comments on the card, the landing
+— push, request, wait, merge — and launching each step's command or skill and `/phil:handoff`. The work a step does — editing, testing, committing,
 launching an agent — runs under the session's own permissions, and a call the session denies is a
 blocker.
 
@@ -31,9 +31,13 @@ blocker.
 - Use `gh issue comment` only with `-R` and `--body-file -`, and `glab issue note` only with `-R` and
   `--message`; never `--edit-last` or `--delete-last`.
 - File no card, run no `/phil:done`, and close no card: done is the developer's, after inspecting.
-- Push nothing, open no pull or merge request, and merge nothing: this release lands nothing.
-- In autopilot's own calls, run `git` only as `rev-parse`, `worktree list --porcelain` and
-  `fetch origin <default>`; a step's commits run under the session's permissions.
+- Land as the skill's `references/land.md` says: push without `--force`, name the card in the
+  request as `issue <n>`, and merge only on a pipeline the forge reports green, with
+  `--match-head-commit` or `--sha`; never `--admin` or `--auto`, always `--auto-merge=false` on
+  GitLab, and never `--delete-branch` or `--remove-source-branch` without `=false`.
+- In autopilot's own calls, run `git` only as `rev-parse`, `worktree list --porcelain`,
+  `fetch origin <default>` and `push -u origin <branch>`; a step's commits run under the session's
+  permissions.
 - Cut a worktree only through `EnterWorktree`, and call `ExitWorktree` only with `keep`.
 
 No tool boundary backs these limits.

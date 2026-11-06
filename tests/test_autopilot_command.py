@@ -19,6 +19,7 @@ SKILL_DIR = REPO / "skills" / "autopilot"
 SKILL = SKILL_DIR / "SKILL.md"
 RUN = SKILL_DIR / "references" / "run.md"
 RECORD = SKILL_DIR / "references" / "record.md"
+LAND = SKILL_DIR / "references" / "land.md"
 
 
 def _parts(path):
@@ -32,7 +33,7 @@ def _flat(path):
 
 def _all():
     """The skill body and its references: a pin holds wherever the skill keeps the sentence."""
-    return " ".join([_parts(SKILL)[1], _flat(RUN), _flat(RECORD)])
+    return " ".join([_parts(SKILL)[1], _flat(RUN), _flat(RECORD), _flat(LAND)])
 
 
 def _tools():
@@ -139,9 +140,92 @@ def test_plan_runs_no_step():
     assert "With `--plan`, stop before the first step of the path" in body
 
 
-def test_landing_waits_for_a_later_release():
-    """Slice 04 owns the push, the pull request and the merge."""
-    assert "Stop before the first landing step" in _all()
+# --- slice 04: land the work ------------------------------------------------------------------
+
+EXPECTED_GRANT = {
+    "Read", "Glob", "Grep", "AskUserQuestion", "Skill", "EnterWorktree", "ExitWorktree",
+    "Bash(git rev-parse:*)", "Bash(git worktree list:*)", "Bash(git fetch:*)", "Bash(git push:*)",
+    "Bash(gh api graphql:*)", "Bash(gh project item-add:*)", "Bash(gh project item-edit:*)",
+    "Bash(gh issue edit:*)", "Bash(gh issue comment:*)", "Bash(gh pr create:*)", "Bash(gh pr checks:*)",
+    "Bash(gh pr merge:*)", "Bash(gh run list:*)", "Bash(gh run watch:*)",
+    "Bash(glab api:*)", "Bash(jq:*)", "Bash(glab issue update:*)", "Bash(glab issue note:*)",
+    "Bash(glab mr create:*)", "Bash(glab mr merge:*)", "Bash(glab ci status:*)",
+}
+
+
+def test_the_grant_is_exactly_autopilots_own_calls():
+    """D4, D10: the claim, the comments and the landing on both forges, and nothing more; the work a step
+    does runs under the session's own permissions."""
+    assert _tools() == EXPECTED_GRANT, _tools() ^ EXPECTED_GRANT
+
+
+def test_the_skill_reads_land_whole_before_landing():
+    assert "`${CLAUDE_PLUGIN_ROOT}/skills/autopilot/references/land.md` whole before the first" in _flat(RUN)
+
+
+def test_landing_merges_only_on_green_with_the_head_matched():
+    """AC4.1, AC4.2: green is read from the forge, and the merge names the head it judged."""
+    text = _flat(LAND)
+    assert "Judge every state by reading the forge, never by a wait command's exit code" in text
+    assert "--match-head-commit <sha>" in text and "--sha <sha>" in text
+    assert "GitLab's `head_pipeline.sha` equal to `sha`" in text, "a stale head pipeline judges nothing"
+
+
+def test_landing_never_forces_bypasses_or_cleans_up():
+    """A force push, an admin merge, a forge auto-merge or a deleted branch each skip a check or take
+    /phil:done's cleanup (D13). glab mr merge sets auto-merge unless told not to."""
+    text = _flat(LAND)
+    for flag in ("`--force`", "`--admin`", "`--auto`", "`--delete-branch`", "`--remove-source-branch`"):
+        assert flag in text, flag
+    assert "--auto-merge=false --yes" in text
+    assert "--remove-source-branch=false --yes" in text
+    assert "never push with" in text.lower() and "never merge with" in text.lower()
+
+
+def test_the_wait_is_bounded_and_explicit():
+    text = _flat(LAND)
+    assert "`timeout: 600000`" in text
+    assert "has not registered after 10 minutes is absent" in text
+    assert "still pending after 60 minutes is stuck" in text
+
+
+def test_a_red_pipeline_is_a_circuit_breaker_and_a_red_default_branch_blocks():
+    text = _flat(LAND)
+    assert "a pipeline still red after two fixes is a blocker" in text
+    assert "A red default branch after the merge is a blocker" in text
+    assert "judge the merge commit itself" in text, "never the request's pipeline"
+
+
+def test_nothing_merges_into_a_red_default_branch():
+    assert "Red there is a blocker before anything lands" in _flat(LAND)
+
+
+def test_merging_closes_nothing():
+    """D13: a closing reference or keyword in the request or its commits would close the card."""
+    text = _flat(LAND)
+    assert "closingIssuesReferences" in text and "closes_issues" in text
+    assert "every `#` written as `issue `" in text
+
+
+def test_a_gitlab_request_body_runs_no_quick_action():
+    assert "Start no line of the body with `/`" in _flat(LAND)
+
+
+def test_the_card_stays_in_progress_and_the_wave_moves_through_its_owner():
+    """D7, D13: the wave label and block move through phil:nwave-issue-board, never the column."""
+    text = _flat(RUN)
+    assert "launch `phil:nwave-issue-board`" in text
+    assert "the label and the block only, never the column" in text
+    assert "a Status other than In Progress is a blocker" in text
+
+
+def test_a_blocker_stands_whatever_step_comments_follow_it():
+    """A mixed step's step comment must not hide its own blocker from the next run."""
+    assert "whatever step comments follow it" in _flat(RUN)
+
+
+def test_landed_is_reported():
+    assert "`LANDED`" in _parts(SKILL)[1]
 
 
 def test_gitlab_ships_with_github():
@@ -290,7 +374,7 @@ def test_an_agent_step_launches_through_the_agent_tool():
 
 
 def test_a_mixed_step_leaves_its_landing_and_is_not_done():
-    """Fixture 22: the work is done, the landing is left, and the step is not marked done."""
+    """A mixed step whose landing stops on a blocker is not marked done; its work is."""
     text = _all()
     assert "`— work done, landing left`" in text
 

@@ -1,6 +1,6 @@
 # Expected — AUTOPILOT-SELFTEST-20
 
-`CARRIED` · `CLAIMED` · `UNDERWAY` · `WORKTREE-ENTERED` · `DECLARED-PATH` · `ALREADY-RECORDED` · `RESUMED` · `HANDED-OFF`
+`CARRIED` · `CLAIMED` · `UNDERWAY` · `WORKTREE-ENTERED` · `DECLARED-PATH` · `ALREADY-RECORDED` · `RESUMED` · `LANDED` · `HANDED-OFF`
 
 ## Situation
 
@@ -8,10 +8,12 @@
 
 ## What must happen
 
-The claim finds every write made: `CLAIMED`. WORKTREE enters the card's worktree: `UNDERWAY`, `WORKTREE-ENTERED`. The path comment matches on its quoted lines and authorized step numbers, though steps 2 and 3 are now done: `ALREADY-RECORDED`. RUN finds steps 2 and 3 marked done by step comments that quote the same source lines, and starts at step 4: `RESUMED`. The latest step or blocker comment is the blocker, and the developer's later comment answers it. The run regenerates the fixture, re-runs the tests, commits, stops before step 6, and hands off: `CARRIED`, `HANDED-OFF`. The step 4 comment records the answer as the developer's comment, quoted.
+The claim finds every write made: `CLAIMED`. WORKTREE enters the card's worktree: `UNDERWAY`, `WORKTREE-ENTERED`. The path comment matches on its quoted lines and authorized step numbers, though steps 2 and 3 are now done: `ALREADY-RECORDED`. RUN finds steps 2 and 3 marked done by step comments that quote the same source lines, and starts at step 4: `RESUMED`. The latest step or blocker comment is the blocker, and the developer's later comment answers it. The run regenerates the fixture, re-runs the tests, commits, lands the work on green, and hands off: `LANDED`, `CARRIED`, `HANDED-OFF`. The step 4 comment records the answer as the developer's comment, quoted.
 
 ## What must NOT happen
 
+- Merge before the forge reports the pipeline green, or with `--admin` or `--auto`.
+- Delete the branch or force-push.
 - Rerun steps 2 or 3.
 - Post a second path comment.
 - Ask the blocker's question again.

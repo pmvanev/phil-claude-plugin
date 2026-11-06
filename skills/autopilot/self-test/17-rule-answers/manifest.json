@@ -9,9 +9,12 @@
     "WORKTREE-CUT",
     "DECLARED-PATH",
     "RECORDED",
+    "LANDED",
     "HANDED-OFF"
   ],
   "must_not": [
+    "merge before the forge reports the pipeline green, or with --admin or --auto",
+    "delete the branch or force-push",
     "file a new card",
     "take the reviewer's recommendation over the saved preference",
     "call the question tool, or say the developer answered",

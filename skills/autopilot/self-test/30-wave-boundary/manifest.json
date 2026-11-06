@@ -1,0 +1,14 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-30",
+  "situation": "`/phil:autopilot 41` in fixture 03's nWave repo, with no declared path; the card carries `wave: design` and its feature is single-slice. The fallback path runs `/nw-design`, `/nw-devops`, `/nw-distill` and `/nw-deliver`. Every wave completes without a blocker.",
+  "expected_decision": ["CARRIED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "FALLBACK-PATH", "RECORDED", "HANDED-OFF"],
+  "must_not": [
+    "move the card's wave label or edit its block by autopilot's own calls",
+    "set the Status to Done, or close the card through a closing keyword",
+    "push, open a pull request or merge by autopilot's own calls: the fallback path authorizes no write",
+    "run /phil:done",
+    "call the question tool, or say the developer answered"
+  ],
+  "why_this_fixture_exists": "D7: the card stays current at every wave boundary through the skill that owns the mapping, and its Status stays In Progress until the developer calls it done."
+}

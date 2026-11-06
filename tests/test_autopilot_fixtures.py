@@ -15,7 +15,7 @@ FIXTURES = sorted((SKILL_DIR / "self-test").glob("*/manifest.json"))
 
 TERMINAL = {"PLANNED", "CARRIED", "BLOCKED", "STOPPED", "NO-MATCH", "REFUSED-CLOSED", "CANNOT-RUN"}
 OWN_LINES = {"DECLARED-PATH", "FALLBACK-PATH", "RECORDED", "ALREADY-RECORDED", "RECORD-FAILED",
-             "DONE-IS-YOURS", "UNDERWAY", "RESUMED", "HANDED-OFF", "WROTE-NOTHING"}
+             "DONE-IS-YOURS", "UNDERWAY", "RESUMED", "LANDED", "HANDED-OFF", "WROTE-NOTHING"}
 RUNS_STEPS = {"CARRIED", "BLOCKED"}
 FROM_START = {"PICKED", "ANOTHERS-CARD", "OPEN-IN-DONE", "CLAIMED", "NO-BOARD-BLOCK", "NOT-ASSIGNED",
               "CLAIM-FAILED", "READ-BACK-MISMATCH", "WORKTREE-CUT", "WORKTREE-ENTERED", "WORKTREE-FAILED"}
@@ -105,6 +105,25 @@ def test_slice_02_and_03_fixtures_exist():
                    "22-gitlab-carried", "23-path-end-hands-off", "24-blocker-still-stands",
                    "25-route-verdict-is-yours"):
         assert wanted in names, f"slices 02 and 03 name fixture {wanted}"
+
+
+def test_slice_04_fixtures_exist():
+    names = {m.parent.name for m in FIXTURES}
+    for wanted in ("26-red-pipeline-fixed", "27-red-pipeline-blocks", "28-default-branch-red",
+                   "29-no-pipeline", "30-wave-boundary", "31-last-wave-stays-in-progress",
+                   "32-closing-reference-blocks", "33-gitlab-no-pipeline",
+                   "34-default-branch-red-before-merge"):
+        assert wanted in names, f"slice 04 names fixture {wanted}"
+
+
+@pytest.mark.parametrize("manifest", FIXTURES, ids=lambda p: p.parent.name)
+def test_a_landed_run_never_closes_the_card(manifest):
+    """D13: landing is not done; the card stays open and In Progress."""
+    d = json.loads(manifest.read_text())
+    if "LANDED" in d["expected_report_lines"]:
+        must_not = " ".join(d["must_not"]).lower()
+        assert "closing keyword" in must_not or "close the card" in must_not, d["fixture_id"]
+        assert "HANDED-OFF" in d["expected_report_lines"], d["fixture_id"]
 
 
 def test_the_register_lists_every_token_each_manifest_expects():

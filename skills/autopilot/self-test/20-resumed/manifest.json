@@ -11,9 +11,12 @@
     "DECLARED-PATH",
     "ALREADY-RECORDED",
     "RESUMED",
+    "LANDED",
     "HANDED-OFF"
   ],
   "must_not": [
+    "merge before the forge reports the pipeline green, or with --admin or --auto",
+    "delete the branch or force-push",
     "rerun steps 2 or 3",
     "post a second path comment",
     "ask the blocker's question again",

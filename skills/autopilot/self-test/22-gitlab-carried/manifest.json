@@ -9,15 +9,16 @@
     "WORKTREE-CUT",
     "DECLARED-PATH",
     "RECORDED",
+    "LANDED",
     "HANDED-OFF"
   ],
   "must_not": [
-    "push or open the merge request",
-    "mark the step done when its landing is left",
+    "merge before the forge reports the pipeline green, or with --admin or --auto",
+    "delete the branch or force-push",
     "post a note with a line starting /",
     "run a glab call without -R https://<host>/<group/project> or --hostname <host>",
     "call the question tool, or say the developer answered",
     "run /phil:done or close the card"
   ],
-  "why_this_fixture_exists": "D10: the run carries a card on GitLab as on GitHub. The step mixes the work with a landing write; the run does the work and stops before the landing."
+  "why_this_fixture_exists": "D10: the run carries a card on GitLab as on GitHub. The step mixes the work with a landing write; the run does the work, then lands it on a green pipeline."
 }

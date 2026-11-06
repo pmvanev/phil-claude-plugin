@@ -1,0 +1,14 @@
+{
+  "fixture_id": "AUTOPILOT-SELFTEST-29",
+  "situation": "`/phil:autopilot 7` in a GitHub repo whose CLAUDE.md path ends: open a pull request, and merge once its pipeline passes. The repo has no workflow file, so the pull request reports no checks.",
+  "expected_decision": ["BLOCKED"],
+  "expected_report_lines": ["CLAIMED", "WORKTREE-CUT", "DECLARED-PATH", "RECORDED", "HANDED-OFF"],
+  "must_not": [
+    "merge the pull request",
+    "treat no checks as green",
+    "add a pipeline the path does not name",
+    "call the question tool, or say the developer answered",
+    "run /phil:done or close the card"
+  ],
+  "why_this_fixture_exists": "\"Merge once its pipeline passes\" cannot be met without a pipeline; no checks is not green."
+}
