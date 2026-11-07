@@ -149,6 +149,9 @@ Test in production-like environments. Match production wherever it shapes behavi
 - Never make manual changes to production
 - Environments are disposable and reproducible
 
+`iac.md` turns these into rows a review can check: state, pinned providers, lock files and
+environments that differ only by input.
+
 ---
 
 ### Deployability

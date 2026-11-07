@@ -1,0 +1,14 @@
+{
+  "node_id": "RC-SELFTEST-11",
+  "mode": "review",
+  "target": ".",
+  "pins": "a YAML defect is named by the YAML id of its rules/yaml.md row, takes that row's Preferred form as its fix, and is filed at Priority 1; a defect security.md owns is filed once, under its CWE; GitHub Actions' on: key, a Helm template, a number meant as a number and a round-trip-safe version are not flagged",
+  "expected_guard": "five YAML-named items and one CWE-798 item across a GitLab CI file and a Helm values file; four decoys unflagged",
+  "decoys": [
+    "NODE_MAJOR: 20",
+    "weight: 1.0",
+    ".github/workflows/ci.yml",
+    "RETRY_SLOT"
+  ],
+  "min_items": 6
+}

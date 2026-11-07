@@ -1,0 +1,13 @@
+{
+  "node_id": "RC-SELFTEST-12",
+  "mode": "review",
+  "target": ".",
+  "pins": "an infrastructure defect is named by the IAC id of its rules/iac.md row, takes that row's tool-agnostic Preferred form as its fix with the Terraform spelling after it, and is filed at Priority 1 where the row is a hazard and Priority 7 otherwise; a lower bound in a reusable module, a lower bound on the tool's own version and a module with no lock file are not flagged",
+  "expected_guard": "seven IAC-named items across a reusable network module and two environment roots; three decoys unflagged",
+  "decoys": [
+    ">= 1.11",
+    ">= 5.40",
+    "modules/network/versions.tf"
+  ],
+  "min_items": 7
+}

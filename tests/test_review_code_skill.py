@@ -64,7 +64,7 @@ def test_thresholds_match_coding_md():
 
 def test_a_directory_is_recognised_before_an_extension():
     text = SKILL.read_text()
-    assert text.index("| Is a directory") < text.index("| Has a file extension")
+    assert text.index("| Is a directory") < text.index("| Is a file")
 
 
 def test_the_self_test_drives_this_working_tree():

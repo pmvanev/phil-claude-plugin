@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-billing
+data:
+  LOG_LEVEL: {{ .Values.logging.level | quote }}
+  LOG_FORMAT: {{ .Values.logging.format | quote }}
+  RETRY_SLOT: 01:05

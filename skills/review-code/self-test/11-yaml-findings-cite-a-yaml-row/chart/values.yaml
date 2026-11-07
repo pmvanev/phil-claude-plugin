@@ -1,0 +1,23 @@
+replicaCount: 2
+
+image:
+  repository: registry.example.com/billing
+  tag: "2.4.1"
+
+logging:
+  level: off
+  format: json
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  weight: 1.0
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 128Mi
