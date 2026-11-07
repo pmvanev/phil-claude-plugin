@@ -1,7 +1,7 @@
 ---
 description: "Pick the work back up: read the resume point, state up front whether it is still current or stale against the tree, say whether the board agrees about what is in flight, and only then present what was decided, the diversion stack you were inside, and what to do next. All of it in about 300 words of plain English — and where the verdict, the divergence and the stack cannot fit in that, it says the bound gave way rather than dropping any of them. With no resume point, reconstructs the position from the artifacts that own it and says that is what it did."
 mutates: true
-allowed-tools: Read, Glob, Grep, Bash(git rev-parse:*), Bash(git status:*), Bash(git rev-list:*), Bash(git log:*), Bash(gh api graphql:*), Skill
+allowed-tools: Read, Glob, Grep, Bash(git rev-parse:*), Bash(git status:*), Bash(git rev-list:*), Bash(git log:*), Bash(gh api graphql:*), Bash(glab api:*), Bash(jq:*), Skill
 ---
 
 Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handoff/SKILL.md`. Follow the BOOTSTRAP path, in its
@@ -9,14 +9,20 @@ Load the `session-handoff` skill at `${CLAUDE_PLUGIN_ROOT}/skills/session-handof
 snapshot format, the deriving rules, the decision outcomes, and the invariants govern all three paths.
 
 **This command writes nothing — not to the repository, and not to the board.** It has no `Write`, no
-`Edit` and no bare `Bash`. Its `git` grants are scoped to read-only subcommands, and its one remaining
-verb, `gh api graphql`, is used for **board reads only**: reading the project's items and their Status
-so the snapshot's next action can be compared against what the board says is in flight.
+`Edit` and no bare `Bash`. Its `git` grants are scoped to read-only subcommands, and its remaining
+verbs, `gh api graphql` and on GitLab `glab api`, are used for **board reads only**: reading the
+project's items and their Status so the snapshot's next action can be compared against what the board
+says is in flight.
 
-**It declares `mutates: true` because that verb can carry a mutation, not because this command does.**
-`mutates` is a claim about the grant, which is the half a script can verify; the intent lives here and
-in the skill's invariants, which forbids moving a card, setting a Status, or posting a comment on
-either path. This is the `adversarial-review` pattern `CLAUDE.md` documents.
+**On GitLab, `glab api` reads the board's label columns instead**, as `/phil:start`'s reads do: the
+label GET that tells a missing label from an empty column has no `glab` verb of its own. Pass
+`--hostname <host>` on every call. Send `glab api` only GETs: never `-f`, `-F`, `--field`,
+`--raw-field`, `--input`, `--form`, `-X` or `--method`. Pipe `jq` only from it.
+
+**It declares `mutates: true` because `gh api graphql` and `glab api` can each carry a write, not
+because this command does.** `mutates` is a claim about the grant, which is the half a script can
+verify; the intent lives here and in the skill's invariants, which forbid moving a card, setting a
+Status, or posting a comment on either path. This is the `adversarial-review` pattern `CLAUDE.md` documents.
 
 The honest trade, stated so nobody discovers it later: this command's read-only guarantee used to be
 **enforced** by its tool list and is now **declared**. No `gh` verb both reads Projects v2 reliably and

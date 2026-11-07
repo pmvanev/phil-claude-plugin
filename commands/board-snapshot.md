@@ -2,13 +2,13 @@
 description: "Say where the issue board stands right now: what is blocked and what each waits on, what is in flight, and the next few in the board's own order, in 200 words or fewer. With --all, every open card instead, as a number, a title and a plain-English description of 100 words or fewer — no total ceiling, nothing dropped. Reports drift and never fixes it. For what is WRONG with the cards use /phil:groom-issues instead."
 argument-hint: "[<owner/repo>] [--all] [--next N]"
 mutates: true
-allowed-tools: Read, Glob, Grep, Bash(gh api graphql:*), Bash(gh issue view:*), Bash(gh issue list:*)
+allowed-tools: Read, Glob, Grep, Bash(gh api graphql:*), Bash(gh issue view:*), Bash(gh issue list:*), Bash(glab api:*), Bash(jq:*)
 ---
 
 Load the `board-snapshot` skill at `${CLAUDE_PLUGIN_ROOT}/skills/board-snapshot/SKILL.md` and render the
 standing check it describes.
 
-Read the board constants — the owner, the project number and the Status field — from the working tree's
+Read the board constants — on GitHub the owner, the project number and the Status field — from the working tree's
 `CLAUDE.md` before making any call. Do not probe for them: `/phil:board-setup` owns writing them, and a
 snapshot that re-derived them would be a second authority over a fact the repo already records.
 
@@ -17,6 +17,13 @@ constants can be read only from the working tree, so a different repo would mix 
 well-formed wrong answer. When the argument differs, or `CLAUDE.md` holds no board constants, stop and
 name `/phil:board-setup`, to be run in the target repo's checkout. Pass `-R <owner/repo>` on every `gh
 issue` call, per `phil:issue-board`: an inferred remote reads the wrong repo's issues successfully.
+
+**On GitLab**, the constants are the host, the project and the status family, and the skill's
+`references/gitlab.md` holds the reads. They go through `glab api`, as `/phil:start`'s do, because the
+label GET that tells a missing label from an empty column has no `glab` verb of its own. Pass
+`--hostname <host>` on every `glab api` call. Send `glab api`
+only GETs: never `-f`, `-F`, `--field`, `--raw-field`, `--input`, `--form`, `-X` or `--method`. Pipe
+`jq` only from it.
 
 `--next N` sets how many queued cards to print in the standing check. Default 5.
 
@@ -28,7 +35,7 @@ themselves differently, and the skill says why.
 `mutation`.** The grant accepts a mutation document and no tool boundary refuses one: with no `Write` or
 `Edit`, no file can be touched, but the forge write rests on this prose and the skill's Invariants list.
 
-Status is a project field, not a label: `gh issue list --json` returns no Status and no flag adds one, so
+On GitHub, Status is a project field, not a label: `gh issue list --json` returns no Status and no flag adds one, so
 the sections need the GraphQL project-items query. `gh project item-list` is refused: it served a stale
 title on 2026-08-12 and can under-report, invisibly inside a bounded read. `gh issue list` is the
 reconciliation call: the project-items query returns only issues somebody added to the project, so without

@@ -84,4 +84,4 @@ than empty: one is a claim about the record, the other a claim about the work.
 An under-reporting board read is a **missed divergence**. `phil:issue-board` owns which call is
 trustworthy on each forge and which under-reports; delegate rather than inlining the mechanics. This is
 also why `/phil:resume` declares `mutates: true` while writing nothing — `gh api graphql` can carry a
-mutation, and the read-only alternative under-reports.
+mutation and `glab api` a POST, and on GitHub the read-only alternative under-reports.

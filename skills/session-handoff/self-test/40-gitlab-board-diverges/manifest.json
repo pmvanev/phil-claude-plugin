@@ -1,0 +1,34 @@
+{
+  "fixture_id": "SH-SELFTEST-40",
+  "phase": "BOOTSTRAP",
+  "situation": "A GitLab Premium repo. Its CLAUDE.md board block names the status family `status::to-do`, `status::in-progress` and `status::blocked`. The recorded next action continues card 58; the board's `status::in-progress` column holds card 20 alone, and card 58 sits in `status::to-do`. The tree has not moved since capture.",
+  "forge": "gitlab",
+  "snapshot_present": true,
+  "tree_fingerprint_at_capture": "4be21c0",
+  "tree_fingerprint_at_readback": "4be21c0",
+  "commits_between": 0,
+  "working_tree_dirty_at_capture": false,
+  "working_tree_dirty": false,
+  "next_action_recorded": "finish the owner panel on card 58's settings page, then land it",
+  "board_state": {
+    "readable": true,
+    "in_progress": [
+      {
+        "card": 20,
+        "title": "Run the New Boston demo end to end in modive"
+      }
+    ],
+    "todo_in_board_order": [
+      {
+        "card": 54,
+        "title": "Cap what modive can spend on AWS"
+      },
+      {
+        "card": 58,
+        "title": "Show who owns an item and who can reach it, on its settings page"
+      }
+    ]
+  },
+  "expected_decision": "RESUME-CURRENT + BOARD-DIVERGES",
+  "expected_guard": "card 76's checklist, 2026-11-06 — the board check reads GitLab's label columns through `glab api` GETs, takes the In Progress label's card as the in-flight claim, names both sides and resolves nothing"
+}
