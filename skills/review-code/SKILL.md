@@ -43,7 +43,7 @@ shipped bug, a module frozen because changing it frightens the team, a subsystem
 work on, or a suite that reports coverage while supporting no change. **Its oath is a charter, not a
 review criterion**; cite the standards against a diff and leave the promises alone.
 
-**Language idioms.** For each file, also load the matching language rules file and check against it: `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `${CLAUDE_PLUGIN_ROOT}/rules/python.md` (`.py`), `${CLAUDE_PLUGIN_ROOT}/rules/typescript.md` (`.ts/.tsx`), `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (`.tsx/.jsx`), `${CLAUDE_PLUGIN_ROOT}/rules/bash.md` (`.sh/.bash`, and an extensionless file whose first line is a shebang naming `sh` or `bash`), `${CLAUDE_PLUGIN_ROOT}/rules/yaml.md` (`.yml/.yaml`, outside a Helm chart's `templates/`). A `.tsx` file is checked against both TypeScript and React rules. Load only the rules whose match covers the file under review.
+**Language idioms.** For each file, also load the matching language rules file and check against it: `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `${CLAUDE_PLUGIN_ROOT}/rules/python.md` (`.py`), `${CLAUDE_PLUGIN_ROOT}/rules/typescript.md` (`.ts/.tsx`), `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (`.tsx/.jsx`), `${CLAUDE_PLUGIN_ROOT}/rules/bash.md` (`.sh/.bash`, and an extensionless file whose first line is a shebang naming `sh` or `bash`), `${CLAUDE_PLUGIN_ROOT}/rules/yaml.md` (`.yml/.yaml`, outside a Helm chart's `templates/`), `${CLAUDE_PLUGIN_ROOT}/rules/iac.md` (`.tf`). A `.tsx` file is checked against both TypeScript and React rules. Load only the rules whose match covers the file under review.
 
 ## Parse the Argument
 
@@ -65,19 +65,20 @@ Determine what `$ARGUMENTS` refers to:
 Run `git diff HEAD~1 --name-only` to get changed files, and `git ls-files --others --exclude-standard`
 for new files not yet added. With no parent commit, use `git diff HEAD --name-only` and say so. Skip
 deleted files. Filter to code files only (exclude configs, lockfiles, generated files), but keep shell
-scripts and YAML files — the files **Language idioms** matches to `bash.md` and `yaml.md` — CI workflows (`.github/workflows/**`, `.gitlab-ci*`),
-`Dockerfile*` and package-manager config (`package.json`, `.npmrc`, `pyproject.toml`,
-`requirements*.txt`, `pip.conf`), and, where the review reads `lambda-web-app-speed.md`, Terraform
-(`*.tf`), SAM `template.y*ml`, `serverless.y*ml` and `.size-limit*`. Check those against `security.md`
-and, where the review read it, `lambda-web-app-speed.md`, a shell script against `bash.md` and a YAML file against `yaml.md` as
-well; hold them to no other standard. Read each changed file in full, plus run
+scripts, YAML files and Terraform — the files **Language idioms** matches to `bash.md`, `yaml.md` and
+`iac.md` — CI workflows (`.github/workflows/**`, `.gitlab-ci*`), `Dockerfile*` and package-manager
+config (`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and, where the
+review reads `lambda-web-app-speed.md`, SAM `template.y*ml`, `serverless.y*ml` and `.size-limit*`. Check
+those against `security.md` and, where the review read it, `lambda-web-app-speed.md`, a shell script
+against `bash.md`, a YAML file against `yaml.md` and an infrastructure file against `iac.md` as well;
+hold them to no other standard. Read each changed file in full, plus run
 `git diff HEAD~1 -- <file>` to see what changed, and find the tests of each changed production file as
 File Path mode does.
 
 ### File Path
 
-Read the entire file. A CI workflow, a `Dockerfile*`, package-manager config, a shell script or a YAML file
-named alone meets the same standards here as in a directory: **Directory Path** names them. If it is
+Read the entire file. A CI workflow, a `Dockerfile*`, package-manager config, a shell script, a YAML file or a
+Terraform file named alone meets the same standards here as in a directory: **Directory Path** names them. If it is
 production code, find its tests by the project's naming convention and read them too — Priority 6
 cannot judge tests it never read, and a public behaviour with no test is itself a finding.
 
@@ -87,12 +88,13 @@ Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swi
 skipping vendored and generated trees — `node_modules/`, `.venv/`, `venv/`, `vendor/`, `dist/`, `build/`.
 Also gather `**/*.{sh,bash}` and an extensionless file whose first line is a shebang naming `sh` or
 `bash` (`^#!.*\b(ba)?sh\b`, outside the trees skipped above and `.git/`), `**/*.{yml,yaml}` outside a
-Helm chart's `templates/` (a `templates/` beside a `Chart.yaml`), `.github/workflows/**`, `.gitlab-ci*`, `Dockerfile*` and package-manager config
-(`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and, where the review
-reads `lambda-web-app-speed.md`, `**/*.tf`, `**/template.y*ml`, `**/serverless.y*ml` and
-`**/.size-limit*`. Check those against `security.md` and, where the review read it,
-`lambda-web-app-speed.md`, a shell script against `bash.md` and a YAML file against `yaml.md` as
-well; hold them to no other standard. A bundler config written in JavaScript or TypeScript (`vite.config.*`, `webpack.config.*`)
+Helm chart's `templates/` (a `templates/` beside a `Chart.yaml`), `**/*.tf` outside `.terraform/`,
+`.github/workflows/**`, `.gitlab-ci*`, `Dockerfile*` and package-manager config (`package.json`,
+`.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and, where the review reads
+`lambda-web-app-speed.md`, `**/template.y*ml`, `**/serverless.y*ml` and `**/.size-limit*`. Check those
+against `security.md` and, where the review read it, `lambda-web-app-speed.md`, a shell script against
+`bash.md`, a YAML file against `yaml.md` and an infrastructure file against `iac.md` as well; hold them
+to no other standard. A bundler config written in JavaScript or TypeScript (`vite.config.*`, `webpack.config.*`)
 is code and gets every check.
 Read each file. For large directories (>20 files), an Explore agent may locate the files, but read each
 one yourself: the backlog records exact lines, which a summary cannot give.
@@ -227,9 +229,9 @@ never a score. Suite runtime is out of scope here too — this command reads a d
 claim about a whole suite.
 
 ### Priority 7 — Language Idioms
-Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`, `bash.md`, `yaml.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1. An idiom that is also a security sink — `dangerouslySetInnerHTML` fed untrusted data — is a Priority 1 security item under its CWE id, filed once, never also at Priority 7.
+Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`, `bash.md`, `yaml.md`, `iac.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1. An idiom that is also a security sink — `dangerouslySetInnerHTML` fed untrusted data — is a Priority 1 security item under its CWE id, filed once, never also at Priority 7.
 
-**Language rows.** Where a language rule names its rows by id — `bash.md`'s `SH-n`, `yaml.md`'s `YAML-n` — apply its
+**Language rows.** Where a language rule names its rows by id — `bash.md`'s `SH-n`, `yaml.md`'s `YAML-n`, `iac.md`'s `IAC-n` — apply its
 Always-flag table the way **Security** applies `security.md`'s:
 
 - Name each finding by its row's id, and take the row's Preferred form verbatim as the fix, then
@@ -241,7 +243,7 @@ Always-flag table the way **Security** applies `security.md`'s:
 - Raise the rule's Advisory bullets as **Security** defines an Advisory item, and only where a file the
   review read shows the subject, with a Rationale naming the bullet.
 - Where a row or a Do-not-flag case turns on a file the review did not gather — the CI config,
-  `.yamllint`, the code that loads a YAML file, `.shellcheckrc`, the script that sources this one —
+  `.yamllint`, the code that loads a YAML file, a root's lock and state files, `.shellcheckrc`, the script that sources this one —
   read it; where none exists, apply the row.
 - Leave every case on the rule's Do-not-flag list alone.
 

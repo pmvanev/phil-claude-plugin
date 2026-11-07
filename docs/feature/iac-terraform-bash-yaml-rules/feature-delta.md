@@ -399,3 +399,44 @@ all six expected items with the right rows, fixes and priorities, filed the pass
 and flagged no decoy. It added two Advisory questions the fixture allows: no yamllint in CI, and a
 workflow nothing validates. Its notes changed one thing: the rule now says a review may read a Helm
 template to learn how a value is used, and files nothing in it.
+
+## Wave: DISCUSS / [REF] Slice 03 delivered (2026-11-06)
+
+**Evidence check first.** The Handoff's check ran over § 3 before the rule: a research reviewer, a live
+re-fetch (51 of 60 claims verified), and the Morris and Sharma passes. Morris's own posts now back the
+copied-environment row and the Principles. Sharma's catalogue is Puppet only and maps to no row. The
+research Addendum records each correction.
+
+**What landed.** `rules/iac.md`:
+
+- four Principles, quoting Morris from his own pages;
+- seven Always-flag rows (IAC-1 to IAC-7), three of them hazards: committed state, two environments
+  in one state, and a root with no lock file;
+- Advisory and Do-not-flag lists.
+
+Every row is stated without a tool's syntax, and a test holds it so. `review-code` now gathers `*.tf` on
+every run, not only beside a Lambda, and checks it against `iac.md`. `continuous-delivery.md`'s four
+bullets point to it. Fixture 12 seeds seven defects in a Terraform module and two roots, beside three
+decoys. Version 1.36.0.
+
+**Fixture run.** A fresh agent drove the skill by hand over fixture 12. It filed all seven items with
+the right rows, fixes and priorities, and flagged no decoy. Its Priority 6 item was right: the fixture's
+test skipped on any `init` failure, and now asserts instead.
+
+**Dogfood.** The rule, driven by hand over three sibling Terraform trees — 11 roots, 10 modules:
+
+- one IAC-3 finding, of low confidence, on a spike root; no other row fired;
+- Advisory questions on unreviewed applies (3), missing drift detection (3), large states (2) and an
+  imperative DNS script;
+- six false positives, now Do-not-flag cases: a bootstrap that creates the state backend, refactor
+  records and one environment's own resources under IAC-7, and the module-output bullet, dropped;
+- five misses, now Advisory: an input taken from a person's shell or an ignored file at apply time, an
+  input one root sets and another leaves to a default, and an upper bound inside a reusable module.
+  IAC-6 now covers any value one environment owns, not only account ids.
+
+**The learning hypothesis failed in part.** Several rows needed Terraform knowledge to judge: whether
+`~>` sets an upper bound, which files hold state, what a backend location is. `iac.md` alone cannot
+supply it, so slice 04's `terraform.md` carries the Terraform spelling of every IAC row, and a review
+loads both for a `.tf` file. The rows stay tool-agnostic; the spelling moves, as D12 planned.
+
+The dogfood record stays outside the repo, because it names files in private projects.

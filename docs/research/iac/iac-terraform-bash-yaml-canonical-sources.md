@@ -1322,3 +1322,76 @@ reference, and a scan of every local repository, made while writing `rules/yaml.
   is recorded in the feature delta.
 - **`rules/yaml.md`** takes research YAML-1 to YAML-5 as YAML-1 to YAML-5, scoped by the consumer
   table; research YAML-6 and YAML-7 and the merge-key and schema candidates are Advisory.
+
+### Slices 03 and 04 evidence check (2026-11-06)
+
+The Handoff's check, rerun over § 3 and § 4 before `iac.md` and `terraform.md`: a research reviewer
+for each section, two agents that fetched every row-bearing source again, and Terraform 1.15.3 run
+locally.
+
+| Section | Claims | Verified | Paraphrased | Not found | Contradicted |
+|---|---|---|---|---|---|
+| IaC | 60 | 51 | 4 | 2 | 3 |
+| Terraform | 88 | 84 | 1 | 0 | 3 |
+
+**Infrastructure as Code**
+
+- **Morris, in his own words** (the book is still unread; O'Reilly refused the fetch again):
+  - drift: "The little differences and inconsistencies that accumulate between servers over time are
+    Configuration Drift" (infrastructure-as-code.com, "Models for server updates", 2016);
+  - copied environments: "Maintaining separate, inconsistent copies of infrastructure code for
+    different environment that should be essentially consistent is an antipattern, Snowflakes as
+    Code"; the remedy is to "reuse a single instance of infrastructure code for multiple instances of
+    the infrastructure, and manage necessary variation between environments with parameters"
+    ("Snowflakes as Code", updated 2025-01-08). In 2017 he still called per-environment definitions
+    workable "for simple setups";
+  - manual change: "The only changes made to an environment you care about are the ones that have
+    been fed into the pipeline" ("Environment pipeline", 2017);
+  - nothing on pinning versions or on applying the reviewed plan.
+- Gap 1's "the site does not state the principles" holds for its home page only; the posts above do.
+- Research IAC-3 now has a source that states the defect (Morris), beside Google's form.
+- Research IAC-1: no page says lost state recreates resources. Brikman says committed state leads "to
+  conflicts, data loss, and state file corruption"; that is the hazard. Its locking half cites a
+  benefit only: Advisory.
+- Research IAC-2: AWS calls workspaces acceptable with weaker isolation, so a workspace-only split is
+  Advisory; two environments in one state is the hazard.
+- Research IAC-7: the Addendum's "say nothing of reviewing a plan" is wrong. The plan page: "check
+  whether the proposed changes match what you expected before you apply the changes or share your
+  changes with your team for broader review"; the apply page recommends "first perform a plan operation
+  and review the proposed changes". The row still judges a pipeline file, so it is Advisory.
+- Research IAC-9: Sharma's Imperative Abstraction ("imperative statements (such as 'exec') defies the
+  purpose of the language") joins Google's "Avoid custom scripts, if possible"; both are preferences,
+  so Advisory.
+- **Sharma et al., read in full**: the 24 names above are exact; the catalogue is Puppet only. It has no
+  hard-coded-value smell; Duplicate Block means a block over 150 tokens repeated within a module, and
+  Unguarded Variable an interpolation without braces. None maps to a row.
+- The Gang of Eight's "Configuration data is the most frequent" comes from the replication's automated
+  run; its manual classification put Syntax first (933 against 895).
+
+**Terraform**
+
+- **Gap 8 closed: TF-13 is a hazard.** `{ a = 1, a = 2 }` passes `terraform validate` and plans as
+  `{ a = 2 }` with no warning, on Terraform 1.15.3. HashiCorp's bulletin HCSEC-2023-26: "When
+  processing maps with duplicate keys, Terraform silently replaces all but the last entry", and `plan`
+  "does not warn about duplicate keys". A duplicate argument in a block is a hard error ("Each argument
+  may be set only once").
+- **TF-1's wording.** Removing a middle element does not recreate every later instance: each later
+  instance takes its neighbour's values, updated in place where it can be and replaced where an
+  argument forces it, and the last is destroyed (Brikman's own plan; a local apply). The hazard stands;
+  "shifts every later instance" replaces "recreates". HashiCorp's `count` page uses the pattern as an
+  example, so the defect rests on Brikman alone.
+- **TF-9** gains HashiCorp's own text: "A module intended to be called by one or more other modules
+  must not contain any provider blocks" (providers-within-modules page).
+- **TF-11**: TFLint says a lone `"${var.x}"` is "not deprecated in the latest Terraform version". The
+  recommended preset covers the row and it is no hazard: dropped.
+- **TF-12**: HashiCorp's `fmt` page says "you may choose not to use this command"; a formatting check
+  is a CI job, not a review row: Advisory. **TF-7** rests on "We also recommend": Advisory. **TF-14**
+  needs a search across files and the preset covers it: dropped. **TF-5** names a form but no defect:
+  Advisory.
+- **TF-8** and **TF-10** meet the hazard test: an unpinned module source or an uncommitted lock changes
+  what the next `init` installs.
+- **TFLint**: the recommended preset's thirteen rules are confirmed; none of the twenty reads `count`,
+  `for_each` or `moved`. `terraform_map_duplicate_keys` skips keys it cannot evaluate, and sixteen
+  rules lint only the directory TFLint runs in, so a child module is checked only under `--recursive`.
+- The rows that restate an IaC row (TF-6, TF-9, TF-10, TF-15) stay in `iac.md`; `terraform.md` gives
+  their Terraform spelling and files them under the IAC id (D12).
