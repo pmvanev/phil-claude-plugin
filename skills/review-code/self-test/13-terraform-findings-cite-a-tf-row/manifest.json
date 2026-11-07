@@ -1,0 +1,13 @@
+{
+  "node_id": "RC-SELFTEST-13",
+  "mode": "review",
+  "target": ".",
+  "pins": "a Terraform defect is named by the TF id of its rules/terraform.md row, takes that row's Preferred form as its fix, and is filed at Priority 1 where the row is a hazard and Priority 7 otherwise; the 0/1 count toggle, count over identical instances and a lower-bound required_version are not flagged, and a root that meets iac.md draws no IAC item",
+  "expected_guard": "five TF-named items in one root; three decoys unflagged",
+  "decoys": [
+    "count = var.enable_nat ? 1 : 0",
+    "count = var.replica_count",
+    ">= 1.11"
+  ],
+  "min_items": 5
+}

@@ -440,3 +440,44 @@ supply it, so slice 04's `terraform.md` carries the Terraform spelling of every 
 loads both for a `.tf` file. The rows stay tool-agnostic; the spelling moves, as D12 planned.
 
 The dogfood record stays outside the repo, because it names files in private projects.
+
+## Wave: DISCUSS / [REF] Slice 04 delivered (2026-11-06)
+
+**What landed.** `rules/terraform.md`:
+
+- four Principles;
+- six Always-flag rows (TF-1 to TF-6), four of them hazards: `count` over a collection of things with
+  identities, an address changed with no `moved` block, an unpinned module source, and a duplicate map
+  key;
+- a table giving the Terraform spelling of each IAC row, which a review files under the `IAC-n` id;
+- Advisory and Do-not-flag lists.
+
+The evidence check moved `required_version`, `fmt`, `sensitive` and deprecated syntax to Advisory, and
+dropped unused declarations. It confirmed the duplicate-key hazard against HashiCorp's bulletin and a
+local plan. `review-code` checks a `.tf` file against both `iac.md` and `terraform.md`. A row that turns
+on a fact no file settles now goes to Advisory. Fixture 13 seeds five defects in a root that meets every
+IAC row, beside three decoys. Version 1.37.0.
+
+**Fixture run.** A fresh agent drove the skill by hand over fixture 13. It filed all five items with the
+right rows, fixes and priorities, flagged no decoy, and kept the unpinned module off CWE-494. Its one
+extra item, an IAC-1 on a root with no state file, came from this rule's spelling table, which now says
+such a root is not the row.
+
+**Dogfood.** The rule, driven by hand over 56 `.tf` files in two sibling repos, both of which run
+`tflint --recursive` in CI:
+
+- TF-1 fired on all four measured `count = length(…)` sites and on none of the 57 toggles. Only one
+  site is a hazard: one counts chunks with no identity, one mirrors another counted resource, and one
+  follows the hazard. The row now names elements with an identity of their own, and the other two
+  shapes are Do not flag.
+- TF-4 found 70 undescribed outputs and variables, 19 carrying a `#` comment instead. The row now says a
+  comment is not a description, and files one item per file.
+- TF-3, TF-5 and TF-6 found nothing; TFLint's recommended preset already covers TF-3.
+- The toggle written `? 0 : 1` is now cleared too. The module-layout Advisory is dropped as noise, and
+  the `sensitive` Advisory no longer catches a key's name or ARN.
+
+**The learning hypotheses.** `terraform.md` points to `iac.md` without restating a row: fixture 13 filed
+no copied row. D11 held at the toggle (none flagged) and the four sites (all found), and narrowed at the
+hazard, which only one of the four carries.
+
+The dogfood record stays outside the repo, because it names files in private projects.

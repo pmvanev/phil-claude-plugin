@@ -1,6 +1,6 @@
 ---
 name: review-code
-description: Skill bundle for phil:review-code command — code review against coding standards, security defects by CWE, shell-script and YAML defects by SH and YAML row, and a Lambda web app's load-time defects by LWS row, with prioritized refactoring backlog
+description: Skill bundle for phil:review-code command — code review against coding standards, security defects by CWE, shell-script, YAML and infrastructure-code defects by SH, YAML, IAC and TF row, and a Lambda web app's load-time defects by LWS row, with prioritized refactoring backlog
 ---
 
 # Review Code
@@ -43,7 +43,7 @@ shipped bug, a module frozen because changing it frightens the team, a subsystem
 work on, or a suite that reports coverage while supporting no change. **Its oath is a charter, not a
 review criterion**; cite the standards against a diff and leave the promises alone.
 
-**Language idioms.** For each file, also load the matching language rules file and check against it: `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `${CLAUDE_PLUGIN_ROOT}/rules/python.md` (`.py`), `${CLAUDE_PLUGIN_ROOT}/rules/typescript.md` (`.ts/.tsx`), `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (`.tsx/.jsx`), `${CLAUDE_PLUGIN_ROOT}/rules/bash.md` (`.sh/.bash`, and an extensionless file whose first line is a shebang naming `sh` or `bash`), `${CLAUDE_PLUGIN_ROOT}/rules/yaml.md` (`.yml/.yaml`, outside a Helm chart's `templates/`), `${CLAUDE_PLUGIN_ROOT}/rules/iac.md` (`.tf`). A `.tsx` file is checked against both TypeScript and React rules. Load only the rules whose match covers the file under review.
+**Language idioms.** For each file, also load the matching language rules file and check against it: `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `${CLAUDE_PLUGIN_ROOT}/rules/python.md` (`.py`), `${CLAUDE_PLUGIN_ROOT}/rules/typescript.md` (`.ts/.tsx`), `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (`.tsx/.jsx`), `${CLAUDE_PLUGIN_ROOT}/rules/bash.md` (`.sh/.bash`, and an extensionless file whose first line is a shebang naming `sh` or `bash`), `${CLAUDE_PLUGIN_ROOT}/rules/yaml.md` (`.yml/.yaml`, outside a Helm chart's `templates/`), `${CLAUDE_PLUGIN_ROOT}/rules/iac.md` (`.tf`), `${CLAUDE_PLUGIN_ROOT}/rules/terraform.md` (`.tf`). A `.tsx` file is checked against both TypeScript and React rules. A `.tf` file is checked against both `iac.md` and `terraform.md`, which spells each `IAC-n` row in Terraform's terms. Load only the rules whose match covers the file under review.
 
 ## Parse the Argument
 
@@ -70,7 +70,7 @@ scripts, YAML files and Terraform — the files **Language idioms** matches to `
 config (`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and, where the
 review reads `lambda-web-app-speed.md`, SAM `template.y*ml`, `serverless.y*ml` and `.size-limit*`. Check
 those against `security.md` and, where the review read it, `lambda-web-app-speed.md`, a shell script
-against `bash.md`, a YAML file against `yaml.md` and an infrastructure file against `iac.md` as well;
+against `bash.md`, a YAML file against `yaml.md` and an infrastructure file against `iac.md` and `terraform.md` as well;
 hold them to no other standard. Read each changed file in full, plus run
 `git diff HEAD~1 -- <file>` to see what changed, and find the tests of each changed production file as
 File Path mode does.
@@ -93,8 +93,8 @@ Helm chart's `templates/` (a `templates/` beside a `Chart.yaml`), `**/*.tf` outs
 `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and, where the review reads
 `lambda-web-app-speed.md`, `**/template.y*ml`, `**/serverless.y*ml` and `**/.size-limit*`. Check those
 against `security.md` and, where the review read it, `lambda-web-app-speed.md`, a shell script against
-`bash.md`, a YAML file against `yaml.md` and an infrastructure file against `iac.md` as well; hold them
-to no other standard. A bundler config written in JavaScript or TypeScript (`vite.config.*`, `webpack.config.*`)
+`bash.md`, a YAML file against `yaml.md` and an infrastructure file against `iac.md` and `terraform.md` as well;
+hold them to no other standard. A bundler config written in JavaScript or TypeScript (`vite.config.*`, `webpack.config.*`)
 is code and gets every check.
 Read each file. For large directories (>20 files), an Explore agent may locate the files, but read each
 one yourself: the backlog records exact lines, which a summary cannot give.
@@ -229,9 +229,9 @@ never a score. Suite runtime is out of scope here too — this command reads a d
 claim about a whole suite.
 
 ### Priority 7 — Language Idioms
-Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`, `bash.md`, `yaml.md`, `iac.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1. An idiom that is also a security sink — `dangerouslySetInnerHTML` fed untrusted data — is a Priority 1 security item under its CWE id, filed once, never also at Priority 7.
+Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`, `bash.md`, `yaml.md`, `iac.md`, `terraform.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1. An idiom that is also a security sink — `dangerouslySetInnerHTML` fed untrusted data — is a Priority 1 security item under its CWE id, filed once, never also at Priority 7.
 
-**Language rows.** Where a language rule names its rows by id — `bash.md`'s `SH-n`, `yaml.md`'s `YAML-n`, `iac.md`'s `IAC-n` — apply its
+**Language rows.** Where a language rule names its rows by id — `bash.md`'s `SH-n`, `yaml.md`'s `YAML-n`, `iac.md`'s `IAC-n`, `terraform.md`'s `TF-n` — apply its
 Always-flag table the way **Security** applies `security.md`'s:
 
 - Name each finding by its row's id, and take the row's Preferred form verbatim as the fix, then
@@ -245,6 +245,8 @@ Always-flag table the way **Security** applies `security.md`'s:
 - Where a row or a Do-not-flag case turns on a file the review did not gather — the CI config,
   `.yamllint`, the code that loads a YAML file, a root's lock and state files, `.shellcheckrc`, the script that sources this one —
   read it; where none exists, apply the row.
+- Where a row turns on a fact no file in the repository settles — which environments a root is applied
+  to, what a pipeline outside it passes in — file an Advisory item naming the row instead.
 - Leave every case on the rule's Do-not-flag list alone.
 
 For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file, or for Priority 6 the fix from `test-patterns.md`'s Smell Catalogue, or for a security, load-time or language-row item the fix the **Security**, **Load time** or **Language rows** block above defines) that addresses it.
