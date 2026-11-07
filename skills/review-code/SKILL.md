@@ -1,6 +1,6 @@
 ---
 name: review-code
-description: Skill bundle for phil:review-code command — code review against coding standards, security defects by CWE, shell-script, YAML and infrastructure-code defects by SH, YAML, IAC and TF row, and a Lambda web app's load-time defects by LWS row, with prioritized refactoring backlog
+description: Skill bundle for phil:review-code command — code review against coding standards, security defects by CWE, shell, YAML, IaC and Terraform defects by SH, YAML, IAC and TF row, and a Lambda web app's load-time defects by LWS row, with prioritized refactoring backlog
 ---
 
 # Review Code
@@ -43,7 +43,7 @@ shipped bug, a module frozen because changing it frightens the team, a subsystem
 work on, or a suite that reports coverage while supporting no change. **Its oath is a charter, not a
 review criterion**; cite the standards against a diff and leave the promises alone.
 
-**Language idioms.** For each file, also load the matching language rules file and check against it: `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `${CLAUDE_PLUGIN_ROOT}/rules/python.md` (`.py`), `${CLAUDE_PLUGIN_ROOT}/rules/typescript.md` (`.ts/.tsx`), `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (`.tsx/.jsx`), `${CLAUDE_PLUGIN_ROOT}/rules/bash.md` (`.sh/.bash`, and an extensionless file whose first line is a shebang naming `sh` or `bash`), `${CLAUDE_PLUGIN_ROOT}/rules/yaml.md` (`.yml/.yaml`, outside a Helm chart's `templates/`), `${CLAUDE_PLUGIN_ROOT}/rules/iac.md` (`.tf`), `${CLAUDE_PLUGIN_ROOT}/rules/terraform.md` (`.tf`). A `.tsx` file is checked against both TypeScript and React rules. A `.tf` file is checked against both `iac.md` and `terraform.md`, which spells each `IAC-n` row in Terraform's terms. Load only the rules whose match covers the file under review.
+**Language idioms.** For each file, also load the matching language rules file and check against it: `${CLAUDE_PLUGIN_ROOT}/rules/cpp.md` (`.cpp/.cc/.cxx/.c/.h/.hpp/.hxx`), `${CLAUDE_PLUGIN_ROOT}/rules/python.md` (`.py`), `${CLAUDE_PLUGIN_ROOT}/rules/typescript.md` (`.ts/.tsx`), `${CLAUDE_PLUGIN_ROOT}/rules/react.md` (`.tsx/.jsx`), `${CLAUDE_PLUGIN_ROOT}/rules/bash.md` (`.sh/.bash`, and an extensionless file whose first line is a shebang naming `sh` or `bash`), `${CLAUDE_PLUGIN_ROOT}/rules/yaml.md` (`.yml/.yaml`, outside a Helm chart's `templates/` — a `templates/` beside a `Chart.yaml`), `${CLAUDE_PLUGIN_ROOT}/rules/iac.md` (`.tf`), `${CLAUDE_PLUGIN_ROOT}/rules/terraform.md` (`.tf`). A `.tsx` file is checked against both TypeScript and React rules. A `.tf` file is checked against both `iac.md` and `terraform.md`, which spells each `IAC-n` row in Terraform's terms. Load only the rules whose match covers the file under review.
 
 ## Parse the Argument
 
@@ -64,38 +64,40 @@ Determine what `$ARGUMENTS` refers to:
 
 Run `git diff HEAD~1 --name-only` to get changed files, and `git ls-files --others --exclude-standard`
 for new files not yet added. With no parent commit, use `git diff HEAD --name-only` and say so. Skip
-deleted files. Filter to code files only (exclude configs, lockfiles, generated files), but keep shell
-scripts, YAML files and Terraform — the files **Language idioms** matches to `bash.md`, `yaml.md` and
-`iac.md` — CI workflows (`.github/workflows/**`, `.gitlab-ci*`), `Dockerfile*` and package-manager
+deleted files, except a deleted `.tf` file: read its diff, since TF-2 judges the addresses it removed.
+Filter to code files only (exclude configs, lockfiles, generated files), but keep shell scripts, YAML
+files and Terraform — the files **Language idioms** matches to `bash.md`, `yaml.md`, `iac.md` and
+`terraform.md` — Terraform's `*.tfvars` and `*.tfstate*`, CI workflows (`.github/workflows/**`, `.gitlab-ci*`), `Dockerfile*` and package-manager
 config (`package.json`, `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and, where the
 review reads `lambda-web-app-speed.md`, SAM `template.y*ml`, `serverless.y*ml` and `.size-limit*`. Check
 those against `security.md` and, where the review read it, `lambda-web-app-speed.md`, a shell script
-against `bash.md`, a YAML file against `yaml.md` and an infrastructure file against `iac.md` and `terraform.md` as well;
-hold them to no other standard. Read each changed file in full, plus run
+against `bash.md`, a YAML file against `yaml.md` and a Terraform file against `iac.md` and
+`terraform.md` as well; hold them to no other standard. Read each changed file in full, plus run
 `git diff HEAD~1 -- <file>` to see what changed, and find the tests of each changed production file as
 File Path mode does.
 
 ### File Path
 
-Read the entire file. A CI workflow, a `Dockerfile*`, package-manager config, a shell script, a YAML file or a
-Terraform file named alone meets the same standards here as in a directory: **Directory Path** names them. If it is
-production code, find its tests by the project's naming convention and read them too — Priority 6
-cannot judge tests it never read, and a public behaviour with no test is itself a finding.
+Read the entire file. A CI workflow, a `Dockerfile*`, package-manager config, a shell script, a YAML
+file or a Terraform file named alone meets the same standards here as in a directory: **Directory
+Path** names them. If it is production code, find its tests by the project's naming convention and
+read them too — Priority 6 cannot judge tests it never read, and a public behaviour with no test is
+itself a finding.
 
 ### Directory Path
 
 Glob recursively for code files (`**/*.{ts,tsx,js,jsx,py,go,rs,java,cs,rb,kt,swift,cpp,c,h,hpp,scala,clj,ex,exs,hs,ml,fs,fsx}`),
 skipping vendored and generated trees — `node_modules/`, `.venv/`, `venv/`, `vendor/`, `dist/`, `build/`.
-Also gather `**/*.{sh,bash}` and an extensionless file whose first line is a shebang naming `sh` or
-`bash` (`^#!.*\b(ba)?sh\b`, outside the trees skipped above and `.git/`), `**/*.{yml,yaml}` outside a
-Helm chart's `templates/` (a `templates/` beside a `Chart.yaml`), `**/*.tf` outside `.terraform/`,
+Also gather, outside the trees skipped above and `.git/`: `**/*.{sh,bash}` and an extensionless file
+whose first line is a shebang naming `sh` or `bash` (`^#!.*\b(ba)?sh\b`), `**/*.{yml,yaml}` outside a
+Helm chart's `templates/`, `**/*.tf`, `**/*.tfvars` and `**/*.tfstate*` outside `.terraform/`,
 `.github/workflows/**`, `.gitlab-ci*`, `Dockerfile*` and package-manager config (`package.json`,
 `.npmrc`, `pyproject.toml`, `requirements*.txt`, `pip.conf`), and, where the review reads
 `lambda-web-app-speed.md`, `**/template.y*ml`, `**/serverless.y*ml` and `**/.size-limit*`. Check those
 against `security.md` and, where the review read it, `lambda-web-app-speed.md`, a shell script against
-`bash.md`, a YAML file against `yaml.md` and an infrastructure file against `iac.md` and `terraform.md` as well;
-hold them to no other standard. A bundler config written in JavaScript or TypeScript (`vite.config.*`, `webpack.config.*`)
-is code and gets every check.
+`bash.md`, a YAML file against `yaml.md` and a Terraform file against `iac.md` and `terraform.md` as
+well; hold them to no other standard. A bundler config written in JavaScript or TypeScript
+(`vite.config.*`, `webpack.config.*`) is code and gets every check.
 Read each file. For large directories (>20 files), an Explore agent may locate the files, but read each
 one yourself: the backlog records exact lines, which a summary cannot give.
 
@@ -231,8 +233,9 @@ claim about a whole suite.
 ### Priority 7 — Language Idioms
 Violations of the matching language rules file (`cpp.md`, `python.md`, `typescript.md`, `react.md`, `bash.md`, `yaml.md`, `iac.md`, `terraform.md`). Flag where code works but isn't idiomatic for the ecosystem — e.g. `#define` constant instead of `constexpr` (C++), mutable default argument or bare `except` (Python), `any` instead of `unknown` or a floating promise (TypeScript), array-index `key` or a conditional hook call (React). Name the preferred form from the language rules file as the fix. Promote idiom violations that are genuine correctness hazards (mutable default arg, missing effect deps, `any` masking a real bug) to Priority 1. An idiom that is also a security sink — `dangerouslySetInnerHTML` fed untrusted data — is a Priority 1 security item under its CWE id, filed once, never also at Priority 7.
 
-**Language rows.** Where a language rule names its rows by id — `bash.md`'s `SH-n`, `yaml.md`'s `YAML-n`, `iac.md`'s `IAC-n`, `terraform.md`'s `TF-n` — apply its
-Always-flag table the way **Security** applies `security.md`'s:
+**Language rows.** Where a language rule names its rows by id — `bash.md`'s `SH-n`, `yaml.md`'s
+`YAML-n`, `iac.md`'s `IAC-n`, `terraform.md`'s `TF-n` — apply its Always-flag table the way
+**Security** applies `security.md`'s:
 
 - Name each finding by its row's id, and take the row's Preferred form verbatim as the fix, then
   ` — here: ` and this code's one change.
@@ -243,10 +246,12 @@ Always-flag table the way **Security** applies `security.md`'s:
 - Raise the rule's Advisory bullets as **Security** defines an Advisory item, and only where a file the
   review read shows the subject, with a Rationale naming the bullet.
 - Where a row or a Do-not-flag case turns on a file the review did not gather — the CI config,
-  `.yamllint`, the code that loads a YAML file, a root's lock and state files, `.shellcheckrc`, the script that sources this one —
-  read it; where none exists, apply the row.
-- Where a row turns on a fact no file in the repository settles — which environments a root is applied
-  to, what a pipeline outside it passes in — file an Advisory item naming the row instead.
+  `.yamllint`, the code that loads a YAML file, a root's lock and state files, `.tflint.hcl`,
+  `.shellcheckrc`, the script that sources this one — read it; where none exists, apply the row.
+- File a defect the rule assigns to another rule — a secret to `security.md`, a YAML row's pipeline
+  behaviour to `ci-pipelines.md` — under that rule alone.
+- File an Advisory item naming the row where the row turns on a fact no file in the repository
+  settles: which environments a root is applied to, what a pipeline outside it passes in.
 - Leave every case on the rule's Do-not-flag list alone.
 
 For each finding, identify the **specific named refactoring** from the catalog (or the preferred idiom from the language rules file, or for Priority 6 the fix from `test-patterns.md`'s Smell Catalogue, or for a security, load-time or language-row item the fix the **Security**, **Load time** or **Language rows** block above defines) that addresses it.
@@ -287,7 +292,7 @@ Scope: {argument — e.g., "--changes", "src/services/", "src/order.py"}
 - **Priority**: {1-7}
 - **Smell**: {smell name from catalog; for a security item, its CWE id, e.g. `CWE-78`; for a load-time item, its `LWS-n` id; for a language row with an id, that id, e.g. `SH-2`; `Advisory` for a question}
 - **Refactoring**: {named refactoring from catalog; for a security, load-time or language-row item, the row's Preferred form verbatim, then ` — here: ` and this code's one change}
-- **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route; a Priority 7 item routes to `/phil:refactor` in production code and `report only` in a test file}
+- **Route**: {`/phil:refactor` for a structural refactoring; `report only` for every Priority 1 item, since each fix changes what the code does; for Priority 6, the catalogue row's route; a Priority 7 item routes to `/phil:refactor` in production code and `report only` in a test file; an `IAC-n` or `TF-n` item is `report only` at any priority, since no test suite checks a plan}
 - **Rationale**: {why this matters — which coding standard is violated; for a security, load-time or language-row item, the rule (`security.md`, `lambda-web-app-speed.md` or the language rule) and the row's Cite column; for a concurrency Advisory, `modern-software-engineering.md` and its *Performance: Concurrency Is Complexity* section}
 - **Status**: pending
 ```

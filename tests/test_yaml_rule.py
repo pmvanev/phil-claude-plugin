@@ -166,7 +166,7 @@ def test_ci_pipelines_points_to_the_yaml_rule():
 
 def test_review_code_names_the_rule_and_gathers_yaml_outside_helm_templates():
     body = _flat(SKILL.read_text())
-    assert "`${CLAUDE_PLUGIN_ROOT}/rules/yaml.md` (`.yml/.yaml`, outside a Helm chart's `templates/`)" in body
+    assert "`${CLAUDE_PLUGIN_ROOT}/rules/yaml.md` (`.yml/.yaml`, outside a Helm chart's `templates/` — a `templates/` beside a `Chart.yaml`)" in body
     directory = body.split("### Directory Path", 1)[1].split("## Step 2", 1)[0]
     assert "`**/*.{yml,yaml}`" in directory
     assert "a YAML file against `yaml.md`" in directory

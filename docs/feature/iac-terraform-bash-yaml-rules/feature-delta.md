@@ -287,8 +287,8 @@ This answers the card's open questions: D5 settles where YAML stops, and D2 keep
 **Before each slice, check its evidence** (developer's decision, 2026-11-06, after slice 01 shipped on
 research one agent wrote and nobody checked). Before writing a rule:
 
-1. Have the research-reviewer agent judge the slice's research section: does each candidate row's cited
-   Evidence support it, and which rows rest on one source or on interpretation.
+1. Have the research-reviewer agent judge the slice's research section: whether each candidate row's cited
+   Evidence supports it, and which rows rest on one source or on interpretation.
 2. Have a web-capable agent fetch each source a row rests on, and mark each quote and linter id
    verified, paraphrased, not found or contradicted. The research reviewer cannot fetch pages.
 3. Settle the slice's open gaps that decide a tier, each in a short pass of its own:
@@ -298,7 +298,7 @@ research one agent wrote and nobody checked). Before writing a rule:
 4. Fold every correction into the research document, dated, before the rule cites it.
 
 The 2026-11-06 run covered the whole document and serves slice 02. Slices 03 and 04 rerun steps 1 to 3
-over their own sections. Slice 01 shipped before this step existed; the same run checks its sources
+over their own sections. Slice 01 shipped before this step existed; the same run checked its sources
 after the fact.
 
 ## Wave: DISCUSS / [REF] Slice 01 delivered (2026-11-06)
@@ -340,12 +340,12 @@ The full record stays outside the repo, because it names lines in private projec
 
 **Evidence check (2026-11-06, after the commit).** The developer asked for an independent check of the
 research. A reviewer found 17 of its 42 candidate rows over-reaching, and live fetches confirmed 63 of
-70 Bash claims. It changed the shipped rule:
+70 Bash claims. The check changed the shipped rule:
 
 - The temp-file trap row and the no-directive library clause moved to Advisory: no source names either
   as a defect.
 - `local` in `sh` moved to Advisory: dash, BusyBox ash and ksh run it.
-- Two citations were wrong (Google has no "Pipes" section; POSIX puts `local` in § 2.9.1.4).
+- Two wrong citations were fixed (Google has no "Pipes" section; POSIX puts `local` in § 2.9.1.4).
 - Linter cells gained SC2044, SC2206 and SC2292.
 - The rule now states its hazard and idiom tests, and the ids were renumbered to run without a gap,
   since none has shipped.
@@ -414,7 +414,7 @@ research Addendum records each correction.
   in one state, and a root with no lock file;
 - Advisory and Do-not-flag lists.
 
-Every row is stated without a tool's syntax, and a test holds it so. `review-code` now gathers `*.tf` on
+Every row avoids a tool's syntax, and a test holds it so. `review-code` now gathers `*.tf` on
 every run, not only beside a Lambda, and checks it against `iac.md`. `continuous-delivery.md`'s four
 bullets point to it. Fixture 12 seeds seven defects in a Terraform module and two roots, beside three
 decoys. Version 1.36.0.
@@ -461,7 +461,7 @@ IAC row, beside three decoys. Version 1.37.0.
 **Fixture run.** A fresh agent drove the skill by hand over fixture 13. It filed all five items with the
 right rows, fixes and priorities, flagged no decoy, and kept the unpinned module off CWE-494. Its one
 extra item, an IAC-1 on a root with no state file, came from this rule's spelling table, which now says
-such a root is not the row.
+such a root falls outside the row.
 
 **Dogfood.** The rule, driven by hand over 56 `.tf` files in two sibling repos, both of which run
 `tflint --recursive` in CI:

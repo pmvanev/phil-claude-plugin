@@ -49,14 +49,14 @@ deployed in an environment", and the next apply either reverts it or trips over 
 
 ### 3. State is the tool's memory of the world
 
-Keep it remote, locked and apart per environment. Committed to version control it invites "conflicts,
-data loss, and state file corruption" (Brikman); shared between environments, one environment's apply
-rewrites another's record.
+Keep it remote, locked and apart per environment. Committed to version control, it invites "conflicts,
+data loss, and state file corruption" (Brikman); shared between environments, it lets one
+environment's apply rewrite another's record.
 
 ### 4. Pin what the root depends on
 
 A root that bounds its provider versions and commits the tool's lock file applies the same code the
-same way tomorrow. A reusable module states only the oldest versions it works with, and leaves the
+same way tomorrow. A reusable module states only the oldest versions it works with and leaves the
 choice to the root.
 
 ---
@@ -91,7 +91,7 @@ A reviewer raises these; the author decides.
   "distinct backends provide stronger isolation"; Brikman calls workspaces "not a suitable mechanism
   for isolating one environment from another."
 - **A pipeline that applies changes without the plan a person or a gate reviewed.** HashiCorp's `apply`
-  page recommends to "first perform a plan operation and review the proposed changes". Raise it only
+  page recommends that you "first perform a plan operation and review the proposed changes". Raise it only
   where the review read the pipeline file.
 - **No drift detection**: nothing plans each environment on a schedule and tells someone when the plan
   is not empty. Raise it only where the review read the pipeline file.

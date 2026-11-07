@@ -180,7 +180,7 @@ def test_every_expected_item_takes_its_id_fix_and_priority_from_its_row():
             assert _takes_the_form(fix, _plain(rows[smell]["Preferred form"])), f"{smell}: {fix!r}"
             hazard = _plain(rows[smell]["Hazard"]) == "hazard"
             assert _field(item, "Priority") == ("1" if hazard else "7"), smell
-            assert _field(item, "Route") == ("report only" if hazard else "`/phil:refactor`"), smell
+            assert _field(item, "Route") == "report only", f"{smell}: no test suite checks a plan"
 
 
 def test_no_fixture_expects_an_item_on_a_decoy():

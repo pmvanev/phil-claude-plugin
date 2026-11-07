@@ -44,7 +44,7 @@ Scope: .
 - **Priority**: 7
 - **Smell**: TF-3
 - **Refactoring**: The narrowest `type` that admits every value it takes — here: `type = list(string)`
-- **Route**: `/phil:refactor`
+- **Route**: report only
 - **Rationale**: terraform.md — HashiCorp, Style Guide; Google, style and structure
 - **Status**: pending
 
@@ -55,6 +55,6 @@ Scope: .
 - **Priority**: 7
 - **Smell**: TF-4
 - **Refactoring**: A one- or two-sentence `description` — here: `description = "Environment name, used in resource names and tags."`
-- **Route**: `/phil:refactor`
+- **Route**: report only
 - **Rationale**: terraform.md — HashiCorp, Style Guide; HashiCorp, "Standard Module Structure"
 - **Status**: pending

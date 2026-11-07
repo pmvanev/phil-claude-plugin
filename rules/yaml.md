@@ -67,8 +67,8 @@ an error". PyYAML and Psych keep the last value and say nothing; ruamel.yaml ref
 
 ### 4. Lint where the file is written
 
-yamllint's default config rejects duplicate keys and warns on truthy values, and disables
-`octal-values`. A warning fails nothing unless CI runs it with `--strict`.
+yamllint's default config rejects duplicate keys, warns on truthy values and disables
+`octal-values`. A warning fails nothing unless CI runs yamllint with `--strict`.
 
 ---
 

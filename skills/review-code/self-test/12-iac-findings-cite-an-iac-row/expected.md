@@ -47,8 +47,8 @@ matches on the Smell and on a Refactoring that is the row's Preferred form verba
     root owes none.
 - **IAC-2 is one item**, though two files show it.
 - **No item names a secret**: the account ids are identifiers, not credentials.
-- Every hazard item carries `Priority: 1` and `Route: report only`; every other item carries
-  `Priority: 7` and ``Route: `/phil:refactor` ``.
+- Every hazard item carries `Priority: 1`, and every other item `Priority: 7`. Every item carries
+  `Route: report only`: no test suite checks a plan, so `/phil:refactor` cannot prove a change safe.
 
 **Not a failure:**
 

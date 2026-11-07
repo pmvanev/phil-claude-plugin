@@ -69,8 +69,8 @@ TFLint for the rest (Style Guide). Leave to them what they enforce.
 
 ## Always-flag — objective defects
 
-Name each finding by its `TF-n` id. A defect `iac.md` names is filed under its `IAC-n` id, spelled as
-the table below this one gives it, never also here. A secret is `security.md`'s alone; an unpinned
+Name each finding by its `TF-n` id. File a defect `iac.md` names under its `IAC-n` id, spelled as the
+next table gives it, never also here. A secret is `security.md`'s alone; an unpinned
 module source is TF-5 alone, never also `security.md`'s CWE-494.
 
 | Id | Violation | Preferred form | Hazard | Linter | Cite |
@@ -149,6 +149,7 @@ A reviewer raises these; the author decides.
 - **A child module with no `.terraform.lock.hcl`**, or with one: Terraform reads the root's.
 - **A variable with no `validation`**, unless its values have "uniquely restrictive requirements".
 - **A row or an Advisory bullet the project's TFLint already enforces**: CI runs TFLint, and its
-  config enables the rule it names. Read both: the bundled default preset is `recommended`, which leaves out TF-4's rules, and most
-  rules lint only the directory TFLint runs in, so a child module is checked only under `--recursive`.
+  config enables the rule it names. Read both: the bundled default preset is `recommended`, which
+  leaves out TF-4's rules, and most rules lint only the directory TFLint runs in, so TFLint checks a
+  child module only under `--recursive`.
   A row whose Linter cell reads none never stands down.

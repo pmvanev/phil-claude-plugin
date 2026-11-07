@@ -13,7 +13,7 @@
 > point to them rather than restate them (D12).
 
 **Read the Addendum (2026-11-06) at the end first.** An independent review and a live re-check of every
-row-bearing quote corrected this document; where the two disagree, the Addendum wins.
+row-bearing quote corrected this document; where the Addendum and the body disagree, the Addendum wins.
 
 ## Executive Summary
 
@@ -1318,8 +1318,8 @@ reference, and a scan of every local repository, made while writing `rules/yaml.
   templates. It found no instance of research YAML-1 to YAML-5. Its hits were 16 `on:` keys in GitHub
   workflows, which D7 clears, and 333 trailing-zero numbers, each meant as a number (`min`, `max`,
   `cpus: 2.0`, a weight of `1.0`) or, once, an AWS Image Builder `schemaVersion: 1.0`. Every Python
-  version in a CI file was already quoted. The rule's tier rests on its sources, and the null result
-  is recorded in the feature delta.
+  version in a CI file was already quoted. The rule's tier rests on its sources, and the feature delta
+  records the null result.
 - **`rules/yaml.md`** takes research YAML-1 to YAML-5 as YAML-1 to YAML-5, scoped by the consumer
   table; research YAML-6 and YAML-7 and the merge-key and schema candidates are Advisory.
 
@@ -1392,6 +1392,6 @@ locally.
   what the next `init` installs.
 - **TFLint**: the recommended preset's thirteen rules are confirmed; none of the twenty reads `count`,
   `for_each` or `moved`. `terraform_map_duplicate_keys` skips keys it cannot evaluate, and sixteen
-  rules lint only the directory TFLint runs in, so a child module is checked only under `--recursive`.
+  rules lint only the directory TFLint runs in, so TFLint checks a child module only under `--recursive`.
 - The rows that restate an IaC row (TF-6, TF-9, TF-10, TF-15) stay in `iac.md`; `terraform.md` gives
   their Terraform spelling and files them under the IAC id (D12).

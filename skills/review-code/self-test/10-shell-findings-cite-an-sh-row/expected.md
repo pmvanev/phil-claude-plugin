@@ -23,7 +23,7 @@ shell its shebang names.
 - It files a hazard row at Priority 1 and every other row at Priority 7.
 
 Before the rule existed, a review checked these files against `security.md` alone and filed none of
-them.
+the nine.
 
 **How to drive it:** drive this working tree's `skills/review-code/SKILL.md` by hand over this
 directory (`/phil:review-code` runs the released copy).
@@ -69,9 +69,9 @@ matches on the Smell and on a Refactoring that is the row's Preferred form verba
 - line numbers within ±2, and SH-1's Lines given as a list.
 
 **Driven 2026-11-06** against this working tree's `SKILL.md`, by a fresh agent that read only the
-fixture's scripts and test, the rules and the skill, before SH-11 (then SH-12) and `check-services.sh` existed, and before the evidence check moved the
-temp-file row and the library clause to Advisory. It
-filed all ten items the fixture then held, with the expected rows, priorities and fixes, and no decoy.
+fixture's scripts and test, the rules and the skill. It ran before SH-11 (then SH-12) and
+`check-services.sh` existed, and before the evidence check moved the temp-file row and the library
+clause to Advisory. It filed all ten items the fixture then held, with the expected rows, priorities and fixes, and no decoy.
 Its extras:
 
 - an Advisory question on CI running no ShellCheck, which is allowed;

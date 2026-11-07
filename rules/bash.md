@@ -19,11 +19,11 @@ Complement those — do not restate them.
 
 **It applies to** a `.sh` or `.bash` file, and to an extensionless file whose first line is a shebang
 naming `sh` or `bash`. The shebang decides the dialect: `#!/bin/bash` and `#!/usr/bin/env bash` are
-Bash; `#!/bin/sh` is POSIX `sh`, and a row written for Bash never reaches it. A file with no shebang is
-judged by its `# shellcheck shell=` directive, and failing that, as Bash where it ends in `.bash`.
+Bash; `#!/bin/sh` is POSIX `sh`, and a row written for Bash never reaches it. Judge a file with no
+shebang by its `# shellcheck shell=` directive and, failing that, as Bash where it ends in `.bash`.
 The `paths:` frontmatter cannot express a shebang, so a consumer who copies this rule into
-`.claude/rules/` loads it for the extensions alone. A sourced file runs under its caller's options: read the `set` line of the script that sources it
-before judging SH-1, SH-2 or SH-11 there.
+`.claude/rules/` loads it for the extensions alone. A sourced file runs under its caller's options:
+read the `set` line of the script that sources it before judging SH-1, SH-2 or SH-11 there.
 
 **The two halves divide on checkability.** The reviewer half — Always-flag, Advisory and Do not flag —
 names the defects a script shows, each by its `SH-n` id. A row is a hazard when a miss changes what
@@ -40,8 +40,8 @@ one. The Principles half is design and yields no finding on its own.
 ### 1. Check every failure that matters
 
 "Always check return values" (Google). Two mechanisms serve it, and both are sound: `set -euo pipefail`
-after the shebang, which stops the script at the first failure, or an explicit `|| exit` and `if !`
-after each command whose failure the next step depends on. Wooledge and ShellCheck's own SC2310 page
+after the shebang, which stops the script at the first failure, or an explicit `|| exit` or `if !`
+on each command whose failure the next step depends on. Wooledge and ShellCheck's own SC2310 page
 prefer the explicit form, because Bash suspends `errexit` inside an `if`, a `!`, an `&&` or `||` list
 and a command substitution. A script fails this principle when a failure goes unchecked, not when it lacks
 `set -e`.
@@ -50,8 +50,8 @@ and a command substitution. A script fails this principle when a failure goes un
 
 Bash and POSIX `sh` are different languages. `[[ ]]`, `local`, arrays and the `function` keyword are
 Bash. POSIX leaves `[[` and `local` unspecified, and dash — `/bin/sh` on Debian and Ubuntu — rejects
-`[[ ]]`, arrays and `function`, though it runs `local`. `pipefail` entered POSIX in 2024, yet dash and macOS's `sh` adopted it late, so a portable
-script does without it. Choose the shebang first, then write to it.
+`[[ ]]`, arrays and `function`, though it runs `local`. `pipefail` entered POSIX in 2024, yet dash
+and macOS's `sh` adopted it late, so a portable script does without it. Choose the shebang first, then write to it.
 
 ### 3. Quote every expansion unless splitting is the point
 
@@ -67,8 +67,8 @@ with `trap … EXIT` as soon as it exists.
 
 "Shell should only be used for small utilities or simple wrapper scripts" (Google). Dong et al. found
 that a Bash script's error-proneness rises with its size. Past about a hundred lines, or once the
-control flow stops being straightforward, the script is a program and belongs in a language that has
-data structures and tests.
+control flow stops being straightforward, the script is a program and belongs in a language with data
+structures and tests.
 
 ---
 

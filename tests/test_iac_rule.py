@@ -152,7 +152,7 @@ def test_review_code_names_the_rule_and_gathers_terraform_on_every_run():
     assert "`${CLAUDE_PLUGIN_ROOT}/rules/iac.md` (`.tf`" in body
     directory = body.split("### Directory Path", 1)[1].split("## Step 2", 1)[0]
     assert "`**/*.tf`" in directory.split("where the review", 1)[0], "Terraform is gathered on every run"
-    assert "an infrastructure file against `iac.md`" in directory
+    assert "a Terraform file against `iac.md`" in directory
     assert "`iac.md`'s `IAC-n`" in body
 
 
@@ -180,7 +180,7 @@ def test_every_expected_item_takes_its_id_fix_and_priority_from_its_row():
             assert _takes_the_form(fix, _plain(rows[smell]["Preferred form"])), f"{smell}: {fix!r}"
             hazard = _plain(rows[smell]["Hazard"]) == "hazard"
             assert _field(item, "Priority") == ("1" if hazard else "7"), smell
-            assert _field(item, "Route") == ("report only" if hazard else "`/phil:refactor`"), smell
+            assert _field(item, "Route") == "report only", f"{smell}: no test suite checks a plan"
 
 
 def test_no_fixture_expects_an_item_on_a_decoy():
@@ -198,3 +198,16 @@ def test_every_decoy_is_in_the_fixture():
                          and p.name not in {"manifest.json", "expected.md", "expected-backlog.md"})
         for decoy in json.loads(manifest.read_text())["decoys"]:
             assert decoy in corpus, f"{manifest.parent.name}: {decoy} is not in the fixture"
+
+
+def test_an_infrastructure_item_is_report_only():
+    """Skill review 2026-11-06: `/phil:refactor` proves a change by tests, and no test suite checks a plan."""
+    assert "an `IAC-n` or `TF-n` item is `report only` at any priority" in _flat(SKILL.read_text())
+
+
+def test_review_code_gathers_state_variables_and_deleted_terraform():
+    """Skill review 2026-11-06: a commit adding only a state or `.tfvars` file drew no review."""
+    body = _flat(SKILL.read_text())
+    assert "`*.tfvars` and `*.tfstate*`" in body.split("### File Path", 1)[0]
+    assert "except a deleted `.tf` file" in body
+    assert "`**/*.tfvars` and `**/*.tfstate*`" in body

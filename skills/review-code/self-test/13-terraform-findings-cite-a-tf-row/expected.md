@@ -40,8 +40,8 @@ matches on the Smell and on a Refactoring that is the row's Preferred form verba
   - `>= 1.11`: a lower bound alone on Terraform's own version.
 - **No IAC item**: the root has a remote backend, a committed lock file and a bounded provider.
 - **TF-5 is one item**, never also `security.md`'s CWE-494.
-- Every hazard item carries `Priority: 1` and `Route: report only`; every other item carries
-  `Priority: 7` and ``Route: `/phil:refactor` ``.
+- Every hazard item carries `Priority: 1`, and every other item `Priority: 7`. Every item carries
+  `Route: report only`: no test suite checks a plan, so `/phil:refactor` cannot prove a change safe.
 
 **Not a failure:**
 

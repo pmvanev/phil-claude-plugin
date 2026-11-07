@@ -44,7 +44,7 @@ Scope: .
 - **Priority**: 7
 - **Smell**: IAC-4
 - **Refactoring**: A lower and an upper bound on each provider, in the root — here: `version = "~> 5.80"`, as staging pins it
-- **Route**: `/phil:refactor`
+- **Route**: report only
 - **Rationale**: iac.md — HashiCorp, "Version Constraints"; Google, root modules
 - **Status**: pending
 
@@ -55,7 +55,7 @@ Scope: .
 - **Priority**: 7
 - **Smell**: IAC-5
 - **Refactoring**: Configure backends and providers in the root, and pass providers in — here: delete the `provider "aws"` block and the `region` variable; the calling root's provider already sets the region
-- **Route**: `/phil:refactor`
+- **Route**: report only
 - **Rationale**: iac.md — Google, reusable modules; HashiCorp, "Providers Within Modules"
 - **Status**: pending
 
@@ -66,7 +66,7 @@ Scope: .
 - **Priority**: 7
 - **Smell**: IAC-6
 - **Refactoring**: An input with no default, set by each environment's root — here: delete `default = "111122223333"` from `account_id`
-- **Route**: `/phil:refactor`
+- **Route**: report only
 - **Rationale**: iac.md — Google, style and structure
 - **Status**: pending
 
@@ -77,6 +77,6 @@ Scope: .
 - **Priority**: 7
 - **Smell**: IAC-7
 - **Refactoring**: One shared module; each environment a root that passes its own inputs — here: replace prod's `aws_vpc` and `aws_subnet` with a `module "network"` call like staging's, passing prod's CIDR blocks, name and account, and move the resources with `moved` blocks
-- **Route**: `/phil:refactor`
+- **Route**: report only
 - **Rationale**: iac.md — Morris, "Snowflakes as Code"; Google, root modules
 - **Status**: pending
