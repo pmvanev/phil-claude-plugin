@@ -69,8 +69,9 @@ reason go into the report, since no closing comment carries them.
 
 The plan holds no closing comment, no Status write, no close and no block refresh: only CLEAR's lines,
 found as `clear.md` finds them, from the session's merged pull requests. Show the snapshot in this
-checkout with its next action and stack, read through `session-exchanges.py head` as `clear.md` reads
-any snapshot, so the developer can tell whose work it records.
+checkout with its verdict, next action and stack, read through `session-exchanges.py head` and judged
+stale or current as `clear.md` directs, so the developer can tell whose work it records and whether the
+tree has moved past it.
 
 - Where CLEAR holds a branch, a snapshot elsewhere or a force-delete, ask once, with the answers
   `SKILL.md` gives the plan.

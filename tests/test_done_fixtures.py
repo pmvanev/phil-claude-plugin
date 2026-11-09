@@ -203,3 +203,35 @@ def test_a_no_card_finish_holding_only_the_snapshot_asks_once():
     d = json.loads((SKILL_DIR / "self-test" / "44-no-card-retire-the-snapshot-only" /
                     "manifest.json").read_text())
     assert d["questions_asked"] == 1, "one question, about the snapshot alone"
+
+
+
+VERDICT_FIXTURES = [m for m in FIXTURES if "snapshot_verdict" in json.loads(m.read_text())]
+VERDICT_SHAPES = (
+    r"STALE — snapshot at [0-9a-f]{7,}, HEAD is now [0-9a-f]{7,} \(\d+ commits?\); tree (clean|dirty)",
+    r"STALE — snapshot at [0-9a-f]{7,}, not in HEAD's history \(another branch, or rebased\); HEAD is now [0-9a-f]{7,}",
+    r"STALE — snapshot at [0-9a-f]{7,} recorded a (clean|dirty) tree; the tree is now (clean|dirty)",
+    r"CURRENT — snapshot at [0-9a-f]{7,}, HEAD; tree (clean|dirty)",
+)
+
+
+@pytest.mark.parametrize("manifest", VERDICT_FIXTURES, ids=lambda p: p.parent.name)
+def test_the_snapshot_here_carries_a_verdict_and_survives_a_plain_yes(manifest):
+    """The developer's answer, 2026-11-09: the plan marks the snapshot here STALE or CURRENT, as
+    /phil:resume judges it, and a plain yes still keeps it, because a note about other work in flight
+    turns stale too once anything merges."""
+    d = json.loads(manifest.read_text())
+    assert any(re.fullmatch(s, d["snapshot_verdict"]) for s in VERDICT_SHAPES), d["snapshot_verdict"]
+    assert d["developer_answers"] == ["yes"]
+    assert not [w for w in d["writes"] if "snapshot" in w], "a plain yes keeps the snapshot here"
+    assert "LEFT" in d["expected_report_lines"]
+
+
+def test_every_verdict_shape_has_a_fixture_and_appears_in_clear():
+    """A run that marks every snapshot STALE must fail a fixture (skill-reviewer, 2026-11-09)."""
+    verdicts = [json.loads(m.read_text())["snapshot_verdict"] for m in VERDICT_FIXTURES]
+    for shape in (VERDICT_SHAPES[0], VERDICT_SHAPES[1], VERDICT_SHAPES[3]):
+        assert any(re.fullmatch(shape, v) for v in verdicts), shape
+    clear = (SKILL_DIR / "references" / "clear.md").read_text()
+    for shape in VERDICT_SHAPES:
+        assert re.search(shape, clear), shape
