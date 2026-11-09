@@ -427,7 +427,7 @@ jobs:
     opportunity_score: not-scored   # single new job; priority by default
     status: validated
     personas: [robin-backlog-curator]
-    features: [groom-issues, board-prose-standard]
+    features: [groom-issues, board-prose-standard, story-quality-standard]
     # Setup facet (DISCUSS, feature board-setup-block, 2026-08-14, issue #32):
     # The job is unchanged — Robin wants a board that says what it means — but one of its checks has an
     # input with no author, and that is a DIFFERENT job (know-a-boards-hazards-before-contact) rather
@@ -560,6 +560,22 @@ jobs:
     # LIMIT: on GitLab there is no stable issue parent to read, so tier 1 is reported unevaluated there.
     # And the grant did NOT rescue the completion-counter check — that counts closed children, not built
     # ones, which no grant fixes. See skills/groom-issues/self-test/45-parent-edge-is-read/ and 39.
+
+    #
+    # COMPOSITION FACET (DISCUSS, feature story-quality-standard, 2026-11-09, issue 114).
+    # The job is unchanged — Robin wants a board that says what it means. What changes is WHERE the
+    # standard bites: upstream, at the moment a session drafts card content, rather than at the scan.
+    #   functional (composition): when a session suggests a purpose or a done-when, or drafts a whole
+    #     card, shape it by what the canon says a story carries — the why, a done-condition a stranger
+    #     can check, a size that can be demonstrated — in the house card shape, with no sentence template.
+    #   push (composition): no file named INVEST or SMART, and the house card shape was unwritten, so a
+    #     drafted card copied whatever cards the session happened to read, and a suggested done-when
+    #     followed `writing.md` for its words and nothing for its content.
+    #   anxiety (composition): (J) The canon becomes a formula or a gate — a Definition of Ready by
+    #     another name — or it starts flagging cards a person wrote, which is anxiety (C) and (H) again.
+    #     Answered by the developer's decision: it shapes composition only, held as guidelines in the
+    #     authors' own disclaimers (Wake's "fuzzy clusters", Doran's "a guideline").
+    # The scan is UNTOUCHED. See docs/feature/story-quality-standard/feature-delta.md [D3].
 
   - id: make-in-flight-work-transferable
     # Registered by DISCUSS wave, feature: single-issue-per-feature (2026-08-14)

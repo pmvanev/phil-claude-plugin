@@ -102,3 +102,22 @@ orientation_facet:
   vocabulary:
     - standing check, orientation read, board order, word ceiling, per-row bound, drift line,
       composed versus copied, permitted identifier, the outside view
+
+# Composition facet — added by DISCUSS wave, feature: story-quality-standard (2026-11-09, issue 114).
+# Robin upstream of grooming: the standard moves from checking a card a person wrote to shaping the card a
+# session drafts. No new persona — a "story author" was considered and rejected, because the author of a
+# card on this board is Robin or a session acting for Robin.
+composition_facet:
+  goals:
+    - Trust a card a session drafted as much as one I wrote
+    - Get suggestions for a done-when that a stranger could check, not a task list or "works correctly"
+    - Keep the format I have; it is just the right level of formal
+  frustrations:
+    - INVEST and SMART live in my head and nowhere in the repo
+    - A drafted card copies the shape of whatever cards the session happened to read
+  mental_model:
+    - Stories began as sticky notes; a heuristic is a reminder, not a gate
+    - A board read by strangers has no room to hold the conversation, so the card carries its results
+    - Demonstrable beats small, but nobody argues for big
+  vocabulary:
+    - INVEST, SMART, 3 Cs, house card shape, done-when item, observable outcome, held lightly

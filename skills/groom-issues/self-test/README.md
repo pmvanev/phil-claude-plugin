@@ -107,6 +107,7 @@ Forge responses are supplied by `manifest.json` so the suite runs unattended.
 | `43-story-members-carded-separately/` | four whole-feature cards whose deltas declare one `Story:` slug | reports the set and offers a **story card**; suppresses ungrouped effort's milestone offer | `STORY-MEMBERS-CARDED-SEPARATELY` |
 | `44-you-wrote-field-not-tightened/` | an elicited `you wrote` field that is correct but loose | tightening the human's own words while the label still says they wrote them | `WRITE-ELICITED` — the standard governs the drafted fields only |
 | `45-parent-edge-is-read/` | four slice cards parented to an open feature card, and **no other tie** | reporting clean because the strongest evidence tier was unreadable | `SURFACE-CANDIDATE` — the edge is read, not inferred |
+| `46-suggested-done-when-follows-the-story-standard/` | a card with a purpose and no done-when, naming no number | suggesting a procedure, a quality, a template sentence or an unasked-for number | `WRITE-ELICITED` — each suggested item an observable outcome; the purpose untouched |
 
 ## The sharpest
 
@@ -322,3 +323,14 @@ two suggestions drafted in the same run, so a session applying it nowhere pins n
 **This suite has no driver** (issue #42), so nothing runs this fixture automatically. Its pair,
 `skills/session-handoff/self-test/27-stack-frame-not-tightened/`, sits in a suite that does.
 
+## Fixture 46 — a suggested done-when follows the story standard
+
+Added 2026-11-09 (issue 114, `story-quality-standard` slice 01). That slice brought the session's own
+suggestions under `${CLAUDE_PLUGIN_ROOT}/rules/stories.md`, which records INVEST and SMART as guidelines
+and shapes only what a session composes.
+
+`46-suggested-done-when-follows-the-story-standard` gives a card that states its problem and names
+nothing to measure, so the temptations are a done-when written as a procedure, a bare quality, a template
+sentence or a number nobody asked for. It supplies no candidate wording: it pins the classes the rule
+names, so it cannot reward the shorter string. `tests/test_stories_rule.py` checks its structure and the
+citation; like fixture 44, nothing drives the run itself.

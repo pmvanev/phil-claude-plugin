@@ -57,6 +57,13 @@ forbid drafting — it is to make every field's origin legible and every rewrite
   reason past the edit: the human's change is theirs.
 
   The tidying licence above is that standard restricted to a rewrite; naming it adds no licence.
+- **What a suggestion says follows the story standard.** Read `${CLAUDE_PLUGIN_ROOT}/rules/stories.md`
+  before drafting the first suggestion, and draft each suggested purpose and done-when item as its
+  *Composing a purpose* and *Composing a done-when item* sections direct. Draft no more than about six
+  done-when items; whether the card splits is `/phil:groom-set`'s question, not this command's. The rule
+  shapes the session's own suggestions and nothing else: never a `you wrote` field, never the human's
+  change in a `you edited my suggestion` field, and never an `I rephrased your answer` rewrite, which
+  tidies and adds no content.
 - **An accept must name the suggestion or restate its text.** A bare affirmation — "ok", "sure", "yep",
   "sounds right", "that works" — is never an accept. This holds **even when only one suggestion was
   offered**: the reply may mean only *I have read the question*.
