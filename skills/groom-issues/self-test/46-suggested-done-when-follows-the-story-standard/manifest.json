@@ -1,0 +1,10 @@
+{
+  "fixture_id": "GROOM-SELFTEST-46",
+  "situation": "Elicitation runs on a card whose opening paragraph states a purpose -- a flaky upload retry loses files when the network drops mid-transfer, and users re-upload by hand -- and which has no section saying when it is done. The scan reported rule 2 failing and rule 1 passing. The session drafts suggestions for the done-when, and nothing in the card names a number, a date or an estimate.",
+  "forge": "github",
+  "command": "groom-ask",
+  "issue": {"number": 62, "title": "upload retry drops files on a network blip", "body_shape": "one opening paragraph stating the problem and who it costs; no other section"},
+  "user_response": "accepted the first suggestion unchanged, naming it",
+  "expected_decision": "WRITE-ELICITED",
+  "expected_guard": "every suggested done-when item follows ${CLAUDE_PLUGIN_ROOT}/rules/stories.md: each names one observable outcome a stranger can check -- never a procedure, never a quality such as 'works', never a number or a date the card does not need, never a sentence template -- and the purpose, which passed, stays as written."
+}

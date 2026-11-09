@@ -134,6 +134,10 @@ eleven principles of composition** — active voice, positive form, concrete lan
 and the emphatic word last are the others that bear here. Read it as *compose well*, never as *compose
 short*.
 
+**What a composed suggestion says follows `${CLAUDE_PLUGIN_ROOT}/rules/stories.md`**, on the same
+discriminator: `writing.md` governs how the session's words read, and `stories.md` governs what its
+suggested purpose and done-when carry. `references/ask.md` applies it; a human's words stay theirs.
+
 **Naming the standard is the mechanism, and naming is not running an editor as a step.** Nothing here
 authorises a pass over a body already written; the standard governs composition at the moment text is
 drafted.
@@ -272,6 +276,11 @@ reports each with its evidence and stops; resolving them is `/phil:groom-set`, a
   would be proposed for splitting every run, and with no marker a declined split returns forever.
   `phil:issue-board`'s split clause is about concurrency — two halves in different columns at once —
   and the concurrency class below catches the wrong story shape.
+
+  This departs from INVEST's Small on purpose. North sizes stories in "demonstrable chunks" and Cockburn
+  counts a slice only if it is "visibly different from last slice"; `${CLAUDE_PLUGIN_ROOT}/rules/stories.md`
+  records both. The scan keeps to its five structural items: that rule shapes only what a session
+  composes.
 - **Two or more features in flight on one story card** — two or more rows **of the feature roster**
   carry the state word `in progress`. **Quote every such feature by name, with its roster row.**
 

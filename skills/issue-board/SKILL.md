@@ -305,6 +305,10 @@ An **nWave** project answers this question for you, because its artifacts alread
 feature, slice, step. Use `phil:nwave-issue-board` for that mapping. Everywhere else, use the rule
 above.
 
+**Before drafting a card's body, read `${CLAUDE_PLUGIN_ROOT}/rules/stories.md`** for the house card
+shape and for INVEST and SMART, held as guidelines rather than a template. Apply it only to the text
+this session adds; leave the rest of a body as its author wrote it.
+
 ## Per-project setup
 
 Instance-specific constants belong in the project's `CLAUDE.md`, not in this skill. Record only what
