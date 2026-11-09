@@ -1,0 +1,27 @@
+{
+  "fixture_id": "SH-SELFTEST-42",
+  "phase": "BOOTSTRAP",
+  "situation": "A session captured at `4a91c02`, three commits past `2c3d4e5`. Someone then ran `git reset --hard 2c3d4e5`; the three commits survive in the object store. `git rev-list --count --left-right 4a91c02...HEAD` prints `3\t0`, and a plain `git rev-list --count 4a91c02..HEAD` prints 0. A fresh session picks the work up.",
+  "snapshot_present": true,
+  "tree_fingerprint_at_capture": "4a91c02",
+  "tree_fingerprint_at_readback": "2c3d4e5",
+  "left_right": [
+    3,
+    0
+  ],
+  "working_tree_dirty": false,
+  "working_tree_dirty_at_capture": false,
+  "next_action_recorded": "push the three commits and open the pull request",
+  "board_state": {
+    "readable": true,
+    "in_progress": [
+      {
+        "card": 12,
+        "title": "Push the three commits and open the pull request"
+      }
+    ],
+    "todo_in_board_order": []
+  },
+  "expected_decision": "RESUME-STALE + BOARD-AGREES",
+  "expected_guard": "the verdict reads `STALE — snapshot at 4a91c02, HEAD is now 2c3d4e5, 3 commits behind it (reset or checked out backwards), working tree clean.` before any content"
+}

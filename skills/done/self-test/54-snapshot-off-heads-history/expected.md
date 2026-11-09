@@ -4,7 +4,7 @@
 
 ## Situation
 
-PR 99 (`fix-11`, head `a0b1c2d`, opened by the developer) squash-merged into main, which is green, and every ask is done. Its branch exists locally only, at `a0b1c2d`. This session runs in the main checkout, on main at `e17bd55`, clean. The checkout holds a `.session-handoff.md` written while `fix-11` was checked out there: its header reads `commit: 9f8e7d6` and `dirty: no`. `git rev-parse --verify --quiet 9f8e7d6^{commit}` resolves it, but `git merge-base --is-ancestor 9f8e7d6 HEAD` exits 1, because the squash merge left it off main's history.
+PR 99 (`fix-11`, head `a0b1c2d`, opened by the developer) squash-merged into main, which is green, and every ask is done. Its branch exists locally only, at `a0b1c2d`. This session runs in the main checkout, on main at `e17bd55`, clean. The checkout holds a `.session-handoff.md` written while `fix-11` was checked out there: its header reads `commit: 9f8e7d6` and `dirty: no`. `git rev-parse --verify --quiet 9f8e7d6^{commit}` resolves it, but the squash merge left it off main's history: `git rev-list --count --left-right 9f8e7d6...HEAD` prints `3\t5`.
 
 ## The plan shows
 

@@ -63,6 +63,8 @@ them.
 | `38-exchanges-are-never-typed/` | long replies, and a previous region on disk | *The last exchanges*, *Writing the snapshot* | no prompt or reply passes through the session's output or its reads — the 0.97.0 refusal | `CAPTURE` |
 | `39-show-by-name/` | fixture `18`'s snapshot, read by `/phil:stack show` | the `show` heading in `references/stack.md` | `show` by name is the bare verb: the same render, nothing written | `SHOWN` |
 | `40-gitlab-board-diverges/` | a GitLab board's In Progress label holds other work than the recorded next action | card 76's checklist | the board check reads GitLab's label columns and names both sides | `RESUME-CURRENT + BOARD-DIVERGES` |
+| `41-stale-off-heads-history/` | the recorded commit resolves but a squash merge left it off `HEAD`'s history | BOOTSTRAP's `RESUME-STALE` | ancestry is tested before the distance, so no count that measures nothing is printed | `RESUME-STALE + BOARD-DIVERGES` |
+| `42-stale-behind-the-snapshot/` | the tree was reset behind the recorded commit | BOOTSTRAP's `RESUME-STALE` | the distance counts the commits the tree lost, never 0 and never "another branch" | `RESUME-STALE + BOARD-AGREES` |
 
 ## The two sharpest fixtures
 

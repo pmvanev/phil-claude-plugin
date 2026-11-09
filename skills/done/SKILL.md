@@ -36,7 +36,7 @@ same of the session's own work and closes nothing.
   none, skip the Status write, report the skip, and name `/phil:board-setup`.
 
 Run `git` only for `rev-parse`, the `log` reads of the block refresh and of FORCE, and CLEAR's
-`worktree list`, `worktree remove`, `remote get-url`, `merge-base --is-ancestor`, `rev-list --count`,
+`worktree list`, `worktree remove`, `remote get-url`, `merge-base --is-ancestor`, `rev-list --count --left-right`,
 `branch -d`, `branch -D` and `push --delete`. Pass none of them `--output`, which writes a file from
 `log` and `rev-list`. Look files up on the forge: a `<branch>:<path>` lookup through local git reads a
 ref that may be stale.
