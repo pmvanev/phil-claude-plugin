@@ -210,6 +210,7 @@ VERDICT_FIXTURES = [m for m in FIXTURES if "snapshot_verdict" in json.loads(m.re
 VERDICT_SHAPES = (
     r"STALE — snapshot at [0-9a-f]{7,}, HEAD is now [0-9a-f]{7,} \(\d+ commits?\); tree (clean|dirty)",
     r"STALE — snapshot at [0-9a-f]{7,}, not in HEAD's history \(another branch, or rebased\); HEAD is now [0-9a-f]{7,}",
+    r"STALE — snapshot at [0-9a-f]{7,}, HEAD is now [0-9a-f]{7,}, \d+ commits? behind it \(reset or checked out backwards\); tree (clean|dirty)",
     r"STALE — snapshot at [0-9a-f]{7,} recorded a (clean|dirty) tree; the tree is now (clean|dirty)",
     r"CURRENT — snapshot at [0-9a-f]{7,}, HEAD; tree (clean|dirty)",
 )
@@ -230,8 +231,10 @@ def test_the_snapshot_here_carries_a_verdict_and_survives_a_plain_yes(manifest):
 def test_every_verdict_shape_has_a_fixture_and_appears_in_clear():
     """A run that marks every snapshot STALE must fail a fixture (skill-reviewer, 2026-11-09)."""
     verdicts = [json.loads(m.read_text())["snapshot_verdict"] for m in VERDICT_FIXTURES]
-    for shape in (VERDICT_SHAPES[0], VERDICT_SHAPES[1], VERDICT_SHAPES[3]):
+    for shape in (VERDICT_SHAPES[0], VERDICT_SHAPES[1], VERDICT_SHAPES[2], VERDICT_SHAPES[4]):
         assert any(re.fullmatch(shape, v) for v in verdicts), shape
     clear = (SKILL_DIR / "references" / "clear.md").read_text()
+    assert "rev-list --count --left-right <recorded>...HEAD" in clear, \
+        "one call tells ahead, behind and diverged apart (skill-reviewer, 2026-11-09)"
     for shape in VERDICT_SHAPES:
         assert re.search(shape, clear), shape

@@ -65,5 +65,6 @@ the fixtures are model-driven, and that read is by hand.
 | `52-stale-snapshot-here-is-flagged` | `CLOSED` | `CLEARED` `LEFT` | The snapshot here carries its STALE verdict and distance, and a plain yes still keeps it |
 | `53-current-snapshot-here-is-marked-current` | `CLOSED` | `CLEARED` `LEFT` | A snapshot at `HEAD` on a clean tree reads CURRENT, never STALE |
 | `54-snapshot-off-heads-history` | `CLOSED` | `CLEARED` `LEFT` | A snapshot off `HEAD`'s history reads STALE with no commit count |
+| `55-snapshot-behind-head` | `CLOSED` | `CLEARED` `LEFT` | A tree reset behind the snapshot counts the commits it lost |
 
 `WROTE-NOTHING` is expected on every fixture that writes nothing.

@@ -21,21 +21,32 @@ fingerprint records only *that* the tree was dirty, not what was in it, so uncom
 moved beneath a current verdict.
 
 **`RESUME-STALE`** — the commit differs, **or** the dirty flag differs in either direction, **or** the
-recorded commit is unknown to this tree (rebased, or captured on another branch). Say so **before**
-any content, and quantify it:
+recorded commit is off `HEAD`'s history or unknown to this tree. Say so **before** any content, and
+quantify it:
 
 ```
 STALE — snapshot at 4a91c02, HEAD is now e17bd55 (6 commits), working tree dirty.
 The recorded next action may no longer apply.
 ```
 
-Measure the distance with `git rev-list --count <recorded>..HEAD`. If that command fails, the
-recorded commit is not in this tree's history — report `STALE` and say the recorded commit is
-unreachable, rather than reporting no distance at all.
+Measure the distance with one call: `git rev-list --count --left-right <recorded>...HEAD` prints
+`A<tab>B`, where `A` counts the commits only the snapshot has and `B` those only `HEAD` has. Never pass
+it `--output`. A plain `<recorded>..HEAD` count succeeds for any commit the object store holds, so it
+reads 0 for a tree reset behind the snapshot and counts nothing real from a squash-merged branch.
+
+- **`A` is 0** — `HEAD` is at or past the recorded commit: report `B`, as the example above does. `B`
+  is 0 only where the dirty flag alone made it stale.
+- **`A` above 0, `B` 0** — the tree went back: `STALE — snapshot at 4a91c02, HEAD is now 2c3d4e5, 3
+  commits behind it (reset or checked out backwards), working tree clean.`
+- **Both above 0** — the recorded commit sits off `HEAD`'s history: captured on a branch later
+  squash-merged, or rebased away. Give no count: `STALE — snapshot at 9f8e7d6, not in HEAD's history
+  (another branch, or rebased); HEAD is now e17bd55, working tree clean.`
+- **The call fails** — the recorded commit is unknown to this tree. Report `STALE` and say it is
+  unreachable, rather than reporting no distance at all.
 
 The shape is what matters, not these values: both fingerprints, the distance between them, and the
-tree state. Report the distance in whatever unit is available — commit count is best; a bare
-"different" is acceptable; silence is not.
+tree state. Report the distance in whatever unit is available — commit count is best; `not in
+HEAD's history` or a bare "different" is acceptable; silence is not.
 
 State a stale verdict as `STALE` whenever the fingerprint proves it, never as "may be out of date". A
 confidently followed stale snapshot is worse than none, because the next session acts on it.

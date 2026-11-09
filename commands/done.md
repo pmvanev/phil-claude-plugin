@@ -26,8 +26,8 @@ first close write that fails; a refusal during the cleanup leaves that item and 
 - Use `glab issue update` only with `--unlabel` for the status labels, or with `--description`.
 - Use `gh issue edit --body-file` and `glab issue update --description` only inside the block refresh.
 - Use `git log` and `ls` only for the refresh's reads and FORCE's list of the commits a delete would lose.
-- Use `git rev-list --count` only to count the commits from a snapshot's recorded commit to `HEAD`,
-  where that commit is an ancestor of `HEAD`.
+- Use `git rev-list --count` only as `git rev-list --count --left-right <recorded>...HEAD`, to compare a
+  snapshot's recorded commit with `HEAD`.
 - Pass `--output` to no git command: it writes a file from `log` and `rev-list`.
 - Remove only a worktree on the work's own merged branch that `worktree-state.py --expect-head` reads
   `CLEAN` at the merged tip, whoever made it, never with `--force`, and never one another session locks:

@@ -97,16 +97,19 @@ dirty, `CLEAN` or `HIDDEN` clean.
 - **Unjudged** where `worktree-state.py` prints `UNREADABLE`: say the tree's state could not be read,
   and never print `CURRENT`.
 
-Measure the distance only where `git merge-base --is-ancestor <recorded> HEAD` exits 0, with
-`git rev-list --count <recorded>..HEAD`. A recorded commit off `HEAD`'s history — written on another
-branch, or rebased away — gets no count: a snapshot written on a feature branch, then squash-merged,
-still resolves, and counting from it measures nothing. Put the verdict on the snapshot's plan line
-before its next action, with both short commits and the tree's state, in one of these shapes, never as
-"may be out of date":
+Measure the distance with one call: `git rev-list --count --left-right <recorded>...HEAD` prints
+`A<tab>B`, where `A` counts the commits only the snapshot has and `B` those only `HEAD` has. `A` of 0
+means `HEAD` is at or past the snapshot: count `B`. `A` above 0 with `B` of 0 means the tree went back
+behind it: count `A`. Both above 0 means the recorded commit sits off `HEAD`'s history — a snapshot
+written on a feature branch, then squash-merged, still resolves — so give no count. Where the call
+fails, the commit is unknown to this tree: say it is unreachable. Put the verdict on the snapshot's
+plan line before its next action, with both short commits and the tree's state, in one of these
+shapes, never as "may be out of date":
 
 ```
 STALE — snapshot at 4a91c02, HEAD is now e17bd55 (6 commits); tree clean
 STALE — snapshot at 4a91c02, not in HEAD's history (another branch, or rebased); HEAD is now e17bd55
+STALE — snapshot at 4a91c02, HEAD is now 2c3d4e5, 3 commits behind it (reset or checked out backwards); tree clean
 STALE — snapshot at 4a91c02 recorded a clean tree; the tree is now dirty
 CURRENT — snapshot at e17bd55, HEAD; tree clean
 ```

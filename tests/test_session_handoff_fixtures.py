@@ -411,3 +411,24 @@ def test_the_fixtures_outside_the_both_flags_rule_are_a_known_set():
     assert carries_a_flag == EXEMPT_FROM_BOTH_FLAGS, (
         f"the set of fixtures comparing fingerprints outside the both-flags rule changed: "
         f"expected {sorted(EXEMPT_FROM_BOTH_FLAGS)}, found {sorted(carries_a_flag)}")
+
+
+
+def _left_right(name):
+    return json.loads((SKILL_DIR / "self-test" / name / "manifest.json").read_text())["left_right"]
+
+
+def test_the_distance_tells_ahead_behind_and_diverged_apart():
+    """`git rev-list --count <recorded>..HEAD` succeeds for any commit the object store holds, so it
+    counts from a squash-merged branch and reads 0 for a tree reset behind the snapshot
+    (plugin-dev:skill-reviewer, 2026-11-09). One `--left-right` call separates the cases."""
+    assert _left_right("41-stale-off-heads-history") == [3, 5]
+    assert _left_right("42-stale-behind-the-snapshot") == [3, 0]
+    for name in ("41-stale-off-heads-history", "42-stale-behind-the-snapshot"):
+        d = json.loads((SKILL_DIR / "self-test" / name / "manifest.json").read_text())
+        assert "RESUME-STALE" in _outcomes(SKILL_DIR / "self-test" / name / "manifest.json"), name
+        assert "working tree" in d["expected_guard"], f"{name}: the verdict names the tree state"
+    bootstrap = (SKILL_DIR / "references" / "bootstrap.md").read_text()
+    for phrase in ("rev-list --count --left-right <recorded>...HEAD", "not in HEAD's history",
+                   "behind it (reset or checked out backwards)"):
+        assert phrase in bootstrap, phrase

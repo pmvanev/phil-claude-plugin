@@ -1,0 +1,27 @@
+{
+  "fixture_id": "SH-SELFTEST-41",
+  "phase": "BOOTSTRAP",
+  "situation": "A session captured in the main checkout while `fix-11` was checked out there, then the branch was squash-merged and the checkout switched back to main. The recorded commit still resolves, but the squash merge left it off main's history: `git rev-list --count --left-right 9f8e7d6...HEAD` prints `3\t5`. A plain `git rev-list --count 9f8e7d6..HEAD` prints 5, a number that measures nothing. A fresh session picks the work up on main.",
+  "snapshot_present": true,
+  "tree_fingerprint_at_capture": "9f8e7d6",
+  "tree_fingerprint_at_readback": "e17bd55",
+  "left_right": [
+    3,
+    5
+  ],
+  "working_tree_dirty": false,
+  "working_tree_dirty_at_capture": false,
+  "next_action_recorded": "open the pull request for fix-11",
+  "board_state": {
+    "readable": true,
+    "in_progress": [],
+    "todo_in_board_order": [
+      {
+        "card": 12,
+        "title": "A card nobody has started"
+      }
+    ]
+  },
+  "expected_decision": "RESUME-STALE + BOARD-DIVERGES",
+  "expected_guard": "the verdict reads `STALE — snapshot at 9f8e7d6, not in HEAD's history (another branch, or rebased); HEAD is now e17bd55, working tree clean.`, with no commit count, before any content"
+}

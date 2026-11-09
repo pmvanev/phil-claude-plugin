@@ -1,0 +1,31 @@
+{
+  "fixture_id": "DONE-SELFTEST-55",
+  "situation": "PR 100 (`fix-12`, head `b2c3d4e`, opened by the developer) merged into main, which is green, and every ask is done. Its branch exists locally only, at `b2c3d4e`. This session runs in the main checkout, on main at `2c3d4e5`, clean, after `git reset --hard` took it back three commits from `4a91c02`. The checkout holds a `.session-handoff.md` whose header reads `commit: 4a91c02` and `dirty: no`. `git rev-list --count --left-right 4a91c02...HEAD` prints `3\t0`.",
+  "snapshot_verdict": "STALE — snapshot at 4a91c02, HEAD is now 2c3d4e5, 3 commits behind it (reset or checked out backwards); tree clean",
+  "developer_answers": [
+    "yes"
+  ],
+  "questions_asked": 1,
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "delete the local branch"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED",
+    "LEFT"
+  ],
+  "expected_guard": "the plan's SURVIVES line reads `STALE — snapshot at 4a91c02, HEAD is now 2c3d4e5, 3 commits behind it (reset or checked out backwards); tree clean`; the plain yes keeps it",
+  "must_not": [
+    "print `(0 commits)`",
+    "call it `not in HEAD's history`",
+    "retire the snapshot here on a plain yes",
+    "read the snapshot's recorded exchanges",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "A tree reset behind the snapshot reads 0 from a plain count and failed the first ancestry test, which sent it to the off-history line (skill-reviewer, 2026-11-09)."
+}
