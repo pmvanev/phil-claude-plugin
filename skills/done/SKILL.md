@@ -36,9 +36,10 @@ same of the session's own work and closes nothing.
   none, skip the Status write, report the skip, and name `/phil:board-setup`.
 
 Run `git` only for `rev-parse`, the `log` reads of the block refresh and of FORCE, and CLEAR's
-`worktree list`, `worktree remove`, `remote get-url`, `merge-base --is-ancestor`, `branch -d`,
-`branch -D` and `push --delete`. Look files up on the forge: a `<branch>:<path>` lookup through local git reads a ref
-that may be stale.
+`worktree list`, `worktree remove`, `remote get-url`, `merge-base --is-ancestor`, `rev-list --count`,
+`branch -d`, `branch -D` and `push --delete`. Pass none of them `--output`, which writes a file from
+`log` and `rev-list`. Look files up on the forge: a `<branch>:<path>` lookup through local git reads a
+ref that may be stale.
 
 ## FIND — the card, its pull requests and the default branch
 
@@ -192,7 +193,8 @@ ask with its reason.
 
 Read `${CLAUDE_PLUGIN_ROOT}/skills/done/references/clear.md` whole before composing the plan: it finds
 the work's snapshots, branches and worktrees, holds what must survive, asks FORCE's question for each of
-the developer's own unmerged branches, and adds the cleanup lines and the third answer.
+the developer's own unmerged branches, marks the snapshot here `STALE` or `CURRENT`, and adds the
+cleanup lines and the third answer.
 
 Compose the closing comment: one short paragraph naming the pull requests that landed and the asks they
 met, then each dropped ask quoted with its reason. Apply `${CLAUDE_PLUGIN_ROOT}/rules/writing.md` to

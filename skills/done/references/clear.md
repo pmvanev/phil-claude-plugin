@@ -83,6 +83,37 @@ The snapshot in the checkout this session runs in records no branch, so it may b
 plain yes keeps it; it goes only on the third answer. Removing the worktree this session runs in deletes
 that snapshot with it, so where the worktree holds one, remove it only on the third answer.
 
+**Judge that snapshot stale or current, as `/phil:resume` does,** so the developer answers knowing
+which. Read it with `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/session-exchanges.py head --file
+<root>/.session-handoff.md`, where `<root>` is `git rev-parse --show-toplevel`, and keep the `SHA <h>`
+for the third answer's retire. Take `commit:` and `dirty:` from its header. Read the tree's state with
+`python3 ${CLAUDE_PLUGIN_ROOT}/scripts/worktree-state.py <root>`, without `--expect-head`: `DIRTY` reads
+dirty, `CLEAN` or `HIDDEN` clean.
+
+- **`STALE`** where the recorded commit is not `HEAD` — compare `git rev-parse --verify --quiet
+  <recorded>^{commit}` with `git rev-parse HEAD`, full hashes both — or where `dirty:` disagrees with
+  the tree.
+- **`CURRENT`** otherwise. Where both read dirty, add that uncommitted work may have moved beneath it.
+- **Unjudged** where `worktree-state.py` prints `UNREADABLE`: say the tree's state could not be read,
+  and never print `CURRENT`.
+
+Measure the distance only where `git merge-base --is-ancestor <recorded> HEAD` exits 0, with
+`git rev-list --count <recorded>..HEAD`. A recorded commit off `HEAD`'s history — written on another
+branch, or rebased away — gets no count: a snapshot written on a feature branch, then squash-merged,
+still resolves, and counting from it measures nothing. Put the verdict on the snapshot's plan line
+before its next action, with both short commits and the tree's state, in one of these shapes, never as
+"may be out of date":
+
+```
+STALE — snapshot at 4a91c02, HEAD is now e17bd55 (6 commits); tree clean
+STALE — snapshot at 4a91c02, not in HEAD's history (another branch, or rebased); HEAD is now e17bd55
+STALE — snapshot at 4a91c02 recorded a clean tree; the tree is now dirty
+CURRENT — snapshot at e17bd55, HEAD; tree clean
+```
+
+Stale proves only that the tree moved: a note about other work in flight turns stale once anything
+merges. So a stale snapshot still survives a plain yes (the developer's answer, 2026-11-09).
+
 ## FORCE — an unmerged branch, one at a time
 
 An unmerged branch survives unless the developer says otherwise, for that branch alone. Offer it only for
@@ -138,7 +169,8 @@ FOR YOU TO RUN — a worktree that is locked, not clean, or off the merged tip
   ../fw-03 has uncommitted changes:  M src/a.py  ?? notes.md
 SURVIVES
   finish-work/spike and ../fw-spike — PR 86 closed unmerged
-  ./.session-handoff.md — may be other work; the third answer retires it
+  ./.session-handoff.md — STALE — snapshot at 4a91c02, HEAD is now e17bd55 (6 commits); tree clean;
+                          next: "verify the wave table"; may be other work; the third answer retires it
 ```
 
 Ask with three answers: **yes**, **yes, and retire the snapshot here too** — offered where the
@@ -195,5 +227,5 @@ Count each branch once, saying where it went:
 CLEARED: 1 snapshot, 1 worktree, 1 branch (local and remote)
 FOR YOU: ../fw-02 — git worktree remove ../fw-02, then git branch -d and git push --delete for finish-work/slice-02
 LEFT: finish-work/spike and ../fw-spike — PR 86 closed unmerged
-LEFT: ./.session-handoff.md — kept: may be other work
+LEFT: ./.session-handoff.md — kept: may be other work (STALE)
 ```

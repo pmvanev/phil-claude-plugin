@@ -1,0 +1,31 @@
+{
+  "fixture_id": "DONE-SELFTEST-53",
+  "situation": "PR 98 (`fix-10`, head `d7e8f90`, opened by the developer) merged into main, which is green, and every ask is done. Its branch exists locally only, at `d7e8f90`. This session runs in the main checkout, on main at `e17bd55`, clean. The checkout holds a `.session-handoff.md` whose header reads `commit: e17bd55` and `dirty: no`, which `git rev-parse` resolves to `HEAD`'s full hash.",
+  "snapshot_verdict": "CURRENT — snapshot at e17bd55, HEAD; tree clean",
+  "developer_answers": [
+    "yes"
+  ],
+  "questions_asked": 1,
+  "writes": [
+    "the closing comment",
+    "Status=Done",
+    "the close",
+    "delete the local branch"
+  ],
+  "expected_decision": [
+    "CLOSED"
+  ],
+  "expected_report_lines": [
+    "CLEARED",
+    "LEFT"
+  ],
+  "expected_guard": "the plan's SURVIVES line for the snapshot here reads `CURRENT — snapshot at e17bd55, HEAD; tree clean` before its next action; the plain yes keeps it",
+  "must_not": [
+    "mark it STALE",
+    "retire the snapshot here on a plain yes",
+    "compare a short hash with a full one",
+    "read the snapshot's recorded exchanges",
+    "merge anything"
+  ],
+  "why_this_fixture_exists": "A run that marks every snapshot STALE passes fixture 52; this one fails it (skill-reviewer, 2026-11-09)."
+}
